@@ -12,7 +12,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Log paginado, acotado al centro del principal (un admin puede elegir centro o verlos todos).
+         * Log paginado de todos los centros donde se tiene auditoria.read (centerIds o clinicId acotan); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auditoria`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -33,7 +33,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Log paginado, acotado al centro del principal (un admin puede elegir centro o verlos todos).
+         * Log paginado de todos los centros donde se tiene auditoria.read (centerIds o clinicId acotan); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/audit`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -53,7 +53,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Log paginado, acotado al centro del principal (un admin puede elegir centro o verlos todos). */
+        /** Log paginado de todos los centros donde se tiene auditoria.read (centerIds o clinicId acotan); cada fila con clinicName. */
         get: operations["AuditLogController_list[2]_v2"];
         put?: never;
         post?: never;
@@ -70,7 +70,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Log paginado, acotado al centro del principal (un admin puede elegir centro o verlos todos). */
+        /** Log paginado de todos los centros donde se tiene auditoria.read (centerIds o clinicId acotan); cada fila con clinicName. */
         get: operations["AuditLogController_list[3]_v2"];
         put?: never;
         post?: never;
@@ -1027,7 +1027,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol.
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/servicios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1048,7 +1048,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol.
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/services`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1069,7 +1069,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol.
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/servicios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1090,7 +1090,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol.
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/services`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1110,7 +1110,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[4]_v2"];
         put?: never;
         post?: never;
@@ -1127,7 +1127,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[5]_v2"];
         put?: never;
         post?: never;
@@ -1144,7 +1144,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[6]_v2"];
         put?: never;
         post?: never;
@@ -1161,7 +1161,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[7]_v2"];
         put?: never;
         post?: never;
@@ -1249,6 +1249,178 @@ export interface paths {
          * @description Suma lo que el paciente gastó en el periodo, agrupado por grupo de facturación. Las devoluciones RESTAN: el papel dice lo que gastó de verdad. Entran consultas y facturación general. `centroId` opcional para pedirlo de otro centro (exige el permiso allí).
          */
         get: operations["CertificacionDeGastosController_certificado[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/pendientes-entrega": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pendientes por entregar de un paciente
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/pendientes-entrega`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Sin `centerIds`, los del centro de la sesión (contrato del frontdesk). Con `centerIds`, los de esos centros (factura.read en cada uno, si no 403), cada paquete con su `clinicName`: el cambio de protocolo los lista todos y cada cambio se hace en el centro del paquete. / Without `centerIds`, the session clinic; with it, those clinics, each package named.
+         */
+        get: operations["DeliveryPendingController_pendientesEntrega[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/delivery-pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pendientes por entregar de un paciente
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/delivery-pending`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Sin `centerIds`, los del centro de la sesión (contrato del frontdesk). Con `centerIds`, los de esos centros (factura.read en cada uno, si no 403), cada paquete con su `clinicName`: el cambio de protocolo los lista todos y cada cambio se hace en el centro del paquete. / Without `centerIds`, the session clinic; with it, those clinics, each package named.
+         */
+        get: operations["DeliveryPendingController_pendientesEntrega[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/pendientes-entrega": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pendientes por entregar de un paciente
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/pendientes-entrega`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Sin `centerIds`, los del centro de la sesión (contrato del frontdesk). Con `centerIds`, los de esos centros (factura.read en cada uno, si no 403), cada paquete con su `clinicName`: el cambio de protocolo los lista todos y cada cambio se hace en el centro del paquete. / Without `centerIds`, the session clinic; with it, those clinics, each package named.
+         */
+        get: operations["DeliveryPendingController_pendientesEntrega[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/delivery-pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pendientes por entregar de un paciente
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/delivery-pending`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Sin `centerIds`, los del centro de la sesión (contrato del frontdesk). Con `centerIds`, los de esos centros (factura.read en cada uno, si no 403), cada paquete con su `clinicName`: el cambio de protocolo los lista todos y cada cambio se hace en el centro del paquete. / Without `centerIds`, the session clinic; with it, those clinics, each package named.
+         */
+        get: operations["DeliveryPendingController_pendientesEntrega[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/pendientes-entrega": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pendientes por entregar de un paciente
+         * @description Sin `centerIds`, los del centro de la sesión (contrato del frontdesk). Con `centerIds`, los de esos centros (factura.read en cada uno, si no 403), cada paquete con su `clinicName`: el cambio de protocolo los lista todos y cada cambio se hace en el centro del paquete. / Without `centerIds`, the session clinic; with it, those clinics, each package named.
+         */
+        get: operations["DeliveryPendingController_pendientesEntrega[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/delivery-pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pendientes por entregar de un paciente
+         * @description Sin `centerIds`, los del centro de la sesión (contrato del frontdesk). Con `centerIds`, los de esos centros (factura.read en cada uno, si no 403), cada paquete con su `clinicName`: el cambio de protocolo los lista todos y cada cambio se hace en el centro del paquete. / Without `centerIds`, the session clinic; with it, those clinics, each package named.
+         */
+        get: operations["DeliveryPendingController_pendientesEntrega[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/pendientes-entrega": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pendientes por entregar de un paciente
+         * @description Sin `centerIds`, los del centro de la sesión (contrato del frontdesk). Con `centerIds`, los de esos centros (factura.read en cada uno, si no 403), cada paquete con su `clinicName`: el cambio de protocolo los lista todos y cada cambio se hace en el centro del paquete. / Without `centerIds`, the session clinic; with it, those clinics, each package named.
+         */
+        get: operations["DeliveryPendingController_pendientesEntrega[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/delivery-pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pendientes por entregar de un paciente
+         * @description Sin `centerIds`, los del centro de la sesión (contrato del frontdesk). Con `centerIds`, los de esos centros (factura.read en cada uno, si no 403), cada paquete con su `clinicName`: el cambio de protocolo los lista todos y cada cambio se hace en el centro del paquete. / Without `centerIds`, the session clinic; with it, those clinics, each package named.
+         */
+        get: operations["DeliveryPendingController_pendientesEntrega[7]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1865,6 +2037,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Invoices of every center in scope; `meta.resumen` sums the same centers as the rows.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1889,6 +2062,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Invoices of every center in scope; `meta.resumen` sums the same centers as the rows.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1912,6 +2086,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Invoices of every center in scope; `meta.resumen` sums the same centers as the rows. */
         get: operations["FacturacionController_list[2]_v2"];
         put?: never;
         post: operations["FacturacionController_crear[2]_v2"];
@@ -1928,6 +2103,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Invoices of every center in scope; `meta.resumen` sums the same centers as the rows. */
         get: operations["FacturacionController_list[3]_v2"];
         put?: never;
         post: operations["FacturacionController_crear[3]_v2"];
@@ -2081,158 +2257,6 @@ export interface paths {
         };
         /** Patient search for billing (name / record / phone). */
         get: operations["FacturacionController_buscarPaciente[7]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/facturas/pendientes-entrega": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * "Pendientes por entregar" de un paciente (contrato frontdesk).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/pendientes-entrega`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["FacturacionController_pendientesEntrega[0]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/facturas/delivery-pending": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * "Pendientes por entregar" de un paciente (contrato frontdesk).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/delivery-pending`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["FacturacionController_pendientesEntrega[1]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/invoices/pendientes-entrega": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * "Pendientes por entregar" de un paciente (contrato frontdesk).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/pendientes-entrega`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["FacturacionController_pendientesEntrega[2]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/invoices/delivery-pending": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * "Pendientes por entregar" de un paciente (contrato frontdesk).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/delivery-pending`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["FacturacionController_pendientesEntrega[3]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/facturas/pendientes-entrega": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** "Pendientes por entregar" de un paciente (contrato frontdesk). */
-        get: operations["FacturacionController_pendientesEntrega[4]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/facturas/delivery-pending": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** "Pendientes por entregar" de un paciente (contrato frontdesk). */
-        get: operations["FacturacionController_pendientesEntrega[5]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/invoices/pendientes-entrega": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** "Pendientes por entregar" de un paciente (contrato frontdesk). */
-        get: operations["FacturacionController_pendientesEntrega[6]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/invoices/delivery-pending": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** "Pendientes por entregar" de un paciente (contrato frontdesk). */
-        get: operations["FacturacionController_pendientesEntrega[7]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3233,6 +3257,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * One invoice, in any center where the caller reads invoices (a record cannot mix centers).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -3258,6 +3283,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * One invoice, in any center where the caller reads invoices (a record cannot mix centers).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -3282,6 +3308,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** One invoice, in any center where the caller reads invoices (a record cannot mix centers). */
         get: operations["FacturacionController_get[2]_v2"];
         put?: never;
         post?: never;
@@ -3299,6 +3326,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** One invoice, in any center where the caller reads invoices (a record cannot mix centers). */
         get: operations["FacturacionController_get[3]_v2"];
         put?: never;
         post?: never;
@@ -8153,6 +8181,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturacion/reportes/productos-exonerados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Facturas con productos exonerados de IVU
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturacion/reportes/productos-exonerados`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FacturasReportesController_exoneratedProducts[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturacion/reportes/exonerated-products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Facturas con productos exonerados de IVU
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturacion/reportes/exonerated-products`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FacturasReportesController_exoneratedProducts[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/reports/productos-exonerados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Facturas con productos exonerados de IVU
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/billing/reports/productos-exonerados`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FacturasReportesController_exoneratedProducts[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/reports/exonerated-products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Facturas con productos exonerados de IVU
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/billing/reports/exonerated-products`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FacturasReportesController_exoneratedProducts[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturacion/reportes/productos-exonerados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Facturas con productos exonerados de IVU */
+        get: operations["FacturasReportesController_exoneratedProducts[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturacion/reportes/exonerated-products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Facturas con productos exonerados de IVU */
+        get: operations["FacturasReportesController_exoneratedProducts[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/billing/reports/productos-exonerados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Facturas con productos exonerados de IVU */
+        get: operations["FacturasReportesController_exoneratedProducts[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/billing/reports/exonerated-products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Facturas con productos exonerados de IVU */
+        get: operations["FacturasReportesController_exoneratedProducts[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturacion/reportes/impuestos": {
         parameters: {
             query?: never;
@@ -9817,6 +9997,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/cambiar-paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * La factura se hizo al paciente equivocado: la reabre, la pasa al paciente correcto y la vuelve a emitir con el mismo número, fecha y vendedor; sus paquetes nacen para el paciente correcto. Mismas reglas que reabrir (quien tiene invoice_reopen.any_date, cualquier fecha). / Wrong patient on an invoice: reopen, move, re-issue with the same number.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/cambiar-paciente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceReopeningController_changePatient[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/change-patient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * La factura se hizo al paciente equivocado: la reabre, la pasa al paciente correcto y la vuelve a emitir con el mismo número, fecha y vendedor; sus paquetes nacen para el paciente correcto. Mismas reglas que reabrir (quien tiene invoice_reopen.any_date, cualquier fecha). / Wrong patient on an invoice: reopen, move, re-issue with the same number.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/change-patient`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceReopeningController_changePatient[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/cambiar-paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * La factura se hizo al paciente equivocado: la reabre, la pasa al paciente correcto y la vuelve a emitir con el mismo número, fecha y vendedor; sus paquetes nacen para el paciente correcto. Mismas reglas que reabrir (quien tiene invoice_reopen.any_date, cualquier fecha). / Wrong patient on an invoice: reopen, move, re-issue with the same number.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/cambiar-paciente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceReopeningController_changePatient[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/change-patient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * La factura se hizo al paciente equivocado: la reabre, la pasa al paciente correcto y la vuelve a emitir con el mismo número, fecha y vendedor; sus paquetes nacen para el paciente correcto. Mismas reglas que reabrir (quien tiene invoice_reopen.any_date, cualquier fecha). / Wrong patient on an invoice: reopen, move, re-issue with the same number.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/change-patient`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceReopeningController_changePatient[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/cambiar-paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** La factura se hizo al paciente equivocado: la reabre, la pasa al paciente correcto y la vuelve a emitir con el mismo número, fecha y vendedor; sus paquetes nacen para el paciente correcto. Mismas reglas que reabrir (quien tiene invoice_reopen.any_date, cualquier fecha). / Wrong patient on an invoice: reopen, move, re-issue with the same number. */
+        post: operations["InvoiceReopeningController_changePatient[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/change-patient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** La factura se hizo al paciente equivocado: la reabre, la pasa al paciente correcto y la vuelve a emitir con el mismo número, fecha y vendedor; sus paquetes nacen para el paciente correcto. Mismas reglas que reabrir (quien tiene invoice_reopen.any_date, cualquier fecha). / Wrong patient on an invoice: reopen, move, re-issue with the same number. */
+        post: operations["InvoiceReopeningController_changePatient[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/cambiar-paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** La factura se hizo al paciente equivocado: la reabre, la pasa al paciente correcto y la vuelve a emitir con el mismo número, fecha y vendedor; sus paquetes nacen para el paciente correcto. Mismas reglas que reabrir (quien tiene invoice_reopen.any_date, cualquier fecha). / Wrong patient on an invoice: reopen, move, re-issue with the same number. */
+        post: operations["InvoiceReopeningController_changePatient[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/change-patient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** La factura se hizo al paciente equivocado: la reabre, la pasa al paciente correcto y la vuelve a emitir con el mismo número, fecha y vendedor; sus paquetes nacen para el paciente correcto. Mismas reglas que reabrir (quien tiene invoice_reopen.any_date, cualquier fecha). / Wrong patient on an invoice: reopen, move, re-issue with the same number. */
+        post: operations["InvoiceReopeningController_changePatient[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/{id}/reaperturas": {
         parameters: {
             query?: never;
@@ -9977,7 +10309,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Lista global de devoluciones del centro (nº factura, fecha, estado, monto).
+         * Refunds of every center where the caller holds `factura.read` (admin: all), narrowed by
+         *     `centerIds`; each row with its center and numbered with ITS center's series.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturacion/devoluciones`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -9998,7 +10331,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Lista global de devoluciones del centro (nº factura, fecha, estado, monto).
+         * Refunds of every center where the caller holds `factura.read` (admin: all), narrowed by
+         *     `centerIds`; each row with its center and numbered with ITS center's series.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/billing/refunds`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -10018,7 +10352,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lista global de devoluciones del centro (nº factura, fecha, estado, monto). */
+        /**
+         * Refunds of every center where the caller holds `factura.read` (admin: all), narrowed by
+         *     `centerIds`; each row with its center and numbered with ITS center's series.
+         */
         get: operations["DevolucionesController_list[2]_v2"];
         put?: never;
         post?: never;
@@ -10035,7 +10372,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lista global de devoluciones del centro (nº factura, fecha, estado, monto). */
+        /**
+         * Refunds of every center where the caller holds `factura.read` (admin: all), narrowed by
+         *     `centerIds`; each row with its center and numbered with ITS center's series.
+         */
         get: operations["DevolucionesController_list[3]_v2"];
         put?: never;
         post?: never;
@@ -11288,6 +11628,8 @@ export interface paths {
         };
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
+         *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
+         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/catalogo`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11309,6 +11651,8 @@ export interface paths {
         };
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
+         *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
+         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/catalog`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11330,6 +11674,8 @@ export interface paths {
         };
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
+         *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
+         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/catalogo`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11351,6 +11697,8 @@ export interface paths {
         };
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
+         *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
+         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/catalog`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11370,7 +11718,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda. */
+        /**
+         * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
+         *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
+         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         */
         get: operations["PreciosController_catalogo[4]_v2"];
         put?: never;
         post?: never;
@@ -11387,7 +11739,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda. */
+        /**
+         * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
+         *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
+         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         */
         get: operations["PreciosController_catalogo[5]_v2"];
         put?: never;
         post?: never;
@@ -11404,7 +11760,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda. */
+        /**
+         * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
+         *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
+         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         */
         get: operations["PreciosController_catalogo[6]_v2"];
         put?: never;
         post?: never;
@@ -11421,7 +11781,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda. */
+        /**
+         * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
+         *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
+         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         */
         get: operations["PreciosController_catalogo[7]_v2"];
         put?: never;
         post?: never;
@@ -11735,6 +12099,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The prices of a presentation in every center where the caller reads prices, each named.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11759,6 +12124,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The prices of a presentation in every center where the caller reads prices, each named.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11782,6 +12148,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The prices of a presentation in every center where the caller reads prices, each named. */
         get: operations["PreciosController_list[2]_v2"];
         put?: never;
         post: operations["PreciosController_create[2]_v2"];
@@ -11798,6 +12165,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The prices of a presentation in every center where the caller reads prices, each named. */
         get: operations["PreciosController_list[3]_v2"];
         put?: never;
         post: operations["PreciosController_create[3]_v2"];
@@ -11895,6 +12263,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The offers of a presentation in every center where the caller reads prices, each named.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/ofertas`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11919,6 +12288,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The offers of a presentation in every center where the caller reads prices, each named.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/offers`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11942,6 +12312,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The offers of a presentation in every center where the caller reads prices, each named. */
         get: operations["OfertasController_list[2]_v2"];
         put?: never;
         post: operations["OfertasController_create[2]_v2"];
@@ -11958,6 +12329,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The offers of a presentation in every center where the caller reads prices, each named. */
         get: operations["OfertasController_list[3]_v2"];
         put?: never;
         post: operations["OfertasController_create[3]_v2"];
@@ -15051,6 +15423,9 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Who serves in every center where the caller can read staff (`centerIds` / `centroId` narrow;
+         *     a center without the permission is a 403). One row per person: `clinicName` is the home center,
+         *     `servesInCenters` the centers of the scope where that person shows up.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -15075,6 +15450,9 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Who serves in every center where the caller can read staff (`centerIds` / `centroId` narrow;
+         *     a center without the permission is a 403). One row per person: `clinicName` is the home center,
+         *     `servesInCenters` the centers of the scope where that person shows up.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -15098,6 +15476,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Who serves in every center where the caller can read staff (`centerIds` / `centroId` narrow;
+         *     a center without the permission is a 403). One row per person: `clinicName` is the home center,
+         *     `servesInCenters` the centers of the scope where that person shows up.
+         */
         get: operations["PersonalController_list[2]_v2"];
         put?: never;
         post: operations["PersonalController_create[2]_v2"];
@@ -15114,6 +15497,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Who serves in every center where the caller can read staff (`centerIds` / `centroId` narrow;
+         *     a center without the permission is a 403). One row per person: `clinicName` is the home center,
+         *     `servesInCenters` the centers of the scope where that person shows up.
+         */
         get: operations["PersonalController_list[3]_v2"];
         put?: never;
         post: operations["PersonalController_create[3]_v2"];
@@ -15603,6 +15991,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The record in any center where the caller reads staff (where it serves, or its home center).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -15631,6 +16020,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The record in any center where the caller reads staff (where it serves, or its home center).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -15658,6 +16048,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The record in any center where the caller reads staff (where it serves, or its home center). */
         get: operations["PersonalController_get[2]_v2"];
         put: operations["PersonalController_update[2]_v2"];
         post?: never;
@@ -15674,6 +16065,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The record in any center where the caller reads staff (where it serves, or its home center). */
         get: operations["PersonalController_get[3]_v2"];
         put: operations["PersonalController_update[3]_v2"];
         post?: never;
@@ -19687,7 +20079,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Eventos recibidos del EHR, del centro activo o de `centerIds`, más nuevos primero.
+         * Eventos recibidos del EHR, de todos los centros donde se tiene el permiso (`centerIds` acota), más nuevos primero; cada uno con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ehr-integration/events`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -19712,7 +20104,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Eventos recibidos del EHR, del centro activo o de `centerIds`, más nuevos primero. */
+        /** Eventos recibidos del EHR, de todos los centros donde se tiene el permiso (`centerIds` acota), más nuevos primero; cada uno con clinicName. */
         get: operations["EhrEventsController_list_v2"];
         put?: never;
         /** Webhook del EHR, UNA URL para los dos centros: firma con el secreto cargado; el centro sale de la llave del paciente («BAY-015520»). Sin centro reconocible responde 200 con centerId null y no guarda. */
@@ -19769,7 +20161,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. Del centro activo o de `centerIds`.
+         * Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. De todos los centros donde se tiene el permiso; `centerIds` acota.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ehr-integration/events/summary`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -19790,7 +20182,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. Del centro activo o de `centerIds`.
+         * Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. De todos los centros donde se tiene el permiso; `centerIds` acota.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ehr-integration/events/resumen`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -19810,7 +20202,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. Del centro activo o de `centerIds`. */
+        /** Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. De todos los centros donde se tiene el permiso; `centerIds` acota. */
         get: operations["EhrEventsController_summary[2]_v2"];
         put?: never;
         post?: never;
@@ -19827,7 +20219,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. Del centro activo o de `centerIds`. */
+        /** Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. De todos los centros donde se tiene el permiso; `centerIds` acota. */
         get: operations["EhrEventsController_summary[3]_v2"];
         put?: never;
         post?: never;
@@ -20905,7 +21297,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Lo que se encoló y cómo fue, sin el contenido. / What was queued and how it went, without the payload.
+         * Lo que se encoló y cómo fue, sin el contenido, de todos los centros donde se tiene print-hub.read (centerIds acota); cada fila con clinicName. / What was queued and how it went, without the payload, in every center where you hold print-hub.read.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-trabajos`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -20926,7 +21318,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Lo que se encoló y cómo fue, sin el contenido. / What was queued and how it went, without the payload.
+         * Lo que se encoló y cómo fue, sin el contenido, de todos los centros donde se tiene print-hub.read (centerIds acota); cada fila con clinicName. / What was queued and how it went, without the payload, in every center where you hold print-hub.read.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-jobs`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -20946,7 +21338,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lo que se encoló y cómo fue, sin el contenido. / What was queued and how it went, without the payload. */
+        /** Lo que se encoló y cómo fue, sin el contenido, de todos los centros donde se tiene print-hub.read (centerIds acota); cada fila con clinicName. / What was queued and how it went, without the payload, in every center where you hold print-hub.read. */
         get: operations["PrintJobsController_list[2]_v2"];
         put?: never;
         post?: never;
@@ -20963,7 +21355,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Lo que se encoló y cómo fue, sin el contenido. / What was queued and how it went, without the payload. */
+        /** Lo que se encoló y cómo fue, sin el contenido, de todos los centros donde se tiene print-hub.read (centerIds acota); cada fila con clinicName. / What was queued and how it went, without the payload, in every center where you hold print-hub.read. */
         get: operations["PrintJobsController_list[3]_v2"];
         put?: never;
         post?: never;
@@ -23949,6 +24341,7 @@ export interface paths {
         get: operations["UbicacionesController_list[0]_v1"];
         put?: never;
         /**
+         * In the warehouse's center: a location of a Caguas warehouse is a Caguas row.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ubicaciones`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -23973,6 +24366,7 @@ export interface paths {
         get: operations["UbicacionesController_list[1]_v1"];
         put?: never;
         /**
+         * In the warehouse's center: a location of a Caguas warehouse is a Caguas row.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/locations`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -23992,6 +24386,7 @@ export interface paths {
         };
         get: operations["UbicacionesController_list[2]_v2"];
         put?: never;
+        /** In the warehouse's center: a location of a Caguas warehouse is a Caguas row. */
         post: operations["UbicacionesController_create[2]_v2"];
         delete?: never;
         options?: never;
@@ -24008,6 +24403,7 @@ export interface paths {
         };
         get: operations["UbicacionesController_list[3]_v2"];
         put?: never;
+        /** In the warehouse's center: a location of a Caguas warehouse is a Caguas row. */
         post: operations["UbicacionesController_create[3]_v2"];
         delete?: never;
         options?: never;
@@ -24109,6 +24505,7 @@ export interface paths {
         get: operations["LotesController_list[0]_v1"];
         put?: never;
         /**
+         * In the warehouse's center: a lot of a Caguas warehouse is a Caguas lot.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/lotes`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -24133,6 +24530,7 @@ export interface paths {
         get: operations["LotesController_list[1]_v1"];
         put?: never;
         /**
+         * In the warehouse's center: a lot of a Caguas warehouse is a Caguas lot.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/lots`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -24152,6 +24550,7 @@ export interface paths {
         };
         get: operations["LotesController_list[2]_v2"];
         put?: never;
+        /** In the warehouse's center: a lot of a Caguas warehouse is a Caguas lot. */
         post: operations["LotesController_create[2]_v2"];
         delete?: never;
         options?: never;
@@ -24168,6 +24567,7 @@ export interface paths {
         };
         get: operations["LotesController_list[3]_v2"];
         put?: never;
+        /** In the warehouse's center: a lot of a Caguas warehouse is a Caguas lot. */
         post: operations["LotesController_create[3]_v2"];
         delete?: never;
         options?: never;
@@ -24485,6 +24885,7 @@ export interface paths {
         get: operations["VialesAbiertosController_list[0]_v1"];
         put?: never;
         /**
+         * In the warehouse's center: a vial opened from a Caguas warehouse is a Caguas vial.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/viales-abiertos`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -24509,6 +24910,7 @@ export interface paths {
         get: operations["VialesAbiertosController_list[1]_v1"];
         put?: never;
         /**
+         * In the warehouse's center: a vial opened from a Caguas warehouse is a Caguas vial.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/open-vials`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -24528,6 +24930,7 @@ export interface paths {
         };
         get: operations["VialesAbiertosController_list[2]_v2"];
         put?: never;
+        /** In the warehouse's center: a vial opened from a Caguas warehouse is a Caguas vial. */
         post: operations["VialesAbiertosController_create[2]_v2"];
         delete?: never;
         options?: never;
@@ -24544,6 +24947,7 @@ export interface paths {
         };
         get: operations["VialesAbiertosController_list[3]_v2"];
         put?: never;
+        /** In the warehouse's center: a vial opened from a Caguas warehouse is a Caguas vial. */
         post: operations["VialesAbiertosController_create[3]_v2"];
         delete?: never;
         options?: never;
@@ -24563,7 +24967,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/viales-abiertos/reporte`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. Filtra por el centro activo.
+         *     Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. UN centro: el primero de `centerIds` (comprobado), si no el activo.
          */
         get: operations["VialesAbiertosController_reporte[0]_v1"];
         put?: never;
@@ -24586,7 +24990,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/viales-abiertos/report`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. Filtra por el centro activo.
+         *     Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. UN centro: el primero de `centerIds` (comprobado), si no el activo.
          */
         get: operations["VialesAbiertosController_reporte[1]_v1"];
         put?: never;
@@ -24609,7 +25013,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/open-vials/reporte`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. Filtra por el centro activo.
+         *     Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. UN centro: el primero de `centerIds` (comprobado), si no el activo.
          */
         get: operations["VialesAbiertosController_reporte[2]_v1"];
         put?: never;
@@ -24632,7 +25036,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/open-vials/report`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. Filtra por el centro activo.
+         *     Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. UN centro: el primero de `centerIds` (comprobado), si no el activo.
          */
         get: operations["VialesAbiertosController_reporte[3]_v1"];
         put?: never;
@@ -24652,7 +25056,7 @@ export interface paths {
         };
         /**
          * Seguimiento de un producto que se dosifica en viales.
-         * @description Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. Filtra por el centro activo.
+         * @description Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. UN centro: el primero de `centerIds` (comprobado), si no el activo.
          */
         get: operations["VialesAbiertosController_reporte[4]_v2"];
         put?: never;
@@ -24672,7 +25076,7 @@ export interface paths {
         };
         /**
          * Seguimiento de un producto que se dosifica en viales.
-         * @description Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. Filtra por el centro activo.
+         * @description Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. UN centro: el primero de `centerIds` (comprobado), si no el activo.
          */
         get: operations["VialesAbiertosController_reporte[5]_v2"];
         put?: never;
@@ -24692,7 +25096,7 @@ export interface paths {
         };
         /**
          * Seguimiento de un producto que se dosifica en viales.
-         * @description Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. Filtra por el centro activo.
+         * @description Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. UN centro: el primero de `centerIds` (comprobado), si no el activo.
          */
         get: operations["VialesAbiertosController_reporte[6]_v2"];
         put?: never;
@@ -24712,7 +25116,7 @@ export interface paths {
         };
         /**
          * Seguimiento de un producto que se dosifica en viales.
-         * @description Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. Filtra por el centro activo.
+         * @description Devuelve en una sola llamada: `cerrados` (frascos sellados en el estante), `activo` (el vial en uso con su remanente y su porcentaje, null si no hay ninguno abierto), `historicos` (los que ya pasaron, del más reciente al más viejo) y `consumos` (cada dosis con el NÚMERO del vial del que salió, su paciente, quién la aplicó y la FACTURA que la pagó — `facturaId` y `facturaNumero` ya formateado, null cuando la entrega no nació de una factura). Filtros opcionales: desde, hasta, pacienteId. Un remanente negativo se devuelve tal cual —es la señal de que se aplicó más de lo que el frasco tenía— pero el porcentaje se queda en 0. UN centro: el primero de `centerIds` (comprobado), si no el activo.
          */
         get: operations["VialesAbiertosController_reporte[7]_v2"];
         put?: never;
@@ -26583,6 +26987,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The warehouse decides the center; the scope only keeps a warehouse the caller cannot read out.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/stock/fefo`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -26603,6 +27008,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The warehouse decides the center; the scope only keeps a warehouse the caller cannot read out.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/stock/fefo`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -26622,6 +27028,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The warehouse decides the center; the scope only keeps a warehouse the caller cannot read out. */
         get: operations["StockController_fefo[2]_v2"];
         put?: never;
         post?: never;
@@ -26638,6 +27045,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The warehouse decides the center; the scope only keeps a warehouse the caller cannot read out. */
         get: operations["StockController_fefo[3]_v2"];
         put?: never;
         post?: never;
@@ -28859,7 +29267,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Productos sin regla de descarga explícita (1:1 implícito, visible).
+         * Productos sin regla de descarga explícita (1:1 implícito, visible). Global catalog: no center.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/productos-sin-regla`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -28880,7 +29288,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Productos sin regla de descarga explícita (1:1 implícito, visible).
+         * Productos sin regla de descarga explícita (1:1 implícito, visible). Global catalog: no center.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/products-without-rule`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -28901,7 +29309,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Productos sin regla de descarga explícita (1:1 implícito, visible).
+         * Productos sin regla de descarga explícita (1:1 implícito, visible). Global catalog: no center.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/productos-sin-regla`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -28922,7 +29330,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Productos sin regla de descarga explícita (1:1 implícito, visible).
+         * Productos sin regla de descarga explícita (1:1 implícito, visible). Global catalog: no center.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/products-without-rule`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -28942,7 +29350,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Productos sin regla de descarga explícita (1:1 implícito, visible). */
+        /** Productos sin regla de descarga explícita (1:1 implícito, visible). Global catalog: no center. */
         get: operations["ReportesController_productosSinRegla[4]_v2"];
         put?: never;
         post?: never;
@@ -28959,7 +29367,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Productos sin regla de descarga explícita (1:1 implícito, visible). */
+        /** Productos sin regla de descarga explícita (1:1 implícito, visible). Global catalog: no center. */
         get: operations["ReportesController_productosSinRegla[5]_v2"];
         put?: never;
         post?: never;
@@ -28976,7 +29384,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Productos sin regla de descarga explícita (1:1 implícito, visible). */
+        /** Productos sin regla de descarga explícita (1:1 implícito, visible). Global catalog: no center. */
         get: operations["ReportesController_productosSinRegla[6]_v2"];
         put?: never;
         post?: never;
@@ -28993,7 +29401,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Productos sin regla de descarga explícita (1:1 implícito, visible). */
+        /** Productos sin regla de descarga explícita (1:1 implícito, visible). Global catalog: no center. */
         get: operations["ReportesController_productosSinRegla[7]_v2"];
         put?: never;
         post?: never;
@@ -30379,7 +30787,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana).
+         * Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana), de todos los centros donde puedo leerlas (centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/comunicaciones/alertas`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -30405,7 +30813,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana).
+         * Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana), de todos los centros donde puedo leerlas (centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/comunicaciones/alerts`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -30431,7 +30839,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana).
+         * Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana), de todos los centros donde puedo leerlas (centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/communications/alertas`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -30457,7 +30865,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana).
+         * Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana), de todos los centros donde puedo leerlas (centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/communications/alerts`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -30482,7 +30890,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana). */
+        /** Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana), de todos los centros donde puedo leerlas (centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listAlertas[4]_v2"];
         put?: never;
         /** Crea una alerta interna. modoAcuse=por_usuario exige targets.usuarioIds. */
@@ -30500,7 +30908,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana). */
+        /** Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana), de todos los centros donde puedo leerlas (centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listAlertas[5]_v2"];
         put?: never;
         /** Crea una alerta interna. modoAcuse=por_usuario exige targets.usuarioIds. */
@@ -30518,7 +30926,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana). */
+        /** Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana), de todos los centros donde puedo leerlas (centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listAlertas[6]_v2"];
         put?: never;
         /** Crea una alerta interna. modoAcuse=por_usuario exige targets.usuarioIds. */
@@ -30536,7 +30944,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana). */
+        /** Mis alertas activas + contador de NO LEÍDAS por mí (badge de la campana), de todos los centros donde puedo leerlas (centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listAlertas[7]_v2"];
         put?: never;
         /** Crea una alerta interna. modoAcuse=por_usuario exige targets.usuarioIds. */
@@ -31493,7 +31901,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro y registra el intento).
+         * Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro DE LA CITA y registra el intento allí).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/comunicaciones/notificaciones/enviar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31514,7 +31922,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro y registra el intento).
+         * Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro DE LA CITA y registra el intento allí).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/comunicaciones/notifications/send`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31535,7 +31943,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro y registra el intento).
+         * Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro DE LA CITA y registra el intento allí).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/communications/notificaciones/enviar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31556,7 +31964,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro y registra el intento).
+         * Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro DE LA CITA y registra el intento allí).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/communications/notifications/send`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31576,7 +31984,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro y registra el intento). */
+        /** Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro DE LA CITA y registra el intento allí). */
         post: operations["ComunicacionesController_enviar[4]_v2"];
         delete?: never;
         options?: never;
@@ -31593,7 +32001,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro y registra el intento). */
+        /** Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro DE LA CITA y registra el intento allí). */
         post: operations["ComunicacionesController_enviar[5]_v2"];
         delete?: never;
         options?: never;
@@ -31610,7 +32018,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro y registra el intento). */
+        /** Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro DE LA CITA y registra el intento allí). */
         post: operations["ComunicacionesController_enviar[6]_v2"];
         delete?: never;
         options?: never;
@@ -31627,7 +32035,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro y registra el intento). */
+        /** Envía una notificación de cita por whatsapp|sms|email|impresa (renderiza la plantilla del centro DE LA CITA y registra el intento allí). */
         post: operations["ComunicacionesController_enviar[7]_v2"];
         delete?: never;
         options?: never;
@@ -31643,7 +32051,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bitácora de notificaciones enviadas (opcional: filtra por citaId).
+         * Bitácora de notificaciones enviadas de todos los centros donde puedo leerlas (opcional: citaId; centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/comunicaciones/notificaciones`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31664,7 +32072,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bitácora de notificaciones enviadas (opcional: filtra por citaId).
+         * Bitácora de notificaciones enviadas de todos los centros donde puedo leerlas (opcional: citaId; centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/comunicaciones/notifications`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31685,7 +32093,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bitácora de notificaciones enviadas (opcional: filtra por citaId).
+         * Bitácora de notificaciones enviadas de todos los centros donde puedo leerlas (opcional: citaId; centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/communications/notificaciones`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31706,7 +32114,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bitácora de notificaciones enviadas (opcional: filtra por citaId).
+         * Bitácora de notificaciones enviadas de todos los centros donde puedo leerlas (opcional: citaId; centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/communications/notifications`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31726,7 +32134,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bitácora de notificaciones enviadas (opcional: filtra por citaId). */
+        /** Bitácora de notificaciones enviadas de todos los centros donde puedo leerlas (opcional: citaId; centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listarNotificaciones[4]_v2"];
         put?: never;
         post?: never;
@@ -31743,7 +32151,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bitácora de notificaciones enviadas (opcional: filtra por citaId). */
+        /** Bitácora de notificaciones enviadas de todos los centros donde puedo leerlas (opcional: citaId; centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listarNotificaciones[5]_v2"];
         put?: never;
         post?: never;
@@ -31760,7 +32168,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bitácora de notificaciones enviadas (opcional: filtra por citaId). */
+        /** Bitácora de notificaciones enviadas de todos los centros donde puedo leerlas (opcional: citaId; centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listarNotificaciones[6]_v2"];
         put?: never;
         post?: never;
@@ -31777,7 +32185,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bitácora de notificaciones enviadas (opcional: filtra por citaId). */
+        /** Bitácora de notificaciones enviadas de todos los centros donde puedo leerlas (opcional: citaId; centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listarNotificaciones[7]_v2"];
         put?: never;
         post?: never;
@@ -31795,7 +32203,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Plantillas del centro (cuerpo con {{vars}} por canal e idioma).
+         * Plantillas de todos los centros donde puedo leer notificaciones (cuerpo con {{vars}} por canal e idioma; centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/comunicaciones/notificaciones/plantillas`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31821,7 +32229,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Plantillas del centro (cuerpo con {{vars}} por canal e idioma).
+         * Plantillas de todos los centros donde puedo leer notificaciones (cuerpo con {{vars}} por canal e idioma; centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/comunicaciones/notifications/templates`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31847,7 +32255,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Plantillas del centro (cuerpo con {{vars}} por canal e idioma).
+         * Plantillas de todos los centros donde puedo leer notificaciones (cuerpo con {{vars}} por canal e idioma; centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/communications/notificaciones/plantillas`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31873,7 +32281,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Plantillas del centro (cuerpo con {{vars}} por canal e idioma).
+         * Plantillas de todos los centros donde puedo leer notificaciones (cuerpo con {{vars}} por canal e idioma; centerIds acota); cada fila con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/communications/notifications/templates`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -31898,7 +32306,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Plantillas del centro (cuerpo con {{vars}} por canal e idioma). */
+        /** Plantillas de todos los centros donde puedo leer notificaciones (cuerpo con {{vars}} por canal e idioma; centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listPlantillas[4]_v2"];
         put?: never;
         /** Crea una plantilla de notificación para el centro. */
@@ -31916,7 +32324,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Plantillas del centro (cuerpo con {{vars}} por canal e idioma). */
+        /** Plantillas de todos los centros donde puedo leer notificaciones (cuerpo con {{vars}} por canal e idioma; centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listPlantillas[5]_v2"];
         put?: never;
         /** Crea una plantilla de notificación para el centro. */
@@ -31934,7 +32342,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Plantillas del centro (cuerpo con {{vars}} por canal e idioma). */
+        /** Plantillas de todos los centros donde puedo leer notificaciones (cuerpo con {{vars}} por canal e idioma; centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listPlantillas[6]_v2"];
         put?: never;
         /** Crea una plantilla de notificación para el centro. */
@@ -31952,7 +32360,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Plantillas del centro (cuerpo con {{vars}} por canal e idioma). */
+        /** Plantillas de todos los centros donde puedo leer notificaciones (cuerpo con {{vars}} por canal e idioma; centerIds acota); cada fila con clinicName. */
         get: operations["ComunicacionesController_listPlantillas[7]_v2"];
         put?: never;
         /** Crea una plantilla de notificación para el centro. */
@@ -36315,12 +36723,16 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Schedules of every center where the caller reads appointments (`centerIds` narrows; outside is
+         *     403), each row with `clinicId`/`clinicName`. With `staffId`, resolved day by day inside EACH
+         *     center: a screen of one center sends `centerIds=[that center]`.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medicos/horarios`, que devuelve lo mismo con los nombres en inglés.
          */
         get: operations["HorariosController_list[0]_v1"];
         put?: never;
         /**
+         * In `centerId` (citas.config there) or the session center.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medicos/horarios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -36339,12 +36751,16 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Schedules of every center where the caller reads appointments (`centerIds` narrows; outside is
+         *     403), each row with `clinicId`/`clinicName`. With `staffId`, resolved day by day inside EACH
+         *     center: a screen of one center sends `centerIds=[that center]`.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/doctors/schedules`, que devuelve lo mismo con los nombres en inglés.
          */
         get: operations["HorariosController_list[1]_v1"];
         put?: never;
         /**
+         * In `centerId` (citas.config there) or the session center.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/doctors/schedules`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -36362,8 +36778,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Schedules of every center where the caller reads appointments (`centerIds` narrows; outside is
+         *     403), each row with `clinicId`/`clinicName`. With `staffId`, resolved day by day inside EACH
+         *     center: a screen of one center sends `centerIds=[that center]`.
+         */
         get: operations["HorariosController_list[2]_v2"];
         put?: never;
+        /** In `centerId` (citas.config there) or the session center. */
         post: operations["HorariosController_create[2]_v2"];
         delete?: never;
         options?: never;
@@ -36378,8 +36800,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Schedules of every center where the caller reads appointments (`centerIds` narrows; outside is
+         *     403), each row with `clinicId`/`clinicName`. With `staffId`, resolved day by day inside EACH
+         *     center: a screen of one center sends `centerIds=[that center]`.
+         */
         get: operations["HorariosController_list[3]_v2"];
         put?: never;
+        /** In `centerId` (citas.config there) or the session center. */
         post: operations["HorariosController_create[3]_v2"];
         delete?: never;
         options?: never;
@@ -36480,6 +36908,7 @@ export interface paths {
         };
         get?: never;
         /**
+         * In the schedule's own center, with citas.config there.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medicos/horarios/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -36504,6 +36933,7 @@ export interface paths {
         };
         get?: never;
         /**
+         * In the schedule's own center, with citas.config there.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/doctors/schedules/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -36527,6 +36957,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        /** In the schedule's own center, with citas.config there. */
         put: operations["HorariosController_update[2]_v2"];
         post?: never;
         delete: operations["HorariosController_remove[2]_v2"];
@@ -36543,6 +36974,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        /** In the schedule's own center, with citas.config there. */
         put: operations["HorariosController_update[3]_v2"];
         post?: never;
         delete: operations["HorariosController_remove[3]_v2"];
@@ -36565,6 +36997,7 @@ export interface paths {
         get: operations["FestivosController_list[0]_v1"];
         put?: never;
         /**
+         * A center holiday lands in `centerId` (citas.config there) or the session center; a global one has none.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/festivos`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -36589,6 +37022,7 @@ export interface paths {
         get: operations["FestivosController_list[1]_v1"];
         put?: never;
         /**
+         * A center holiday lands in `centerId` (citas.config there) or the session center; a global one has none.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/holidays`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -36608,6 +37042,7 @@ export interface paths {
         };
         get: operations["FestivosController_list[2]_v2"];
         put?: never;
+        /** A center holiday lands in `centerId` (citas.config there) or the session center; a global one has none. */
         post: operations["FestivosController_create[2]_v2"];
         delete?: never;
         options?: never;
@@ -36624,6 +37059,7 @@ export interface paths {
         };
         get: operations["FestivosController_list[3]_v2"];
         put?: never;
+        /** A center holiday lands in `centerId` (citas.config there) or the session center; a global one has none. */
         post: operations["FestivosController_create[3]_v2"];
         delete?: never;
         options?: never;
@@ -36800,6 +37236,7 @@ export interface paths {
         };
         get?: never;
         /**
+         * In the absence's own center, with citas.config there (403), if readable at all (404).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medicos/ausencias/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -36824,6 +37261,7 @@ export interface paths {
         };
         get?: never;
         /**
+         * In the absence's own center, with citas.config there (403), if readable at all (404).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/doctors/absences/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -36847,6 +37285,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        /** In the absence's own center, with citas.config there (403), if readable at all (404). */
         put: operations["DoctorAbsencesController_update[2]_v2"];
         post?: never;
         delete: operations["DoctorAbsencesController_remove[2]_v2"];
@@ -36863,6 +37302,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        /** In the absence's own center, with citas.config there (403), if readable at all (404). */
         put: operations["DoctorAbsencesController_update[3]_v2"];
         post?: never;
         delete: operations["DoctorAbsencesController_remove[3]_v2"];
@@ -37027,7 +37467,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/captacion/por-agente`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita.
+         *     Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita; todos los centros donde se tiene captacion.read (centerIds acota).
          */
         get: operations["CaptacionController_porAgente[0]_v1"];
         put?: never;
@@ -37050,7 +37490,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/captacion/agent-by`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita.
+         *     Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita; todos los centros donde se tiene captacion.read (centerIds acota).
          */
         get: operations["CaptacionController_porAgente[1]_v1"];
         put?: never;
@@ -37073,7 +37513,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/acquisition/por-agente`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita.
+         *     Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita; todos los centros donde se tiene captacion.read (centerIds acota).
          */
         get: operations["CaptacionController_porAgente[2]_v1"];
         put?: never;
@@ -37096,7 +37536,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/acquisition/agent-by`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita.
+         *     Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita; todos los centros donde se tiene captacion.read (centerIds acota).
          */
         get: operations["CaptacionController_porAgente[3]_v1"];
         put?: never;
@@ -37116,7 +37556,7 @@ export interface paths {
         };
         /**
          * Efectividad del control de citas: citas, pacientes distintos y pacientes NUEVOS por agente.
-         * @description Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita.
+         * @description Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita; todos los centros donde se tiene captacion.read (centerIds acota).
          */
         get: operations["CaptacionController_porAgente[4]_v2"];
         put?: never;
@@ -37136,7 +37576,7 @@ export interface paths {
         };
         /**
          * Efectividad del control de citas: citas, pacientes distintos y pacientes NUEVOS por agente.
-         * @description Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita.
+         * @description Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita; todos los centros donde se tiene captacion.read (centerIds acota).
          */
         get: operations["CaptacionController_porAgente[5]_v2"];
         put?: never;
@@ -37156,7 +37596,7 @@ export interface paths {
         };
         /**
          * Efectividad del control de citas: citas, pacientes distintos y pacientes NUEVOS por agente.
-         * @description Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita.
+         * @description Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita; todos los centros donde se tiene captacion.read (centerIds acota).
          */
         get: operations["CaptacionController_porAgente[6]_v2"];
         put?: never;
@@ -37176,7 +37616,7 @@ export interface paths {
         };
         /**
          * Efectividad del control de citas: citas, pacientes distintos y pacientes NUEVOS por agente.
-         * @description Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita.
+         * @description Por agente: `citas` (cuántas tomó), `pacientes` (personas DISTINTAS — cinco citas de un paciente son un paciente), `nuevos` (citas de primera visita), `pacientesNuevos` (personas distintas captadas por primera vez), `seguimientos`, su `porcentaje` de las citas del periodo y `efectividadNuevos` (qué parte de SUS citas es de paciente nuevo — la captación, no el volumen). `base=agendado` (default) cuenta por cuándo se tomó la cita, en el día de Puerto Rico; `base=cita` por la fecha de la cita. Las citas que nacieron sin autor salen en una fila "Sin registrar": esconderlas inflaría el porcentaje de los demás. Centro: el de la cita; todos los centros donde se tiene captacion.read (centerIds acota).
          */
         get: operations["CaptacionController_porAgente[7]_v2"];
         put?: never;
@@ -37199,7 +37639,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/eventos`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve los eventos del centro activo MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de ese centro, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día. `centroId` acota a otro centro para quien pueda verlos.
+         *     Devuelve los eventos de cada centro donde se tiene calendario.read (acotados por `centerIds`, o el `centroId` de siempre) MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de esos centros, cada fila con `clinicName`, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día.
          */
         get: operations["CalendarioController_eventos[0]_v1"];
         put?: never;
@@ -37227,7 +37667,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/events`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve los eventos del centro activo MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de ese centro, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día. `centroId` acota a otro centro para quien pueda verlos.
+         *     Devuelve los eventos de cada centro donde se tiene calendario.read (acotados por `centerIds`, o el `centroId` de siempre) MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de esos centros, cada fila con `clinicName`, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día.
          */
         get: operations["CalendarioController_eventos[1]_v1"];
         put?: never;
@@ -37255,7 +37695,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/eventos`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve los eventos del centro activo MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de ese centro, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día. `centroId` acota a otro centro para quien pueda verlos.
+         *     Devuelve los eventos de cada centro donde se tiene calendario.read (acotados por `centerIds`, o el `centroId` de siempre) MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de esos centros, cada fila con `clinicName`, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día.
          */
         get: operations["CalendarioController_eventos[2]_v1"];
         put?: never;
@@ -37283,7 +37723,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/events`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve los eventos del centro activo MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de ese centro, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día. `centroId` acota a otro centro para quien pueda verlos.
+         *     Devuelve los eventos de cada centro donde se tiene calendario.read (acotados por `centerIds`, o el `centroId` de siempre) MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de esos centros, cada fila con `clinicName`, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día.
          */
         get: operations["CalendarioController_eventos[3]_v1"];
         put?: never;
@@ -37308,7 +37748,7 @@ export interface paths {
         };
         /**
          * Eventos del rango que se está mirando (mes, semana o día).
-         * @description Devuelve los eventos del centro activo MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de ese centro, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día. `centroId` acota a otro centro para quien pueda verlos.
+         * @description Devuelve los eventos de cada centro donde se tiene calendario.read (acotados por `centerIds`, o el `centroId` de siempre) MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de esos centros, cada fila con `clinicName`, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día.
          */
         get: operations["CalendarioController_eventos[4]_v2"];
         put?: never;
@@ -37329,7 +37769,7 @@ export interface paths {
         };
         /**
          * Eventos del rango que se está mirando (mes, semana o día).
-         * @description Devuelve los eventos del centro activo MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de ese centro, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día. `centroId` acota a otro centro para quien pueda verlos.
+         * @description Devuelve los eventos de cada centro donde se tiene calendario.read (acotados por `centerIds`, o el `centroId` de siempre) MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de esos centros, cada fila con `clinicName`, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día.
          */
         get: operations["CalendarioController_eventos[5]_v2"];
         put?: never;
@@ -37350,7 +37790,7 @@ export interface paths {
         };
         /**
          * Eventos del rango que se está mirando (mes, semana o día).
-         * @description Devuelve los eventos del centro activo MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de ese centro, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día. `centroId` acota a otro centro para quien pueda verlos.
+         * @description Devuelve los eventos de cada centro donde se tiene calendario.read (acotados por `centerIds`, o el `centroId` de siempre) MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de esos centros, cada fila con `clinicName`, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día.
          */
         get: operations["CalendarioController_eventos[6]_v2"];
         put?: never;
@@ -37371,7 +37811,7 @@ export interface paths {
         };
         /**
          * Eventos del rango que se está mirando (mes, semana o día).
-         * @description Devuelve los eventos del centro activo MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de ese centro, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día. `centroId` acota a otro centro para quien pueda verlos.
+         * @description Devuelve los eventos de cada centro donde se tiene calendario.read (acotados por `centerIds`, o el `centroId` de siempre) MÁS los globales (los que valen para toda la empresa) MÁS las ausencias de personal (vacaciones/permisos, cualquier cargo) de esos centros, cada fila con `clinicName`, proyectadas como eventos de SOLO LECTURA (`origin: "staff_absence"`) — se editan desde Disponibilidad, no desde aquí. Por solapamiento: una feria de tres días sale en todas las semanas que toca, no solo en la de su primer día.
          */
         get: operations["CalendarioController_eventos[7]_v2"];
         put?: never;
@@ -38289,7 +38729,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/en-vivo`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora.
+         *     Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
          */
         get: operations["CallcenterController_enVivo[0]_v1"];
         put?: never;
@@ -38312,7 +38752,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/live-at`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora.
+         *     Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
          */
         get: operations["CallcenterController_enVivo[1]_v1"];
         put?: never;
@@ -38332,7 +38772,7 @@ export interface paths {
         };
         /**
          * Estado actual de cada extensión.
-         * @description Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora.
+         * @description Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
          */
         get: operations["CallcenterController_enVivo[2]_v2"];
         put?: never;
@@ -38352,7 +38792,7 @@ export interface paths {
         };
         /**
          * Estado actual de cada extensión.
-         * @description Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora.
+         * @description Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
          */
         get: operations["CallcenterController_enVivo[3]_v2"];
         put?: never;
@@ -38375,7 +38815,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/llamadas`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     El dato estable del callcenter: efectivas contra perdidas. Filtra por el centro activo.
+         *     El dato estable del callcenter: efectivas contra perdidas. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
          */
         get: operations["CallcenterController_llamadas[0]_v1"];
         put?: never;
@@ -38398,7 +38838,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/calls`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     El dato estable del callcenter: efectivas contra perdidas. Filtra por el centro activo.
+         *     El dato estable del callcenter: efectivas contra perdidas. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
          */
         get: operations["CallcenterController_llamadas[1]_v1"];
         put?: never;
@@ -38418,7 +38858,7 @@ export interface paths {
         };
         /**
          * Llamadas terminadas (CDR) de un rango.
-         * @description El dato estable del callcenter: efectivas contra perdidas. Filtra por el centro activo.
+         * @description El dato estable del callcenter: efectivas contra perdidas. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
          */
         get: operations["CallcenterController_llamadas[2]_v2"];
         put?: never;
@@ -38438,7 +38878,7 @@ export interface paths {
         };
         /**
          * Llamadas terminadas (CDR) de un rango.
-         * @description El dato estable del callcenter: efectivas contra perdidas. Filtra por el centro activo.
+         * @description El dato estable del callcenter: efectivas contra perdidas. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
          */
         get: operations["CallcenterController_llamadas[3]_v2"];
         put?: never;
@@ -38807,6 +39247,7 @@ export interface paths {
         get: operations["OrdenesCompraController_list[0]_v1"];
         put?: never;
         /**
+         * In the warehouse's center: an order for a Caguas warehouse is a Caguas order.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ordenes-compra`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -38831,6 +39272,7 @@ export interface paths {
         get: operations["OrdenesCompraController_list[1]_v1"];
         put?: never;
         /**
+         * In the warehouse's center: an order for a Caguas warehouse is a Caguas order.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/purchase-orders`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -38850,6 +39292,7 @@ export interface paths {
         };
         get: operations["OrdenesCompraController_list[2]_v2"];
         put?: never;
+        /** In the warehouse's center: an order for a Caguas warehouse is a Caguas order. */
         post: operations["OrdenesCompraController_crear[2]_v2"];
         delete?: never;
         options?: never;
@@ -38866,6 +39309,7 @@ export interface paths {
         };
         get: operations["OrdenesCompraController_list[3]_v2"];
         put?: never;
+        /** In the warehouse's center: an order for a Caguas warehouse is a Caguas order. */
         post: operations["OrdenesCompraController_crear[3]_v2"];
         delete?: never;
         options?: never;
@@ -40153,6 +40597,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pacientes/disponibilidad-legado/{record}/diagnostico-desde-visitas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Diagnóstico (solo lectura) a partir de las visitas del legado ENVIADAS desde la clínica (bot del 172): producción no alcanza al legado.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/{record}/diagnostico-desde-visitas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_diagnosticoDesdeVisitas[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/{record}/diagnosis-from-visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Diagnóstico (solo lectura) a partir de las visitas del legado ENVIADAS desde la clínica (bot del 172): producción no alcanza al legado.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/{record}/diagnosis-from-visits`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_diagnosticoDesdeVisitas[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/{record}/diagnostico-desde-visitas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Diagnóstico (solo lectura) a partir de las visitas del legado ENVIADAS desde la clínica (bot del 172): producción no alcanza al legado.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/{record}/diagnostico-desde-visitas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_diagnosticoDesdeVisitas[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/{record}/diagnosis-from-visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Diagnóstico (solo lectura) a partir de las visitas del legado ENVIADAS desde la clínica (bot del 172): producción no alcanza al legado.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/{record}/diagnosis-from-visits`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_diagnosticoDesdeVisitas[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/{record}/diagnostico-desde-visitas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Diagnóstico (solo lectura) a partir de las visitas del legado ENVIADAS desde la clínica (bot del 172): producción no alcanza al legado. */
+        post: operations["DisponibilidadLegadoController_diagnosticoDesdeVisitas[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/{record}/diagnosis-from-visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Diagnóstico (solo lectura) a partir de las visitas del legado ENVIADAS desde la clínica (bot del 172): producción no alcanza al legado. */
+        post: operations["DisponibilidadLegadoController_diagnosticoDesdeVisitas[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/{record}/diagnostico-desde-visitas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Diagnóstico (solo lectura) a partir de las visitas del legado ENVIADAS desde la clínica (bot del 172): producción no alcanza al legado. */
+        post: operations["DisponibilidadLegadoController_diagnosticoDesdeVisitas[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/{record}/diagnosis-from-visits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Diagnóstico (solo lectura) a partir de las visitas del legado ENVIADAS desde la clínica (bot del 172): producción no alcanza al legado. */
+        post: operations["DisponibilidadLegadoController_diagnosticoDesdeVisitas[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pacientes/disponibilidad-legado/{record}/aplicar": {
         parameters: {
             query?: never;
@@ -40529,7 +41125,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Historial de medidas del paciente (báscula y cinta), más reciente primero.
+         * Historial de medidas del paciente (báscula y cinta), más reciente primero, de cada centro donde se tiene body_measurements.read (`centerIds` acota); cada fila con `clinicName`.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/pacientes/{patientId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -40550,7 +41146,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Historial de medidas del paciente (báscula y cinta), más reciente primero.
+         * Historial de medidas del paciente (báscula y cinta), más reciente primero, de cada centro donde se tiene body_measurements.read (`centerIds` acota); cada fila con `clinicName`.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/patients/{patientId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -40571,7 +41167,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Historial de medidas del paciente (báscula y cinta), más reciente primero.
+         * Historial de medidas del paciente (báscula y cinta), más reciente primero, de cada centro donde se tiene body_measurements.read (`centerIds` acota); cada fila con `clinicName`.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/pacientes/{patientId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -40592,7 +41188,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Historial de medidas del paciente (báscula y cinta), más reciente primero.
+         * Historial de medidas del paciente (báscula y cinta), más reciente primero, de cada centro donde se tiene body_measurements.read (`centerIds` acota); cada fila con `clinicName`.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/patients/{patientId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -40612,7 +41208,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Historial de medidas del paciente (báscula y cinta), más reciente primero. */
+        /** Historial de medidas del paciente (báscula y cinta), más reciente primero, de cada centro donde se tiene body_measurements.read (`centerIds` acota); cada fila con `clinicName`. */
         get: operations["BodyMeasurementsController_forPatient[4]_v2"];
         put?: never;
         post?: never;
@@ -40629,7 +41225,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Historial de medidas del paciente (báscula y cinta), más reciente primero. */
+        /** Historial de medidas del paciente (báscula y cinta), más reciente primero, de cada centro donde se tiene body_measurements.read (`centerIds` acota); cada fila con `clinicName`. */
         get: operations["BodyMeasurementsController_forPatient[5]_v2"];
         put?: never;
         post?: never;
@@ -40646,7 +41242,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Historial de medidas del paciente (báscula y cinta), más reciente primero. */
+        /** Historial de medidas del paciente (báscula y cinta), más reciente primero, de cada centro donde se tiene body_measurements.read (`centerIds` acota); cada fila con `clinicName`. */
         get: operations["BodyMeasurementsController_forPatient[6]_v2"];
         put?: never;
         post?: never;
@@ -40663,7 +41259,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Historial de medidas del paciente (báscula y cinta), más reciente primero. */
+        /** Historial de medidas del paciente (báscula y cinta), más reciente primero, de cada centro donde se tiene body_measurements.read (`centerIds` acota); cada fila con `clinicName`. */
         get: operations["BodyMeasurementsController_forPatient[7]_v2"];
         put?: never;
         post?: never;
@@ -40687,7 +41283,7 @@ export interface paths {
          */
         get: operations["BodyMeasurementsController_forSession[0]_v1"];
         /**
-         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión).
+         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión), en el centro de la visita: hace falta body_measurements.write allí.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/sesiones/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -40713,7 +41309,7 @@ export interface paths {
          */
         get: operations["BodyMeasurementsController_forSession[1]_v1"];
         /**
-         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión).
+         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión), en el centro de la visita: hace falta body_measurements.write allí.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/sessions/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -40739,7 +41335,7 @@ export interface paths {
          */
         get: operations["BodyMeasurementsController_forSession[2]_v1"];
         /**
-         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión).
+         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión), en el centro de la visita: hace falta body_measurements.write allí.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/sesiones/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -40765,7 +41361,7 @@ export interface paths {
          */
         get: operations["BodyMeasurementsController_forSession[3]_v1"];
         /**
-         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión).
+         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión), en el centro de la visita: hace falta body_measurements.write allí.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/sessions/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -40786,7 +41382,7 @@ export interface paths {
         };
         /** Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita. */
         get: operations["BodyMeasurementsController_forSession[4]_v2"];
-        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión). */
+        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión), en el centro de la visita: hace falta body_measurements.write allí. */
         put: operations["BodyMeasurementsController_saveForSession[4]_v2"];
         post?: never;
         delete?: never;
@@ -40804,7 +41400,7 @@ export interface paths {
         };
         /** Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita. */
         get: operations["BodyMeasurementsController_forSession[5]_v2"];
-        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión). */
+        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión), en el centro de la visita: hace falta body_measurements.write allí. */
         put: operations["BodyMeasurementsController_saveForSession[5]_v2"];
         post?: never;
         delete?: never;
@@ -40822,7 +41418,7 @@ export interface paths {
         };
         /** Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita. */
         get: operations["BodyMeasurementsController_forSession[6]_v2"];
-        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión). */
+        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión), en el centro de la visita: hace falta body_measurements.write allí. */
         put: operations["BodyMeasurementsController_saveForSession[6]_v2"];
         post?: never;
         delete?: never;
@@ -40840,7 +41436,7 @@ export interface paths {
         };
         /** Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita. */
         get: operations["BodyMeasurementsController_forSession[7]_v2"];
-        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión). */
+        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión), en el centro de la visita: hace falta body_measurements.write allí. */
         put: operations["BodyMeasurementsController_saveForSession[7]_v2"];
         post?: never;
         delete?: never;
@@ -42177,6 +42773,810 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tickets-de-despacho": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pick tickets of the readable centers (centerIds narrows).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_list[0]_v1"];
+        put?: never;
+        /**
+         * Creates a pick ticket for a warehouse. Only products that a scale reports there (else 400 PICK_TICKET_PRODUCT_WITHOUT_SCALE), 1 to 12 lines. Never touches the book inventory.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_create[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pick tickets of the readable centers (centerIds narrows).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_list[1]_v1"];
+        put?: never;
+        /**
+         * Creates a pick ticket for a warehouse. Only products that a scale reports there (else 400 PICK_TICKET_PRODUCT_WITHOUT_SCALE), 1 to 12 lines. Never touches the book inventory.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_create[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pick tickets of the readable centers (centerIds narrows). */
+        get: operations["PickTicketsController_list[2]_v2"];
+        put?: never;
+        /** Creates a pick ticket for a warehouse. Only products that a scale reports there (else 400 PICK_TICKET_PRODUCT_WITHOUT_SCALE), 1 to 12 lines. Never touches the book inventory. */
+        post: operations["PickTicketsController_create[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pick tickets of the readable centers (centerIds narrows). */
+        get: operations["PickTicketsController_list[3]_v2"];
+        put?: never;
+        /** Creates a pick ticket for a warehouse. Only products that a scale reports there (else 400 PICK_TICKET_PRODUCT_WITHOUT_SCALE), 1 to 12 lines. Never touches the book inventory. */
+        post: operations["PickTicketsController_create[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/monitor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What the warehouse monitor shows, in one call: schedule (inSchedule), open tickets and scale pads. include= narrows (tickets,schedule,scales); scales also need inventario.read.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/monitor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_monitor[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/monitor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What the warehouse monitor shows, in one call: schedule (inSchedule), open tickets and scale pads. include= narrows (tickets,schedule,scales); scales also need inventario.read.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/monitor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_monitor[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/monitor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What the warehouse monitor shows, in one call: schedule (inSchedule), open tickets and scale pads. include= narrows (tickets,schedule,scales); scales also need inventario.read. */
+        get: operations["PickTicketsController_monitor[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/monitor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What the warehouse monitor shows, in one call: schedule (inSchedule), open tickets and scale pads. include= narrows (tickets,schedule,scales); scales also need inventario.read. */
+        get: operations["PickTicketsController_monitor[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/horario-del-monitor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The warehouse monitor schedule of a center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/horario-del-monitor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_schedule[0]_v1"];
+        /**
+         * Sets the warehouse monitor schedule of a center (ISO days, local HH:MM start/end).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/horario-del-monitor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PickTicketsController_setSchedule[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/monitor-schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The warehouse monitor schedule of a center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/monitor-schedule`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_schedule[1]_v1"];
+        /**
+         * Sets the warehouse monitor schedule of a center (ISO days, local HH:MM start/end).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/monitor-schedule`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PickTicketsController_setSchedule[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/horario-del-monitor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The warehouse monitor schedule of a center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/horario-del-monitor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_schedule[2]_v1"];
+        /**
+         * Sets the warehouse monitor schedule of a center (ISO days, local HH:MM start/end).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/horario-del-monitor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PickTicketsController_setSchedule[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/monitor-schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The warehouse monitor schedule of a center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/monitor-schedule`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_schedule[3]_v1"];
+        /**
+         * Sets the warehouse monitor schedule of a center (ISO days, local HH:MM start/end).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/monitor-schedule`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PickTicketsController_setSchedule[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/horario-del-monitor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The warehouse monitor schedule of a center. */
+        get: operations["PickTicketsController_schedule[4]_v2"];
+        /** Sets the warehouse monitor schedule of a center (ISO days, local HH:MM start/end). */
+        put: operations["PickTicketsController_setSchedule[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/monitor-schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The warehouse monitor schedule of a center. */
+        get: operations["PickTicketsController_schedule[5]_v2"];
+        /** Sets the warehouse monitor schedule of a center (ISO days, local HH:MM start/end). */
+        put: operations["PickTicketsController_setSchedule[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/horario-del-monitor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The warehouse monitor schedule of a center. */
+        get: operations["PickTicketsController_schedule[6]_v2"];
+        /** Sets the warehouse monitor schedule of a center (ISO days, local HH:MM start/end). */
+        put: operations["PickTicketsController_setSchedule[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/monitor-schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The warehouse monitor schedule of a center. */
+        get: operations["PickTicketsController_schedule[7]_v2"];
+        /** Sets the warehouse monitor schedule of a center (ISO days, local HH:MM start/end). */
+        put: operations["PickTicketsController_setSchedule[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SSE of the ACTIVE center (a center key: its own): `pick_ticket` with the resulting state,
+         *     `scale_stock` when a scale moved, and `{ tipo: 'heartbeat' }` every 15 s.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/stream`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_stream[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SSE of the ACTIVE center (a center key: its own): `pick_ticket` with the resulting state,
+         *     `scale_stock` when a scale moved, and `{ tipo: 'heartbeat' }` every 15 s.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/stream`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_stream[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SSE of the ACTIVE center (a center key: its own): `pick_ticket` with the resulting state,
+         *     `scale_stock` when a scale moved, and `{ tipo: 'heartbeat' }` every 15 s.
+         */
+        get: operations["PickTicketsController_stream[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SSE of the ACTIVE center (a center key: its own): `pick_ticket` with the resulting state,
+         *     `scale_stock` when a scale moved, and `{ tipo: 'heartbeat' }` every 15 s.
+         */
+        get: operations["PickTicketsController_stream[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One pick ticket with each line progress.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_get[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One pick ticket with each line progress.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PickTicketsController_get[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One pick ticket with each line progress. */
+        get: operations["PickTicketsController_get[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One pick ticket with each line progress. */
+        get: operations["PickTicketsController_get[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/{id}/cancelar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancels an open ticket, with a reason: its requester, or whoever holds pick_ticket.cancel in its center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/{id}/cancelar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_cancel[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancels an open ticket, with a reason: its requester, or whoever holds pick_ticket.cancel in its center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/{id}/cancel`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_cancel[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/{id}/cancelar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancels an open ticket, with a reason: its requester, or whoever holds pick_ticket.cancel in its center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/{id}/cancelar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_cancel[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancels an open ticket, with a reason: its requester, or whoever holds pick_ticket.cancel in its center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/{id}/cancel`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_cancel[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/{id}/cancelar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels an open ticket, with a reason: its requester, or whoever holds pick_ticket.cancel in its center. */
+        post: operations["PickTicketsController_cancel[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels an open ticket, with a reason: its requester, or whoever holds pick_ticket.cancel in its center. */
+        post: operations["PickTicketsController_cancel[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/{id}/cancelar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels an open ticket, with a reason: its requester, or whoever holds pick_ticket.cancel in its center. */
+        post: operations["PickTicketsController_cancel[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels an open ticket, with a reason: its requester, or whoever holds pick_ticket.cancel in its center. */
+        post: operations["PickTicketsController_cancel[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/{id}/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Closes an open ticket by hand (the warehouse), with a reason; audited.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/{id}/cerrar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_close[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tickets-de-despacho/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Closes an open ticket by hand (the warehouse), with a reason; audited.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tickets-de-despacho/{id}/close`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_close[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/{id}/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Closes an open ticket by hand (the warehouse), with a reason; audited.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/{id}/cerrar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_close[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pick-tickets/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Closes an open ticket by hand (the warehouse), with a reason; audited.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pick-tickets/{id}/close`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PickTicketsController_close[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/{id}/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Closes an open ticket by hand (the warehouse), with a reason; audited. */
+        post: operations["PickTicketsController_close[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/tickets-de-despacho/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Closes an open ticket by hand (the warehouse), with a reason; audited. */
+        post: operations["PickTicketsController_close[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/{id}/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Closes an open ticket by hand (the warehouse), with a reason; audited. */
+        post: operations["PickTicketsController_close[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pick-tickets/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Closes an open ticket by hand (the warehouse), with a reason; audited. */
+        post: operations["PickTicketsController_close[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/configuracion/panel": {
         parameters: {
             query?: never;
@@ -42347,6 +43747,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The export log of every center where the caller holds export.read (`centerIds` narrows).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/export/jobs`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -42366,6 +43767,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The export log of every center where the caller holds export.read (`centerIds` narrows). */
         get: operations["ExportController_listJobs_v2"];
         put?: never;
         post?: never;
@@ -42699,6 +44101,9 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The catalog of the session clinic, or — with `centerIds` — of those clinics (servicios.read in
+         *     each, else 403), each row with its `clinicName`. A catalog is a clinic's own configuration, so the
+         *     default stays the session's; a screen that spans clinics names them.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/servicios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -42723,6 +44128,9 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The catalog of the session clinic, or — with `centerIds` — of those clinics (servicios.read in
+         *     each, else 403), each row with its `clinicName`. A catalog is a clinic's own configuration, so the
+         *     default stays the session's; a screen that spans clinics names them.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/services`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -42746,6 +44154,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * The catalog of the session clinic, or — with `centerIds` — of those clinics (servicios.read in
+         *     each, else 403), each row with its `clinicName`. A catalog is a clinic's own configuration, so the
+         *     default stays the session's; a screen that spans clinics names them.
+         */
         get: operations["ServiciosController_list[2]_v2"];
         put?: never;
         post: operations["ServiciosController_create[2]_v2"];
@@ -42762,6 +44175,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * The catalog of the session clinic, or — with `centerIds` — of those clinics (servicios.read in
+         *     each, else 403), each row with its `clinicName`. A catalog is a clinic's own configuration, so the
+         *     default stays the session's; a screen that spans clinics names them.
+         */
         get: operations["ServiciosController_list[3]_v2"];
         put?: never;
         post: operations["ServiciosController_create[3]_v2"];
@@ -43435,7 +44853,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/reportes/avisos`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve SIEMPRE los tres contadores (en cero si no hubo ninguno, para que un día limpio se lea de un vistazo) y el detalle del más reciente al más viejo, con el paciente, el servicio y quién lo hizo. `entrega_sin_paquete`: la visita ocurrió y no había paquete al que descontarla, así que el insumo no se movió. `dosis_no_comprada`: se aplicó una presentación que el paciente no compró y se cobró al paquete de la fila. `entrega_sin_saldo`: se entregó sin disponibilidad y el pendiente quedó negativo. Filtra por el centro activo; el admin sin centro elegido ve todos.
+         *     Devuelve SIEMPRE los tres contadores (en cero si no hubo ninguno, para que un día limpio se lea de un vistazo) y el detalle del más reciente al más viejo, con el paciente, el servicio y quién lo hizo. `entrega_sin_paquete`: la visita ocurrió y no había paquete al que descontarla, así que el insumo no se movió. `dosis_no_comprada`: se aplicó una presentación que el paciente no compró y se cobró al paquete de la fila. `entrega_sin_saldo`: se entregó sin disponibilidad y el pendiente quedó negativo. Cubre todos los centros donde se tiene `frontdesk.read` (cada aviso con `clinicId`/`clinicName`); `centerIds` acota.
          */
         get: operations["FrontdeskController_repAvisos[0]_v1"];
         put?: never;
@@ -43458,7 +44876,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/reports/notices`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Devuelve SIEMPRE los tres contadores (en cero si no hubo ninguno, para que un día limpio se lea de un vistazo) y el detalle del más reciente al más viejo, con el paciente, el servicio y quién lo hizo. `entrega_sin_paquete`: la visita ocurrió y no había paquete al que descontarla, así que el insumo no se movió. `dosis_no_comprada`: se aplicó una presentación que el paciente no compró y se cobró al paquete de la fila. `entrega_sin_saldo`: se entregó sin disponibilidad y el pendiente quedó negativo. Filtra por el centro activo; el admin sin centro elegido ve todos.
+         *     Devuelve SIEMPRE los tres contadores (en cero si no hubo ninguno, para que un día limpio se lea de un vistazo) y el detalle del más reciente al más viejo, con el paciente, el servicio y quién lo hizo. `entrega_sin_paquete`: la visita ocurrió y no había paquete al que descontarla, así que el insumo no se movió. `dosis_no_comprada`: se aplicó una presentación que el paciente no compró y se cobró al paquete de la fila. `entrega_sin_saldo`: se entregó sin disponibilidad y el pendiente quedó negativo. Cubre todos los centros donde se tiene `frontdesk.read` (cada aviso con `clinicId`/`clinicName`); `centerIds` acota.
          */
         get: operations["FrontdeskController_repAvisos[1]_v1"];
         put?: never;
@@ -43478,7 +44896,7 @@ export interface paths {
         };
         /**
          * Descuidos de la jornada: entregas sin paquete, dosis no compradas y entregas sin saldo.
-         * @description Devuelve SIEMPRE los tres contadores (en cero si no hubo ninguno, para que un día limpio se lea de un vistazo) y el detalle del más reciente al más viejo, con el paciente, el servicio y quién lo hizo. `entrega_sin_paquete`: la visita ocurrió y no había paquete al que descontarla, así que el insumo no se movió. `dosis_no_comprada`: se aplicó una presentación que el paciente no compró y se cobró al paquete de la fila. `entrega_sin_saldo`: se entregó sin disponibilidad y el pendiente quedó negativo. Filtra por el centro activo; el admin sin centro elegido ve todos.
+         * @description Devuelve SIEMPRE los tres contadores (en cero si no hubo ninguno, para que un día limpio se lea de un vistazo) y el detalle del más reciente al más viejo, con el paciente, el servicio y quién lo hizo. `entrega_sin_paquete`: la visita ocurrió y no había paquete al que descontarla, así que el insumo no se movió. `dosis_no_comprada`: se aplicó una presentación que el paciente no compró y se cobró al paquete de la fila. `entrega_sin_saldo`: se entregó sin disponibilidad y el pendiente quedó negativo. Cubre todos los centros donde se tiene `frontdesk.read` (cada aviso con `clinicId`/`clinicName`); `centerIds` acota.
          */
         get: operations["FrontdeskController_repAvisos[2]_v2"];
         put?: never;
@@ -43498,7 +44916,7 @@ export interface paths {
         };
         /**
          * Descuidos de la jornada: entregas sin paquete, dosis no compradas y entregas sin saldo.
-         * @description Devuelve SIEMPRE los tres contadores (en cero si no hubo ninguno, para que un día limpio se lea de un vistazo) y el detalle del más reciente al más viejo, con el paciente, el servicio y quién lo hizo. `entrega_sin_paquete`: la visita ocurrió y no había paquete al que descontarla, así que el insumo no se movió. `dosis_no_comprada`: se aplicó una presentación que el paciente no compró y se cobró al paquete de la fila. `entrega_sin_saldo`: se entregó sin disponibilidad y el pendiente quedó negativo. Filtra por el centro activo; el admin sin centro elegido ve todos.
+         * @description Devuelve SIEMPRE los tres contadores (en cero si no hubo ninguno, para que un día limpio se lea de un vistazo) y el detalle del más reciente al más viejo, con el paciente, el servicio y quién lo hizo. `entrega_sin_paquete`: la visita ocurrió y no había paquete al que descontarla, así que el insumo no se movió. `dosis_no_comprada`: se aplicó una presentación que el paciente no compró y se cobró al paquete de la fila. `entrega_sin_saldo`: se entregó sin disponibilidad y el pendiente quedó negativo. Cubre todos los centros donde se tiene `frontdesk.read` (cada aviso con `clinicId`/`clinicName`); `centerIds` acota.
          */
         get: operations["FrontdeskController_repAvisos[3]_v2"];
         put?: never;
@@ -43911,7 +45329,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/cola`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. `centerIds` opcional, cada uno con `frontdesk.read` allí. Se refresca con el SSE de sesiones.
+         *     Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. Cubre todos los centros donde se tiene `frontdesk.read` (cada servicio con `clinicId`/`clinicName`); `centerIds` acota. `techniciansToday` = técnicos con una sesión viva hoy (también los que ya terminaron), para contar libres/ocupados. Se refresca con el SSE de sesiones.
          */
         get: operations["FrontdeskController_queue[0]_v1"];
         put?: never;
@@ -43934,7 +45352,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/queue`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. `centerIds` opcional, cada uno con `frontdesk.read` allí. Se refresca con el SSE de sesiones.
+         *     Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. Cubre todos los centros donde se tiene `frontdesk.read` (cada servicio con `clinicId`/`clinicName`); `centerIds` acota. `techniciansToday` = técnicos con una sesión viva hoy (también los que ya terminaron), para contar libres/ocupados. Se refresca con el SSE de sesiones.
          */
         get: operations["FrontdeskController_queue[1]_v1"];
         put?: never;
@@ -43954,7 +45372,7 @@ export interface paths {
         };
         /**
          * Cola por terapia: en sala por orden de llegada y en terapia ahora
-         * @description Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. `centerIds` opcional, cada uno con `frontdesk.read` allí. Se refresca con el SSE de sesiones.
+         * @description Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. Cubre todos los centros donde se tiene `frontdesk.read` (cada servicio con `clinicId`/`clinicName`); `centerIds` acota. `techniciansToday` = técnicos con una sesión viva hoy (también los que ya terminaron), para contar libres/ocupados. Se refresca con el SSE de sesiones.
          */
         get: operations["FrontdeskController_queue[2]_v2"];
         put?: never;
@@ -43974,7 +45392,7 @@ export interface paths {
         };
         /**
          * Cola por terapia: en sala por orden de llegada y en terapia ahora
-         * @description Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. `centerIds` opcional, cada uno con `frontdesk.read` allí. Se refresca con el SSE de sesiones.
+         * @description Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. Cubre todos los centros donde se tiene `frontdesk.read` (cada servicio con `clinicId`/`clinicName`); `centerIds` acota. `techniciansToday` = técnicos con una sesión viva hoy (también los que ya terminaron), para contar libres/ocupados. Se refresca con el SSE de sesiones.
          */
         get: operations["FrontdeskController_queue[3]_v2"];
         put?: never;
@@ -44031,7 +45449,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Board for a service on a day: effective columns + projected sessions.
+         * Board for a service on a day: effective columns + projected sessions. ONE center's board:
+         *     `centerIds[0]` (checked against `frontdesk.read`) or the session's — never a mix.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/tablero`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44052,7 +45471,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Board for a service on a day: effective columns + projected sessions.
+         * Board for a service on a day: effective columns + projected sessions. ONE center's board:
+         *     `centerIds[0]` (checked against `frontdesk.read`) or the session's — never a mix.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/board`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44072,7 +45492,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Board for a service on a day: effective columns + projected sessions. */
+        /**
+         * Board for a service on a day: effective columns + projected sessions. ONE center's board:
+         *     `centerIds[0]` (checked against `frontdesk.read`) or the session's — never a mix.
+         */
         get: operations["FrontdeskController_tablero[2]_v2"];
         put?: never;
         post?: never;
@@ -44089,7 +45512,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Board for a service on a day: effective columns + projected sessions. */
+        /**
+         * Board for a service on a day: effective columns + projected sessions. ONE center's board:
+         *     `centerIds[0]` (checked against `frontdesk.read`) or the session's — never a mix.
+         */
         get: operations["FrontdeskController_tablero[3]_v2"];
         put?: never;
         post?: never;
@@ -44393,7 +45819,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta.
+         * Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta. Every center
+         *     where the caller holds `frontdesk.read` (each row with `clinicName`); `centerIds` narrows.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44419,7 +45846,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta.
+         * Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta. Every center
+         *     where the caller holds `frontdesk.read` (each row with `clinicName`); `centerIds` narrows.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44444,7 +45872,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta. */
+        /**
+         * Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta. Every center
+         *     where the caller holds `frontdesk.read` (each row with `clinicName`); `centerIds` narrows.
+         */
         get: operations["FrontdeskController_listarSesiones[2]_v2"];
         put?: never;
         /** Crea la cita de servicio y devuelve avisos de cupos NO bloqueantes en meta.warnings. */
@@ -44462,7 +45893,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta. */
+        /**
+         * Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta. Every center
+         *     where the caller holds `frontdesk.read` (each row with `clinicName`); `centerIds` narrows.
+         */
         get: operations["FrontdeskController_listarSesiones[3]_v2"];
         put?: never;
         /** Crea la cita de servicio y devuelve avisos de cupos NO bloqueantes en meta.warnings. */
@@ -44633,6 +46067,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * One session, in any center where the caller holds `frontdesk.read` (with `clinicName`).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44658,6 +46093,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * One session, in any center where the caller holds `frontdesk.read` (with `clinicName`).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44682,6 +46118,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** One session, in any center where the caller holds `frontdesk.read` (with `clinicName`). */
         get: operations["FrontdeskController_get[2]_v2"];
         put?: never;
         post?: never;
@@ -44699,6 +46136,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** One session, in any center where the caller holds `frontdesk.read` (with `clinicName`). */
         get: operations["FrontdeskController_get[3]_v2"];
         put?: never;
         post?: never;
@@ -44717,7 +46155,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Calendario/agenda de un paciente: todas sus citas de servicio (coloreadas por servicio).
+         * Calendario/agenda de un paciente: todas sus citas de servicio, de todos los centros del alcance.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/pacientes/{pacienteId}/agenda`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44738,7 +46176,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Calendario/agenda de un paciente: todas sus citas de servicio (coloreadas por servicio).
+         * Calendario/agenda de un paciente: todas sus citas de servicio, de todos los centros del alcance.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/patients/{pacienteId}/agenda`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44758,7 +46196,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Calendario/agenda de un paciente: todas sus citas de servicio (coloreadas por servicio). */
+        /** Calendario/agenda de un paciente: todas sus citas de servicio, de todos los centros del alcance. */
         get: operations["FrontdeskController_agendaPaciente[2]_v2"];
         put?: never;
         post?: never;
@@ -44775,7 +46213,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Calendario/agenda de un paciente: todas sus citas de servicio (coloreadas por servicio). */
+        /** Calendario/agenda de un paciente: todas sus citas de servicio, de todos los centros del alcance. */
         get: operations["FrontdeskController_agendaPaciente[3]_v2"];
         put?: never;
         post?: never;
@@ -44793,7 +46231,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Historial de terapias de un paciente para un servicio (proyectado para el modal).
+         * Historial de terapias de un paciente (proyectado para el modal), de todos los centros del alcance.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/pacientes/{pacienteId}/historial`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44814,7 +46252,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Historial de terapias de un paciente para un servicio (proyectado para el modal).
+         * Historial de terapias de un paciente (proyectado para el modal), de todos los centros del alcance.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/patients/{pacienteId}/history`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44834,7 +46272,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Historial de terapias de un paciente para un servicio (proyectado para el modal). */
+        /** Historial de terapias de un paciente (proyectado para el modal), de todos los centros del alcance. */
         get: operations["FrontdeskController_historialPaciente[2]_v2"];
         put?: never;
         post?: never;
@@ -44851,7 +46289,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Historial de terapias de un paciente para un servicio (proyectado para el modal). */
+        /** Historial de terapias de un paciente (proyectado para el modal), de todos los centros del alcance. */
         get: operations["FrontdeskController_historialPaciente[3]_v2"];
         put?: never;
         post?: never;
@@ -44945,6 +46383,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The events of a session found in the `frontdesk.read` scope; outside it, a 404 (not its events).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/historial`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44965,6 +46404,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The events of a session found in the `frontdesk.read` scope; outside it, a 404 (not its events).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/history`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44984,6 +46424,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The events of a session found in the `frontdesk.read` scope; outside it, a 404 (not its events). */
         get: operations["FrontdeskController_historial[2]_v2"];
         put?: never;
         post?: never;
@@ -45000,6 +46441,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** The events of a session found in the `frontdesk.read` scope; outside it, a 404 (not its events). */
         get: operations["FrontdeskController_historial[3]_v2"];
         put?: never;
         post?: never;
@@ -45909,6 +47351,234 @@ export interface paths {
         get: operations["FrontdeskPestanasController_pestanas[3]_v2"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sesiones/{id}/reabrir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopens a cancelled session ONLY on its own day (center time zone), back to where its flow had got, keeping its forms.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/reabrir`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SessionReopenController_reopen[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sessions/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopens a cancelled session ONLY on its own day (center time zone), back to where its flow had got, keeping its forms.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/reopen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SessionReopenController_reopen[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sesiones/{id}/reabrir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reopens a cancelled session ONLY on its own day (center time zone), back to where its flow had got, keeping its forms. */
+        post: operations["SessionReopenController_reopen[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sessions/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reopens a cancelled session ONLY on its own day (center time zone), back to where its flow had got, keeping its forms. */
+        post: operations["SessionReopenController_reopen[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/pacientes/{patientId}/dia/cancelar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancels all of a patient's open, not-attended sessions of a day (default today) with one reason. Attended ones stay.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/pacientes/{patientId}/dia/cancelar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SessionReopenController_cancelDay[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/patients/{patientId}/day/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancels all of a patient's open, not-attended sessions of a day (default today) with one reason. Attended ones stay.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/patients/{patientId}/day/cancel`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SessionReopenController_cancelDay[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/pacientes/{patientId}/dia/cancelar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels all of a patient's open, not-attended sessions of a day (default today) with one reason. Attended ones stay. */
+        post: operations["SessionReopenController_cancelDay[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/patients/{patientId}/day/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancels all of a patient's open, not-attended sessions of a day (default today) with one reason. Attended ones stay. */
+        post: operations["SessionReopenController_cancelDay[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/pacientes/{patientId}/dia/reabrir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopens ONLY the patient's sessions cancelled today. Open ones are not touched (no event, no change, no error); one that cannot come back is listed in `skipped`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/pacientes/{patientId}/dia/reabrir`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SessionReopenController_reopenDay[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/patients/{patientId}/day/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopens ONLY the patient's sessions cancelled today. Open ones are not touched (no event, no change, no error); one that cannot come back is listed in `skipped`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/patients/{patientId}/day/reopen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SessionReopenController_reopenDay[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/pacientes/{patientId}/dia/reabrir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reopens ONLY the patient's sessions cancelled today. Open ones are not touched (no event, no change, no error); one that cannot come back is listed in `skipped`. */
+        post: operations["SessionReopenController_reopenDay[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/patients/{patientId}/day/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reopens ONLY the patient's sessions cancelled today. Open ones are not touched (no event, no change, no error); one that cannot come back is listed in `skipped`. */
+        post: operations["SessionReopenController_reopenDay[3]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -47235,7 +48905,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Paneles del centro activo.
+         * Paneles de todos los centros donde puedo leerlos (centerIds acota); cada uno con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47261,7 +48931,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Paneles del centro activo.
+         * Paneles de todos los centros donde puedo leerlos (centerIds acota); cada uno con clinicName.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47286,7 +48956,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Paneles del centro activo. */
+        /** Paneles de todos los centros donde puedo leerlos (centerIds acota); cada uno con clinicName. */
         get: operations["PanelesController_list[2]_v2"];
         put?: never;
         /** Crea un panel EN BLANCO (sin secciones); las secciones se agregan después. */
@@ -47304,7 +48974,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Paneles del centro activo. */
+        /** Paneles de todos los centros donde puedo leerlos (centerIds acota); cada uno con clinicName. */
         get: operations["PanelesController_list[3]_v2"];
         put?: never;
         /** Crea un panel EN BLANCO (sin secciones); las secciones se agregan después. */
@@ -47411,7 +49081,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo.
+         * Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/definicion`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47432,7 +49102,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo.
+         * Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/definition`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47453,7 +49123,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo.
+         * Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/definicion`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47474,7 +49144,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo.
+         * Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/definition`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47494,7 +49164,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. */
+        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_definicion[4]_v2"];
         put?: never;
         post?: never;
@@ -47511,7 +49181,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. */
+        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_definicion[5]_v2"];
         put?: never;
         post?: never;
@@ -47528,7 +49198,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. */
+        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_definicion[6]_v2"];
         put?: never;
         post?: never;
@@ -47545,7 +49215,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. */
+        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_definicion[7]_v2"];
         put?: never;
         post?: never;
@@ -48219,7 +49889,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Avisos del panel (por defecto los pendientes).
+         * Avisos del panel (por defecto los pendientes). De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/notificaciones`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48240,7 +49910,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Avisos del panel (por defecto los pendientes).
+         * Avisos del panel (por defecto los pendientes). De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/notifications`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48261,7 +49931,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Avisos del panel (por defecto los pendientes).
+         * Avisos del panel (por defecto los pendientes). De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/notificaciones`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48282,7 +49952,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Avisos del panel (por defecto los pendientes).
+         * Avisos del panel (por defecto los pendientes). De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/notifications`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48302,7 +49972,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Avisos del panel (por defecto los pendientes). */
+        /** Avisos del panel (por defecto los pendientes). De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_notificaciones[4]_v2"];
         put?: never;
         post?: never;
@@ -48319,7 +49989,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Avisos del panel (por defecto los pendientes). */
+        /** Avisos del panel (por defecto los pendientes). De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_notificaciones[5]_v2"];
         put?: never;
         post?: never;
@@ -48336,7 +50006,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Avisos del panel (por defecto los pendientes). */
+        /** Avisos del panel (por defecto los pendientes). De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_notificaciones[6]_v2"];
         put?: never;
         post?: never;
@@ -48353,7 +50023,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Avisos del panel (por defecto los pendientes). */
+        /** Avisos del panel (por defecto los pendientes). De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_notificaciones[7]_v2"];
         put?: never;
         post?: never;
@@ -48675,7 +50345,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano).
+         * Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/contadores`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48696,7 +50366,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano).
+         * Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/counters`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48717,7 +50387,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano).
+         * Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/contadores`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48738,7 +50408,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano).
+         * Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). De UN centro: centerIds[0] (comprobado) o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/counters`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48758,7 +50428,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). */
+        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_contadores[4]_v2"];
         put?: never;
         post?: never;
@@ -48775,7 +50445,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). */
+        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_contadores[5]_v2"];
         put?: never;
         post?: never;
@@ -48792,7 +50462,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). */
+        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_contadores[6]_v2"];
         put?: never;
         post?: never;
@@ -48809,7 +50479,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). */
+        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). De UN centro: centerIds[0] (comprobado) o el de la sesión. */
         get: operations["PanelesController_contadores[7]_v2"];
         put?: never;
         post?: never;
@@ -50167,6 +51837,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * A cash close of any center the caller reads (404 outside), with its detail computed THERE.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50187,6 +51858,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * A cash close of any center the caller reads (404 outside), with its detail computed THERE.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50207,6 +51879,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * A cash close of any center the caller reads (404 outside), with its detail computed THERE.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50227,6 +51900,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * A cash close of any center the caller reads (404 outside), with its detail computed THERE.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50246,6 +51920,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** A cash close of any center the caller reads (404 outside), with its detail computed THERE. */
         get: operations["CajaController_getCuadre[4]_v2"];
         put?: never;
         post?: never;
@@ -50262,6 +51937,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** A cash close of any center the caller reads (404 outside), with its detail computed THERE. */
         get: operations["CajaController_getCuadre[5]_v2"];
         put?: never;
         post?: never;
@@ -50278,6 +51954,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** A cash close of any center the caller reads (404 outside), with its detail computed THERE. */
         get: operations["CajaController_getCuadre[6]_v2"];
         put?: never;
         post?: never;
@@ -50294,6 +51971,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** A cash close of any center the caller reads (404 outside), with its detail computed THERE. */
         get: operations["CajaController_getCuadre[7]_v2"];
         put?: never;
         post?: never;
@@ -50313,7 +51991,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Envía un cuadre por email (archivo/compartir). Requiere email destino.
+         * The sheet of this reconciliation by email, FOR REAL: HTML body + PDF attachment, to `emails[]` or
+         *     the center's default list. 503 MAIL_NOT_CONFIGURED without a provider; 502 MAIL_NOT_SENT when the
+         *     server refuses it. In the reconciliation's own center, like its GET.
+         *     See docs/specs/cuadre-por-email-de-verdad.md.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/email`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50334,7 +52015,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Envía un cuadre por email (archivo/compartir). Requiere email destino.
+         * The sheet of this reconciliation by email, FOR REAL: HTML body + PDF attachment, to `emails[]` or
+         *     the center's default list. 503 MAIL_NOT_CONFIGURED without a provider; 502 MAIL_NOT_SENT when the
+         *     server refuses it. In the reconciliation's own center, like its GET.
+         *     See docs/specs/cuadre-por-email-de-verdad.md.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/email`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50355,7 +52039,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Envía un cuadre por email (archivo/compartir). Requiere email destino.
+         * The sheet of this reconciliation by email, FOR REAL: HTML body + PDF attachment, to `emails[]` or
+         *     the center's default list. 503 MAIL_NOT_CONFIGURED without a provider; 502 MAIL_NOT_SENT when the
+         *     server refuses it. In the reconciliation's own center, like its GET.
+         *     See docs/specs/cuadre-por-email-de-verdad.md.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/email`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50376,7 +52063,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Envía un cuadre por email (archivo/compartir). Requiere email destino.
+         * The sheet of this reconciliation by email, FOR REAL: HTML body + PDF attachment, to `emails[]` or
+         *     the center's default list. 503 MAIL_NOT_CONFIGURED without a provider; 502 MAIL_NOT_SENT when the
+         *     server refuses it. In the reconciliation's own center, like its GET.
+         *     See docs/specs/cuadre-por-email-de-verdad.md.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/email`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50396,7 +52086,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envía un cuadre por email (archivo/compartir). Requiere email destino. */
+        /**
+         * The sheet of this reconciliation by email, FOR REAL: HTML body + PDF attachment, to `emails[]` or
+         *     the center's default list. 503 MAIL_NOT_CONFIGURED without a provider; 502 MAIL_NOT_SENT when the
+         *     server refuses it. In the reconciliation's own center, like its GET.
+         *     See docs/specs/cuadre-por-email-de-verdad.md.
+         */
         post: operations["CajaController_enviarEmail[4]_v2"];
         delete?: never;
         options?: never;
@@ -50413,7 +52108,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envía un cuadre por email (archivo/compartir). Requiere email destino. */
+        /**
+         * The sheet of this reconciliation by email, FOR REAL: HTML body + PDF attachment, to `emails[]` or
+         *     the center's default list. 503 MAIL_NOT_CONFIGURED without a provider; 502 MAIL_NOT_SENT when the
+         *     server refuses it. In the reconciliation's own center, like its GET.
+         *     See docs/specs/cuadre-por-email-de-verdad.md.
+         */
         post: operations["CajaController_enviarEmail[5]_v2"];
         delete?: never;
         options?: never;
@@ -50430,7 +52130,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envía un cuadre por email (archivo/compartir). Requiere email destino. */
+        /**
+         * The sheet of this reconciliation by email, FOR REAL: HTML body + PDF attachment, to `emails[]` or
+         *     the center's default list. 503 MAIL_NOT_CONFIGURED without a provider; 502 MAIL_NOT_SENT when the
+         *     server refuses it. In the reconciliation's own center, like its GET.
+         *     See docs/specs/cuadre-por-email-de-verdad.md.
+         */
         post: operations["CajaController_enviarEmail[6]_v2"];
         delete?: never;
         options?: never;
@@ -50447,8 +52152,317 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envía un cuadre por email (archivo/compartir). Requiere email destino. */
+        /**
+         * The sheet of this reconciliation by email, FOR REAL: HTML body + PDF attachment, to `emails[]` or
+         *     the center's default list. 503 MAIL_NOT_CONFIGURED without a provider; 502 MAIL_NOT_SENT when the
+         *     server refuses it. In the reconciliation's own center, like its GET.
+         *     See docs/specs/cuadre-por-email-de-verdad.md.
+         */
         post: operations["CajaController_enviarEmail[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadres/{id}/firmar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign (accept) a cash sheet as its cashier or as a supervisor
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/firmar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_firmar[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/reconciliations/{id}/sign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign (accept) a cash sheet as its cashier or as a supervisor
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/sign`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_firmar[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadres/{id}/firmar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign (accept) a cash sheet as its cashier or as a supervisor
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/firmar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_firmar[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/reconciliations/{id}/sign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign (accept) a cash sheet as its cashier or as a supervisor
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/sign`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_firmar[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadres/{id}/firmar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign (accept) a cash sheet as its cashier or as a supervisor */
+        post: operations["CajaController_firmar[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/reconciliations/{id}/sign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign (accept) a cash sheet as its cashier or as a supervisor */
+        post: operations["CajaController_firmar[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadres/{id}/firmar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign (accept) a cash sheet as its cashier or as a supervisor */
+        post: operations["CajaController_firmar[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/reconciliations/{id}/sign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign (accept) a cash sheet as its cashier or as a supervisor */
+        post: operations["CajaController_firmar[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadres/{id}/firmas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every signature of a sheet, voided ones included (history).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/firmas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_firmas[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/reconciliations/{id}/signatures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every signature of a sheet, voided ones included (history).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/signatures`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_firmas[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadres/{id}/firmas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every signature of a sheet, voided ones included (history).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/firmas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_firmas[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/reconciliations/{id}/signatures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every signature of a sheet, voided ones included (history).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/signatures`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_firmas[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadres/{id}/firmas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every signature of a sheet, voided ones included (history). */
+        get: operations["CajaController_firmas[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/reconciliations/{id}/signatures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every signature of a sheet, voided ones included (history). */
+        get: operations["CajaController_firmas[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadres/{id}/firmas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every signature of a sheet, voided ones included (history). */
+        get: operations["CajaController_firmas[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/reconciliations/{id}/signatures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every signature of a sheet, voided ones included (history). */
+        get: operations["CajaController_firmas[7]_v2"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -50913,6 +52927,614 @@ export interface paths {
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          */
         post: operations["CajaController_reabrir[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadre-total/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The day total sheet by email (same rules as the reconciliation email; one center).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadre-total/email`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_emailTotal[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/total-reconciliation/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The day total sheet by email (same rules as the reconciliation email; one center).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/total-reconciliation/email`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_emailTotal[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadre-total/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The day total sheet by email (same rules as the reconciliation email; one center).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadre-total/email`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_emailTotal[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/total-reconciliation/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The day total sheet by email (same rules as the reconciliation email; one center).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/total-reconciliation/email`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_emailTotal[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadre-total/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The day total sheet by email (same rules as the reconciliation email; one center). */
+        post: operations["CajaController_emailTotal[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/total-reconciliation/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The day total sheet by email (same rules as the reconciliation email; one center). */
+        post: operations["CajaController_emailTotal[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadre-total/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The day total sheet by email (same rules as the reconciliation email; one center). */
+        post: operations["CajaController_emailTotal[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/total-reconciliation/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The day total sheet by email (same rules as the reconciliation email; one center). */
+        post: operations["CajaController_emailTotal[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadre-total": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cuadre total del día: las dos divisiones, todos los cajeros, un conteo, y la comprobación contra consulta + general
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadre-total`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_reporteTotal[0]_v1"];
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadre-total`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_abrirTotal[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/total-reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cuadre total del día: las dos divisiones, todos los cajeros, un conteo, y la comprobación contra consulta + general
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/total-reconciliation`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_reporteTotal[1]_v1"];
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/total-reconciliation`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_abrirTotal[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadre-total": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cuadre total del día: las dos divisiones, todos los cajeros, un conteo, y la comprobación contra consulta + general
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadre-total`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_reporteTotal[2]_v1"];
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadre-total`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_abrirTotal[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/total-reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cuadre total del día: las dos divisiones, todos los cajeros, un conteo, y la comprobación contra consulta + general
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/total-reconciliation`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_reporteTotal[3]_v1"];
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/total-reconciliation`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_abrirTotal[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadre-total": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cuadre total del día: las dos divisiones, todos los cajeros, un conteo, y la comprobación contra consulta + general */
+        get: operations["CajaController_reporteTotal[4]_v2"];
+        put?: never;
+        post: operations["CajaController_abrirTotal[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/total-reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cuadre total del día: las dos divisiones, todos los cajeros, un conteo, y la comprobación contra consulta + general */
+        get: operations["CajaController_reporteTotal[5]_v2"];
+        put?: never;
+        post: operations["CajaController_abrirTotal[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadre-total": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cuadre total del día: las dos divisiones, todos los cajeros, un conteo, y la comprobación contra consulta + general */
+        get: operations["CajaController_reporteTotal[6]_v2"];
+        put?: never;
+        post: operations["CajaController_abrirTotal[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/total-reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cuadre total del día: las dos divisiones, todos los cajeros, un conteo, y la comprobación contra consulta + general */
+        get: operations["CajaController_reporteTotal[7]_v2"];
+        put?: never;
+        post: operations["CajaController_abrirTotal[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadre-total/{id}/conteo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadre-total/{id}/conteo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_contarTotal[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/total-reconciliation/{id}/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/total-reconciliation/{id}/count`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_contarTotal[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadre-total/{id}/conteo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadre-total/{id}/conteo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_contarTotal[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/total-reconciliation/{id}/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/total-reconciliation/{id}/count`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_contarTotal[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadre-total/{id}/conteo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CajaController_contarTotal[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/total-reconciliation/{id}/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CajaController_contarTotal[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadre-total/{id}/conteo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CajaController_contarTotal[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/total-reconciliation/{id}/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CajaController_contarTotal[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadre-total/{id}/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadre-total/{id}/cerrar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_cerrarTotal[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/total-reconciliation/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/total-reconciliation/{id}/close`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_cerrarTotal[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadre-total/{id}/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadre-total/{id}/cerrar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_cerrarTotal[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/total-reconciliation/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/total-reconciliation/{id}/close`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_cerrarTotal[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadre-total/{id}/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CajaController_cerrarTotal[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/total-reconciliation/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CajaController_cerrarTotal[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadre-total/{id}/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CajaController_cerrarTotal[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/total-reconciliation/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CajaController_cerrarTotal[7]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -52060,6 +54682,9 @@ export interface components {
             oldRecordSuggestionYears: number;
             invoiceReopenEnabled: boolean;
             invoiceReopenWindowDays: number | null;
+            warehouseMonitorDays: number[];
+            warehouseMonitorStart: string;
+            warehouseMonitorEnd: string;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -52160,6 +54785,20 @@ export interface components {
             logoUrl?: string;
             frontdeskAutoPresent?: boolean;
         };
+        TransferirTratamientoDto: {
+            /** Format: uuid */
+            destinationClinicId: string;
+            sessions?: number;
+            /** @enum {string} */
+            mode?: "virtual" | "fisica";
+            /** Format: uuid */
+            sourceWarehouseId?: string;
+            /** Format: uuid */
+            destinationWarehouseId?: string;
+            reason?: string;
+            /** Format: uuid */
+            actorId?: string;
+        };
         TransferenciaTratamientoEntity: {
             sourcePackageId: string;
             paqueteOrigenIdRef?: Record<string, never>;
@@ -52190,20 +54829,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        TransferirTratamientoDto: {
-            /** Format: uuid */
-            destinationClinicId: string;
-            sessions?: number;
-            /** @enum {string} */
-            mode?: "virtual" | "fisica";
-            /** Format: uuid */
-            sourceWarehouseId?: string;
-            /** Format: uuid */
-            destinationWarehouseId?: string;
-            reason?: string;
-            /** Format: uuid */
-            actorId?: string;
         };
         AjusteDisponibilidadDto: {
             /** @description Nuevo total de sesiones del paquete (p.ej. corregir 12→10 días). Debe ser ≥ lo ya consumido. */
@@ -52503,6 +55128,14 @@ export interface components {
             incluidos: string[];
         };
         KitComponenteDto: {
+            /**
+             * @description Areas × days of a therapy with those columns (keys = its group columns, e.g. { areas: 2, dias: 12 }). Its quantity is then CALCULATED (areas × days ÷ kits) and its sessions are the days. See docs/specs/areas-y-dias-en-los-componentes-del-kit.md.
+             * @example {
+             *       "areas": 2,
+             *       "dias": 12
+             *     }
+             */
+            multipliers?: Record<string, never>;
             /** Format: uuid */
             productId: string;
             quantity: number;
@@ -52681,6 +55314,64 @@ export interface components {
             amount?: number;
             reason?: string;
         };
+        TaxComponentDto: {
+            taxId: string;
+            key: string | null;
+            name: string | null;
+            /** @description Percent */
+            rate: number | null;
+            amount: number;
+        };
+        TaxBreakdownDto: {
+            total: number;
+            /** @description Components of the tax from the catalog (IVU PR = Estatal 10.5 % + Municipal 1 %), highest rate first. */
+            components: components["schemas"]["TaxComponentDto"][];
+        };
+        InvoiceHeaderDto: {
+            subtotal: number;
+            discount: number;
+            shipping: number;
+            total: number;
+        };
+        ProductSalesInvoiceDto: {
+            id: string;
+            number: string | null;
+            date: string | null;
+            patient: string | null;
+            medicalRecordNumber: string | null;
+            status: string;
+            /** @example EF+VISA */
+            paymentMethods: string;
+            /** @description Product part of the invoice */
+            base: number;
+            discount: number;
+            tax: components["schemas"]["TaxBreakdownDto"];
+            total: number;
+            exonerated: boolean;
+            exoneratedBase: number;
+            /** @description Product amount refunded on this invoice */
+            refunded: number;
+            taxWouldBe: components["schemas"]["TaxBreakdownDto"];
+            /** @description The whole invoice */
+            invoice: components["schemas"]["InvoiceHeaderDto"];
+        };
+        ExoneratedTotalsDto: {
+            invoices: number;
+            subtotal: number;
+            discount: number;
+            shipping: number;
+            total: number;
+            exoneratedBase: number;
+            /** @description Product amount refunded on this invoice */
+            refunded: number;
+            taxWouldBe: components["schemas"]["TaxBreakdownDto"];
+        };
+        ExoneratedProductsReportDto: {
+            from: string;
+            to: string;
+            invoices: components["schemas"]["ProductSalesInvoiceDto"][];
+            totals: components["schemas"]["ExoneratedTotalsDto"];
+        };
         MedioEntity: {
             slug: string;
             labelKey: string;
@@ -52716,6 +55407,8 @@ export interface components {
             division?: string;
             /** @description Activo (false = deshabilitado, soft). */
             active?: boolean;
+            /** @description «Venta de producto (IVU)»: switch the group as product sales (true) or not (false). Absent = unchanged. */
+            isProductSale?: boolean;
             /**
              * Format: uuid
              * @description MEGAGRUPO: id del grupo padre bajo el que se totaliza en el reporte de ventas. `null` lo devuelve a ser su propio encabezado. Se valida que exista y que la jerarquía no haga ciclo.
@@ -52727,6 +55420,13 @@ export interface components {
             labelKey: string;
             division: string;
             active: boolean;
+            /**
+             * @description «Venta de producto (IVU)»: this group's lines are PRODUCT sales, which Contabilidad separates from
+             *     services in the cash report for the IVU return. Switched from the UI (owner, 5-nov-2026); a
+             *     product added to a flagged group counts as a product sale on its own.
+             *     See docs/specs/venta-de-productos-e-ivu-en-el-cuadre.md.
+             */
+            isProductSale: boolean;
             parentId: string | null;
             parentIdRef?: Record<string, never>;
             id: string;
@@ -52787,6 +55487,8 @@ export interface components {
              * @description MEGAGRUPO: id del grupo padre bajo el que este grupo se totaliza en el reporte de ventas (p. ej. npt e intravenoso bajo un "suero"). Omitido = es su propio encabezado.
              */
             parentId?: string;
+            /** @description «Venta de producto (IVU)»: the group's lines are product sales, separated in the cash report. Default false. */
+            isProductSale?: boolean;
         };
         CrearColumnaFacturacionDto: {
             /** @description Solo multiplicadores: true = cuenta VISITAS y entra en las sesiones del paquete (días); false = describe la visita y solo multiplica el precio (áreas). */
@@ -52843,6 +55545,18 @@ export interface components {
             /**
              * @description Por qué se reabre (obligatorio). En /api/v2 se envía como `reason`. / Why it is reopened (required). Sent as `reason` in /api/v2.
              * @example Se exoneró por error: el paciente paga 10 dólares
+             */
+            reason: string;
+        };
+        ChangeInvoicePatientDto: {
+            /**
+             * Format: uuid
+             * @description El paciente correcto. En /api/v2 se envía como `patientId`. / The right patient (`patientId` in /api/v2).
+             */
+            patientId: string;
+            /**
+             * @description Por qué (obligatorio). En /api/v2, `reason`. / Why (required); `reason` in /api/v2.
+             * @example Récord equivocado: era el 680
              */
             reason: string;
         };
@@ -53116,6 +55830,24 @@ export interface components {
             /** @description true = preview (no escribe). */
             dryRun?: boolean;
         };
+        CreatePrecioDto: {
+            /** Format: uuid */
+            presentationId: string;
+            /** Format: uuid */
+            priceTypeId: string;
+            price: number;
+            /**
+             * Format: uuid
+             * @description Centro dueño (admin fija el centro). Sin él = scope del header.
+             */
+            clinicId?: string;
+            /** Format: uuid */
+            currencyId?: string;
+            /** Format: uuid */
+            taxId?: string;
+            validFrom?: string;
+            validUntil?: string;
+        };
         PrecioEntity: {
             /** @default null */
             clinicId: string | null;
@@ -53140,24 +55872,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        CreatePrecioDto: {
-            /** Format: uuid */
-            presentationId: string;
-            /** Format: uuid */
-            priceTypeId: string;
-            price: number;
-            /**
-             * Format: uuid
-             * @description Centro dueño (admin fija el centro). Sin él = scope del header.
-             */
-            clinicId?: string;
-            /** Format: uuid */
-            currencyId?: string;
-            /** Format: uuid */
-            taxId?: string;
-            validFrom?: string;
-            validUntil?: string;
-        };
         UpdatePrecioDto: {
             price?: number;
             /** Format: uuid */
@@ -53167,6 +55881,18 @@ export interface components {
             validFrom?: string;
             validUntil?: string;
             active?: boolean;
+        };
+        CreateOfertaDto: {
+            presentationId: string;
+            name: string;
+            price?: number;
+            discountPct?: number;
+            validFrom?: string;
+            validUntil?: string;
+            startTime?: string;
+            endTime?: string;
+            daysOfWeek?: string;
+            priority?: number;
         };
         OfertaEntity: {
             clinicRef?: Record<string, never>;
@@ -53190,18 +55916,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        CreateOfertaDto: {
-            presentationId: string;
-            name: string;
-            price?: number;
-            discountPct?: number;
-            validFrom?: string;
-            validUntil?: string;
-            startTime?: string;
-            endTime?: string;
-            daysOfWeek?: string;
-            priority?: number;
         };
         UpdateOfertaDto: {
             name?: string;
@@ -53544,6 +56258,33 @@ export interface components {
             flagTypeId: string;
             note?: string;
         };
+        CreatePersonalDto: {
+            /** @description Iniciales (4 letras). Si no se manda, se arman del nombre y el apellido. */
+            initials?: string;
+            /**
+             * @description Sexo: 'f' | 'm'. Por defecto 'f'.
+             * @enum {string}
+             */
+            sex?: "f" | "m";
+            name: string;
+            lastName?: string;
+            /** Format: uuid */
+            profileId?: string;
+            jobTitle?: string;
+            capabilities?: string[];
+            specialty?: string;
+            phone?: string;
+            /** Format: email */
+            email?: string;
+            legacyCode?: string;
+            /** @description Phone extension on the call center PBX (names the operator in «Ahora mismo»). */
+            extension?: string;
+            /**
+             * @description Color con el que se pinta a esta persona en los tableros. Es un dato suyo y se edita como el
+             *     resto: no tener dónde cambiarlo obligaba a tocar la base a mano.
+             */
+            color?: string;
+        };
         PersonalEntity: {
             clinicRef?: Record<string, never>;
             name: string;
@@ -53610,33 +56351,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        CreatePersonalDto: {
-            /** @description Iniciales (4 letras). Si no se manda, se arman del nombre y el apellido. */
-            initials?: string;
-            /**
-             * @description Sexo: 'f' | 'm'. Por defecto 'f'.
-             * @enum {string}
-             */
-            sex?: "f" | "m";
-            name: string;
-            lastName?: string;
-            /** Format: uuid */
-            profileId?: string;
-            jobTitle?: string;
-            capabilities?: string[];
-            specialty?: string;
-            phone?: string;
-            /** Format: email */
-            email?: string;
-            legacyCode?: string;
-            /** @description Phone extension on the call center PBX (names the operator in «Ahora mismo»). */
-            extension?: string;
-            /**
-             * @description Color con el que se pinta a esta persona en los tableros. Es un dato suyo y se edita como el
-             *     resto: no tener dónde cambiarlo obligaba a tocar la base a mano.
-             */
-            color?: string;
         };
         UpdatePersonalDto: {
             /** @description Legacy login/code (e.g. CRIVERA). Empty string clears it. Unique per clinic. */
@@ -55054,6 +57768,12 @@ export interface components {
             note?: string;
             active?: boolean;
         };
+        CreateProductoCentroDto: {
+            /** Format: uuid */
+            productId: string;
+            minStock?: number;
+            maxStock?: number;
+        };
         ProductoCentroEntity: {
             clinicRef?: Record<string, never>;
             productId: string;
@@ -55068,16 +57788,15 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        CreateProductoCentroDto: {
-            /** Format: uuid */
-            productId: string;
-            minStock?: number;
-            maxStock?: number;
-        };
         UpdateProductoCentroDto: {
             active?: boolean;
             minStock?: number;
             maxStock?: number;
+        };
+        CreateAlmacenDto: {
+            name: string;
+            /** @enum {string} */
+            type?: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
         };
         AlmacenEntity: {
             clinicRef?: Record<string, never>;
@@ -55092,16 +57811,17 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        CreateAlmacenDto: {
-            name: string;
-            /** @enum {string} */
-            type?: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
-        };
         UpdateAlmacenDto: {
             name?: string;
             /** @enum {string} */
             type?: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
             active?: boolean;
+        };
+        CreateUbicacionDto: {
+            /** Format: uuid */
+            warehouseId: string;
+            name: string;
+            type?: string;
         };
         UbicacionEntity: {
             clinicRef?: Record<string, never>;
@@ -55117,16 +57837,24 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        CreateUbicacionDto: {
-            /** Format: uuid */
-            warehouseId: string;
-            name: string;
-            type?: string;
-        };
         UpdateUbicacionDto: {
             name?: string;
             type?: string;
             active?: boolean;
+        };
+        CreateLoteDto: {
+            /** Format: uuid */
+            productId: string;
+            /** Format: uuid */
+            warehouseId: string;
+            lotNumber?: string;
+            purchaseInvoiceNumber?: string;
+            expirationDate?: string;
+            unitCost?: number;
+            /** Format: uuid */
+            supplierId?: string;
+            /** Format: uuid */
+            supplierPresentationId?: string;
         };
         LoteEntity: {
             clinicRef?: Record<string, never>;
@@ -55151,20 +57879,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        CreateLoteDto: {
-            /** Format: uuid */
-            productId: string;
-            /** Format: uuid */
-            warehouseId: string;
-            lotNumber?: string;
-            purchaseInvoiceNumber?: string;
-            expirationDate?: string;
-            unitCost?: number;
-            /** Format: uuid */
-            supplierId?: string;
-            /** Format: uuid */
-            supplierPresentationId?: string;
-        };
         UpdateLoteDto: {
             lotNumber?: string;
             purchaseInvoiceNumber?: string;
@@ -55174,6 +57888,31 @@ export interface components {
             supplierId?: string;
             /** @enum {string} */
             status?: "activo" | "recall" | "bloqueado" | "vencido";
+        };
+        CreateVialAbiertoDto: {
+            /**
+             * Format: uuid
+             * @description Presentación de la que sale el vial. Se CONGELA: si mañana se activa otra de distinta concentración, este vial sigue contando con la suya.
+             */
+            presentationId?: string;
+            /** @description Correlativo por producto y centro; lo asigna `abrirVial`, no el cliente. */
+            number?: number;
+            /**
+             * Format: uuid
+             * @description Paciente dueño del vial (BPC-157 y cualquier producto de viales personalizados).
+             */
+            patientId?: string;
+            /** Format: uuid */
+            productId: string;
+            /** Format: uuid */
+            warehouseId: string;
+            /** Format: uuid */
+            lotId?: string;
+            totalCapacity: number;
+            /** Format: uuid */
+            unitId?: string;
+            openedAt?: string;
+            openingExpiresAt?: string;
         };
         VialAbiertoEntity: {
             clinicRef?: Record<string, never>;
@@ -55203,31 +57942,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        CreateVialAbiertoDto: {
-            /**
-             * Format: uuid
-             * @description Presentación de la que sale el vial. Se CONGELA: si mañana se activa otra de distinta concentración, este vial sigue contando con la suya.
-             */
-            presentationId?: string;
-            /** @description Correlativo por producto y centro; lo asigna `abrirVial`, no el cliente. */
-            number?: number;
-            /**
-             * Format: uuid
-             * @description Paciente dueño del vial (BPC-157 y cualquier producto de viales personalizados).
-             */
-            patientId?: string;
-            /** Format: uuid */
-            productId: string;
-            /** Format: uuid */
-            warehouseId: string;
-            /** Format: uuid */
-            lotId?: string;
-            totalCapacity: number;
-            /** Format: uuid */
-            unitId?: string;
-            openedAt?: string;
-            openingExpiresAt?: string;
         };
         UpdateVialAbiertoDto: {
             /** @enum {string} */
@@ -55348,6 +58062,12 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        CreateCierreDto: {
+            cutoffDate: string;
+            /** Format: uuid */
+            userId?: string;
+            notes?: string;
+        };
         CierreInventarioEntity: {
             clinicRef?: Record<string, never>;
             /** Format: date-time */
@@ -55363,12 +58083,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        CreateCierreDto: {
-            cutoffDate: string;
-            /** Format: uuid */
-            userId?: string;
-            notes?: string;
         };
         CierreInventarioDetalleEntity: {
             clinicRef?: Record<string, never>;
@@ -55995,55 +58709,6 @@ export interface components {
             content?: string;
             active?: boolean;
         };
-        CitaEntity: {
-            clinicRef?: Record<string, never>;
-            patientId: string;
-            pacienteIdRef?: Record<string, never>;
-            appointmentTypeId: string;
-            tipoCitaIdRef?: Record<string, never>;
-            doctorId: string | null;
-            medicoIdRef?: Record<string, never>;
-            date: string;
-            time: string | null;
-            endTime: string | null;
-            /** @enum {string} */
-            status: "presente" | "cancelada" | "programada" | "confirmada" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
-            isFirstVisit: boolean;
-            /** @enum {string} */
-            channel: "atencion" | "callcenter" | "webhook" | "ia";
-            reason: string | null;
-            notes: string | null;
-            rescheduledFromId: string | null;
-            reprogramadaDeIdRef?: Record<string, never>;
-            bookedByStaffId: string | null;
-            callcenterIdRef?: Record<string, never>;
-            createdByProfileId: string | null;
-            creadoPorPerfilIdRef?: Record<string, never>;
-            frontDeskStaffId: string | null;
-            atencionIdRef?: Record<string, never>;
-            vitalsNurseId: string | null;
-            enfermeraVitalesIdRef?: Record<string, never>;
-            /** Format: date-time */
-            confirmedAt: string | null;
-            /** Format: date-time */
-            arrivedAt: string | null;
-            /** Format: date-time */
-            vitalsAt: string | null;
-            /** Format: date-time */
-            checkedInAt: string | null;
-            /** Format: date-time */
-            checkedOutAt: string | null;
-            /** Format: date-time */
-            lateRegisteredAt: string | null;
-            legacyId: string | null;
-            legacyOrigin: string | null;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
         ValidarCitaDto: {
             /**
              * Format: uuid
@@ -56090,6 +58755,56 @@ export interface components {
             bookedByStaffId?: string;
             /** Format: uuid */
             frontDeskStaffId?: string;
+        };
+        CitaEntity: {
+            clinicRef?: Record<string, never>;
+            patientId: string;
+            pacienteIdRef?: Record<string, never>;
+            appointmentTypeId: string;
+            tipoCitaIdRef?: Record<string, never>;
+            doctorId: string | null;
+            medicoIdRef?: Record<string, never>;
+            date: string;
+            time: string | null;
+            endTime: string | null;
+            /** @enum {string} */
+            status: "presente" | "cancelada" | "programada" | "confirmada" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
+            isFirstVisit: boolean;
+            /** @enum {string} */
+            channel: "atencion" | "callcenter" | "webhook" | "ia";
+            reason: string | null;
+            notes: string | null;
+            rescheduledFromId: string | null;
+            reprogramadaDeIdRef?: Record<string, never>;
+            bookedByStaffId: string | null;
+            callcenterIdRef?: Record<string, never>;
+            createdByProfileId: string | null;
+            creadoPorPerfilIdRef?: Record<string, never>;
+            frontDeskStaffId: string | null;
+            atencionIdRef?: Record<string, never>;
+            vitalsNurseId: string | null;
+            enfermeraVitalesIdRef?: Record<string, never>;
+            /** Format: date-time */
+            confirmedAt: string | null;
+            /** Format: date-time */
+            arrivedAt: string | null;
+            /** Format: date-time */
+            vitalsAt: string | null;
+            /** Format: date-time */
+            checkedInAt: string | null;
+            /** Format: date-time */
+            checkedOutAt: string | null;
+            /** Format: date-time */
+            lateRegisteredAt: string | null;
+            legacyId: string | null;
+            legacyOrigin: string | null;
+            sheetSlotId: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         UpdateCitaDto: {
             /** Format: uuid */
@@ -56292,6 +59007,12 @@ export interface components {
             staffId?: string;
             /**
              * Format: uuid
+             * @description The ONE center this lands in (a doctor's availability is per center). Absent = the session's.
+             *     Another center needs it assigned AND citas.config THERE (403 otherwise).
+             */
+            centerId?: string;
+            /**
+             * Format: uuid
              * @deprecated
              */
             doctorId?: string;
@@ -56303,6 +59024,12 @@ export interface components {
         SetHorariosBulkDto: {
             /** Format: uuid */
             staffId?: string;
+            /**
+             * Format: uuid
+             * @description The ONE center this lands in (a doctor's availability is per center). Absent = the session's.
+             *     Another center needs it assigned AND citas.config THERE (403 otherwise).
+             */
+            centerId?: string;
             daysOfWeek: number[];
             startTime: string;
             endTime: string;
@@ -56321,6 +59048,25 @@ export interface components {
             endTime?: string;
             active?: boolean;
         };
+        CreateFestivoDto: {
+            date: string;
+            /**
+             * Format: uuid
+             * @description The ONE center this lands in (a doctor's availability is per center). Absent = the session's.
+             *     Another center needs it assigned AND citas.config THERE (403 otherwise).
+             */
+            centerId?: string;
+            name: string;
+            recursAnnually?: boolean;
+            /** @description True (default) = cierra la agenda ese día; false = informativo. */
+            blocksSchedule?: boolean;
+            active?: boolean;
+            /**
+             * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
+             * @enum {string}
+             */
+            scope?: "centro" | "global";
+        };
         FestivoEntity: {
             /** @default null */
             clinicId: string | null;
@@ -56335,19 +59081,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        CreateFestivoDto: {
-            date: string;
-            name: string;
-            recursAnnually?: boolean;
-            /** @description True (default) = cierra la agenda ese día; false = informativo. */
-            blocksSchedule?: boolean;
-            active?: boolean;
-            /**
-             * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
-             * @enum {string}
-             */
-            scope?: "centro" | "global";
         };
         UpdateFestivoDto: {
             date?: string;
@@ -56374,6 +59107,12 @@ export interface components {
              * @deprecated
              */
             doctorId?: string;
+            /**
+             * Format: uuid
+             * @description The ONE center this lands in (a doctor's availability is per center). Absent = the session's.
+             *     Another center needs it assigned AND citas.config THERE (403 otherwise).
+             */
+            centerId?: string;
             /** @enum {string} */
             kind: "vacation" | "leave";
             startDate: string;
@@ -56639,6 +59378,20 @@ export interface components {
             validUntil?: string;
             active?: boolean;
         };
+        OrdenCompraLineaDto: {
+            /** Format: uuid */
+            productId: string;
+            quantity: number;
+            unitCost?: number;
+        };
+        CreateOrdenCompraDto: {
+            /** Format: uuid */
+            supplierId: string;
+            /** Format: uuid */
+            warehouseId: string;
+            lines: components["schemas"]["OrdenCompraLineaDto"][];
+            notes?: string;
+        };
         OrdenCompraEntity: {
             clinicRef?: Record<string, never>;
             number: string | null;
@@ -56656,20 +59409,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        OrdenCompraLineaDto: {
-            /** Format: uuid */
-            productId: string;
-            quantity: number;
-            unitCost?: number;
-        };
-        CreateOrdenCompraDto: {
-            /** Format: uuid */
-            supplierId: string;
-            /** Format: uuid */
-            warehouseId: string;
-            lines: components["schemas"]["OrdenCompraLineaDto"][];
-            notes?: string;
         };
         OrdenCompraDetalleEntity: {
             clinicRef?: Record<string, never>;
@@ -56694,6 +59433,33 @@ export interface components {
             productId: string;
             /** @description 0 QUITA la línea: así se deshace lo tecleado de más sin dejar un renglón a cero. */
             quantity: number;
+        };
+        LegacyVisitDto: {
+            /**
+             * @description Legacy item code (mconsultass.coditems)
+             * @example TD01
+             */
+            itemCode: string;
+            /**
+             * @description Visit date (YYYY-MM-DD)
+             * @example 2026-11-03
+             */
+            appointmentDate: string;
+            /**
+             * @description tera_sesiones «X/Y»: session X of a package of Y
+             * @example 5/12
+             */
+            progress: string;
+            /** @description Attended (asistido = 3). false = only scheduled: counts only for an item with no attended visit. */
+            attended: boolean;
+        };
+        DiagnosisFromVisitsDto: {
+            /**
+             * Format: uuid
+             * @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO).
+             */
+            patientId?: string;
+            visits: components["schemas"]["LegacyVisitDto"][];
         };
         AplicarLegadoItemDto: {
             coditems: string;
@@ -56884,6 +59650,67 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        PickTicketLineDto: {
+            /**
+             * Format: uuid
+             * @description Supplier presentation the scale counts (it must be on a scale pad of that warehouse).
+             */
+            supplierPresentationId: string;
+            /** @description Units asked for (pieces). */
+            units: number;
+        };
+        CreatePickTicketDto: {
+            /**
+             * Format: uuid
+             * @description Warehouse of the ticket (of the center it is created in).
+             */
+            warehouseId: string;
+            /**
+             * Format: uuid
+             * @description Invoice it was asked for; voiding it cancels the ticket.
+             */
+            invoiceId?: string;
+            /**
+             * Format: uuid
+             * @description Center to create it in (default: the active one). Needs pick_ticket.create there.
+             */
+            centerId?: string;
+            items: components["schemas"]["PickTicketLineDto"][];
+        };
+        Object: Record<string, never>;
+        SetMonitorScheduleDto: {
+            /**
+             * @description ISO weekdays, 1 = Monday … 7 = Sunday.
+             * @example [
+             *       1,
+             *       2,
+             *       3,
+             *       4,
+             *       5,
+             *       6
+             *     ]
+             */
+            days: number[];
+            /**
+             * @description Local HH:MM it turns on.
+             * @example 06:00
+             */
+            start: string;
+            /**
+             * @description Local HH:MM it turns off.
+             * @example 18:00
+             */
+            end: string;
+            /**
+             * Format: uuid
+             * @description Center (default: the active one). Needs pick_ticket.config there.
+             */
+            centerId?: string;
+        };
+        EndPickTicketDto: {
+            /** @description Why it is cancelled or closed (required). */
+            reason: string;
+        };
         ExportarDto: {
             resource: string;
             /** @enum {string} */
@@ -56963,6 +59790,8 @@ export interface components {
             queuePreNoticeMinutes: number;
             queueLongWaitMinutes: number;
             pushesToEhrOnPresente: boolean;
+            /** @enum {string|null} */
+            sheetSection: "LASER" | "IV" | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -56999,6 +59828,11 @@ export interface components {
             packageConsumption?: "fila" | "simultaneo";
         };
         UpdateServicioPorClaveDto: {
+            /**
+             * @description Section of the call-center sheet whose seats this service books (LASER, or IV = Endolaser y Suero); null = not on the sheet. See docs/specs/reservar-en-la-hoja-antes-de-agendar.md.
+             * @enum {string|null}
+             */
+            sheetSection?: "LASER" | "IV" | null;
             name?: string;
             color?: string | null;
             icon?: string | null;
@@ -57032,6 +59866,11 @@ export interface components {
              * @enum {string}
              */
             scope?: "centro" | "todos";
+            /**
+             * @description Section of the call-center sheet whose seats this service books (LASER, or IV = Endolaser y Suero); null = not on the sheet. See docs/specs/reservar-en-la-hoja-antes-de-agendar.md.
+             * @enum {string|null}
+             */
+            sheetSection?: "LASER" | "IV" | null;
             name?: string;
             color?: string;
             icon?: string;
@@ -57078,6 +59917,8 @@ export interface components {
              * @description Tipo de estatus (nurse_status_tipos.id); null/omitido = reset (disponible).
              */
             statusTypeId?: string | null;
+            /** @description Minutes the status lasts (e.g. a break); it then ends by itself. Omitted = until changed by hand. See docs/specs/estatus-con-caducidad.md. */
+            durationMinutes?: number | null;
         };
         NurseStatusLogEntity: {
             clinicRef?: Record<string, never>;
@@ -57086,6 +59927,8 @@ export interface components {
             date: string;
             statusTypeId: string | null;
             statusTipoIdRef?: Record<string, never>;
+            /** Format: date-time */
+            expiresAt: string | null;
             actorId: string | null;
             actorIdRef?: Record<string, never>;
             id: string;
@@ -57104,6 +59947,7 @@ export interface components {
             sortOrder: number;
             active: boolean;
             countsAsAvailable: boolean;
+            durationOptions: number[] | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -57123,53 +59967,6 @@ export interface components {
              * @description Producto a anclar el paquete nuevo. Obligatorio cuando el servicio es de GRUPO (varios productos, p. ej. Láser: HILT+MLS) y no tiene un productoId propio; debe pertenecer al grupo del servicio.
              */
             productId?: string;
-        };
-        Object: Record<string, never>;
-        FrontdeskSesionEntity: {
-            clinicRef?: Record<string, never>;
-            patientId: string;
-            pacienteIdRef?: Record<string, never>;
-            serviceId: string;
-            servicioIdRef?: Record<string, never>;
-            consumedPackages: string[] | null;
-            packageId: string | null;
-            paqueteIdRef?: Record<string, never>;
-            technicianId: string | null;
-            tecnicoIdRef?: Record<string, never>;
-            nurseId: string | null;
-            enfermeraIdRef?: Record<string, never>;
-            doctorId: string | null;
-            medicoIdRef?: Record<string, never>;
-            date: string;
-            time: string | null;
-            /** @enum {string} */
-            status: "pendiente" | "presente" | "en_terapia" | "asistido" | "cancelada";
-            quantity: number;
-            /** Format: date-time */
-            presentAt: string | null;
-            /** Format: date-time */
-            therapyStartedAt: string | null;
-            /** Format: date-time */
-            attendedAt: string | null;
-            /** Format: date-time */
-            calledAt: string | null;
-            data: Record<string, never> | null;
-            /** @enum {string} */
-            source: "manual" | "autopresente" | "agendada";
-            appliedProductId: string | null;
-            productoAplicadoIdRef?: Record<string, never>;
-            openVialId: string | null;
-            vialAbiertoIdRef?: Record<string, never>;
-            legacyId: string | null;
-            legacyOrigin: string | null;
-            bookedByStaffId: string | null;
-            callcenterIdRef?: Record<string, never>;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
         };
         CreateSesionDto: {
             /** @description Franja horaria "HH:mm" (p. ej. "08:00") elegida por el usuario; descuenta el cupo de esa hora (NO bloqueante). Omitir/null = agenda por día, sin tocar cupos por hora. */
@@ -57218,7 +60015,7 @@ export interface components {
             sessionId: string;
             sesionIdRef?: Record<string, never>;
             /** @enum {string} */
-            type: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete" | "called" | "call_undone";
+            type: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete" | "called" | "call_undone" | "reopened";
             actorId: string | null;
             actorIdRef?: Record<string, never>;
             reason: string | null;
@@ -57252,6 +60049,53 @@ export interface components {
              */
             technicianId?: string;
         };
+        FrontdeskSesionEntity: {
+            clinicRef?: Record<string, never>;
+            patientId: string;
+            pacienteIdRef?: Record<string, never>;
+            serviceId: string;
+            servicioIdRef?: Record<string, never>;
+            consumedPackages: string[] | null;
+            packageId: string | null;
+            paqueteIdRef?: Record<string, never>;
+            technicianId: string | null;
+            tecnicoIdRef?: Record<string, never>;
+            nurseId: string | null;
+            enfermeraIdRef?: Record<string, never>;
+            doctorId: string | null;
+            medicoIdRef?: Record<string, never>;
+            date: string;
+            time: string | null;
+            /** @enum {string} */
+            status: "pendiente" | "presente" | "en_terapia" | "asistido" | "cancelada";
+            quantity: number;
+            /** Format: date-time */
+            presentAt: string | null;
+            /** Format: date-time */
+            therapyStartedAt: string | null;
+            /** Format: date-time */
+            attendedAt: string | null;
+            /** Format: date-time */
+            calledAt: string | null;
+            data: Record<string, never> | null;
+            /** @enum {string} */
+            source: "manual" | "autopresente" | "agendada";
+            appliedProductId: string | null;
+            productoAplicadoIdRef?: Record<string, never>;
+            openVialId: string | null;
+            vialAbiertoIdRef?: Record<string, never>;
+            legacyId: string | null;
+            legacyOrigin: string | null;
+            bookedByStaffId: string | null;
+            callcenterIdRef?: Record<string, never>;
+            sheetSlotId: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         RepararSesionDto: {
             reason: string;
             quantity?: number;
@@ -57274,6 +60118,43 @@ export interface components {
         CancelarSesionDto: {
             reason: string;
             /** Format: uuid */
+            actorId?: string;
+        };
+        ReopenSessionDto: {
+            /** @description Why it is reopened (kept in its trace). */
+            reason?: string;
+            /**
+             * Format: uuid
+             * @description Staff member who reopens it; defaults to the caller.
+             */
+            actorId?: string;
+        };
+        CancelPatientDayDto: {
+            /**
+             * Format: uuid
+             * @description Center of that day (checked against the caller's frontdesk.update centers); defaults to the active one.
+             */
+            centerId?: string;
+            /**
+             * Format: uuid
+             * @description Staff member who does it; defaults to the caller.
+             */
+            actorId?: string;
+            /** @description One reason for all of them. */
+            reason: string;
+            /** @description YYYY-MM-DD; defaults to today in the center. */
+            date?: string;
+        };
+        ReopenPatientDayDto: {
+            /**
+             * Format: uuid
+             * @description Center of that day (checked against the caller's frontdesk.update centers); defaults to the active one.
+             */
+            centerId?: string;
+            /**
+             * Format: uuid
+             * @description Staff member who does it; defaults to the caller.
+             */
             actorId?: string;
         };
         CreateResourceDto: {
@@ -57385,6 +60266,15 @@ export interface components {
             maxMinutesPerPatient?: number | null;
             active?: boolean;
         };
+        CreatePanelDto: {
+            /** @description Pista de presentación para el FE (por defecto "tarjetas"). */
+            layout?: string;
+            /** @description Opciones declarativas del panel (audio por defecto, tema, refresco). */
+            config?: Record<string, never>;
+            slug: string;
+            /** @description i18n: el FE traduce; nunca se guarda el texto visible. */
+            labelKey: string;
+        };
         PanelEntity: {
             clinicRef?: Record<string, never>;
             slug: string;
@@ -57398,15 +60288,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-        };
-        CreatePanelDto: {
-            /** @description Pista de presentación para el FE (por defecto "tarjetas"). */
-            layout?: string;
-            /** @description Opciones declarativas del panel (audio por defecto, tema, refresco). */
-            config?: Record<string, never>;
-            slug: string;
-            /** @description i18n: el FE traduce; nunca se guarda el texto visible. */
-            labelKey: string;
         };
         UpdatePanelDto: {
             labelKey?: string;
@@ -57543,7 +60424,7 @@ export interface components {
              * @description Origen del valor. Del paciente/sesión: paciente.nombre | paciente.record | sesion.fecha | sesion.sesiones (X/Y) | sesion.dosis (producto aplicado). De la última medición corporal: medicion.pesoKg | medicion.imc | medicion.grasaPct | medicion.masaMuscularKg | medicion.aguaPct | medicion.fecha. Cadena vacía = hueco en blanco para rellenar a mano.
              * @enum {string}
              */
-            source?: "" | "paciente.nombre" | "paciente.record" | "paciente.telefono" | "sesion.fecha" | "sesion.sesiones" | "sesion.dosis" | "sesion.enfermera" | "sesion.tecnico" | "usuario.nombre" | "scale.weightLbs" | "scale.weightKg" | "scale.bmi" | "scale.bodyFatPct" | "scale.skeletalMusclePct" | "scale.muscleMassKg" | "scale.proteinPct" | "scale.bmrKcal" | "scale.visceralFat" | "scale.hydrationPct" | "scale.boneMassKg" | "scale.metabolicAge" | "tape.neck" | "tape.shoulder" | "tape.leftBiceps" | "tape.rightBiceps" | "tape.chest" | "tape.waist" | "tape.abdomen" | "tape.hip" | "tape.leftThigh" | "tape.rightThigh" | "tape.leftCalf" | "tape.rightCalf" | "tape.waistHipRatio";
+            source?: "" | "paciente.nombre" | "paciente.record" | "paciente.telefono" | "paciente.apellidosNombre" | "sesion.fecha" | "sesion.sesiones" | "sesion.sesionYTerapia" | "sesion.dosis" | "sesion.enfermera" | "sesion.tecnico" | "usuario.nombre" | "scale.weightLbs" | "scale.weightKg" | "scale.bmi" | "scale.bodyFatPct" | "scale.skeletalMusclePct" | "scale.muscleMassKg" | "scale.proteinPct" | "scale.bmrKcal" | "scale.visceralFat" | "scale.hydrationPct" | "scale.boneMassKg" | "scale.metabolicAge" | "tape.neck" | "tape.shoulder" | "tape.leftBiceps" | "tape.rightBiceps" | "tape.chest" | "tape.waist" | "tape.abdomen" | "tape.hip" | "tape.leftThigh" | "tape.rightThigh" | "tape.leftCalf" | "tape.rightCalf" | "tape.waistHipRatio";
             slug: string;
             labelKey: string;
         };
@@ -57597,6 +60478,50 @@ export interface components {
             /** @description Monto NETO (pagos − reembolsos); puede ser negativo por devoluciones. */
             amount: number;
         };
+        SalesBucketDto: {
+            /** @description Charged: base + tax */
+            amount: number;
+            discount: number;
+            base: number;
+            tax: number;
+            lines: number;
+        };
+        ExoneratedBucketDto: {
+            /** @description Charged: base + tax */
+            amount: number;
+            discount: number;
+            base: number;
+            tax: number;
+            lines: number;
+            /** @description The IVU that was due */
+            taxWouldBe: components["schemas"]["TaxBreakdownDto"];
+        };
+        ProductRefundsDto: {
+            amount: number;
+            base: number;
+            tax: components["schemas"]["TaxBreakdownDto"];
+            /** @description Refund documents */
+            documents: number;
+        };
+        ProductSalesCheckDto: {
+            products: number;
+            services: number;
+            dayNet: number;
+            squares: boolean;
+            gap: number;
+        };
+        ProductSalesDto: {
+            taxable: components["schemas"]["SalesBucketDto"];
+            exempt: components["schemas"]["SalesBucketDto"];
+            exonerated: components["schemas"]["ExoneratedBucketDto"];
+            /** @description IVU collected */
+            tax: components["schemas"]["TaxBreakdownDto"];
+            refunds: components["schemas"]["ProductRefundsDto"];
+            /** @description Base + IVU − refunds */
+            net: number;
+            invoices: components["schemas"]["ProductSalesInvoiceDto"][];
+            check: components["schemas"]["ProductSalesCheckDto"];
+        };
         DenominacionEntity: {
             currencyId: string;
             monedaIdRef?: Record<string, never>;
@@ -57624,33 +60549,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        CuadreCajaEntity: {
-            clinicRef?: Record<string, never>;
-            userId: string | null;
-            usuarioIdRef?: Record<string, never>;
-            /** @enum {string|null} */
-            division: "general" | "consulta" | null;
-            date: string;
-            currencyId: string | null;
-            monedaIdRef?: Record<string, never>;
-            /** @enum {string} */
-            status: "abierto" | "cerrado";
-            declaredPettyCash: number;
-            pettyCashApplies: boolean;
-            countedCash: number;
-            expectedCash: number;
-            difference: number;
-            totalsByMethod: Record<string, never> | null;
-            notes: string | null;
-            /** Format: date-time */
-            closedAt: string | null;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
         CajeroDto: {
             /** @description Staff id of the cashier (staff.id, the person): what payments and reconciliations store. */
             userId: string;
@@ -57660,6 +60558,8 @@ export interface components {
             active: boolean;
         };
         EmailCuadreDto: {
+            /** @description Recipients for this send; they replace the center default list (preference caja.emailRecipients). */
+            emails?: string[];
             /**
              * Format: email
              * @description Email destino (obligatorio: el cuadre no está ligado a un paciente).
@@ -57667,6 +60567,38 @@ export interface components {
             email?: string;
             /** @description Cuerpo del correo (opcional; por defecto un resumen del cuadre). */
             body?: string;
+        };
+        CashEmailSentDto: {
+            sent: boolean;
+            to: string[];
+            messageId: string | null;
+            notificationId: string;
+        };
+        SignReconciliationDto: {
+            /**
+             * @description As whom: cashier = the sheet's own cashier confirming her cash (only her); supervisor = someone holding caja.ver_todos approving the sheet.
+             * @enum {string}
+             */
+            signAs: "cashier" | "supervisor";
+            /** @description The acceptance: must be true. Signing IS accepting the statement shown (preference caja.signOff.statement). */
+            agree: boolean;
+        };
+        ReconciliationSignatureDto: {
+            id: string;
+            reconciliationId: string;
+            /** @enum {string} */
+            role: "cashier" | "supervisor";
+            staffId: string;
+            signerName: string;
+            /** @description The exact text accepted. */
+            statement: string;
+            /** Format: date-time */
+            signedAt: string;
+            /** @description The sheet figures accepted: dayTotal, salesCash, countedCash, difference. */
+            figures: Record<string, never>;
+            /** Format: date-time */
+            voidedAt: string | null;
+            voidReason: string | null;
         };
         AbrirCuadreDto: {
             /**
@@ -57688,17 +60620,226 @@ export interface components {
             /** @description Whether the starting fund (Inicio) applies, i.e. is subtracted from the counted cash. Omitted on create = true; omitted on resume = unchanged. */
             pettyCashApplies?: boolean;
         };
+        CuadreCajaEntity: {
+            clinicRef?: Record<string, never>;
+            userId: string | null;
+            usuarioIdRef?: Record<string, never>;
+            /** @enum {string|null} */
+            division: "general" | "consulta" | "todas" | null;
+            date: string;
+            currencyId: string | null;
+            monedaIdRef?: Record<string, never>;
+            /** @enum {string} */
+            status: "abierto" | "cerrado";
+            declaredPettyCash: number;
+            pettyCashApplies: boolean;
+            countedCash: number;
+            expectedCash: number;
+            difference: number;
+            totalsByMethod: Record<string, never> | null;
+            notes: string | null;
+            /** Format: date-time */
+            closedAt: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         ConteoLineaDto: {
             /** Format: uuid */
             denominationId: string;
             quantity: number;
         };
         ContarCuadreDto: {
+            /** @description Lines of the count by denomination. An EMPTY list clears the count: a consolidated or day total goes back to the sum of the cashiers. */
             conteos: components["schemas"]["ConteoLineaDto"][];
         };
         ReabrirCuadreDto: {
             /** @description Por qué se reabre. Obligatorio: reabrir sin decir el motivo es justo lo que no se quiere poder hacer. Queda en las notas del cuadre, fechado. */
             reason: string;
+        };
+        EmailTotalReconciliationDto: {
+            /** @description Recipients for this send; they replace the center default list (preference caja.emailRecipients). */
+            emails?: string[];
+            /**
+             * Format: email
+             * @description Email destino (obligatorio: el cuadre no está ligado a un paciente).
+             */
+            email?: string;
+            /** @description Cuerpo del correo (opcional; por defecto un resumen del cuadre). */
+            body?: string;
+            /** @description Day (YYYY-MM-DD). Default: today in the center. */
+            date?: string;
+        };
+        TotalReconciliationDayDto: {
+            /** @description Day (YYYY-MM-DD). Default: today in the center. */
+            date?: string;
+            /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+            centerIds?: string[];
+        };
+        RightNowSellerDto: {
+            userId?: string | null;
+            name?: string | null;
+            total: number;
+        };
+        RightNowBigGroupDto: {
+            slug: string;
+            neto: number;
+            invoices: number;
+        };
+        RightNowSalesDto: {
+            invoices: number;
+            bruto: number;
+            devuelto: number;
+            neto: number;
+            byStatus: {
+                [key: string]: number;
+            };
+            byPaymentMethod: {
+                [key: string]: number;
+            };
+            /** @description Refunds made that day (count). */
+            refunds: number;
+            sellers: components["schemas"]["RightNowSellerDto"][];
+            megagrupos: components["schemas"]["RightNowBigGroupDto"][];
+        };
+        RightNowDoctorDto: {
+            /** @description Null on the last row: sales of invoices with no doctor, so the table adds up to the sales. */
+            doctorId: string | null;
+            name?: string | null;
+            /** @description Only on the no-doctor row: rightNow.doctors.noDoctor. */
+            labelKey?: string;
+            total: number;
+            attended: number;
+            firstVisit: number;
+            followUp: number;
+            /** @description Billed that day with the doctor minus refunded that day. */
+            net: number;
+        };
+        RightNowPatientsDto: {
+            /** @description Arrived AND has a record (legacy rule). */
+            present: number;
+            firstVisit: number;
+            followUp: number;
+            attended: number;
+            pending: number;
+        };
+        RightNowWaitingDto: {
+            medicalRecordNumber?: string | null;
+            patient?: string | null;
+            since?: string | null;
+        };
+        RightNowCompletedDto: {
+            medicalRecordNumber?: string | null;
+            patient?: string | null;
+            attendedBy?: string | null;
+            startedAt?: string | null;
+            endedAt?: string | null;
+        };
+        RightNowServiceDto: {
+            serviceId: string;
+            name: string;
+            color?: string | null;
+            icon?: string | null;
+            total: number;
+            waiting: number;
+            inCare: number;
+            completed: number;
+            staffOnDuty: string[];
+            waitingList: components["schemas"]["RightNowWaitingDto"][];
+            completedList: components["schemas"]["RightNowCompletedDto"][];
+        };
+        RightNowPrescriptionsDto: {
+            /** @example ehr */
+            source: string;
+            /** @description False until the EHR sends prescriptions. */
+            available: boolean;
+            ranking: Record<string, never>[];
+        };
+        RightNowPbxDto: {
+            total: number;
+            inbound: number;
+            outbound: number;
+            missed: number;
+            /** @description Answered inbound / inbound, 0..1. */
+            answerRate: number;
+            pbx: string;
+        };
+        RightNowCallTallyDto: {
+            total: number;
+            inbound: number;
+            outbound: number;
+            missed: number;
+            /** @description Answered inbound / inbound, 0..1. */
+            answerRate: number;
+        };
+        RightNowOperatorDto: {
+            extension: string;
+            name?: string | null;
+            answered: number;
+            outbound: number;
+        };
+        RightNowCallsDto: {
+            byPbx: components["schemas"]["RightNowPbxDto"][];
+            consolidated: components["schemas"]["RightNowCallTallyDto"];
+            ranking: components["schemas"]["RightNowOperatorDto"][];
+        };
+        RightNowSnapshotDto: {
+            /** @example 2026-11-04 */
+            date: string;
+            sales?: components["schemas"]["RightNowSalesDto"];
+            appointments?: {
+                [key: string]: unknown;
+            };
+            doctors?: components["schemas"]["RightNowDoctorDto"][];
+            frontdesk?: {
+                [key: string]: unknown;
+            };
+            caja?: {
+                [key: string]: unknown;
+            };
+            alerts?: {
+                [key: string]: unknown;
+            };
+            patients?: components["schemas"]["RightNowPatientsDto"];
+            services?: components["schemas"]["RightNowServiceDto"][];
+            prescriptions?: components["schemas"]["RightNowPrescriptionsDto"];
+            calls?: components["schemas"]["RightNowCallsDto"];
+        };
+        RightNowCenterSnapshotDto: {
+            /** @example 2026-11-04 */
+            date: string;
+            sales?: components["schemas"]["RightNowSalesDto"];
+            appointments?: {
+                [key: string]: unknown;
+            };
+            doctors?: components["schemas"]["RightNowDoctorDto"][];
+            frontdesk?: {
+                [key: string]: unknown;
+            };
+            caja?: {
+                [key: string]: unknown;
+            };
+            alerts?: {
+                [key: string]: unknown;
+            };
+            patients?: components["schemas"]["RightNowPatientsDto"];
+            services?: components["schemas"]["RightNowServiceDto"][];
+            prescriptions?: components["schemas"]["RightNowPrescriptionsDto"];
+            calls?: components["schemas"]["RightNowCallsDto"];
+            clinicId: string;
+            name: string;
+        };
+        RightNowCentersDto: {
+            /** @example 2026-11-04 */
+            date: string;
+            centers: components["schemas"]["RightNowCenterSnapshotDto"][];
+            /** @description The numbers of every center added up (lists stay per center). */
+            combinado: {
+                [key: string]: unknown;
+            };
         };
         LaserParametroEntity: {
             pathology: string;
@@ -57822,6 +60963,8 @@ export interface components {
             externalClinicCode: string | null;
             reverseSyncEnabled: boolean;
             importsOnlyConfirmed: boolean;
+            /** @enum {string} */
+            sheetDownPolicy: "block" | "allow";
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -57832,6 +60975,11 @@ export interface components {
         UpdateSchedulingBridgeConfigDto: {
             /** @description Solo entran las citas que el call center marcó CONFIRMADAS en la hoja (médicas y servicios). Por defecto true. */
             importsOnlyConfirmed?: boolean;
+            /**
+             * @description Qué hace agendar si la hoja del call center no responde, con la reserva encendida: 'block' = no se agenda (503); 'allow' = se agenda aquí con aviso y sin asiento allá. Por defecto 'block'.
+             * @enum {string}
+             */
+            sheetDownPolicy?: "block" | "allow";
             enabled?: boolean;
             pollIntervalSeconds?: number;
             workDays?: (0 | 1 | 2 | 3 | 4 | 5 | 6)[];
@@ -57940,6 +61088,8 @@ export interface operations {
     "AuditLogController_list[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -57957,7 +61107,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -57975,13 +61125,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "AuditLogController_list[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -57999,7 +61153,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58017,13 +61171,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "AuditLogController_list[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58041,7 +61199,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58059,13 +61217,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "AuditLogController_list[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58083,7 +61245,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58101,13 +61263,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "AuditLogController_errores[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58125,7 +61291,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58143,13 +61309,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "AuditLogController_errores[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58167,7 +61337,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58185,13 +61355,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "AuditLogController_errores[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58209,7 +61383,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58227,13 +61401,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "AuditLogController_errores[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58251,7 +61429,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58269,13 +61447,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "AuditLogController_resumen[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58293,7 +61475,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58320,6 +61502,8 @@ export interface operations {
     "AuditLogController_resumen[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58337,7 +61521,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58364,6 +61548,8 @@ export interface operations {
     "AuditLogController_resumen[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58381,7 +61567,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58408,6 +61594,8 @@ export interface operations {
     "AuditLogController_resumen[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58425,7 +61613,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58452,6 +61640,8 @@ export interface operations {
     "AuditLogController_facetas[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58469,7 +61659,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58496,6 +61686,8 @@ export interface operations {
     "AuditLogController_facetas[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58513,7 +61705,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58540,6 +61732,8 @@ export interface operations {
     "AuditLogController_facetas[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58557,7 +61751,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -58584,6 +61778,8 @@ export interface operations {
     "AuditLogController_facetas[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Desde (ISO-8601), inclusive. */
                 from?: string;
                 /** @description Hasta (ISO-8601), inclusive. */
@@ -58601,7 +61797,7 @@ export interface operations {
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
                 excluirErrorCode?: string[];
-                /** @description Centro. Sólo lo respeta un principal admin; a un principal de centro se le impone el suyo. */
+                /** @description Centro (compat: equivale a centerIds=<este>). Solo acota dentro de los centros donde se tiene auditoria.read; uno ajeno es 403. */
                 clinicId?: string;
                 /** @description Alias documentado de X-Tenant-ID que lee TenantMiddleware. Se acepta para no romperlo con forbidNonWhitelisted; el filtrado lo hace el scope, no este campo. */
                 tenant?: string;
@@ -59775,6 +62971,8 @@ export interface operations {
     "EstadisticasController_porServicio[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -59799,6 +62997,8 @@ export interface operations {
     "EstadisticasController_porServicio[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -59823,6 +63023,8 @@ export interface operations {
     "EstadisticasController_porServicio[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -59847,6 +63049,8 @@ export interface operations {
     "EstadisticasController_porServicio[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -59871,6 +63075,8 @@ export interface operations {
     "EstadisticasController_porServicio[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -59895,6 +63101,8 @@ export interface operations {
     "EstadisticasController_porServicio[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -59919,6 +63127,8 @@ export interface operations {
     "EstadisticasController_porServicio[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -59943,6 +63153,8 @@ export interface operations {
     "EstadisticasController_porServicio[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -60052,10 +63264,11 @@ export interface operations {
             };
         };
     };
-    "FacturacionController_listarTransferencias[0]_v1": {
+    "DeliveryPendingController_pendientesEntrega[0]_v1": {
         parameters: {
             query?: {
-                patientId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -60068,7 +63281,183 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransferenciaTratamientoEntity"][];
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DeliveryPendingController_pendientesEntrega[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DeliveryPendingController_pendientesEntrega[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DeliveryPendingController_pendientesEntrega[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DeliveryPendingController_pendientesEntrega[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DeliveryPendingController_pendientesEntrega[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DeliveryPendingController_pendientesEntrega[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DeliveryPendingController_pendientesEntrega[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "FacturacionController_listarTransferencias[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -60076,7 +63465,8 @@ export interface operations {
     "FacturacionController_listarTransferencias[1]_v1": {
         parameters: {
             query?: {
-                patientId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -60089,7 +63479,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransferenciaTratamientoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -60097,7 +63487,8 @@ export interface operations {
     "FacturacionController_listarTransferencias[2]_v1": {
         parameters: {
             query?: {
-                patientId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -60110,7 +63501,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransferenciaTratamientoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -60118,7 +63509,8 @@ export interface operations {
     "FacturacionController_listarTransferencias[3]_v1": {
         parameters: {
             query?: {
-                patientId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -60131,7 +63523,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransferenciaTratamientoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -60139,7 +63531,8 @@ export interface operations {
     "FacturacionController_listarTransferencias[4]_v2": {
         parameters: {
             query?: {
-                patientId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -60152,7 +63545,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransferenciaTratamientoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -60160,7 +63553,8 @@ export interface operations {
     "FacturacionController_listarTransferencias[5]_v2": {
         parameters: {
             query?: {
-                patientId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -60173,7 +63567,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransferenciaTratamientoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -60181,7 +63575,8 @@ export interface operations {
     "FacturacionController_listarTransferencias[6]_v2": {
         parameters: {
             query?: {
-                patientId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -60194,7 +63589,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransferenciaTratamientoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -60202,7 +63597,8 @@ export interface operations {
     "FacturacionController_listarTransferencias[7]_v2": {
         parameters: {
             query?: {
-                patientId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -60215,7 +63611,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransferenciaTratamientoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -61120,174 +64516,6 @@ export interface operations {
             };
         };
     };
-    "FacturacionController_pendientesEntrega[0]_v1": {
-        parameters: {
-            query: {
-                patientId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>[];
-                };
-            };
-        };
-    };
-    "FacturacionController_pendientesEntrega[1]_v1": {
-        parameters: {
-            query: {
-                patientId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>[];
-                };
-            };
-        };
-    };
-    "FacturacionController_pendientesEntrega[2]_v1": {
-        parameters: {
-            query: {
-                patientId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>[];
-                };
-            };
-        };
-    };
-    "FacturacionController_pendientesEntrega[3]_v1": {
-        parameters: {
-            query: {
-                patientId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>[];
-                };
-            };
-        };
-    };
-    "FacturacionController_pendientesEntrega[4]_v2": {
-        parameters: {
-            query: {
-                patientId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>[];
-                };
-            };
-        };
-    };
-    "FacturacionController_pendientesEntrega[5]_v2": {
-        parameters: {
-            query: {
-                patientId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>[];
-                };
-            };
-        };
-    };
-    "FacturacionController_pendientesEntrega[6]_v2": {
-        parameters: {
-            query: {
-                patientId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>[];
-                };
-            };
-        };
-    };
-    "FacturacionController_pendientesEntrega[7]_v2": {
-        parameters: {
-            query: {
-                patientId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>[];
-                };
-            };
-        };
-    };
     "FacturacionController_resumenPaciente[0]_v1": {
         parameters: {
             query?: never;
@@ -61443,12 +64671,8 @@ export interface operations {
     "FacturacionController_tablero[0]_v1": {
         parameters: {
             query?: {
-                status?: string;
-                patientId?: string;
-                context?: string;
-                from?: string;
-                to?: string;
-                date?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -61467,12 +64691,8 @@ export interface operations {
     "FacturacionController_tablero[1]_v1": {
         parameters: {
             query?: {
-                status?: string;
-                patientId?: string;
-                context?: string;
-                from?: string;
-                to?: string;
-                date?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -61491,12 +64711,8 @@ export interface operations {
     "FacturacionController_tablero[2]_v1": {
         parameters: {
             query?: {
-                status?: string;
-                patientId?: string;
-                context?: string;
-                from?: string;
-                to?: string;
-                date?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -61515,12 +64731,8 @@ export interface operations {
     "FacturacionController_tablero[3]_v1": {
         parameters: {
             query?: {
-                status?: string;
-                patientId?: string;
-                context?: string;
-                from?: string;
-                to?: string;
-                date?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -61539,12 +64751,8 @@ export interface operations {
     "FacturacionController_tablero[4]_v2": {
         parameters: {
             query?: {
-                status?: string;
-                patientId?: string;
-                context?: string;
-                from?: string;
-                to?: string;
-                date?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -61563,12 +64771,8 @@ export interface operations {
     "FacturacionController_tablero[5]_v2": {
         parameters: {
             query?: {
-                status?: string;
-                patientId?: string;
-                context?: string;
-                from?: string;
-                to?: string;
-                date?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -61587,12 +64791,8 @@ export interface operations {
     "FacturacionController_tablero[6]_v2": {
         parameters: {
             query?: {
-                status?: string;
-                patientId?: string;
-                context?: string;
-                from?: string;
-                to?: string;
-                date?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -61611,12 +64811,8 @@ export interface operations {
     "FacturacionController_tablero[7]_v2": {
         parameters: {
             query?: {
-                status?: string;
-                patientId?: string;
-                context?: string;
-                from?: string;
-                to?: string;
-                date?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -62438,7 +65634,10 @@ export interface operations {
     };
     "FacturacionController_get[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -62478,7 +65677,10 @@ export interface operations {
     };
     "FacturacionController_get[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -62518,7 +65720,10 @@ export interface operations {
     };
     "FacturacionController_get[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -62558,7 +65763,10 @@ export interface operations {
     };
     "FacturacionController_get[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -68126,9 +71334,14 @@ export interface operations {
     };
     "FacturasReportesController_resumen[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68146,9 +71359,14 @@ export interface operations {
     };
     "FacturasReportesController_resumen[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68166,9 +71384,14 @@ export interface operations {
     };
     "FacturasReportesController_resumen[2]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68186,9 +71409,14 @@ export interface operations {
     };
     "FacturasReportesController_resumen[3]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68206,9 +71434,14 @@ export interface operations {
     };
     "FacturasReportesController_resumen[4]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68226,9 +71459,14 @@ export interface operations {
     };
     "FacturasReportesController_resumen[5]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68246,9 +71484,14 @@ export interface operations {
     };
     "FacturasReportesController_resumen[6]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68266,9 +71509,14 @@ export interface operations {
     };
     "FacturasReportesController_resumen[7]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68286,9 +71534,14 @@ export interface operations {
     };
     "FacturasReportesController_porMedico[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68306,9 +71559,14 @@ export interface operations {
     };
     "FacturasReportesController_porMedico[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68326,9 +71584,14 @@ export interface operations {
     };
     "FacturasReportesController_porMedico[2]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68346,9 +71609,14 @@ export interface operations {
     };
     "FacturasReportesController_porMedico[3]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68366,9 +71634,14 @@ export interface operations {
     };
     "FacturasReportesController_porMedico[4]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68386,9 +71659,14 @@ export interface operations {
     };
     "FacturasReportesController_porMedico[5]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68406,9 +71684,14 @@ export interface operations {
     };
     "FacturasReportesController_porMedico[6]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68426,9 +71709,14 @@ export interface operations {
     };
     "FacturasReportesController_porMedico[7]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68446,11 +71734,14 @@ export interface operations {
     };
     "FacturasReportesController_porUsuario[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
                 /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68468,11 +71759,14 @@ export interface operations {
     };
     "FacturasReportesController_porUsuario[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
                 /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68490,11 +71784,14 @@ export interface operations {
     };
     "FacturasReportesController_porUsuario[2]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
                 /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68512,11 +71809,14 @@ export interface operations {
     };
     "FacturasReportesController_porUsuario[3]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
                 /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68534,11 +71834,14 @@ export interface operations {
     };
     "FacturasReportesController_porUsuario[4]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
                 /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68556,11 +71859,14 @@ export interface operations {
     };
     "FacturasReportesController_porUsuario[5]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
                 /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68578,11 +71884,14 @@ export interface operations {
     };
     "FacturasReportesController_porUsuario[6]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
                 /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68600,11 +71909,14 @@ export interface operations {
     };
     "FacturasReportesController_porUsuario[7]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
                 /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68622,9 +71934,14 @@ export interface operations {
     };
     "FacturasReportesController_porProducto[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68642,9 +71959,14 @@ export interface operations {
     };
     "FacturasReportesController_porProducto[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68662,9 +71984,14 @@ export interface operations {
     };
     "FacturasReportesController_porProducto[2]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68682,9 +72009,14 @@ export interface operations {
     };
     "FacturasReportesController_porProducto[3]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68702,9 +72034,14 @@ export interface operations {
     };
     "FacturasReportesController_porProducto[4]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68722,9 +72059,14 @@ export interface operations {
     };
     "FacturasReportesController_porProducto[5]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68742,9 +72084,14 @@ export interface operations {
     };
     "FacturasReportesController_porProducto[6]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68762,9 +72109,14 @@ export interface operations {
     };
     "FacturasReportesController_porProducto[7]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68782,11 +72134,14 @@ export interface operations {
     };
     "FacturasReportesController_porGrupo[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                /** @description División de facturación a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68804,11 +72159,14 @@ export interface operations {
     };
     "FacturasReportesController_porGrupo[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                /** @description División de facturación a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68826,11 +72184,14 @@ export interface operations {
     };
     "FacturasReportesController_porGrupo[2]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                /** @description División de facturación a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68848,11 +72209,14 @@ export interface operations {
     };
     "FacturasReportesController_porGrupo[3]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                /** @description División de facturación a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68870,11 +72234,14 @@ export interface operations {
     };
     "FacturasReportesController_porGrupo[4]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                /** @description División de facturación a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68892,11 +72259,14 @@ export interface operations {
     };
     "FacturasReportesController_porGrupo[5]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                /** @description División de facturación a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68914,11 +72284,14 @@ export interface operations {
     };
     "FacturasReportesController_porGrupo[6]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                /** @description División de facturación a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68936,11 +72309,14 @@ export interface operations {
     };
     "FacturasReportesController_porGrupo[7]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                /** @description División de facturación a medir. Omitido = todas. NUNCA mezcla consulta con general. */
-                context?: "consulta" | "general";
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68956,11 +72332,232 @@ export interface operations {
             };
         };
     };
+    "FacturasReportesController_exoneratedProducts[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExoneratedProductsReportDto"];
+                };
+            };
+        };
+    };
+    "FacturasReportesController_exoneratedProducts[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExoneratedProductsReportDto"];
+                };
+            };
+        };
+    };
+    "FacturasReportesController_exoneratedProducts[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExoneratedProductsReportDto"];
+                };
+            };
+        };
+    };
+    "FacturasReportesController_exoneratedProducts[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExoneratedProductsReportDto"];
+                };
+            };
+        };
+    };
+    "FacturasReportesController_exoneratedProducts[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExoneratedProductsReportDto"];
+                };
+            };
+        };
+    };
+    "FacturasReportesController_exoneratedProducts[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExoneratedProductsReportDto"];
+                };
+            };
+        };
+    };
+    "FacturasReportesController_exoneratedProducts[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExoneratedProductsReportDto"];
+                };
+            };
+        };
+    };
+    "FacturasReportesController_exoneratedProducts[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExoneratedProductsReportDto"];
+                };
+            };
+        };
+    };
     "FacturasReportesController_impuestos[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68978,9 +72575,14 @@ export interface operations {
     };
     "FacturasReportesController_impuestos[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -68998,9 +72600,14 @@ export interface operations {
     };
     "FacturasReportesController_impuestos[2]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69018,9 +72625,14 @@ export interface operations {
     };
     "FacturasReportesController_impuestos[3]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69038,9 +72650,14 @@ export interface operations {
     };
     "FacturasReportesController_impuestos[4]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69058,9 +72675,14 @@ export interface operations {
     };
     "FacturasReportesController_impuestos[5]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69078,9 +72700,14 @@ export interface operations {
     };
     "FacturasReportesController_impuestos[6]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69098,9 +72725,14 @@ export interface operations {
     };
     "FacturasReportesController_impuestos[7]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69118,10 +72750,14 @@ export interface operations {
     };
     "FacturasReportesController_consumoInsumos[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                estimated?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69139,10 +72775,14 @@ export interface operations {
     };
     "FacturasReportesController_consumoInsumos[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                estimated?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69160,10 +72800,14 @@ export interface operations {
     };
     "FacturasReportesController_consumoInsumos[2]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                estimated?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69181,10 +72825,14 @@ export interface operations {
     };
     "FacturasReportesController_consumoInsumos[3]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                estimated?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69202,10 +72850,14 @@ export interface operations {
     };
     "FacturasReportesController_consumoInsumos[4]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                estimated?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69223,10 +72875,14 @@ export interface operations {
     };
     "FacturasReportesController_consumoInsumos[5]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                estimated?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69244,10 +72900,14 @@ export interface operations {
     };
     "FacturasReportesController_consumoInsumos[6]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                estimated?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -69265,10 +72925,14 @@ export interface operations {
     };
     "FacturasReportesController_consumoInsumos[7]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
-                estimated?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from?: string;
+                to?: string;
+                /** @description División a medir. Omitido = todas. NUNCA mezcla consulta con general. */
+                context?: "general" | "consulta";
+                estimated?: "true" | "false" | "all";
             };
             header?: never;
             path?: never;
@@ -71252,6 +74916,198 @@ export interface operations {
             };
         };
     };
+    "InvoiceReopeningController_changePatient[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeInvoicePatientDto"];
+            };
+        };
+        responses: {
+            /** @description `data` = la factura emitida, misma forma que GET /invoices/:id; avisos en `meta.warnings`. 400: INVOICE_REOPEN_NOT_ALLOWED, INVOICE_CHANGE_PATIENT_SAME, INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT o INVOICE_CHANGE_PATIENT_UNKNOWN. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_changePatient[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeInvoicePatientDto"];
+            };
+        };
+        responses: {
+            /** @description `data` = la factura emitida, misma forma que GET /invoices/:id; avisos en `meta.warnings`. 400: INVOICE_REOPEN_NOT_ALLOWED, INVOICE_CHANGE_PATIENT_SAME, INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT o INVOICE_CHANGE_PATIENT_UNKNOWN. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_changePatient[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeInvoicePatientDto"];
+            };
+        };
+        responses: {
+            /** @description `data` = la factura emitida, misma forma que GET /invoices/:id; avisos en `meta.warnings`. 400: INVOICE_REOPEN_NOT_ALLOWED, INVOICE_CHANGE_PATIENT_SAME, INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT o INVOICE_CHANGE_PATIENT_UNKNOWN. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_changePatient[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeInvoicePatientDto"];
+            };
+        };
+        responses: {
+            /** @description `data` = la factura emitida, misma forma que GET /invoices/:id; avisos en `meta.warnings`. 400: INVOICE_REOPEN_NOT_ALLOWED, INVOICE_CHANGE_PATIENT_SAME, INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT o INVOICE_CHANGE_PATIENT_UNKNOWN. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_changePatient[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeInvoicePatientDto"];
+            };
+        };
+        responses: {
+            /** @description `data` = la factura emitida, misma forma que GET /invoices/:id; avisos en `meta.warnings`. 400: INVOICE_REOPEN_NOT_ALLOWED, INVOICE_CHANGE_PATIENT_SAME, INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT o INVOICE_CHANGE_PATIENT_UNKNOWN. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_changePatient[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeInvoicePatientDto"];
+            };
+        };
+        responses: {
+            /** @description `data` = la factura emitida, misma forma que GET /invoices/:id; avisos en `meta.warnings`. 400: INVOICE_REOPEN_NOT_ALLOWED, INVOICE_CHANGE_PATIENT_SAME, INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT o INVOICE_CHANGE_PATIENT_UNKNOWN. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_changePatient[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeInvoicePatientDto"];
+            };
+        };
+        responses: {
+            /** @description `data` = la factura emitida, misma forma que GET /invoices/:id; avisos en `meta.warnings`. 400: INVOICE_REOPEN_NOT_ALLOWED, INVOICE_CHANGE_PATIENT_SAME, INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT o INVOICE_CHANGE_PATIENT_UNKNOWN. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_changePatient[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeInvoicePatientDto"];
+            };
+        };
+        responses: {
+            /** @description `data` = la factura emitida, misma forma que GET /invoices/:id; avisos en `meta.warnings`. 400: INVOICE_REOPEN_NOT_ALLOWED, INVOICE_CHANGE_PATIENT_SAME, INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT o INVOICE_CHANGE_PATIENT_UNKNOWN. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "InvoiceReopeningController_list[0]_v1": {
         parameters: {
             query?: never;
@@ -71862,7 +75718,10 @@ export interface operations {
     };
     "CambioProtocoloController_historialDeCambios[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -71908,7 +75767,10 @@ export interface operations {
     };
     "CambioProtocoloController_historialDeCambios[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -71954,7 +75816,10 @@ export interface operations {
     };
     "CambioProtocoloController_historialDeCambios[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -72000,7 +75865,10 @@ export interface operations {
     };
     "CambioProtocoloController_historialDeCambios[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -72046,7 +75914,10 @@ export interface operations {
     };
     "CambioProtocoloController_historialDeCambios[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -72092,7 +75963,10 @@ export interface operations {
     };
     "CambioProtocoloController_historialDeCambios[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -72138,7 +76012,10 @@ export interface operations {
     };
     "CambioProtocoloController_historialDeCambios[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -72184,7 +76061,10 @@ export interface operations {
     };
     "CambioProtocoloController_historialDeCambios[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -73769,8 +77649,10 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
                 clinicId?: string;
+                /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -73797,8 +77679,10 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
                 clinicId?: string;
+                /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -73825,8 +77709,10 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
                 clinicId?: string;
+                /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -73853,8 +77739,10 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
                 clinicId?: string;
+                /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -73881,8 +77769,10 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
                 clinicId?: string;
+                /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -73909,8 +77799,10 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
                 clinicId?: string;
+                /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -73937,8 +77829,10 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
                 clinicId?: string;
+                /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -73965,8 +77859,10 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
                 clinicId?: string;
+                /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -74331,6 +78227,8 @@ export interface operations {
     "PreciosController_list[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 presentationId: string;
             };
             header?: never;
@@ -74344,7 +78242,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PrecioEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -74375,6 +78273,8 @@ export interface operations {
     "PreciosController_list[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 presentationId: string;
             };
             header?: never;
@@ -74388,7 +78288,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PrecioEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -74419,6 +78319,8 @@ export interface operations {
     "PreciosController_list[2]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 presentationId: string;
             };
             header?: never;
@@ -74432,7 +78334,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PrecioEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -74463,6 +78365,8 @@ export interface operations {
     "PreciosController_list[3]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 presentationId: string;
             };
             header?: never;
@@ -74476,7 +78380,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PrecioEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -74683,6 +78587,8 @@ export interface operations {
     "OfertasController_list[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 presentationId: string;
             };
             header?: never;
@@ -74696,7 +78602,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OfertaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -74727,6 +78633,8 @@ export interface operations {
     "OfertasController_list[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 presentationId: string;
             };
             header?: never;
@@ -74740,7 +78648,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OfertaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -74771,6 +78679,8 @@ export interface operations {
     "OfertasController_list[2]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 presentationId: string;
             };
             header?: never;
@@ -74784,7 +78694,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OfertaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -74815,6 +78725,8 @@ export interface operations {
     "OfertasController_list[3]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 presentationId: string;
             };
             header?: never;
@@ -74828,7 +78740,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OfertaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -77466,7 +81378,10 @@ export interface operations {
     };
     "PacientesController_ubicacionesEnVivo[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -77485,7 +81400,10 @@ export interface operations {
     };
     "PacientesController_ubicacionesEnVivo[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -77504,7 +81422,10 @@ export interface operations {
     };
     "PacientesController_ubicacionesEnVivo[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -77523,7 +81444,10 @@ export interface operations {
     };
     "PacientesController_ubicacionesEnVivo[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -77542,7 +81466,10 @@ export interface operations {
     };
     "PacientesController_ubicacionesEnVivo[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -77561,7 +81488,10 @@ export interface operations {
     };
     "PacientesController_ubicacionesEnVivo[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -77580,7 +81510,10 @@ export interface operations {
     };
     "PacientesController_ubicacionesEnVivo[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -77599,7 +81532,10 @@ export interface operations {
     };
     "PacientesController_ubicacionesEnVivo[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -79231,6 +83167,8 @@ export interface operations {
     "PersonalController_list[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -79274,6 +83212,8 @@ export interface operations {
     "PersonalController_list[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -79317,6 +83257,8 @@ export interface operations {
     "PersonalController_list[2]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -79360,6 +83302,8 @@ export interface operations {
     "PersonalController_list[3]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -79403,7 +83347,8 @@ export interface operations {
     "PersonalController_porCapacidad[0]_v1": {
         parameters: {
             query?: {
-                centerId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -79418,7 +83363,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -79426,7 +83371,8 @@ export interface operations {
     "PersonalController_porCapacidad[1]_v1": {
         parameters: {
             query?: {
-                centerId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -79441,7 +83387,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -79449,7 +83395,8 @@ export interface operations {
     "PersonalController_porCapacidad[2]_v1": {
         parameters: {
             query?: {
-                centerId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -79464,7 +83411,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -79472,7 +83419,8 @@ export interface operations {
     "PersonalController_porCapacidad[3]_v1": {
         parameters: {
             query?: {
-                centerId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -79487,7 +83435,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -79495,7 +83443,8 @@ export interface operations {
     "PersonalController_porCapacidad[4]_v2": {
         parameters: {
             query?: {
-                centerId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -79510,7 +83459,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -79518,7 +83467,8 @@ export interface operations {
     "PersonalController_porCapacidad[5]_v2": {
         parameters: {
             query?: {
-                centerId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -79533,7 +83483,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -79541,7 +83491,8 @@ export interface operations {
     "PersonalController_porCapacidad[6]_v2": {
         parameters: {
             query?: {
-                centerId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -79556,7 +83507,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -79564,7 +83515,8 @@ export interface operations {
     "PersonalController_porCapacidad[7]_v2": {
         parameters: {
             query?: {
-                centerId?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -79579,7 +83531,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -79722,7 +83674,10 @@ export interface operations {
     };
     "PersonalController_centrosDeLaFicha[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -79766,7 +83721,10 @@ export interface operations {
     };
     "PersonalController_centrosDeLaFicha[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -79810,7 +83768,10 @@ export interface operations {
     };
     "PersonalController_centrosDeLaFicha[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -79854,7 +83815,10 @@ export interface operations {
     };
     "PersonalController_centrosDeLaFicha[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -79898,7 +83862,10 @@ export interface operations {
     };
     "PersonalController_centrosDeLaFicha[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -79942,7 +83909,10 @@ export interface operations {
     };
     "PersonalController_centrosDeLaFicha[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -79986,7 +83956,10 @@ export interface operations {
     };
     "PersonalController_centrosDeLaFicha[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -80030,7 +84003,10 @@ export interface operations {
     };
     "PersonalController_centrosDeLaFicha[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -80074,7 +84050,10 @@ export interface operations {
     };
     "PersonalController_get[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -80088,7 +84067,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -80139,7 +84118,10 @@ export interface operations {
     };
     "PersonalController_get[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -80153,7 +84135,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -80204,7 +84186,10 @@ export interface operations {
     };
     "PersonalController_get[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -80218,7 +84203,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -80269,7 +84254,10 @@ export interface operations {
     };
     "PersonalController_get[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -80283,7 +84271,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PersonalEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -86045,13 +90033,14 @@ export interface operations {
     EhrEventsController_list_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Solo los eventos de este paciente. */
                 patientId?: string;
                 /** @description ISO date-time: solo lo recibido desde aquí. */
                 since?: string;
                 /** @description Máximo de filas (1..500, default 100). */
                 limit?: number;
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -86089,13 +90078,14 @@ export interface operations {
     EhrEventsController_list_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Solo los eventos de este paciente. */
                 patientId?: string;
                 /** @description ISO date-time: solo lo recibido desde aquí. */
                 since?: string;
                 /** @description Máximo de filas (1..500, default 100). */
                 limit?: number;
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -86171,9 +90161,10 @@ export interface operations {
     "EhrEventsController_summary[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description ISO date-time: solo lo recibido desde aquí. */
                 since?: string;
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -86194,9 +90185,10 @@ export interface operations {
     "EhrEventsController_summary[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description ISO date-time: solo lo recibido desde aquí. */
                 since?: string;
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -86217,9 +90209,10 @@ export interface operations {
     "EhrEventsController_summary[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description ISO date-time: solo lo recibido desde aquí. */
                 since?: string;
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -86240,9 +90233,10 @@ export interface operations {
     "EhrEventsController_summary[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description ISO date-time: solo lo recibido desde aquí. */
                 since?: string;
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -87999,7 +91993,7 @@ export interface operations {
     "PrintJobsController_list[0]_v1": {
         parameters: {
             query?: {
-                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -88012,14 +92006,16 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "PrintJobsController_list[1]_v1": {
         parameters: {
             query?: {
-                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -88032,14 +92028,16 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "PrintJobsController_list[2]_v2": {
         parameters: {
             query?: {
-                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -88052,14 +92050,16 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "PrintJobsController_list[3]_v2": {
         parameters: {
             query?: {
-                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -88072,7 +92072,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
@@ -92480,7 +96482,9 @@ export interface operations {
     };
     "ProductosCentroController_list[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -92492,7 +96496,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductoCentroEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -92522,7 +96526,9 @@ export interface operations {
     };
     "ProductosCentroController_list[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -92534,7 +96540,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductoCentroEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -92564,7 +96570,9 @@ export interface operations {
     };
     "ProductosCentroController_list[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -92576,7 +96584,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductoCentroEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -92606,7 +96614,9 @@ export interface operations {
     };
     "ProductosCentroController_list[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -92618,7 +96628,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductoCentroEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -92824,7 +96834,9 @@ export interface operations {
     };
     "AlmacenesController_list[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -92836,7 +96848,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlmacenEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -92866,7 +96878,9 @@ export interface operations {
     };
     "AlmacenesController_list[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -92878,7 +96892,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlmacenEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -92908,7 +96922,9 @@ export interface operations {
     };
     "AlmacenesController_list[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -92920,7 +96936,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlmacenEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -92950,7 +96966,9 @@ export interface operations {
     };
     "AlmacenesController_list[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -92962,7 +96980,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AlmacenEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93170,6 +97188,7 @@ export interface operations {
         parameters: {
             query: {
                 warehouseId: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93182,7 +97201,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UbicacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93214,6 +97233,7 @@ export interface operations {
         parameters: {
             query: {
                 warehouseId: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93226,7 +97246,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UbicacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93258,6 +97278,7 @@ export interface operations {
         parameters: {
             query: {
                 warehouseId: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93270,7 +97291,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UbicacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93302,6 +97323,7 @@ export interface operations {
         parameters: {
             query: {
                 warehouseId: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93314,7 +97336,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UbicacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93521,6 +97543,8 @@ export interface operations {
     "LotesController_list[0]_v1": {
         parameters: {
             query: {
+                /** @description Centers to narrow the read to (comma list); without it, every center where the caller can read the inventory. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -93564,6 +97588,8 @@ export interface operations {
     "LotesController_list[1]_v1": {
         parameters: {
             query: {
+                /** @description Centers to narrow the read to (comma list); without it, every center where the caller can read the inventory. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -93607,6 +97633,8 @@ export interface operations {
     "LotesController_list[2]_v2": {
         parameters: {
             query: {
+                /** @description Centers to narrow the read to (comma list); without it, every center where the caller can read the inventory. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -93650,6 +97678,8 @@ export interface operations {
     "LotesController_list[3]_v2": {
         parameters: {
             query: {
+                /** @description Centers to narrow the read to (comma list); without it, every center where the caller can read the inventory. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -93694,6 +97724,7 @@ export interface operations {
         parameters: {
             query?: {
                 days?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93706,7 +97737,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LoteEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93715,6 +97746,7 @@ export interface operations {
         parameters: {
             query?: {
                 days?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93727,7 +97759,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LoteEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93736,6 +97768,7 @@ export interface operations {
         parameters: {
             query?: {
                 days?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93748,7 +97781,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LoteEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93757,6 +97790,7 @@ export interface operations {
         parameters: {
             query?: {
                 days?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93769,7 +97803,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LoteEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93778,6 +97812,7 @@ export interface operations {
         parameters: {
             query?: {
                 days?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93790,7 +97825,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LoteEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93799,6 +97834,7 @@ export interface operations {
         parameters: {
             query?: {
                 days?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93811,7 +97847,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LoteEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93820,6 +97856,7 @@ export interface operations {
         parameters: {
             query?: {
                 days?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93832,7 +97869,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LoteEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -93841,6 +97878,7 @@ export interface operations {
         parameters: {
             query?: {
                 days?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -93853,7 +97891,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LoteEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -94122,6 +98160,7 @@ export interface operations {
         parameters: {
             query?: {
                 productId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94134,7 +98173,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VialAbiertoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -94166,6 +98205,7 @@ export interface operations {
         parameters: {
             query?: {
                 productId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94178,7 +98218,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VialAbiertoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -94210,6 +98250,7 @@ export interface operations {
         parameters: {
             query?: {
                 productId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94222,7 +98263,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VialAbiertoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -94254,6 +98295,7 @@ export interface operations {
         parameters: {
             query?: {
                 productId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94266,7 +98308,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["VialAbiertoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -94301,6 +98343,7 @@ export interface operations {
                 from?: string;
                 to?: string;
                 patientId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94325,6 +98368,7 @@ export interface operations {
                 from?: string;
                 to?: string;
                 patientId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94349,6 +98393,7 @@ export interface operations {
                 from?: string;
                 to?: string;
                 patientId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94373,6 +98418,7 @@ export interface operations {
                 from?: string;
                 to?: string;
                 patientId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94397,6 +98443,7 @@ export interface operations {
                 from?: string;
                 to?: string;
                 patientId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94421,6 +98468,7 @@ export interface operations {
                 from?: string;
                 to?: string;
                 patientId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94445,6 +98493,7 @@ export interface operations {
                 from?: string;
                 to?: string;
                 patientId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -94469,6 +98518,7 @@ export interface operations {
                 from?: string;
                 to?: string;
                 patientId?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -95353,6 +99403,8 @@ export interface operations {
     "MovimientosInventarioController_list[0]_v1": {
         parameters: {
             query: {
+                /** @description Centers to narrow the read to (comma list); without it, every center where the caller can read the inventory. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -95396,6 +99448,8 @@ export interface operations {
     "MovimientosInventarioController_list[1]_v1": {
         parameters: {
             query: {
+                /** @description Centers to narrow the read to (comma list); without it, every center where the caller can read the inventory. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -95439,6 +99493,8 @@ export interface operations {
     "MovimientosInventarioController_list[2]_v2": {
         parameters: {
             query: {
+                /** @description Centers to narrow the read to (comma list); without it, every center where the caller can read the inventory. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -95482,6 +99538,8 @@ export interface operations {
     "MovimientosInventarioController_list[3]_v2": {
         parameters: {
             query: {
+                /** @description Centers to narrow the read to (comma list); without it, every center where the caller can read the inventory. */
+                centerIds?: string[];
                 page: number;
                 limit: number;
             };
@@ -95528,6 +99586,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95551,6 +99610,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95574,6 +99634,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95597,6 +99658,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95625,6 +99687,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95651,6 +99714,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95677,6 +99741,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95703,6 +99768,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95729,6 +99795,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95755,6 +99822,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95781,6 +99849,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95807,6 +99876,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95830,6 +99900,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95853,6 +99924,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95876,6 +99948,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95899,6 +99972,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95922,6 +99996,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95945,6 +100020,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95968,6 +100044,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -95991,6 +100068,7 @@ export interface operations {
                 asOf?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96015,6 +100093,7 @@ export interface operations {
                 to?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96039,6 +100118,7 @@ export interface operations {
                 to?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96063,6 +100143,7 @@ export interface operations {
                 to?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96087,6 +100168,7 @@ export interface operations {
                 to?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96111,6 +100193,7 @@ export interface operations {
                 to?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96135,6 +100218,7 @@ export interface operations {
                 to?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96159,6 +100243,7 @@ export interface operations {
                 to?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96183,6 +100268,7 @@ export interface operations {
                 to?: string;
                 page?: string;
                 limit?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96204,6 +100290,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96227,6 +100314,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96250,6 +100338,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96273,6 +100362,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96296,6 +100386,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96319,6 +100410,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96342,6 +100434,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96365,6 +100458,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96386,6 +100480,7 @@ export interface operations {
         parameters: {
             query?: {
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -96407,6 +100502,7 @@ export interface operations {
         parameters: {
             query?: {
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -96428,6 +100524,7 @@ export interface operations {
         parameters: {
             query?: {
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -96449,6 +100546,7 @@ export interface operations {
         parameters: {
             query?: {
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -96470,6 +100568,7 @@ export interface operations {
         parameters: {
             query?: {
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -96491,6 +100590,7 @@ export interface operations {
         parameters: {
             query?: {
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -96512,6 +100612,7 @@ export interface operations {
         parameters: {
             query?: {
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -96533,6 +100634,7 @@ export interface operations {
         parameters: {
             query?: {
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path: {
@@ -96552,7 +100654,9 @@ export interface operations {
     };
     "StockController_remanenteVial[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -96573,7 +100677,9 @@ export interface operations {
     };
     "StockController_remanenteVial[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -96594,7 +100700,9 @@ export interface operations {
     };
     "StockController_remanenteVial[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -96615,7 +100723,9 @@ export interface operations {
     };
     "StockController_remanenteVial[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -96636,7 +100746,9 @@ export interface operations {
     };
     "StockController_remanenteVial[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -96657,7 +100769,9 @@ export interface operations {
     };
     "StockController_remanenteVial[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -96678,7 +100792,9 @@ export interface operations {
     };
     "StockController_remanenteVial[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -96699,7 +100815,9 @@ export interface operations {
     };
     "StockController_remanenteVial[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -96724,6 +100842,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96747,6 +100866,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96770,6 +100890,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96793,6 +100914,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96816,6 +100938,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96839,6 +100962,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96862,6 +100986,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96885,6 +101010,7 @@ export interface operations {
                 productId?: string;
                 warehouseId?: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96906,6 +101032,7 @@ export interface operations {
         parameters: {
             query: {
                 productId: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96927,6 +101054,7 @@ export interface operations {
         parameters: {
             query: {
                 productId: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96948,6 +101076,7 @@ export interface operations {
         parameters: {
             query: {
                 productId: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96969,6 +101098,7 @@ export interface operations {
         parameters: {
             query: {
                 productId: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -96990,6 +101120,7 @@ export interface operations {
         parameters: {
             query: {
                 productId: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -97011,6 +101142,7 @@ export interface operations {
         parameters: {
             query: {
                 productId: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -97032,6 +101164,7 @@ export interface operations {
         parameters: {
             query: {
                 productId: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -97053,6 +101186,7 @@ export interface operations {
         parameters: {
             query: {
                 productId: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -97077,6 +101211,7 @@ export interface operations {
                 warehouseId: string;
                 quantity: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -97101,6 +101236,7 @@ export interface operations {
                 warehouseId: string;
                 quantity: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -97125,6 +101261,7 @@ export interface operations {
                 warehouseId: string;
                 quantity: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -97149,6 +101286,7 @@ export interface operations {
                 warehouseId: string;
                 quantity: string;
                 asOf?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -97173,6 +101311,7 @@ export interface operations {
                 lotId?: string;
                 from?: string;
                 to?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -97197,6 +101336,7 @@ export interface operations {
                 lotId?: string;
                 from?: string;
                 to?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -97221,6 +101361,7 @@ export interface operations {
                 lotId?: string;
                 from?: string;
                 to?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -97245,6 +101386,7 @@ export interface operations {
                 lotId?: string;
                 from?: string;
                 to?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -97264,7 +101406,9 @@ export interface operations {
     };
     "CierresController_list[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -97276,7 +101420,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CierreInventarioEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -97306,7 +101450,9 @@ export interface operations {
     };
     "CierresController_list[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -97318,7 +101464,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CierreInventarioEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -97348,7 +101494,9 @@ export interface operations {
     };
     "CierresController_list[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -97360,7 +101508,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CierreInventarioEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -97390,7 +101538,9 @@ export interface operations {
     };
     "CierresController_list[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -97402,7 +101552,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CierreInventarioEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -98979,6 +103129,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99001,6 +103152,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99023,6 +103175,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99045,6 +103198,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99067,6 +103221,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99089,6 +103244,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99111,6 +103267,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99133,6 +103290,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99155,6 +103313,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99177,6 +103336,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99199,6 +103359,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99221,6 +103382,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99243,6 +103405,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99265,6 +103428,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99287,6 +103451,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99309,6 +103474,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99331,6 +103497,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99353,6 +103520,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99375,6 +103543,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99397,6 +103566,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99419,6 +103589,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99441,6 +103612,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99463,6 +103635,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99485,6 +103658,7 @@ export interface operations {
             query?: {
                 from?: string;
                 to?: string;
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -99504,7 +103678,9 @@ export interface operations {
     };
     "ReportesController_bajoMinimo[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99523,7 +103699,9 @@ export interface operations {
     };
     "ReportesController_bajoMinimo[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99542,7 +103720,9 @@ export interface operations {
     };
     "ReportesController_bajoMinimo[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99561,7 +103741,9 @@ export interface operations {
     };
     "ReportesController_bajoMinimo[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99580,7 +103762,9 @@ export interface operations {
     };
     "ReportesController_bajoMinimo[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99599,7 +103783,9 @@ export interface operations {
     };
     "ReportesController_bajoMinimo[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99618,7 +103804,9 @@ export interface operations {
     };
     "ReportesController_bajoMinimo[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99637,7 +103825,9 @@ export interface operations {
     };
     "ReportesController_bajoMinimo[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99656,7 +103846,9 @@ export interface operations {
     };
     "ReportesController_comprasSugeridas[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99667,13 +103859,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "ReportesController_comprasSugeridas[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99684,13 +103880,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "ReportesController_comprasSugeridas[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99701,13 +103901,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "ReportesController_comprasSugeridas[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99718,13 +103922,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "ReportesController_comprasSugeridas[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99735,13 +103943,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "ReportesController_comprasSugeridas[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99752,13 +103964,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "ReportesController_comprasSugeridas[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99769,13 +103985,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "ReportesController_comprasSugeridas[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99786,13 +104006,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "ReportesController_productosSinRegla[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99811,7 +104035,9 @@ export interface operations {
     };
     "ReportesController_productosSinRegla[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99830,7 +104056,9 @@ export interface operations {
     };
     "ReportesController_productosSinRegla[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99849,7 +104077,9 @@ export interface operations {
     };
     "ReportesController_productosSinRegla[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99868,7 +104098,9 @@ export interface operations {
     };
     "ReportesController_productosSinRegla[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99887,7 +104119,9 @@ export interface operations {
     };
     "ReportesController_productosSinRegla[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99906,7 +104140,9 @@ export interface operations {
     };
     "ReportesController_productosSinRegla[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -99925,7 +104161,9 @@ export interface operations {
     };
     "ReportesController_productosSinRegla[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -100827,6 +105065,7 @@ export interface operations {
             query?: {
                 status?: string;
                 address?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -100870,6 +105109,7 @@ export interface operations {
             query?: {
                 status?: string;
                 address?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -100913,6 +105153,7 @@ export interface operations {
             query?: {
                 status?: string;
                 address?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -100956,6 +105197,7 @@ export interface operations {
             query?: {
                 status?: string;
                 address?: string;
+                centerIds?: string;
             };
             header?: never;
             path?: never;
@@ -100996,7 +105238,9 @@ export interface operations {
     };
     "TransferenciasInventarioController_pendientes[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101007,15 +105251,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TransferenciaInventarioEntity"][];
-                };
+                content?: never;
             };
         };
     };
     "TransferenciasInventarioController_pendientes[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101026,15 +105270,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TransferenciaInventarioEntity"][];
-                };
+                content?: never;
             };
         };
     };
     "TransferenciasInventarioController_pendientes[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101045,15 +105289,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TransferenciaInventarioEntity"][];
-                };
+                content?: never;
             };
         };
     };
     "TransferenciasInventarioController_pendientes[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101064,15 +105308,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TransferenciaInventarioEntity"][];
-                };
+                content?: never;
             };
         };
     };
     "TransferenciasInventarioController_pendientes[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101083,15 +105327,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TransferenciaInventarioEntity"][];
-                };
+                content?: never;
             };
         };
     };
     "TransferenciasInventarioController_pendientes[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101102,15 +105346,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TransferenciaInventarioEntity"][];
-                };
+                content?: never;
             };
         };
     };
     "TransferenciasInventarioController_pendientes[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101121,15 +105365,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TransferenciaInventarioEntity"][];
-                };
+                content?: never;
             };
         };
     };
     "TransferenciasInventarioController_pendientes[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101140,9 +105384,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TransferenciaInventarioEntity"][];
-                };
+                content?: never;
             };
         };
     };
@@ -101700,7 +105942,10 @@ export interface operations {
     };
     "ComunicacionesController_listAlertas[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101740,7 +105985,10 @@ export interface operations {
     };
     "ComunicacionesController_listAlertas[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101780,7 +106028,10 @@ export interface operations {
     };
     "ComunicacionesController_listAlertas[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101820,7 +106071,10 @@ export interface operations {
     };
     "ComunicacionesController_listAlertas[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101860,7 +106114,10 @@ export interface operations {
     };
     "ComunicacionesController_listAlertas[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101900,7 +106157,10 @@ export interface operations {
     };
     "ComunicacionesController_listAlertas[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101940,7 +106200,10 @@ export interface operations {
     };
     "ComunicacionesController_listAlertas[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -101980,7 +106243,10 @@ export interface operations {
     };
     "ComunicacionesController_listAlertas[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -103477,6 +107743,9 @@ export interface operations {
     "ComunicacionesController_listarNotificaciones[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo las de esta cita. / Only this appointment. */
                 appointmentId?: string;
             };
             header?: never;
@@ -103490,7 +107759,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -103498,6 +107767,9 @@ export interface operations {
     "ComunicacionesController_listarNotificaciones[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo las de esta cita. / Only this appointment. */
                 appointmentId?: string;
             };
             header?: never;
@@ -103511,7 +107783,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -103519,6 +107791,9 @@ export interface operations {
     "ComunicacionesController_listarNotificaciones[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo las de esta cita. / Only this appointment. */
                 appointmentId?: string;
             };
             header?: never;
@@ -103532,7 +107807,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -103540,6 +107815,9 @@ export interface operations {
     "ComunicacionesController_listarNotificaciones[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo las de esta cita. / Only this appointment. */
                 appointmentId?: string;
             };
             header?: never;
@@ -103553,7 +107831,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -103561,6 +107839,9 @@ export interface operations {
     "ComunicacionesController_listarNotificaciones[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo las de esta cita. / Only this appointment. */
                 appointmentId?: string;
             };
             header?: never;
@@ -103574,7 +107855,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -103582,6 +107863,9 @@ export interface operations {
     "ComunicacionesController_listarNotificaciones[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo las de esta cita. / Only this appointment. */
                 appointmentId?: string;
             };
             header?: never;
@@ -103595,7 +107879,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -103603,6 +107887,9 @@ export interface operations {
     "ComunicacionesController_listarNotificaciones[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo las de esta cita. / Only this appointment. */
                 appointmentId?: string;
             };
             header?: never;
@@ -103616,7 +107903,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -103624,6 +107911,9 @@ export interface operations {
     "ComunicacionesController_listarNotificaciones[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo las de esta cita. / Only this appointment. */
                 appointmentId?: string;
             };
             header?: never;
@@ -103637,14 +107927,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
     };
     "ComunicacionesController_listPlantillas[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -103686,7 +107979,10 @@ export interface operations {
     };
     "ComunicacionesController_listPlantillas[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -103728,7 +108024,10 @@ export interface operations {
     };
     "ComunicacionesController_listPlantillas[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -103770,7 +108069,10 @@ export interface operations {
     };
     "ComunicacionesController_listPlantillas[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -103812,7 +108114,10 @@ export interface operations {
     };
     "ComunicacionesController_listPlantillas[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -103854,7 +108159,10 @@ export interface operations {
     };
     "ComunicacionesController_listPlantillas[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -103896,7 +108204,10 @@ export interface operations {
     };
     "ComunicacionesController_listPlantillas[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -103938,7 +108249,10 @@ export interface operations {
     };
     "ComunicacionesController_listPlantillas[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -104597,6 +108911,8 @@ export interface operations {
     "CitasReportesController_resumen[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104617,6 +108933,8 @@ export interface operations {
     "CitasReportesController_resumen[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104637,6 +108955,8 @@ export interface operations {
     "CitasReportesController_resumen[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104657,6 +108977,8 @@ export interface operations {
     "CitasReportesController_resumen[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104677,6 +108999,8 @@ export interface operations {
     "CitasReportesController_resumen[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104697,6 +109021,8 @@ export interface operations {
     "CitasReportesController_resumen[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104717,6 +109043,8 @@ export interface operations {
     "CitasReportesController_resumen[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104737,6 +109065,8 @@ export interface operations {
     "CitasReportesController_resumen[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104757,6 +109087,8 @@ export interface operations {
     "CitasReportesController_porMedico[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104777,6 +109109,8 @@ export interface operations {
     "CitasReportesController_porMedico[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104797,6 +109131,8 @@ export interface operations {
     "CitasReportesController_porMedico[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104817,6 +109153,8 @@ export interface operations {
     "CitasReportesController_porMedico[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104837,6 +109175,8 @@ export interface operations {
     "CitasReportesController_porMedico[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104857,6 +109197,8 @@ export interface operations {
     "CitasReportesController_porMedico[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104877,6 +109219,8 @@ export interface operations {
     "CitasReportesController_porMedico[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104897,6 +109241,8 @@ export interface operations {
     "CitasReportesController_porMedico[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104917,6 +109263,8 @@ export interface operations {
     "CitasReportesController_tiempos[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104937,6 +109285,8 @@ export interface operations {
     "CitasReportesController_tiempos[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104957,6 +109307,8 @@ export interface operations {
     "CitasReportesController_tiempos[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104977,6 +109329,8 @@ export interface operations {
     "CitasReportesController_tiempos[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -104997,6 +109351,8 @@ export interface operations {
     "CitasReportesController_tiempos[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105017,6 +109373,8 @@ export interface operations {
     "CitasReportesController_tiempos[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105037,6 +109395,8 @@ export interface operations {
     "CitasReportesController_tiempos[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105057,6 +109417,8 @@ export interface operations {
     "CitasReportesController_tiempos[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105077,6 +109439,8 @@ export interface operations {
     "CitasReportesController_vitalesPorEnfermera[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105097,6 +109461,8 @@ export interface operations {
     "CitasReportesController_vitalesPorEnfermera[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105117,6 +109483,8 @@ export interface operations {
     "CitasReportesController_vitalesPorEnfermera[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105137,6 +109505,8 @@ export interface operations {
     "CitasReportesController_vitalesPorEnfermera[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105157,6 +109527,8 @@ export interface operations {
     "CitasReportesController_vitalesPorEnfermera[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105177,6 +109549,8 @@ export interface operations {
     "CitasReportesController_vitalesPorEnfermera[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105197,6 +109571,8 @@ export interface operations {
     "CitasReportesController_vitalesPorEnfermera[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -105217,6 +109593,8 @@ export interface operations {
     "CitasReportesController_vitalesPorEnfermera[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
             };
@@ -106041,6 +110419,8 @@ export interface operations {
     "CitasController_list[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
                 from?: string;
                 /** @description Rango: fecha fin (YYYY-MM-DD, inclusivo) */
@@ -106108,6 +110488,8 @@ export interface operations {
     "CitasController_list[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
                 from?: string;
                 /** @description Rango: fecha fin (YYYY-MM-DD, inclusivo) */
@@ -106175,6 +110557,8 @@ export interface operations {
     "CitasController_list[2]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
                 from?: string;
                 /** @description Rango: fecha fin (YYYY-MM-DD, inclusivo) */
@@ -106242,6 +110626,8 @@ export interface operations {
     "CitasController_list[3]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
                 from?: string;
                 /** @description Rango: fecha fin (YYYY-MM-DD, inclusivo) */
@@ -106309,11 +110695,11 @@ export interface operations {
     "CitasController_tablero[0]_v1": {
         parameters: {
             query: {
-                /** @description Día (YYYY-MM-DD) */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date: string;
-                /** @description Clave del tablero (default citas) */
                 boardSlug?: string;
-                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                /** @description 'true'/'1' = Patient-Attention board: only states visibleEnAtencion. */
                 onlyCare?: string;
             };
             header?: never;
@@ -106333,11 +110719,11 @@ export interface operations {
     "CitasController_tablero[1]_v1": {
         parameters: {
             query: {
-                /** @description Día (YYYY-MM-DD) */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date: string;
-                /** @description Clave del tablero (default citas) */
                 boardSlug?: string;
-                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                /** @description 'true'/'1' = Patient-Attention board: only states visibleEnAtencion. */
                 onlyCare?: string;
             };
             header?: never;
@@ -106357,11 +110743,11 @@ export interface operations {
     "CitasController_tablero[2]_v1": {
         parameters: {
             query: {
-                /** @description Día (YYYY-MM-DD) */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date: string;
-                /** @description Clave del tablero (default citas) */
                 boardSlug?: string;
-                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                /** @description 'true'/'1' = Patient-Attention board: only states visibleEnAtencion. */
                 onlyCare?: string;
             };
             header?: never;
@@ -106381,11 +110767,11 @@ export interface operations {
     "CitasController_tablero[3]_v1": {
         parameters: {
             query: {
-                /** @description Día (YYYY-MM-DD) */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date: string;
-                /** @description Clave del tablero (default citas) */
                 boardSlug?: string;
-                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                /** @description 'true'/'1' = Patient-Attention board: only states visibleEnAtencion. */
                 onlyCare?: string;
             };
             header?: never;
@@ -106405,11 +110791,11 @@ export interface operations {
     "CitasController_tablero[4]_v2": {
         parameters: {
             query: {
-                /** @description Día (YYYY-MM-DD) */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date: string;
-                /** @description Clave del tablero (default citas) */
                 boardSlug?: string;
-                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                /** @description 'true'/'1' = Patient-Attention board: only states visibleEnAtencion. */
                 onlyCare?: string;
             };
             header?: never;
@@ -106429,11 +110815,11 @@ export interface operations {
     "CitasController_tablero[5]_v2": {
         parameters: {
             query: {
-                /** @description Día (YYYY-MM-DD) */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date: string;
-                /** @description Clave del tablero (default citas) */
                 boardSlug?: string;
-                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                /** @description 'true'/'1' = Patient-Attention board: only states visibleEnAtencion. */
                 onlyCare?: string;
             };
             header?: never;
@@ -106453,11 +110839,11 @@ export interface operations {
     "CitasController_tablero[6]_v2": {
         parameters: {
             query: {
-                /** @description Día (YYYY-MM-DD) */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date: string;
-                /** @description Clave del tablero (default citas) */
                 boardSlug?: string;
-                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                /** @description 'true'/'1' = Patient-Attention board: only states visibleEnAtencion. */
                 onlyCare?: string;
             };
             header?: never;
@@ -106477,11 +110863,11 @@ export interface operations {
     "CitasController_tablero[7]_v2": {
         parameters: {
             query: {
-                /** @description Día (YYYY-MM-DD) */
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date: string;
-                /** @description Clave del tablero (default citas) */
                 boardSlug?: string;
-                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                /** @description 'true'/'1' = Patient-Attention board: only states visibleEnAtencion. */
                 onlyCare?: string;
             };
             header?: never;
@@ -107165,6 +111551,8 @@ export interface operations {
     "CitasController_countByDay[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
@@ -107190,6 +111578,8 @@ export interface operations {
     "CitasController_countByDay[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
@@ -107215,6 +111605,8 @@ export interface operations {
     "CitasController_countByDay[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
@@ -107240,6 +111632,8 @@ export interface operations {
     "CitasController_countByDay[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
@@ -107265,6 +111659,8 @@ export interface operations {
     "CitasController_countByDay[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
@@ -107290,6 +111686,8 @@ export interface operations {
     "CitasController_countByDay[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
@@ -107315,6 +111713,8 @@ export interface operations {
     "CitasController_countByDay[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
@@ -107340,6 +111740,8 @@ export interface operations {
     "CitasController_countByDay[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
+                centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
@@ -107516,7 +111918,10 @@ export interface operations {
     };
     "CitasController_get[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -107530,7 +111935,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CitaEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -107562,7 +111967,10 @@ export interface operations {
     };
     "CitasController_get[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -107576,7 +111984,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CitaEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -107608,7 +112016,10 @@ export interface operations {
     };
     "CitasController_get[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -107622,7 +112033,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CitaEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -107654,7 +112065,10 @@ export interface operations {
     };
     "CitasController_get[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -107668,7 +112082,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CitaEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -109925,6 +114339,8 @@ export interface operations {
     "HorariosController_list[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 staffId?: string;
                 /**
                  * @deprecated
@@ -109974,6 +114390,8 @@ export interface operations {
     "HorariosController_list[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 staffId?: string;
                 /**
                  * @deprecated
@@ -110023,6 +114441,8 @@ export interface operations {
     "HorariosController_list[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 staffId?: string;
                 /**
                  * @deprecated
@@ -110072,6 +114492,8 @@ export interface operations {
     "HorariosController_list[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 staffId?: string;
                 /**
                  * @deprecated
@@ -110389,6 +114811,8 @@ export interface operations {
     "FestivosController_list[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Año (resuelve recurrentes) */
                 anio?: number;
                 /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
@@ -110405,7 +114829,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FestivoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -110436,6 +114860,8 @@ export interface operations {
     "FestivosController_list[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Año (resuelve recurrentes) */
                 anio?: number;
                 /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
@@ -110452,7 +114878,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FestivoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -110483,6 +114909,8 @@ export interface operations {
     "FestivosController_list[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Año (resuelve recurrentes) */
                 anio?: number;
                 /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
@@ -110499,7 +114927,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FestivoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -110530,6 +114958,8 @@ export interface operations {
     "FestivosController_list[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Año (resuelve recurrentes) */
                 anio?: number;
                 /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
@@ -110546,7 +114976,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FestivoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -110753,6 +115183,8 @@ export interface operations {
     "DoctorAbsencesController_list[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 staffId?: string;
                 /**
                  * @deprecated
@@ -110762,8 +115194,6 @@ export interface operations {
                 /** @description Overlapping this range (YYYY-MM-DD) */
                 from?: string;
                 to?: string;
-                /** @description Centers to resolve the permission against, instead of only the active one. */
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -110807,6 +115237,8 @@ export interface operations {
     "DoctorAbsencesController_list[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 staffId?: string;
                 /**
                  * @deprecated
@@ -110816,8 +115248,6 @@ export interface operations {
                 /** @description Overlapping this range (YYYY-MM-DD) */
                 from?: string;
                 to?: string;
-                /** @description Centers to resolve the permission against, instead of only the active one. */
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -110861,6 +115291,8 @@ export interface operations {
     "DoctorAbsencesController_list[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 staffId?: string;
                 /**
                  * @deprecated
@@ -110870,8 +115302,6 @@ export interface operations {
                 /** @description Overlapping this range (YYYY-MM-DD) */
                 from?: string;
                 to?: string;
-                /** @description Centers to resolve the permission against, instead of only the active one. */
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -110915,6 +115345,8 @@ export interface operations {
     "DoctorAbsencesController_list[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 staffId?: string;
                 /**
                  * @deprecated
@@ -110924,8 +115356,6 @@ export interface operations {
                 /** @description Overlapping this range (YYYY-MM-DD) */
                 from?: string;
                 to?: string;
-                /** @description Centers to resolve the permission against, instead of only the active one. */
-                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -111385,6 +115815,8 @@ export interface operations {
     "CaptacionController_porAgente[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -111411,6 +115843,8 @@ export interface operations {
     "CaptacionController_porAgente[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -111437,6 +115871,8 @@ export interface operations {
     "CaptacionController_porAgente[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -111463,6 +115899,8 @@ export interface operations {
     "CaptacionController_porAgente[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -111489,6 +115927,8 @@ export interface operations {
     "CaptacionController_porAgente[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -111515,6 +115955,8 @@ export interface operations {
     "CaptacionController_porAgente[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -111541,6 +115983,8 @@ export interface operations {
     "CaptacionController_porAgente[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -111567,6 +116011,8 @@ export interface operations {
     "CaptacionController_porAgente[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
                 from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
@@ -111593,9 +116039,11 @@ export interface operations {
     "CalendarioController_eventos[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
-                /** @description Solo los de este centro (además de los globales). Sin él, el centro activo. */
+                /** @description Legacy: the same as `centerIds=[centroId]` (plus the company-wide ones). */
                 centerId?: string;
             };
             header?: never;
@@ -111640,9 +116088,11 @@ export interface operations {
     "CalendarioController_eventos[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
-                /** @description Solo los de este centro (además de los globales). Sin él, el centro activo. */
+                /** @description Legacy: the same as `centerIds=[centroId]` (plus the company-wide ones). */
                 centerId?: string;
             };
             header?: never;
@@ -111687,9 +116137,11 @@ export interface operations {
     "CalendarioController_eventos[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
-                /** @description Solo los de este centro (además de los globales). Sin él, el centro activo. */
+                /** @description Legacy: the same as `centerIds=[centroId]` (plus the company-wide ones). */
                 centerId?: string;
             };
             header?: never;
@@ -111734,9 +116186,11 @@ export interface operations {
     "CalendarioController_eventos[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
-                /** @description Solo los de este centro (además de los globales). Sin él, el centro activo. */
+                /** @description Legacy: the same as `centerIds=[centroId]` (plus the company-wide ones). */
                 centerId?: string;
             };
             header?: never;
@@ -111781,9 +116235,11 @@ export interface operations {
     "CalendarioController_eventos[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
-                /** @description Solo los de este centro (además de los globales). Sin él, el centro activo. */
+                /** @description Legacy: the same as `centerIds=[centroId]` (plus the company-wide ones). */
                 centerId?: string;
             };
             header?: never;
@@ -111828,9 +116284,11 @@ export interface operations {
     "CalendarioController_eventos[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
-                /** @description Solo los de este centro (además de los globales). Sin él, el centro activo. */
+                /** @description Legacy: the same as `centerIds=[centroId]` (plus the company-wide ones). */
                 centerId?: string;
             };
             header?: never;
@@ -111875,9 +116333,11 @@ export interface operations {
     "CalendarioController_eventos[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
-                /** @description Solo los de este centro (además de los globales). Sin él, el centro activo. */
+                /** @description Legacy: the same as `centerIds=[centroId]` (plus the company-wide ones). */
                 centerId?: string;
             };
             header?: never;
@@ -111922,9 +116382,11 @@ export interface operations {
     "CalendarioController_eventos[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 from: string;
                 to: string;
-                /** @description Solo los de este centro (además de los globales). Sin él, el centro activo. */
+                /** @description Legacy: the same as `centerIds=[centroId]` (plus the company-wide ones). */
                 centerId?: string;
             };
             header?: never;
@@ -113220,7 +117682,10 @@ export interface operations {
     };
     "CallcenterController_enVivo[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -113239,7 +117704,10 @@ export interface operations {
     };
     "CallcenterController_enVivo[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -113258,7 +117726,10 @@ export interface operations {
     };
     "CallcenterController_enVivo[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -113277,7 +117748,10 @@ export interface operations {
     };
     "CallcenterController_enVivo[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -113297,8 +117771,13 @@ export interface operations {
     "CallcenterController_llamadas[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
                 from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Extensión. / Extension. */
                 extension?: string;
             };
             header?: never;
@@ -113320,8 +117799,13 @@ export interface operations {
     "CallcenterController_llamadas[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
                 from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Extensión. / Extension. */
                 extension?: string;
             };
             header?: never;
@@ -113343,8 +117827,13 @@ export interface operations {
     "CallcenterController_llamadas[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
                 from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Extensión. / Extension. */
                 extension?: string;
             };
             header?: never;
@@ -113366,8 +117855,13 @@ export interface operations {
     "CallcenterController_llamadas[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
                 from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Extensión. / Extension. */
                 extension?: string;
             };
             header?: never;
@@ -114223,7 +118717,9 @@ export interface operations {
     };
     "OrdenesCompraController_list[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -114235,7 +118731,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrdenCompraEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -114265,7 +118761,9 @@ export interface operations {
     };
     "OrdenesCompraController_list[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -114277,7 +118775,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrdenCompraEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -114307,7 +118805,9 @@ export interface operations {
     };
     "OrdenesCompraController_list[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -114319,7 +118819,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrdenCompraEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -114349,7 +118849,9 @@ export interface operations {
     };
     "OrdenesCompraController_list[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                centerIds?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -114361,7 +118863,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrdenCompraEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -115993,6 +120495,214 @@ export interface operations {
             };
         };
     };
+    "DisponibilidadLegadoController_diagnosticoDesdeVisitas[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Número de récord del paciente, en el centro activo. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiagnosisFromVisitsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_diagnosticoDesdeVisitas[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Número de récord del paciente, en el centro activo. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiagnosisFromVisitsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_diagnosticoDesdeVisitas[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Número de récord del paciente, en el centro activo. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiagnosisFromVisitsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_diagnosticoDesdeVisitas[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Número de récord del paciente, en el centro activo. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiagnosisFromVisitsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_diagnosticoDesdeVisitas[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Número de récord del paciente, en el centro activo. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiagnosisFromVisitsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_diagnosticoDesdeVisitas[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Número de récord del paciente, en el centro activo. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiagnosisFromVisitsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_diagnosticoDesdeVisitas[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Número de récord del paciente, en el centro activo. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiagnosisFromVisitsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_diagnosticoDesdeVisitas[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Número de récord del paciente, en el centro activo. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiagnosisFromVisitsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     "DisponibilidadLegadoController_aplicar[0]_v1": {
         parameters: {
             query?: never;
@@ -116459,7 +121169,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forPatient[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -116478,7 +121191,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forPatient[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -116497,7 +121213,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forPatient[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -116516,7 +121235,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forPatient[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -116535,7 +121257,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forPatient[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -116554,7 +121279,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forPatient[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -116573,7 +121301,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forPatient[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -116592,7 +121323,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forPatient[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 patientId: string;
@@ -116611,7 +121345,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forSession[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -116624,9 +121361,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -116657,7 +121392,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forSession[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -116670,9 +121408,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -116703,7 +121439,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forSession[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -116716,9 +121455,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -116749,7 +121486,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forSession[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -116762,9 +121502,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -116795,7 +121533,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forSession[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -116808,9 +121549,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -116841,7 +121580,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forSession[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -116854,9 +121596,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -116887,7 +121627,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forSession[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -116900,9 +121643,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -116933,7 +121674,10 @@ export interface operations {
     };
     "BodyMeasurementsController_forSession[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -116946,9 +121690,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -117644,6 +122386,8 @@ export interface operations {
     "InventoryScaleController_history[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
                 supplierPresentationId: string;
             };
@@ -117689,6 +122433,8 @@ export interface operations {
     "InventoryScaleController_history[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
                 supplierPresentationId: string;
             };
@@ -117734,6 +122480,8 @@ export interface operations {
     "InventoryScaleController_history[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
                 supplierPresentationId: string;
             };
@@ -117779,6 +122527,8 @@ export interface operations {
     "InventoryScaleController_history[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
                 supplierPresentationId: string;
             };
@@ -117824,6 +122574,8 @@ export interface operations {
     "InventoryScaleController_history[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
                 supplierPresentationId: string;
             };
@@ -117869,6 +122621,8 @@ export interface operations {
     "InventoryScaleController_history[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
                 supplierPresentationId: string;
             };
@@ -117914,6 +122668,8 @@ export interface operations {
     "InventoryScaleController_history[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
                 supplierPresentationId: string;
             };
@@ -117959,6 +122715,8 @@ export interface operations {
     "InventoryScaleController_history[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
                 supplierPresentationId: string;
             };
@@ -118961,6 +123719,1170 @@ export interface operations {
             };
         };
     };
+    "PickTicketsController_list[0]_v1": {
+        parameters: {
+            query?: {
+                status?: "open" | "completed" | "cancelled" | "closed";
+                warehouseId?: string;
+                /** @description Centers to read (each needs pick_ticket.read); default: the readable ones. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PickTicketsController_create[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_list[1]_v1": {
+        parameters: {
+            query?: {
+                status?: "open" | "completed" | "cancelled" | "closed";
+                warehouseId?: string;
+                /** @description Centers to read (each needs pick_ticket.read); default: the readable ones. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PickTicketsController_create[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_list[2]_v2": {
+        parameters: {
+            query?: {
+                status?: "open" | "completed" | "cancelled" | "closed";
+                warehouseId?: string;
+                /** @description Centers to read (each needs pick_ticket.read); default: the readable ones. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PickTicketsController_create[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_list[3]_v2": {
+        parameters: {
+            query?: {
+                status?: "open" | "completed" | "cancelled" | "closed";
+                warehouseId?: string;
+                /** @description Centers to read (each needs pick_ticket.read); default: the readable ones. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PickTicketsController_create[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_monitor[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Warehouse the monitor shows. */
+                warehouseId: string;
+                /** @description Parts to return (default all): tickets, schedule, scales. Comma separated. */
+                include?: components["schemas"]["Object"][];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_monitor[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Warehouse the monitor shows. */
+                warehouseId: string;
+                /** @description Parts to return (default all): tickets, schedule, scales. Comma separated. */
+                include?: components["schemas"]["Object"][];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_monitor[2]_v2": {
+        parameters: {
+            query: {
+                /** @description Warehouse the monitor shows. */
+                warehouseId: string;
+                /** @description Parts to return (default all): tickets, schedule, scales. Comma separated. */
+                include?: components["schemas"]["Object"][];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_monitor[3]_v2": {
+        parameters: {
+            query: {
+                /** @description Warehouse the monitor shows. */
+                warehouseId: string;
+                /** @description Parts to return (default all): tickets, schedule, scales. Comma separated. */
+                include?: components["schemas"]["Object"][];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_schedule[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Center (default: the only one the caller reads). */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_setSchedule[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonitorScheduleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_schedule[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Center (default: the only one the caller reads). */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_setSchedule[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonitorScheduleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_schedule[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Center (default: the only one the caller reads). */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_setSchedule[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonitorScheduleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_schedule[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Center (default: the only one the caller reads). */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_setSchedule[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonitorScheduleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_schedule[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Center (default: the only one the caller reads). */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_setSchedule[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonitorScheduleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_schedule[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Center (default: the only one the caller reads). */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_setSchedule[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonitorScheduleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_schedule[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Center (default: the only one the caller reads). */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_setSchedule[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonitorScheduleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_schedule[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Center (default: the only one the caller reads). */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_setSchedule[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonitorScheduleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PickTicketsController_stream[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_stream[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_stream[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_stream[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_get[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_get[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_get[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_get[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_cancel[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_cancel[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_cancel[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_cancel[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_cancel[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_cancel[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_cancel[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_cancel[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_close[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_close[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_close[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_close[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_close[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_close[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_close[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PickTicketsController_close[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndPickTicketDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     "ConfiguracionController_ver[0]_v1": {
         parameters: {
             query?: never;
@@ -119170,6 +125092,9 @@ export interface operations {
     ExportController_listJobs_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo este recurso. / Only this resource. */
                 resource?: string;
             };
             header?: never;
@@ -119191,6 +125116,9 @@ export interface operations {
     ExportController_listJobs_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Solo este recurso. / Only this resource. */
                 resource?: string;
             };
             header?: never;
@@ -119484,7 +125412,10 @@ export interface operations {
     "ServiciosController_list[0]_v1": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Incluir los inactivos ("true"). / Include inactive ones ("true"). */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -119528,7 +125459,10 @@ export interface operations {
     "ServiciosController_list[1]_v1": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Incluir los inactivos ("true"). / Include inactive ones ("true"). */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -119572,7 +125506,10 @@ export interface operations {
     "ServiciosController_list[2]_v2": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Incluir los inactivos ("true"). / Include inactive ones ("true"). */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -119616,7 +125553,10 @@ export interface operations {
     "ServiciosController_list[3]_v2": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Incluir los inactivos ("true"). / Include inactive ones ("true"). */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -120471,9 +126411,13 @@ export interface operations {
     };
     "FrontdeskController_repResumen[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120491,9 +126435,13 @@ export interface operations {
     };
     "FrontdeskController_repResumen[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120511,9 +126459,13 @@ export interface operations {
     };
     "FrontdeskController_repResumen[2]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120531,9 +126483,13 @@ export interface operations {
     };
     "FrontdeskController_repResumen[3]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120551,9 +126507,13 @@ export interface operations {
     };
     "FrontdeskController_repPorServicio[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120571,9 +126531,13 @@ export interface operations {
     };
     "FrontdeskController_repPorServicio[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120591,9 +126555,13 @@ export interface operations {
     };
     "FrontdeskController_repPorServicio[2]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120611,9 +126579,13 @@ export interface operations {
     };
     "FrontdeskController_repPorServicio[3]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120631,9 +126603,13 @@ export interface operations {
     };
     "FrontdeskController_repPorTecnico[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120651,9 +126627,13 @@ export interface operations {
     };
     "FrontdeskController_repPorTecnico[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120671,9 +126651,13 @@ export interface operations {
     };
     "FrontdeskController_repPorTecnico[2]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120691,9 +126675,13 @@ export interface operations {
     };
     "FrontdeskController_repPorTecnico[3]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120711,9 +126699,13 @@ export interface operations {
     };
     "FrontdeskController_repAvisos[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120731,9 +126723,13 @@ export interface operations {
     };
     "FrontdeskController_repAvisos[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120751,9 +126747,13 @@ export interface operations {
     };
     "FrontdeskController_repAvisos[2]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120771,9 +126771,13 @@ export interface operations {
     };
     "FrontdeskController_repAvisos[3]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120791,9 +126795,13 @@ export interface operations {
     };
     "FrontdeskController_repTiempos[0]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120811,9 +126819,13 @@ export interface operations {
     };
     "FrontdeskController_repTiempos[1]_v1": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120831,9 +126843,13 @@ export interface operations {
     };
     "FrontdeskController_repTiempos[2]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120851,9 +126867,13 @@ export interface operations {
     };
     "FrontdeskController_repTiempos[3]_v2": {
         parameters: {
-            query: {
-                from: string;
-                to: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -120872,6 +126892,9 @@ export interface operations {
     "FrontdeskController_nurseStatusActuales[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD; omitido = hoy. */
                 date?: string;
             };
             header?: never;
@@ -120916,6 +126939,9 @@ export interface operations {
     "FrontdeskController_nurseStatusActuales[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD; omitido = hoy. */
                 date?: string;
             };
             header?: never;
@@ -120960,6 +126986,9 @@ export interface operations {
     "FrontdeskController_nurseStatusActuales[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD; omitido = hoy. */
                 date?: string;
             };
             header?: never;
@@ -121004,6 +127033,9 @@ export interface operations {
     "FrontdeskController_nurseStatusActuales[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD; omitido = hoy. */
                 date?: string;
             };
             header?: never;
@@ -121283,7 +127315,10 @@ export interface operations {
     };
     "FrontdeskController_presentes[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -121302,7 +127337,10 @@ export interface operations {
     };
     "FrontdeskController_presentes[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -121321,7 +127359,10 @@ export interface operations {
     };
     "FrontdeskController_presentes[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -121340,7 +127381,10 @@ export interface operations {
     };
     "FrontdeskController_presentes[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -121364,7 +127408,7 @@ export interface operations {
                 date?: string;
                 /** @description Solo esta terapia (id del servicio). */
                 serviceId?: string;
-                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. */
+                /** @description Centros a los que acotar la cola, separados por coma; omitido = todos donde se tiene frontdesk.read. */
                 centerIds?: string[];
             };
             header?: never;
@@ -121377,9 +127421,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -121390,7 +127432,7 @@ export interface operations {
                 date?: string;
                 /** @description Solo esta terapia (id del servicio). */
                 serviceId?: string;
-                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. */
+                /** @description Centros a los que acotar la cola, separados por coma; omitido = todos donde se tiene frontdesk.read. */
                 centerIds?: string[];
             };
             header?: never;
@@ -121403,9 +127445,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -121416,7 +127456,7 @@ export interface operations {
                 date?: string;
                 /** @description Solo esta terapia (id del servicio). */
                 serviceId?: string;
-                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. */
+                /** @description Centros a los que acotar la cola, separados por coma; omitido = todos donde se tiene frontdesk.read. */
                 centerIds?: string[];
             };
             header?: never;
@@ -121429,9 +127469,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
@@ -121442,7 +127480,7 @@ export interface operations {
                 date?: string;
                 /** @description Solo esta terapia (id del servicio). */
                 serviceId?: string;
-                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. */
+                /** @description Centros a los que acotar la cola, separados por coma; omitido = todos donde se tiene frontdesk.read. */
                 centerIds?: string[];
             };
             header?: never;
@@ -121455,17 +127493,19 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
     FrontdeskController_agendaDia_v1: {
         parameters: {
-            query: {
-                service: string;
-                date: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Clave del servicio. */
+                service?: string;
+                /** @description Día (YYYY-MM-DD), obligatorio. */
+                date?: string;
             };
             header?: never;
             path?: never;
@@ -121483,9 +127523,13 @@ export interface operations {
     };
     FrontdeskController_agendaDia_v2: {
         parameters: {
-            query: {
-                service: string;
-                date: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Clave del servicio. */
+                service?: string;
+                /** @description Día (YYYY-MM-DD), obligatorio. */
+                date?: string;
             };
             header?: never;
             path?: never;
@@ -121503,10 +127547,16 @@ export interface operations {
     };
     "FrontdeskController_tablero[0]_v1": {
         parameters: {
-            query: {
-                service: string;
-                date: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Clave del servicio (pestaña). */
+                service?: string;
+                /** @description Día del tablero (YYYY-MM-DD). */
+                date?: string;
+                /** @description Rango (vista gerente): si llega, manda sobre `fecha`. */
                 from?: string;
+                /** @description Fin del rango (vista gerente). */
                 to?: string;
             };
             header?: never;
@@ -121525,10 +127575,16 @@ export interface operations {
     };
     "FrontdeskController_tablero[1]_v1": {
         parameters: {
-            query: {
-                service: string;
-                date: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Clave del servicio (pestaña). */
+                service?: string;
+                /** @description Día del tablero (YYYY-MM-DD). */
+                date?: string;
+                /** @description Rango (vista gerente): si llega, manda sobre `fecha`. */
                 from?: string;
+                /** @description Fin del rango (vista gerente). */
                 to?: string;
             };
             header?: never;
@@ -121547,10 +127603,16 @@ export interface operations {
     };
     "FrontdeskController_tablero[2]_v2": {
         parameters: {
-            query: {
-                service: string;
-                date: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Clave del servicio (pestaña). */
+                service?: string;
+                /** @description Día del tablero (YYYY-MM-DD). */
+                date?: string;
+                /** @description Rango (vista gerente): si llega, manda sobre `fecha`. */
                 from?: string;
+                /** @description Fin del rango (vista gerente). */
                 to?: string;
             };
             header?: never;
@@ -121569,10 +127631,16 @@ export interface operations {
     };
     "FrontdeskController_tablero[3]_v2": {
         parameters: {
-            query: {
-                service: string;
-                date: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Clave del servicio (pestaña). */
+                service?: string;
+                /** @description Día del tablero (YYYY-MM-DD). */
+                date?: string;
+                /** @description Rango (vista gerente): si llega, manda sobre `fecha`. */
                 from?: string;
+                /** @description Fin del rango (vista gerente). */
                 to?: string;
             };
             header?: never;
@@ -121902,6 +127970,8 @@ export interface operations {
     "FrontdeskController_listarSesiones[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Filtra las sesiones de un paciente (historial). */
                 patientId?: string;
                 /** @description Estado(s) de la sesión. Admite uno suelto o varios (repetido o separado por comas). */
@@ -121928,7 +127998,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -121957,6 +128027,8 @@ export interface operations {
     "FrontdeskController_listarSesiones[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Filtra las sesiones de un paciente (historial). */
                 patientId?: string;
                 /** @description Estado(s) de la sesión. Admite uno suelto o varios (repetido o separado por comas). */
@@ -121983,7 +128055,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -122012,6 +128084,8 @@ export interface operations {
     "FrontdeskController_listarSesiones[2]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Filtra las sesiones de un paciente (historial). */
                 patientId?: string;
                 /** @description Estado(s) de la sesión. Admite uno suelto o varios (repetido o separado por comas). */
@@ -122038,7 +128112,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -122067,6 +128141,8 @@ export interface operations {
     "FrontdeskController_listarSesiones[3]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Filtra las sesiones de un paciente (historial). */
                 patientId?: string;
                 /** @description Estado(s) de la sesión. Admite uno suelto o varios (repetido o separado por comas). */
@@ -122093,7 +128169,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -122297,7 +128373,10 @@ export interface operations {
     };
     "FrontdeskController_get[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -122311,7 +128390,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -122337,7 +128416,10 @@ export interface operations {
     };
     "FrontdeskController_get[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -122351,7 +128433,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -122377,7 +128459,10 @@ export interface operations {
     };
     "FrontdeskController_get[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -122391,7 +128476,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -122417,7 +128502,10 @@ export interface operations {
     };
     "FrontdeskController_get[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -122431,7 +128519,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -122458,6 +128546,8 @@ export interface operations {
     "FrontdeskController_agendaPaciente[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Rango desde (YYYY-MM-DD); si falta, sin límite inferior. */
                 from?: string;
                 /** @description Rango hasta (YYYY-MM-DD); requiere `desde` para acotar. */
@@ -122475,13 +128565,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "FrontdeskController_agendaPaciente[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Rango desde (YYYY-MM-DD); si falta, sin límite inferior. */
                 from?: string;
                 /** @description Rango hasta (YYYY-MM-DD); requiere `desde` para acotar. */
@@ -122499,13 +128593,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "FrontdeskController_agendaPaciente[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Rango desde (YYYY-MM-DD); si falta, sin límite inferior. */
                 from?: string;
                 /** @description Rango hasta (YYYY-MM-DD); requiere `desde` para acotar. */
@@ -122523,13 +128621,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "FrontdeskController_agendaPaciente[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Rango desde (YYYY-MM-DD); si falta, sin límite inferior. */
                 from?: string;
                 /** @description Rango hasta (YYYY-MM-DD); requiere `desde` para acotar. */
@@ -122547,13 +128649,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "FrontdeskController_historialPaciente[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Acota el historial a un servicio (recomendado para el modal). */
                 serviceId?: string;
             };
@@ -122569,13 +128675,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "FrontdeskController_historialPaciente[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Acota el historial a un servicio (recomendado para el modal). */
                 serviceId?: string;
             };
@@ -122591,13 +128701,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "FrontdeskController_historialPaciente[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Acota el historial a un servicio (recomendado para el modal). */
                 serviceId?: string;
             };
@@ -122613,13 +128727,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
     "FrontdeskController_historialPaciente[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description Acota el historial a un servicio (recomendado para el modal). */
                 serviceId?: string;
             };
@@ -122635,7 +128753,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
@@ -123774,6 +129894,8 @@ export interface operations {
     "FrontdeskInstantaneaController_instantanea[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description CLAVE del servicio del tablero (p. ej. `apex`), igual que en GET /frontdesk/board. NO es su uuid. */
                 service?: string;
                 /** @description ID del servicio, solo para filtrar la pieza `sessions`. Es otro dato distinto de `servicio`. */
@@ -123806,6 +129928,8 @@ export interface operations {
     "FrontdeskInstantaneaController_instantanea[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description CLAVE del servicio del tablero (p. ej. `apex`), igual que en GET /frontdesk/board. NO es su uuid. */
                 service?: string;
                 /** @description ID del servicio, solo para filtrar la pieza `sessions`. Es otro dato distinto de `servicio`. */
@@ -123838,6 +129962,8 @@ export interface operations {
     "FrontdeskInstantaneaController_instantanea[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description CLAVE del servicio del tablero (p. ej. `apex`), igual que en GET /frontdesk/board. NO es su uuid. */
                 service?: string;
                 /** @description ID del servicio, solo para filtrar la pieza `sessions`. Es otro dato distinto de `servicio`. */
@@ -123870,6 +129996,8 @@ export interface operations {
     "FrontdeskInstantaneaController_instantanea[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 /** @description CLAVE del servicio del tablero (p. ej. `apex`), igual que en GET /frontdesk/board. NO es su uuid. */
                 service?: string;
                 /** @description ID del servicio, solo para filtrar la pieza `sessions`. Es otro dato distinto de `servicio`. */
@@ -123901,7 +130029,10 @@ export interface operations {
     };
     "FrontdeskPestanasController_pestanas[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -123920,7 +130051,10 @@ export interface operations {
     };
     "FrontdeskPestanasController_pestanas[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -123939,7 +130073,10 @@ export interface operations {
     };
     "FrontdeskPestanasController_pestanas[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -123958,7 +130095,10 @@ export interface operations {
     };
     "FrontdeskPestanasController_pestanas[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -123972,6 +130112,318 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>[];
                 };
+            };
+        };
+    };
+    "SessionReopenController_reopen[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenSessionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+            /** @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_reopen[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenSessionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+            /** @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_reopen[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenSessionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+            /** @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_reopen[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenSessionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+            /** @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_cancelDay[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelPatientDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_cancelDay[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelPatientDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_cancelDay[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelPatientDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_cancelDay[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelPatientDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_reopenDay[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenPatientDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_reopenDay[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenPatientDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_reopenDay[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenPatientDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionReopenController_reopenDay[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenPatientDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -126082,7 +132534,10 @@ export interface operations {
     "PanelesController_list[0]_v1": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = también los inactivos. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -126095,7 +132550,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PanelEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -126126,7 +132581,10 @@ export interface operations {
     "PanelesController_list[1]_v1": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = también los inactivos. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -126139,7 +132597,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PanelEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -126170,7 +132628,10 @@ export interface operations {
     "PanelesController_list[2]_v2": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = también los inactivos. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -126183,7 +132644,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PanelEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -126214,7 +132675,10 @@ export interface operations {
     "PanelesController_list[3]_v2": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = también los inactivos. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path?: never;
@@ -126227,7 +132691,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PanelEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -126433,7 +132897,10 @@ export interface operations {
     };
     "PanelesController_definicion[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -126454,7 +132921,10 @@ export interface operations {
     };
     "PanelesController_definicion[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -126475,7 +132945,10 @@ export interface operations {
     };
     "PanelesController_definicion[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -126496,7 +132969,10 @@ export interface operations {
     };
     "PanelesController_definicion[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -126517,7 +132993,10 @@ export interface operations {
     };
     "PanelesController_definicion[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -126538,7 +133017,10 @@ export interface operations {
     };
     "PanelesController_definicion[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -126559,7 +133041,10 @@ export interface operations {
     };
     "PanelesController_definicion[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -126580,7 +133065,10 @@ export interface operations {
     };
     "PanelesController_definicion[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -127738,6 +134226,9 @@ export interface operations {
     "PanelesController_notificaciones[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Estado de los avisos (default pendiente). */
                 status?: string;
             };
             header?: never;
@@ -127761,6 +134252,9 @@ export interface operations {
     "PanelesController_notificaciones[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Estado de los avisos (default pendiente). */
                 status?: string;
             };
             header?: never;
@@ -127784,6 +134278,9 @@ export interface operations {
     "PanelesController_notificaciones[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Estado de los avisos (default pendiente). */
                 status?: string;
             };
             header?: never;
@@ -127807,6 +134304,9 @@ export interface operations {
     "PanelesController_notificaciones[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Estado de los avisos (default pendiente). */
                 status?: string;
             };
             header?: never;
@@ -127830,6 +134330,9 @@ export interface operations {
     "PanelesController_notificaciones[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Estado de los avisos (default pendiente). */
                 status?: string;
             };
             header?: never;
@@ -127853,6 +134356,9 @@ export interface operations {
     "PanelesController_notificaciones[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Estado de los avisos (default pendiente). */
                 status?: string;
             };
             header?: never;
@@ -127876,6 +134382,9 @@ export interface operations {
     "PanelesController_notificaciones[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Estado de los avisos (default pendiente). */
                 status?: string;
             };
             header?: never;
@@ -127899,6 +134408,9 @@ export interface operations {
     "PanelesController_notificaciones[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Estado de los avisos (default pendiente). */
                 status?: string;
             };
             header?: never;
@@ -128322,6 +134834,9 @@ export interface operations {
     "PanelesController_contadores[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
                 date?: string;
             };
             header?: never;
@@ -128345,6 +134860,9 @@ export interface operations {
     "PanelesController_contadores[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
                 date?: string;
             };
             header?: never;
@@ -128368,6 +134886,9 @@ export interface operations {
     "PanelesController_contadores[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
                 date?: string;
             };
             header?: never;
@@ -128391,6 +134912,9 @@ export interface operations {
     "PanelesController_contadores[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
                 date?: string;
             };
             header?: never;
@@ -128414,6 +134938,9 @@ export interface operations {
     "PanelesController_contadores[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
                 date?: string;
             };
             header?: never;
@@ -128437,6 +134964,9 @@ export interface operations {
     "PanelesController_contadores[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
                 date?: string;
             };
             header?: never;
@@ -128460,6 +134990,9 @@ export interface operations {
     "PanelesController_contadores[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
                 date?: string;
             };
             header?: never;
@@ -128483,6 +135016,9 @@ export interface operations {
     "PanelesController_contadores[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
                 date?: string;
             };
             header?: never;
@@ -128977,9 +135513,11 @@ export interface operations {
     };
     "CajaController_reporteDia[0]_v1": {
         parameters: {
-            query: {
-                date: string;
-                division?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
                 userId?: string;
             };
             header?: never;
@@ -128998,9 +135536,11 @@ export interface operations {
     };
     "CajaController_reporteDia[1]_v1": {
         parameters: {
-            query: {
-                date: string;
-                division?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
                 userId?: string;
             };
             header?: never;
@@ -129019,9 +135559,11 @@ export interface operations {
     };
     "CajaController_reporteDia[2]_v1": {
         parameters: {
-            query: {
-                date: string;
-                division?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
                 userId?: string;
             };
             header?: never;
@@ -129040,9 +135582,11 @@ export interface operations {
     };
     "CajaController_reporteDia[3]_v1": {
         parameters: {
-            query: {
-                date: string;
-                division?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
                 userId?: string;
             };
             header?: never;
@@ -129061,9 +135605,11 @@ export interface operations {
     };
     "CajaController_reporteDia[4]_v2": {
         parameters: {
-            query: {
-                date: string;
-                division?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
                 userId?: string;
             };
             header?: never;
@@ -129082,9 +135628,11 @@ export interface operations {
     };
     "CajaController_reporteDia[5]_v2": {
         parameters: {
-            query: {
-                date: string;
-                division?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
                 userId?: string;
             };
             header?: never;
@@ -129103,9 +135651,11 @@ export interface operations {
     };
     "CajaController_reporteDia[6]_v2": {
         parameters: {
-            query: {
-                date: string;
-                division?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
                 userId?: string;
             };
             header?: never;
@@ -129124,9 +135674,11 @@ export interface operations {
     };
     "CajaController_reporteDia[7]_v2": {
         parameters: {
-            query: {
-                date: string;
-                division?: string;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
                 userId?: string;
             };
             header?: never;
@@ -130106,10 +136658,12 @@ export interface operations {
     "CajaController_listarCuadres[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date?: string;
-                division?: string;
+                division?: "consulta" | "general";
                 userId?: string;
-                status?: string;
+                status?: "abierto" | "cerrado";
             };
             header?: never;
             path?: never;
@@ -130122,7 +136676,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CuadreCajaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -130153,10 +136707,12 @@ export interface operations {
     "CajaController_listarCuadres[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date?: string;
-                division?: string;
+                division?: "consulta" | "general";
                 userId?: string;
-                status?: string;
+                status?: "abierto" | "cerrado";
             };
             header?: never;
             path?: never;
@@ -130169,7 +136725,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CuadreCajaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -130200,10 +136756,12 @@ export interface operations {
     "CajaController_listarCuadres[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date?: string;
-                division?: string;
+                division?: "consulta" | "general";
                 userId?: string;
-                status?: string;
+                status?: "abierto" | "cerrado";
             };
             header?: never;
             path?: never;
@@ -130216,7 +136774,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CuadreCajaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -130247,10 +136805,12 @@ export interface operations {
     "CajaController_listarCuadres[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date?: string;
-                division?: string;
+                division?: "consulta" | "general";
                 userId?: string;
-                status?: string;
+                status?: "abierto" | "cerrado";
             };
             header?: never;
             path?: never;
@@ -130263,7 +136823,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CuadreCajaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -130294,10 +136854,12 @@ export interface operations {
     "CajaController_listarCuadres[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date?: string;
-                division?: string;
+                division?: "consulta" | "general";
                 userId?: string;
-                status?: string;
+                status?: "abierto" | "cerrado";
             };
             header?: never;
             path?: never;
@@ -130310,7 +136872,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CuadreCajaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -130341,10 +136903,12 @@ export interface operations {
     "CajaController_listarCuadres[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date?: string;
-                division?: string;
+                division?: "consulta" | "general";
                 userId?: string;
-                status?: string;
+                status?: "abierto" | "cerrado";
             };
             header?: never;
             path?: never;
@@ -130357,7 +136921,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CuadreCajaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -130388,10 +136952,12 @@ export interface operations {
     "CajaController_listarCuadres[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date?: string;
-                division?: string;
+                division?: "consulta" | "general";
                 userId?: string;
-                status?: string;
+                status?: "abierto" | "cerrado";
             };
             header?: never;
             path?: never;
@@ -130404,7 +136970,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CuadreCajaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -130435,10 +137001,12 @@ export interface operations {
     "CajaController_listarCuadres[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 date?: string;
-                division?: string;
+                division?: "consulta" | "general";
                 userId?: string;
-                status?: string;
+                status?: "abierto" | "cerrado";
             };
             header?: never;
             path?: never;
@@ -130451,7 +137019,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CuadreCajaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -130482,6 +137050,8 @@ export interface operations {
     "CajaController_listarCajeros[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 q?: string;
                 active?: string;
                 date?: string;
@@ -130506,6 +137076,8 @@ export interface operations {
     "CajaController_listarCajeros[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 q?: string;
                 active?: string;
                 date?: string;
@@ -130530,6 +137102,8 @@ export interface operations {
     "CajaController_listarCajeros[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 q?: string;
                 active?: string;
                 date?: string;
@@ -130554,6 +137128,8 @@ export interface operations {
     "CajaController_listarCajeros[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 q?: string;
                 active?: string;
                 date?: string;
@@ -130578,6 +137154,8 @@ export interface operations {
     "CajaController_listarCajeros[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 q?: string;
                 active?: string;
                 date?: string;
@@ -130602,6 +137180,8 @@ export interface operations {
     "CajaController_listarCajeros[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 q?: string;
                 active?: string;
                 date?: string;
@@ -130626,6 +137206,8 @@ export interface operations {
     "CajaController_listarCajeros[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 q?: string;
                 active?: string;
                 date?: string;
@@ -130650,6 +137232,8 @@ export interface operations {
     "CajaController_listarCajeros[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
                 q?: string;
                 active?: string;
                 date?: string;
@@ -130673,7 +137257,10 @@ export interface operations {
     };
     "CajaController_getCuadre[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130686,13 +137273,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "CajaController_getCuadre[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130705,13 +137297,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "CajaController_getCuadre[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130724,13 +137321,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "CajaController_getCuadre[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130743,13 +137345,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "CajaController_getCuadre[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130762,13 +137369,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "CajaController_getCuadre[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130781,13 +137393,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "CajaController_getCuadre[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130800,13 +137417,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "CajaController_getCuadre[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130819,13 +137441,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
     "CajaController_enviarEmail[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130838,19 +137465,22 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CashEmailSentDto"];
                 };
             };
         };
     };
     "CajaController_enviarEmail[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130863,19 +137493,22 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CashEmailSentDto"];
                 };
             };
         };
     };
     "CajaController_enviarEmail[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130888,19 +137521,22 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CashEmailSentDto"];
                 };
             };
         };
     };
     "CajaController_enviarEmail[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130913,19 +137549,22 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CashEmailSentDto"];
                 };
             };
         };
     };
     "CajaController_enviarEmail[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130938,19 +137577,22 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CashEmailSentDto"];
                 };
             };
         };
     };
     "CajaController_enviarEmail[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130963,19 +137605,22 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CashEmailSentDto"];
                 };
             };
         };
     };
     "CajaController_enviarEmail[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -130988,19 +137633,22 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CashEmailSentDto"];
                 };
             };
         };
     };
     "CajaController_enviarEmail[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -131013,12 +137661,428 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmar[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmar[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmar[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmar[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmar[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmar[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmar[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmar[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_firmas[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_firmas[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_firmas[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_firmas[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_firmas[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_firmas[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_firmas[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_firmas[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"][];
                 };
             };
         };
@@ -131591,6 +138655,942 @@ export interface operations {
             };
         };
     };
+    "CajaController_emailTotal[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTotalReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_emailTotal[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTotalReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_emailTotal[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTotalReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_emailTotal[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTotalReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_emailTotal[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTotalReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_emailTotal[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTotalReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_emailTotal[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTotalReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_emailTotal[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailTotalReconciliationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashEmailSentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_reporteTotal[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center. */
+                date?: string;
+                /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_abrirTotal[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    "CajaController_reporteTotal[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center. */
+                date?: string;
+                /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_abrirTotal[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    "CajaController_reporteTotal[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center. */
+                date?: string;
+                /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_abrirTotal[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    "CajaController_reporteTotal[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center. */
+                date?: string;
+                /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_abrirTotal[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    "CajaController_reporteTotal[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center. */
+                date?: string;
+                /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_abrirTotal[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    "CajaController_reporteTotal[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center. */
+                date?: string;
+                /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_abrirTotal[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    "CajaController_reporteTotal[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center. */
+                date?: string;
+                /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_abrirTotal[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    "CajaController_reporteTotal[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center. */
+                date?: string;
+                /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_abrirTotal[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    "CajaController_contarTotal[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContarCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_contarTotal[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContarCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_contarTotal[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContarCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_contarTotal[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContarCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_contarTotal[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContarCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_contarTotal[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContarCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_contarTotal[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContarCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_contarTotal[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContarCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_cerrarTotal[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_cerrarTotal[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_cerrarTotal[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_cerrarTotal[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_cerrarTotal[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_cerrarTotal[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_cerrarTotal[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CajaController_cerrarTotal[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     "AhoraMismoController_stream[0]_v1": {
         parameters: {
             query?: never;
@@ -131681,12 +139681,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description One center, or (several centerIds) the same shape as /centers. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["RightNowSnapshotDto"];
                 };
             };
         };
@@ -131705,12 +139706,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description One center, or (several centerIds) the same shape as /centers. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["RightNowSnapshotDto"];
                 };
             };
         };
@@ -131729,12 +139731,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description One center, or (several centerIds) the same shape as /centers. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["RightNowSnapshotDto"];
                 };
             };
         };
@@ -131753,12 +139756,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description One center, or (several centerIds) the same shape as /centers. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["RightNowSnapshotDto"];
                 };
             };
         };
@@ -131781,7 +139785,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RightNowCentersDto"];
+                };
             };
         };
     };
@@ -131803,7 +139809,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RightNowCentersDto"];
+                };
             };
         };
     };
@@ -131825,7 +139833,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RightNowCentersDto"];
+                };
             };
         };
     };
@@ -131847,7 +139857,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RightNowCentersDto"];
+                };
             };
         };
     };
@@ -131869,7 +139881,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RightNowCentersDto"];
+                };
             };
         };
     };
@@ -131891,7 +139905,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RightNowCentersDto"];
+                };
             };
         };
     };
@@ -131913,7 +139929,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RightNowCentersDto"];
+                };
             };
         };
     };
@@ -131935,7 +139953,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RightNowCentersDto"];
+                };
             };
         };
     };

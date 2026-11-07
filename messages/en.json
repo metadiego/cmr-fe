@@ -2079,7 +2079,26 @@
     "patientNotFound": "That patient does not exist in this center.",
     "serviceNotFound": "One of the chosen services does not exist in this center.",
     "removeStep": "Remove {step}",
-    "formatoTherapyCount": "Therapies to print"
+    "formatoTherapyCount": "Therapies to print",
+    "reopen": "Reopen",
+    "reopenAll": "Reopen all",
+    "cancelAll": "Cancel all",
+    "cancelAllTitle": "Cancel all of the day's sessions",
+    "cancelAllHint": "This patient's pending, present and in-therapy sessions today are cancelled. Attended ones are left alone. One reason for all.",
+    "reopened": "Session reopened",
+    "reopenedMany": "{n, plural, one {# session reopened} other {# sessions reopened}}",
+    "cancelledMany": "{n, plural, one {# session cancelled} other {# sessions cancelled}}",
+    "reopenSkipped": "Reopened: {n}. Did not come back: {reasons}",
+    "error": {
+      "reopenOnlyToday": "A session can only be reopened the same day",
+      "reopenPackageClosed": "The package is no longer active: invoice voided, refunded or protocol changed",
+      "reopenNotCancelled": "The session is not cancelled",
+      "sessionSameDay": "There is already another session of this service today",
+      "sheetSlotTaken": "The sheet has no seat at that time"
+    },
+    "evento": {
+      "reopened": "Reopened"
+    }
   },
   "programarCitas": {
     "title": "Schedule sessions",

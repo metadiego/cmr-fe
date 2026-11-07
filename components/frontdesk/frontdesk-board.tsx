@@ -32,6 +32,7 @@ import { getDefinicion, getOpciones, getTableros, type TableroDefinicion, type O
 import { useRouter } from "next/navigation";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
+import { hideCancelledRow } from "@/lib/frontdesk/reopen";
 import { flowColumns, plainColumns, renderColumns, sortBoardRowsNatural } from "@/lib/frontdesk/board-columns";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
@@ -101,9 +102,8 @@ export function FrontdeskBoard() {
   const puedeRango = can("frontdesk.rango");
   const rango = puedeRango && hasta && hasta > fecha ? { desde: fecha, hasta } : undefined;
   const [estadoFiltro, setEstadoFiltro] = React.useState("");
-  // Ocultar canceladas: ENCENDIDO por defecto (la jornada se recarga y las anteriores quedan canceladas
-  // como borrado lógico; no son bug, pero estorban el día). Filtro de cliente sobre estado==='cancelada'.
-  // Se ignora cuando el usuario filtra explícitamente por el KPI "Cancelada" (quiere verlas para reactivar).
+  // Hide cancelled: ON by default, except TODAY's, which stay visible so they can be reopened (BE #508,
+  // lib/frontdesk/reopen.ts). Ignored when the user filters by the «Cancelada» KPI.
   const [ocultarCanceladas, setOcultarCanceladas] = React.useState(true);
   const [q, setQ] = React.useState("");
   // Cockpit de agendar: disparado por Citar (sin paciente) o por postAccion de una columna (con paciente).
@@ -405,7 +405,7 @@ export function FrontdeskBoard() {
     });
     const conVisibilidad =
       ocultarCanceladas && estadoFiltro !== "cancelada"
-        ? conBusqueda.filter((f) => estadoFila(f) !== "cancelada")
+        ? conBusqueda.filter((f) => !hideCancelledRow(estadoFila(f), sesiones.get(f.id)?.date, todayISO()))
         : conBusqueda;
     return estadoFiltro
       ? conVisibilidad.filter((f) => estadoFila(f) === estadoFiltro)
@@ -450,9 +450,9 @@ export function FrontdeskBoard() {
     }
     // "Todos" refleja lo VISIBLE: si se ocultan canceladas, no las cuenta (evita "Todos: 25" con 22 filas).
     // Los `counts` quedan completos para que la ficha "Cancelada" siga mostrando su número y poder revelarlas.
-    const ocultas = ocultarCanceladas && estadoFiltro !== "cancelada" ? (counts.get("cancelada") ?? 0) : 0;
+    const ocultas = ocultarCanceladas && estadoFiltro !== "cancelada" ? filas.filter((f) => hideCancelledRow(estadoFila(f), sesiones.get(f.id)?.date, todayISO())).length : 0;
     return { counts, total: filas.length - ocultas };
-  }, [board, estadoFila, ocultarCanceladas, estadoFiltro]);
+  }, [board, estadoFila, ocultarCanceladas, estadoFiltro, sesiones]);
 
   // Until the tabs (services + Consulta) and the board resolve, KPIs/rows would read "0"/empty: skeleton instead.
   const cargando = [servRes, tabsRes, boardRes, defRes].some((r) => r.state.kind === "loading");

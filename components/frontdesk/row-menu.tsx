@@ -6,11 +6,19 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
+import { cancelarSesion } from "@/lib/api/frontdesk";
+import { cancelPatientDay, reopenPatientDay, reopenSession } from "@/lib/api/frontdesk-day";
+import { ApiError } from "@/lib/api/types";
+import { toastError } from "@/lib/api/errors";
+import { todayISO } from "@/lib/agenda/calendar";
+import { canReopen, duplicatesReopen, REOPEN_ERROR_KEYS, skippedReasons } from "@/lib/frontdesk/reopen";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -43,7 +51,8 @@ export function RowMenu({
   accionesMenu,
   onAccion,
   onProgramar,
-  onCancelar,
+  day,
+  onDone,
   onReparar,
 }: {
   disabled: boolean;
@@ -56,24 +65,76 @@ export function RowMenu({
   onReport?: (id: string) => void;
   // Acciones data-driven aplicables desde el estado actual (p. ej. reactivar una cancelada). El BE es la
   // autoridad (transiciones + permiso); el FE solo las pinta y confirma si la transición lo pide.
-  accionesMenu?: { clave: string; label: string; confirmar?: boolean }[];
+  accionesMenu?: { clave: string; label: string; confirmar?: boolean; from?: string[] | null }[];
   onAccion?: (clave: string) => void;
   onProgramar?: () => void; // abrir "Programar citas" desde la fila (agendar la próxima aunque ya esté asistido)
-  onCancelar: (motivo: string) => void;
+  // The row's session and its patient's day: Cancelar, Cancelar todas, Reabrir, Reabrir todas (BE #508).
+  day: { sessionId: string; status: string; patientId?: string | null; date?: string | null; centerId?: string };
+  onDone: () => void;
   onReparar: (payload: { reason: string; status?: string }) => void;
 }) {
   const t = useTranslations("frontdesk");
   const tc = useTranslations("common");
-  const [cancelOpen, setCancelOpen] = React.useState(false);
+  const tRoot = useTranslations();
+  // Which cancel the dialog confirms: this session, or every open session of the patient's day.
+  const [cancelOpen, setCancelOpen] = React.useState<false | "one" | "all">(false);
   const [repararOpen, setRepararOpen] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
   const [estadoNuevo, setEstadoNuevo] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  // Reopen is offered only on a cancelled session of TODAY; the BE re-checks it (409 otherwise).
+  const reopenable = canReopen(day.status, day.date, todayISO());
+  const patientId = day.patientId ?? null;
+  const acciones = reopenable ? (accionesMenu ?? []).filter((a) => !duplicatesReopen(a.from)) : (accionesMenu ?? []);
+
+  const say = (code: string) => {
+    const key = REOPEN_ERROR_KEYS[code];
+    return key && tRoot.has(key) ? tRoot(key) : code;
+  };
+  async function act(fn: () => Promise<string | null>) {
+    setBusy(true);
+    try {
+      const msg = await fn();
+      if (msg) toast.success(msg);
+      onDone();
+    } catch (err) {
+      if (err instanceof ApiError && REOPEN_ERROR_KEYS[err.code]) toast.error(say(err.code));
+      else toastError(err, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const cancel = (mode: "one" | "all", reason: string) =>
+    act(async () => {
+      if (mode === "one") {
+        await cancelarSesion(day.sessionId, reason, day.centerId);
+        return null;
+      }
+      const r = await cancelPatientDay(patientId!, reason, day.centerId);
+      return t("cancelledMany", { n: r.count });
+    });
+  const reopenOne = () =>
+    act(async () => {
+      await reopenSession(day.sessionId, undefined, day.centerId);
+      return t("reopened");
+    });
+  const reopenAll = () =>
+    act(async () => {
+      const r = await reopenPatientDay(patientId!, day.centerId);
+      const skipped = skippedReasons(r.skipped);
+      if (skipped.length) {
+        toast.warning(t("reopenSkipped", { n: r.reopened.length, reasons: skipped.map((x) => `${say(x.code)} (${x.n})`).join(" · ") }));
+        return null;
+      }
+      return t("reopenedMany", { n: r.reopened.length });
+    });
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8" disabled={disabled} aria-label={t("acciones")}>
+          <Button variant="ghost" size="icon" className="size-8" disabled={disabled || busy} aria-label={t("acciones")}>
             <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -87,7 +148,17 @@ export function RowMenu({
           ))}
           {/* Acciones data-driven desde el estado actual (p. ej. Reactivar una cancelada → segunda
               oportunidad). Confirmación con toast cuando la transición del BE la exige. */}
-          {(accionesMenu ?? []).map((a) => (
+          {reopenable && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); reopenOne(); }}>
+              {t("reopen")}
+            </DropdownMenuItem>
+          )}
+          {reopenable && patientId && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); reopenAll(); }}>
+              {t("reopenAll")}
+            </DropdownMenuItem>
+          )}
+          {acciones.map((a) => (
             <DropdownMenuItem
               key={a.clave}
               onSelect={(e) => {
@@ -115,8 +186,13 @@ export function RowMenu({
             </DropdownMenuItem>
           )}
           {!cancelada && (
-            <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen(true); }}>
+            <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("one"); }}>
               {t("cancelar")}
+            </DropdownMenuItem>
+          )}
+          {!cancelada && patientId && (
+            <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("all"); }}>
+              {t("cancelAll")}
             </DropdownMenuItem>
           )}
           {canReparar && (
@@ -127,18 +203,21 @@ export function RowMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+      <Dialog open={!!cancelOpen} onOpenChange={(v) => !v && setCancelOpen(false)}>
         <DialogContent className="sm:max-w-sm">
-          <DialogHeader><DialogTitle>{t("cancelarTitle")}</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{cancelOpen === "all" ? t("cancelAllTitle") : t("cancelarTitle")}</DialogTitle>
+            {cancelOpen === "all" && <DialogDescription>{t("cancelAllHint")}</DialogDescription>}
+          </DialogHeader>
           <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivo")} autoFocus />
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setCancelOpen(false)}>{tc("cancel")}</Button>
             <Button
               variant="destructive"
               disabled={!motivo.trim()}
-              onClick={() => { setCancelOpen(false); onCancelar(motivo.trim()); }}
+              onClick={() => { const mode = cancelOpen || "one"; setCancelOpen(false); void cancel(mode, motivo.trim()); }}
             >
-              {t("cancelar")}
+              {cancelOpen === "all" ? t("cancelAll") : t("cancelar")}
             </Button>
           </div>
         </DialogContent>

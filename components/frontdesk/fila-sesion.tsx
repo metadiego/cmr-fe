@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
-  cancelarSesion,
   repararSesion,
   type PendienteEntrega,
   type FrontdeskColumna,
@@ -493,7 +492,7 @@ export function FilaSesion({
     .map((tr) => ({
       clave: tr.slug,
       label: tr.labelKey && tRoot.has(tr.labelKey) ? tRoot(tr.labelKey) : (t.has(tr.slug) ? t(tr.slug) : tr.slug),
-      confirmar: tr.requiresConfirmation,
+      confirmar: tr.requiresConfirmation, from: tr.fromStatuses,
     }));
 
   // Campos requeridos por servicio (data-driven, servicio.formAcciones). Para un estado destino, los que
@@ -623,7 +622,8 @@ export function FilaSesion({
           accionesMenu={accionesMenu}
           onAccion={(clave) => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: clave }, centro))}
           onProgramar={sesion?.patientId ? () => onProgramar({ pacienteId: sesion.patientId!, pacienteNombre, servicioId: servicio?.id }) : undefined}
-          onCancelar={(motivo) => run(() => cancelarSesion(fila.id, motivo, centro))}
+          day={{ sessionId: fila.id, status: estadoActual, patientId: sesion?.patientId, date: sesion?.date, centerId: centro }}
+          onDone={onChanged}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />
         {sesion?.patientId && (

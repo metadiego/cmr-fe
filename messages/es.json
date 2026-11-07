@@ -2079,7 +2079,26 @@
     "patientNotFound": "Ese paciente no existe en este centro.",
     "serviceNotFound": "Algún servicio elegido no existe en este centro.",
     "removeStep": "Quitar {step}",
-    "formatoTherapyCount": "Terapias a imprimir"
+    "formatoTherapyCount": "Terapias a imprimir",
+    "reopen": "Reabrir",
+    "reopenAll": "Reabrir todas",
+    "cancelAll": "Cancelar todas",
+    "cancelAllTitle": "Cancelar todas las sesiones del día",
+    "cancelAllHint": "Se cancelan las pendientes, presentes y en terapia de este paciente hoy. Las asistidas no se tocan. Un solo motivo para todas.",
+    "reopened": "Sesión reabierta",
+    "reopenedMany": "{n, plural, one {# sesión reabierta} other {# sesiones reabiertas}}",
+    "cancelledMany": "{n, plural, one {# sesión cancelada} other {# sesiones canceladas}}",
+    "reopenSkipped": "Reabiertas: {n}. No volvieron: {reasons}",
+    "error": {
+      "reopenOnlyToday": "Solo se puede reabrir el mismo día",
+      "reopenPackageClosed": "El paquete ya no está activo: factura anulada, devuelta o protocolo cambiado",
+      "reopenNotCancelled": "La sesión no está cancelada",
+      "sessionSameDay": "Ya tiene otra sesión de este servicio hoy",
+      "sheetSlotTaken": "La hoja no tiene hueco a esa hora"
+    },
+    "evento": {
+      "reopened": "Reabierta"
+    }
   },
   "programarCitas": {
     "title": "Programar citas",

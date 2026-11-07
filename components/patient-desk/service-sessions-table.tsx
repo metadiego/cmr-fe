@@ -30,6 +30,8 @@ import type {
 } from "@/lib/api/agenda-dia"
 import { NotificarCell as NotifyBell } from "@/components/agenda/tablero-dinamico"
 import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers"
+import { isSessionToday } from "@/lib/frontdesk/reopen"
+import { todayISO } from "@/lib/agenda/calendar"
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion"
 import type { EhrGateCtx } from "@/components/tablero/flujo-atencion"
 import { useCan } from "@/hooks/use-can"
@@ -43,7 +45,8 @@ interface Props {
   color: string | null
   // Every session attended: the service is painted gray (still editable — nothing is locked).
   concluded?: boolean
-  // Every session that day was cancelled: a discreet mark instead of operative rows.
+  // Every session that day was cancelled: a discreet mark instead of operative rows — except TODAY,
+  // when the rows stay (dimmed) so they can be reopened (BE #508).
   cancelledOnly?: boolean
   service: Service | undefined
   board: ServiceBoard | undefined
@@ -218,7 +221,7 @@ export function ServiceSessionsTable({
           </span>
         )}
       </header>
-      {cancelledOnly ? null : !board ? (
+      {cancelledOnly && !isSessionToday(date, todayISO()) ? null : !board ? (
         <ServiceTableSkeleton rows={Math.max(1, sessionIds.length)} />
       ) : (
         <div className="overflow-x-auto">
