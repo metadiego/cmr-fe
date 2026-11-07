@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { personalizarKit, type FacturaItem } from "@/lib/api/facturas";
-import { listComponentes, listProductos, type ProductoComponente, type Producto as ProductoInv } from "@/lib/api/inventario";
+import { getProducto, listComponentes, listProductos, type ProductoComponente, type Producto as ProductoInv } from "@/lib/api/inventario";
 import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/facturacion-config";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
@@ -47,11 +47,13 @@ export function PersonalizarKitDialog({
   // Receta base del compuesto (BOM) + nombres de producto. Autocontenido, como ComponentesEditor.
   const recetaRes = useResource<ProductoComponente[]>(() => listComponentes(String(item.productId)), [item.productId]);
   const prodRes = useResource<ProductoInv[]>(() => listProductos({}), []);
+  // Names of the components the first page of products does not carry (the list stops at 100).
+  const [extraNames, setExtraNames] = React.useState<Record<string, string>>({});
   const prodName = React.useMemo(() => {
-    const m = new Map<string, string>();
+    const m = new Map<string, string>(Object.entries(extraNames));
     if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.name));
     return m;
-  }, [prodRes.state]);
+  }, [prodRes.state, extraNames]);
 
   // Base = personalización ya guardada (si la hay) o la receta real (activa, no estimada). Los insumos
   // ESTIMADOS no se descargan ni entran a frontdesk → fuera de aquí.
@@ -72,6 +74,21 @@ export function PersonalizarKitDialog({
       .filter((c) => c.active !== false && !c.estimated)
       .map((c) => ({ productoId: c.componentId, cantidad: Number(c.quantity) || 0, nombre: prodName.get(c.componentId) ?? c.componentId }));
   }, [perso, recetaRes.state, prodName]);
+
+  const missingIds = React.useMemo(
+    () => (prodRes.state.kind === "ok" ? base.map((r) => r.productoId).filter((id) => !prodName.has(id)) : []),
+    [base, prodName, prodRes.state.kind],
+  );
+  React.useEffect(() => {
+    if (missingIds.length === 0) return;
+    let alive = true;
+    Promise.all(missingIds.map((id) => getProducto(id).then((p) => [id, p.name] as const).catch(() => [id, ""] as const))).then((pairs) => {
+      if (alive) setExtraNames((m) => ({ ...m, ...Object.fromEntries(pairs.filter(([, n]) => n)) }));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [missingIds]);
 
   const [removed, setRemoved] = React.useState<Record<string, boolean>>({});
   const [qty, setQty] = React.useState<Record<string, string>>({});
@@ -101,6 +118,17 @@ export function PersonalizarKitDialog({
       columnasRes.state.kind === "ok" ? (columnasRes.state.data[id] ?? []).filter((c) => c.role === "multiplicador") : [],
     [columnasRes.state],
   );
+
+  // The product about to be added: if its group bills by áreas × días, the add row asks for those (with
+  // their labels) instead of a bare, unlabelled quantity.
+  const nuevoColsRes = useResource<ColumnaFacturacion[]>(
+    () => (nuevoId ? listColumnasFacturacion(nuevoId, centro) : Promise.resolve([])),
+    [nuevoId, centro],
+  );
+  const nuevoCols = nuevoColsRes.state.kind === "ok" ? nuevoColsRes.state.data.filter((c) => c.role === "multiplicador") : [];
+  const [nuevoMult, setNuevoMult] = React.useState<Record<string, string>>({});
+  const nuevoMultVals = Object.fromEntries(nuevoCols.map((c) => [c.slug, nuevoMult[c.slug] ?? "1"]));
+  const nuevoMultCant = nuevoCols.reduce((p, c) => p * Math.max(1, Math.floor(Number(nuevoMultVals[c.slug]) || 1)), 1);
 
   const cargando = recetaRes.state.kind === "loading" || prodRes.state.kind === "loading";
   // Valores efectivos de las columnas multiplicador de un componente: lo tecleado, o el default —
@@ -135,8 +163,9 @@ export function PersonalizarKitDialog({
   ].filter((r) => r.cantidad > 0);
 
   function agregar() {
-    const c = Math.max(1, Math.floor(Number(nuevaCant) || 0));
+    const c = nuevoCols.length > 0 ? nuevoMultCant : Math.max(1, Math.floor(Number(nuevaCant) || 0));
     if (!nuevoId || c <= 0) return;
+    if (nuevoCols.length > 0) setMult((m) => ({ ...m, [nuevoId]: nuevoMultVals }));
     // Si ya está en base y estaba removido, reponerlo en vez de duplicar.
     if (base.some((b) => b.productoId === nuevoId)) {
       setRemoved((m) => ({ ...m, [nuevoId]: false }));
@@ -147,6 +176,7 @@ export function PersonalizarKitDialog({
     setNuevoId("");
     setNuevoNombre("");
     setNuevaCant("1");
+    setNuevoMult({});
   }
 
   async function guardar() {
@@ -169,9 +199,24 @@ export function PersonalizarKitDialog({
     }
   }
 
+  const quitarBtn = (onClick: () => void) => (
+    <Button type="button" variant="ghost" size="icon" onClick={onClick} aria-label={t("kit.quitar")} className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive">
+      ×
+    </Button>
+  );
+  const qtyInput = (value: string, onChange: (v: string) => void) => (
+    <label className="flex flex-col items-end gap-0.5">
+      <span className="text-[11px] text-muted-foreground">{t("kit.cantidad")}</span>
+      <Input value={value} onChange={(e) => onChange(e.target.value)} inputMode="numeric" className="h-9 w-20 text-right tabular-nums" aria-label={t("kit.cantidad")} />
+    </label>
+  );
+  // One grid for every row: name (wraps, never cut) | controls | remove. Same columns for base, added
+  // and the add row, so nothing slides out of the dialog (7-nov-2026: inputs and «Reponer» were cut off).
+  const ROW = "grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-3 rounded-lg border px-3 py-2";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{t("kit.titulo", { nombre: item.description ?? "" })}</DialogTitle>
         </DialogHeader>
@@ -184,45 +229,37 @@ export function PersonalizarKitDialog({
               <p className="py-6 text-center text-sm text-muted-foreground">{t("kit.vacio")}</p>
             )}
 
-            <ul className="space-y-2">
+            <ul className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
               {base.map((r) => {
                 const quitado = !!removed[r.productoId];
                 const cols = multColsDe(r.productoId);
                 return (
-                  <li key={r.productoId} className={"flex items-center justify-between gap-3 rounded-lg border px-3 py-2 " + (quitado ? "opacity-50" : "")}>
-                    <span className={"min-w-0 flex-1 truncate text-sm font-medium " + (quitado ? "line-through" : "")}>{r.nombre}</span>
+                  <li key={r.productoId} className={ROW + (quitado ? " bg-muted/40" : "")}>
+                    <span className={"text-sm font-medium break-words " + (quitado ? "text-muted-foreground line-through" : "")}>{r.nombre}</span>
                     {quitado ? (
-                      <Button variant="ghost" size="sm" onClick={() => setRemoved((m) => ({ ...m, [r.productoId]: false }))}>{t("kit.reponer")}</Button>
+                      <Button variant="outline" size="sm" onClick={() => setRemoved((m) => ({ ...m, [r.productoId]: false }))}>{t("kit.reponer")}</Button>
                     ) : cols.length > 0 ? (
-                      <>
-                        <MultiplicadoresKit
-                          cols={cols}
-                          valores={multValoresDe(r, cols)}
-                          onChange={(slug, val) => setMult((m) => ({ ...m, [r.productoId]: { ...multValoresDe(r, cols), [slug]: val } }))}
-                          cantidad={cantDe(r)}
-                        />
-                        <button type="button" onClick={() => setRemoved((m) => ({ ...m, [r.productoId]: true }))} aria-label={t("kit.quitar")} className="text-destructive hover:opacity-70">×</button>
-                      </>
+                      <MultiplicadoresKit
+                        cols={cols}
+                        valores={multValoresDe(r, cols)}
+                        onChange={(slug, val) => setMult((m) => ({ ...m, [r.productoId]: { ...multValoresDe(r, cols), [slug]: val } }))}
+                        cantidad={cantDe(r)}
+                      />
                     ) : (
-                      <>
-                        <Input
-                          value={qty[r.productoId] ?? String(r.cantidad)}
-                          onChange={(e) => setQty((m) => ({ ...m, [r.productoId]: e.target.value }))}
-                          inputMode="numeric"
-                          className="h-8 w-16 text-right tabular-nums"
-                          aria-label={t("kit.cantidad")}
-                        />
-                        <button type="button" onClick={() => setRemoved((m) => ({ ...m, [r.productoId]: true }))} aria-label={t("kit.quitar")} className="text-destructive hover:opacity-70">×</button>
-                      </>
+                      qtyInput(qty[r.productoId] ?? String(r.cantidad), (v) => setQty((m) => ({ ...m, [r.productoId]: v })))
                     )}
+                    {quitado ? <span /> : quitarBtn(() => setRemoved((m) => ({ ...m, [r.productoId]: true })))}
                   </li>
                 );
               })}
               {added.map((r) => {
                 const cols = multColsDe(r.productoId);
                 return (
-                  <li key={r.productoId} className="flex items-center justify-between gap-3 rounded-md border border-primary/40 bg-primary/5 px-3 py-2">
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium">{r.nombre}<span className="ml-2 text-[11px] text-primary">{t("kit.agregado")}</span></span>
+                  <li key={r.productoId} className={ROW + " border-primary/40 bg-primary/5"}>
+                    <span className="text-sm font-medium break-words">
+                      {r.nombre}
+                      <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">{t("kit.agregado")}</span>
+                    </span>
                     {cols.length > 0 ? (
                       <MultiplicadoresKit
                         cols={cols}
@@ -231,28 +268,38 @@ export function PersonalizarKitDialog({
                         cantidad={cantDe(r)}
                       />
                     ) : (
-                      <span className="tabular-nums text-sm">×{r.cantidad}</span>
+                      <span className="text-sm tabular-nums">×{r.cantidad}</span>
                     )}
-                    <button type="button" onClick={() => setAdded((a) => a.filter((x) => x.productoId !== r.productoId))} aria-label={t("kit.quitar")} className="text-destructive hover:opacity-70">×</button>
+                    {quitarBtn(() => setAdded((a) => a.filter((x) => x.productoId !== r.productoId)))}
                   </li>
                 );
               })}
             </ul>
 
-            {/* Agregar componente: solo con permiso fino (el BE lo exige; no mostramos la puerta si no se abre). */}
+            {/* Add a component (fine-grained permission; the BE enforces it). A product billed by áreas × días
+                asks for them right here, labelled — not an unlabelled number that only made sense after adding. */}
             {puedeAgregar && (
-              <div className="flex items-end gap-2 rounded-md border border-dashed p-3">
-                <div className="min-w-0 flex-1">
-                  <Lbl>{t("kit.agregarComponente")}</Lbl>
+              <div className="space-y-2 rounded-lg border border-dashed p-3">
+                <Lbl>{t("kit.agregarComponente")}</Lbl>
+                <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-3">
                   <ProductoPicker
                     value={nuevoId}
                     soloFisicos={false}
-                    onChange={(id, p) => { setNuevoId(id); setNuevoNombre(p?.name ?? ""); }}
+                    onChange={(id, p) => { setNuevoId(id); setNuevoNombre(p?.name ?? ""); setNuevoMult({}); }}
                     placeholder={t("kit.buscarProducto")}
                   />
+                  {nuevoCols.length > 0 ? (
+                    <MultiplicadoresKit
+                      cols={nuevoCols}
+                      valores={nuevoMultVals}
+                      onChange={(slug, val) => setNuevoMult((m) => ({ ...m, [slug]: val }))}
+                      cantidad={nuevoMultCant}
+                    />
+                  ) : (
+                    qtyInput(nuevaCant, setNuevaCant)
+                  )}
+                  <Button size="sm" className="h-9" onClick={agregar} disabled={!nuevoId}>{tc("add")}</Button>
                 </div>
-                <Input value={nuevaCant} onChange={(e) => setNuevaCant(e.target.value)} inputMode="numeric" className="h-9 w-16 text-right tabular-nums" aria-label={t("kit.cantidad")} />
-                <Button size="sm" onClick={agregar} disabled={!nuevoId}>{tc("add")}</Button>
               </div>
             )}
 
@@ -270,8 +317,8 @@ export function PersonalizarKitDialog({
   );
 }
 
-// Un input por columna multiplicador (áreas/días) de un componente del kit + la cantidad resultante,
-// bloqueada = producto de los valores. Labels data-driven (fac.col.<slug>), igual que el recibo.
+// One labelled input per multiplier column (Áreas, Días) + the resulting quantity, locked = their product.
+// Labels data-driven (fac.col.<slug>), same as the receipt.
 function MultiplicadoresKit({
   cols,
   valores,
@@ -283,22 +330,24 @@ function MultiplicadoresKit({
   onChange: (slug: string, valor: string) => void;
   cantidad: number;
 }) {
+  const t = useTranslations("facturacion");
   const tRoot = useTranslations();
+  const name = (slug: string) => (tRoot.has(`fac.col.${slug}`) ? tRoot(`fac.col.${slug}`) : slug);
   return (
-    <div className="flex items-center gap-2">
-      {cols.map((c) => (
-        <label key={c.slug} className="flex flex-col items-end gap-0.5">
-          <span className="text-[10px] text-muted-foreground">{tRoot.has(`fac.col.${c.slug}`) ? tRoot(`fac.col.${c.slug}`) : c.slug}</span>
-          <Input
-            value={valores[c.slug] ?? ""}
-            onChange={(e) => onChange(c.slug, e.target.value)}
-            inputMode="numeric"
-            className="h-8 w-14 text-right tabular-nums"
-            aria-label={tRoot.has(`fac.col.${c.slug}`) ? tRoot(`fac.col.${c.slug}`) : c.slug}
-          />
-        </label>
+    <div className="flex items-end gap-2">
+      {cols.map((c, i) => (
+        <React.Fragment key={c.slug}>
+          {i > 0 && <span className="pb-2 text-sm text-muted-foreground">×</span>}
+          <label className="flex flex-col items-center gap-0.5">
+            <span className="text-[11px] text-muted-foreground">{name(c.slug)}</span>
+            <Input value={valores[c.slug] ?? ""} onChange={(e) => onChange(c.slug, e.target.value)} inputMode="numeric" className="h-9 w-16 text-center tabular-nums" aria-label={name(c.slug)} />
+          </label>
+        </React.Fragment>
       ))}
-      <span className="shrink-0 tabular-nums text-sm text-muted-foreground">= ×{cantidad}</span>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="text-[11px] text-muted-foreground">{t("kit.terapias")}</span>
+        <span className="flex h-9 min-w-12 items-center justify-center rounded-md bg-muted px-2 text-sm font-semibold tabular-nums">{cantidad}</span>
+      </div>
     </div>
   );
 }

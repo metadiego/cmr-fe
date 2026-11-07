@@ -38,6 +38,8 @@ export function listProductosPaged(opts: {
   );
 }
 
+// One product by id: listProductos stops at 100 (Caguas has 144), so names past it came out as UUIDs.
+export const getProducto = (id: string) => apiFetch<Producto>(`/inventory/products/${encodeURIComponent(id)}`);
 // Clases del catálogo para las pestañas (data-driven + i18n). GET /inventory/products/classes.
 export interface ClaseProductoOpcion {
   class: string;

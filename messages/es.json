@@ -2918,7 +2918,8 @@
       "agregado": "agregado",
       "agregarComponente": "Agregar componente",
       "buscarProducto": "Buscar producto…",
-      "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto."
+      "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto.",
+      "terapias": "Terapias"
     },
     "imprimirNoEmitida": "La factura no se emitió al imprimir.",
     "corregirImpuesto": {

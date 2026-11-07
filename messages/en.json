@@ -2918,7 +2918,8 @@
       "agregado": "added",
       "agregarComponente": "Add component",
       "buscarProducto": "Search product…",
-      "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe."
+      "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe.",
+      "terapias": "Therapies"
     },
     "imprimirNoEmitida": "The invoice was not issued when printing.",
     "corregirImpuesto": {
