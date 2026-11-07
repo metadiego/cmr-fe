@@ -53,3 +53,14 @@ export function techniciansNow(queue: FrontdeskQueue | null): {
     activosHoy,
   };
 }
+
+// Minutes offered for a break: data on the status type (`durationOptions`, handoff
+// docs/specs/break-duration-options-handoff.md), so adding 45/60 needs no code. null, empty or not yet
+// served by the BE → the original quick list.
+export const DEFAULT_BREAK_MINUTES: readonly number[] = [10, 15, 30];
+export function breakMinutes(tipo: object | null | undefined): readonly number[] {
+  const raw = (tipo as { durationOptions?: unknown } | null | undefined)?.durationOptions;
+  if (!Array.isArray(raw)) return DEFAULT_BREAK_MINUTES;
+  const ok = [...new Set(raw.filter((n): n is number => Number.isInteger(n) && n > 0))].sort((a, b) => a - b);
+  return ok.length ? ok : DEFAULT_BREAK_MINUTES;
+}

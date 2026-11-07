@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { techniciansNow } from "./technicians-today.ts";
+import { breakMinutes, techniciansNow } from "./technicians-today.ts";
 import type { FrontdeskQueue } from "../api/frontdesk-queue.ts";
 
 const svc = (name: string, inTherapy: Array<[string, string]>, waiting: Array<[string | null, string | null]> = []) =>
@@ -38,4 +38,12 @@ test("fallback without techniciansToday: busy from inTherapy, free from called w
   assert.deepEqual(r.libres, [{ id: "t1", name: "Fabian" }]);
   assert.deepEqual(r.ocupados, [{ id: "t2", name: "Ana", servicio: "Láser" }]);
   assert.deepEqual(techniciansNow(null), { libres: [], ocupados: [], activosHoy: new Map() });
+});
+
+test("breakMinutes: the type's durationOptions, sorted and unique; null/empty/missing → 10/15/30", () => {
+  assert.deepEqual(breakMinutes({ durationOptions: [60, 10, 15, 30, 45, 15] }), [10, 15, 30, 45, 60]);
+  assert.deepEqual(breakMinutes({ durationOptions: null }), [10, 15, 30]);
+  assert.deepEqual(breakMinutes({ durationOptions: [] }), [10, 15, 30]);
+  assert.deepEqual(breakMinutes({}), [10, 15, 30]);
+  assert.deepEqual(breakMinutes(undefined), [10, 15, 30]);
 });

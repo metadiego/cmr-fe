@@ -6,7 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { UserSquareIcon } from "@hugeicons/core-free-icons";
 
 import { getFrontdeskQueue, type FrontdeskQueue } from "@/lib/api/frontdesk-queue";
-import { techniciansNow } from "@/lib/frontdesk/technicians-today";
+import { breakMinutes, techniciansNow } from "@/lib/frontdesk/technicians-today";
 import {
   getNurseStatusTipos,
   getNurseStatusActuales,
@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip } from "@/components/ui/tooltip";
 
-const MINUTOS_RAPIDOS = [10, 15, 30] as const;
 const horaDe = (iso: string) => new Date(iso).toLocaleTimeString("es-PR", { hour: "2-digit", minute: "2-digit" });
 
 // «Técnicos» icon: free / in therapy NOW. Who counts is decided in lib/frontdesk/technicians-today.ts:
@@ -58,6 +57,7 @@ export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fec
   // nurse-status, ahora con caducidad — el tipo `break` ya cuenta como "no disponible". Se ofrece
   // solo a quien está activo hoy (mismo roster que libres/ocupados), nunca a todo el personal.
   const breakTipo = tipos.find((x) => x.slug === "break");
+  const minutosDescanso = breakMinutes(breakTipo);
   const enDescanso = breakTipo ? actuales.filter((a) => a.statusTypeId === breakTipo.id) : [];
   const nombreDe = (id: string) => activosHoy.get(id) ?? id.slice(0, 8);
 
@@ -118,9 +118,9 @@ export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fec
                   <option key={id} value={id}>{name}</option>
                 ))}
               </select>
-              <div className="flex gap-1.5">
-                {MINUTOS_RAPIDOS.map((m) => (
-                  <button key={m} type="button" disabled={!sel || busy} onClick={() => ponerDescanso(m)} className="flex-1 rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-40">
+              <div className="flex flex-wrap gap-1.5">
+                {minutosDescanso.map((m) => (
+                  <button key={m} type="button" disabled={!sel || busy} onClick={() => ponerDescanso(m)} className="min-w-12 flex-1 rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-40">
                     {t("tecnicosMinutos", { n: m })}
                   </button>
                 ))}
