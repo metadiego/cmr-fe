@@ -48,7 +48,7 @@ aplicada al revés).
 3. **Revisar los dañados:** citas `seguimiento` o con `isFirstVisit: false` cuyo paciente no tenía
    ninguna cita atendida antes de esa fecha. Pasar la lista al dueño **antes** de repararlas, porque
    mueve el conteo de nuevos y las comisiones de captación.
-4. **La factura F001109** ($20 de seguimiento) **no se toca** sin que el dueño decida.
+4. **La factura F001109 no se toca.** El dueño (7-nov): solo cambia el tipo de la cita.
 
 ## Verificación
 
