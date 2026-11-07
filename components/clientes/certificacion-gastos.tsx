@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import { getCertificacionGastos, type CertificacionGastos as Cert } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
+import { parseDayUTC } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -16,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+const dayFmt = new Intl.DateTimeFormat("en-US", { month: "2-digit", day: "2-digit", year: "numeric", timeZone: "UTC" });
 
 // Certificación de gastos (legado) dentro de la ficha. El BE ya suma por concepto (grupo de
 // facturación) con las devoluciones RESTADAS; el FE solo elige el rango, muestra y arma el DOCUMENTO
@@ -35,6 +39,9 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
   const [{ desde, hasta }, setRango] = React.useState(anioEnCurso);
   const [persona, setPersona] = React.useState("");
   const [trato, setTrato] = React.useState<"sr" | "sra">("sr");
+  const [expandido, setExpandido] = React.useState<Set<string>>(new Set());
+  const qsCentro = centro ? `?centro=${encodeURIComponent(centro)}` : "";
+  const dia = (iso: string) => { const d = parseDayUTC(iso); return d ? dayFmt.format(d) : iso; };
 
   const { state } = useResource<Cert>(
     () => getCertificacionGastos(pacienteId, desde, hasta, centro),
@@ -153,14 +160,53 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
               {conceptos.length === 0 ? (
                 <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">{t("empty")}</td></tr>
               ) : (
-                conceptos.map((c) => (
-                  <tr key={c.slug} className="border-t">
-                    <td className="px-3 py-2">{nombreConcepto(c)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.invoices}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.refunds ? money.format(c.refunds) : "—"}</td>
-                    <td className="px-3 py-2 text-right font-medium tabular-nums">{money.format(c.total)}</td>
-                  </tr>
-                ))
+                conceptos.map((c) => {
+                  const tieneDetalle = !!c.detail?.length;
+                  const abierto = expandido.has(c.slug);
+                  return (
+                    <React.Fragment key={c.slug}>
+                      <tr className={"border-t " + (tieneDetalle ? "cursor-pointer hover:bg-muted/30" : "")} onClick={() => tieneDetalle && setExpandido((s) => { const n = new Set(s); if (n.has(c.slug)) n.delete(c.slug); else n.add(c.slug); return n; })}>
+                        <td className="px-3 py-2">
+                          {tieneDetalle && <span className="mr-1.5 inline-block w-3 text-muted-foreground">{abierto ? "▾" : "▸"}</span>}
+                          {nombreConcepto(c)}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.invoices}</td>
+                        <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.refunds ? money.format(c.refunds) : "—"}</td>
+                        <td className="px-3 py-2 text-right font-medium tabular-nums">{money.format(c.total)}</td>
+                      </tr>
+                      {abierto && tieneDetalle && (
+                        <tr className="border-t bg-muted/20">
+                          <td colSpan={4} className="px-3 py-2">
+                            <table className="w-full text-xs">
+                              <tbody>
+                                {c.detail!.map((f) => (
+                                  <React.Fragment key={f.invoiceId}>
+                                    <tr>
+                                      <td className="py-1 pl-4 font-mono">
+                                        <Link href={`/billing/invoices/${f.invoiceId}${qsCentro}`} className="text-primary underline-offset-2 hover:underline">{f.number || "—"}</Link>
+                                      </td>
+                                      <td className="py-1 tabular-nums text-muted-foreground">{dia(f.date)}</td>
+                                      <td colSpan={2} />
+                                    </tr>
+                                    {f.lines.map((l) => (
+                                      <tr key={l.invoiceItemId}>
+                                        <td colSpan={2} className="py-0.5 pl-10 text-muted-foreground">
+                                          <Link href={`/inventory/products`} className="hover:underline hover:text-foreground">{l.description}</Link>
+                                        </td>
+                                        <td colSpan={1} />
+                                        <td className="py-0.5 text-right tabular-nums text-muted-foreground">{money.format(l.amount)}</td>
+                                      </tr>
+                                    ))}
+                                  </React.Fragment>
+                                ))}
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
               )}
             </tbody>
             {conceptos.length > 0 && (

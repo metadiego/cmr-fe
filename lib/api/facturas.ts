@@ -238,6 +238,21 @@ export function getResumenPaciente(
 // /invoices/expenses-certificate?patientId=&desde=&hasta=. Handoff ficha-del-paciente-hub-y-certificacion-de-gastos.
 // La RESPUESTA SÍ se englishifica (verificado live 1-oct): patient/from/to/refunds/reconciliation, conceptos
 // con slug/refunds/invoices. Antes el tipo estaba en español y el nombre del paciente salía en blanco.
+// Línea de una factura dentro de un concepto (cmr-be PR #496): para "sin_clasificar" es lo único que
+// dice QUÉ compró el paciente, no solo el monto agregado.
+export interface CertificacionConceptoLinea {
+  invoiceItemId: string;
+  productId: string;
+  description: string;
+  amount: number;
+}
+export interface CertificacionConceptoFactura {
+  invoiceId: string;
+  number: string;
+  date: string;
+  amount: number;
+  lines: CertificacionConceptoLinea[];
+}
 export interface CertificacionConcepto {
   grupoId: string;
   slug: string;
@@ -245,6 +260,7 @@ export interface CertificacionConcepto {
   total: number;
   refunds: number;
   invoices: number;
+  detail?: CertificacionConceptoFactura[];
 }
 export interface CertificacionGastos {
   patient: { id: string; name: string; medicalRecordNumber?: string | null; documentId?: string | null };
