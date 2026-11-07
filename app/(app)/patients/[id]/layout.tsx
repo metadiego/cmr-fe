@@ -350,7 +350,7 @@ function PacienteDetail({
           <TabsContent value="appointments"><FichaCitas pacienteId={p.id} /></TabsContent>
         )}
         {puedeFrontdesk && (
-          <TabsContent value="therapies"><FichaTerapias pacienteId={p.id} centro={centroId} /></TabsContent>
+          <TabsContent value="therapies"><FichaTerapias pacienteId={p.id} pacienteNombre={fullName(p)} record={p.medicalRecordNumber} centro={centroId} /></TabsContent>
         )}
         {puedeFactura && (
           <TabsContent value="billing"><FichaFacturacion pacienteId={p.id} centro={centroId} /></TabsContent>

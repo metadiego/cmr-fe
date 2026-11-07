@@ -926,6 +926,7 @@
       "technician": "Technician / Nurse",
       "doctor": "Doctor",
       "session": "Session",
+      "formats": "Formats",
       "invoice": "Invoice",
       "concept": "Concept",
       "net": "Net",

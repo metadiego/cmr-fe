@@ -5,6 +5,9 @@ import { useTranslations } from "next-intl";
 
 import { listCitasEveryCenter, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
+import { getServicios, type Servicio } from "@/lib/api/servicios";
+import { parseAcciones } from "@/lib/frontdesk/acciones";
+import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { Badge } from "@/components/ui/badge";
@@ -134,11 +137,30 @@ function ReagendamientosDialog({ pacienteId, onClose }: { pacienteId: string; on
   );
 }
 
-export function FichaTerapias({ pacienteId, centro }: { pacienteId: string; centro?: string }) {
+// Antes, el ÚNICO camino a un formato (GLP-1, APEX…) era el tablero de frontdesk del día: para verlo
+// desde la ficha había que ir a cazar la fila correcta ahí — y ese rastreo fue lo que causó un
+// "desatender" por error en otra fila (06-nov-2026). El motor (FormatosModal) ya era reusable; solo
+// faltaba ofrecerlo aquí, por sesión, igual que en la fila del tablero.
+export function FichaTerapias({
+  pacienteId,
+  pacienteNombre,
+  record,
+  centro,
+}: {
+  pacienteId: string;
+  pacienteNombre: string;
+  record?: string | null;
+  centro?: string;
+}) {
   const t = useTranslations("patients.hub");
   const dia = useDia();
   const [filtro, setFiltro] = React.useState<string>(""); // "" = todos; si no, serviceId/nombre
+  const [formatoFila, setFormatoFila] = React.useState<HistorialSesion | null>(null);
   const res = useResource<HistorialSesion[]>(() => getHistorialPaciente(pacienteId, undefined, centro), [pacienteId, centro]);
+  const serviciosRes = useResource<Servicio[]>(() => getServicios(centro), [centro]);
+  const catalogo = serviciosRes.state.kind === "ok" ? serviciosRes.state.data : [];
+  const servicioPorId = React.useMemo(() => new Map(catalogo.map((s) => [s.id, s])), [catalogo]);
+  const reportsDe = (serviceId: string) => parseAcciones(servicioPorId.get(serviceId)?.formActions).reports ?? [];
   const hist = res.state.kind === "ok" ? res.state.data : [];
   // Más reciente primero.
   const ordenado = [...hist].sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")));
@@ -173,17 +195,44 @@ export function FichaTerapias({ pacienteId, centro }: { pacienteId: string; cent
           </Select>
         </div>
       )}
-      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("service")}</Th><Th>{t("session")}</Th><Th>{t("technician")}</Th><Th>{t("status")}</Th></tr>}>
-        {filtrado.map((s) => (
-          <tr key={s.id} className="border-t">
-            <Td>{dia(s.date)}</Td>
-            <Td>{s.serviceName ?? "—"}</Td>
-            <Td className="tabular-nums text-muted-foreground">{s.sesionNumero != null && s.totalSessions != null ? `${s.sesionNumero}/${s.totalSessions}` : "—"}</Td>
-            <Td>{s.staffNombre ?? "—"}</Td>
-            <Td><Estado value={s.status} /></Td>
-          </tr>
-        ))}
+      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("service")}</Th><Th>{t("session")}</Th><Th>{t("technician")}</Th><Th>{t("status")}</Th><Th>{t("formats")}</Th></tr>}>
+        {filtrado.map((s) => {
+          const reports = reportsDe(s.serviceId);
+          return (
+            <tr key={s.id} className="border-t">
+              <Td>{dia(s.date)}</Td>
+              <Td>{s.serviceName ?? "—"}</Td>
+              <Td className="tabular-nums text-muted-foreground">{s.sesionNumero != null && s.totalSessions != null ? `${s.sesionNumero}/${s.totalSessions}` : "—"}</Td>
+              <Td>{s.staffNombre ?? "—"}</Td>
+              <Td><Estado value={s.status} /></Td>
+              <Td>
+                {reports.length > 0 ? (
+                  <Button variant="outline" size="sm" onClick={() => setFormatoFila(s)}>{t("formats")}</Button>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </Td>
+            </tr>
+          );
+        })}
       </Tabla>
+      {formatoFila && (
+        <FormatosModal
+          open={!!formatoFila}
+          onOpenChange={(o) => !o && setFormatoFila(null)}
+          servicioNombre={formatoFila.serviceName ?? ""}
+          formAcciones={servicioPorId.get(formatoFila.serviceId)?.formActions}
+          pacienteNombre={pacienteNombre}
+          record={record}
+          sesionNN={formatoFila.sesionNumero != null && formatoFila.totalSessions != null ? `${formatoFila.sesionNumero}/${formatoFila.totalSessions}` : undefined}
+          servicioId={formatoFila.serviceId}
+          pacienteId={pacienteId}
+          tecnicoNombre={formatoFila.staffNombre}
+          sesionId={formatoFila.id}
+          fecha={formatoFila.date}
+          centro={centro}
+        />
+      )}
     </div>
   );
 }
