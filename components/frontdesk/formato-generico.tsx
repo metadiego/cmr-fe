@@ -11,6 +11,7 @@ import { imprimirFormato, LogoFormato, PieFormato } from "@/components/frontdesk
 import { FormatoPaginado } from "@/components/frontdesk/formato-paginado";
 import { splitInlineFields, chunkPairs } from "@/lib/formatos/inline-fields";
 import { rowsForPrint } from "@/lib/formatos/print-rows";
+import { controlHeaderLayout, splitControlTitle } from "@/lib/formatos/control-sheet";
 import { Input } from "@/components/ui/input";
 
 // Documento GENÉRICO imprimible (tabla con filas en blanco para llenar a mano). Data-driven: todo viene
@@ -40,6 +41,11 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   const render = d.render ?? {};
   const ocultarEmpresa = d.letterhead?.ocultarEmpresa || render.ocultarEmpresa;
   const camposEnLinea = splitInlineFields(campos, render.camposEnLinea);
+  // Legacy «control de sesiones» sheet (tabla + ocultarEmpresa: EMTT, Cámaras, PEMF, AVACEN…): logo
+  // CENTRED over the title, title split on « · », header fields per lib/formatos/control-sheet.ts, and the
+  // grid drawn like the legacy (centred grey headers, black borders, centred numbers).
+  const esControl = !esCampos && !!ocultarEmpresa && d.layout !== "sesiones" && d.layout !== "sessions" && d.layout !== "paginas";
+  const tituloControl = splitControlTitle(d.title);
   // Numbered grid (one row per therapy): the desk can type how many to print — see print-rows.ts.
   const contadorFilas = !esCampos && d.layout !== "sesiones" && d.layout !== "sessions" ? render.numerarFilas : undefined;
   const filas = rowsForPrint(d.rows ?? [], contadorFilas ? Number(printCount) : null, contadorFilas, !!render.numerarComoFraccion);
@@ -127,16 +133,29 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
               si el logo mueve algo, está mal). En rejillas apretadas el logo baja a 32px. */}
           <div className="relative text-center" style={{ position: "relative" }}>
             {/* Inline position: the print window has no Tailwind, and the logo landed centred over the title. */}
-            <div className="absolute left-0 top-0" style={{ position: "absolute", left: 0, top: 0 }}>
-              <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
-            </div>
+            {esControl ? (
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+                <LogoFormato logoUrl={d.letterhead?.logoUrl} size={48} />
+              </div>
+            ) : (
+              <div className="absolute left-0 top-0" style={{ position: "absolute", left: 0, top: 0 }}>
+                <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
+              </div>
+            )}
             {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa NI la del centro (solo logo +
                 título) — el logo de esos formatos ya trae "CENTRO DE MEDICINA REGENERATIVA" horneado. */}
             {!ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
             {!ocultarEmpresa && d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
             {/* Línea más chica arriba del título (p. ej. "Cámara Energética" sobre "CONTROL DE SESIONES"). */}
             {render.subtitulo && <div className="text-sm font-semibold">{render.subtitulo}</div>}
-            <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
+            {esControl ? (
+              <>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: "4px 0 0" }}>{tituloControl.main}</h2>
+                {tituloControl.sub && <div style={{ fontSize: 14, fontWeight: 700, marginTop: 4 }}>{tituloControl.sub}</div>}
+              </>
+            ) : (
+              <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
+            )}
           </div>
 
     </>
@@ -260,6 +279,9 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
               {/* Cabecera data-driven igual que "sesiones": se pinta `fields` tal cual venga (paciente/record,
                   y a veces fecha) en vez de inventar qué mostrar — ver nota en el bloque "sesiones" arriba.
                   Fallback a `d.patient`/`d.date` solo si el BE no manda `fields` (contrato viejo). */}
+              {esControl && campos.length > 0 ? (
+                <ControlHeader campos={campos} labelOf={(c) => c.label ?? `${label(c.labelKey)} :`} />
+              ) : (
               <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-1 border-b pb-2 text-sm">
                 {campos.length > 0 ? (
                   campos.map((c) => (
@@ -277,10 +299,35 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                   </>
                 )}
               </div>
+              )}
               {/* Rejilla con filas en blanco (aireadas, para llenar a mano). El BE "hornea" el valor final de
                   cada celda (incluido el contador de `render.numerarFilas`, p. ej. "1/24" cuando
                   `numerarComoFraccion` aplica) — el FE pinta tal cual, nunca lo recalcula. Confirmado por BE
                   tras un primer intento equivocado de este lado donde el FE le agregaba "/total" él mismo. */}
+              {esControl ? (
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, marginTop: 10 }}>
+                  <thead>
+                    <tr>
+                      {cols.map((c) => (
+                        <th key={c.clave} style={{ border: "1px solid #000", background: "#f0f0f0", padding: "6px 6px", textAlign: "center", fontWeight: 700 }}>
+                          {c.label ?? label(c.labelKey, c.clave)}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filas.map((f, i) => (
+                      <tr key={i}>
+                        {cols.map((c, ci) => (
+                          <td key={c.clave} style={{ border: "1px solid #000", height: 36, padding: "4px 6px", textAlign: ci === 0 ? "center" : "left", verticalAlign: "middle" }}>
+                            {f?.[c.clave] ?? ""}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
               <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
                 <thead>
                   <tr className="bg-neutral-100 text-left">
@@ -295,6 +342,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                   ))}
                 </tbody>
               </table>
+              )}
             </>
           )}
 
@@ -344,6 +392,38 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
           <PieFormato pie={d.footer} />
         </div>
       </div>
+    </div>
+  );
+}
+
+// Header of a legacy control sheet (lib/formatos/control-sheet.ts): two fields at opposite ends; more,
+// one per line, with hand-filled ones on a blank line (alone) or on one row (several). Inline styles.
+function ControlHeader<T extends { clave: string; origen?: string; valor?: string | null }>({
+  campos,
+  labelOf,
+}: {
+  campos: T[];
+  labelOf: (c: T) => string;
+}) {
+  const { spread, stacked, handRow } = controlHeaderLayout(campos);
+  const value = (c: T, width: number) =>
+    c.origen === "" ? (
+      <span style={{ display: "inline-block", minWidth: width, borderBottom: "1px solid #000" }}>{c.valor || "\u00a0"}</span>
+    ) : (
+      <span>{c.valor ?? ""}</span>
+    );
+  const item = (c: T, width: number) => (
+    <span key={c.clave}>
+      <b>{labelOf(c)}</b> {value(c, width)}
+    </span>
+  );
+  if (spread) {
+    return <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, fontSize: 12 }}>{spread.map((c) => item(c, 120))}</div>;
+  }
+  return (
+    <div style={{ marginTop: 18, fontSize: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+      {stacked.map((c) => <div key={c.clave}>{item(c, 300)}</div>)}
+      {handRow.length > 0 && <div style={{ display: "flex", justifyContent: "space-between", gap: 16, marginTop: 8 }}>{handRow.map((c) => item(c, 110))}</div>}
     </div>
   );
 }
