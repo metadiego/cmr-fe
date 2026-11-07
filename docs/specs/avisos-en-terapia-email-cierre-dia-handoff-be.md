@@ -26,6 +26,18 @@ Al cierre de cada día (medianoche / cierre de caja del centro), un job que:
    específico? ¿rol `gerente` por centro?) — a confirmar con el dueño si no es obvio desde el catálogo de
    permisos existente.
 
+## Contenido del email (pedido del dueño)
+
+Va al **responsable** (el `actorId`) Y al/los **gerente(s) del centro**, mismo email o copia — el
+dueño no distingue tono entre uno y otro. Debe explicar, no solo listar:
+
+- Por qué importa para el PACIENTE llevar el registro de cada sesión de su terapia (continuidad del
+  tratamiento, historial clínico/de servicio).
+- Que esto alimenta las ESTADÍSTICAS de técnicos, enfermeras y médicos — dejar sesiones sin cerrar
+  ensucia esos números para todo el equipo, no solo para quien la dejó así.
+- La lista de pacientes/sesiones concretas que ese usuario dejó sin asistir (fecha, servicio,
+  paciente).
+
 ## Por qué urge
 
 El dueño lo pidió explícitamente como medida de presión/responsabilidad: hoy mismo, no mañana. Si el
