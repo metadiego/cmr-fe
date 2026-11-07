@@ -150,7 +150,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             {render.subtitulo && <div className="text-sm font-semibold">{render.subtitulo}</div>}
             {esControl ? (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, margin: "4px 0 0" }}>{tituloControl.main}</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 700, margin: "4px 0 0" }}>{tituloControl.main}</h2>
                 {tituloControl.sub && <div style={{ fontSize: 14, fontWeight: 700, marginTop: 4 }}>{tituloControl.sub}</div>}
               </>
             ) : (
