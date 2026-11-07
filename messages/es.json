@@ -3855,6 +3855,12 @@
       "countedCash": "Efectivo en caja",
       "difference": "Diferencia",
       "signMine": "Firmar mi hoja"
+    },
+    "otherDivision": {
+      "inConsulta": "Hoy cobraste en Consulta: tu hoja y tu firma están en el cuadre de Consulta, no en este.",
+      "inGeneral": "Hoy cobraste en General: tu hoja y tu firma están en el cuadre General, no en este.",
+      "goConsulta": "Ir al cuadre de Consulta",
+      "goGeneral": "Ir al cuadre General"
     }
   },
   "gruposFacturacion": {

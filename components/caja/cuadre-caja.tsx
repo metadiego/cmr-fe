@@ -43,6 +43,7 @@ import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
+import { OtherDivisionHint } from "@/components/caja/other-division-hint";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
@@ -137,6 +138,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
 
       {/* While the centre gate / profile resolve, the date row is already real and the editor area
           shows its skeleton. Permissions arrive with the profile, so until then it is the cashier layout. */}
+      {!loadingGate && <OtherDivisionHint division={division} fecha={fecha} meId={myStaffId(me)} />}
       {loadingGate ? (
         <CuadreCajaSkeleton isGerencia={isGerencia} esConsolidado={effScope === "consolidated"} filterSlot={filterSlot} />
       ) : (

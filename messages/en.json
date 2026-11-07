@@ -3855,6 +3855,12 @@
       "countedCash": "Cash in drawer",
       "difference": "Difference",
       "signMine": "Sign my sheet"
+    },
+    "otherDivision": {
+      "inConsulta": "You billed in Consultation today: your sheet and your signature are in the Consultation cash count, not this one.",
+      "inGeneral": "You billed in General today: your sheet and your signature are in the General cash count, not this one.",
+      "goConsulta": "Go to the Consultation cash count",
+      "goGeneral": "Go to the General cash count"
     }
   },
   "gruposFacturacion": {
