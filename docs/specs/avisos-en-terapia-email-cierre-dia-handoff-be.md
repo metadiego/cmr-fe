@@ -40,6 +40,12 @@ dueño no distingue tono entre uno y otro. Debe explicar, no solo listar:
 - La lista de pacientes/sesiones concretas que ese usuario dejó sin asistir (fecha, servicio,
   paciente).
 
+## Copia de control (pedido del dueño)
+
+Mandar copia de CADA correo (el del responsable y el resumen del gerente) a `larciles@centrodemedicinaregenerativa.com`
+— por ahora, al menos para **CMR Caguas**, donde el dueño quiere manejar esto directamente con el
+personal de ese centro.
+
 ## Por qué urge
 
 El dueño lo pidió explícitamente como medida de presión/responsabilidad: hoy mismo, no mañana. Si el
