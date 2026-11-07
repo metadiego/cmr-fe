@@ -16,6 +16,7 @@ import { listPersonalPorCapacidad } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip } from "@/components/ui/tooltip";
 
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -86,17 +87,18 @@ export function NurseStatusButton({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" className="relative gap-1.5">
-          <HugeiconsIcon icon={StethoscopeIcon} className="size-4" />
-          {t("nurseTitle")}
-          {count > 0 && (
-            <span className="absolute -right-1.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-4 text-white">
-              {count}
-            </span>
-          )}
-        </Button>
-      </SheetTrigger>
+      <Tooltip content={t("nurseTitle")}>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="relative" aria-label={t("nurseTitle")}>
+            <HugeiconsIcon icon={StethoscopeIcon} className="size-4" />
+            {count > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-4 text-white">
+                {count}
+              </span>
+            )}
+          </Button>
+        </SheetTrigger>
+      </Tooltip>
       <SheetContent side="right" className="w-96 p-4">
         <SheetHeader className="p-0">
           <SheetTitle>{t("nurseTitle")}</SheetTitle>
