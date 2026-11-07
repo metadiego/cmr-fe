@@ -92,10 +92,23 @@ export type QueueService = {
   inTherapy: QueueInTherapyEntry[];
 };
 
+// Technicians who worked today (BE PR #499, handoff docs/specs/technicians-today-handoff.md): anyone
+// with a session today in presente / en_terapia / asistido — so someone who already FINISHED their
+// patient still counts. Cancelled and merely scheduled (pendiente) sessions do not. Most sessions first.
+export type QueueTechnicianToday = {
+  staffId: string;
+  name: string;
+  clinicId: string | null;
+  sessions: number;
+  inTherapy: boolean;
+};
+
 export type FrontdeskQueue = {
   date: string;
   totals: { waiting: number; inTherapy: number }; // pacientes DISTINTOS, no sesiones
   services: QueueService[];
+  /** Absent until BE #499 is deployed: callers fall back to inTherapy + waiting. */
+  techniciansToday?: QueueTechnicianToday[];
 };
 
 // GET /frontdesk/queue?date=&serviceId=&centerIds= — permiso frontdesk.read.

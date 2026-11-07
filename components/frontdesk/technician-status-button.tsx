@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { UserSquareIcon } from "@hugeicons/core-free-icons";
 
 import { getFrontdeskQueue, type FrontdeskQueue } from "@/lib/api/frontdesk-queue";
+import { techniciansNow } from "@/lib/frontdesk/technicians-today";
 import {
   getNurseStatusTipos,
   getNurseStatusActuales,
@@ -21,16 +22,12 @@ import { Tooltip } from "@/components/ui/tooltip";
 const MINUTOS_RAPIDOS = [10, 15, 30] as const;
 const horaDe = (iso: string) => new Date(iso).toLocaleTimeString("es-PR", { hour: "2-digit", minute: "2-digit" });
 
-// Ícono "Técnicos": libre/en terapia AHORA, derivado de la misma cola que ya alimenta
-// therapy-queue-strip.tsx (GET /frontdesk/queue) — sin estado propio, sin pedir nada nuevo al BE.
-// A PROPÓSITO no se usa `onShift` (el roster por CAPACIDAD configurada): trae relleno de catálogo
-// (p. ej. "noaplica", un registro legado activo pero sin ser una persona real) y personal que puede
-// hacer el servicio pero no está trabajando hoy. El dueño pidió (06-nov-2026) contar SOLO a quien
-// realmente tiene un paciente hoy: ocupado = tiene algo en `inTherapy`; libre = ya le asignaron
-// alguien (`waiting[].technicianId`, llamado) pero no está en terapia ahora mismo. El roster completo
-// (todo el personal con la capacidad, esté o no activo hoy) queda para una iteración aparte.
-// "Descanso" (manual, con auto-expiración por minutos) queda pendiente de BE — ver
-// docs/specs/estatus-tecnicos-libre-ocupado-descanso-handoff-be.md.
+// «Técnicos» icon: free / in therapy NOW. Who counts is decided in lib/frontdesk/technicians-today.ts:
+// `techniciansToday` from GET /frontdesk/queue (BE #499) — everyone with a live session today, so a
+// technician who already finished their patient shows as free — with a fallback to inTherapy +
+// called waiting until that field is deployed. `onShift` (the capability roster) is deliberately
+// NOT used: it carries catalogue filler and staff who are not working today (owner, 06-nov-2026).
+// «Descanso» (BE #498): a break hides someone from Libres until it expires.
 export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fecha: string }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -55,24 +52,7 @@ export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fec
     getNurseStatusActuales(fecha, centro).then(setActuales).catch(() => setActuales([]));
   }, [open, centro, fecha, gen]);
 
-  const { libres, ocupados, activosHoy } = React.useMemo(() => {
-    const ocupadosMap = new Map<string, { name: string; servicio: string }>();
-    const activosHoy = new Map<string, string>();
-    for (const s of queue?.services ?? []) {
-      for (const p of s.inTherapy) {
-        if (!p.technicianId) continue;
-        activosHoy.set(p.technicianId, p.technicianName ?? p.technicianId.slice(0, 8));
-        if (!ocupadosMap.has(p.technicianId)) {
-          ocupadosMap.set(p.technicianId, { name: p.technicianName ?? p.technicianId.slice(0, 8), servicio: s.name });
-        }
-      }
-      for (const w of s.waiting) {
-        if (w.technicianId) activosHoy.set(w.technicianId, w.technicianName ?? w.technicianId.slice(0, 8));
-      }
-    }
-    const libres = [...activosHoy.entries()].filter(([id]) => !ocupadosMap.has(id)).map(([id, name]) => ({ id, name }));
-    return { libres, ocupados: [...ocupadosMap.entries()].map(([id, v]) => ({ id, ...v })), activosHoy };
-  }, [queue]);
+  const { libres, ocupados, activosHoy } = React.useMemo(() => techniciansNow(queue), [queue]);
 
   // "Descanso" (BE PR #498, 06-nov-2026, desplegado): un estatus más del mismo catálogo de
   // nurse-status, ahora con caducidad — el tipo `break` ya cuenta como "no disponible". Se ofrece
