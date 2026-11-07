@@ -18,6 +18,7 @@ import {
   asConsultationView,
   filterByKind,
   filterByService,
+  filterByServiceArrivedPending,
   filterPatients,
   orderSections,
   servicesOfTheDay,
@@ -39,6 +40,7 @@ import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-pi
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
 import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip"
 import { PatientDeskSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
+import { ServiceFilterDropdown } from "@/components/patient-desk/service-filter-dropdown"
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail"
 import { LiveBadge } from "@/components/live-badge"
 import { EnTerapiaSinAsistirBanner } from "@/components/frontdesk/en-terapia-sin-asistir-banner"
@@ -57,12 +59,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-const SUB_FILTER_ALL = "__all__"
 
 // Patient desk — the frontdesk turned around (alternative to /boards/frontdesk, which stays as is):
 // the day's patients first, services and consultation together; pick one to see and work all their
@@ -127,9 +125,17 @@ export function PatientDesk() {
   const [consultSubtypeFilter, setConsultSubtypeFilter] = React.useState<
     string | null
   >(() => (freshToday ? initialParams.get("subtype") : null))
+  // Narrows the service filter further to "arrived but not yet attended" — the owner's N=presente/
+  // N=asistidos gap (06-nov-2026), one click away from the dropdown's own counts.
+  const [serviceArrivedPending, setServiceArrivedPending] = React.useState(false)
+  const pickServiceFilter = (serviceId: string | null, pendingOnly = false) => {
+    setServiceFilter(serviceId)
+    setServiceArrivedPending(serviceId ? pendingOnly : false)
+  }
   const pickKind = (k: PatientKind) => {
     setKindPicked(k)
     setServiceFilter(null)
+    setServiceArrivedPending(false)
     setConsultSubtypeFilter(null)
   }
   const servicesToday = React.useMemo(
@@ -146,7 +152,12 @@ export function PatientDesk() {
   const patients = React.useMemo(() => {
     let list = filterByKind(day.patients, kind)
     const serviceFiltered = kind === "services" && !!serviceFilter
-    if (serviceFiltered) list = filterByService(list, serviceFilter)
+    if (serviceFiltered) {
+      list =
+        serviceArrivedPending
+          ? filterByServiceArrivedPending(list, serviceFilter!)
+          : filterByService(list, serviceFilter!)
+    }
     if (kind === "consultation")
       list = sortByArrival(
         filterByConsultationSubtype(list, consultSubtypeFilter).map(
@@ -164,6 +175,7 @@ export function PatientDesk() {
     day.isConsultationTerminal,
     kind,
     serviceFilter,
+    serviceArrivedPending,
     consultSubtypeFilter,
     query,
   ])
@@ -298,86 +310,28 @@ export function PatientDesk() {
             </button>
           ))}
         </div>
-        {kind === "services" || kind === "consultation" ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant={
-                  (kind === "services" && serviceFilter) ||
-                  (kind === "consultation" && consultSubtypeFilter)
-                    ? "default"
-                    : "outline"
-                }
-                size="icon"
-                className="size-7"
-                aria-label={
-                  kind === "services" ? t("filterByService") : t("filterByType")
-                }
-              >
-                <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {kind === "services" ? (
-                <DropdownMenuRadioGroup
-                  value={serviceFilter ?? SUB_FILTER_ALL}
-                  onValueChange={(v) =>
-                    setServiceFilter(v === SUB_FILTER_ALL ? null : v)
-                  }
-                >
-                  <DropdownMenuRadioItem value={SUB_FILTER_ALL}>
-                    {t("allServices")}
-                  </DropdownMenuRadioItem>
-                  {servicesToday.map((s) => (
-                    <DropdownMenuRadioItem
-                      key={s.serviceId}
-                      value={s.serviceId}
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <span
-                          className="size-2 rounded-full"
-                          style={{
-                            backgroundColor:
-                              s.color ?? "var(--muted-foreground)",
-                          }}
-                          aria-hidden
-                        />
-                        {s.name}
-                      </span>
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              ) : (
-                <DropdownMenuRadioGroup
-                  value={consultSubtypeFilter ?? SUB_FILTER_ALL}
-                  onValueChange={(v) =>
-                    setConsultSubtypeFilter(v === SUB_FILTER_ALL ? null : v)
-                  }
-                >
-                  <DropdownMenuRadioItem value={SUB_FILTER_ALL}>
-                    {t("allTypes")}
-                  </DropdownMenuRadioItem>
-                  {consultSubtypes.map((s) => (
-                    <DropdownMenuRadioItem key={s.id} value={s.slug}>
-                      {tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : null}
+        <ServiceFilterDropdown
+          kind={kind}
+          serviceFilter={serviceFilter}
+          consultSubtypeFilter={consultSubtypeFilter}
+          servicesToday={servicesToday}
+          consultSubtypes={consultSubtypes}
+          onPickService={pickServiceFilter}
+          onPickConsultSubtype={setConsultSubtypeFilter}
+        />
         {/* El filtro activo se ve, no solo se infiere del ícono relleno — antes alguien dejaba
             "Seguimiento" puesto y no se daba cuenta de que algunos pacientes no aparecían (handoff
             quejas-de-mostrador-2026-10-20 §3). */}
         {kind === "services" && serviceFilter && (
           <button
             type="button"
-            onClick={() => setServiceFilter(null)}
-            className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+            onClick={() => pickServiceFilter(null)}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
+              serviceArrivedPending ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
+            )}
           >
-            {t("filteringBy", {
+            {t(serviceArrivedPending ? "filteringByPending" : "filteringBy", {
               name: servicesToday.find((s) => s.serviceId === serviceFilter)?.name ?? serviceFilter,
             })}
             <HugeiconsIcon icon={Cancel01Icon} className="size-3" />

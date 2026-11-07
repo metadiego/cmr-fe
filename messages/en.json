@@ -4926,6 +4926,8 @@
     "allServices": "All services",
     "allTypes": "All types",
     "filteringBy": "filtering: {name}",
+    "filteringByPending": "unattended: {name}",
+    "serviceArrivedPendingHint": "See who's still unattended for this service",
     "clearSearch": "Clear search",
     "enSala": "In the room",
     "enSalaTotal": "Total",

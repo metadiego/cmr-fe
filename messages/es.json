@@ -4926,6 +4926,8 @@
     "allServices": "Todos los servicios",
     "allTypes": "Todos los tipos",
     "filteringBy": "filtrando: {name}",
+    "filteringByPending": "sin asistir: {name}",
+    "serviceArrivedPendingHint": "Ver a quién le falta asistir en este servicio",
     "clearSearch": "Limpiar búsqueda",
     "enSala": "En sala",
     "enSalaTotal": "Total",

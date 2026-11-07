@@ -355,20 +355,54 @@ export function filterByConsultationSubtype(
 }
 
 // The services actually present today, in first-seen order, for the "Servicios" sub-filter — never
-// a static catalog: a service nobody has today does not clutter the dropdown.
-export function servicesOfTheDay(
-  list: PatientDay[]
-): { serviceId: string; name: string; color: string | null }[] {
-  const out: { serviceId: string; name: string; color: string | null }[] = []
-  const seen = new Set<string>()
+// a static catalog: a service nobody has today does not clutter the dropdown. `arrived`/`attended`
+// (owner, 06-nov-2026): sessions that showed up (status not 'pendiente'/'cancelada') vs. sessions
+// closed ('asistido') — by end of day they should match; the gap is exactly what's left to close.
+export function servicesOfTheDay(list: PatientDay[]): {
+  serviceId: string
+  name: string
+  color: string | null
+  arrived: number
+  attended: number
+}[] {
+  const order: string[] = []
+  const meta = new Map<string, { name: string; color: string | null }>()
+  const counts = new Map<string, { arrived: number; attended: number }>()
   for (const p of list) {
     for (const s of p.services) {
-      if (seen.has(s.serviceId)) continue
-      seen.add(s.serviceId)
-      out.push({ serviceId: s.serviceId, name: s.name, color: s.color })
+      if (!meta.has(s.serviceId)) {
+        order.push(s.serviceId)
+        meta.set(s.serviceId, { name: s.name, color: s.color })
+        counts.set(s.serviceId, { arrived: 0, attended: 0 })
+      }
+      const c = counts.get(s.serviceId)!
+      for (const status of s.statuses) {
+        if (status === "cancelada") continue
+        if (status !== "pendiente") c.arrived++
+        if (status === "asistido") c.attended++
+      }
     }
   }
-  return out
+  return order.map((serviceId) => ({
+    serviceId,
+    ...meta.get(serviceId)!,
+    ...counts.get(serviceId)!,
+  }))
+}
+
+// Patients still owed a close for this service TODAY: arrived (presente/en_terapia) but not yet
+// 'asistido' — the gap between servicesOfTheDay's `arrived` and `attended` counts, made clickable.
+export function filterByServiceArrivedPending(
+  list: PatientDay[],
+  serviceId: string
+): PatientDay[] {
+  return filterByService(list, serviceId).filter((p) =>
+    p.services.some(
+      (s) =>
+        s.serviceId === serviceId &&
+        s.statuses.some((x) => x === "presente" || x === "en_terapia")
+    )
+  )
 }
 
 // ─── Section order: what is still pending goes first (owner, 14-oct-2026) ──────────────────────────
