@@ -13,6 +13,7 @@ import {
   queueEntryDisplayName,
   queueEntryRecord,
 } from "@/lib/frontdesk/therapy-queue"
+import { onShiftState } from "@/lib/frontdesk/technicians-today"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 import { toastError } from "@/lib/api/errors"
 import { cn } from "@/lib/utils"
@@ -289,9 +290,11 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
                                           }
                                         >
                                           {o.name}
-                                          {!o.available
+                                          {onShiftState(o) === "busy"
                                             ? ` · ${t("busyLoad", { n: o.load })}`
-                                            : ""}
+                                            : onShiftState(o) === "notYetToday"
+                                              ? ` · ${t("notYetToday")}`
+                                              : ""}
                                         </span>
                                       </SelectItem>
                                     ))}

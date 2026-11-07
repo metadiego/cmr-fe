@@ -64,3 +64,12 @@ export function breakMinutes(tipo: object | null | undefined): readonly number[]
   const ok = [...new Set(raw.filter((n): n is number => Number.isInteger(n) && n > 0))].sort((a, b) => a - b);
   return ok.length ? ok : DEFAULT_BREAK_MINUTES;
 }
+
+// How an onShift row reads in the technician picker: available → free; not working here yet today
+// (presentToday=false, available=false with load 0) → «sin pacientes hoy», still selectable; otherwise
+// busy (load > 0, on a break or shift over). Without presentToday (older BE) → busy, as before.
+export type OnShiftState = "free" | "notYetToday" | "busy";
+export function onShiftState(o: { available: boolean; presentToday?: boolean }): OnShiftState {
+  if (o.available) return "free";
+  return o.presentToday === false ? "notYetToday" : "busy";
+}

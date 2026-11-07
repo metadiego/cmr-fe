@@ -4956,6 +4956,7 @@
       "uncall": "Deshacer",
       "pickTechnician": "Elegir técnico",
       "busyLoad": "ocupado · {n}",
+      "notYetToday": "sin pacientes hoy",
       "calledLabel": "Llamado · {technician} · {time}",
       "busyIn": "Ocupado en {service}",
       "free": "Libres: {names}",

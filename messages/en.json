@@ -4956,6 +4956,7 @@
       "uncall": "Undo",
       "pickTechnician": "Pick technician",
       "busyLoad": "busy · {n}",
+      "notYetToday": "no patients today",
       "calledLabel": "Called · {technician} · {time}",
       "busyIn": "Busy in {service}",
       "free": "Free: {names}",

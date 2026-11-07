@@ -76,6 +76,9 @@ export type QueueOnShiftStaff = {
   name: string;
   load: number;
   available: boolean;
+  // BE #499: false = not working HERE yet today (the first assignment of the day is manual, owner
+  // 13-oct) — NOT busy. Absent on older deploys.
+  presentToday?: boolean;
 };
 
 export type QueueService = {

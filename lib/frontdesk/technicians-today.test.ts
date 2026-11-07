@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { breakMinutes, techniciansNow } from "./technicians-today.ts";
+import { breakMinutes, onShiftState, techniciansNow } from "./technicians-today.ts";
 import type { FrontdeskQueue } from "../api/frontdesk-queue.ts";
 
 const svc = (name: string, inTherapy: Array<[string, string]>, waiting: Array<[string | null, string | null]> = []) =>
@@ -46,4 +46,11 @@ test("breakMinutes: the type's durationOptions, sorted and unique; null/empty/mi
   assert.deepEqual(breakMinutes({ durationOptions: [] }), [10, 15, 30]);
   assert.deepEqual(breakMinutes({}), [10, 15, 30]);
   assert.deepEqual(breakMinutes(undefined), [10, 15, 30]);
+});
+
+test("onShiftState: load 0 and not here today is «not yet today», not busy", () => {
+  assert.equal(onShiftState({ available: true, presentToday: true }), "free");
+  assert.equal(onShiftState({ available: false, presentToday: false }), "notYetToday");
+  assert.equal(onShiftState({ available: false, presentToday: true }), "busy");
+  assert.equal(onShiftState({ available: false }), "busy");
 });
