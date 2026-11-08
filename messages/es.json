@@ -5249,6 +5249,7 @@
     "cancel": "Cancelar",
     "linkTitle": "Vincular a una visita",
     "linkHint": "Visitas del frontdesk del {date} en {center}. Primero las del mismo paciente.",
+    "glp1Only": "Solo se puede vincular a una visita GLP-1.",
     "searchVisit": "Buscar por nombre, récord o servicio",
     "visitsError": "No se pudieron cargar las visitas de ese día",
     "noVisits": "No hay visitas ese día que coincidan",
@@ -5294,7 +5295,8 @@
     "error": {
       "alreadyLinked": "Esa visita ya tiene su medida de este tipo",
       "visionNotConfigured": "La lectura por imagen aún no está configurada en el servidor",
-      "visionUnreadable": "No se pudo leer la imagen de la báscula"
+      "visionUnreadable": "No se pudo leer la imagen de la báscula",
+      "visitTakesNoReadings": "Solo se puede vincular a una visita GLP-1"
     }
   }
 }

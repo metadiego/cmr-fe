@@ -35,18 +35,22 @@ const c = (id: string, over: Partial<LinkCandidate>): LinkCandidate => ({
   id, patientId: null, patientName: null, record: null, serviceName: null, time: null, status: "pendiente", ...over,
 });
 
-test("rankCandidates: own patient first, then GLP-1, then time; cancelled out", () => {
+test("rankCandidates: GLP-1 visits only (BE rejects any other service), own patient first, cancelled out", () => {
   const list = [
     c("a", { patientId: "x", serviceName: "Láser", time: "08:00" }),
-    c("b", { patientId: "p1", serviceName: "Láser", time: "10:00" }),
+    c("b", { patientId: "p1", serviceName: "GLP-1", time: "10:00" }),
     c("c", { patientId: "y", serviceName: "GLP-1", time: "09:00" }),
     c("d", { patientId: "p1", serviceName: "GLP-1", time: "11:00", status: "cancelada" }),
+    c("e", { patientId: "p1", serviceName: "PEMF", time: "07:00" }),
   ];
-  assert.deepEqual(rankCandidates(list, { patientId: "p1" }).map((x) => x.id), ["b", "c", "a"]);
+  assert.deepEqual(rankCandidates(list, { patientId: "p1" }).map((x) => x.id), ["b", "c"], "Láser, PEMF and the cancelled GLP-1 are excluded");
 });
 
 test("rankCandidates: the search matches name, record or service, without accents", () => {
-  const list = [c("a", { patientName: "PÉREZ ÁLAMO, MAGDA", record: "15001" }), c("b", { patientName: "SOTO, LUIS", record: "16041" })];
+  const list = [
+    c("a", { patientName: "PÉREZ ÁLAMO, MAGDA", record: "15001", serviceName: "GLP-1" }),
+    c("b", { patientName: "SOTO, LUIS", record: "16041", serviceName: "GLP-1" }),
+  ];
   assert.deepEqual(rankCandidates(list, { query: "perez" }).map((x) => x.id), ["a"]);
   assert.deepEqual(rankCandidates(list, { query: "16041" }).map((x) => x.id), ["b"]);
 });

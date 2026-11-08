@@ -75,8 +75,9 @@ export interface LinkCandidate {
 const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 /**
- * The candidates to offer: cancelled visits out; filtered by the search (name, record or service);
- * the reading's own patient first, then GLP-1-looking services, then by time.
+ * The candidates to offer: ONLY GLP-1 visits (BE rejects linking to any other service with
+ * BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS), cancelled ones out, filtered by the search (name,
+ * record or service), the reading's own patient first, then by time.
  */
 export function rankCandidates(
   list: readonly LinkCandidate[],
@@ -84,10 +85,10 @@ export function rankCandidates(
 ): LinkCandidate[] {
   const q = fold(opts.query?.trim() ?? "");
   const own = (c: LinkCandidate) => (opts.patientId && c.patientId === opts.patientId ? 0 : 1);
-  const glp = (c: LinkCandidate) => (c.serviceName && /glp/i.test(c.serviceName) ? 0 : 1);
   return list
     .filter((c) => c.status !== "cancelada")
+    .filter((c) => c.serviceName && /glp/i.test(c.serviceName))
     .filter((c) => !q || [c.patientName, c.record, c.serviceName].some((x) => x && fold(x).includes(q)))
     .slice()
-    .sort((a, b) => own(a) - own(b) || glp(a) - glp(b) || String(a.time ?? "").localeCompare(String(b.time ?? "")));
+    .sort((a, b) => own(a) - own(b) || String(a.time ?? "").localeCompare(String(b.time ?? "")));
 }

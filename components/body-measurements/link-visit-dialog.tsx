@@ -90,6 +90,7 @@ export function LinkVisitDialog({
           <DialogTitle>{t("linkTitle")}</DialogTitle>
           <DialogDescription>{t("linkHint", { date: reading?.date ?? "", center: reading?.clinicName ?? "" })}</DialogDescription>
         </DialogHeader>
+        <p className="text-xs text-muted-foreground">{t("glp1Only")}</p>
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchVisit")} autoFocus />
         <div className="max-h-[50vh] overflow-y-auto rounded-md ring-1 ring-foreground/10">
           {failed ? (

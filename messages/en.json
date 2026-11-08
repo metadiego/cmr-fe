@@ -5249,6 +5249,7 @@
     "cancel": "Cancel",
     "linkTitle": "Link to a visit",
     "linkHint": "Frontdesk visits on {date} at {center}. The same patient's first.",
+    "glp1Only": "Can only link to a GLP-1 visit.",
     "searchVisit": "Search by name, record or service",
     "visitsError": "That day's visits could not be loaded",
     "noVisits": "No visits that day match",
@@ -5294,7 +5295,8 @@
     "error": {
       "alreadyLinked": "That visit already has its measurement of this kind",
       "visionNotConfigured": "Reading by image is not configured on the server yet",
-      "visionUnreadable": "The scale image could not be read"
+      "visionUnreadable": "The scale image could not be read",
+      "visitTakesNoReadings": "Can only link to a GLP-1 visit"
     }
   }
 }
