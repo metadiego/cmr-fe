@@ -578,6 +578,8 @@ function Editor({
         reporte={reporte}
         firmas={signOff.printed}
         firmaTexto={signOff.statement}
+        reconciliationId={cuadreInicial?.id}
+        centroId={centro}
         resumen={{
           inicio,
           salesCash,

@@ -293,6 +293,69 @@ export function getCashSignatures(id: string, centerId?: string | null): Promise
   return apiFetch<CashSignature[]>(`/cash/reconciliations/${id}/signatures${centerQs(centerId)}`);
 }
 
+// ---- Adjuntos del cuadre (settlements escaneado, BE PR #516, handoff
+// .personal/handoff-cuadre-adjuntar-settlements.md) — sub-recurso aparte del cuadre, igual que las
+// firmas: no toca procesarCierre() ni CuadreCaja. El gerente subiendo por un cajero que no sabe usar
+// el teléfono es el camino NORMAL, no una excepción (uploadedBy/uploadedByName = quien subió DE VERDAD).
+export const CASH_ATTACHMENT_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"] as const;
+export type CashAttachmentContentType = (typeof CASH_ATTACHMENT_TYPES)[number];
+export const CASH_ATTACHMENT_MAX_BYTES = 20 * 1024 * 1024; // tope del bucket (BE)
+
+export interface CashReconciliationAttachment {
+  id: string;
+  clinicId: string;
+  reconciliationId: string;
+  uploadedBy: string | null;
+  storagePath: string;
+  contentType: string;
+  ocrStatus: string | null;
+  ocrData: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// La lista trae además `url` (firmada, caduca en 1h — pedir la lista de nuevo para refrescar; puede
+// venir null si el archivo no se pudo firmar: pintar "archivo no disponible", sin romper la lista) y
+// `uploadedByName` (o null: pintar "—", nunca el id crudo).
+export type CashReconciliationAttachmentListed = CashReconciliationAttachment & {
+  url: string | null;
+  uploadedByName: string | null;
+};
+
+export function getCashAttachmentUploadUrl(
+  id: string,
+  contentType: CashAttachmentContentType,
+  centerId?: string | null,
+): Promise<{ uploadUrl: string; path: string }> {
+  return apiFetch<{ uploadUrl: string; path: string }>(`/cash/reconciliations/${id}/attachments/upload-url${centerQs(centerId)}`, {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
+  });
+}
+
+// PUT directo al storage firmado (sin apiFetch: el token va en la URL). Mismo patrón que
+// lib/api/media.ts, pero sin publicUrl — el bucket es privado.
+export async function uploadCashAttachmentFile(uploadUrl: string, file: File): Promise<void> {
+  const res = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
+  if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+}
+
+export function registerCashAttachment(
+  id: string,
+  payload: { path: string; contentType: CashAttachmentContentType },
+  centerId?: string | null,
+): Promise<CashReconciliationAttachment> {
+  return apiFetch<CashReconciliationAttachment>(`/cash/reconciliations/${id}/attachments${centerQs(centerId)}`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// El más nuevo primero (es historial: nunca se borra ni se reemplaza un adjunto viejo).
+export function listCashAttachments(id: string, centerId?: string | null): Promise<CashReconciliationAttachmentListed[]> {
+  return apiFetch<CashReconciliationAttachmentListed[]>(`/cash/reconciliations/${id}/attachments${centerQs(centerId)}`);
+}
+
 // ---- Cuadre TOTAL del día (handoff cuadre-unico-del-dia, cmr-be #457, en prod desde 04-nov-2026) --
 // Las DOS divisiones + todos los cajeros, un solo conteo opcional, comprobado contra la suma de los
 // cuadres individuales. Rutas confirmadas leyendo /api/docs-json de prod (no están en schema.d.ts: el

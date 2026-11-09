@@ -3878,6 +3878,19 @@
       "difference": "Diferencia",
       "signMine": "Firmar mi hoja"
     },
+    "attachments": {
+      "title": "Settlements escaneado",
+      "add": "Adjuntar settlements",
+      "uploading": "Subiendo…",
+      "uploaded": "Adjunto guardado",
+      "empty": "Sin adjuntos todavía",
+      "unavailable": "Archivo no disponible",
+      "uploadedBy": "Subido por {name}",
+      "uploadedByUnknown": "—",
+      "loadError": "No se pudieron cargar los adjuntos",
+      "typeNotAllowed": "Solo se aceptan fotos (JPG, PNG, WEBP) o PDF.",
+      "tooLarge": "El archivo pesa más de 20 MB."
+    },
     "otherDivision": {
       "inConsulta": "Hoy cobraste en Consulta: tu hoja y tu firma están en el cuadre de Consulta, no en este.",
       "inGeneral": "Hoy cobraste en General: tu hoja y tu firma están en el cuadre General, no en este.",
@@ -4866,6 +4879,12 @@
     "commandSetEscpos": "Epson (ESC/POS)",
     "commandSetStarLine": "Star (Star Line Mode)",
     "invalidCommandSet": "El lenguaje de la impresora debe ser Epson (ESC/POS) o Star (Star Line Mode)."
+  },
+  "cashReconciliation": {
+    "error": {
+      "attachmentTypeNotAllowed": "Ese tipo de archivo no se acepta: solo fotos (JPG, PNG, WEBP) o PDF.",
+      "attachmentPathInvalid": "No se pudo registrar el adjunto; vuelve a adjuntarlo."
+    }
   },
   "invoiceReopen": {
     "action": "Reabrir",

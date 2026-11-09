@@ -10,6 +10,7 @@ import { money } from "@/lib/caja/totales";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { ProductSalesSection } from "@/components/caja/product-sales-section";
+import { CuadreAttachments } from "@/components/caja/cuadre-attachments";
 import { productSalesPrintHtml, type ProductSalesPrintLabels } from "@/lib/caja/product-sales-print";
 import { signaturesPrintHtml, type PrintedSignature } from "@/lib/caja/sign-off";
 
@@ -39,6 +40,8 @@ export function CuadreDetalle({
   resumen,
   firmas,
   firmaTexto,
+  reconciliationId,
+  centroId,
 }: {
   // Título de la hoja impresa; default = t("title") ("Cuadre de caja"). El cuadre TOTAL del día
   // (handoff cuadre-unico-del-dia) pasa el suyo propio ("Cuadre total del día").
@@ -54,6 +57,10 @@ export function CuadreDetalle({
   // over each line. Absent = the two blank lines of before.
   firmas?: PrintedSignature[];
   firmaTexto?: string;
+  // Cuadre POR DIVISIÓN (no el total del día, que es otro recurso): habilita el adjunto de settlements.
+  // Ausente = sin cuadre real todavía (consolidado sin seleccionar cajero) → sin bloque de adjuntos.
+  reconciliationId?: string;
+  centroId?: string | null;
 }) {
   const t = useTranslations("caja");
   const tp = useTranslations("caja.payments");
@@ -165,6 +172,8 @@ export function CuadreDetalle({
           <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {td("print")}
         </Button>
       </div>
+
+      {reconciliationId && <CuadreAttachments reconciliationId={reconciliationId} centroId={centroId} />}
 
       {/* 0. Conteo de efectivo (sellado / consolidado): cantidad · valor · monto, de mayor a menor. */}
       <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
