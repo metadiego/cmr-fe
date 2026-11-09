@@ -23,6 +23,12 @@ simple es que el cajero tome la foto con la cámara del teléfono/tableta **desd
 cuadre** — un `<input type="file" accept="image/*" capture>` — o adjunte un archivo si ya tiene el
 escaneo. Cero infraestructura nueva de hardware.
 
+**Si el cajero no sabe/puede hacerlo** (9-nov-2026, aclarado por el dueño): el gerente o admin tiene
+que poder subir el adjunto él mismo, **por el cajero**, sin fricción — abriendo el cuadre de ESE
+cajero (no solo el suyo propio) y adjuntando ahí la foto. No es un camino aparte ni un formulario
+especial: es el mismo botón "Adjuntar settlements", disponible también en la vista que el gerente ya
+usa para ver el cuadre de cualquier cajero (la que hoy le da `caja.ver_todos`).
+
 ## Lo que se investigó en el FE antes de escribir esto (no se asume)
 
 - **Pantalla:** `components/caja/cuadre-caja.tsx` (`CuadreCaja`) es la única pantalla, para cajero Y
@@ -86,7 +92,10 @@ dueño del cuadre ve el suyo, `caja.ver_todos` ve todos — el BE decide, el FE 
 ### 4. Permisos
 
 Quién puede SUBIR: el cajero dueño del cuadre (mientras está `abierto` o recién `cerrado`, a definir
-la ventana) y cualquiera con `caja.ver_todos`/`caja.cerrar` (gerencia, retroactivo). Quién puede VER:
+la ventana) **y, con el mismo peso, cualquiera con `caja.ver_todos`/`caja.cerrar` subiendo por un
+cajero que no sabe o no puede hacerlo él mismo** — no es un caso borde ni una excepción retroactiva,
+es el camino normal para el personal que no maneja bien el teléfono. `uploadedBy` siempre registra
+quién subió de verdad (el gerente, si fue él), nunca se finge que lo subió el cajero. Quién puede VER:
 mismo alcance que `GET /cash/reconciliations/:id`. No se pide un permiso nuevo si `caja.read` +
 `caja.ver_todos` ya alcanza — a criterio del BE.
 
