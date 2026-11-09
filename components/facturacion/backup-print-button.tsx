@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { getPrintHubForPrinting, type PrintHubForPrinting } from "@/lib/api/print-hub";
 import { buildHubRequestUrls, hubOrigin, hubStatusUrl } from "@/lib/print/hub-target";
 import { pickPrinter, readPrinterChoice, savePrinterChoice } from "@/lib/print/printer-choice";
-import { checkHubs, sendToHubs, type HubHealth } from "@/lib/print/hub";
+import { bytesForPrinter, checkHubs, sendToHubs, type HubHealth } from "@/lib/print/hub";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 
@@ -85,7 +85,7 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
   async function print() {
     setBusy(true);
     try {
-      const i = await sendToHubs(requestUrls, await buildBytes());
+      const i = await sendToHubs(requestUrls, bytesForPrinter(await buildBytes(), printer?.commandSet));
       toast.success(i === 0 ? t("backupHubDone") : t("backupHubDoneFallback", { hub: new URL(requestUrls[i]).host }));
     } catch (err) {
       toastError(err, tRoot);

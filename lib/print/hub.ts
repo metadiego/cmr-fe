@@ -1,4 +1,5 @@
 import { EscPosWriter } from "./escpos.ts";
+import { escposToStarLine } from "./star-line.ts";
 
 // Backup ESC/POS print path — a fallback for the normal one (browser + window.print()), which stays
 // the default. The receipt goes as raw ESC/POS bytes (lib/print/receipt-escpos.ts) to the print hub,
@@ -6,6 +7,15 @@ import { EscPosWriter } from "./escpos.ts";
 // every browser. The request URL (hub + destination printer) is resolved per center by
 // buildHubRequestUrl (lib/print/hub-target.ts); this module never picks a destination itself.
 // See docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
+
+// A printer speaks ESC/POS (Epson, the default) or Star Line Mode (Star, e.g. TSP700II — it cannot be
+// switched to ESC/POS). Every screen that sends bytes to a hub goes through this one translation point,
+// so no screen reimplements it. docs/specs/impresoras-star-line-mode.md.
+export type PrintCommandSet = "escpos" | "star_line";
+
+export function bytesForPrinter(bytes: Uint8Array, commandSet: PrintCommandSet | undefined): Uint8Array {
+  return commandSet === "star_line" ? escposToStarLine(bytes) : bytes;
+}
 
 // A short ticket to check a center's hub + printer settings from the configuration screen.
 export function testTicketToEscPos(lines: string[]): Uint8Array<ArrayBuffer> {

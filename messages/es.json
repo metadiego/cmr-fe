@@ -4860,7 +4860,11 @@
     "notFound": "Este centro no tiene configurado un hub de impresión de respaldo.",
     "printerNameRequired": "Ponle un nombre a la impresora.",
     "duplicatePrinterName": "Ya hay una impresora con ese nombre en este centro.",
-    "printerNotFound": "Esa impresora ya no existe."
+    "printerNotFound": "Esa impresora ya no existe.",
+    "commandSet": "Lenguaje de la impresora",
+    "commandSetEscpos": "Epson (ESC/POS)",
+    "commandSetStarLine": "Star (Star Line Mode)",
+    "invalidCommandSet": "El lenguaje de la impresora debe ser Epson (ESC/POS) o Star (Star Line Mode)."
   },
   "invoiceReopen": {
     "action": "Reabrir",

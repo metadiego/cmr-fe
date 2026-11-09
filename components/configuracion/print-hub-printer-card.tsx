@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { createPrinter, deletePrinter, updatePrinter, type CenterPrinter } from "@/lib/api/print-hub";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { DEFAULT_PORTS, buildHubDiscoverUrl, buildHubRequestUrls, type HubDiscovery, type PrintHubProtocol } from "@/lib/print/hub-target";
-import { sendToHubs, testTicketToEscPos } from "@/lib/print/hub";
+import { bytesForPrinter, sendToHubs, testTicketToEscPos, type PrintCommandSet } from "@/lib/print/hub";
 import { PrintHubLogin } from "@/components/configuracion/print-hub-login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,12 +22,20 @@ interface Form {
   printerHost: string;
   printerPort: string;
   printerQueue: string;
+  commandSet: PrintCommandSet;
 }
 
 const fromPrinter = (p: CenterPrinter | null): Form =>
   p
-    ? { name: p.name, protocol: p.protocol, printerHost: p.printerHost ?? "", printerPort: String(p.printerPort), printerQueue: p.printerQueue }
-    : { name: "", protocol: "ipp", printerHost: "", printerPort: String(DEFAULT_PORTS.ipp), printerQueue: "" };
+    ? {
+        name: p.name,
+        protocol: p.protocol,
+        printerHost: p.printerHost ?? "",
+        printerPort: String(p.printerPort),
+        printerQueue: p.printerQueue,
+        commandSet: p.commandSet ?? "escpos",
+      }
+    : { name: "", protocol: "ipp", printerHost: "", printerPort: String(DEFAULT_PORTS.ipp), printerQueue: "", commandSet: "escpos" };
 
 interface Props {
   centerId: string;
@@ -91,6 +99,7 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
       printerHost: form.printerHost.trim(),
       printerPort: Number(form.printerPort),
       printerQueue: form.printerQueue.trim(),
+      commandSet: form.commandSet,
     };
     try {
       const saved = printer ? await updatePrinter(centerId, printer.id, body) : await createPrinter(centerId, body);
@@ -122,7 +131,8 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
     setBusy("test");
     try {
       const stamp = new Date().toISOString().slice(0, 19).replace("T", " ");
-      const i = await sendToHubs(requestUrls, testTicketToEscPos([tReceipt("hubTestTitle"), `${centerName} · ${form.name}`, form.printerQueue, stamp]));
+      const ticket = testTicketToEscPos([tReceipt("hubTestTitle"), `${centerName} · ${form.name}`, form.printerQueue, stamp]);
+      const i = await sendToHubs(requestUrls, bytesForPrinter(ticket, form.commandSet));
       toast.success(t("hubTestSentVia", { hub: new URL(requestUrls[i]).host }));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));
@@ -201,6 +211,19 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
           </div>
         </div>
         <p className="text-xs text-muted-foreground">{form.protocol === "smb" ? t("printerHelpWindows") : t("printerHelpLinuxMac")}</p>
+
+        <div className="space-y-1.5">
+          <Label htmlFor={`cs-${id}`}>{tRoot("printHub.commandSet")}</Label>
+          <select
+            id={`cs-${id}`}
+            value={form.commandSet}
+            onChange={(e) => setForm((f) => ({ ...f, commandSet: e.target.value as PrintCommandSet }))}
+            className="h-9 w-full max-w-xs rounded-md border bg-background px-2 text-sm"
+          >
+            <option value="escpos">{tRoot("printHub.commandSetEscpos")}</option>
+            <option value="star_line">{tRoot("printHub.commandSetStarLine")}</option>
+          </select>
+        </div>
       </fieldset>
 
       <div className="flex flex-wrap gap-2">
