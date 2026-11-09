@@ -1899,6 +1899,7 @@
     "rangoHint": "Rango de fechas (gerencia): deja vacío para ver un solo día.",
     "elegir": "Elegir…",
     "sinOpciones": "Sin opciones",
+    "sinAsignar": "Sin asignar",
     "faltanCampos": "Falta completar: {campos}",
     "calDiaTitle": "Calendario del día",
     "calPacienteTitle": "Calendario del paciente",

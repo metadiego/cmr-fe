@@ -14,6 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const SIN_ASIGNAR = "__none__"; // Radix no admite value="" — handoff vaciar-recurso-asignado.
+
 // Data-driven editable `select` cell. Options come from GET /tablero/opciones
 // (fetched once per column at the board level and passed down). Writes via the
 // generic cell endpoint (POST /tablero/celda) and lets SSE + onSaved refresh the
@@ -27,6 +29,7 @@ export function CeldaSelect({
   options,
   centroId,
   etiqueta,
+  clearable,
   onSaved,
 }: {
   tablero: string;
@@ -36,6 +39,7 @@ export function CeldaSelect({
   options: Opcion[];
   centroId?: string;
   etiqueta?: string; // nombre humano de la columna para el toast de certificación
+  clearable?: boolean; // ofrece «Sin asignar» (render.clearable de la columna)
   onSaved?: () => void;
 }) {
   const tRoot = useTranslations();
@@ -52,11 +56,12 @@ export function CeldaSelect({
   const current = optimistic ?? (options.find((o) => o.label === label)?.value ?? "");
 
   async function onChange(next: string) {
-    if (next === current) return;
+    const picked = next === SIN_ASIGNAR ? "" : next;
+    if (picked === current) return;
     setBusy(true);
-    setOptimistic(next); // instant feedback
+    setOptimistic(picked); // instant feedback
     try {
-      const { persistencia } = await editarCelda({ boardSlug: tablero, entityId: entidadId, column: columna, value: next }, centroId);
+      const { persistencia } = await editarCelda({ boardSlug: tablero, entityId: entidadId, column: columna, value: picked === "" ? null : picked }, centroId);
       // Certifica con la base. Si ok:false, soltamos el optimista y onSaved() re-lee la verdad.
       const ok = notifyPersistencia(persistencia, etiqueta);
       if (!ok) setOptimistic(null);
@@ -77,6 +82,7 @@ export function CeldaSelect({
         <SelectValue placeholder={label || "—"} />
       </SelectTrigger>
       <SelectContent>
+        {clearable && <SelectItem value={SIN_ASIGNAR}>{tRoot("frontdesk.sinAsignar")}</SelectItem>}
         {options.map((o) => (
           <SelectItem key={o.value} value={o.value}>
             {o.label}

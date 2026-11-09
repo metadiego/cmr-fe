@@ -1899,6 +1899,7 @@
     "rangoHint": "Date range (management): leave empty for a single day.",
     "elegir": "Pick…",
     "sinOpciones": "No options",
+    "sinAsignar": "Unassigned",
     "faltanCampos": "Missing: {campos}",
     "calDiaTitle": "Day calendar",
     "calPacienteTitle": "Patient calendar",

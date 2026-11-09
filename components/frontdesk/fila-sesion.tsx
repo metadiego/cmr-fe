@@ -52,6 +52,7 @@ import { Tick02Icon, Notification03Icon, ShoppingCart01Icon } from "@hugeicons/c
 // pasos, el menú de acciones y los modales que solo ella usa (historial, compras, transferir
 // tratamiento). Handoff: HANDOFF-banderas-de-prioridad-del-paciente.md (celda "paciente" ahora
 // también deja ver/asignar/quitar banderas de prioridad, sin abrir la ficha).
+const SIN_ASIGNAR = "__none__"; // Radix no admite value="" — handoff vaciar-recurso-asignado.
 export function FilaSesion({
   fila,
   sesion,
@@ -103,16 +104,14 @@ export function FilaSesion({
   const [historialOpen, setHistorialOpen] = React.useState(false);
   const [comprasOpen, setComprasOpen] = React.useState(false);
   const [notificarCfg, setNotificarCfg] = React.useState<{ panel: string; seccion: string } | null>(null);
-  // Reports del servicio (HILT/MLS, o formatos genéricos): se listan PLANOS en el menú de Acciones,
-  // cada uno abre su documento imprimible. Handoff HANDOFF-formato-laser-hilt-mls (§3).
+  // Reports del servicio (HILT/MLS o formatos genéricos): listados PLANOS en Acciones, cada uno abre su documento imprimible. Handoff HANDOFF-formato-laser-hilt-mls (§3).
   const reportsAcc = React.useMemo(() => (parseAcciones(servicio?.formActions).reports ?? []), [servicio]);
   const [formatoReport, setFormatoReport] = React.useState<ReportAccion | null>(null);
   // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
   // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
   const [pendSelect, setPendSelect] = React.useState<Record<string, string>>({});
-  // Cartel CENTRADO (no bloqueante) cuando el usuario elige una dosis que el paciente NO compró teniendo
-  // dosis compradas pendientes. Guarda todo lo necesario para confirmar/revertir sin recalcular. El dueño
-  // lo pidió a la vista (no un toast abajo): que se dé cuenta cuando aún puede corregir. Handoff §1.
+  // Cartel CENTRADO (no bloqueante) cuando elige una dosis que el paciente NO compró con dosis compradas
+  // pendientes: guarda todo para confirmar/revertir sin recalcular. El dueño lo pidió a la vista, no un toast abajo. Handoff §1.
   const [dosisAviso, setDosisAviso] = React.useState<{
     clave: string;
     valor: string;
@@ -128,10 +127,9 @@ export function FilaSesion({
   const cancelada = estadoActual === "cancelada";
   const pacienteNombre = String(fila.paciente ?? fila.fd_paciente ?? fila.fac_paciente ?? "");
 
-  // Devuelve true SOLO si la acción tuvo éxito. Así quien encadena un postAccion (p. ej. abrir "Programar
-  // citas" tras Asistido) no lo dispara cuando la acción falló (sesión caducada, requerido faltante): antes
-  // el `.then` corría igual y parecía que había asistido sin haberlo hecho (QA-002). El error se avisa con
-  // un toast (mensaje del BE, i18n); si la sesión expiró, el cliente muestra el aviso y va al login.
+  // Devuelve true SOLO si la acción tuvo éxito, así quien encadena un postAccion (p. ej. abrir "Programar
+  // citas" tras Asistido) no lo dispara si falló (sesión caducada, requerido faltante) — antes `.then` corría
+  // igual y parecía asistido sin haberlo hecho (QA-002). El error se avisa con un toast; sesión expirada → login.
   async function run(fn: () => Promise<unknown>): Promise<boolean> {
     setBusy(true);
     try {
@@ -285,6 +283,7 @@ export function FilaSesion({
           value={shown}
           disabled={busy || cancelada || ops.length === 0 || estadoNoCumplido}
           onValueChange={(valor) => {
+            if (valor === SIN_ASIGNAR) { setPendSelect((p) => ({ ...p, [c.clave]: "" })); run(() => guardarCelda(c.clave, null, etiquetaCol(c))); return; }
             setPendSelect((p) => ({ ...p, [c.clave]: valor })); // reflejo instantáneo
             // Eligió una dosis que el paciente NO compró teniendo compradas pendientes → cartel CENTRADO,
             // no bloqueante (§1). Reflejamos la elección mientras decide y DIFERIMOS la escritura al confirmar.
@@ -323,6 +322,7 @@ export function FilaSesion({
             <SelectValue placeholder={ops.length ? t("elegir") : t("sinOpciones")}>{label}</SelectValue>
           </SelectTrigger>
           <SelectContent>
+            {(c.render as { clearable?: boolean } | null)?.clearable && <SelectItem value={SIN_ASIGNAR}>{t("sinAsignar")}</SelectItem>}
             {conSaldo ? (
               <>
                 {/* Las dosis que compró, primero, con su saldo. */}
