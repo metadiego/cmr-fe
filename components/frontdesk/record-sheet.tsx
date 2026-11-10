@@ -48,6 +48,12 @@ export function RecordSheet({ d, label, onVolver }: { d: FormatoArmado; label: L
       <div ref={printRef} className="formato-print rounded-lg border bg-white p-6 text-black">
         <div style={{ display: "flex", flexDirection: "column", fontFamily: "Arial, Helvetica, sans-serif", color: "#000", fontSize: 10 }}>
           <div style={{ textAlign: "center", paddingBottom: 14, borderBottom: RULE }}>
+            {/* The form's own logo (render.logo), centred over the company line — the legacy Plaquex has it,
+                Vit C and BPC-157 do not. */}
+            {d.render?.logo && (
+              // eslint-disable-next-line @next/next/no-img-element -- cloned into a print window; next/image does not survive it.
+              <img src={d.render.logo} alt="" style={{ display: "block", height: 54, maxHeight: 54, width: "auto", margin: "0 auto 10px" }} />
+            )}
             {!d.letterhead?.ocultarEmpresa && <div style={{ fontSize: 15, fontWeight: 700, textTransform: "uppercase" }}>{t("formatoEmpresa")}</div>}
             {d.letterhead?.center && <div style={{ fontSize: 11, fontWeight: 700, marginTop: 4 }}>{d.letterhead.center}</div>}
             <div style={{ fontSize: 14, fontWeight: 700, textTransform: "uppercase", marginTop: 4 }}>{d.title}</div>
