@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 import { ApiError } from "./types";
+import { CONFIRMATION_DECLINED } from "./confirm-action";
 
 // Minimal shape of a next-intl translator: t(key) → string. Kept loose so any
 // namespace's `useTranslations(...)` result can be passed.
@@ -69,5 +70,7 @@ export function apiErrorLabel(err: unknown, t?: Translate): string {
 
 // Shows an error toast using the i18n-aware label.
 export function toastError(err: unknown, t?: Translate): void {
+  // «Cancelar» on the confirmation dialog: the person chose; nothing failed, nothing to say.
+  if (err instanceof ApiError && err.code === CONFIRMATION_DECLINED) return;
   toast.error(apiErrorLabel(err, t));
 }

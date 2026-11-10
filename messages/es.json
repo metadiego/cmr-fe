@@ -1269,7 +1269,9 @@
     "ahora_mismo": "Ahora mismo",
     "productosExonerados": "Productos exonerados (IVU)",
     "bothCenters": "AMBOS",
-    "bodyMeasurementsUnlinked": "Medidas sin vincular"
+    "bodyMeasurementsUnlinked": "Medidas sin vincular",
+    "changeLog": "Historial de cambios",
+    "confirmationPolicies": "Confirmaciones"
   },
   "admin": {
     "title": "Administración",
@@ -3538,7 +3540,9 @@
       "frontdesk": "Frontdesk",
       "tablero": "Tablero",
       "auth": "Autenticación"
-    }
+    },
+    "filtroEntidad": "Entidad {id}",
+    "filtrarPorEntidad": "Filtrar por esta entidad"
   },
   "comunicaciones": {
     "title": "Alertas",
@@ -5428,5 +5432,109 @@
     "ownerNoteFailed": "No se pudo anotar el dueño de cartera en la hoja",
     "down": "La hoja del call center no responde: la disponibilidad puede no estar al día",
     "noSeatDays": "Sin asiento en la hoja: {days}"
+  },
+  "confirmation": {
+    "required": "Esta acción necesita tu confirmación antes de guardarse.",
+    "unknownAction": "Confirmar: {action}",
+    "cancel": "Cancelar",
+    "accept": "Aceptar",
+    "action": {
+      "unattend": "Desasistir la sesión",
+      "deleteSession": "Eliminar la sesión",
+      "cancelDay": "Cancelar todas las sesiones del día",
+      "repair": "Reparar la sesión",
+      "cancelSession": "Cancelar la sesión",
+      "undoPresent": "Deshacer presente",
+      "undoChange": "Deshacer el cambio",
+      "voidInvoice": "Anular la factura",
+      "voidRefund": "Anular la devolución"
+    },
+    "effect": {
+      "returnsPackageSession": "Devuelve la sesión al paquete",
+      "returnsStock": "Devuelve al inventario lo descontado",
+      "clearsAttendedTime": "Borra la hora de asistido",
+      "sessionDeleted": "La sesión desaparece del tablero",
+      "cancelsOpenSessionsOfTheDay": "Cancela las sesiones abiertas del día",
+      "redoesDischarge": "Rehace el descuento de inventario",
+      "sessionCancelled": "La sesión queda cancelada",
+      "backToPending": "La sesión vuelve a pendiente",
+      "invoiceVoided": "La factura queda anulada",
+      "refundVoided": "La devolución queda anulada"
+    },
+    "policies": {
+      "title": "Confirmaciones",
+      "hint": "Qué acciones delicadas piden «¿Aceptar o no?» antes de guardarse, por centro.",
+      "action": "Acción",
+      "default": "por defecto",
+      "saved": "Guardado",
+      "noPermission": "No tienes permiso para configurar las confirmaciones."
+    }
+  },
+  "changeLog": {
+    "title": "Historial de cambios",
+    "dayTitle": "Historial del día",
+    "screenHint": "Quién cambió qué, con el antes y el después, y deshacer donde se permite.",
+    "noPermission": "No tienes permiso para ver el historial de cambios.",
+    "loadError": "No se pudo cargar el historial",
+    "empty": "Sin cambios registrados",
+    "system": "Sistema",
+    "undo": "Deshacer",
+    "undoing": "Deshaciendo…",
+    "undone": "Cambio deshecho",
+    "undoneBy": "Deshecho por {name}",
+    "more": "Ver {n} más",
+    "changedId": "(cambiado)",
+    "filter": {
+      "from": "Desde",
+      "to": "Hasta",
+      "user": "Usuario",
+      "allUsers": "Todos",
+      "patient": "Paciente",
+      "patientHint": "Nombre o récord"
+    },
+    "action": {
+      "create": "Creada",
+      "present": "Presente",
+      "undo_present": "Deshacer presente",
+      "start_therapy": "En terapia",
+      "back_to_present": "Vuelve a presente",
+      "back_to_pending": "Vuelve a pendiente",
+      "attend": "Asistida",
+      "unattend": "Desasistida",
+      "cancel": "Cancelada",
+      "reopen": "Reabierta",
+      "reschedule": "Reagendada",
+      "edit": "Editada",
+      "delete": "Eliminada",
+      "status": "Cambio de estado"
+    },
+    "field": {
+      "estado": "Estado",
+      "presenteEn": "Presente",
+      "terapiaInEn": "En terapia",
+      "asistidoEn": "Asistido",
+      "productoAplicadoId": "Dosis",
+      "cantidad": "Cantidad",
+      "enfermeraId": "Enfermera",
+      "tecnicoId": "Técnico",
+      "medicoId": "Médico",
+      "datos": "Datos",
+      "fecha": "Fecha",
+      "hora": "Hora",
+      "paqueteId": "Paquete",
+      "vialAbiertoId": "Vial abierto"
+    },
+    "status": {
+      "pendiente": "Pendiente",
+      "presente": "Presente",
+      "en_terapia": "En terapia",
+      "asistido": "Asistido",
+      "cancelada": "Cancelada"
+    },
+    "error": {
+      "superseded": "Alguien cambió esos campos después: deshaz primero el cambio posterior",
+      "alreadyUndone": "Ese cambio ya se deshizo",
+      "notUndoable": "Ese cambio no se puede deshacer"
+    }
   }
 }

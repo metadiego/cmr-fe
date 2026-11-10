@@ -129,6 +129,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "ehr-integration", route: "/configuration/ehr-integration", group: "configuration", order: 12 },
   // clave real del BE confirmada en cmr-be/src/scripts/menu-items.ts: "config-panel".
   { clave: "config-panel", route: "/configuration/panel", group: "configuration", order: 13 },
+  // BE #529: which guarded actions ask «¿Aceptar o no?» (BE path /configuracion/confirmaciones).
+  { clave: "confirmation-policies", route: "/configuration/confirmations", group: "configuration", order: 13.6 },
   // clave INVENTADA del lado FE: el BE (06-oct-2026) todavía no sembró una fila de menú para esta
   // pantalla nueva — se llega hoy por el enlace "Catálogo" dentro del propio selector de banderas
   // de prioridad (components/clientes/priority-flags-badges.tsx), no por el menú lateral. Cuando el

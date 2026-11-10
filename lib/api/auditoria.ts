@@ -35,6 +35,7 @@ export interface AuditListParams {
   desde?: string;
   hasta?: string;
   userId?: string;
+  entidadId?: string; // one entity (a session, an invoice…), BE #529
   dominio?: string;
   accion?: string;
   resultado?: "ok" | "error";

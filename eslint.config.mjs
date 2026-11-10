@@ -52,7 +52,8 @@ const DEBT = {
   // se extrajeron a components/servicios/servicio-form-fields.tsx para hacerle lugar al toggle de
   // allowSessionFixWithoutPackage sin tocar el ceiling. Ver HANDOFF-sesiones-sin-paquete-listo.md.
   "components/servicios/servicios-admin.tsx": 661,
-  "components/auditoria/auditoria-log.tsx": 642,
+  // 10-nov-2026: 642 → 618 — Campo/CopiableCampo moved to components/auditoria/audit-fields.tsx.
+  "components/auditoria/auditoria-log.tsx": 618,
   "components/clientes/paciente-form-sheet.tsx": 550,
   // 20-oct-2026: first entry for this file — same EHR-gate wiring as above, in both CentroSheet and
   // CentroSheetV2 (the classic and beta day views share this file). Admitted debt, not a silent bump.

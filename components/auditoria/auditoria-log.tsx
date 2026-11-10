@@ -4,7 +4,7 @@ import * as React from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { RefreshIcon, Copy01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { RefreshIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import {
   listAuditoria,
@@ -29,6 +29,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Tooltip } from "@/components/ui/tooltip";
 import { DataTable, type Column } from "@/components/kit/data-table";
+import { Campo, CopiableCampo } from "@/components/auditoria/audit-fields";
+import { ChangeLogList } from "@/components/change-log/change-log-list";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -106,6 +108,7 @@ export function AuditoriaLog() {
   // hay mapa nombre→id en el cliente. Se activa clicando la celda Usuario de una fila (trae ambos).
   const [userId, setUserId] = React.useState("");
   const [userLabel, setUserLabel] = React.useState("");
+  const [entidadId, setEntidadId] = React.useState(""); // one session, one invoice… (from the detail panel)
   const [page, setPage] = React.useState(1);
   const [detalle, setDetalle] = React.useState<AuditRow | null>(null);
 
@@ -162,6 +165,7 @@ export function AuditoriaLog() {
     soloCambios: soloCambios || undefined,
     excluirErrorCode: ocultarRuido && hayRateLimited ? "RATE_LIMITED" : undefined,
     userId: userId || undefined,
+    entidadId: entidadId || undefined,
     clinicId: clinicId === TODOS ? undefined : clinicId,
     page,
     limit: 50,
@@ -232,7 +236,7 @@ export function AuditoriaLog() {
             </button>
           </Tooltip>
         ) : (
-          <span className="text-muted-foreground">—</span>
+          <span className={r.usuarioNombre ? "text-sm" : "text-muted-foreground"}>{r.usuarioNombre ?? "—"}</span>
         ),
     },
     {
@@ -390,6 +394,12 @@ export function AuditoriaLog() {
             <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
           </Button>
         ) : null}
+        {entidadId ? (
+          <Button size="sm" variant="secondary" onClick={() => { setEntidadId(""); setPage(1); }} className="gap-1">
+            {t("filtroEntidad", { id: entidadId.slice(0, 8) })}
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          </Button>
+        ) : null}
         <span className="ml-auto flex items-center gap-3">
           {state.kind === "ok" ? (
             <span className="text-xs text-muted-foreground">{t("totalRegistros", { total: meta.total })}</span>
@@ -416,6 +426,7 @@ export function AuditoriaLog() {
         onClose={() => setDetalle(null)}
         centroNombre={centroNombre}
         onCopy={copiar}
+        onEntity={(id) => { setEntidadId(id); setPage(1); setDetalle(null); }}
       />
     </div>
   );
@@ -546,11 +557,13 @@ function DetalleSheet({
   onClose,
   centroNombre,
   onCopy,
+  onEntity,
 }: {
   row: AuditRow | null;
   onClose: () => void;
   centroNombre: (id: string | null) => string;
   onCopy: (txt: string) => void;
+  onEntity: (id: string) => void;
 }) {
   const t = useTranslations("auditoria");
   const format = useFormatter();
@@ -579,16 +592,18 @@ function DetalleSheet({
             <Campo label={t("col.duracion")}>{row.durationMs != null ? `${row.durationMs} ms` : "—"}</Campo>
             <Campo label={t("col.centro")}>{centroNombre(row.clinicId)}</Campo>
             <Campo label={t("col.usuario")}>
-              <span className="font-mono text-xs">{row.userId ?? "—"}</span>
+              {row.usuarioNombre ?? <span className="font-mono text-xs">{row.userId ?? "—"}</span>}
               {row.userType ? <span className="ml-2 text-muted-foreground">({row.userType})</span> : null}
             </Campo>
             {row.entidadId ? (
               <Campo label={t("entidadId")}>
-                <span className="font-mono text-xs">{row.entidadId}</span>
+                <button type="button" onClick={() => onEntity(row.entidadId!)} className="font-mono text-xs hover:underline" title={t("filtrarPorEntidad")}>{row.entidadId}</button>
               </Campo>
             ) : null}
             <CopiableCampo label="requestId" value={row.requestId} onCopy={onCopy} vacio={t("sinDato")} />
             <CopiableCampo label="IP" value={row.ip} onCopy={onCopy} vacio={t("sinDato")} />
+            {/* Before / after of this request (BE #529: today only frontdesk sessions; empty elsewhere). */}
+            {row.requestId && row.resultado !== "error" ? <ChangeLogList filter={{ requestId: row.requestId }} pageSize={20} /> : null}
             {row.resultado === "error" ? (
               <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3">
                 <p className="text-xs font-semibold text-destructive">{row.errorCode ?? t("error")}</p>
@@ -599,44 +614,5 @@ function DetalleSheet({
         )}
       </SheetContent>
     </Sheet>
-  );
-}
-
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <span className="text-right">{children}</span>
-    </div>
-  );
-}
-
-function CopiableCampo({
-  label,
-  value,
-  onCopy,
-  vacio,
-}: {
-  label: string;
-  value: string | null;
-  onCopy: (txt: string) => void;
-  vacio: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {value ? (
-        <button
-          type="button"
-          onClick={() => onCopy(value)}
-          className={cn("flex items-center gap-1 font-mono text-xs hover:text-foreground")}
-        >
-          <span className="max-w-[12rem] truncate">{value}</span>
-          <HugeiconsIcon icon={Copy01Icon} className="size-3.5 opacity-60" />
-        </button>
-      ) : (
-        <span className="text-xs text-muted-foreground">{vacio}</span>
-      )}
-    </div>
   );
 }
