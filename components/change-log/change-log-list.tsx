@@ -131,7 +131,7 @@ export function ChangeLogList({
                 <ul className="mt-1 space-y-0.5 text-xs">
                   {changes.map((c) => (
                     <li key={c.field}>
-                      <span className="text-muted-foreground">{label("field", c.field)}:</span> {value(c.field, c.before)} → <b>{value(c.field, c.after)}</b>
+                      <span className="text-muted-foreground">{label("field", c.field)}:</span> {c.beforeName ?? value(c.field, c.before)} → <b>{c.afterName ?? value(c.field, c.after)}</b>
                     </li>
                   ))}
                 </ul>

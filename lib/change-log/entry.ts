@@ -6,13 +6,26 @@ export interface FieldChange {
   field: string;
   before: unknown;
   after: unknown;
+  /** BE #534: the display name next to an id (enfermeraId → enfermeraNombre); null = show the id. */
+  beforeName?: string | null;
+  afterName?: string | null;
+}
+
+/** The key that carries an id's display name: `enfermeraId` → `enfermeraNombre`, `productoAplicadoId` → `productoNombre`. */
+export function nameKey(field: string): string | null {
+  if (field === "productoAplicadoId") return "productoNombre";
+  return /Id$/.test(field) ? field.replace(/Id$/, "Nombre") : null;
 }
 
 /** One line per field the click changed, in the BE's order; a field with no before/after is skipped. */
 export function fieldChanges(e: Pick<ChangeLogEntry, "changeSet">): FieldChange[] {
   const { fields = [], before, after } = e.changeSet ?? { fields: [], before: null, after: null };
   return fields
-    .map((field) => ({ field, before: before?.[field] ?? null, after: after?.[field] ?? null }))
+    .map((field) => {
+      const nk = nameKey(field);
+      const nameOf = (o: Record<string, unknown> | null | undefined) => (nk && typeof o?.[nk] === "string" ? (o[nk] as string) : null);
+      return { field, before: before?.[field] ?? null, after: after?.[field] ?? null, beforeName: nameOf(before), afterName: nameOf(after) };
+    })
     .filter((c) => c.before !== null || c.after !== null);
 }
 

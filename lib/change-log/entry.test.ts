@@ -15,8 +15,8 @@ const prod = {
 
 test("fieldChanges: one line per changed field, before → after", () => {
   assert.deepEqual(fieldChanges(prod), [
-    { field: "estado", before: "presente", after: "en_terapia" },
-    { field: "terapiaInEn", before: null, after: "2026-11-10T18:03:27.300Z" },
+    { field: "estado", before: "presente", after: "en_terapia", beforeName: null, afterName: null },
+    { field: "terapiaInEn", before: null, after: "2026-11-10T18:03:27.300Z", beforeName: null, afterName: null },
   ]);
   assert.deepEqual(fieldChanges({ changeSet: { fields: ["x"], before: null, after: null } }), []);
 });
@@ -38,4 +38,12 @@ test("valueText: names for ids, the center's clock for timestamps, a dash for em
   assert.equal(valueText("2026-11-10T18:03:27.300Z"), "14:03", "UTC stamp → Puerto Rico clock");
   assert.equal(valueText("nurse-1", (id) => (id === "nurse-1" ? "Glorimar Lebron" : undefined)), "Glorimar Lebron");
   assert.equal(valueText(2), "2");
+});
+
+test("fieldChanges: the BE's display name next to an id (BE #534)", () => {
+  const e = { changeSet: { fields: ["enfermeraId", "productoAplicadoId"], before: { enfermeraId: null, enfermeraNombre: null, productoAplicadoId: null }, after: { enfermeraId: "n1", enfermeraNombre: "Yashira Del Valle Massa", productoAplicadoId: "p1", productoNombre: "25 g Vitamina C" } } };
+  const [nurse, dose] = fieldChanges(e);
+  assert.equal(nurse.afterName, "Yashira Del Valle Massa");
+  assert.equal(nurse.beforeName, null);
+  assert.equal(dose.afterName, "25 g Vitamina C");
 });
