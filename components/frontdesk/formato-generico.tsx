@@ -9,6 +9,7 @@ import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { imprimirFormato, LogoFormato, PieFormato } from "@/components/frontdesk/formato-parts";
 import { FormatoPaginado } from "@/components/frontdesk/formato-paginado";
+import { BodyCompositionSheet } from "@/components/frontdesk/body-composition-sheet";
 import { splitInlineFields, chunkPairs } from "@/lib/formatos/inline-fields";
 import { rowsForPrint } from "@/lib/formatos/print-rows";
 import { controlHeaderLayout, splitControlTitle } from "@/lib/formatos/control-sheet";
@@ -85,6 +86,9 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   // sin ninguna línea para escribir — verificado en vivo contra GET /formats/terapia_camener/assembly.
   // External order forms reproduced sheet by sheet (landscape, own logo, watermark per page).
   if (d.layout === "paginas") return <FormatoPaginado d={d} label={label} onVolver={onVolver} />;
+  // GLP-1 body composition (the two sections + the body image): its own one-page sheet, like the legacy.
+  if (seccionComposicion && seccionMedidas && seccionComposicion.tipo === "campos" && seccionMedidas.tipo === "campos")
+    return <BodyCompositionSheet d={d} label={label} composicion={seccionComposicion} medidas={seccionMedidas} onVolver={onVolver} />;
   // Pain scale, at the legacy size (62%, max 480px; inline because the print sheet caps img at 38px). With
   // signatures it sits between the observations and them (ondas_choque_form.php); without, before the foot.
   const primeraFirma = seccionesVisibles.find((s) => s.tipo === "firmas");
@@ -368,21 +372,10 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             );
           })}
 
-          {/* Diagrama del cuerpo (GLP-1): hombre o mujer ya resuelto por el BE según sexo del paciente, en 3
-              columnas junto a Composición Corporal / Medidas Corporales — igual que el legado. Si vinieran
-              las claves pero no el diagrama (o viceversa), se cae a apilado para no perder datos. */}
-          {tresColumnas && seccionComposicion && seccionMedidas && render.imagenCuerpo ? (
-            <div className="mt-6 flex flex-wrap items-start justify-center gap-6">
-              <div className="min-w-[200px] flex-1"><SeccionInner s={seccionComposicion} label={label} /></div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={render.imagenCuerpo} alt="" className="w-full max-w-[220px] shrink-0 object-contain" />
-              <div className="min-w-[200px] flex-1"><SeccionInner s={seccionMedidas} label={label} /></div>
-            </div>
-          ) : (
-            render.imagenCuerpo && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={render.imagenCuerpo} alt="" className="mt-6 w-full max-w-md self-center object-contain" />
-            )
+          {/* A body image without the two GLP-1 sections (that case has its own sheet): shown, never lost. */}
+          {render.imagenCuerpo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={render.imagenCuerpo} alt="" style={{ display: "block", width: "100%", maxWidth: 420, maxHeight: "none", margin: "24px auto 0", objectFit: "contain" }} />
           )}
 
           {/* Escala de dolor sin firmas (HILT/MLS): antes del pie. */}

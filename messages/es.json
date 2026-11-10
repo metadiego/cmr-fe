@@ -2187,7 +2187,8 @@
       "horaEntrada": "Hora Entrada:",
       "horaSalida": "Hora Salida:",
       "firma": "Firma del Paciente"
-    }
+    },
+    "formatoPage": "Pág. {page}"
   },
   "programarCitas": {
     "title": "Programar citas",
