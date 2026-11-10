@@ -2907,7 +2907,11 @@
     "regularPrice": "Regular price",
     "savings": "Savings",
     "packagePrice": "Package price",
-    "youSaved": "You saved"
+    "youSaved": "You saved",
+    "originInvoice": "Original invoice #{number}",
+    "refundOption": "Refund #{number} · ${amount}",
+    "invoiceOption": "Invoice (original)",
+    "voided": "voided"
   },
   "facturacion": {
     "title": "Bill consultation",

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { invoiceBalance } from "@/lib/factura/balance";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -491,7 +492,7 @@ function Editor({
   // Exento → lista vacía (no ceros). Handoff HANDOFF-ivu-estatal-y-municipal.
   const impuestosDesglose = (factura as { taxes?: { name?: string; rate?: number; amount?: number }[] }).taxes ?? [];
   const total = n(factura.total) || Math.max(0, subtotal - descuento + impuesto);
-  const saldo = total - n(factura.paidAmount);
+  const saldo = invoiceBalance(factura.status, total, n(factura.paidAmount)); // a refunded invoice owes 0
 
   function setEdit(itemId: string, p: Partial<Edit>) {
     setEdits((m) => ({ ...m, [itemId]: { ...(m[itemId] ?? { quantity: 1, unitPrice: 0 }), ...p } }));

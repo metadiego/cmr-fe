@@ -1,3 +1,4 @@
+import { invoiceBalance } from "./balance.ts";
 import type { FacturaConItems, FacturaEmpresa, ReciboDevolucion } from "@/lib/api/facturas";
 import { invoiceSavings, packageEvidence, savingsPct } from "./sales-package.ts";
 
@@ -41,6 +42,8 @@ export type Recibo = {
   logoUrl: string | null;
   // "factura" (por defecto) o "devolucion" → el encabezado dice "Factura #" vs "Devolución #".
   tipoDocumento?: "factura" | "devolucion" | "presupuesto";
+  /** A refund's receipt: the invoice it comes from («Factura de origen #L006875»). */
+  facturaOrigen?: string | null;
   numeroDisplay: string;
   fecha: string;
   estado: string;
@@ -173,7 +176,7 @@ export function buildRecibo(
     ahorroPaquetes: invoiceSavings(f.items ?? []),
     total,
     montoAbonado,
-    saldo: Math.max(0, total - montoAbonado),
+    saldo: Math.max(0, invoiceBalance(String(f.status ?? ""), total, montoAbonado)), // a refunded invoice owes 0
     pagos: (f.payments ?? []).map((p) => ({
       formaPagoNombre: p.formaPagoNombre ?? "—",
       clave: p.paymentMethodId ? clavePorFormaId[String(p.paymentMethodId)] : undefined,
@@ -224,6 +227,7 @@ export function buildReciboDevolucion(
     logoUrl: d.empresa?.logoUrl ?? null,
     tipoDocumento: "devolucion",
     numeroDisplay: d.displayNumber ?? "—",
+    facturaOrigen: d.invoiceNumber ?? null,
     fecha: d.date ?? "",
     estado: String(d.status ?? ""),
     anulada: String(d.status ?? "") === "anulada",

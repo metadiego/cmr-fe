@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackupPrintButton } from "@/components/facturacion/backup-print-button";
 import { RECEIPT_STATUS_MESSAGE, type ReceiptStatusMessage } from "@/lib/print/receipt-status-message";
+import { defaultReceipt, receiptUrl, refundsNewestFirst } from "@/lib/print/receipt-choice";
+import { listDevolucionesDeFactura, type Devolucion } from "@/lib/api/facturas";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Status = { kind: "loading" } | { kind: "ready" } | { kind: "error"; message: string };
 
@@ -56,6 +59,23 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
   // Bumped by "Retry": remounts the iframe, which loads the page (and asks the server) again.
   const [attempt, setAttempt] = React.useState(0);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  // The invoice's refunds: each one prints its OWN receipt («DEVOLUCIÓN #D-…»); the latest is the default.
+  const [refunds, setRefunds] = React.useState<Devolucion[] | null>(null);
+  const [doc, setDoc] = React.useState<string | null>(null); // "" = the invoice, else a refund id
+  React.useEffect(() => {
+    let alive = true;
+    listDevolucionesDeFactura(invoiceId, centerId)
+      .then((rows) => {
+        if (!alive) return;
+        const sorted = refundsNewestFirst(Array.isArray(rows) ? rows : []);
+        setRefunds(sorted);
+        setDoc((d) => d ?? defaultReceipt(sorted));
+      })
+      .catch(() => alive && (setRefunds([]), setDoc((d) => d ?? "")));
+    return () => {
+      alive = false;
+    };
+  }, [invoiceId, centerId]);
 
   React.useEffect(() => {
     function onMessage(e: MessageEvent) {
@@ -75,7 +95,7 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
   }
 
   const query = new URLSearchParams(centerId ? { centro: centerId } : {});
-  const pageUrl = `/print/invoice/${invoiceId}`;
+  const pageUrl = receiptUrl(invoiceId, doc ?? "");
   const print = () => window.open(`${pageUrl}${query.size ? `?${query}` : ""}`, "_blank", "noopener");
   query.set("embed", "1");
 
@@ -85,14 +105,32 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
         <DialogTitle className="text-base">{t("print")}</DialogTitle>
       </DialogHeader>
 
+      {refunds && refunds.length > 0 && (
+        <div className="border-b px-4 py-2">
+          <Select value={doc ?? ""} onValueChange={(v) => { setDoc(v === "__invoice__" ? "" : v); setStatus({ kind: "loading" }); }}>
+            <SelectTrigger size="sm" className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {refunds.map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {t("refundOption", { number: r.displayNumber ?? String(r.number ?? "—"), amount: (r.refundedAmount ?? 0).toFixed(2) })}
+                  {r.status === "anulada" ? ` · ${t("voided")}` : ""}
+                </SelectItem>
+              ))}
+              <SelectItem value="__invoice__">{t("invoiceOption")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       <div className="relative min-h-0 flex-1 bg-muted/40">
+        {doc === null ? null : (
         <iframe
-          key={attempt}
+          key={`${attempt}|${doc}`}
           ref={iframeRef}
           src={`${pageUrl}?${query}`}
           title={t("previewTitle")}
           className={"block h-[min(70svh,40rem)] w-full bg-white " + (status.kind === "error" ? "invisible" : "")}
         />
+        )}
         {status.kind === "error" && (
           <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
             <HugeiconsIcon icon={Alert02Icon} className="size-8 text-destructive" />
@@ -107,9 +145,12 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
 
       <div className="flex flex-col gap-3 border-t px-4 py-3">
         {/* Backup path, apart from the normal Print: raw ESC/POS through the print hub. */}
-        <div className="rounded-md bg-muted/50 py-2">
-          <BackupPrintButton centerId={centerId} buildBytes={buildBackupBytes} />
-        </div>
+        {/* The ESC/POS backup builds the INVOICE bytes: offered only when the invoice is the document. */}
+        {doc === "" && (
+          <div className="rounded-md bg-muted/50 py-2">
+            <BackupPrintButton centerId={centerId} buildBytes={buildBackupBytes} />
+          </div>
+        )}
         <div className="flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onClose}>{tc("cancel")}</Button>
           <Button size="sm" onClick={print} disabled={status.kind !== "ready"}>

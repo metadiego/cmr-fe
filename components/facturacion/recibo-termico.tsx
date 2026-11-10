@@ -100,6 +100,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         </span>
         <span className="font-normal">{fecha}</span>
       </div>
+      {recibo.facturaOrigen && <div>{t("originInvoice", { number: recibo.facturaOrigen })}</div>}
 
       <Dashed />
 

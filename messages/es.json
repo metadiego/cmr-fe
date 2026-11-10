@@ -2907,7 +2907,11 @@
     "regularPrice": "Precio regular",
     "savings": "Ahorro",
     "packagePrice": "Precio del paquete",
-    "youSaved": "Usted ahorró"
+    "youSaved": "Usted ahorró",
+    "originInvoice": "Factura de origen #{number}",
+    "refundOption": "Devolución #{number} · ${amount}",
+    "invoiceOption": "Factura (original)",
+    "voided": "anulada"
   },
   "facturacion": {
     "title": "Facturar consulta",
