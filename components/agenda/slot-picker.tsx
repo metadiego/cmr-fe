@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // los dos campos Hora Inicio/Hora Fin: la hora de fin se deriva sola de la duración del tipo. NO BLOQUEANTE: las
 // franjas llenas se ven atenuadas pero se pueden elegir igual (el BE avisa, no impide). Dos variantes para
 // comparar cuál sirve mejor (decisión pendiente del dueño). Handoff citas-hora-por-cupo-handoff-be.
-export type Slot = { time: string; vacios: number; cupo: number };
+// enHoja: full because the call-center sheet has no seat left (cappedBy 'hoja'), not our own slots.
+export type Slot = { time: string; vacios: number; cupo: number; enHoja?: boolean };
 export type SlotVariant = "dropdown" | "chips";
 
 export function SlotPicker({
@@ -25,7 +26,8 @@ export function SlotPicker({
   variant: SlotVariant;
 }) {
   const t = useTranslations("agenda.slot");
-  const libresLabel = (s: Slot) => (s.vacios > 0 ? t("free", { n: s.vacios }) : t("full"));
+  const fullLabel = (s: Slot) => (s.enHoja ? t("fullInSheet") : t("full"));
+  const libresLabel = (s: Slot) => (s.vacios > 0 ? t("free", { n: s.vacios }) : fullLabel(s));
 
   if (slots.length === 0) {
     // Sin cupos para este tipo/día: NO se atrapa al usuario (no bloqueante), pero tampoco el reloj con minutos
@@ -83,7 +85,7 @@ export function SlotPicker({
             )}
           >
             <span className="font-mono tabular-nums">{s.time}</span>
-            <span className="text-[10px] opacity-80">{full ? t("full") : t("freeShort", { n: s.vacios })}</span>
+            <span className="text-[10px] opacity-80">{full ? fullLabel(s) : t("freeShort", { n: s.vacios })}</span>
           </button>
         );
       })}

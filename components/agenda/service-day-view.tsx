@@ -10,6 +10,7 @@ import { listSesionesRango, type Sesion, type EstadoSesion } from "@/lib/api/fro
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { listPersonal } from "@/lib/api/personal";
 import { getAvailability, type Availability } from "@/lib/api/resources";
+import { SheetNotice } from "@/components/agenda/sheet-notice";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
@@ -219,6 +220,7 @@ export function ServiceDayView({ fecha, centro: centroPedido }: { fecha: string;
           </div>
           {availRes.state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
           {avail && !avail.configured && <p className="text-sm text-muted-foreground">{tPlanner("notConfigured")}</p>}
+          <SheetNotice sheet={avail?.sheet} className="mb-2" />
           {avail && avail.configured && (
             <div className="flex flex-wrap gap-2">
               {avail.slots.map((sl) => (

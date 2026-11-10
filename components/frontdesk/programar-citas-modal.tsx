@@ -19,6 +19,8 @@ import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
+import { SheetNotice } from "@/components/agenda/sheet-notice";
+import { noSeatDays, type SheetCheck } from "@/lib/agenda/sheet";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,12 +188,12 @@ export function ProgramarCitasModal({
   // personal de turno, no un cupo tecleado a mano (GET /resources/availability). Informativa: muestra
   // dónde cabe de verdad para elegir un día con espacio. Patrón por-key.
   const horaKey = open && firstServicioId && nuevaFecha ? `${firstServicioId}|${nuevaFecha}|${pacienteId}|${centro ?? ""}` : "";
-  const [horaData, setHoraData] = React.useState<{ key: string; slots: AvailabilitySlot[] } | null>(null);
+  const [horaData, setHoraData] = React.useState<{ key: string; slots: AvailabilitySlot[]; sheet?: SheetCheck } | null>(null);
   React.useEffect(() => {
     if (!horaKey) return;
     let cancel = false;
     getAvailability({ date: nuevaFecha, serviceId: firstServicioId, patientId: pacienteId || undefined }, centro)
-      .then((r) => !cancel && setHoraData({ key: horaKey, slots: r.configured ? r.slots : [] }))
+      .then((r) => !cancel && setHoraData({ key: horaKey, slots: r.configured ? r.slots : [], sheet: r.sheet }))
       .catch(() => {});
     return () => { cancel = true; };
   }, [horaKey, firstServicioId, nuevaFecha, pacienteId, centro]);
@@ -229,6 +231,8 @@ export function ProgramarCitasModal({
       toast.success(t("resumen", { creadas, omitidas }));
       mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo por (servicio, fecha) — no bloquea
       if (data.aviso) toast.warning(t("avisoDisponibilidad")); // disponibilidad excedida por servicio — no bloquea
+      const sinAsiento = noSeatDays(data); // days the call-center sheet had no seat for (BE #521)
+      if (sinAsiento.length) toast.warning(tRoot("sheet.noSeatDays", { days: sinAsiento.map((d) => formatFechaSolo(d)).join(", ") }), { duration: 10000 });
       onOpenChange(false);
       setFechas([]);
       setNuevaFecha("");
@@ -344,6 +348,7 @@ export function ProgramarCitasModal({
             </div>
             {/* Huecos reales por hora del día elegido (cuartos + personal de turno): ayuda a ver dónde
                 cabe de verdad. Informativo: una franja sin hueco sigue siendo elegible (no bloquea). */}
+            <SheetNotice sheet={horaData && horaData.key === horaKey ? horaData.sheet : null} />
             {nuevaFecha && horas.length > 0 && (
               <div className="mt-1 rounded-md bg-card p-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("cuposDia")}</p>

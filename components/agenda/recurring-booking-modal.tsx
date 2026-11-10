@@ -9,6 +9,7 @@ import { agendarMultiple } from "@/lib/api/frontdesk";
 import { buildRecurringPlan, weekdayOf, type RecurringPlanItem, type RecurringPlanStatus } from "@/lib/agenda/recurring-plan";
 import type { ApiWarning } from "@/lib/api/types";
 import { formatFechaSolo, todayPR, nowTimePR } from "@/lib/format/fecha";
+import { noSeatDays } from "@/lib/agenda/sheet";
 import { toastError } from "@/lib/api/errors";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { cn } from "@/lib/utils";
@@ -186,9 +187,11 @@ export function RecurringBookingModal({
     let booked = 0;
     let failedGroups = 0;
     const allWarnings: ApiWarning[] = [];
+    const noSeat: string[] = []; // days the call-center sheet had no seat for (BE #521)
     for (const [groupTime, dates] of byTime) {
       try {
-        const { warnings } = await agendarMultiple({ patientId, serviceId, dates, time: groupTime }, centro);
+        const { data, warnings } = await agendarMultiple({ patientId, serviceId, dates, time: groupTime }, centro);
+        noSeat.push(...noSeatDays(data));
         booked += dates.length;
         allWarnings.push(...warnings);
       } catch (err) {
@@ -197,6 +200,7 @@ export function RecurringBookingModal({
       }
     }
     mostrarAvisos(allWarnings, tRoot);
+    if (noSeat.length) toast.warning(tRoot("sheet.noSeatDays", { days: [...new Set(noSeat)].sort().map((d) => formatFechaSolo(d)).join(", ") }), { duration: 10000 });
     if (booked > 0) {
       toast.success(t("recurringSummary", { booked, skipped }));
       onBooked();

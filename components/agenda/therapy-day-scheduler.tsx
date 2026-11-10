@@ -15,6 +15,8 @@ import { toastError } from "@/lib/api/errors";
 import { ApiError } from "@/lib/api/types";
 import { getMyPreferences } from "@/lib/api/preferences";
 import { type Paciente } from "@/lib/api/pacientes";
+import { SheetNotice } from "@/components/agenda/sheet-notice";
+import { isSheetSlotTaken } from "@/lib/agenda/sheet";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { PacienteSelect } from "@/components/citas/paciente-select";
@@ -250,6 +252,7 @@ export function TherapyDayScheduler({
         upcomingRes.refresh();
       } else {
         toastError(err, tRoot);
+        if (isSheetSlotTaken(err)) trainRes.refresh(); // someone took the seat after the grid was drawn
       }
     } finally {
       setSubmitting(false);
@@ -477,6 +480,7 @@ export function TherapyDayScheduler({
             </div>
           </div>
 
+          <SheetNotice sheet={train?.sheet} className="mb-2" />
           {!chosen.length ? (
             <p className="py-10 text-center text-sm text-muted-foreground">{t("pickCard")}</p>
           ) : (

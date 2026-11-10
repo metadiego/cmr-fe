@@ -185,7 +185,8 @@
     "seriesCountRequired": "Indica cuántas sesiones para estas terapias.",
     "seriesStartInThePast": "La serie empieza hoy o después.",
     "seriesDayDoesNotFit": "El tren del {date} ya no cabe a su hora. No se agendó nada.",
-    "seriesDaysInvalid": "Días de la serie no válidos."
+    "seriesDaysInvalid": "Días de la serie no válidos.",
+    "sheetFull": "Lleno en la hoja del call center"
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -741,7 +742,8 @@
       "full": "lleno",
       "placeholder": "Elige una hora disponible",
       "variantDropdown": "Lista",
-      "variantChips": "Rejilla"
+      "variantChips": "Rejilla",
+      "fullInSheet": "Lleno en la hoja"
     }
   },
   "appointments": {
@@ -5412,5 +5414,13 @@
       "visionUnreadable": "No se pudo leer la imagen de la báscula",
       "visitTakesNoReadings": "Solo se puede vincular a una visita GLP-1"
     }
+  },
+  "sheet": {
+    "slotTaken": "Esa hora ya no tiene asiento en la hoja del call center",
+    "unavailable": "La hoja del call center no responde; no se agendó",
+    "noOwnerCode": "El paciente no tiene dueño de cartera con código en la hoja",
+    "ownerNoteFailed": "No se pudo anotar el dueño de cartera en la hoja",
+    "down": "La hoja del call center no responde: la disponibilidad puede no estar al día",
+    "noSeatDays": "Sin asiento en la hoja: {days}"
   }
 }

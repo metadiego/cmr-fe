@@ -19,6 +19,8 @@ import { getMedicos, type Personal } from "@/lib/api/personal";
 import { parseDayUTC } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { SheetNotice } from "@/components/agenda/sheet-notice";
+import { cappedBySheet } from "@/lib/agenda/sheet";
 import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
 import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
 import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
@@ -168,7 +170,7 @@ export function CitaModal({
     if (cuposRes.state.kind !== "ok" || !cuposRes.state.data) return [];
     // Tolera `slots` o `franjas` (el BE oscila el nombre) y NUNCA `.map` sobre undefined → reventaba el modal.
     const arr = cuposRes.state.data.slots ?? cuposRes.state.data.franjas ?? [];
-    return arr.map((s) => ({ time: s.time, vacios: s.free, cupo: s.capacity }));
+    return arr.map((s) => ({ time: s.time, vacios: s.free, cupo: s.capacity, enHoja: cappedBySheet(s) }));
   }, [cuposRes.state]);
   // Duración del tipo (del endpoint; manda sobre el catálogo). Se usa para derivar la hora de fin.
   const slotDuration = cuposRes.state.kind === "ok" ? cuposRes.state.data?.durationMinutes ?? null : null;
@@ -376,6 +378,7 @@ export function CitaModal({
                   </button>
                 </div>
               </div>
+              <SheetNotice sheet={cuposRes.state.kind === "ok" ? cuposRes.state.data?.sheet : null} className="mb-2" />
               <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
               {/* Aviso NO bloqueante: la hora elegida ya no tiene cupo. El BE no bloquea ni avisa en citas, así
                   que el aviso lo da el FE. Handoff citas-hora-por-cupo-handoff-be. */}

@@ -185,7 +185,8 @@
     "seriesCountRequired": "Say how many sessions for these therapies.",
     "seriesStartInThePast": "A series starts today or later.",
     "seriesDayDoesNotFit": "The train of {date} no longer fits at its time. Nothing was booked.",
-    "seriesDaysInvalid": "Invalid series days."
+    "seriesDaysInvalid": "Invalid series days.",
+    "sheetFull": "Full on the call-center sheet"
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -741,7 +742,8 @@
       "full": "full",
       "placeholder": "Pick an available time",
       "variantDropdown": "List",
-      "variantChips": "Grid"
+      "variantChips": "Grid",
+      "fullInSheet": "Full on the sheet"
     }
   },
   "appointments": {
@@ -5412,5 +5414,13 @@
       "visionUnreadable": "The scale image could not be read",
       "visitTakesNoReadings": "Can only link to a GLP-1 visit"
     }
+  },
+  "sheet": {
+    "slotTaken": "That hour no longer has a seat on the call-center sheet",
+    "unavailable": "The call-center sheet is not answering; nothing was booked",
+    "noOwnerCode": "The patient has no portfolio owner with a code on the sheet",
+    "ownerNoteFailed": "The portfolio owner could not be noted on the sheet",
+    "down": "The call-center sheet is not answering: availability may be out of date",
+    "noSeatDays": "No seat on the sheet: {days}"
   }
 }

@@ -1,4 +1,5 @@
 import { apiFetch, apiFetchEnvelope } from "./client";
+import type { SheetCheck } from "@/lib/agenda/sheet";
 import type { ConWarnings, Sesion } from "./frontdesk";
 
 // Agenda de terapias por RECURSOS (cuarto/silla/persona), no por servicio. El cuello es el recurso:
@@ -105,6 +106,9 @@ export interface Availability {
   minutes: number; // ya calculado con las áreas
   resource?: { slug: string; capacity: number; concurrency: ResourceConcurrency } | null;
   slots: AvailabilitySlot[];
+  // The call-center sheet (BE #521): null = not read (reservation off / no section); ok:false = it did
+  // not answer. Full hours already come as fits:false + reasonKey therapies.sheetFull.
+  sheet?: SheetCheck;
 }
 export function getAvailability(
   params: { date: string; serviceId: string; areas?: number; patientId?: string },
@@ -200,6 +204,7 @@ export interface PatientTrain {
   unconfiguredServiceIds: string[];
   patientMinutes: number;
   slots: TrainSlot[];
+  sheet?: SheetCheck; // same as Availability.sheet (BE #521)
 }
 export function planPatientTrain(
   body: {

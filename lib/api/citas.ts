@@ -1,4 +1,5 @@
 import type { components } from "./schema";
+import type { SheetCheck } from "@/lib/agenda/sheet";
 import { apiFetch, apiFetchPaged, apiFetchEnvelope, oneCenterPath } from "./client";
 import type { Paginated } from "./types";
 import { getCentrosDondePuedo } from "./centers";
@@ -358,6 +359,8 @@ export interface CuposLibres {
   // vez el 2-oct). Ambos opcionales; el FE lee el que venga (`slots ?? franjas`) para no romperse en el vaivén.
   slots?: SlotLibre[];
   franjas?: SlotLibre[];
+  // The call-center sheet (BE #521); a slot it tops comes with cappedBy 'hoja'.
+  sheet?: SheetCheck;
 }
 export function getCuposLibres(
   date: string,
