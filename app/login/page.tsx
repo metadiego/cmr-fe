@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useActionState } from "react";
+import { Suspense, useActionState, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ForgotPasswordDialog } from "@/components/auth/forgot-password-dialog";
+import { getPublicPreferences } from "@/lib/api/preferences";
+import { completeEmail, readEmailDomains } from "@/lib/email/domains";
 
 const initialState: LoginState = {};
 
@@ -29,6 +31,21 @@ function LoginForm() {
   // Aviso cuando el usuario llega aquí porque su sesión expiró (redirigido con ?expired=1). Refuerza el
   // toast del cliente de API para que el motivo quede claro también en la pantalla de login (QA-001).
   const expirada = useSearchParams().has("expired");
+
+  // Domain autocompletion (anonymous: no session yet, so the public preferences endpoint, not
+  // getMyPreferences). A bare user part ("mirna.arciles") becomes the full house email; anything
+  // with "@" is kept as typed. completeEmail is a no-op until domains load.
+  const [email, setEmail] = useState("");
+  const [domains, setDomains] = useState<string[]>([]);
+  useEffect(() => {
+    let alive = true;
+    getPublicPreferences()
+      .then((p) => alive && setDomains(readEmailDomains(p.effective)))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-5 bg-muted px-6 py-12">
@@ -62,6 +79,19 @@ function LoginForm() {
               autoComplete="username"
               required
               placeholder={t("emailPlaceholder")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setEmail((v) => completeEmail(v, domains))}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                const next = completeEmail(email, domains);
+                if (next !== email) {
+                  // First Enter only completes the domain; it must not also submit with the bare
+                  // user part still in the field (type="email" would block a value without "@").
+                  e.preventDefault();
+                  setEmail(next);
+                }
+              }}
             />
           </div>
 
