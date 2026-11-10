@@ -3,29 +3,29 @@
 // host, a protocol-relative `//host`, a backslash a browser reads as `/`, an encoded `//`, a control
 // character) is refused rather than "cleaned". See docs/specs/mcp-connector-consent-page.md §2.
 
-const BASE = "http://app.invalid";
-const LOGIN = "/login";
+const BASE = "http://app.invalid"
+const LOGIN = "/login"
 
 export function safeNextPath(raw: string | null | undefined): string | null {
-  if (!raw || raw[0] !== "/") return null;
-  if (raw[1] === "/" || raw.includes("\\")) return null;
+  if (!raw || raw[0] !== "/") return null
+  if (raw[1] === "/" || raw.includes("\\")) return null
   // Control characters and spaces (a newline can split `/` and `/evil.host` in some parsers).
-  if (/[\u0000- \u007f]/.test(raw)) return null;
-  let decoded: string;
+  if (/[\u0000- \u007f]/.test(raw)) return null
+  let decoded: string
   try {
-    decoded = decodeURIComponent(raw);
+    decoded = decodeURIComponent(raw)
   } catch {
-    return null;
+    return null
   }
-  if (decoded.startsWith("//") || decoded.includes("\\")) return null;
+  if (decoded.startsWith("//") || decoded.includes("\\")) return null
 
-  let url: URL;
+  let url: URL
   try {
-    url = new URL(raw, BASE);
+    url = new URL(raw, BASE)
   } catch {
-    return null;
+    return null
   }
-  if (url.origin !== BASE) return null;
-  if (url.pathname === LOGIN) return null;
-  return `${url.pathname}${url.search}`;
+  if (url.origin !== BASE) return null
+  if (url.pathname === LOGIN) return null
+  return `${url.pathname}${url.search}`
 }

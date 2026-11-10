@@ -4,7 +4,7 @@ import * as React from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { RefreshIcon, Copy01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { RefreshIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import {
   listAuditoria,
@@ -46,13 +46,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { AuditDetailSheet } from "./audit-detail-sheet";
+import { agentTool, auditVia } from "@/lib/audit/via";
 
 // Fallback de dominios SOLO si /auditoria/facetas aún no cargó o viene vacío (el desplegable se
 // llena con facetas.dominios, que son los valores realmente presentes).
@@ -98,6 +93,7 @@ export function AuditoriaLog() {
   const [resultado, setResultado] = React.useState(TODOS);
   const [metodo, setMetodo] = React.useState(TODOS);
   const [clinicId, setClinicId] = React.useState(TODOS);
+  const [via, setVia] = React.useState(TODOS); // "rest" (the app) | "mcp" (Claude)
   // Chips (BE cmr-be): soloCambios = solo mutaciones; ocultarRuido = excluirErrorCode=RATE_LIMITED.
   // "Ocultar límite de tasa" arranca ENCENDIDO: el 81% de los errores son RATE_LIMITED (ruido).
   const [soloCambios, setSoloCambios] = React.useState(false);
@@ -163,6 +159,7 @@ export function AuditoriaLog() {
     excluirErrorCode: ocultarRuido && hayRateLimited ? "RATE_LIMITED" : undefined,
     userId: userId || undefined,
     clinicId: clinicId === TODOS ? undefined : clinicId,
+    channel: via === TODOS ? undefined : (via as "rest" | "mcp"),
     page,
     limit: 50,
   };
@@ -249,8 +246,21 @@ export function AuditoriaLog() {
       header: t("col.accion"),
       cell: (r) => (
         <Tooltip content={r.accion}>
-          <span className="text-sm">{frase(r)}</span>
+          {agentTool(r) ? (
+            <span className="font-mono text-xs">{agentTool(r)}</span>
+          ) : (
+            <span className="text-sm">{frase(r)}</span>
+          )}
         </Tooltip>
+      ),
+    },
+    {
+      key: "via",
+      header: t("col.via"),
+      cell: (r) => (
+        <Badge variant={auditVia(r) === "claude" ? "default" : "outline"} className="font-normal">
+          {t(`via.${auditVia(r)}`)}
+        </Badge>
       ),
     },
     {
@@ -336,6 +346,13 @@ export function AuditoriaLog() {
             { value: "error", label: t("resultadoError") },
           ])}
         </div>
+        <div className="space-y-1">
+          <Label className="text-xs">{t("col.via")}</Label>
+          {selectAll(via, onFilter(setVia), t("todos"), [
+            { value: "rest", label: t("via.app") },
+            { value: "mcp", label: t("via.claude") },
+          ])}
+        </div>
         {/* Acción (Controller.handler): la pregunta más afilada de una bitácora. Solo admin (las
             acciones son identificadores internos y el BE solo las expone con scope admin). */}
         {admin && accionesOpts.length > 0 ? (
@@ -411,12 +428,7 @@ export function AuditoriaLog() {
         labels={{ empty: t("vacio") }}
       />
 
-      <DetalleSheet
-        row={detalle}
-        onClose={() => setDetalle(null)}
-        centroNombre={centroNombre}
-        onCopy={copiar}
-      />
+      <AuditDetailSheet row={detalle} onClose={() => setDetalle(null)} centerName={centroNombre} onCopy={copiar} />
     </div>
   );
 }
@@ -537,106 +549,5 @@ function PurgaButton() {
         </AlertDialogContent>
       </AlertDialog>
     </>
-  );
-}
-
-// Panel lateral de detalle: todos los campos crudos + requestId/ip copiables + error completo.
-function DetalleSheet({
-  row,
-  onClose,
-  centroNombre,
-  onCopy,
-}: {
-  row: AuditRow | null;
-  onClose: () => void;
-  centroNombre: (id: string | null) => string;
-  onCopy: (txt: string) => void;
-}) {
-  const t = useTranslations("auditoria");
-  const format = useFormatter();
-  return (
-    <Sheet open={!!row} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
-        <SheetHeader className="border-b px-6 py-4">
-          <SheetTitle>{t("detalleTitulo")}</SheetTitle>
-          <SheetDescription>{row ? format.dateTime(new Date(row.createdAt), "dateAndTime") : ""}</SheetDescription>
-        </SheetHeader>
-        {row && (
-          <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5 text-sm">
-            <Campo label={t("col.accion")}>
-              <span className="font-mono text-xs">{row.accion}</span>
-            </Campo>
-            <Campo label={t("col.metodo")}>
-              <span className="font-mono text-xs">
-                {row.metodo} {row.ruta}
-              </span>
-            </Campo>
-            <Campo label={t("col.resultado")}>
-              <Badge variant={row.resultado === "error" ? "destructive" : "secondary"}>
-                {row.statusCode ?? row.resultado}
-              </Badge>
-            </Campo>
-            <Campo label={t("col.duracion")}>{row.durationMs != null ? `${row.durationMs} ms` : "—"}</Campo>
-            <Campo label={t("col.centro")}>{centroNombre(row.clinicId)}</Campo>
-            <Campo label={t("col.usuario")}>
-              <span className="font-mono text-xs">{row.userId ?? "—"}</span>
-              {row.userType ? <span className="ml-2 text-muted-foreground">({row.userType})</span> : null}
-            </Campo>
-            {row.entidadId ? (
-              <Campo label={t("entidadId")}>
-                <span className="font-mono text-xs">{row.entidadId}</span>
-              </Campo>
-            ) : null}
-            <CopiableCampo label="requestId" value={row.requestId} onCopy={onCopy} vacio={t("sinDato")} />
-            <CopiableCampo label="IP" value={row.ip} onCopy={onCopy} vacio={t("sinDato")} />
-            {row.resultado === "error" ? (
-              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3">
-                <p className="text-xs font-semibold text-destructive">{row.errorCode ?? t("error")}</p>
-                {row.errorMensaje ? <p className="mt-1 text-xs">{row.errorMensaje}</p> : null}
-              </div>
-            ) : null}
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <span className="text-right">{children}</span>
-    </div>
-  );
-}
-
-function CopiableCampo({
-  label,
-  value,
-  onCopy,
-  vacio,
-}: {
-  label: string;
-  value: string | null;
-  onCopy: (txt: string) => void;
-  vacio: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {value ? (
-        <button
-          type="button"
-          onClick={() => onCopy(value)}
-          className={cn("flex items-center gap-1 font-mono text-xs hover:text-foreground")}
-        >
-          <span className="max-w-[12rem] truncate">{value}</span>
-          <HugeiconsIcon icon={Copy01Icon} className="size-3.5 opacity-60" />
-        </button>
-      ) : (
-        <span className="text-xs text-muted-foreground">{vacio}</span>
-      )}
-    </div>
   );
 }

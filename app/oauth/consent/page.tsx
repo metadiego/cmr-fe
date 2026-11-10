@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Stethoscope02Icon } from "@hugeicons/core-free-icons";
+import { Suspense, useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Stethoscope02Icon } from "@hugeicons/core-free-icons"
 
-import { createClient } from "@/lib/supabase/client";
-import { useMe } from "@/hooks/use-me";
-import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client"
+import { useMe } from "@/hooks/use-me"
+import { Button } from "@/components/ui/button"
 import {
   canApprove,
   consentStep,
   redirectHost,
   type ConsentDetails,
-} from "@/lib/oauth/consent";
+} from "@/lib/oauth/consent"
 
 // Consent page of Supabase Auth's OAuth 2.1 server: Claude (or another MCP client) asks to act in
 // CMR as the signed-in user. Supabase redirects here with `authorization_id`; this page approves or
@@ -26,72 +26,75 @@ export default function OAuthConsentPage() {
     <Suspense>
       <Consent />
     </Suspense>
-  );
+  )
 }
 
 type View =
   | { kind: "loading" }
   | { kind: "error" }
-  | { kind: "consent"; details: ConsentDetails };
+  | { kind: "consent"; details: ConsentDetails }
 
 function Consent() {
-  const t = useTranslations("oauthConsent");
-  const tPending = useTranslations("pending");
-  const authorizationId = useSearchParams().get("authorization_id");
-  const me = useMe();
-  const [view, setView] = useState<View>({ kind: "loading" });
-  const [busy, setBusy] = useState(false);
+  const t = useTranslations("oauthConsent")
+  const tPending = useTranslations("pending")
+  const authorizationId = useSearchParams().get("authorization_id")
+  const me = useMe()
+  const [view, setView] = useState<View>({ kind: "loading" })
+  const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    if (!authorizationId) return;
-    let active = true;
+    if (!authorizationId) return
+    let active = true
     createClient()
       .auth.oauth.getAuthorizationDetails(authorizationId)
       .then(({ data, error }) => {
-        if (!active) return;
-        const step = error ? { kind: "error" as const } : consentStep(data);
+        if (!active) return
+        const step = error ? { kind: "error" as const } : consentStep(data)
         // Already approved for this client: straight back to it.
-        if (step.kind === "redirect") window.location.assign(step.url);
-        else setView(step.kind === "consent" ? step : { kind: "error" });
+        if (step.kind === "redirect") window.location.assign(step.url)
+        else setView(step.kind === "consent" ? step : { kind: "error" })
       })
-      .catch(() => active && setView({ kind: "error" }));
+      .catch(() => active && setView({ kind: "error" }))
     return () => {
-      active = false;
-    };
-  }, [authorizationId]);
+      active = false
+    }
+  }, [authorizationId])
 
   async function decide(approve: boolean) {
-    if (!authorizationId || busy) return;
-    setBusy(true);
-    const oauth = createClient().auth.oauth;
+    if (!authorizationId || busy) return
+    setBusy(true)
+    const oauth = createClient().auth.oauth
     // Without skipBrowserRedirect, Supabase sends the browser back to the client itself.
     const { error } = approve
       ? await oauth.approveAuthorization(authorizationId)
-      : await oauth.denyAuthorization(authorizationId);
+      : await oauth.denyAuthorization(authorizationId)
     if (error) {
-      setBusy(false);
-      setView({ kind: "error" });
+      setBusy(false)
+      setView({ kind: "error" })
     }
   }
 
   async function signOut() {
-    await createClient().auth.signOut();
-    const here = `${window.location.pathname}${window.location.search}`;
-    window.location.assign(`/login?next=${encodeURIComponent(here)}`);
+    await createClient().auth.signOut()
+    const here = `${window.location.pathname}${window.location.search}`
+    window.location.assign(`/login?next=${encodeURIComponent(here)}`)
   }
 
   // A pending, rejected or suspended account cannot hand its access to Claude. A suspended one
   // cannot even read /auth/me (the API answers 403), so "could not load the account" blocks too.
-  const status = me.kind === "ok" ? me.me.status : null;
+  const status = me.kind === "ok" ? me.me.status : null
   // No authorization_id in the link: nothing to ask Supabase about.
-  const shown: View | { kind: "invalid" } = authorizationId ? view : { kind: "invalid" };
-  const blocked = me.kind === "fail" || (me.kind === "ok" && !canApprove(status));
+  const shown: View | { kind: "invalid" } = authorizationId
+    ? view
+    : { kind: "invalid" }
+  const blocked =
+    me.kind === "fail" || (me.kind === "ok" && !canApprove(status))
   const blockedMessage =
     status === "pendiente"
       ? tPending("waiting")
       : status === "rechazado"
         ? tPending("rejected")
-        : tPending("suspended");
+        : tPending("suspended")
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-5 bg-muted px-6 py-12">
@@ -102,15 +105,19 @@ function Consent() {
         <span className="text-lg font-semibold tracking-tight">CMR</span>
       </div>
 
-      <div className="w-full max-w-md rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
-        {shown.kind === "loading" || (shown.kind === "consent" && me.kind === "loading") ? (
+      <div className="w-full max-w-md rounded-md bg-card p-6 shadow-sm ring-1 shadow-[rgba(16,32,64,0.06)] ring-foreground/10">
+        {shown.kind === "loading" ||
+        (shown.kind === "consent" && me.kind === "loading") ? (
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
         ) : shown.kind === "invalid" || shown.kind === "error" ? (
           <div className="space-y-4">
             <h1 className="text-xl font-semibold tracking-tight">
               {t(shown.kind === "invalid" ? "invalidLink" : "genericError")}
             </h1>
-            <Button variant="outline" onClick={() => window.location.assign("/")}>
+            <Button
+              variant="outline"
+              onClick={() => window.location.assign("/")}
+            >
               {t("backToCmr")}
             </Button>
           </div>
@@ -127,22 +134,22 @@ function Consent() {
         )}
       </div>
     </div>
-  );
+  )
 }
 
 function ConsentCard(props: {
-  details: ConsentDetails;
-  blocked: boolean;
-  blockedMessage: string;
-  busy: boolean;
-  onApprove: () => void;
-  onDeny: () => void;
-  onSignOut: () => void;
+  details: ConsentDetails
+  blocked: boolean
+  blockedMessage: string
+  busy: boolean
+  onApprove: () => void
+  onDeny: () => void
+  onSignOut: () => void
 }) {
-  const t = useTranslations("oauthConsent");
-  const { details } = props;
-  const client = details.client.name || t("unknownClient");
-  const host = redirectHost(details.redirect_uri);
+  const t = useTranslations("oauthConsent")
+  const { details } = props
+  const client = details.client.name || t("unknownClient")
+  const host = redirectHost(details.redirect_uri)
 
   return (
     <div className="space-y-5">
@@ -159,11 +166,14 @@ function ConsentCard(props: {
             {client.slice(0, 1).toUpperCase()}
           </span>
         )}
-        <h1 className="text-xl font-semibold tracking-tight">{t("title", { client })}</h1>
+        <h1 className="text-xl font-semibold tracking-tight">
+          {t("title", { client })}
+        </h1>
       </div>
 
       <p className="text-sm">
-        {t("signedInAs")} <span className="font-medium">{details.user.email}</span>{" "}
+        {t("signedInAs")}{" "}
+        <span className="font-medium">{details.user.email}</span>{" "}
         <button
           type="button"
           onClick={props.onSignOut}
@@ -180,7 +190,8 @@ function ConsentCard(props: {
 
       {host && (
         <p className="text-sm text-muted-foreground">
-          {t("returnTo")} <span className="font-medium text-foreground">{host}</span>
+          {t("returnTo")}{" "}
+          <span className="font-medium text-foreground">{host}</span>
         </p>
       )}
 
@@ -201,7 +212,9 @@ function ConsentCard(props: {
         )}
       </div>
 
-      <p className="text-xs text-muted-foreground">{t("disconnectHint", { client })}</p>
+      <p className="text-xs text-muted-foreground">
+        {t("disconnectHint", { client })}
+      </p>
     </div>
-  );
+  )
 }

@@ -3520,7 +3520,8 @@
       "metodo": "Method",
       "resultado": "Result",
       "duracion": "Duration",
-      "centro": "Center"
+      "centro": "Center",
+      "via": "Via"
     },
     "verbo": {
       "creo": "Created",
@@ -3538,7 +3539,12 @@
       "frontdesk": "Frontdesk",
       "tablero": "Board",
       "auth": "Authentication"
-    }
+    },
+    "via": {
+      "app": "App",
+      "claude": "Claude"
+    },
+    "tool": "Tool"
   },
   "comunicaciones": {
     "title": "Alerts",
