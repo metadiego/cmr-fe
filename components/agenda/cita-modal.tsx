@@ -174,6 +174,9 @@ export function CitaModal({
   }, [cuposRes.state]);
   // Duración del tipo (del endpoint; manda sobre el catálogo). Se usa para derivar la hora de fin.
   const slotDuration = cuposRes.state.kind === "ok" ? cuposRes.state.data?.durationMinutes ?? null : null;
+  // Festivo del día elegido (BE handoff booking-availability-fixes §D): explica un selector vacío por
+  // `closedByHoliday` en vez de dejarlo en silencio. El informativo (no bloqueante) también se muestra.
+  const festivoHoy = cuposRes.state.kind === "ok" ? cuposRes.state.data?.holidays?.[0] : null;
   // La hora elegida ya no tiene cupo → aviso NO bloqueante (el BE deja agendar igual).
   const slotLleno = !!hora && slots.some((s) => s.time === hora && s.vacios <= 0);
 
@@ -378,6 +381,21 @@ export function CitaModal({
                   </button>
                 </div>
               </div>
+              {festivoHoy && (
+                <p
+                  role="status"
+                  className={
+                    "mb-2 rounded-md border px-3 py-2 text-xs " +
+                    (festivoHoy.blocksSchedule
+                      ? "border-destructive/30 bg-destructive/10 text-destructive"
+                      : "border-warning/40 bg-warning/10 text-warning-foreground")
+                  }
+                >
+                  {festivoHoy.blocksSchedule
+                    ? t("holidayClosed", { name: festivoHoy.name })
+                    : t("holidayInfo", { name: festivoHoy.name })}
+                </p>
+              )}
               <SheetNotice sheet={cuposRes.state.kind === "ok" ? cuposRes.state.data?.sheet : null} className="mb-2" />
               <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
               {/* Aviso NO bloqueante: la hora elegida ya no tiene cupo. El BE no bloquea ni avisa en citas, así

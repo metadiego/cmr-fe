@@ -361,6 +361,11 @@ export interface CuposLibres {
   franjas?: SlotLibre[];
   // The call-center sheet (BE #521); a slot it tops comes with cappedBy 'hoja'.
   sheet?: SheetCheck;
+  // Festivo bloqueante ese día (BE handoff booking-availability-fixes §D, 2026-11-10): `slots`/`franjas`
+  // ya viene vacío, esto es solo para EXPLICAR el vacío en vez de mostrar "sin horas" a secas. Festivo
+  // informativo (no bloqueante): `closedByHoliday` es false y `holidays` igual trae el nombre.
+  closedByHoliday?: boolean;
+  holidays?: Array<{ date: string; name: string; blocksSchedule: boolean }>;
 }
 export function getCuposLibres(
   date: string,

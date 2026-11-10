@@ -23,19 +23,15 @@ export async function getHorariosMedico(
   return asArray<HorarioMedico>(await apiFetch(await oneCenterPath(`/doctors/schedules${q}`)));
 }
 
-// GET /holidays?anio= — holidays for the year (recurring ones resolved to it).
-// `anio` NO está en el mapa api-ingles (campos.ts) → el DTO del BE espera `anio`: se manda tal cual.
-// `centers`: the clinics a month calendar shows (`null` = every one with citas.read); omitted = the
-// active one, as before. Each row says its clinic. The company-wide holidays (no clinic) come too: the
-// clinic list never includes them (`scope=global` is a separate read), so the calendars never showed
-// them. A failed company-wide read only loses those.
+// GET /holidays?anio=&includeGlobal=true — holidays for the year (recurring ones resolved to it), the
+// clinic(s) in scope PLUS the company-wide ones in a single call (BE handoff booking-availability-fixes
+// §F, 2026-11-10: `includeGlobal` already existed on the BE, confirmed in schema.d.ts — replaces the two
+// merged reads this used to do). `anio` NO está en el mapa api-ingles (campos.ts) → el DTO del BE espera
+// `anio`: se manda tal cual. `centers`: the clinics a month calendar shows (`null` = every one with
+// citas.read); omitted = the active one, as before. Each row says its clinic (company-wide = null).
 export async function getFestivos(anio: number, centers?: CenterChoice): Promise<Festivo[]> {
-  const path = await oneCenterPath(`/holidays?anio=${anio}`, centers);
-  const [clinics, global] = await Promise.all([
-    apiFetch(path, {}, tenantOf(centers)),
-    apiFetch(`/holidays?anio=${anio}&scope=global`, {}, null).catch(() => []),
-  ]);
-  return [...asArray<Festivo>(clinics), ...asArray<Festivo>(global)];
+  const path = await oneCenterPath(`/holidays?anio=${anio}&includeGlobal=true`, centers);
+  return asArray<Festivo>(await apiFetch(path, {}, tenantOf(centers)));
 }
 
 // ── Schedules WRITE (RBAC citas.config). Campos ya en inglés en el schema (dayOfWeek/startTime/endTime).

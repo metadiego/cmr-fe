@@ -189,7 +189,8 @@
     "sheetFull": "Full on the call-center sheet",
     "notAStartTime": "This service only starts on the hour: pick a whole hour",
     "outsideHours": "Outside the center's hours",
-    "pastClosing": "Ends after the center closes"
+    "pastClosing": "Ends after the center closes",
+    "notConfigured": "Service has no resource configured"
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -734,7 +735,9 @@
       "variantGrid": "Grid",
       "slotFullWarn": "That time is full; it books anyway (non-blocking).",
       "rescheduledFrom": "The patient already had an appointment on {date}: it was moved to this date (one live appointment per patient).",
-      "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date."
+      "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date.",
+      "holidayClosed": "{name} — holiday, the schedule is closed that day.",
+      "holidayInfo": "{name} — holiday."
     },
     "fecha": "Date",
     "prevDay": "Previous day",

@@ -189,7 +189,8 @@
     "sheetFull": "Lleno en la hoja del call center",
     "notAStartTime": "Este servicio solo empieza en punto: elige una hora entera",
     "outsideHours": "Fuera del horario del centro",
-    "pastClosing": "Termina después del cierre del centro"
+    "pastClosing": "Termina después del cierre del centro",
+    "notConfigured": "Servicio sin recurso configurado"
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -734,7 +735,9 @@
       "variantGrid": "Rejilla",
       "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea).",
       "rescheduledFrom": "El paciente ya tenía una cita el {date}: se movió a esta fecha (una cita viva por paciente).",
-      "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha."
+      "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha.",
+      "holidayClosed": "{name} — día feriado, la agenda está cerrada ese día.",
+      "holidayInfo": "{name} — día feriado."
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",
