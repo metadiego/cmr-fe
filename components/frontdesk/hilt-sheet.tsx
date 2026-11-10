@@ -20,7 +20,8 @@ import { BORDER, LineInput, PatientLine, SHEET, TD, TH, type LaserSheetHeader } 
 
 type Region = { region: string; filas: LaserParametro[] };
 
-const ROW: React.CSSProperties = { ...TD, height: 18, padding: "1px 4px" };
+// Row height per sheet: the first has room to breathe (it fills the page like the legacy), the second is dense.
+const rowStyle = (height: number): React.CSSProperties => ({ ...TD, height, padding: "1px 4px" });
 
 export function HiltSheet({ centro, header, onVolver }: { centro?: string; header: LaserSheetHeader; onVolver: () => void }) {
   const t = useTranslations("frontdesk");
@@ -40,7 +41,7 @@ export function HiltSheet({ centro, header, onVolver }: { centro?: string; heade
   const { first, second } = hiltPages<Region>(data.sections ?? []);
   const labels = { paciente: th("paciente"), fecha: th("fecha"), record: th("record") };
 
-  const table = (regions: Region[]) => (
+  const table = (regions: Region[], ROW: React.CSSProperties) => (
     <table style={{ width: "100%", borderCollapse: "collapse", margin: 0 }}>
       <thead>
         <tr>
@@ -107,7 +108,7 @@ export function HiltSheet({ centro, header, onVolver }: { centro?: string; heade
             <div style={{ fontSize: 30, fontWeight: 700, lineHeight: 1 }}>{th("title")}</div>
           </div>
           <PatientLine header={header} labels={labels} layout="spread" style={{ marginTop: 12 }} />
-          <div style={{ marginTop: 10 }}>{table(first)}</div>
+          <div style={{ marginTop: 10 }}>{table(first, rowStyle(20.5))}</div>
 
           <div style={{ border: BORDER, minHeight: 40, padding: "10px 8px", marginTop: 12, fontSize: 10.5 }}>{th("comentarios")}</div>
 
@@ -128,13 +129,13 @@ export function HiltSheet({ centro, header, onVolver }: { centro?: string; heade
 
           {/* The pain scale at the legacy size (the print CSS caps img at 38px; inline wins). */}
           {/* eslint-disable-next-line @next/next/no-img-element -- cloned into a print window; next/image does not survive it. */}
-          <img src="/img/pain_measurement_scale.png" alt={t("escalaDolorAlt")} style={{ width: "36%", maxWidth: "36%", maxHeight: "none", margin: "18px auto 0", display: "block" }} />
+          <img src="/img/pain_measurement_scale.png" alt={t("escalaDolorAlt")} style={{ width: "38%", maxWidth: "38%", maxHeight: "none", margin: "20px auto 0", display: "block" }} />
         </div>
 
         {second.length > 0 && (
           <div style={{ ...SHEET, breakBefore: "page", pageBreakBefore: "always", marginTop: 24 }}>
             <PatientLine header={header} labels={labels} layout="spread" />
-            <div style={{ marginTop: 6 }}>{table(second)}</div>
+            <div style={{ marginTop: 6 }}>{table(second, rowStyle(18))}</div>
           </div>
         )}
         <PieFormato pie={data.footer} align="right" />

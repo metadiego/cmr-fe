@@ -10,7 +10,7 @@ import { legacyDay } from "@/lib/formatos/mls-sheet";
 export type LaserSheetHeader = { paciente: string; record: string; sesion: string; tecnico: string; proximaCita: string; fecha: string };
 
 export const BORDER = "1px solid #000";
-export const TH: React.CSSProperties = { border: BORDER, background: "#f0f0f0", padding: "3px 4px", textAlign: "center", fontWeight: 700, fontSize: 10 };
+export const TH: React.CSSProperties = { border: BORDER, background: "#f0f0f0", padding: "3px 4px", textAlign: "center", verticalAlign: "middle", fontWeight: 700, fontSize: 10 };
 export const TD: React.CSSProperties = { border: BORDER, padding: "2px 4px", height: 21, textAlign: "center", verticalAlign: "middle", fontSize: 10 };
 export const SHEET: React.CSSProperties = { display: "flex", flexDirection: "column", fontFamily: "Arial, Helvetica, sans-serif", color: "#000" };
 
