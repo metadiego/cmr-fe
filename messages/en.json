@@ -4992,10 +4992,13 @@
     "printerNameRequired": "Give the printer a name.",
     "duplicatePrinterName": "There is already a printer with that name in this center.",
     "printerNotFound": "That printer no longer exists.",
-    "commandSet": "Printer language",
-    "commandSetEscpos": "Epson (ESC/POS)",
-    "commandSetStarLine": "Star (Star Line Mode)",
-    "invalidCommandSet": "The printer language must be Epson (ESC/POS) or Star (Star Line Mode)."
+    "invalidCommandSet": "The printer language must be Epson (ESC/POS) or Star (Star Line Mode).",
+    "model": "Model",
+    "modelPlaceholder": "e.g. Epson TM-T20II",
+    "font": "Font",
+    "fontNone": "Unchanged",
+    "fontA": "Normal (A)",
+    "fontB": "Small (B)"
   },
   "cashReconciliation": {
     "error": {

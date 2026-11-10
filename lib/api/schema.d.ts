@@ -417,6 +417,462 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/politicas-de-confirmacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every guarded action (key, labelKey, default) with whether it asks in each center you can read (centerIds narrows).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/politicas-de-confirmacion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ConfirmationController_list[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/confirmation-policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every guarded action (key, labelKey, default) with whether it asks in each center you can read (centerIds narrows).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/confirmation-policies`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ConfirmationController_list[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/politicas-de-confirmacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every guarded action (key, labelKey, default) with whether it asks in each center you can read (centerIds narrows). */
+        get: operations["ConfirmationController_list[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/confirmation-policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every guarded action (key, labelKey, default) with whether it asks in each center you can read (centerIds narrows). */
+        get: operations["ConfirmationController_list[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/politicas-de-confirmacion/{actionKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Whether this guarded action asks before running, in the given centers (centerIds, required). Needs confirmation_policies.manage in each center (a center outside is a 403).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/politicas-de-confirmacion/{actionKey}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["ConfirmationController_set[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/confirmation-policies/{actionKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Whether this guarded action asks before running, in the given centers (centerIds, required). Needs confirmation_policies.manage in each center (a center outside is a 403).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/confirmation-policies/{actionKey}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["ConfirmationController_set[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/politicas-de-confirmacion/{actionKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Whether this guarded action asks before running, in the given centers (centerIds, required). Needs confirmation_policies.manage in each center (a center outside is a 403). */
+        put: operations["ConfirmationController_set[2]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/confirmation-policies/{actionKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Whether this guarded action asks before running, in the given centers (centerIds, required). Needs confirmation_policies.manage in each center (a center outside is a 403). */
+        put: operations["ConfirmationController_set[3]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/registro-de-cambios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after and whether it was undone.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/registro-de-cambios`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ChangeLogController_list[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/change-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after and whether it was undone.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/change-log`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ChangeLogController_list[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/registro-de-cambios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after and whether it was undone. */
+        get: operations["ChangeLogController_list[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/change-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after and whether it was undone. */
+        get: operations["ChangeLogController_list[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/registro-de-cambios/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One change, with its row before and after.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/registro-de-cambios/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ChangeLogController_get[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/change-log/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One change, with its row before and after.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/change-log/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ChangeLogController_get[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/registro-de-cambios/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One change, with its row before and after. */
+        get: operations["ChangeLogController_get[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/change-log/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One change, with its row before and after. */
+        get: operations["ChangeLogController_get[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/registro-de-cambios/{id}/deshacer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Undo the click this change belongs to, through the domain (a package, a stock or a sheet seat go back too). Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: change_log.undo. 409 if a later change touched the same fields, or it was already undone.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/registro-de-cambios/{id}/deshacer`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ChangeLogController_undo[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/registro-de-cambios/{id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Undo the click this change belongs to, through the domain (a package, a stock or a sheet seat go back too). Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: change_log.undo. 409 if a later change touched the same fields, or it was already undone.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/registro-de-cambios/{id}/undo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ChangeLogController_undo[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/change-log/{id}/deshacer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Undo the click this change belongs to, through the domain (a package, a stock or a sheet seat go back too). Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: change_log.undo. 409 if a later change touched the same fields, or it was already undone.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/change-log/{id}/deshacer`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ChangeLogController_undo[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/change-log/{id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Undo the click this change belongs to, through the domain (a package, a stock or a sheet seat go back too). Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: change_log.undo. 409 if a later change touched the same fields, or it was already undone.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/change-log/{id}/undo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ChangeLogController_undo[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/registro-de-cambios/{id}/deshacer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Undo the click this change belongs to, through the domain (a package, a stock or a sheet seat go back too). Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: change_log.undo. 409 if a later change touched the same fields, or it was already undone. */
+        post: operations["ChangeLogController_undo[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/registro-de-cambios/{id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Undo the click this change belongs to, through the domain (a package, a stock or a sheet seat go back too). Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: change_log.undo. 409 if a later change touched the same fields, or it was already undone. */
+        post: operations["ChangeLogController_undo[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/change-log/{id}/deshacer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Undo the click this change belongs to, through the domain (a package, a stock or a sheet seat go back too). Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: change_log.undo. 409 if a later change touched the same fields, or it was already undone. */
+        post: operations["ChangeLogController_undo[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/change-log/{id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Undo the click this change belongs to, through the domain (a package, a stock or a sheet seat go back too). Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: change_log.undo. 409 if a later change touched the same fields, or it was already undone. */
+        post: operations["ChangeLogController_undo[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/centros-donde-puedo": {
         parameters: {
             query?: never;
@@ -46683,7 +47139,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Borra de verdad una sesión y su historial. 'cancelada' es un estado del negocio; esto es limpieza. No aplica a una sesión asistida (desasistir primero).
+         * Deletes a session. The change log keeps it with its history: undoing the deletion (POST /change-log/:id/undo) brings it back. Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: frontdesk.delete. Not on an attended session (unattend first). 'cancelada' is a business state; this is not.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -46709,7 +47165,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Borra de verdad una sesión y su historial. 'cancelada' es un estado del negocio; esto es limpieza. No aplica a una sesión asistida (desasistir primero).
+         * Deletes a session. The change log keeps it with its history: undoing the deletion (POST /change-log/:id/undo) brings it back. Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: frontdesk.delete. Not on an attended session (unattend first). 'cancelada' is a business state; this is not.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -46730,7 +47186,7 @@ export interface paths {
         get: operations["FrontdeskController_get[2]_v2"];
         put?: never;
         post?: never;
-        /** Borra de verdad una sesión y su historial. 'cancelada' es un estado del negocio; esto es limpieza. No aplica a una sesión asistida (desasistir primero). */
+        /** Deletes a session. The change log keeps it with its history: undoing the deletion (POST /change-log/:id/undo) brings it back. Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: frontdesk.delete. Not on an attended session (unattend first). 'cancelada' is a business state; this is not. */
         delete: operations["FrontdeskController_eliminarSesion[2]_v2"];
         options?: never;
         head?: never;
@@ -46748,7 +47204,7 @@ export interface paths {
         get: operations["FrontdeskController_get[3]_v2"];
         put?: never;
         post?: never;
-        /** Borra de verdad una sesión y su historial. 'cancelada' es un estado del negocio; esto es limpieza. No aplica a una sesión asistida (desasistir primero). */
+        /** Deletes a session. The change log keeps it with its history: undoing the deletion (POST /change-log/:id/undo) brings it back. Guarded: 428 ACTION_REQUIRES_CONFIRMATION until repeated with X-Confirm-Action: frontdesk.delete. Not on an attended session (unattend first). 'cancelada' is a business state; this is not. */
         delete: operations["FrontdeskController_eliminarSesion[3]_v2"];
         options?: never;
         head?: never;
@@ -56035,6 +56491,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        SetConfirmationPolicyDto: {
+            /** @description true = ask before running the action; false = run it without asking. */
+            required: boolean;
+            /** @description Centers to set it in. */
+            centerIds: string[];
+        };
+        UndoChangeDto: {
+            /** @description Why it is undone (kept in the log). */
+            reason?: string;
+        };
         CreateCentroDto: {
             name: string;
             code: string;
@@ -56077,6 +56543,8 @@ export interface components {
             warehouseMonitorDays: number[];
             warehouseMonitorStart: string;
             warehouseMonitorEnd: string;
+            opensAt: string | null;
+            closesAt: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -56097,6 +56565,16 @@ export interface components {
             logoUrl?: string;
             /** @description Centro activo. */
             active?: boolean;
+            /**
+             * @description Opening time for therapies (HH:MM, center time zone): the first start time offered. Null = the old fixed day.
+             * @example 07:00
+             */
+            opensAt?: string | null;
+            /**
+             * @description Closing time (HH:MM): nothing starts at or after it, and a slot is offered only if the therapy ends by it. Null = no closing check.
+             * @example 17:00
+             */
+            closesAt?: string | null;
         };
         DatosFiscalesDto: {
             /** @description Razón social / nombre legal. */
@@ -58362,6 +58840,9 @@ export interface components {
             printerPort: number;
             /** @example EPSON TM-T20II Receipt5 */
             printerQueue: string;
+            model: string | null;
+            /** @enum {string|null} */
+            escposFont: "A" | "B" | null;
             /** @example 0 */
             sortOrder: number;
             /** @example true */
@@ -58401,6 +58882,17 @@ export interface components {
              */
             printerQueue: string;
             /**
+             * @description Marca y modelo, solo informativo (no cambia lo que se imprime); null lo borra. / Informational make and model, e.g. 'Star TSP743II (emulación Epson)'.
+             * @example Star TSP743II (emulación Epson)
+             */
+            model?: string | null;
+            /**
+             * @description Fuente ESC/POS con que se imprime: 'A' (normal) o 'B' (más pequeña); null = el ticket sale tal cual (todas las Epson). / ESC/POS font for this printer; null = untouched.
+             * @example B
+             * @enum {string|null}
+             */
+            escposFont?: "A" | "B" | null;
+            /**
              * @description Posición en la lista; si falta, al final. / Position in the list; defaults to last.
              * @example 1
              */
@@ -58438,6 +58930,17 @@ export interface components {
              * @example EPSON TM-T20II Receipt5
              */
             printerQueue?: string;
+            /**
+             * @description Marca y modelo, solo informativo (no cambia lo que se imprime); null lo borra. / Informational make and model, e.g. 'Star TSP743II (emulación Epson)'.
+             * @example Star TSP743II (emulación Epson)
+             */
+            model?: string | null;
+            /**
+             * @description Fuente ESC/POS con que se imprime: 'A' (normal) o 'B' (más pequeña); null = el ticket sale tal cual (todas las Epson). / ESC/POS font for this printer; null = untouched.
+             * @example B
+             * @enum {string|null}
+             */
+            escposFont?: "A" | "B" | null;
             /**
              * @description Posición en la lista; si falta, al final. / Position in the list; defaults to last.
              * @example 1
@@ -58526,6 +59029,12 @@ export interface components {
             printerPort: number;
             /** @example EPSON TM-T20II Receipt5 */
             printerQueue: string;
+            model: string | null;
+            /**
+             * @description B: put ESC M 1 right after the receipt's ESC @ before sending it to the hub; null: send it untouched.
+             * @enum {string|null}
+             */
+            escposFont: "A" | "B" | null;
         };
         MyPrintHubResponseDto: {
             enabled: boolean;
@@ -62708,6 +63217,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -62715,6 +63226,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -62754,6 +63269,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -62761,6 +63278,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -62800,6 +63321,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -62807,6 +63330,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -62846,6 +63373,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -62853,6 +63382,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -62892,6 +63425,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -62899,6 +63434,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -62938,6 +63477,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -62945,6 +63486,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -62984,6 +63529,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -62991,6 +63538,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63030,6 +63581,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63037,6 +63590,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63076,6 +63633,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63083,6 +63642,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63122,6 +63685,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63129,6 +63694,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63168,6 +63737,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63175,6 +63746,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63214,6 +63789,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63221,6 +63798,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63260,6 +63841,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63267,6 +63850,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63306,6 +63893,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63313,6 +63902,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63352,6 +63945,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63359,6 +63954,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63398,6 +63997,8 @@ export interface operations {
                 to?: string;
                 /** @description Actor: es el authUserId de Supabase, no el id del perfil. */
                 userId?: string;
+                /** @description The entity the write touched (e.g. a session id). Its before/after: GET /change-log?requestId=<requestId of the row>. */
+                entityId?: string;
                 /** @description Dominio/módulo (p.ej. facturas). */
                 domain?: string;
                 /** @description Acción: Controller.handler. */
@@ -63405,6 +64006,10 @@ export interface operations {
                 result?: "ok" | "error";
                 /** @description Método HTTP exacto. */
                 method?: string;
+                /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
+                channel?: "rest" | "mcp";
+                /** @description MCP tool name (only MCP rows have one). */
+                tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
                 soloCambios?: boolean;
                 /** @description Códigos de error a ocultar (repetible o CSV). Las filas sin código —las mutaciones correctas— nunca se ocultan. */
@@ -63637,6 +64242,726 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ConfirmationController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ConfirmationController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ConfirmationController_list[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ConfirmationController_list[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ConfirmationController_set[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetConfirmationPolicyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ConfirmationController_set[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetConfirmationPolicyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ConfirmationController_set[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetConfirmationPolicyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ConfirmationController_set[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetConfirmationPolicyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ChangeLogController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Kind of row (e.g. 'frontdesk_session'). */
+                entityType?: string;
+                /** @description One row: every change it had (e.g. a session id). */
+                entityId?: string;
+                /** @description Every change to the rows of this patient. */
+                patientId?: string;
+                /** @description Business day of the rows (YYYY-MM-DD), e.g. the session date. */
+                date?: string;
+                /** @description Changes made by this person (staff id). */
+                actorStaffId?: string;
+                /** @description Changes made by this user profile. */
+                actorProfileId?: string;
+                /** @description The changes one request made: an audit row (GET /audit) has the same requestId, so this is its before/after. */
+                requestId?: string;
+                /** @description Changes made from this moment (ISO-8601), inclusive. */
+                from?: string;
+                /** @description Changes made up to this moment (ISO-8601), inclusive. */
+                to?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Kind of row (e.g. 'frontdesk_session'). */
+                entityType?: string;
+                /** @description One row: every change it had (e.g. a session id). */
+                entityId?: string;
+                /** @description Every change to the rows of this patient. */
+                patientId?: string;
+                /** @description Business day of the rows (YYYY-MM-DD), e.g. the session date. */
+                date?: string;
+                /** @description Changes made by this person (staff id). */
+                actorStaffId?: string;
+                /** @description Changes made by this user profile. */
+                actorProfileId?: string;
+                /** @description The changes one request made: an audit row (GET /audit) has the same requestId, so this is its before/after. */
+                requestId?: string;
+                /** @description Changes made from this moment (ISO-8601), inclusive. */
+                from?: string;
+                /** @description Changes made up to this moment (ISO-8601), inclusive. */
+                to?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_list[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Kind of row (e.g. 'frontdesk_session'). */
+                entityType?: string;
+                /** @description One row: every change it had (e.g. a session id). */
+                entityId?: string;
+                /** @description Every change to the rows of this patient. */
+                patientId?: string;
+                /** @description Business day of the rows (YYYY-MM-DD), e.g. the session date. */
+                date?: string;
+                /** @description Changes made by this person (staff id). */
+                actorStaffId?: string;
+                /** @description Changes made by this user profile. */
+                actorProfileId?: string;
+                /** @description The changes one request made: an audit row (GET /audit) has the same requestId, so this is its before/after. */
+                requestId?: string;
+                /** @description Changes made from this moment (ISO-8601), inclusive. */
+                from?: string;
+                /** @description Changes made up to this moment (ISO-8601), inclusive. */
+                to?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_list[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Kind of row (e.g. 'frontdesk_session'). */
+                entityType?: string;
+                /** @description One row: every change it had (e.g. a session id). */
+                entityId?: string;
+                /** @description Every change to the rows of this patient. */
+                patientId?: string;
+                /** @description Business day of the rows (YYYY-MM-DD), e.g. the session date. */
+                date?: string;
+                /** @description Changes made by this person (staff id). */
+                actorStaffId?: string;
+                /** @description Changes made by this user profile. */
+                actorProfileId?: string;
+                /** @description The changes one request made: an audit row (GET /audit) has the same requestId, so this is its before/after. */
+                requestId?: string;
+                /** @description Changes made from this moment (ISO-8601), inclusive. */
+                from?: string;
+                /** @description Changes made up to this moment (ISO-8601), inclusive. */
+                to?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_get[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_get[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_get[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_get[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_undo[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoChangeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CHANGE_SUPERSEDED (carries fields) or CHANGE_ALREADY_UNDONE. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept it, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_undo[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoChangeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CHANGE_SUPERSEDED (carries fields) or CHANGE_ALREADY_UNDONE. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept it, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_undo[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoChangeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CHANGE_SUPERSEDED (carries fields) or CHANGE_ALREADY_UNDONE. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept it, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_undo[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoChangeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CHANGE_SUPERSEDED (carries fields) or CHANGE_ALREADY_UNDONE. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept it, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_undo[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoChangeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CHANGE_SUPERSEDED (carries fields) or CHANGE_ALREADY_UNDONE. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept it, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_undo[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoChangeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CHANGE_SUPERSEDED (carries fields) or CHANGE_ALREADY_UNDONE. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept it, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_undo[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoChangeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CHANGE_SUPERSEDED (carries fields) or CHANGE_ALREADY_UNDONE. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept it, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ChangeLogController_undo[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoChangeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CHANGE_SUPERSEDED (carries fields) or CHANGE_ALREADY_UNDONE. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept it, then repeat with X-Confirm-Action. */
+            428: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -131456,6 +132781,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_get[1]_v1": {
@@ -131494,6 +132826,13 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept, then repeat with X-Confirm-Action. */
+            428: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -131542,6 +132881,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept, then repeat with X-Confirm-Action. */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_get[3]_v2": {
@@ -131580,6 +132926,13 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ACTION_REQUIRES_CONFIRMATION: accept, then repeat with X-Confirm-Action. */
+            428: {
                 headers: {
                     [name: string]: unknown;
                 };

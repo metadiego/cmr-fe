@@ -1,5 +1,4 @@
 import { EscPosWriter } from "./escpos.ts";
-import { escposToStarLine } from "./star-line.ts";
 
 // Backup ESC/POS print path — a fallback for the normal one (browser + window.print()), which stays
 // the default. The receipt goes as raw ESC/POS bytes (lib/print/receipt-escpos.ts) to the print hub,
@@ -8,13 +7,21 @@ import { escposToStarLine } from "./star-line.ts";
 // buildHubRequestUrl (lib/print/hub-target.ts); this module never picks a destination itself.
 // See docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
 
-// A printer speaks ESC/POS (Epson, the default) or Star Line Mode (Star, e.g. TSP700II — it cannot be
-// switched to ESC/POS). Every screen that sends bytes to a hub goes through this one translation point,
-// so no screen reimplements it. docs/specs/impresoras-star-line-mode.md.
-export type PrintCommandSet = "escpos" | "star_line";
+// The ESC/POS font of a printer (BE #540, `escposFont`): a Star in Epson emulation prints font A wider than
+// an Epson, so the 48-column ticket wraps; font B fits. Every screen that sends bytes to a hub goes through
+// this one point. null/undefined = the bytes go UNTOUCHED, byte for byte (every Epson today). Mirrors
+// cmr-be src/modules/print-hub/printer-font.ts: ESC M n right after the ticket's leading ESC @, or first.
+export type EscPosFont = "A" | "B";
 
-export function bytesForPrinter(bytes: Uint8Array, commandSet: PrintCommandSet | undefined): Uint8Array {
-  return commandSet === "star_line" ? escposToStarLine(bytes) : bytes;
+export function bytesForPrinter(bytes: Uint8Array, font: EscPosFont | null | undefined): Uint8Array {
+  if (font !== "A" && font !== "B") return bytes;
+  const select = [0x1b, 0x4d, font === "B" ? 1 : 0];
+  const at = bytes[0] === 0x1b && bytes[1] === 0x40 ? 2 : 0;
+  const out = new Uint8Array(bytes.length + 3);
+  out.set(bytes.subarray(0, at), 0);
+  out.set(select, at);
+  out.set(bytes.subarray(at), at + 3);
+  return out;
 }
 
 // A short ticket to check a center's hub + printer settings from the configuration screen.

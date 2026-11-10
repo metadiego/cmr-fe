@@ -85,7 +85,7 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
   async function print() {
     setBusy(true);
     try {
-      const i = await sendToHubs(requestUrls, bytesForPrinter(await buildBytes(), printer?.commandSet));
+      const i = await sendToHubs(requestUrls, bytesForPrinter(await buildBytes(), printer?.escposFont));
       toast.success(i === 0 ? t("backupHubDone") : t("backupHubDoneFallback", { hub: new URL(requestUrls[i]).host }));
     } catch (err) {
       toastError(err, tRoot);

@@ -7,19 +7,12 @@ import { ApiError } from "./types";
 // print-hub.read/update/delete IN that center; printing reads GET /me/print-hub, which needs no admin
 // permission. Handoff docs/specs/print-hub-several-printers-handoff-be.md.
 
-// `commandSet` (BE PR #513, impresoras Star Line Mode — EN REVISIÓN a esta fecha): cada impresora trae
-// cómo habla ("escpos", el default, o "star_line" para una Star que no se puede pasar a ESC/POS). Se
-// declara A MANO porque el schema generado todavía no lo trae (mismo patrón que
-// `frontdeskStartsOnConsultation` en lib/api/personal.ts) — quitar este tipo y usar el campo real en
-// cuanto `npm run gen:api` lo traiga. Handoff .personal/handoff-impresoras-star.md.
-import type { PrintCommandSet } from "@/lib/print/hub";
-type ConCommandSet<T> = T & { commandSet?: PrintCommandSet };
-
-export type CenterPrinter = ConCommandSet<components["schemas"]["PrinterResponseDto"]>;
-export type CreatePrinterPayload = ConCommandSet<components["schemas"]["CreatePrinterDto"]>;
-export type UpdatePrinterPayload = ConCommandSet<components["schemas"]["UpdatePrinterDto"]>;
-export type PrinterForPrinting = ConCommandSet<components["schemas"]["PrinterForPrintingDto"]>;
-// `printers` overridden below: the schema's own array entry type does not know about `commandSet` yet.
+// Each printer carries `model` (a label) and `escposFont` ('A' | 'B' | null) since BE #540; the retired
+// Star Line Mode (`commandSet`, BE PR #513) is gone.
+export type CenterPrinter = components["schemas"]["PrinterResponseDto"];
+export type CreatePrinterPayload = components["schemas"]["CreatePrinterDto"];
+export type UpdatePrinterPayload = components["schemas"]["UpdatePrinterDto"];
+export type PrinterForPrinting = components["schemas"]["PrinterForPrintingDto"];
 export type PrintHub = Omit<components["schemas"]["PrintHubResponseDto"], "printers"> & { printers: CenterPrinter[] };
 export type PrintHubForPrinting = Omit<components["schemas"]["MyPrintHubResponseDto"], "printers"> & { printers: PrinterForPrinting[] };
 

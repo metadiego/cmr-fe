@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { createPrinter, deletePrinter, updatePrinter, type CenterPrinter } from "@/lib/api/print-hub";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { DEFAULT_PORTS, buildHubDiscoverUrl, buildHubRequestUrls, type HubDiscovery, type PrintHubProtocol } from "@/lib/print/hub-target";
-import { bytesForPrinter, sendToHubs, testTicketToEscPos, type PrintCommandSet } from "@/lib/print/hub";
+import { bytesForPrinter, sendToHubs, testTicketToEscPos, type EscPosFont } from "@/lib/print/hub";
 import { PrintHubLogin } from "@/components/configuracion/print-hub-login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,8 @@ interface Form {
   printerHost: string;
   printerPort: string;
   printerQueue: string;
-  commandSet: PrintCommandSet;
+  model: string;
+  font: EscPosFont | "";
 }
 
 const fromPrinter = (p: CenterPrinter | null): Form =>
@@ -33,9 +34,10 @@ const fromPrinter = (p: CenterPrinter | null): Form =>
         printerHost: p.printerHost ?? "",
         printerPort: String(p.printerPort),
         printerQueue: p.printerQueue,
-        commandSet: p.commandSet ?? "escpos",
+        model: p.model ?? "",
+        font: p.escposFont ?? "",
       }
-    : { name: "", protocol: "ipp", printerHost: "", printerPort: String(DEFAULT_PORTS.ipp), printerQueue: "", commandSet: "escpos" };
+    : { name: "", protocol: "ipp", printerHost: "", printerPort: String(DEFAULT_PORTS.ipp), printerQueue: "", model: "", font: "" };
 
 interface Props {
   centerId: string;
@@ -99,7 +101,8 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
       printerHost: form.printerHost.trim(),
       printerPort: Number(form.printerPort),
       printerQueue: form.printerQueue.trim(),
-      commandSet: form.commandSet,
+      model: form.model.trim() || null,
+      escposFont: form.font || null,
     };
     try {
       const saved = printer ? await updatePrinter(centerId, printer.id, body) : await createPrinter(centerId, body);
@@ -132,7 +135,7 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
     try {
       const stamp = new Date().toISOString().slice(0, 19).replace("T", " ");
       const ticket = testTicketToEscPos([tReceipt("hubTestTitle"), `${centerName} · ${form.name}`, form.printerQueue, stamp]);
-      const i = await sendToHubs(requestUrls, bytesForPrinter(ticket, form.commandSet));
+      const i = await sendToHubs(requestUrls, bytesForPrinter(ticket, form.font || null));
       toast.success(t("hubTestSentVia", { hub: new URL(requestUrls[i]).host }));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));
@@ -212,17 +215,25 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
         </div>
         <p className="text-xs text-muted-foreground">{form.protocol === "smb" ? t("printerHelpWindows") : t("printerHelpLinuxMac")}</p>
 
-        <div className="space-y-1.5">
-          <Label htmlFor={`cs-${id}`}>{tRoot("printHub.commandSet")}</Label>
-          <select
-            id={`cs-${id}`}
-            value={form.commandSet}
-            onChange={(e) => setForm((f) => ({ ...f, commandSet: e.target.value as PrintCommandSet }))}
-            className="h-9 w-full max-w-xs rounded-md border bg-background px-2 text-sm"
-          >
-            <option value="escpos">{tRoot("printHub.commandSetEscpos")}</option>
-            <option value="star_line">{tRoot("printHub.commandSetStarLine")}</option>
-          </select>
+        <div className="grid gap-3 sm:grid-cols-[1fr_14rem]">
+          <div className="space-y-1.5">
+            <Label htmlFor={`pm-${id}`}>{tRoot("printHub.model")}</Label>
+            <Input id={`pm-${id}`} value={form.model} maxLength={120} onChange={setField("model")} placeholder={tRoot("printHub.modelPlaceholder")} />
+          </div>
+          <div className="space-y-1.5">
+            {/* Only a Star in Epson emulation needs «Pequeña (B)»; every Epson stays «Sin cambio». */}
+            <Label htmlFor={`pf-${id}`}>{tRoot("printHub.font")}</Label>
+            <select
+              id={`pf-${id}`}
+              value={form.font}
+              onChange={(e) => setForm((f) => ({ ...f, font: e.target.value as EscPosFont | "" }))}
+              className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+            >
+              <option value="">{tRoot("printHub.fontNone")}</option>
+              <option value="A">{tRoot("printHub.fontA")}</option>
+              <option value="B">{tRoot("printHub.fontB")}</option>
+            </select>
+          </div>
         </div>
       </fieldset>
 
