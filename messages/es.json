@@ -2166,6 +2166,27 @@
       "horaSalida": "Hora Salida :",
       "ctd": "CTD :",
       "firma": "Firma del Paciente"
+    },
+    "hilt": {
+      "title": "HILT",
+      "paciente": "Paciente :",
+      "fecha": "Fecha :",
+      "record": "Record #",
+      "patologia": "Patología",
+      "step": "{n} Step",
+      "mjcm": "mj/cm",
+      "hz": "Hz",
+      "totEnergy": "Tot. Energy",
+      "comentarios": "Comentarios:",
+      "triggerPoint": "Trigger Point:",
+      "si": "Si:",
+      "no": "No:",
+      "tecnico": "Nombre Técnico:",
+      "proxima": "Próxima Cita:",
+      "nTerapias": "Número de Terapias # :",
+      "horaEntrada": "Hora Entrada:",
+      "horaSalida": "Hora Salida:",
+      "firma": "Firma del Paciente"
     }
   },
   "programarCitas": {

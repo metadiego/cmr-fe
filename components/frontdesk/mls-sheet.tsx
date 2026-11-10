@@ -5,10 +5,11 @@ import { useTranslations } from "next-intl";
 
 import { getFormato, type LaserParametro } from "@/lib/api/laser";
 import { useResource } from "@/hooks/use-resource";
-import { cell, legacyDay, sameHeight } from "@/lib/formatos/mls-sheet";
+import { cell, sameHeight } from "@/lib/formatos/mls-sheet";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/frontdesk/signature-pad";
 import { LogoFormato, imprimirFormato, PieFormato } from "@/components/frontdesk/formato-parts";
+import { BORDER, LineInput, PatientLine, SHEET, TD, TH, type LaserSheetHeader } from "@/components/frontdesk/laser-sheet-parts";
 
 // The MLS laser sheet, drawn like the legacy «MLS Form» (.personal/formatos-legacy/MLS Form.pdf): logo
 // left and «MLS» centred; Paciente / Fecha / Record on one line; the two pathology tables side by side
@@ -16,14 +17,7 @@ import { LogoFormato, imprimirFormato, PieFormato } from "@/components/frontdesk
 // each over its line; the patient's signature; the pain scale; the f-b/ foot at the right. Inline styles:
 // the sheet is cloned into its own print window (formato-parts imprimirFormato).
 
-export type MlsHeader = { paciente: string; record: string; sesion: string; tecnico: string; proximaCita: string; fecha: string };
-
-const BORDER = "1px solid #000";
-const TH: React.CSSProperties = { border: BORDER, background: "#f0f0f0", padding: "3px 4px", textAlign: "center", fontWeight: 700, fontSize: 10 };
-const TD: React.CSSProperties = { border: BORDER, padding: "2px 4px", height: 21, textAlign: "center", verticalAlign: "middle", fontSize: 10 };
-const LINE_INPUT: React.CSSProperties = { border: 0, borderBottom: BORDER, background: "transparent", font: "inherit", padding: "0 4px", outline: "none", width: "100%" };
-
-export function MlsSheet({ centro, header, onVolver }: { centro?: string; header: MlsHeader; onVolver: () => void }) {
+export function MlsSheet({ centro, header, onVolver }: { centro?: string; header: LaserSheetHeader; onVolver: () => void }) {
   const t = useTranslations("frontdesk");
   const tm = useTranslations("frontdesk.mls");
   const res = useResource(() => getFormato("mls", centro), [centro]);
@@ -69,9 +63,7 @@ export function MlsSheet({ centro, header, onVolver }: { centro?: string; header
       <span style={{ borderBottom: BORDER, minHeight: 16, padding: "0 4px", fontWeight: 700 }}>{value}</span>
     </div>
   );
-  const typed = (value: string, set: (v: string) => void, label: string) => (
-    <input aria-label={label} value={value} onChange={(e) => set(e.target.value)} style={{ ...LINE_INPUT, borderBottom: 0, padding: 0, fontWeight: 700 }} />
-  );
+  const typed = (value: string, set: (v: string) => void, label: string) => <LineInput value={value} onChange={set} label={label} />;
 
   return (
     <div className="space-y-3">
@@ -81,7 +73,7 @@ export function MlsSheet({ centro, header, onVolver }: { centro?: string; header
       </div>
 
       <div ref={printRef} className="formato-print rounded-lg border bg-white p-5 text-black">
-        <div className="formato-doc" style={{ display: "flex", flexDirection: "column", fontFamily: "Arial, Helvetica, sans-serif", color: "#000" }}>
+        <div className="formato-doc" style={SHEET}>
           {/* Logo left, «MLS» centred over the whole width. */}
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 44 }}>
             <div style={{ position: "absolute", left: 0, top: 0 }}>
@@ -90,11 +82,7 @@ export function MlsSheet({ centro, header, onVolver }: { centro?: string; header
             <div style={{ fontSize: 30, fontWeight: 700, lineHeight: 1 }}>{tm("title")}</div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "38% 32% 30%", fontSize: 10.5, marginTop: 14 }}>
-            <span>{tm("paciente")} <b>{header.paciente}</b></span>
-            <span>{tm("fecha")} {legacyDay(header.fecha)}</span>
-            <span>{tm("record")} <b>{header.record}</b></span>
-          </div>
+          <PatientLine header={header} labels={{ paciente: tm("paciente"), fecha: tm("fecha"), record: tm("record") }} style={{ marginTop: 14 }} />
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 12 }}>
             {table(left)}

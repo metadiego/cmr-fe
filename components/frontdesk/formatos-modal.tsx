@@ -3,21 +3,18 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
+import type { LaserTipo } from "@/lib/api/laser";
 import { getDisponibilidadServicio, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
-import { formatFechaSolo, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TimePicker } from "@/components/ui/time-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { SignaturePad } from "@/components/frontdesk/signature-pad";
-import { Campo, HORA_CLS, LogoFormato, imprimirFormato, PieFormato } from "@/components/frontdesk/formato-parts";
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
 import { MlsSheet } from "@/components/frontdesk/mls-sheet";
+import { HiltSheet } from "@/components/frontdesk/hilt-sheet";
 
 // Modal ESTÁNDAR de acciones/formatos por servicio (data-driven desde servicio.formAcciones).
 // Lista los `reports` (HILT/MLS…) y `additional_actions` (Historial). Al elegir un report:
@@ -199,14 +196,12 @@ export function FormatosModal({
           />
         )}
         {report && generado && tipo === "hilt" && (
-          <FormatoRender
-            tipo={tipo}
+          <HiltSheet
             centro={centro}
             header={{
               paciente: pacienteNombre,
               record: record ?? "",
               sesion: sesion || (sesionNN ?? ""),
-              areas: Number(areas) || 0,
               tecnico: enviarTecnico ? (tecnicoNombre ?? "") : "",
               proximaCita: proximaCita ?? "",
               fecha: fecha ?? "",
@@ -221,143 +216,5 @@ export function FormatosModal({
         )}
       </DialogContent>
     </Dialog>
-  );
-}
-
-type Header = { paciente: string; record: string; sesion: string; areas: number; tecnico: string; proximaCita: string; fecha: string };
-
-function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; centro?: string; header: Header; onVolver: () => void }) {
-  const t = useTranslations("frontdesk");
-  const res = useResource<Formato>(() => getFormato(tipo, centro), [tipo, centro]);
-  const [triggerSi, setTriggerSi] = React.useState("");
-  const [triggerNo, setTriggerNo] = React.useState("");
-  const [ctd, setCtd] = React.useState("");
-  const [horaIn, setHoraIn] = React.useState("");
-  const [horaOut, setHoraOut] = React.useState("");
-  const printRef = React.useRef<HTMLDivElement>(null);
-
-  if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
-  // Say WHY (e.g. FORBIDDEN: the user's role lacks the permission), not just that it failed.
-  if (res.state.kind === "fail") return <p className="text-sm text-destructive">{t("formatoError")} — {res.state.message}</p>;
-  if (res.state.kind !== "ok") return null;
-  const data = res.state.data;
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between no-print">
-        <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
-        <Button size="sm" onClick={() => imprimirFormato(printRef.current, t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle"))}>{t("imprimirPdf")}</Button>
-      </div>
-
-      <div ref={printRef} className="formato-print space-y-4 rounded-lg border bg-white p-5 text-black">
-        {/* Encabezado: membrete (logo pequeño + centro) + título; a la derecha fecha/sesión/áreas */}
-        <div className="flex items-start justify-between border-b pb-3">
-          <div className="flex items-center gap-3">
-            <LogoFormato logoUrl={data.letterhead?.logoUrl} />
-            <div>
-              {data.letterhead?.center && <div className="text-xs font-semibold uppercase tracking-wide">{data.letterhead.center}</div>}
-              <h2 className="text-lg font-bold uppercase">{t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle")}</h2>
-              <p className="text-sm">{header.paciente}{header.record ? ` · ${t("recordLabel")} ${header.record}` : ""}</p>
-            </div>
-          </div>
-          <div className="text-right text-xs">
-            {/* header.fecha = fecha de la cita, no la de hoy; sin ella (caller viejo), hoy es el fallback. */}
-            <div>{formatFechaSolo(header.fecha || todayPR())}</div>
-            <div>{t("colSesion")}: {header.sesion} · {t("colAreas")}: {header.areas}</div>
-          </div>
-        </div>
-
-        {tipo === "hilt" && data.type === "hilt" && <HiltTabla secciones={data.sections} t={t} />}
-
-        {/* Footer clínico: Trigger Point (Sí/No) solo HILT, CTD solo MLS — formato homologado. */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 border-t pt-3 text-xs">
-          {tipo === "hilt" ? (
-            <Campo label={t("triggerPoint")}>
-              <span className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  {t("triggerPointSi")}:
-                  <input className="w-16 border-b border-dashed bg-transparent outline-none" value={triggerSi} onChange={(e) => setTriggerSi(e.target.value)} />
-                </span>
-                <span className="flex items-center gap-1">
-                  {t("triggerPointNo")}:
-                  <input className="w-16 border-b border-dashed bg-transparent outline-none" value={triggerNo} onChange={(e) => setTriggerNo(e.target.value)} />
-                </span>
-              </span>
-            </Campo>
-          ) : (
-            <Campo label={t("ctd")}><input className="w-full border-b border-dashed bg-transparent outline-none" value={ctd} onChange={(e) => setCtd(e.target.value)} /></Campo>
-          )}
-          {/* Nº terapias = la "sesión/total" del tablero (p. ej. "4/12"), no días × áreas. */}
-          <Campo label={t("nTerapias")}><span className="font-semibold tabular-nums">{header.sesion || "—"}</span></Campo>
-          <Campo label={t("tecnico")}><span>{header.tecnico || "—"}</span></Campo>
-          <Campo label={t("proximaCita")}><span>{header.proximaCita || "—"}</span></Campo>
-          <Campo label={t("horaEntrada")}><TimePicker step={1} className={HORA_CLS} value={horaIn} onChange={setHoraIn} /></Campo>
-          <Campo label={t("horaSalida")}><TimePicker step={1} className={HORA_CLS} value={horaOut} onChange={setHoraOut} /></Campo>
-        </div>
-
-        {/* Firma del paciente */}
-        <div className="pt-2">
-          <SignaturePad height={110} />
-        </div>
-
-        {/* Escala de dolor: la misma gráfica del formato homologado, no un campo numérico aparte. El
-            `img` global de PRINT_CSS la limita a 38px (pensado para el logo); el inline style la anula. */}
-        <div className="pt-2 text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element -- clonado a una ventana de impresión aparte (ver imprimirFormato); next/image no sobrevive ese clon. */}
-          <img src="/img/pain_measurement_scale.png" alt={t("escalaDolorAlt")} style={{ maxHeight: 140, maxWidth: "100%", margin: "0 auto" }} />
-        </div>
-
-        {/* Pie del legacy (BE PR #201): mismo componente que el genérico. */}
-        <PieFormato pie={data.footer} />
-      </div>
-    </div>
-  );
-}
-
-type TFn = (k: string, v?: Record<string, string | number>) => string;
-
-function HiltTabla({ secciones, t }: { secciones: { region: string; filas: LaserParametro[] }[]; t: TFn }) {
-  return (
-    <div className="space-y-3">
-      {secciones.map((s) => (
-        <div key={s.region} className="region">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide">{s.region}</div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-[11px]">
-              <thead>
-                <tr className="border-b bg-neutral-100 text-left">
-                  <th className="px-2 py-1 font-medium">{t("colPatologia")}</th>
-                  <th className="px-2 py-1 text-center font-medium" colSpan={2}>Step 1</th>
-                  <th className="px-2 py-1 text-center font-medium" colSpan={2}>Step 2</th>
-                  <th className="px-2 py-1 text-center font-medium" colSpan={2}>Step 3</th>
-                  <th className="px-2 py-1 text-right font-medium">{t("colEnergy")}</th>
-                </tr>
-                <tr className="border-b text-[10px] text-neutral-500">
-                  <th />
-                  <th className="px-2 py-0.5 text-center">mJ/cm²</th><th className="px-2 py-0.5 text-center">Hz</th>
-                  <th className="px-2 py-0.5 text-center">mJ/cm²</th><th className="px-2 py-0.5 text-center">Hz</th>
-                  <th className="px-2 py-0.5 text-center">mJ/cm²</th><th className="px-2 py-0.5 text-center">Hz</th>
-                  <th className="px-2 py-0.5 text-right">J</th>
-                </tr>
-              </thead>
-              <tbody>
-                {s.filas.map((f) => (
-                  <tr key={f.id} className="border-b border-neutral-200">
-                    <td className="px-2 py-1">{f.pathology ?? f.patologia}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp1Mjcm ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp1Hz ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp2Mjcm ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp2Hz ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp3Mjcm ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp3Hz ?? "—"}</td>
-                    <td className="px-2 py-1 text-right font-medium tabular-nums">{f.energy ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
-    </div>
   );
 }
