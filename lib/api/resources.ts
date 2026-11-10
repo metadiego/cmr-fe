@@ -121,17 +121,21 @@ export function getAvailability(
 // --- Preferencia del planificador de series (docs/specs/reversas-de-la-serie-solo-hacia-adelante) ---
 export interface RecurringBookingConfig {
   preferForwardTime: boolean;
+  // Cuánto se puede mover una hora dentro del mismo día antes de saltarlo (BE PR #520, tren en
+  // serie). null = sin límite.
+  maxShiftMinutes: number | null;
 }
 export function getRecurringBookingConfig(centroId?: string): Promise<RecurringBookingConfig> {
   return apiFetch<RecurringBookingConfig>(`/resources/recurring-booking-config`, {}, centroId);
 }
+// El PUT acepta cada campo por separado — un patch parcial, no hace falta mandar el objeto entero.
 export function setRecurringBookingConfig(
-  preferForwardTime: boolean,
+  patch: Partial<RecurringBookingConfig>,
   centroId?: string,
 ): Promise<RecurringBookingConfig> {
   return apiFetch<RecurringBookingConfig>(
     `/resources/recurring-booking-config`,
-    { method: "PUT", body: JSON.stringify({ preferForwardTime }) },
+    { method: "PUT", body: JSON.stringify(patch) },
     centroId,
   );
 }
@@ -222,6 +226,72 @@ export function bookTrain(
     { method: "POST", body: JSON.stringify(payload), headers: centroId ? { "X-Tenant-ID": centroId } : undefined },
   ).then((env) => ({
     data: env.data ?? { sessions: [], train: { time: payload.time, fits: false, endsAt: "", legs: [], staffBlocks: [] } },
+    warnings: env.meta.warnings ?? [],
+  }));
+}
+
+// --- La serie del tren: varios días de un tirón, el BE calcula todo (BE PR #520) ---
+export type TrainSeriesCountSource = "request" | "availability";
+export interface TrainSeriesDay {
+  date: string;
+  status: "planned" | "skipped";
+  time?: string; // solo si planned
+  requestedTime: string;
+  adjusted?: boolean;
+  shiftMinutes?: number;
+  serviceIds: string[];
+  endsAt?: string;
+  legs?: TrainLegPlan[];
+  staffBlocks?: PatientDayStaffBlock[];
+  reasonKey?: string | null; // solo si skipped
+  serviceId?: string | null; // qué terapia bloqueó ese día
+}
+export type TrainSeriesStoppedBy = "countsMet" | "days" | "bookingLimit" | "until" | "tooManySkipped" | "horizon";
+export interface TrainSeriesPlan {
+  startDate: string;
+  preferredTime: string;
+  weekdays: number[];
+  preferForwardTime: boolean;
+  maxShiftMinutes: number | null;
+  counts: Record<string, number>;
+  countsSource: Record<string, TrainSeriesCountSource>;
+  days: TrainSeriesDay[];
+  unmet: Record<string, number>;
+  stoppedBy: TrainSeriesStoppedBy;
+}
+export function planTrainSeries(
+  body: {
+    patientId: string;
+    serviceIds: string[];
+    areas?: Record<string, number>;
+    sessions?: Record<string, number>;
+    preferredTime: string;
+    weekdays: number[];
+    startDate: string;
+    days?: number;
+    until?: string;
+    keepOrder?: boolean;
+  },
+  centroId?: string,
+): Promise<TrainSeriesPlan> {
+  return apiFetch<TrainSeriesPlan>(`/resources/train-series`, { method: "POST", body: JSON.stringify(body) }, centroId);
+}
+
+export type BookTrainSeriesResult = { days: Array<{ date: string; time: string; sessions: Sesion[] }>; booked: number };
+export function bookTrainSeries(
+  body: {
+    patientId: string;
+    areas?: Record<string, number>;
+    keepOrder?: boolean;
+    days: Array<{ date: string; time: string; serviceIds: string[] }>;
+  },
+  centroId?: string,
+): Promise<ConWarnings<BookTrainSeriesResult>> {
+  return apiFetchEnvelope<BookTrainSeriesResult>(
+    `/frontdesk/sessions/book-train-series`,
+    { method: "POST", body: JSON.stringify(body), headers: centroId ? { "X-Tenant-ID": centroId } : undefined },
+  ).then((env) => ({
+    data: env.data ?? { days: [], booked: 0 },
     warnings: env.meta.warnings ?? [],
   }));
 }

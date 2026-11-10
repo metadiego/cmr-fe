@@ -108,7 +108,7 @@ export function RecurringBookingModal({
     setPreferForwardTime(next); // Optimistic: the toggle should feel instant.
     setSavingPreference(true);
     try {
-      await setRecurringBookingConfig(next, centro);
+      await setRecurringBookingConfig({ preferForwardTime: next }, centro);
     } catch (err) {
       setPreferForwardTime(!next); // Revert on failure — never claim a preference that didn't save.
       toastError(err, tRoot);

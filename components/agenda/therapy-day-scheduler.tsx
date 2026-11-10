@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { PacienteSelect } from "@/components/citas/paciente-select";
 import { ExistingSessionsBadge } from "@/components/agenda/existing-sessions-badge";
 import { RecurringBookingModal } from "@/components/agenda/recurring-booking-modal";
+import { TrainSeriesModal } from "@/components/agenda/train-series-modal";
 import { AddTherapySelect } from "@/components/agenda/add-therapy-select";
 import { TherapyTrainGrid, trainLegsText } from "@/components/agenda/therapy-train-grid";
 import { Input } from "@/components/ui/input";
@@ -93,6 +94,8 @@ export function TherapyDayScheduler({
   // Which card's "schedule a series" modal is open (its serviceId), or null — additive-only feature,
   // fully independent from the single-date flow above.
   const [recurringFor, setRecurringFor] = React.useState<string | null>(null);
+  // «Programar una serie del tren»: el tren ENTERO, no una tarjeta suelta — handoff tren-en-serie.
+  const [seriesOpen, setSeriesOpen] = React.useState(false);
 
   const areasOf = (id: string) => areas[id] ?? 1;
 
@@ -530,6 +533,9 @@ export function TherapyDayScheduler({
             MISMO paciente en una sola visita — cerrar tras la primera obligaba a reabrir. «Seguir»
             limpia la selección y se queda en el mismo paciente/día; «Cerrar» hace lo de antes. */}
         <div className="flex items-center gap-2">
+          <Button size="sm" variant="ghost" onClick={() => setSeriesOpen(true)} disabled={!paciente || sel.size === 0}>
+            {t("trainSeriesButton")}
+          </Button>
           <Button size="lg" variant="outline" onClick={() => book(false)} disabled={!canBook}>
             {submitting ? tRoot("common.saving") : t("bookAndContinue")}
           </Button>
@@ -538,6 +544,26 @@ export function TherapyDayScheduler({
           </Button>
         </div>
       </div>
+
+      {paciente && sel.size > 0 && (
+        <TrainSeriesModal
+          open={seriesOpen}
+          patientId={paciente.id}
+          patientName={paciente.name}
+          serviceIds={serviceIds}
+          servById={servById}
+          areas={areasPayload}
+          keepOrder={keepOrder}
+          centro={centro}
+          defaultDate={date}
+          defaultTime={time || undefined}
+          onOpenChange={setSeriesOpen}
+          onBooked={() => {
+            upcomingRes.refresh();
+            trainRes.refresh();
+          }}
+        />
+      )}
 
       {recurringFor && paciente && (
         <RecurringBookingModal
