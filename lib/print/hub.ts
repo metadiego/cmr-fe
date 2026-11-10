@@ -70,13 +70,17 @@ async function fetchHubStatus(statusUrl: string): Promise<{ printer: PrinterStat
   return res.json();
 }
 
-// Asks the hubs IN ORDER (the same order printing uses); the first one that answers decides. "unknown"
+// Asks the hubs IN ORDER (the same order printing uses); the first one that can print decides. "unknown"
 // (e.g. a Windows share that needs a login to inspect) does not block printing: only a known-bad state
 // does — and so does a state this build does not know (a newer hub must not lock the button). No hub answering = hub down (or, from a browser, its certificate not accepted yet).
 export async function checkHubs(
   statusUrls: string[],
   get: (url: string) => Promise<{ printer: PrinterState; detail?: string }> = fetchHubStatus,
 ): Promise<HubHealth> {
+  // A hub that says the printer is down does not veto another that can reach it: the hubs see the printer
+  // differently (Caguas, 10-nov: the .2 relay read a stale CUPS «offline-report» on the owner's USB Star as
+  // «disconnected» while .172 saw it idle). The first «down» is kept and reported only if none says ready.
+  let down: HubHealth | null = null;
   for (let i = 0; i < statusUrls.length; i++) {
     let s: { printer: PrinterState; detail?: string };
     try {
@@ -85,7 +89,7 @@ export async function checkHubs(
       continue;
     }
     if (!DOWN_STATES.includes(s.printer)) return { kind: "ready", hub: i };
-    return { kind: "printerDown", hub: i, state: s.printer as DownState, detail: s.detail ?? "" };
+    down ??= { kind: "printerDown", hub: i, state: s.printer as DownState, detail: s.detail ?? "" };
   }
-  return { kind: "hubDown" };
+  return down ?? { kind: "hubDown" };
 }

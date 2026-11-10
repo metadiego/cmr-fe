@@ -59,6 +59,18 @@ test("health: hub up but printer unplugged → printerDown with the reason", asy
   assert.deepEqual(h, { kind: "printerDown", hub: 0, state: "disabled", detail: "Unplugged or turned off" });
 });
 
+test("health: one hub says the printer is down, another sees it ready → ready on that one", async () => {
+  const h = await checkHubs(["a", "b"], async (u) =>
+    u === "a" ? { printer: "disconnected", detail: "printer-state=3 reasons=offline-report" } : { printer: "ready" },
+  );
+  assert.deepEqual(h, { kind: "ready", hub: 1 });
+});
+
+test("health: every hub says down → the first one's reason", async () => {
+  const h = await checkHubs(["a", "b"], async (u) => ({ printer: u === "a" ? "disconnected" : "unreachable", detail: u }));
+  assert.deepEqual(h, { kind: "printerDown", hub: 0, state: "disconnected", detail: "a" });
+});
+
 test("health: unknown state does not block printing", async () => {
   assert.equal((await checkHubs(["a"], async () => ({ printer: "unknown" }))).kind, "ready");
 });
