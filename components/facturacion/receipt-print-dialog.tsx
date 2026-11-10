@@ -131,14 +131,16 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
           </Select>
         </div>
       )}
-      <div className="relative min-h-0 flex-1 bg-muted/40">
+      {/* The preview takes what is left and SHRINKS: a fixed-height iframe overflowed it and covered the hub
+          row below (its printer selector was hidden — owner, 10-nov «no veo la impresora a elegir»). */}
+      <div className="relative min-h-[12rem] flex-1 basis-[min(70svh,40rem)] bg-muted/40">
         {doc === null ? null : (
         <iframe
           key={`${attempt}|${doc}`}
           ref={iframeRef}
           src={`${pageUrl}?${query}`}
           title={t("previewTitle")}
-          className={"block h-[min(70svh,40rem)] w-full bg-white " + (status.kind === "error" ? "invisible" : "")}
+          className={"absolute inset-0 block h-full w-full bg-white " + (status.kind === "error" ? "invisible" : "")}
         />
         )}
         {status.kind === "error" && (
