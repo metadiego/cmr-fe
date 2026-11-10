@@ -2,6 +2,7 @@ import type { components } from "./schema";
 import type { ApiWarning } from "./types";
 import { apiFetch, apiFetchEnvelope, oneCenterPath, tenantOf } from "./client";
 import type { CenterChoice } from "@/lib/clinic-read-scope";
+import { normalizeBookMultipleResult, type BookMultipleResultRaw } from "./book-multiple";
 
 // Escritura con avisos NO bloqueantes (BE PR #168): la operación se realiza y el BE adjunta
 // `meta.warnings` (p. ej. cupo excedido). El FE los muestra como toast traducido por labelKey.
@@ -110,23 +111,22 @@ export async function agendarMultiple(
 }
 
 // Agenda VARIOS servicios en VARIAS fechas (el cruce completo) para un paciente, en UNA sola llamada
-// (POST /frontdesk/sessions/book-multiple), en inglés: `serviceIds` y `dates` (el BE mapeó `fechas→dates`
-// el 2026-09-17, commit 3334d3b; la v2 aún acepta `fechas`, verificado 2026-10-08). Devuelve `creadas` (las sesiones nuevas) y `omitidas` (cuántos
-// pares ya existían: idempotente), + avisos de cupo (meta.warnings) y de disponibilidad excedida por
-// servicio (data.aviso). Nunca bloquea. Handoff citar-varios-servicios.
+// (POST /frontdesk/sessions/book-multiple), en inglés: `serviceIds` y `dates`. Devuelve `creadas`
+// (sesiones nuevas) y `omitidas` (pares ya existentes: idempotente), + avisos de cupo y disponibilidad
+// excedida (data.aviso). Nunca bloquea. Handoff citar-varios-servicios.
 export type BookMultipleResult = { creadas: Sesion[]; omitidas: number; aviso: unknown | null };
 export async function agendarVariosServicios(
   // Handoff citar-varios-servicios / citar-marcar-los-servicios-con-saldo.
   payload: { patientId: string; serviceIds: string[]; dates: string[]; time?: string },
   centroId?: string,
 ): Promise<ConWarnings<BookMultipleResult>> {
-  const env = await apiFetchEnvelope<BookMultipleResult>(`/frontdesk/sessions/book-multiple`, {
+  const env = await apiFetchEnvelope<BookMultipleResultRaw<Sesion>>(`/frontdesk/sessions/book-multiple`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
   return {
-    data: env.data ?? { creadas: [], omitidas: 0, aviso: null },
+    data: normalizeBookMultipleResult(env.data),
     warnings: env.meta.warnings ?? [],
   };
 }

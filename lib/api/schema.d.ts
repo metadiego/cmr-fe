@@ -1315,7 +1315,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/diarias`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso bruto, tomado del mismo sitio que el cuadre de caja. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[0]_v1"];
         put?: never;
@@ -1338,7 +1338,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/daily`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso bruto, tomado del mismo sitio que el cuadre de caja. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[1]_v1"];
         put?: never;
@@ -1361,7 +1361,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/diarias`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso bruto, tomado del mismo sitio que el cuadre de caja. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[2]_v1"];
         put?: never;
@@ -1384,7 +1384,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/daily`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso bruto, tomado del mismo sitio que el cuadre de caja. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[3]_v1"];
         put?: never;
@@ -1404,7 +1404,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso bruto, tomado del mismo sitio que el cuadre de caja. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[4]_v2"];
         put?: never;
@@ -1424,7 +1424,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso bruto, tomado del mismo sitio que el cuadre de caja. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[5]_v2"];
         put?: never;
@@ -1444,7 +1444,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso bruto, tomado del mismo sitio que el cuadre de caja. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[6]_v2"];
         put?: never;
@@ -1464,7 +1464,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso bruto, tomado del mismo sitio que el cuadre de caja. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[7]_v2"];
         put?: never;
@@ -35151,6 +35151,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/citas/disponibilidad-por-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Free places per day of a range (≤ 62 days) for ONE appointment type (unit "appointment") or ONE service (unit "session", also needs resources.read in the center). Each day: capacity, free, freeMorning (< 12:00), freeAfternoon, closedByHoliday, reasonKey. ONE center: centerIds with at most one value (checked; two or more are a 400) or the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/disponibilidad-por-dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_availabilityByDay[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/availability-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Free places per day of a range (≤ 62 days) for ONE appointment type (unit "appointment") or ONE service (unit "session", also needs resources.read in the center). Each day: capacity, free, freeMorning (< 12:00), freeAfternoon, closedByHoliday, reasonKey. ONE center: centerIds with at most one value (checked; two or more are a 400) or the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/availability-by-day`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_availabilityByDay[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/disponibilidad-por-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Free places per day of a range (≤ 62 days) for ONE appointment type (unit "appointment") or ONE service (unit "session", also needs resources.read in the center). Each day: capacity, free, freeMorning (< 12:00), freeAfternoon, closedByHoliday, reasonKey. ONE center: centerIds with at most one value (checked; two or more are a 400) or the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/disponibilidad-por-dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_availabilityByDay[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/availability-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Free places per day of a range (≤ 62 days) for ONE appointment type (unit "appointment") or ONE service (unit "session", also needs resources.read in the center). Each day: capacity, free, freeMorning (< 12:00), freeAfternoon, closedByHoliday, reasonKey. ONE center: centerIds with at most one value (checked; two or more are a 400) or the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/availability-by-day`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_availabilityByDay[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/disponibilidad-por-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Free places per day of a range (≤ 62 days) for ONE appointment type (unit "appointment") or ONE service (unit "session", also needs resources.read in the center). Each day: capacity, free, freeMorning (< 12:00), freeAfternoon, closedByHoliday, reasonKey. ONE center: centerIds with at most one value (checked; two or more are a 400) or the session center. */
+        get: operations["CitasController_availabilityByDay[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/availability-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Free places per day of a range (≤ 62 days) for ONE appointment type (unit "appointment") or ONE service (unit "session", also needs resources.read in the center). Each day: capacity, free, freeMorning (< 12:00), freeAfternoon, closedByHoliday, reasonKey. ONE center: centerIds with at most one value (checked; two or more are a 400) or the session center. */
+        get: operations["CitasController_availabilityByDay[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/disponibilidad-por-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Free places per day of a range (≤ 62 days) for ONE appointment type (unit "appointment") or ONE service (unit "session", also needs resources.read in the center). Each day: capacity, free, freeMorning (< 12:00), freeAfternoon, closedByHoliday, reasonKey. ONE center: centerIds with at most one value (checked; two or more are a 400) or the session center. */
+        get: operations["CitasController_availabilityByDay[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/availability-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Free places per day of a range (≤ 62 days) for ONE appointment type (unit "appointment") or ONE service (unit "session", also needs resources.read in the center). Each day: capacity, free, freeMorning (< 12:00), freeAfternoon, closedByHoliday, reasonKey. ONE center: centerIds with at most one value (checked; two or more are a 400) or the session center. */
+        get: operations["CitasController_availabilityByDay[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/citas/estados": {
         parameters: {
             query?: never;
@@ -37029,7 +37181,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reparación retroactiva de un día pasado (tarea privilegiada de admin).
+         * Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/{id}/reparar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -37050,7 +37202,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reparación retroactiva de un día pasado (tarea privilegiada de admin).
+         * Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/{id}/repair`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -37071,7 +37223,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reparación retroactiva de un día pasado (tarea privilegiada de admin).
+         * Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/{id}/reparar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -37092,7 +37244,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reparación retroactiva de un día pasado (tarea privilegiada de admin).
+         * Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/{id}/repair`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -37112,7 +37264,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reparación retroactiva de un día pasado (tarea privilegiada de admin). */
+        /** Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name). */
         post: operations["CitasController_reparar[4]_v2"];
         delete?: never;
         options?: never;
@@ -37129,7 +37281,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reparación retroactiva de un día pasado (tarea privilegiada de admin). */
+        /** Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name). */
         post: operations["CitasController_reparar[5]_v2"];
         delete?: never;
         options?: never;
@@ -37146,7 +37298,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reparación retroactiva de un día pasado (tarea privilegiada de admin). */
+        /** Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name). */
         post: operations["CitasController_reparar[6]_v2"];
         delete?: never;
         options?: never;
@@ -37163,7 +37315,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reparación retroactiva de un día pasado (tarea privilegiada de admin). */
+        /** Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name). */
         post: operations["CitasController_reparar[7]_v2"];
         delete?: never;
         options?: never;
@@ -48045,7 +48197,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reparación retroactiva (tarea privilegiada de admin).
+         * Retroactive repair: privileged, opened by `frontdesk.reparar` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/reparar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48066,7 +48218,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reparación retroactiva (tarea privilegiada de admin).
+         * Retroactive repair: privileged, opened by `frontdesk.reparar` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/repair`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48086,7 +48238,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reparación retroactiva (tarea privilegiada de admin). */
+        /** Retroactive repair: privileged, opened by `frontdesk.reparar` alone (not a role name). */
         post: operations["FrontdeskController_reparar[2]_v2"];
         delete?: never;
         options?: never;
@@ -48103,7 +48255,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reparación retroactiva (tarea privilegiada de admin). */
+        /** Retroactive repair: privileged, opened by `frontdesk.reparar` alone (not a role name). */
         post: operations["FrontdeskController_reparar[3]_v2"];
         delete?: never;
         options?: never;
@@ -57321,7 +57473,7 @@ export interface components {
             /** @enum {string} */
             type: "readonly" | "numero" | "texto" | "select" | "calculado";
             /** @enum {string} */
-            role: "cantidad" | "accion" | "producto" | "subtotal" | "descuento" | "impuesto" | "precio" | "tarifa" | "multiplicador" | "informativo";
+            role: "cantidad" | "accion" | "producto" | "subtotal" | "descuento" | "impuesto" | "tarifa" | "multiplicador" | "informativo" | "precio";
             /**
              * @description Solo para `rol = multiplicador`: ¿este multiplicador cuenta VISITAS?
              *
@@ -60553,6 +60705,7 @@ export interface components {
             dayOfWeek?: number;
             /** @description Override SOLO para esta fecha ("YYYY-MM-DD"); si se omite aplica por diaSemana/default. */
             date?: string;
+            /** @description `H:mm`, `HH:mm` or `HH:mm:ss`; stored as `HH:mm`. */
             time: string;
             /**
              * Format: uuid
@@ -62171,7 +62324,7 @@ export interface components {
             labelKey: string | null;
             capacity: number;
             /** @enum {string} */
-            kind: "staff" | "person" | "room" | "chair" | "machine";
+            kind: "staff" | "room" | "chair" | "machine" | "person";
             staffId: string | null;
             staffIdRef?: Record<string, never>;
             staffRole: string | null;
@@ -62206,7 +62359,7 @@ export interface components {
             resourceIdRef?: Record<string, never>;
             minutes: number;
             /** @enum {string} */
-            per: "area" | "session";
+            per: "session" | "area";
             staffRole: string | null;
             patientsPerStaff: number | null;
             blocking: boolean;
@@ -62233,6 +62386,7 @@ export interface components {
             resources: components["schemas"]["ServiceResourceLineDto"][];
         };
         PatientDayQueryDto: {
+            /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
             centerIds?: string[];
             serviceIds: string[];
             /** @description Con fecha y hora, la respuesta dice además qué agendas de personal habría que bloquear. */
@@ -62240,6 +62394,8 @@ export interface components {
             time?: string;
         };
         PatientTrainQueryDto: {
+            /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+            centerIds?: string[];
             /**
              * @description Day, YYYY-MM-DD.
              * @example 2026-11-10
@@ -62256,9 +62412,10 @@ export interface components {
             patientId?: string;
             /** @description True = keep the asked order; false (default) = heavier resources first, reordering if needed. */
             keepOrder?: boolean;
-            centerIds?: string[];
         };
         TrainSeriesQueryDto: {
+            /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+            centerIds?: string[];
             /** @description The therapies of the train. */
             serviceIds: string[];
             /**
@@ -62295,7 +62452,6 @@ export interface components {
             until?: string;
             /** @description True = keep the asked order in every day. */
             keepOrder?: boolean;
-            centerIds?: string[];
         };
         UpdateResourceDto: {
             slug: string;
@@ -92466,6 +92622,7 @@ export interface operations {
     EhrIntegrationController_getConfig_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92487,6 +92644,7 @@ export interface operations {
     EhrIntegrationController_setConfig_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92512,6 +92670,7 @@ export interface operations {
     EhrIntegrationController_getConfig_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92533,6 +92692,7 @@ export interface operations {
     EhrIntegrationController_setConfig_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92558,6 +92718,7 @@ export interface operations {
     "EhrIntegrationController_probarConexion[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92577,6 +92738,7 @@ export interface operations {
     "EhrIntegrationController_probarConexion[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92596,6 +92758,7 @@ export interface operations {
     "EhrIntegrationController_probarConexion[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92615,6 +92778,7 @@ export interface operations {
     "EhrIntegrationController_probarConexion[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92634,6 +92798,7 @@ export interface operations {
     EhrIntegrationController_staffLinksList_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92655,6 +92820,7 @@ export interface operations {
     EhrIntegrationController_staffLinksList_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92676,6 +92842,7 @@ export interface operations {
     "EhrIntegrationController_staffLinksSync[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92697,6 +92864,7 @@ export interface operations {
     "EhrIntegrationController_staffLinksSync[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92718,6 +92886,7 @@ export interface operations {
     "EhrIntegrationController_staffLinksSync[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92739,6 +92908,7 @@ export interface operations {
     "EhrIntegrationController_staffLinksSync[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92760,6 +92930,7 @@ export interface operations {
     EhrIntegrationController_roles_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -92781,6 +92952,7 @@ export interface operations {
     EhrIntegrationController_roles_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -114757,6 +114929,262 @@ export interface operations {
             };
         };
     };
+    "CitasController_availabilityByDay[0]_v1": {
+        parameters: {
+            query: {
+                /** @description The center to read: at most ONE center (the view paints one; two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+                /** @description First day (YYYY-MM-DD), included. */
+                from: string;
+                /** @description Last day (YYYY-MM-DD), included; at most 62 days after from. */
+                to: string;
+                /** @description Appointment type (medical): days counted in appointments. Exactly one of appointmentTypeId | serviceId. */
+                appointmentTypeId?: string;
+                /** @description Service (therapy): days counted in sessions of it; also needs resources.read in the center. */
+                serviceId?: string;
+                /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
+                patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_availabilityByDay[1]_v1": {
+        parameters: {
+            query: {
+                /** @description The center to read: at most ONE center (the view paints one; two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+                /** @description First day (YYYY-MM-DD), included. */
+                from: string;
+                /** @description Last day (YYYY-MM-DD), included; at most 62 days after from. */
+                to: string;
+                /** @description Appointment type (medical): days counted in appointments. Exactly one of appointmentTypeId | serviceId. */
+                appointmentTypeId?: string;
+                /** @description Service (therapy): days counted in sessions of it; also needs resources.read in the center. */
+                serviceId?: string;
+                /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
+                patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_availabilityByDay[2]_v1": {
+        parameters: {
+            query: {
+                /** @description The center to read: at most ONE center (the view paints one; two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+                /** @description First day (YYYY-MM-DD), included. */
+                from: string;
+                /** @description Last day (YYYY-MM-DD), included; at most 62 days after from. */
+                to: string;
+                /** @description Appointment type (medical): days counted in appointments. Exactly one of appointmentTypeId | serviceId. */
+                appointmentTypeId?: string;
+                /** @description Service (therapy): days counted in sessions of it; also needs resources.read in the center. */
+                serviceId?: string;
+                /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
+                patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_availabilityByDay[3]_v1": {
+        parameters: {
+            query: {
+                /** @description The center to read: at most ONE center (the view paints one; two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+                /** @description First day (YYYY-MM-DD), included. */
+                from: string;
+                /** @description Last day (YYYY-MM-DD), included; at most 62 days after from. */
+                to: string;
+                /** @description Appointment type (medical): days counted in appointments. Exactly one of appointmentTypeId | serviceId. */
+                appointmentTypeId?: string;
+                /** @description Service (therapy): days counted in sessions of it; also needs resources.read in the center. */
+                serviceId?: string;
+                /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
+                patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_availabilityByDay[4]_v2": {
+        parameters: {
+            query: {
+                /** @description The center to read: at most ONE center (the view paints one; two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+                /** @description First day (YYYY-MM-DD), included. */
+                from: string;
+                /** @description Last day (YYYY-MM-DD), included; at most 62 days after from. */
+                to: string;
+                /** @description Appointment type (medical): days counted in appointments. Exactly one of appointmentTypeId | serviceId. */
+                appointmentTypeId?: string;
+                /** @description Service (therapy): days counted in sessions of it; also needs resources.read in the center. */
+                serviceId?: string;
+                /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
+                patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_availabilityByDay[5]_v2": {
+        parameters: {
+            query: {
+                /** @description The center to read: at most ONE center (the view paints one; two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+                /** @description First day (YYYY-MM-DD), included. */
+                from: string;
+                /** @description Last day (YYYY-MM-DD), included; at most 62 days after from. */
+                to: string;
+                /** @description Appointment type (medical): days counted in appointments. Exactly one of appointmentTypeId | serviceId. */
+                appointmentTypeId?: string;
+                /** @description Service (therapy): days counted in sessions of it; also needs resources.read in the center. */
+                serviceId?: string;
+                /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
+                patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_availabilityByDay[6]_v2": {
+        parameters: {
+            query: {
+                /** @description The center to read: at most ONE center (the view paints one; two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+                /** @description First day (YYYY-MM-DD), included. */
+                from: string;
+                /** @description Last day (YYYY-MM-DD), included; at most 62 days after from. */
+                to: string;
+                /** @description Appointment type (medical): days counted in appointments. Exactly one of appointmentTypeId | serviceId. */
+                appointmentTypeId?: string;
+                /** @description Service (therapy): days counted in sessions of it; also needs resources.read in the center. */
+                serviceId?: string;
+                /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
+                patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_availabilityByDay[7]_v2": {
+        parameters: {
+            query: {
+                /** @description The center to read: at most ONE center (the view paints one; two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+                /** @description First day (YYYY-MM-DD), included. */
+                from: string;
+                /** @description Last day (YYYY-MM-DD), included; at most 62 days after from. */
+                to: string;
+                /** @description Appointment type (medical): days counted in appointments. Exactly one of appointmentTypeId | serviceId. */
+                appointmentTypeId?: string;
+                /** @description Service (therapy): days counted in sessions of it; also needs resources.read in the center. */
+                serviceId?: string;
+                /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
+                patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
     "CitasController_estadosCatalogo[0]_v1": {
         parameters: {
             query?: never;
@@ -117922,6 +118350,8 @@ export interface operations {
                 anio?: number;
                 /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
                 scope?: "centro" | "global";
+                /** @description true = the centers of the read scope (narrowed by centerIds) PLUS the company-wide holidays (clinicId=null), each row with its clinicId. Ignored with scope=global. */
+                includeGlobal?: boolean;
             };
             header?: never;
             path?: never;
@@ -117971,6 +118401,8 @@ export interface operations {
                 anio?: number;
                 /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
                 scope?: "centro" | "global";
+                /** @description true = the centers of the read scope (narrowed by centerIds) PLUS the company-wide holidays (clinicId=null), each row with its clinicId. Ignored with scope=global. */
+                includeGlobal?: boolean;
             };
             header?: never;
             path?: never;
@@ -118020,6 +118452,8 @@ export interface operations {
                 anio?: number;
                 /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
                 scope?: "centro" | "global";
+                /** @description true = the centers of the read scope (narrowed by centerIds) PLUS the company-wide holidays (clinicId=null), each row with its clinicId. Ignored with scope=global. */
+                includeGlobal?: boolean;
             };
             header?: never;
             path?: never;
@@ -118069,6 +118503,8 @@ export interface operations {
                 anio?: number;
                 /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
                 scope?: "centro" | "global";
+                /** @description true = the centers of the read scope (narrowed by centerIds) PLUS the company-wide holidays (clinicId=null), each row with its clinicId. Ignored with scope=global. */
+                includeGlobal?: boolean;
             };
             header?: never;
             path?: never;
@@ -135239,6 +135675,7 @@ export interface operations {
     "ResourcesController_list[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135283,6 +135720,7 @@ export interface operations {
     "ResourcesController_list[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135327,6 +135765,7 @@ export interface operations {
     "ResourcesController_list[2]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135371,6 +135810,7 @@ export interface operations {
     "ResourcesController_list[3]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135415,6 +135855,7 @@ export interface operations {
     "ResourcesController_getLegacyAvailability[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135434,6 +135875,7 @@ export interface operations {
     "ResourcesController_setLegacyAvailability[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135457,6 +135899,7 @@ export interface operations {
     "ResourcesController_getLegacyAvailability[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135476,6 +135919,7 @@ export interface operations {
     "ResourcesController_setLegacyAvailability[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135499,6 +135943,7 @@ export interface operations {
     "ResourcesController_getLegacyAvailability[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135518,6 +135963,7 @@ export interface operations {
     "ResourcesController_setLegacyAvailability[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135541,6 +135987,7 @@ export interface operations {
     "ResourcesController_getLegacyAvailability[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135560,6 +136007,7 @@ export interface operations {
     "ResourcesController_setLegacyAvailability[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135583,6 +136031,7 @@ export interface operations {
     "ResourcesController_getLegacyAvailability[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135602,6 +136051,7 @@ export interface operations {
     "ResourcesController_setLegacyAvailability[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135625,6 +136075,7 @@ export interface operations {
     "ResourcesController_getLegacyAvailability[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135644,6 +136095,7 @@ export interface operations {
     "ResourcesController_setLegacyAvailability[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135667,6 +136119,7 @@ export interface operations {
     "ResourcesController_getLegacyAvailability[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135686,6 +136139,7 @@ export interface operations {
     "ResourcesController_setLegacyAvailability[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135709,6 +136163,7 @@ export interface operations {
     "ResourcesController_getLegacyAvailability[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135728,6 +136183,7 @@ export interface operations {
     "ResourcesController_setLegacyAvailability[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135751,6 +136207,7 @@ export interface operations {
     "ResourcesController_getRecurringBookingConfig[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135772,6 +136229,7 @@ export interface operations {
     "ResourcesController_setRecurringBookingConfig[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135797,6 +136255,7 @@ export interface operations {
     "ResourcesController_getRecurringBookingConfig[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135818,6 +136277,7 @@ export interface operations {
     "ResourcesController_setRecurringBookingConfig[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135843,6 +136303,7 @@ export interface operations {
     "ResourcesController_getRecurringBookingConfig[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135864,6 +136325,7 @@ export interface operations {
     "ResourcesController_setRecurringBookingConfig[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135889,6 +136351,7 @@ export interface operations {
     "ResourcesController_getRecurringBookingConfig[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135910,6 +136373,7 @@ export interface operations {
     "ResourcesController_setRecurringBookingConfig[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135935,6 +136399,7 @@ export interface operations {
     "ResourcesController_getRecurringBookingConfig[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135956,6 +136421,7 @@ export interface operations {
     "ResourcesController_setRecurringBookingConfig[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -135981,6 +136447,7 @@ export interface operations {
     "ResourcesController_getRecurringBookingConfig[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136002,6 +136469,7 @@ export interface operations {
     "ResourcesController_setRecurringBookingConfig[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136027,6 +136495,7 @@ export interface operations {
     "ResourcesController_getRecurringBookingConfig[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136048,6 +136517,7 @@ export interface operations {
     "ResourcesController_setRecurringBookingConfig[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136073,6 +136543,7 @@ export interface operations {
     "ResourcesController_getRecurringBookingConfig[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136094,6 +136565,7 @@ export interface operations {
     "ResourcesController_setRecurringBookingConfig[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136119,6 +136591,7 @@ export interface operations {
     "ResourcesController_configuration[0]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136140,6 +136613,7 @@ export interface operations {
     "ResourcesController_configuration[1]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136161,6 +136635,7 @@ export interface operations {
     "ResourcesController_configuration[2]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136182,6 +136657,7 @@ export interface operations {
     "ResourcesController_configuration[3]_v1": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136203,6 +136679,7 @@ export interface operations {
     "ResourcesController_configuration[4]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136224,6 +136701,7 @@ export interface operations {
     "ResourcesController_configuration[5]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136245,6 +136723,7 @@ export interface operations {
     "ResourcesController_configuration[6]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136266,6 +136745,7 @@ export interface operations {
     "ResourcesController_configuration[7]_v2": {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -136655,6 +137135,7 @@ export interface operations {
     "ResourcesController_dayOccupancy[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
             };
@@ -136675,6 +137156,7 @@ export interface operations {
     "ResourcesController_dayOccupancy[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
             };
@@ -136695,6 +137177,7 @@ export interface operations {
     "ResourcesController_dayOccupancy[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
             };
@@ -136715,6 +137198,7 @@ export interface operations {
     "ResourcesController_dayOccupancy[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
             };
@@ -136735,6 +137219,7 @@ export interface operations {
     "ResourcesController_dayOccupancy[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
             };
@@ -136755,6 +137240,7 @@ export interface operations {
     "ResourcesController_dayOccupancy[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
             };
@@ -136775,6 +137261,7 @@ export interface operations {
     "ResourcesController_dayOccupancy[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
             };
@@ -136795,6 +137282,7 @@ export interface operations {
     "ResourcesController_dayOccupancy[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
             };
@@ -136815,6 +137303,7 @@ export interface operations {
     "ResourcesController_availability[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
                 serviceId: string;
@@ -136839,6 +137328,7 @@ export interface operations {
     "ResourcesController_availability[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
                 serviceId: string;
@@ -136863,6 +137353,7 @@ export interface operations {
     "ResourcesController_availability[2]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
                 serviceId: string;
@@ -136887,6 +137378,7 @@ export interface operations {
     "ResourcesController_availability[3]_v1": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
                 serviceId: string;
@@ -136911,6 +137403,7 @@ export interface operations {
     "ResourcesController_availability[4]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
                 serviceId: string;
@@ -136935,6 +137428,7 @@ export interface operations {
     "ResourcesController_availability[5]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
                 serviceId: string;
@@ -136959,6 +137453,7 @@ export interface operations {
     "ResourcesController_availability[6]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
                 serviceId: string;
@@ -136983,6 +137478,7 @@ export interface operations {
     "ResourcesController_availability[7]_v2": {
         parameters: {
             query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
                 date: string;
                 serviceId: string;
@@ -146327,6 +146823,7 @@ export interface operations {
     SchedulingBridgeController_status_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146346,6 +146843,7 @@ export interface operations {
     SchedulingBridgeController_status_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146365,6 +146863,7 @@ export interface operations {
     SchedulingBridgeController_listRuns_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146386,6 +146885,7 @@ export interface operations {
     SchedulingBridgeController_listRuns_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146545,6 +147045,7 @@ export interface operations {
     SchedulingBridgeController_getConfig_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146566,6 +147067,7 @@ export interface operations {
     SchedulingBridgeController_updateConfig_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146591,6 +147093,7 @@ export interface operations {
     SchedulingBridgeController_getConfig_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146612,6 +147115,7 @@ export interface operations {
     SchedulingBridgeController_updateConfig_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146637,6 +147141,7 @@ export interface operations {
     SchedulingBridgeController_listDoctorMappings_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146658,6 +147163,7 @@ export interface operations {
     SchedulingBridgeController_createDoctorMapping_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146683,6 +147189,7 @@ export interface operations {
     SchedulingBridgeController_listDoctorMappings_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146704,6 +147211,7 @@ export interface operations {
     SchedulingBridgeController_createDoctorMapping_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146817,6 +147325,7 @@ export interface operations {
     SchedulingBridgeController_listAgentMappings_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146838,6 +147347,7 @@ export interface operations {
     SchedulingBridgeController_createAgentMapping_v1: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146863,6 +147373,7 @@ export interface operations {
     SchedulingBridgeController_listAgentMappings_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
@@ -146884,6 +147395,7 @@ export interface operations {
     SchedulingBridgeController_createAgentMapping_v2: {
         parameters: {
             query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
                 centerIds?: string[];
             };
             header?: never;
