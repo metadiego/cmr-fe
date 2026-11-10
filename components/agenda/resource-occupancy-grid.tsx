@@ -115,7 +115,16 @@ function Cell({
       ? "bg-warning/25 text-warning-foreground"
       : "bg-destructive/15 text-destructive";
   const reasonKey = full ? (cell.cappedBy === "staff" ? "therapies.noStaff" : "therapies.full") : null;
-  const title = reasonKey && tRoot.has(reasonKey) ? tRoot(reasonKey) : "";
+  // Solo en una sala de varios cargos (npt_room: técnico y enfermera, BE PR #519): el detalle por
+  // cargo gana al motivo genérico — dice CUÁL cargo falta, no solo que falta alguno.
+  const roleLabel = (role: string) => (tRoot.has(`resources.role.${role}`) ? tRoot(`resources.role.${role}`) : role);
+  const title = cell.byRole?.length
+    ? cell.byRole
+        .map((b) => `${roleLabel(b.role)}: ${b.free}${b.free <= 0 ? ` (${tRoot("resources.role.noStaffShort")})` : ""}`)
+        .join(" · ")
+    : reasonKey && tRoot.has(reasonKey)
+      ? tRoot(reasonKey)
+      : "";
   return (
     <span
       title={title}

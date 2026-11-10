@@ -238,6 +238,9 @@ export interface OccupancyCell {
   // tampoco lo cierra (regla 5). Pintar «—», sin barra.
   free: number | null;
   cappedBy: "stations" | "staff" | null;
+  // Solo en una sala de VARIOS cargos (npt_room: técnico y enfermera, BE PR #519): la respuesta de
+  // cada cargo por separado. `free` de la celda ya es el mejor de ellos; esto es para el detalle.
+  byRole?: Array<{ role: string; free: number; cappedBy: "stations" | "staff" | null }>;
 }
 export interface ResourceDayOccupancy {
   id: string;

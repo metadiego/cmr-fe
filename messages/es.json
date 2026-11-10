@@ -147,6 +147,12 @@
     "fTrainWeightHelp": "Los recursos escasos (rooms de láser, sillas de suero, la doctora de EMPOWER) anclan el tren de terapias: cuanto más alto, antes va.",
     "nurses": "Enfermería",
     "lineRepeated": "Ese recurso ya está en otra línea de este servicio: júntalas en una.",
+    "role": {
+      "tecnico": "Técnico",
+      "enfermera": "Enfermera",
+      "medico": "Médico",
+      "noStaffShort": "sin personal"
+    },
     "kind": {
       "room": "Cuarto",
       "chair": "Silla",

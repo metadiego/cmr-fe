@@ -147,6 +147,12 @@
     "fTrainWeightHelp": "Scarce resources (laser rooms, IV chairs, the EMPOWER doctor) anchor the therapy train: the higher the weight, the earlier it goes.",
     "nurses": "Nursing",
     "lineRepeated": "That resource is already on another line of this service: merge them into one.",
+    "role": {
+      "tecnico": "Technician",
+      "enfermera": "Nurse",
+      "medico": "Doctor",
+      "noStaffShort": "no staff"
+    },
     "kind": {
       "room": "Room",
       "chair": "Chair",
