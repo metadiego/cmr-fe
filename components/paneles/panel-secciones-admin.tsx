@@ -14,7 +14,7 @@ import {
   reordenarSecciones,
   getPanelContadores,
   ASIGNA_A,
-  type PanelSeccion,
+  type PanelSeccionAdmin,
   type PanelContador,
   type CreatePanelSeccionPayload,
 } from "@/lib/api/paneles";
@@ -62,14 +62,14 @@ type FormState = {
   asignaA: string;
   visible: boolean;
 };
-function fromSeccion(s: PanelSeccion): FormState {
+function fromSeccion(s: PanelSeccionAdmin): FormState {
   return {
-    clave: s.clave,
+    clave: s.slug,
     labelKey: s.labelKey,
     color: s.color ?? "",
     audio: s.audio ?? "",
-    capacidad: s.capacidad ?? "",
-    asignaA: s.asignaA ?? ASIGNA_A[0],
+    capacidad: s.capacity ?? "",
+    asignaA: s.assignsTo ?? ASIGNA_A[0],
     visible: s.visible,
   };
 }
@@ -94,12 +94,12 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
 
   const [nonce, setNonce] = React.useState(0);
   const reload = () => setNonce((n) => n + 1);
-  const { state } = useResource<PanelSeccion[]>(
+  const { state } = useResource<PanelSeccionAdmin[]>(
     () => getPanelSecciones(clave, { includeInactive: true }, centro),
     [clave, centro, nonce],
   );
   const secciones = React.useMemo(
-    () => (state.kind === "ok" ? [...state.data].sort((a, b) => a.orden - b.orden) : []),
+    () => (state.kind === "ok" ? [...state.data].sort((a, b) => a.sortOrder - b.sortOrder) : []),
     [state],
   );
 
@@ -136,7 +136,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
 
-  function seleccionar(s: PanelSeccion) {
+  function seleccionar(s: PanelSeccionAdmin) {
     setCreando(false);
     setSelId(s.id);
     setForm(fromSeccion(s));
@@ -160,7 +160,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
     if (from < 0 || to < 0) return;
     const [moved] = arr.splice(from, 1);
     arr.splice(to, 0, moved);
-    const ordenes = arr.map((s, i) => ({ id: s.id, orden: i }));
+    const ordenes = arr.map((s, i) => ({ id: s.id, sortOrder: i }));
     try {
       await reordenarSecciones(clave, ordenes, centro);
       reload();
@@ -169,7 +169,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
     }
   }
 
-  async function toggle(s: PanelSeccion, campo: "visible" | "activo") {
+  async function toggle(s: PanelSeccionAdmin, campo: "visible" | "active") {
     try {
       await updatePanelSeccion(s.id, { [campo]: !s[campo] }, centro);
       reload();
@@ -182,12 +182,12 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
     if (!form.clave.trim() || !form.labelKey.trim()) return;
     setSaving(true);
     const payload: CreatePanelSeccionPayload = {
-      clave: form.clave.trim(),
+      slug: form.clave.trim(),
       labelKey: form.labelKey.trim(),
       color: form.color.trim() || null,
       audio: form.audio.trim() || null,
-      capacidad: form.capacidad || undefined,
-      asignaA: (form.asignaA || ASIGNA_A[0]) as (typeof ASIGNA_A)[number],
+      capacity: form.capacidad || undefined,
+      assignsTo: (form.asignaA || ASIGNA_A[0]) as (typeof ASIGNA_A)[number],
       visible: form.visible,
     };
     try {
@@ -195,9 +195,9 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
         await createPanelSeccion(clave, payload, centro);
         toast.success(t("creada"));
       } else if (selId) {
-        // En edición no se manda la clave (es única/inmutable).
-        const { clave: _clave, ...rest } = payload;
-        void _clave;
+        // En edición no se manda el slug (es único/inmutable).
+        const { slug: _slug, ...rest } = payload;
+        void _slug;
         await updatePanelSeccion(selId, rest, centro);
         toast.success(t("guardada"));
       }
@@ -211,7 +211,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
   }
 
   // Borrado con 409 esperado (tiene histórico): mostrar el mensaje y ofrecer desactivar.
-  const [toDelete, setToDelete] = React.useState<PanelSeccion | null>(null);
+  const [toDelete, setToDelete] = React.useState<PanelSeccionAdmin | null>(null);
   async function confirmarBorrado() {
     if (!toDelete) return;
     const s = toDelete;
@@ -227,7 +227,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
         toast.error(e.message, {
           action: {
             label: t("desactivar"),
-            onClick: () => void toggle(s, "activo"),
+            onClick: () => void toggle(s, "active"),
           },
         });
       } else {
@@ -281,7 +281,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                   selId === s.id && "ring-2 ring-primary",
                   overId === s.id && dragId && "border-primary",
                   dragId === s.id && "opacity-50",
-                  !s.activo && "opacity-60",
+                  !s.active && "opacity-60",
                 )}
               >
                 <span className="cursor-grab text-muted-foreground" aria-hidden>
@@ -296,7 +296,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                   <span className="font-medium">
                     {tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.labelKey}
                   </span>
-                  <span className="ml-2 text-xs text-muted-foreground">{contadorDe(s.clave)}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{contadorDe(s.slug)}</span>
                 </span>
                 <span
                   className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex"
@@ -310,7 +310,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                   onClick={(e) => e.stopPropagation()}
                 >
                   {t("activa")}
-                  <Switch checked={s.activo} onCheckedChange={() => toggle(s, "activo")} />
+                  <Switch checked={s.active} onCheckedChange={() => toggle(s, "active")} />
                 </span>
                 {puedeBorrar && (
                   <Button

@@ -5,11 +5,9 @@ import { apiFetch, apiFetchEnvelope } from "./client";
 // (entidad "panel_notificacion", accion "notificada"|"aceptada"). RBAC panel.read/notificar/aceptar/config.
 // El BE nunca manda texto visible: solo `labelKey` (i18n en el FE).
 
-// OJO: PanelSeccion viaja dentro de `secciones` (bolsa OPACA) en /definition → sus claves NO se traducen y
-// quedan en español. Se mantiene en español TODO el tipo (y los payloads de sección) por coherencia con esa
-// bolsa. Sus claves en español pasan íntegras por el middleware de v2 al entrar (ninguna colisiona con un
-// nombre inglés del mapa). NOTA (hueco BE): los endpoints /sections (GET/POST/PUT) devuelven la sección a
-// NIVEL RAÍZ, donde el interceptor SÍ traduce, así que ahí llegan en inglés — inconsistencia del BE. Ver reporte.
+// PanelSeccion viaja dentro de `secciones` (bolsa OPACA) en /definition → sus claves NO se traducen y
+// quedan en español (verificado en vivo 2026-11-10). Sus claves en español pasan íntegras por el
+// middleware de v2 al entrar (ninguna colisiona con un nombre inglés del mapa).
 export type PanelSeccion = {
   id: string;
   panelId?: string;
@@ -28,20 +26,40 @@ export type PanelSeccion = {
 // asignaA es una FRONTERA DE SEGURIDAD (decide a qué columna de la sesión se escribe) → lista fija.
 export const ASIGNA_A = ["sesion.enfermeraId", "sesion.tecnicoId", "sesion.medicoId"] as const;
 
-// Payloads del CRUD admin. capacidad es `string` a propósito (el BE ya NO la limita a 3 valores:
-// valida contra las capacidades reales del personal del centro). El schema.d.ts está desactualizado.
-export type CreatePanelSeccionPayload = {
-  clave: string;
+// Deuda del BE confirmada en vivo 2026-11-10 (cmr-be-6e, hilo book-multiple): la MISMA sección sale en
+// español dentro de /definition (PanelSeccion arriba) pero en inglés a NIVEL RAÍZ en el CRUD admin
+// (GET/POST/PUT /panels/:clave/sections — slug/sortOrder/source/assignsTo/capacity/active). Antes esto
+// se leía con los nombres en español y el campo real (p.ej. `assignsTo`) nunca llegaba: cada edición de
+// sección en la pantalla de config mostraba y guardaba basura. Tipo aparte para no romper PanelSeccion,
+// que sigue siendo lo correcto para /definition y el tablero en vivo (panel-enfermeria.tsx).
+export type PanelSeccionAdmin = {
+  id: string;
+  panelId?: string;
+  slug: string;
   labelKey: string;
-  orden?: number;
+  sortOrder: number;
+  color: string | null;
+  visible: boolean;
+  audio: string | null;
+  capacity?: string | null;
+  assignsTo?: string | null; // lista cerrada: sesion.enfermeraId | sesion.tecnicoId | sesion.medicoId
+  source?: Record<string, unknown> | null;
+  active: boolean;
+};
+// capacity es `string` a propósito (el BE ya NO la limita a 3 valores: valida contra las capacidades
+// reales del personal del centro).
+export type CreatePanelSeccionPayload = {
+  slug: string;
+  labelKey: string;
+  sortOrder?: number;
   color?: string | null;
   visible?: boolean;
   audio?: string | null;
-  capacidad?: string;
-  asignaA?: (typeof ASIGNA_A)[number];
-  origen?: Record<string, unknown> | null;
+  capacity?: string;
+  assignsTo?: (typeof ASIGNA_A)[number];
+  source?: Record<string, unknown> | null;
 };
-export type UpdatePanelSeccionPayload = Partial<CreatePanelSeccionPayload> & { activo?: boolean };
+export type UpdatePanelSeccionPayload = Partial<CreatePanelSeccionPayload> & { active?: boolean };
 export type PanelPersonal = { id: string; name: string };
 export type PanelEstatus = {
   staffId: string;
@@ -151,22 +169,23 @@ export function getPanelContadores(clave: string, fecha: string, centroId?: stri
 // ─── CRUD admin de secciones (RBAC panel.config; borrar exige además rol admin) ──────────────────
 // GET /paneles/:clave/secciones — catálogo. includeInactive=true trae también las apagadas para
 // poder reactivarlas (sin él, /definicion filtra activo:true y una sección apagada desaparecía).
+// Devuelve PanelSeccionAdmin (inglés, a nivel raíz) — no confundir con PanelSeccion (español, de /definition).
 export function getPanelSecciones(
   clave: string,
   opts: { includeInactive?: boolean } = {},
   centroId?: string,
-): Promise<PanelSeccion[]> {
+): Promise<PanelSeccionAdmin[]> {
   const qs = opts.includeInactive ? "?includeInactive=true" : ""; // `includeInactive` no está en el mapa → igual
   return apiFetch<unknown>(`/panels/${clave}/sections${qs}`, {}, centroId).then((r) =>
-    Array.isArray(r) ? (r as PanelSeccion[]) : (((r as { items?: PanelSeccion[] })?.items) ?? []),
+    Array.isArray(r) ? (r as PanelSeccionAdmin[]) : (((r as { items?: PanelSeccionAdmin[] })?.items) ?? []),
   );
 }
 export function createPanelSeccion(
   clave: string,
   payload: CreatePanelSeccionPayload,
   centroId?: string,
-): Promise<PanelSeccion> {
-  return apiFetch<PanelSeccion>(
+): Promise<PanelSeccionAdmin> {
+  return apiFetch<PanelSeccionAdmin>(
     `/panels/${clave}/sections`,
     { method: "POST", body: JSON.stringify(payload) },
     centroId,
@@ -176,8 +195,8 @@ export function updatePanelSeccion(
   id: string,
   payload: UpdatePanelSeccionPayload,
   centroId?: string,
-): Promise<PanelSeccion> {
-  return apiFetch<PanelSeccion>(
+): Promise<PanelSeccionAdmin> {
+  return apiFetch<PanelSeccionAdmin>(
     `/panels/sections/${id}`,
     { method: "PUT", body: JSON.stringify(payload) },
     centroId,
@@ -190,11 +209,12 @@ export function deletePanelSeccion(id: string, centroId?: string): Promise<void>
 }
 // PUT /paneles/:clave/secciones/orden — reordenar en BLOQUE (atómico): manda la lista entera. Si
 // algún id no es del panel → 400 y no se aplica ninguno.
-// El cuerpo `{ ordenes: [{ id, orden }] }` se queda en español: `ordenes` NO está en el mapa y `orden`
-// no colisiona con ningún nombre inglés → ambos pasan íntegros por el middleware al DTO (dto.ordenes).
+// El cuerpo `{ ordenes: [{ id, sortOrder }] }`: el contenedor `ordenes` NO está en el mapa (se queda en
+// español), pero cada item SÍ es a nivel raíz de ese objeto y el BE lo declara `sortOrder` (verificado
+// en schema.d.ts, OrdenSeccionDto) — `orden` nunca llegaba, el reorden por drag&drop no se guardaba.
 export function reordenarSecciones(
   clave: string,
-  ordenes: { id: string; orden: number }[],
+  ordenes: { id: string; sortOrder: number }[],
   centroId?: string,
 ): Promise<unknown> {
   return apiFetch(
