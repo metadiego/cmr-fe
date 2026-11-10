@@ -5428,5 +5428,22 @@
     "ownerNoteFailed": "The portfolio owner could not be noted on the sheet",
     "down": "The call-center sheet is not answering: availability may be out of date",
     "noSeatDays": "No seat on the sheet: {days}"
+  },
+  "oauthConsent": {
+    "loading": "Loading…",
+    "invalidLink": "Invalid authorization link",
+    "genericError": "The authorization could not be completed. Try again from Claude.",
+    "backToCmr": "Back to CMR",
+    "unknownClient": "An application",
+    "title": "{client} wants to access CMR",
+    "signedInAs": "As:",
+    "notYou": "Not you? Sign out",
+    "whatItCanDo": "{client} will be able to do everything you can do in CMR, with your permissions and in your centers.",
+    "auditNote": "Every action is recorded in the audit log as done through {client}.",
+    "returnTo": "You will return to:",
+    "approve": "Approve",
+    "deny": "Cancel",
+    "working": "One moment…",
+    "disconnectHint": "You can disconnect {client} at any time from its connector settings."
   }
 }

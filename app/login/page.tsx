@@ -30,7 +30,10 @@ function LoginForm() {
   const t = useTranslations("login");
   // Aviso cuando el usuario llega aquí porque su sesión expiró (redirigido con ?expired=1). Refuerza el
   // toast del cliente de API para que el motivo quede claro también en la pantalla de login (QA-001).
-  const expirada = useSearchParams().has("expired");
+  const params = useSearchParams();
+  const expirada = params.has("expired");
+  // Where to go after signing in (set by proxy.ts); the server action validates it.
+  const next = params.get("next") ?? "";
 
   // Domain autocompletion (anonymous: no session yet, so the public preferences endpoint, not
   // getMyPreferences). A bare user part ("mirna.arciles") becomes the full house email; anything
@@ -68,6 +71,7 @@ function LoginForm() {
         )}
 
         <form action={formAction} className="mt-6 space-y-4">
+          <input type="hidden" name="next" value={next} />
           <div className="space-y-1.5">
             <Label htmlFor="email">
               {t("email")}

@@ -5428,5 +5428,22 @@
     "ownerNoteFailed": "No se pudo anotar el dueño de cartera en la hoja",
     "down": "La hoja del call center no responde: la disponibilidad puede no estar al día",
     "noSeatDays": "Sin asiento en la hoja: {days}"
+  },
+  "oauthConsent": {
+    "loading": "Cargando…",
+    "invalidLink": "Enlace de autorización inválido",
+    "genericError": "No se pudo completar la autorización. Vuelve a intentarlo desde Claude.",
+    "backToCmr": "Volver a CMR",
+    "unknownClient": "Una aplicación",
+    "title": "{client} quiere acceder a CMR",
+    "signedInAs": "Como:",
+    "notYou": "¿No eres tú? Cerrar sesión",
+    "whatItCanDo": "{client} podrá hacer todo lo que tú puedes hacer en CMR, con tus mismos permisos y en tus centros.",
+    "auditNote": "Cada acción queda registrada en la auditoría como hecha a través de {client}.",
+    "returnTo": "Volverás a:",
+    "approve": "Aprobar",
+    "deny": "Cancelar",
+    "working": "Un momento…",
+    "disconnectHint": "Puedes desconectar {client} cuando quieras desde sus ajustes de conectores."
   }
 }
