@@ -561,6 +561,7 @@ function Editor({
         fecha={fecha}
         centroNombre={centroNombre}
         reporte={reporte}
+        subtotalesTarjeta={subtotalesTarjeta}
         firmas={signOff.printed}
         firmaTexto={signOff.statement}
         resumen={{

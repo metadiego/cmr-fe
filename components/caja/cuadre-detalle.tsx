@@ -37,6 +37,7 @@ export function CuadreDetalle({
   centroNombre,
   reporte,
   resumen,
+  subtotalesTarjeta,
   firmas,
   firmaTexto,
 }: {
@@ -50,6 +51,10 @@ export function CuadreDetalle({
   centroNombre?: string;
   reporte: ReporteDia;
   resumen: CuadreResumen;
+  // Subtotales informativos configurables de tarjeta (p.ej. VISA + MASTERCARD), el mismo array que
+  // ResumenPagos pinta en pantalla (lib/caja/totales.ts subtotalesTarjeta()) — faltaba en la hoja
+  // impresa, que solo traía "Total tarjetas" sin desglose. Ausente = sin esa sección.
+  subtotalesTarjeta?: Array<{ clave: string; labelKey: string; nombre: string; monto: number }>;
   // Sign-off blocks already put into words (components/caja/cash-sign-off.tsx): «Aceptado por … · when»
   // over each line. Absent = the two blank lines of before.
   firmas?: PrintedSignature[];
@@ -59,6 +64,7 @@ export function CuadreDetalle({
   const tp = useTranslations("caja.payments");
   const td = useTranslations("caja.detalle");
   const tps = useTranslations("caja.productSales");
+  const tRoot = useTranslations();
   const tituloEfectivo = titulo ?? t("title");
 
   const documentos = React.useMemo(() => reporte.documentos ?? [], [reporte.documentos]);
@@ -85,6 +91,11 @@ export function CuadreDetalle({
     return { id, numero: d?.number ?? null, paciente: d?.patient ?? null };
   });
   const hayExonerado = !!trib && trib.exonerado.amount > 0;
+  // Mismo criterio que ResumenPagos: labelKey traducible si existe, si no el nombre crudo del BE.
+  const subtotalesTarjetaResueltos = (subtotalesTarjeta ?? []).map((s) => ({
+    label: tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.nombre,
+    monto: s.monto,
+  }));
 
   function imprimir() {
     if (typeof window === "undefined") return;
@@ -98,6 +109,7 @@ export function CuadreDetalle({
         fechaLabel: formatFechaSolo(fecha),
         resumen,
         reporte,
+        subtotalesTarjeta: subtotalesTarjetaResueltos,
         exoneradas,
         firmasHtml: firmas?.length ? signaturesPrintHtml(firmas, firmaTexto) : undefined,
         productSalesHtml: reporte.productSales
@@ -106,6 +118,9 @@ export function CuadreDetalle({
         divisionLabels: { consulta: t("division.consulta"), general: t("division.general") },
         L: {
           resumen: tp("general"),
+          cards: tp("cards"),
+          otherMethods: tp("otherMethods"),
+          noOther: tp("noOther"),
           opening: tp("opening"),
           salesCash: tp("salesCash"),
           electronic: tp("electronic"),
@@ -371,7 +386,7 @@ td{padding:5px 6px;border-top:1px solid #f0f0f0}
 .res .strong td{font-weight:700;border-top:1px solid #ccc}
 .res .var td{font-weight:800;border-top:2px solid #111;padding-top:7px}
 .conteo{width:100%}
-.conteo .tot td{font-weight:700;border-top:2px solid #111}
+.tot td{font-weight:700;border-top:2px solid #111}
 /* Resumen y conteo lado a lado (uso óptimo del papel). */
 .cols{display:flex;gap:28px;align-items:flex-start;page-break-inside:avoid}
 .cols .col{flex:1;min-width:0}
@@ -408,6 +423,7 @@ function buildPrintHtml(args: {
   fechaLabel: string;
   resumen: CuadreResumen;
   reporte: ReporteDia;
+  subtotalesTarjeta: Array<{ label: string; monto: number }>;
   exoneradas: Array<{ id: string; numero: string | null; paciente: string | null }>;
   productSalesHtml?: string;
   firmasHtml?: string;
@@ -415,13 +431,36 @@ function buildPrintHtml(args: {
   divisionLabels?: { consulta: string; general: string };
   L: PrintLabels;
 }): string {
-  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, exoneradas, divisionLabels, L, productSalesHtml, firmasHtml } = args;
+  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, subtotalesTarjeta, exoneradas, divisionLabels, L, productSalesHtml, firmasHtml } = args;
   const trib = reporte.tributario;
   const documentos = reporte.documentos ?? [];
   const devoluciones = reporte.devolucionesDetalle ?? [];
   const conteo = reporte.conteoEfectivo ?? null;
   const conteoLineas = [...(conteo?.lines ?? [])].sort((a, b) => b.value - a.value);
   const hayExonerado = !!trib && trib.exonerado.amount > 0;
+  const tarjetas = reporte.detalle.tarjetas;
+  const otros = reporte.detalle.otros;
+
+  // Mismo bloque que ResumenPagos en pantalla: filas por método (×cantidad) + subtotales informativos
+  // (p.ej. VISA + MASTERCARD) + total. Antes solo se imprimía "Total tarjetas" sin este desglose.
+  const metodoRows = (rows: typeof tarjetas) =>
+    rows
+      .map((r) => `<tr><td>${esc(r.name)} <span class="dim">×${esc(r.quantity)}</span></td><td class="r mono">${esc(money(r.amount))}</td></tr>`)
+      .join("");
+  const cardsBlock = `<h2>${esc(L.cards)}</h2>
+    <table>
+      <tbody>${tarjetas.length ? metodoRows(tarjetas) : `<tr><td class="dim">${esc(L.noOther)}</td><td></td></tr>`}</tbody>
+      ${
+        subtotalesTarjeta.length
+          ? `<tbody>${subtotalesTarjeta.map((sub) => `<tr><td class="dim"><em>${esc(sub.label)}</em></td><td class="r mono dim"><em>${esc(money(sub.monto))}</em></td></tr>`).join("")}</tbody>`
+          : ""
+      }
+      <tfoot><tr class="tot"><td>${esc(L.totalCards)}</td><td class="r mono">${esc(money(reporte.detalle.totalTarjetas))}</td></tr></tfoot>
+    </table>`;
+  const otherMethodsBlock = `<h2>${esc(L.otherMethods)}</h2>
+    <table>
+      <tbody>${otros.length ? metodoRows(otros) : `<tr><td class="dim">${esc(L.noOther)}</td><td></td></tr>`}</tbody>
+    </table>`;
 
   const conteoBlock = `<h2>${esc(L.conteoEfectivo)}</h2>${
     !conteo
@@ -526,8 +565,8 @@ function buildPrintHtml(args: {
       <div class="sub">${subtitulo} · ${esc(fechaLabel)}</div>
     </div>
     <div class="cols">
-      <div class="col"><h2>${esc(L.resumen)}</h2><table class="res"><tbody>${resumenRows}</tbody></table></div>
-      <div class="col">${conteoBlock}</div>
+      <div class="col">${cardsBlock}${otherMethodsBlock}</div>
+      <div class="col"><h2>${esc(L.resumen)}</h2><table class="res"><tbody>${resumenRows}</tbody></table>${conteoBlock}</div>
     </div>
     ${tribBlock}
     ${productSalesHtml ?? ""}

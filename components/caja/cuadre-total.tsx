@@ -384,6 +384,7 @@ function Editor({
         fecha={fecha}
         centroNombre={centroNombre}
         reporte={reporte}
+        subtotalesTarjeta={subtotalesTarjeta}
         resumen={{
           inicio: reporte.check.day.fund,
           salesCash: reporte.detalle.efectivo.amount,
