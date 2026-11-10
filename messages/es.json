@@ -3985,7 +3985,9 @@
       "uploadedByUnknown": "—",
       "loadError": "No se pudieron cargar los adjuntos",
       "typeNotAllowed": "Solo se aceptan fotos (JPG, PNG, WEBP) o PDF.",
-      "tooLarge": "El archivo pesa más de 20 MB."
+      "tooLarge": "El archivo pesa más de 20 MB.",
+      "pickCashier": "Elige un cajero para adjuntar su settlements",
+      "count": "{n, plural, one {# adjunto} other {# adjuntos}}"
     },
     "otherDivision": {
       "inConsulta": "Hoy cobraste en Consulta: tu hoja y tu firma están en el cuadre de Consulta, no en este.",

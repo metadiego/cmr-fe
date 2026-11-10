@@ -46,20 +46,14 @@ import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { OtherDivisionHint } from "@/components/caja/other-division-hint";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
+import { CuadreAttachments, CuadreAttachmentsOverview } from "@/components/caja/cuadre-attachments";
+import { CuadreScopeSelector } from "@/components/caja/cuadre-scope-selector";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 // Default de INTERFAZ del Inicio (fondo de apertura). Acordado con el BE (PR #120): dato del FE,
 // el backend NO lo hardcodea. Configurable a futuro por centro si el negocio lo pide.
@@ -454,31 +448,13 @@ function Editor({
 
   // Selector de alcance (solo gerencia), on the date's row when the page gives us its slot.
   const scopeSelector = isGerencia && (
-    <div className="flex items-center gap-2">
-      <Label className="text-sm text-muted-foreground">{t("scope.label")}</Label>
-      <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
-        <SelectTrigger className="h-9 w-64">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="consolidated">{t("scope.consolidated")}</SelectItem>
-          {opcionesCajero.length > 0 ? (
-            opcionesCajero.map((c) => (
-              <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
-                {c.usuarioId === meId ? `${c.nombre} · ${t("scope.mine")}` : c.nombre}
-              </SelectItem>
-            ))
-          ) : (
-            <div className="px-2 py-1.5 text-xs text-muted-foreground">
-              {t("cajeros.vacio")}
-            </div>
-          )}
-        </SelectContent>
-      </Select>
-      {cerrado && (
-        <Badge variant="secondary">{t("status.cerrado")}</Badge>
-      )}
-    </div>
+    <CuadreScopeSelector
+      scope={scope}
+      onChange={(v) => setScope(v as Scope)}
+      opcionesCajero={opcionesCajero}
+      meId={meId}
+      cerrado={cerrado}
+    />
   );
 
   return (
@@ -565,6 +541,15 @@ function Editor({
       {/* A biller on the consolidated (caja.ver_todos) signs HER sheet: one click takes her to it. */}
       <CashSignOffPanel signOff={signOff} now={signNow} meId={meId} canSignCashier={canSignCashier} canSignSupervisor={canSignSupervisor} onSignMine={esConsolidado && meId && cajeros.some((c) => c.userId === meId) ? () => setScope(`user:${meId}`) : undefined} />
 
+      {/* Settlements escaneado: junto a la firma (antes solo vivía al pie del cuadre, fuera de vista
+          y SIN pintar nada en consolidado/sin abrir — el dueño no lo encontraba). Handoff
+          .personal/handoff-cuadre-adjuntar-settlements.md. */}
+      {cuadreInicial?.id ? (
+        <CuadreAttachments reconciliationId={cuadreInicial.id} centroId={centro} />
+      ) : (
+        <CuadreAttachmentsOverview cuadres={cuadres} cajeros={cajeros} centroId={centro} onPick={(uid) => setScope(`user:${uid}`)} />
+      )}
+
       {/* Facturas pendientes */}
       <FacturasPendientes pendientes={reporte.pendientes} centroId={centro} />
 
@@ -578,8 +563,6 @@ function Editor({
         reporte={reporte}
         firmas={signOff.printed}
         firmaTexto={signOff.statement}
-        reconciliationId={cuadreInicial?.id}
-        centroId={centro}
         resumen={{
           inicio,
           salesCash,

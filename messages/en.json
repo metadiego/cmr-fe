@@ -3985,7 +3985,9 @@
       "uploadedByUnknown": "—",
       "loadError": "The attachments could not be loaded",
       "typeNotAllowed": "Only photos (JPG, PNG, WEBP) or PDF are accepted.",
-      "tooLarge": "The file is over 20MB."
+      "tooLarge": "The file is over 20MB.",
+      "pickCashier": "Pick a cashier to attach their settlements",
+      "count": "{n, plural, one {# attachment} other {# attachments}}"
     },
     "otherDivision": {
       "inConsulta": "You billed in Consultation today: your sheet and your signature are in the Consultation cash count, not this one.",

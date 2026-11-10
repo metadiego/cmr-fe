@@ -124,3 +124,70 @@ export function CuadreAttachments({
     </div>
   );
 }
+
+// Consolidated / not-yet-opened: no single reconciliationId to attach to. Lists the day's cashiers
+// with how many settlements each already has (one listCashAttachments per cuadre — no bulk endpoint,
+// and a day's cashier count is small) and a button that hands scope back to the caller (onPick),
+// same pattern as CashSignOffPanel's onSignMine. Handoff: owner couldn't find the button at all on
+// the consolidated view (it rendered nothing, buried at the bottom of CuadreDetalle).
+export function CuadreAttachmentsOverview({
+  cuadres,
+  cajeros,
+  centroId,
+  onPick,
+}: {
+  cuadres: Array<{ id: string; userId: string | null }>;
+  cajeros: Array<{ userId: string; name: string }>;
+  centroId?: string | null;
+  onPick: (userId: string) => void;
+}) {
+  const t = useTranslations("caja.attachments");
+  const [counts, setCounts] = React.useState<Record<string, number>>({});
+
+  const rows = React.useMemo(
+    () => cuadres.filter((c): c is { id: string; userId: string } => !!c.userId),
+    [cuadres],
+  );
+
+  React.useEffect(() => {
+    let active = true;
+    Promise.all(
+      rows.map((r) =>
+        listCashAttachments(r.id, centroId)
+          .then((items) => [r.userId, items.length] as const)
+          .catch(() => [r.userId, 0] as const),
+      ),
+    ).then((pairs) => {
+      if (active) setCounts(Object.fromEntries(pairs));
+    });
+    return () => {
+      active = false;
+    };
+  }, [rows, centroId]);
+
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="space-y-2 rounded-lg border bg-card p-4">
+      <p className="text-sm font-semibold">{t("title")}</p>
+      <p className="text-sm text-muted-foreground">{t("pickCashier")}</p>
+      <ul className="space-y-1.5">
+        {rows.map((r) => {
+          const n = counts[r.userId] ?? 0;
+          return (
+            <li key={r.id} className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-2.5 py-1.5 text-sm">
+              <span className="truncate">{cajeros.find((c) => c.userId === r.userId)?.name ?? r.userId}</span>
+              <span className="flex shrink-0 items-center gap-2">
+                {n > 0 && <span className="text-xs text-muted-foreground">{t("count", { n })}</span>}
+                <Button type="button" size="sm" variant="outline" onClick={() => onPick(r.userId)}>
+                  <HugeiconsIcon icon={Attachment01Icon} className="size-4" />
+                  {t("add")}
+                </Button>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
