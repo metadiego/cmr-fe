@@ -114,7 +114,13 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   // grid: the print window has no Tailwind, and «gap-x-6» printed «LOZADARECORD #» glued together.
   const pacienteSesiones = (
     <div
-      style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(1, campos.length || 2)}, 1fr)`, gap: 12, marginTop: 18, paddingBottom: 8, borderBottom: "1px solid #ccc", fontSize: 12 }}
+      // Two fields: one column each (NOMBRE | RECORD at the middle, legacy). Three or more: spread edge to
+      // edge on one line — equal thirds wrapped «ANGEL RIOS / VELEZ».
+      style={
+        campos.length > 2
+          ? { display: "flex", justifyContent: "space-between", gap: 16, whiteSpace: "nowrap", marginTop: 18, paddingBottom: 8, borderBottom: "1px solid #ccc", fontSize: 12 }
+          : { display: "grid", gridTemplateColumns: `repeat(${Math.max(1, campos.length || 2)}, 1fr)`, gap: 12, marginTop: 18, paddingBottom: 8, borderBottom: "1px solid #ccc", fontSize: 12 }
+      }
     >
       {campos.length > 0 ? (
         campos.map((c) => (
@@ -223,6 +229,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                 porPagina={d.porPagina ?? render.porPagina ?? 2}
                 firmas={firmasSesion}
                 label={label}
+                variant={render.estiloSesion === "caja" ? "caja" : "franjas"}
                 repeat={
                   <>
                     {membrete}

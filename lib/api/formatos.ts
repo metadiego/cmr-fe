@@ -137,6 +137,9 @@ export type FormatoPie = { prefix?: string; user?: string; login?: string; fecha
 //   Sesión|Record). Distinto de camposEnLinea (que junta TODOS los elegidos en una sola línea).
 export type FormatoRenderMeta = {
   ocultarEmpresa?: boolean;
+  // Session sheets (layout "sesiones"): «caja» = the Nano Aer Plus family (bordered note boxes, SESION #
+  // at the right, Enfermero | Firma on one row); absent = the Vit C / Láser IV grey bands.
+  estiloSesion?: "caja" | "franjas";
   camposEnLinea?: string[];
   camposEnPares?: boolean;
   // Values of the "campos" header written ON a line («NOMBRE DEL PACIENTE: ̲M̲I̲G̲E̲N̲E̲S̲…», legacy `.fill`).

@@ -385,7 +385,9 @@ export function SeccionInner({
 // label OVER its line. `porPagina` blocks per physical page; every page after the first repeats `repeat`
 // (letterhead + patient line), as the legacy prints a full header on each sheet. Each block is sized so two
 // of them fill a letter page with air. Inline styles only: the print window has no Tailwind.
-const SESSION_BLOCK_MIN_HEIGHT = "4.3in";
+// Two blocks + the header must leave room for the f-b/ foot on the same sheet (4.3in pushed it onto an
+// empty second page).
+const SESSION_BLOCK_MIN_HEIGHT = "4.1in";
 export function SesionesFormato({
   columns,
   sessions,
@@ -394,7 +396,14 @@ export function SesionesFormato({
   firmas,
   label,
   repeat,
+  variant = "franjas",
 }: {
+  /**
+   * The two legacy families (render.estiloSesion): «franjas» = Vit C / Láser IV (grey bands, the
+   * patient's signature low at the right); «caja» = Nano Aer Plus (bordered boxes, «SESION #» at the
+   * right, Enfermero | Firma on one row, a rule closing each block).
+   */
+  variant?: "franjas" | "caja";
   columns: FormatoColumna[];
   sessions: FormatoSesion[];
   notas: string[];
@@ -404,6 +413,7 @@ export function SesionesFormato({
   /** Header repeated at the top of every page after the first. */
   repeat?: React.ReactNode;
 }) {
+  const caja = variant === "caja";
   const bloques: FormatoSesion[] = sessions.length > 0 ? sessions : [{ session: null, date: null }];
   const per = Math.max(1, porPagina);
   const pages: FormatoSesion[][] = [];
@@ -424,7 +434,7 @@ export function SesionesFormato({
           {pi > 0 && <div style={{ marginBottom: 18 }}>{repeat}</div>}
           {page.map((s, i) => (
             <div key={i} style={{ breakInside: "avoid", minHeight: SESSION_BLOCK_MIN_HEIGHT, display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #ccc", paddingBottom: 8, marginBottom: 14, fontSize: 12 }}>
+              <div style={caja ? { display: "flex", justifyContent: "space-between", paddingBottom: 6, marginBottom: 8, fontSize: 12 } : { display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #ccc", paddingBottom: 8, marginBottom: 14, fontSize: 12 }}>
                 <span>
                   {(s.fields ?? []).map((f, fi) => (
                     <span key={f.clave ?? fi} style={{ marginRight: 16 }}>
@@ -456,18 +466,22 @@ export function SesionesFormato({
                   </tr>
                 </tbody>
               </table>
-              {/* Two grey bands to write by hand, stacked full width (legacy). */}
+              {/* Two areas to write by hand, full width: grey bands, or bordered boxes («caja»). */}
               {(notas.length ? notas : ["", ""]).map((_, ni) => (
-                <div key={ni} style={{ height: 34, background: "#f0f0f0", marginTop: ni === 0 ? 20 : 10 }} />
+                <div
+                  key={ni}
+                  style={caja ? { height: 46, border: BORDER, marginTop: ni === 0 ? 12 : 10 } : { height: 34, background: "#f0f0f0", marginTop: ni === 0 ? 20 : 10 }}
+                />
               ))}
               {lineas.length > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 30 }}>
-                  <div style={{ width: "42%" }}>{left.map((l, k) => signLine(l, k, k === 0))}</div>
-                  <div style={{ width: "42%", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: caja ? 14 : 30 }}>
+                  <div style={{ width: "45%" }}>{left.map((l, k) => signLine(l, k, k === 0))}</div>
+                  <div style={{ width: "45%", display: "flex", flexDirection: "column", justifyContent: caja ? "flex-start" : "flex-end" }}>
                     {right.map((l, k) => signLine(l, k, k === 0))}
                   </div>
                 </div>
               )}
+              {caja && <div style={{ borderBottom: BORDER, marginTop: 14 }} />}
             </div>
           ))}
         </div>
