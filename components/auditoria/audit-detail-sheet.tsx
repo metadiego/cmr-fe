@@ -1,13 +1,12 @@
 "use client"
 
-import * as React from "react"
 import { useFormatter, useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { Copy01Icon } from "@hugeicons/core-free-icons"
 
 import type { AuditRow } from "@/lib/api/auditoria"
 import { agentTool, auditVia } from "@/lib/audit/via"
 import { Badge } from "@/components/ui/badge"
+import { Campo, CopiableCampo } from "@/components/auditoria/audit-fields"
+import { ChangeLogList } from "@/components/change-log/change-log-list"
 import {
   Sheet,
   SheetContent,
@@ -18,16 +17,19 @@ import {
 
 // Side panel with every raw field of one audit row: copyable requestId/IP and the full error.
 // Split out of auditoria-log.tsx (at its size ceiling) when the "via" (app / Claude) was added.
+// The label/value rows are the shared ones in audit-fields.tsx.
 export function AuditDetailSheet({
   row,
   onClose,
   centerName,
   onCopy,
+  onEntity,
 }: {
   row: AuditRow | null
   onClose: () => void
   centerName: (id: string | null) => string
   onCopy: (txt: string) => void
+  onEntity: (id: string) => void
 }) {
   const t = useTranslations("auditoria")
   const format = useFormatter()
@@ -43,27 +45,27 @@ export function AuditDetailSheet({
         </SheetHeader>
         {row && (
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5 text-sm">
-            <Field label={t("col.via")}>
+            <Campo label={t("col.via")}>
               <Badge
                 variant={auditVia(row) === "claude" ? "default" : "outline"}
               >
                 {t(`via.${auditVia(row)}`)}
               </Badge>
-            </Field>
+            </Campo>
             {tool ? (
-              <Field label={t("tool")}>
+              <Campo label={t("tool")}>
                 <span className="font-mono text-xs">{tool}</span>
-              </Field>
+              </Campo>
             ) : null}
-            <Field label={t("col.accion")}>
+            <Campo label={t("col.accion")}>
               <span className="font-mono text-xs">{row.accion}</span>
-            </Field>
-            <Field label={t("col.metodo")}>
+            </Campo>
+            <Campo label={t("col.metodo")}>
               <span className="font-mono text-xs">
                 {row.metodo} {row.ruta}
               </span>
-            </Field>
-            <Field label={t("col.resultado")}>
+            </Campo>
+            <Campo label={t("col.resultado")}>
               <Badge
                 variant={
                   row.resultado === "error" ? "destructive" : "secondary"
@@ -71,36 +73,49 @@ export function AuditDetailSheet({
               >
                 {row.statusCode ?? row.resultado}
               </Badge>
-            </Field>
-            <Field label={t("col.duracion")}>
+            </Campo>
+            <Campo label={t("col.duracion")}>
               {row.durationMs != null ? `${row.durationMs} ms` : "—"}
-            </Field>
-            <Field label={t("col.centro")}>{centerName(row.clinicId)}</Field>
-            <Field label={t("col.usuario")}>
-              <span className="font-mono text-xs">{row.userId ?? "—"}</span>
+            </Campo>
+            <Campo label={t("col.centro")}>{centerName(row.clinicId)}</Campo>
+            <Campo label={t("col.usuario")}>
+              {row.usuarioNombre ?? (
+                <span className="font-mono text-xs">{row.userId ?? "—"}</span>
+              )}
               {row.userType ? (
                 <span className="ml-2 text-muted-foreground">
                   ({row.userType})
                 </span>
               ) : null}
-            </Field>
+            </Campo>
             {row.entidadId ? (
-              <Field label={t("entidadId")}>
-                <span className="font-mono text-xs">{row.entidadId}</span>
-              </Field>
+              <Campo label={t("entidadId")}>
+                <button
+                  type="button"
+                  onClick={() => onEntity(row.entidadId!)}
+                  className="font-mono text-xs hover:underline"
+                  title={t("filtrarPorEntidad")}
+                >
+                  {row.entidadId}
+                </button>
+              </Campo>
             ) : null}
-            <CopyableField
+            <CopiableCampo
               label="requestId"
               value={row.requestId}
               onCopy={onCopy}
-              empty={t("sinDato")}
+              vacio={t("sinDato")}
             />
-            <CopyableField
+            <CopiableCampo
               label="IP"
               value={row.ip}
               onCopy={onCopy}
-              empty={t("sinDato")}
+              vacio={t("sinDato")}
             />
+            {/* Before / after of this request (BE #529: today only frontdesk sessions; empty elsewhere). */}
+            {row.requestId && row.resultado !== "error" ? (
+              <ChangeLogList filter={{ requestId: row.requestId }} pageSize={20} />
+            ) : null}
             {row.resultado === "error" ? (
               <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3">
                 <p className="text-xs font-semibold text-destructive">
@@ -115,50 +130,5 @@ export function AuditDetailSheet({
         )}
       </SheetContent>
     </Sheet>
-  )
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <span className="text-right">{children}</span>
-    </div>
-  )
-}
-
-function CopyableField({
-  label,
-  value,
-  onCopy,
-  empty,
-}: {
-  label: string
-  value: string | null
-  onCopy: (txt: string) => void
-  empty: string
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {value ? (
-        <button
-          type="button"
-          onClick={() => onCopy(value)}
-          className="flex items-center gap-1 font-mono text-xs hover:text-foreground"
-        >
-          <span className="max-w-[12rem] truncate">{value}</span>
-          <HugeiconsIcon icon={Copy01Icon} className="size-3.5 opacity-60" />
-        </button>
-      ) : (
-        <span className="text-xs text-muted-foreground">{empty}</span>
-      )}
-    </div>
   )
 }

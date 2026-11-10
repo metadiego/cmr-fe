@@ -102,6 +102,7 @@ export function AuditoriaLog() {
   // hay mapa nombre→id en el cliente. Se activa clicando la celda Usuario de una fila (trae ambos).
   const [userId, setUserId] = React.useState("");
   const [userLabel, setUserLabel] = React.useState("");
+  const [entidadId, setEntidadId] = React.useState(""); // one session, one invoice… (from the detail panel)
   const [page, setPage] = React.useState(1);
   const [detalle, setDetalle] = React.useState<AuditRow | null>(null);
 
@@ -158,6 +159,7 @@ export function AuditoriaLog() {
     soloCambios: soloCambios || undefined,
     excluirErrorCode: ocultarRuido && hayRateLimited ? "RATE_LIMITED" : undefined,
     userId: userId || undefined,
+    entidadId: entidadId || undefined,
     clinicId: clinicId === TODOS ? undefined : clinicId,
     channel: via === TODOS ? undefined : (via as "rest" | "mcp"),
     page,
@@ -229,7 +231,7 @@ export function AuditoriaLog() {
             </button>
           </Tooltip>
         ) : (
-          <span className="text-muted-foreground">—</span>
+          <span className={r.usuarioNombre ? "text-sm" : "text-muted-foreground"}>{r.usuarioNombre ?? "—"}</span>
         ),
     },
     {
@@ -407,6 +409,12 @@ export function AuditoriaLog() {
             <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
           </Button>
         ) : null}
+        {entidadId ? (
+          <Button size="sm" variant="secondary" onClick={() => { setEntidadId(""); setPage(1); }} className="gap-1">
+            {t("filtroEntidad", { id: entidadId.slice(0, 8) })}
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          </Button>
+        ) : null}
         <span className="ml-auto flex items-center gap-3">
           {state.kind === "ok" ? (
             <span className="text-xs text-muted-foreground">{t("totalRegistros", { total: meta.total })}</span>
@@ -428,7 +436,13 @@ export function AuditoriaLog() {
         labels={{ empty: t("vacio") }}
       />
 
-      <AuditDetailSheet row={detalle} onClose={() => setDetalle(null)} centerName={centroNombre} onCopy={copiar} />
+      <AuditDetailSheet
+        row={detalle}
+        onClose={() => setDetalle(null)}
+        centerName={centroNombre}
+        onCopy={copiar}
+        onEntity={(id) => { setEntidadId(id); setPage(1); setDetalle(null); }}
+      />
     </div>
   );
 }

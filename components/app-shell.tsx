@@ -11,6 +11,7 @@ import { screenPathOf } from "@/lib/nav/tab-routes";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { MeProvider } from "@/components/me-provider";
+import { ConfirmActionHost } from "@/components/confirm-action-host";
 import { MenuProvider } from "@/components/menu-provider";
 import { TooltipProvider } from "@/components/ui/tooltip-radix";
 import {
@@ -63,6 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <MeProvider>
       <MenuProvider>
         <ShellChrome>{children}</ShellChrome>
+        <ConfirmActionHost />
       </MenuProvider>
     </MeProvider>
   );

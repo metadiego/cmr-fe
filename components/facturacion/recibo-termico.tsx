@@ -100,6 +100,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         </span>
         <span className="font-normal">{fecha}</span>
       </div>
+      {recibo.facturaOrigen && <div>{t("originInvoice", { number: recibo.facturaOrigen })}</div>}
 
       <Dashed />
 
@@ -191,6 +192,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       {recibo.montoAbonado > 0 && (
         <Line label={t("paid")} value={money(recibo.montoAbonado)} />
       )}
+      {(recibo.reembolsado ?? 0) !== 0 && <Line label={t("refunded")} value={money(recibo.reembolsado ?? 0)} />}
       {recibo.saldo > 0 && (
         <Line label={t("balance")} value={money(recibo.saldo)} bold />
       )}
@@ -202,7 +204,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           {recibo.pagos.map((p, i) => (
             <Line
               key={i}
-              label={formaPagoLabel(tRoot, p.clave, p.formaPagoNombre) + (p.referencia ? ` ${p.referencia}` : "")}
+              label={(p.reembolso ? `${t("refund")} ` : "") + formaPagoLabel(tRoot, p.clave, p.formaPagoNombre) + (p.referencia ? ` ${p.referencia}` : "")}
               value={money(p.monto)}
             />
           ))}

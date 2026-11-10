@@ -5,6 +5,7 @@ import { env } from "@/lib/env";
 import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { handleSessionExpired } from "@/lib/auth/session-expired";
 import { oneCenterIds, type CenterChoice } from "@/lib/clinic-read-scope";
+import { askConfirmation, CONFIRM_HEADER, CONFIRMATION_DECLINED, readConfirmation } from "./confirm-action";
 import {
   ApiError,
   type ApiEnvelope,
@@ -120,8 +121,21 @@ async function rawRequest<T>(
     }
   }
 
-  const body: unknown =
+  let body: unknown =
     res.status === 204 ? null : await res.json().catch(() => null);
+
+  // The safety shield (428 ACTION_REQUIRES_CONFIRMATION, lib/api/confirm-action.ts): ask, and on «Aceptar»
+  // repeat the SAME request once with X-Confirm-Action. «Cancelar» → nothing was written.
+  const shield = readConfirmation(res.status, (body as ApiErrorShape | null)?.error);
+  if (shield) {
+    if (!(await askConfirmation(shield))) {
+      throw new ApiError(CONFIRMATION_DECLINED, "Not confirmed", 428, undefined, undefined, (body as ApiErrorShape | null)?.error);
+    }
+    const confirmed = { ...init, headers: { ...(init.headers as Record<string, string> | undefined), [CONFIRM_HEADER]: shield.action } };
+    init = confirmed;
+    ({ res } = await doFetch());
+    body = res.status === 204 ? null : await res.json().catch(() => null);
+  }
 
   if (!res.ok) {
     const err = (body as ApiErrorShape | null)?.error;

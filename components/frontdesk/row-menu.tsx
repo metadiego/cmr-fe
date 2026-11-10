@@ -7,6 +7,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import { cancelarSesion } from "@/lib/api/frontdesk";
+import { useCan } from "@/hooks/use-can";
+import { ChangeLogSheet } from "@/components/change-log/change-log-sheet";
 import { cancelPatientDay, reopenPatientDay, reopenSession } from "@/lib/api/frontdesk-day";
 import { ApiError } from "@/lib/api/types";
 import { toastError } from "@/lib/api/errors";
@@ -76,12 +78,14 @@ export function RowMenu({
   const t = useTranslations("frontdesk");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const { can } = useCan();
   // Which cancel the dialog confirms: this session, or every open session of the patient's day.
   const [cancelOpen, setCancelOpen] = React.useState<false | "one" | "all">(false);
   const [repararOpen, setRepararOpen] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
   const [estadoNuevo, setEstadoNuevo] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const [changesOpen, setChangesOpen] = React.useState(false); // «Historial de cambios» of this session
 
   // Reopen is offered only on a cancelled session of TODAY; the BE re-checks it (409 otherwise).
   const reopenable = canReopen(day.status, day.date, todayISO());
@@ -185,6 +189,11 @@ export function RowMenu({
               {t("historial")}
             </DropdownMenuItem>
           )}
+          {can("change_log.read") && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setChangesOpen(true); }}>
+              {tRoot("changeLog.title")}
+            </DropdownMenuItem>
+          )}
           {!cancelada && (
             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("one"); }}>
               {t("cancelar")}
@@ -202,6 +211,13 @@ export function RowMenu({
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ChangeLogSheet
+        open={changesOpen}
+        onOpenChange={setChangesOpen}
+        filter={{ entityType: "frontdesk_session", entityId: day.sessionId, centerIds: day.centerId ? [day.centerId] : undefined }}
+        onUndone={onDone}
+      />
 
       <Dialog open={!!cancelOpen} onOpenChange={(v) => !v && setCancelOpen(false)}>
         <DialogContent className="sm:max-w-sm">

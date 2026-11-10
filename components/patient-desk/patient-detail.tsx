@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { PatientDayChangesButton } from "@/components/change-log/patient-day-changes-button"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -435,6 +436,7 @@ export function PatientDetail({
                 {t("markPresent")}
               </Button>
             ))}
+          <PatientDayChangesButton patientId={patient.patientId} date={date} centerId={centerId} patientName={patient.name} onUndone={data.refresh} />
           {/* «Citar» aquí sigue al mismo paciente, no al toggle de arriba (10-13-oct-2026): si SOLO
               tiene servicio va directo al cupo del servicio, si SOLO tiene consulta a agregar
               consulta, y si tiene AMBOS se pregunta — igual que el «Citar» del toolbar, pero

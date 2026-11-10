@@ -187,7 +187,9 @@
     "seriesDayDoesNotFit": "The train of {date} no longer fits at its time. Nothing was booked.",
     "seriesDaysInvalid": "Invalid series days.",
     "sheetFull": "Full on the call-center sheet",
-    "notAStartTime": "This service only starts on the hour: pick a whole hour"
+    "notAStartTime": "This service only starts on the hour: pick a whole hour",
+    "outsideHours": "Outside the center's hours",
+    "pastClosing": "Ends after the center closes"
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -272,7 +274,9 @@
     "recurringRemove": "Remove",
     "recurringConfirm": "Confirm {n} session(s)",
     "recurringConfirming": "Scheduling…",
-    "recurringSummary": "{booked} scheduled, {skipped} skipped"
+    "recurringSummary": "{booked} scheduled, {skipped} skipped",
+    "fullWarns": "Full: booked with a warning",
+    "trainSeriesOverbooked": "Overbooked"
   },
   "citas": {
     "calendario": {
@@ -1269,7 +1273,9 @@
     "ahora_mismo": "Right now",
     "productosExonerados": "Exonerated products (IVU)",
     "bothCenters": "BOTH",
-    "bodyMeasurementsUnlinked": "Unlinked measurements"
+    "bodyMeasurementsUnlinked": "Unlinked measurements",
+    "changeLog": "Change history",
+    "confirmationPolicies": "Confirmations"
   },
   "admin": {
     "title": "Administration",
@@ -2901,7 +2907,13 @@
     "regularPrice": "Regular price",
     "savings": "Savings",
     "packagePrice": "Package price",
-    "youSaved": "You saved"
+    "youSaved": "You saved",
+    "originInvoice": "Original invoice #{number}",
+    "refundOption": "Refund #{number} · ${amount}",
+    "invoiceOption": "Invoice (original)",
+    "voided": "voided",
+    "refunded": "Refunded",
+    "refund": "Refund"
   },
   "facturacion": {
     "title": "Bill consultation",
@@ -3145,7 +3157,8 @@
     "unitsAreasDays": "Quantity (areas × days)",
     "unitsAreasDaysHint": "Computed: areas × days. Not typed.",
     "packages": "Packages",
-    "packagesHint": "How many packages are sold (usually 1)."
+    "packagesHint": "How many packages are sold (usually 1).",
+    "returnedBadge": "Returned"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -3544,7 +3557,9 @@
       "app": "App",
       "claude": "Claude"
     },
-    "tool": "Tool"
+    "tool": "Tool",
+    "filtroEntidad": "Entity {id}",
+    "filtrarPorEntidad": "Filter by this entity"
   },
   "comunicaciones": {
     "title": "Alerts",
@@ -5050,6 +5065,18 @@
       "INVOICE_CHANGE_PATIENT_SAME": "That is already this invoice's patient.",
       "INVOICE_CHANGE_PATIENT_UNKNOWN": "That patient does not exist in this center.",
       "INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT": "This is a consultation linked to an appointment: change the appointment's patient first."
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "tax": "Tax",
+      "shipping": "Shipping",
+      "total": "Total",
+      "paid": "Paid",
+      "refunded": "Refunded",
+      "balance": "Balance",
+      "payment": "Payment",
+      "refund": "Refund"
     }
   },
   "picker": {
@@ -5451,5 +5478,109 @@
     "deny": "Cancel",
     "working": "One moment…",
     "disconnectHint": "You can disconnect {client} at any time from its connector settings."
+  },
+  "confirmation": {
+    "required": "This action needs your confirmation before it is saved.",
+    "unknownAction": "Confirm: {action}",
+    "cancel": "Cancel",
+    "accept": "Accept",
+    "action": {
+      "unattend": "Unattend the session",
+      "deleteSession": "Delete the session",
+      "cancelDay": "Cancel all of the day's sessions",
+      "repair": "Repair the session",
+      "cancelSession": "Cancel the session",
+      "undoPresent": "Undo present",
+      "undoChange": "Undo the change",
+      "voidInvoice": "Void the invoice",
+      "voidRefund": "Void the refund"
+    },
+    "effect": {
+      "returnsPackageSession": "Returns the session to the package",
+      "returnsStock": "Returns what was discharged to stock",
+      "clearsAttendedTime": "Clears the attended time",
+      "sessionDeleted": "The session leaves the board",
+      "cancelsOpenSessionsOfTheDay": "Cancels the day's open sessions",
+      "redoesDischarge": "Redoes the stock discharge",
+      "sessionCancelled": "The session is cancelled",
+      "backToPending": "The session goes back to pending",
+      "invoiceVoided": "The invoice is voided",
+      "refundVoided": "The refund is voided"
+    },
+    "policies": {
+      "title": "Confirmations",
+      "hint": "Which sensitive actions ask «Accept or not?» before saving, per center.",
+      "action": "Action",
+      "default": "default",
+      "saved": "Saved",
+      "noPermission": "You do not have permission to configure confirmations."
+    }
+  },
+  "changeLog": {
+    "title": "Change history",
+    "dayTitle": "Day history",
+    "screenHint": "Who changed what, with before and after, and undo where allowed.",
+    "noPermission": "You do not have permission to see the change history.",
+    "loadError": "The history could not be loaded",
+    "empty": "No changes recorded",
+    "system": "System",
+    "undo": "Undo",
+    "undoing": "Undoing…",
+    "undone": "Change undone",
+    "undoneBy": "Undone by {name}",
+    "more": "Show {n} more",
+    "changedId": "(changed)",
+    "filter": {
+      "from": "From",
+      "to": "To",
+      "user": "User",
+      "allUsers": "All",
+      "patient": "Patient",
+      "patientHint": "Name or record"
+    },
+    "action": {
+      "create": "Created",
+      "present": "Present",
+      "undo_present": "Undo present",
+      "start_therapy": "In therapy",
+      "back_to_present": "Back to present",
+      "back_to_pending": "Back to pending",
+      "attend": "Attended",
+      "unattend": "Unattended",
+      "cancel": "Cancelled",
+      "reopen": "Reopened",
+      "reschedule": "Rescheduled",
+      "edit": "Edited",
+      "delete": "Deleted",
+      "status": "Status change"
+    },
+    "field": {
+      "estado": "Status",
+      "presenteEn": "Present",
+      "terapiaInEn": "In therapy",
+      "asistidoEn": "Attended",
+      "productoAplicadoId": "Dose",
+      "cantidad": "Quantity",
+      "enfermeraId": "Nurse",
+      "tecnicoId": "Technician",
+      "medicoId": "Doctor",
+      "datos": "Data",
+      "fecha": "Date",
+      "hora": "Time",
+      "paqueteId": "Package",
+      "vialAbiertoId": "Open vial"
+    },
+    "status": {
+      "pendiente": "Pending",
+      "presente": "Present",
+      "en_terapia": "In therapy",
+      "asistido": "Attended",
+      "cancelada": "Cancelled"
+    },
+    "error": {
+      "superseded": "Someone changed those fields later: undo the later change first",
+      "alreadyUndone": "That change was already undone",
+      "notUndoable": "That change cannot be undone"
+    }
   }
 }

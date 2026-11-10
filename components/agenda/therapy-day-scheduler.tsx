@@ -17,6 +17,7 @@ import { getMyPreferences } from "@/lib/api/preferences";
 import { type Paciente } from "@/lib/api/pacientes";
 import { SheetNotice } from "@/components/agenda/sheet-notice";
 import { isSheetSlotTaken } from "@/lib/agenda/sheet";
+import { slotWarns } from "@/lib/agenda/slot-pick";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { PacienteSelect } from "@/components/citas/paciente-select";
@@ -513,14 +514,14 @@ export function TherapyDayScheduler({
           ) : selectedSlot && train ? (
             <>
               <div className="flex flex-wrap items-center gap-2">
-                {selectedSlot.fits ? <Badge variant="success">{t("fits")}</Badge> : <Badge variant="destructive">{t("noFits")}</Badge>}
+                {selectedSlot.fits ? <Badge variant="success">{t("fits")}</Badge> : <Badge variant={slotWarns(selectedSlot) ? "warning" : "destructive"}>{slotWarns(selectedSlot) ? t("fullWarns") : t("noFits")}</Badge>}
                 <span className="font-medium">{t("startAt", { time })}</span>
                 <span className="text-muted-foreground">· {t("patientMinutes", { n: train.patientMinutes })}</span>
               </div>
               {selectedSlot.fits ? (
                 <p className="text-muted-foreground">{trainLegsText(selectedSlot, servById, "")}</p>
               ) : (
-                <p className="text-destructive">{reason(selectedSlot)}</p>
+                <p className={slotWarns(selectedSlot) ? "text-warning-foreground" : "text-destructive"}>{reason(selectedSlot)}</p>
               )}
               {train.unconfiguredServiceIds.length > 0 && (
                 <p className="text-warning-foreground">

@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { line, readTotals } from "@/lib/factura/totals";
+import { InvoiceTotalsTail } from "@/components/facturacion/invoice-totals-tail";
+import { invoiceBalance } from "@/lib/factura/balance";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -481,17 +484,20 @@ function Editor({
     return e.quantity * mult * e.unitPrice;
   };
   // Totales de CABECERA = los del BE (subtotal/descuento/impuesto/total). No se recalculan en el cliente.
-  const subtotal = n(factura.subtotal) || serverItems.reduce((s, it) => s + n(it.total), 0);
-  const descuento = n(factura.discount);
-  const impuesto = n(factura.tax);
+  // BE #536: the totals block (lines + moves), the same on screen and paper; the old fields are the fallback.
+  const tot = readTotals(factura);
+  const subtotal = line(tot, "subtotal") ?? (n(factura.subtotal) || serverItems.reduce((s, it) => s + n(it.total), 0));
+  const descuento = tot ? -(line(tot, "discount") ?? 0) : n(factura.discount);
+  const impuesto = line(tot, "tax") ?? n(factura.tax);
   // Desglose de impuestos del BE (impuestos[] con nombre/tasa/monto). Data-driven: N renglones,
   // sin hardcodear "11.5%". El total NO se recomputa aquí. Vacío → una sola línea (o exento).
   // IVU en dos renglones (Estatal 10.5% + Municipal 1%) tal cual los proyecta el BE. NO se filtra por
   // monto>0: un municipal en 0,00 de una línea gravada debe verse (su ausencia se lee como error).
   // Exento → lista vacía (no ceros). Handoff HANDOFF-ivu-estatal-y-municipal.
   const impuestosDesglose = (factura as { taxes?: { name?: string; rate?: number; amount?: number }[] }).taxes ?? [];
-  const total = n(factura.total) || Math.max(0, subtotal - descuento + impuesto);
-  const saldo = total - n(factura.paidAmount);
+  const total = line(tot, "total") ?? (n(factura.total) || Math.max(0, subtotal - descuento + impuesto));
+  // The balance is the BE's `balance` line (it already subtracts refunds); never total − paid.
+  const saldo = line(tot, "balance") ?? invoiceBalance(factura.status, total, n(factura.paidAmount));
 
   function setEdit(itemId: string, p: Partial<Edit>) {
     setEdits((m) => ({ ...m, [itemId]: { ...(m[itemId] ?? { quantity: 1, unitPrice: 0 }), ...p } }));
@@ -744,6 +750,7 @@ function Editor({
             onSet={(m) => run(() => setEnvio(id, m, centro))}
           />
           <div className="border-t pt-2"><Row label={t("total")} value={money(total)} strong /></div>
+          {tot && !esBorrador && <InvoiceTotalsTail totals={tot} />}
           <PackageSavingsRow items={serverItems} />
         </CardContent>
 

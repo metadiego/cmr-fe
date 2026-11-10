@@ -1,3 +1,5 @@
+import { invoiceBalance } from "./balance.ts";
+import { line, readTotals } from "./totals.ts";
 import type { FacturaConItems, FacturaEmpresa, ReciboDevolucion } from "@/lib/api/facturas";
 import { invoiceSavings, packageEvidence, savingsPct } from "./sales-package.ts";
 
@@ -41,6 +43,8 @@ export type Recibo = {
   logoUrl: string | null;
   // "factura" (por defecto) o "devolucion" → el encabezado dice "Factura #" vs "Devolución #".
   tipoDocumento?: "factura" | "devolucion" | "presupuesto";
+  /** A refund's receipt: the invoice it comes from («Factura de origen #L006875»). */
+  facturaOrigen?: string | null;
   numeroDisplay: string;
   fecha: string;
   estado: string;
@@ -55,10 +59,13 @@ export type Recibo = {
   ahorroPaquetes?: number; // «Usted ahorró»: sum of the package lines' savings (0 = none → not printed)
   total: number;
   montoAbonado: number;
+  /** What was refunded, negative (BE totals `refunded` line); 0 = nothing. */
+  reembolsado?: number;
   saldo: number;
   // `clave` = clave estable de la forma (efectivo/cheque/…) para traducir el label en el recibo; el
   // `formaPagoNombre` (español) queda de fallback para formas personalizadas.
-  pagos: { formaPagoNombre: string; clave?: string | null; monto: number; referencia?: string | null }[];
+  // `reembolso`: a refund move (negative), printed as «Reembolso <method>».
+  pagos: { formaPagoNombre: string; clave?: string | null; monto: number; referencia?: string | null; reembolso?: boolean }[];
   atendidoPor?: string;
 };
 
@@ -130,11 +137,14 @@ export function buildRecibo(
       ...(paqueteDe(it) ? { paquete: paqueteDe(it)! } : {}),
     };
   });
-  const subtotal = num(f.subtotal) || items.reduce((s, it) => s + it.total, 0);
-  const descuento = num(f.discount);
-  const impuesto = num(f.tax);
-  const total = num(f.total) || Math.max(0, subtotal - descuento + impuesto);
-  const montoAbonado = num(f.paidAmount);
+  // BE #536: the receipt's footer comes from the SAME totals block as the screen; the old fields are the
+  // fallback for an invoice projection without it.
+  const tot = readTotals(f);
+  const subtotal = line(tot, "subtotal") ?? (num(f.subtotal) || items.reduce((s, it) => s + it.total, 0));
+  const descuento = tot ? -(line(tot, "discount") ?? 0) : num(f.discount);
+  const impuesto = line(tot, "tax") ?? num(f.tax);
+  const total = line(tot, "total") ?? (num(f.total) || Math.max(0, subtotal - descuento + impuesto));
+  const montoAbonado = line(tot, "paid") ?? num(f.paidAmount);
 
   // Tax breakdown when the BE projects it (products); consulta has none.
   const impuestosRaw =
@@ -173,13 +183,16 @@ export function buildRecibo(
     ahorroPaquetes: invoiceSavings(f.items ?? []),
     total,
     montoAbonado,
-    saldo: Math.max(0, total - montoAbonado),
-    pagos: (f.payments ?? []).map((p) => ({
-      formaPagoNombre: p.formaPagoNombre ?? "—",
-      clave: p.paymentMethodId ? clavePorFormaId[String(p.paymentMethodId)] : undefined,
-      monto: num(p.amount),
-      referencia: p.reference ?? null,
-    })),
+    reembolsado: line(tot, "refunded") ?? 0,
+    saldo: Math.max(0, line(tot, "balance") ?? invoiceBalance(String(f.status ?? ""), total, montoAbonado)),
+    pagos: tot
+      ? tot.moves.map((m) => ({ formaPagoNombre: m.method ?? "—", monto: m.amount, reembolso: m.kind === "refund" }))
+      : (f.payments ?? []).map((p) => ({
+          formaPagoNombre: p.formaPagoNombre ?? "—",
+          clave: p.paymentMethodId ? clavePorFormaId[String(p.paymentMethodId)] : undefined,
+          monto: num(p.amount),
+          referencia: p.reference ?? null,
+        })),
     // "Atendido por" = quien COBRÓ (issuedBy) o, si aún es borrador, quien la CREÓ (createdBy).
     // BE PR #82; `emisor` queda como fallback legacy. NUNCA el médico.
     atendidoPor: f.issuedBy?.name ?? f.createdBy?.name ?? f.emisor?.name ?? undefined,
@@ -224,6 +237,7 @@ export function buildReciboDevolucion(
     logoUrl: d.empresa?.logoUrl ?? null,
     tipoDocumento: "devolucion",
     numeroDisplay: d.displayNumber ?? "—",
+    facturaOrigen: d.invoiceNumber ?? null,
     fecha: d.date ?? "",
     estado: String(d.status ?? ""),
     anulada: String(d.status ?? "") === "anulada",

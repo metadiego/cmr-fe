@@ -187,7 +187,9 @@
     "seriesDayDoesNotFit": "El tren del {date} ya no cabe a su hora. No se agendó nada.",
     "seriesDaysInvalid": "Días de la serie no válidos.",
     "sheetFull": "Lleno en la hoja del call center",
-    "notAStartTime": "Este servicio solo empieza en punto: elige una hora entera"
+    "notAStartTime": "Este servicio solo empieza en punto: elige una hora entera",
+    "outsideHours": "Fuera del horario del centro",
+    "pastClosing": "Termina después del cierre del centro"
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -272,7 +274,9 @@
     "recurringRemove": "Quitar",
     "recurringConfirm": "Confirmar {n} sesión(es)",
     "recurringConfirming": "Agendando…",
-    "recurringSummary": "{booked} agendadas, {skipped} omitidas"
+    "recurringSummary": "{booked} agendadas, {skipped} omitidas",
+    "fullWarns": "Lleno: se agenda con aviso",
+    "trainSeriesOverbooked": "Sobrecupo"
   },
   "citas": {
     "calendario": {
@@ -1269,7 +1273,9 @@
     "ahora_mismo": "Ahora mismo",
     "productosExonerados": "Productos exonerados (IVU)",
     "bothCenters": "AMBOS",
-    "bodyMeasurementsUnlinked": "Medidas sin vincular"
+    "bodyMeasurementsUnlinked": "Medidas sin vincular",
+    "changeLog": "Historial de cambios",
+    "confirmationPolicies": "Confirmaciones"
   },
   "admin": {
     "title": "Administración",
@@ -2901,7 +2907,13 @@
     "regularPrice": "Precio regular",
     "savings": "Ahorro",
     "packagePrice": "Precio del paquete",
-    "youSaved": "Usted ahorró"
+    "youSaved": "Usted ahorró",
+    "originInvoice": "Factura de origen #{number}",
+    "refundOption": "Devolución #{number} · ${amount}",
+    "invoiceOption": "Factura (original)",
+    "voided": "anulada",
+    "refunded": "Reembolsado",
+    "refund": "Reembolso"
   },
   "facturacion": {
     "title": "Facturar consulta",
@@ -3145,7 +3157,8 @@
     "unitsAreasDays": "Cantidad (áreas × días)",
     "unitsAreasDaysHint": "Se calcula sola: áreas × días. No se escribe.",
     "packages": "Paquetes",
-    "packagesHint": "Cuántos paquetes se venden (normalmente 1)."
+    "packagesHint": "Cuántos paquetes se venden (normalmente 1).",
+    "returnedBadge": "Devuelta"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -3544,7 +3557,9 @@
       "app": "App",
       "claude": "Claude"
     },
-    "tool": "Herramienta"
+    "tool": "Herramienta",
+    "filtroEntidad": "Entidad {id}",
+    "filtrarPorEntidad": "Filtrar por esta entidad"
   },
   "comunicaciones": {
     "title": "Alertas",
@@ -5050,6 +5065,18 @@
       "INVOICE_CHANGE_PATIENT_SAME": "Ya es el paciente de esta factura.",
       "INVOICE_CHANGE_PATIENT_UNKNOWN": "Ese paciente no existe en este centro.",
       "INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT": "Es una consulta ligada a una cita: cambia primero el paciente de la cita."
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "tax": "Impuesto",
+      "shipping": "Envío",
+      "total": "Total",
+      "paid": "Pagado",
+      "refunded": "Reembolsado",
+      "balance": "Saldo",
+      "payment": "Pago",
+      "refund": "Reembolso"
     }
   },
   "picker": {
@@ -5451,5 +5478,109 @@
     "deny": "Cancelar",
     "working": "Un momento…",
     "disconnectHint": "Puedes desconectar {client} cuando quieras desde sus ajustes de conectores."
+  },
+  "confirmation": {
+    "required": "Esta acción necesita tu confirmación antes de guardarse.",
+    "unknownAction": "Confirmar: {action}",
+    "cancel": "Cancelar",
+    "accept": "Aceptar",
+    "action": {
+      "unattend": "Desasistir la sesión",
+      "deleteSession": "Eliminar la sesión",
+      "cancelDay": "Cancelar todas las sesiones del día",
+      "repair": "Reparar la sesión",
+      "cancelSession": "Cancelar la sesión",
+      "undoPresent": "Deshacer presente",
+      "undoChange": "Deshacer el cambio",
+      "voidInvoice": "Anular la factura",
+      "voidRefund": "Anular la devolución"
+    },
+    "effect": {
+      "returnsPackageSession": "Devuelve la sesión al paquete",
+      "returnsStock": "Devuelve al inventario lo descontado",
+      "clearsAttendedTime": "Borra la hora de asistido",
+      "sessionDeleted": "La sesión desaparece del tablero",
+      "cancelsOpenSessionsOfTheDay": "Cancela las sesiones abiertas del día",
+      "redoesDischarge": "Rehace el descuento de inventario",
+      "sessionCancelled": "La sesión queda cancelada",
+      "backToPending": "La sesión vuelve a pendiente",
+      "invoiceVoided": "La factura queda anulada",
+      "refundVoided": "La devolución queda anulada"
+    },
+    "policies": {
+      "title": "Confirmaciones",
+      "hint": "Qué acciones delicadas piden «¿Aceptar o no?» antes de guardarse, por centro.",
+      "action": "Acción",
+      "default": "por defecto",
+      "saved": "Guardado",
+      "noPermission": "No tienes permiso para configurar las confirmaciones."
+    }
+  },
+  "changeLog": {
+    "title": "Historial de cambios",
+    "dayTitle": "Historial del día",
+    "screenHint": "Quién cambió qué, con el antes y el después, y deshacer donde se permite.",
+    "noPermission": "No tienes permiso para ver el historial de cambios.",
+    "loadError": "No se pudo cargar el historial",
+    "empty": "Sin cambios registrados",
+    "system": "Sistema",
+    "undo": "Deshacer",
+    "undoing": "Deshaciendo…",
+    "undone": "Cambio deshecho",
+    "undoneBy": "Deshecho por {name}",
+    "more": "Ver {n} más",
+    "changedId": "(cambiado)",
+    "filter": {
+      "from": "Desde",
+      "to": "Hasta",
+      "user": "Usuario",
+      "allUsers": "Todos",
+      "patient": "Paciente",
+      "patientHint": "Nombre o récord"
+    },
+    "action": {
+      "create": "Creada",
+      "present": "Presente",
+      "undo_present": "Deshacer presente",
+      "start_therapy": "En terapia",
+      "back_to_present": "Vuelve a presente",
+      "back_to_pending": "Vuelve a pendiente",
+      "attend": "Asistida",
+      "unattend": "Desasistida",
+      "cancel": "Cancelada",
+      "reopen": "Reabierta",
+      "reschedule": "Reagendada",
+      "edit": "Editada",
+      "delete": "Eliminada",
+      "status": "Cambio de estado"
+    },
+    "field": {
+      "estado": "Estado",
+      "presenteEn": "Presente",
+      "terapiaInEn": "En terapia",
+      "asistidoEn": "Asistido",
+      "productoAplicadoId": "Dosis",
+      "cantidad": "Cantidad",
+      "enfermeraId": "Enfermera",
+      "tecnicoId": "Técnico",
+      "medicoId": "Médico",
+      "datos": "Datos",
+      "fecha": "Fecha",
+      "hora": "Hora",
+      "paqueteId": "Paquete",
+      "vialAbiertoId": "Vial abierto"
+    },
+    "status": {
+      "pendiente": "Pendiente",
+      "presente": "Presente",
+      "en_terapia": "En terapia",
+      "asistido": "Asistido",
+      "cancelada": "Cancelada"
+    },
+    "error": {
+      "superseded": "Alguien cambió esos campos después: deshaz primero el cambio posterior",
+      "alreadyUndone": "Ese cambio ya se deshizo",
+      "notUndoable": "Ese cambio no se puede deshacer"
+    }
   }
 }
