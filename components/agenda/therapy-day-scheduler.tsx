@@ -105,6 +105,14 @@ export function TherapyDayScheduler({
   const recRes = useResource<Resource[]>(() => listResources(centro), [centro]);
   const recursos = recRes.state.kind === "ok" ? recRes.state.data : [];
   const recursosById = React.useMemo(() => new Map(recursos.map((r) => [r.id, r])), [recursos]);
+  // «Areas» solo tiene sentido en una terapia que de verdad cobra por área (el Láser): antes salía en
+  // TODAS las tarjetas, Vit C y NPT incluidos, donde no significa nada. Un servicio es «por área» si
+  // CUALQUIERA de sus líneas lo es (`ServiceResourceLine.per`), visto desde `Resource.services[]`.
+  const areaServiceIds = React.useMemo(() => {
+    const ids = new Set<string>();
+    for (const r of recursos) for (const svc of r.services) if (svc.per === "area") ids.add(svc.serviceId);
+    return ids;
+  }, [recursos]);
 
   // Whether the free-slot indicators pulse — a layered preference (system→center→user→override),
   // not a code decision: this exact behavior was flipped by hand twice in one week (removed as a
@@ -323,11 +331,7 @@ export function TherapyDayScheduler({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">{t("pickServices")}</label>
-                <AddTherapySelect
-                  servicios={servicios.filter((s) => !sel.has(s.id))}
-                  onAdd={(id) => toggle(id)}
-                  label={t("addTherapy")}
-                />
+                <AddTherapySelect servicios={servicios} selectedIds={sel} onToggle={toggle} label={t("addTherapy")} />
               </div>
               {chosen.length === 0 ? (
                 <p className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
@@ -371,22 +375,24 @@ export function TherapyDayScheduler({
                           )}
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-medium">{s.name}</div>
-                            <label
-                              className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {t("areas")}
-                              <Input
-                                type="number"
-                                min={1}
-                                value={areasOf(s.id)}
-                                onChange={(e) => {
-                                  setAreas((a) => ({ ...a, [s.id]: Math.max(1, Number(e.target.value) || 1) }));
-                                  if (s.id === selEff) setTime("");
-                                }}
-                                className="h-6 w-14 px-1 py-0 text-xs"
-                              />
-                            </label>
+                            {areaServiceIds.has(s.id) && (
+                              <label
+                                className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {t("areas")}
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  value={areasOf(s.id)}
+                                  onChange={(e) => {
+                                    setAreas((a) => ({ ...a, [s.id]: Math.max(1, Number(e.target.value) || 1) }));
+                                    if (s.id === selEff) setTime("");
+                                  }}
+                                  className="h-6 w-14 px-1 py-0 text-xs"
+                                />
+                              </label>
+                            )}
                           </div>
                           <button
                             type="button"
