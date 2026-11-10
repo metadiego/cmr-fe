@@ -2148,6 +2148,24 @@
     },
     "evento": {
       "reopened": "Reopened"
+    },
+    "mls": {
+      "title": "MLS",
+      "paciente": "Patient :",
+      "fecha": "Date :",
+      "record": "Record #",
+      "patologia": "Pathology",
+      "frec": "Freq",
+      "tiempo": "Time",
+      "int": "Int.",
+      "comentarios": "Comments:",
+      "tecnico": "Technician:",
+      "proxima": "Next appointment:",
+      "nTerapias": "Number of therapies # :",
+      "horaEntrada": "Time in :",
+      "horaSalida": "Time out :",
+      "ctd": "CTD :",
+      "firma": "Patient's signature"
     }
   },
   "programarCitas": {

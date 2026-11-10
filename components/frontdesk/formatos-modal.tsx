@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { SignaturePad } from "@/components/frontdesk/signature-pad";
 import { Campo, HORA_CLS, LogoFormato, imprimirFormato, PieFormato } from "@/components/frontdesk/formato-parts";
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
+import { MlsSheet } from "@/components/frontdesk/mls-sheet";
 
 // Modal ESTÁNDAR de acciones/formatos por servicio (data-driven desde servicio.formAcciones).
 // Lista los `reports` (HILT/MLS…) y `additional_actions` (Historial). Al elegir un report:
@@ -183,7 +184,21 @@ export function FormatosModal({
         )}
 
         {/* 3) Render del formato médico de LÁSER (HILT/MLS, ruta propia con parámetros) */}
-        {report && generado && esFormato && (
+        {report && generado && tipo === "mls" && (
+          <MlsSheet
+            centro={centro}
+            header={{
+              paciente: pacienteNombre,
+              record: record ?? "",
+              sesion: sesion || (sesionNN ?? ""),
+              tecnico: enviarTecnico ? (tecnicoNombre ?? "") : "",
+              proximaCita: proximaCita ?? "",
+              fecha: fecha ?? "",
+            }}
+            onVolver={() => setGenerado(false)}
+          />
+        )}
+        {report && generado && tipo === "hilt" && (
           <FormatoRender
             tipo={tipo}
             centro={centro}
@@ -253,7 +268,6 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
         </div>
 
         {tipo === "hilt" && data.type === "hilt" && <HiltTabla secciones={data.sections} t={t} />}
-        {tipo === "mls" && data.type === "mls" && <MlsTabla izquierda={data.izquierda} derecha={data.derecha} t={t} />}
 
         {/* Footer clínico: Trigger Point (Sí/No) solo HILT, CTD solo MLS — formato homologado. */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 border-t pt-3 text-xs">
@@ -344,40 +358,6 @@ function HiltTabla({ secciones, t }: { secciones: { region: string; filas: Laser
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; derecha: LaserParametro[]; t: TFn }) {
-  const col = (filas: LaserParametro[], titulo: string) => (
-    <div>
-      <div className="mb-1 text-xs font-semibold uppercase tracking-wide">{titulo}</div>
-      <table className="w-full border-collapse text-[11px]">
-        <thead>
-          <tr className="border-b bg-neutral-100 text-left">
-            <th className="px-2 py-1 font-medium">{t("colPatologia")}</th>
-            <th className="px-2 py-1 font-medium">{t("colFrecuencia")}</th>
-            <th className="px-2 py-1 font-medium">{t("colTiempo")}</th>
-            <th className="px-2 py-1 font-medium">{t("colIntensidad")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filas.map((f) => (
-            <tr key={f.id} className="border-b border-neutral-200">
-              <td className="px-2 py-1">{f.pathology ?? f.patologia}</td>
-              <td className="px-2 py-1 tabular-nums">{f.frequency ?? "—"}</td>
-              <td className="px-2 py-1 tabular-nums">{f.duration ?? "—"}</td>
-              <td className="px-2 py-1 tabular-nums">{f.intensity ?? "—"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {col(izquierda, t("ladoIzquierdo"))}
-      {col(derecha, t("ladoDerecho"))}
     </div>
   );
 }

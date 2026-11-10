@@ -2148,6 +2148,24 @@
     },
     "evento": {
       "reopened": "Reabierta"
+    },
+    "mls": {
+      "title": "MLS",
+      "paciente": "Paciente :",
+      "fecha": "Fecha :",
+      "record": "Record #",
+      "patologia": "Patología",
+      "frec": "Frec",
+      "tiempo": "Tiempo",
+      "int": "Int.",
+      "comentarios": "Comentarios:",
+      "tecnico": "Nombre Técnico:",
+      "proxima": "Próxima Cita:",
+      "nTerapias": "Número de Terapias # :",
+      "horaEntrada": "Hora Entrada :",
+      "horaSalida": "Hora Salida :",
+      "ctd": "CTD :",
+      "firma": "Firma del Paciente"
     }
   },
   "programarCitas": {
