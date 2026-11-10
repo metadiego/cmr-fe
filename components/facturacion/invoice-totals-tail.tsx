@@ -2,13 +2,13 @@
 
 import { useTranslations } from "next-intl";
 
-import { money } from "@/lib/caja/totales";
 import type { InvoiceTotals } from "@/lib/factura/totals";
 import { Badge } from "@/components/ui/badge";
 
 // Under the invoice's Total: Pagado, Reembolsado (negative), Saldo — with «Devuelta» when the refunds
 // cover the total — and each payment (+) / refund (−) with its method and date. Straight from the BE's
-// totals block (BE #536); nothing is computed here.
+// totals block (BE #536); nothing is computed here. Money in the invoice screen's own format.
+const money = (v: number) => (v < 0 ? "−" : "") + "$" + Math.abs(v).toFixed(2);
 export function InvoiceTotalsTail({ totals }: { totals: InvoiceTotals }) {
   const tRoot = useTranslations();
   const t = useTranslations("facturacion");
