@@ -1,6 +1,6 @@
 # Handoff FE — página de consentimiento para conectar Claude a CMR
 
-Estado: listo para construir · 2026-11-10 · BE: `cmr-be` rama `feat/mcp-connector-claude`
+Estado: **implementado** en esta rama (`docs/mcp-connector-consent-page`: `app/oauth/consent`, `proxy.ts` + login con `?next=`, auditoría con «Vía») · 2026-11-10 · BE: `cmr-be` rama `feat/mcp-connector-claude`
 (spec `cmr-be/docs/specs/mcp-connector-claude.md`, plan `cmr-be/docs/plans/mcp-connector-claude.md`)
 
 ## Qué es y por qué
