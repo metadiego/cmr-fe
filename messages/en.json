@@ -4631,33 +4631,6 @@
       "rango_invalido": "The absence range is invalid (end before start)."
     }
   },
-  "serviceDay": {
-    "kpi": {
-      "total": "Appointments",
-      "present": "Present",
-      "attended": "Attended",
-      "pending": "Pending"
-    },
-    "all": "All",
-    "plan": "Plan the day",
-    "occupancy": "Hourly occupancy · {service}",
-    "empty": "No service appointments for this day.",
-    "col": {
-      "time": "Time",
-      "service": "Service",
-      "patient": "Patient",
-      "qty": "Qty",
-      "staff": "Staff",
-      "status": "Status"
-    },
-    "filterService": "Therapy",
-    "filterStatus": "Status",
-    "searchPatient": "Search patient by name or record…",
-    "occupancyTitle": "Resource occupancy by hour",
-    "resource": "Resource",
-    "usedOf": "{used}/{available} station-hours",
-    "cap": "cap {n}"
-  },
   "printHub": {
     "invalidQueue": "The queue or share name has characters that are not allowed (only letters, digits, space and _ . - $).",
     "invalidUrl": "A hub URL is not valid: it must be complete, like https://host:port/print-raw.",

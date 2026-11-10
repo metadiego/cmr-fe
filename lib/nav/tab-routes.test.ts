@@ -40,7 +40,6 @@ test("pages below a tabbed screen are not tabs: invoice detail, new sale, a cale
   assert.equal(matchTab(BILLING_GENERAL_TABS, "/billing/invoices/cash/extra"), null);
   // The appointments screen is no longer tabbed: no tab route matches its calendar days either.
   assert.equal(TAB_ROUTES.some((r) => matchTab(r, "/scheduling/appointments/2026-10-29")), false);
-  assert.equal(TAB_ROUTES.some((r) => matchTab(r, "/scheduling/appointments/services/2026-10-29")), false);
 });
 
 test("a tab of another screen does not count (stats exists only in general billing)", () => {

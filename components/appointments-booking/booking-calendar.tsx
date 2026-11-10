@@ -166,11 +166,8 @@ export function BookingCalendar({
   const closedLabel =
     closedKind === "sunday" ? t("day.closed") : closedKind === "holiday" ? t("day.holiday") : undefined;
 
-  const fullDayHref = date
-    ? medical
-      ? `/scheduling/appointments/${date}`
-      : `/scheduling/appointments/services/${date}`
-    : undefined;
+  // Only medical has a full day sheet; services' day is this panel.
+  const fullDayHref = date && medical ? `/scheduling/appointments/${date}` : undefined;
 
   return (
     <section

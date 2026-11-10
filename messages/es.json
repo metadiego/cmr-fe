@@ -4631,33 +4631,6 @@
       "rango_invalido": "El rango de la ausencia es inválido (fin antes del inicio)."
     }
   },
-  "serviceDay": {
-    "kpi": {
-      "total": "Citas",
-      "present": "Presentes",
-      "attended": "Atendidos",
-      "pending": "Pendientes"
-    },
-    "all": "Todos",
-    "plan": "Planificar el día",
-    "occupancy": "Ocupación por hora · {service}",
-    "empty": "No hay citas de servicio para este día.",
-    "col": {
-      "time": "Hora",
-      "service": "Servicio",
-      "patient": "Paciente",
-      "qty": "Cant.",
-      "staff": "Atiende",
-      "status": "Estado"
-    },
-    "filterService": "Terapia",
-    "filterStatus": "Estado",
-    "searchPatient": "Buscar paciente por nombre o récord…",
-    "occupancyTitle": "Ocupación de recursos por hora",
-    "resource": "Recurso",
-    "usedOf": "{used}/{available} puestos-hora",
-    "cap": "cap {n}"
-  },
   "printHub": {
     "invalidQueue": "La cola o el recurso compartido tiene caracteres no permitidos (solo letras, números, espacio y _ . - $).",
     "invalidUrl": "Alguna URL de hub no es válida: debe ser completa, como https://host:puerto/print-raw.",
