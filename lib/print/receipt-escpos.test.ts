@@ -66,10 +66,10 @@ const ES: Record<string, string> = {
   paid: "Total pagado", balance: "Saldo", attendedBy: "Atendido por", thanks: "¡Gracias por su visita!",
   includes: "Incluye", protocolVisits: "Protocolo de {n} visitas",
   packageLine: "Paquete {name}", regularPrice: "Precio regular", savings: "Ahorro", packagePrice: "Precio del paquete",
-  youSaved: "Usted ahorró",
+  youSaved: "Usted ahorró", originInvoice: "Factura de origen #{number}", refunded: "Reembolsado", refund: "Reembolso",
 };
 const TEXT: ReceiptText = {
-  t: (k, v) => (ES[k] ?? k).replace("{n}", String(v?.n ?? "")).replace("{name}", String(v?.name ?? "")),
+  t: (k, v) => (ES[k] ?? k).replace("{n}", String(v?.n ?? "")).replace("{name}", String(v?.name ?? "")).replace("{number}", String(v?.number ?? "")),
   multiplierLabel: (k) => ({ dias: "Días", areas: "Áreas" })[k] ?? k,
   paymentLabel: (p) => (p.clave === "efectivo" ? "Efectivo" : p.formaPagoNombre),
 };
@@ -255,4 +255,27 @@ test("a package line prints regular, savings and package price; the foot, «Uste
   assert.match(text, /Usted ahorró/);
   // Without packages, none of it is printed.
   assert.doesNotMatch(decode(receiptToEscPos(QUOTE, TEXT)).lines.join("\n"), /Usted ahorró|Precio regular/);
+});
+
+test("refund receipt through the hub: title, origin invoice, the refund method (D-000026)", () => {
+  const r: Recibo = {
+    ...QUOTE, tipoDocumento: "devolucion", numeroDisplay: "D-000026", facturaOrigen: "L006875", estado: "activa",
+    fecha: "2026-11-10", montoAbonado: 0, saldo: 0, subtotal: 6360, descuento: 0, total: 6360,
+    pagos: [{ formaPagoNombre: "Care Credit", monto: 6360 }],
+  };
+  const { lines } = decode(receiptToEscPos(r, TEXT));
+  assert.ok(lines.includes(row("Devolución #D-000026", "11/10/2026")));
+  assert.ok(lines.includes("Factura de origen #L006875"));
+  assert.ok(lines.includes(row("Care Credit", "$6360.00")));
+});
+
+test("invoice with a refund: Reembolsado line and the refund move printed as «Reembolso <forma>»", () => {
+  const r: Recibo = {
+    ...QUOTE, tipoDocumento: "factura", numeroDisplay: "L006875", estado: "devuelta_total", montoAbonado: 6360, reembolsado: -6360, saldo: 0,
+    pagos: [{ formaPagoNombre: "Care Credit", monto: 6360 }, { formaPagoNombre: "Care Credit", monto: -6360, reembolso: true }],
+  };
+  const { lines } = decode(receiptToEscPos(r, TEXT));
+  assert.ok(lines.some((l) => l.startsWith("Reembolsado")));
+  assert.ok(lines.some((l) => l.startsWith("Reembolso Care Credit")));
+  assert.ok(!lines.some((l) => l.startsWith("Saldo")), "a refunded invoice owes nothing");
 });

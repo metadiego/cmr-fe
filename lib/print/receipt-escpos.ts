@@ -53,6 +53,8 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
   const pad = w.columns - title.length - fecha.length;
   if (pad >= 1) w.bold(true).text(title).bold(false).line(" ".repeat(pad) + fecha);
   else w.bold(true).wrapped(title).bold(false).line(" ".repeat(Math.max(0, w.columns - fecha.length)) + fecha);
+  // A refund's receipt names the invoice it comes from (same as the on-screen paper).
+  if (r.facturaOrigen) w.wrapped(t("originInvoice", { number: r.facturaOrigen }));
   w.dashed();
 
   // Patient — bilingual caption by legal requirement (same as the legacy receipt).
@@ -109,12 +111,13 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
   w.bold(true).columnsRow(t("total"), money(r.total)).bold(false);
   if ((r.ahorroPaquetes ?? 0) > 0) w.bold(true).columnsRow(t("youSaved"), money(r.ahorroPaquetes ?? 0)).bold(false);
   if (r.montoAbonado > 0) w.columnsRow(t("paid"), money(r.montoAbonado));
+  if ((r.reembolsado ?? 0) !== 0) w.columnsRow(t("refunded"), money(r.reembolsado ?? 0));
   if (r.saldo > 0) w.bold(true).columnsRow(t("balance"), money(r.saldo)).bold(false);
 
   // Payments.
   if (r.pagos.length > 0) {
     w.dashed();
-    for (const p of r.pagos) w.columnsRow(text.paymentLabel(p) + (p.referencia ? ` ${p.referencia}` : ""), money(p.monto));
+    for (const p of r.pagos) w.columnsRow((p.reembolso ? `${t("refund")} ` : "") + text.paymentLabel(p) + (p.referencia ? ` ${p.referencia}` : ""), money(p.monto));
   }
 
   if (r.atendidoPor) w.dashed().wrapped(`${t("attendedBy")}: ${r.atendidoPor}`);

@@ -11,6 +11,10 @@ import { BackupPrintButton } from "@/components/facturacion/backup-print-button"
 import { RECEIPT_STATUS_MESSAGE, type ReceiptStatusMessage } from "@/lib/print/receipt-status-message";
 import { defaultReceipt, receiptUrl, refundsNewestFirst } from "@/lib/print/receipt-choice";
 import { listDevolucionesDeFactura, type Devolucion } from "@/lib/api/facturas";
+import { loadRefundRecibo } from "@/lib/api/refund-receipt";
+import { loadLogoRaster } from "@/lib/print/load-logo";
+import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
+import { buildReceiptText } from "@/lib/print/receipt-labels";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Status = { kind: "loading" } | { kind: "ready" } | { kind: "error"; message: string };
@@ -55,6 +59,12 @@ type BodyProps = {
 function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, onClose }: BodyProps) {
   const t = useTranslations("receipt");
   const tc = useTranslations("common");
+  const tRoot = useTranslations();
+  async function refundBytes(refundId: string): Promise<Uint8Array> {
+    const recibo = await loadRefundRecibo(invoiceId, refundId, centerId);
+    const logo = await loadLogoRaster(recibo.logoUrl ?? "/img/logo_cmr.png", RECEIPT_LOGO_MAX_HEIGHT_MM);
+    return receiptToEscPos(recibo, buildReceiptText(t, tRoot), logo);
+  }
   const [status, setStatus] = React.useState<Status>({ kind: "loading" });
   // Bumped by "Retry": remounts the iframe, which loads the page (and asks the server) again.
   const [attempt, setAttempt] = React.useState(0);
@@ -145,10 +155,11 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
 
       <div className="flex flex-col gap-3 border-t px-4 py-3">
         {/* Backup path, apart from the normal Print: raw ESC/POS through the print hub. */}
-        {/* The ESC/POS backup builds the INVOICE bytes: offered only when the invoice is the document. */}
-        {doc === "" && (
+        {/* Backup path through the center's print hub (raw ESC/POS) for the chosen document: the invoice's
+            bytes come from the screen; a refund's are built here from the same Recibo the paper draws. */}
+        {doc !== null && (
           <div className="rounded-md bg-muted/50 py-2">
-            <BackupPrintButton centerId={centerId} buildBytes={buildBackupBytes} />
+            <BackupPrintButton key={doc} centerId={centerId} buildBytes={doc === "" ? buildBackupBytes : () => refundBytes(doc)} />
           </div>
         )}
         <div className="flex justify-end gap-2">

@@ -4,8 +4,8 @@ import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { getReciboDevolucion, getFactura, getFormasPago } from "@/lib/api/facturas";
-import { buildReciboDevolucion, type Recibo } from "@/lib/factura/build-recibo";
+import { loadRefundRecibo } from "@/lib/api/refund-receipt";
+import type { Recibo } from "@/lib/factura/build-recibo";
 import { getActiveCentro } from "@/lib/tenant";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { apiErrorLabel } from "@/lib/api/errors";
@@ -31,18 +31,10 @@ export default function PrintRefundPage() {
     if (!invoiceId || !refundId) return;
     let active = true;
     const centro = centroParam ?? getActiveCentro() ?? undefined;
-    Promise.all([getReciboDevolucion(invoiceId, refundId, centro), getFactura(invoiceId, centro).catch(() => null), getFormasPago(centro).catch(() => [])])
-      .then(([rec, fact, formas]) => {
+    loadRefundRecibo(invoiceId, refundId, centro)
+      .then((r) => {
         if (!active) return;
-        const nombres: Record<string, string> = {};
-        (fact?.items ?? []).forEach((it) => {
-          if (it.id) nombres[String(it.id)] = it.description ?? "—";
-        });
-        const clavePorNombre: Record<string, string> = {};
-        formas.forEach((f) => {
-          if (f.name && f.slug) clavePorNombre[f.name] = f.slug;
-        });
-        setRecibo(buildReciboDevolucion(rec, nombres, clavePorNombre));
+        setRecibo(r);
         if (embed) window.parent.postMessage(receiptStatusMessage("ready"), window.location.origin);
       })
       .catch((err) => active && setError(err));

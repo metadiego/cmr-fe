@@ -4,8 +4,8 @@ import * as React from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { getReciboDevolucion, getFactura, getFormasPago } from "@/lib/api/facturas";
-import { buildReciboDevolucion, type Recibo } from "@/lib/factura/build-recibo";
+import { loadRefundRecibo } from "@/lib/api/refund-receipt";
+import type { Recibo } from "@/lib/factura/build-recibo";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { ReceiptPaperSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
 import { toastError } from "@/lib/api/errors";
@@ -29,21 +29,9 @@ export default function ReciboDevolucionPage() {
 
   React.useEffect(() => {
     let active = true;
-    Promise.all([
-      getReciboDevolucion(id, devId, centro),
-      getFactura(id, centro).catch(() => null),
-      getFormasPago(centro).catch(() => []),
-    ])
-      .then(([rec, fact, formas]) => {
-        if (!active) return;
-        const nombres: Record<string, string> = {};
-        (fact?.items ?? []).forEach((it) => {
-          if (it.id) nombres[String(it.id)] = it.description ?? "—";
-        });
-        // La forma de reembolso llega como nombre → mapa nombre→clave para traducirla en el recibo.
-        const clavePorNombre: Record<string, string> = {};
-        formas.forEach((f) => { if (f.name && f.slug) clavePorNombre[f.name] = f.slug; });
-        setRecibo(buildReciboDevolucion(rec, nombres, clavePorNombre));
+    loadRefundRecibo(id, devId, centro)
+      .then((r) => {
+        if (active) setRecibo(r);
       })
       .catch((err) => toastError(err, tRoot))
       .finally(() => active && setLoading(false));
