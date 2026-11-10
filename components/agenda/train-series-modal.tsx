@@ -337,6 +337,7 @@ export function TrainSeriesModal({
                   <span className="flex min-w-0 flex-1 justify-end gap-2 truncate text-right">
                     {planned ? (
                       <>
+                        {day.overbooked && <Badge variant="warning">{reasonText(day) || t("trainSeriesOverbooked")}</Badge>}
                         {day.adjusted && (
                           <Badge variant="warning">{t("trainSeriesMoved", { from: day.requestedTime, to: day.time ?? "" })}</Badge>
                         )}

@@ -21,6 +21,7 @@ import { toastError } from "@/lib/api/errors";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { SheetNotice } from "@/components/agenda/sheet-notice";
 import { noSeatDays, type SheetCheck } from "@/lib/agenda/sheet";
+import { slotWarns } from "@/lib/agenda/slot-pick";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -366,9 +367,11 @@ export function ProgramarCitasModal({
                         className={
                           "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] tabular-nums transition ring-offset-1 hover:brightness-110 " +
                           (activa ? "ring-2 ring-primary " : "") +
-                          (!h.fits
-                            ? "bg-destructive/10 text-destructive line-through"
-                            : "bg-success text-success-foreground")
+                          (h.fits
+                            ? "bg-success text-success-foreground"
+                            : slotWarns(h)
+                              ? "bg-warning/20 text-warning-foreground"
+                              : "bg-destructive/10 text-destructive line-through")
                         }
                       >
                         {h.time}{h.fits && h.freeStations != null && <span className="opacity-70">·{h.freeStations}</span>}

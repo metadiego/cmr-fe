@@ -243,6 +243,8 @@ export interface TrainSeriesDay {
   time?: string; // solo si planned
   requestedTime: string;
   adjusted?: boolean;
+  // BE #533: a day with no room is still planned at the preferred time, flagged, with its reasonKey.
+  overbooked?: boolean;
   shiftMinutes?: number;
   serviceIds: string[];
   endsAt?: string;

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { type PatientTrain, type Resource, type TrainSlot } from "@/lib/api/resources";
 import { type Servicio } from "@/lib/api/servicios";
+import { slotPickable } from "@/lib/agenda/slot-pick";
 import { cn } from "@/lib/utils";
 import { SlotGridSkeleton } from "@/components/agenda/therapy-day-skeleton";
 
@@ -74,22 +75,23 @@ export function TherapyTrainGrid({
           const active = time === sl.time;
           const over = dragOver === sl.time;
           const endsAtText = sl.fits ? t("trainEndsAt", { time: sl.endsAt }) : "";
+          const pick = slotPickable(sl); // a full slot warns, it does not block (lib/agenda/slot-pick.ts)
           return (
             <button
               key={sl.time}
               type="button"
-              disabled={!sl.fits}
+              disabled={!pick}
               title={sl.fits ? trainLegsText(sl, servById, endsAtText) : reason(sl)}
-              onClick={() => sl.fits && onPick(sl.time)}
+              onClick={() => pick && onPick(sl.time)}
               onDragOver={(e) => {
-                if (sl.fits) {
+                if (pick) {
                   e.preventDefault();
                   setDragOver(sl.time);
                 }
               }}
               onDragLeave={() => setDragOver((d) => (d === sl.time ? null : d))}
               onDrop={(e) => {
-                if (!sl.fits) return;
+                if (!pick) return;
                 e.preventDefault();
                 const id = e.dataTransfer.getData("text/plain");
                 setDragOver(null);
@@ -101,7 +103,9 @@ export function TherapyTrainGrid({
                   ? "border-primary bg-primary text-primary-foreground shadow-md"
                   : sl.fits
                     ? cn("border-success/40 bg-success/10 hover:bg-success/20", blinkEnabled && "animate-pulse hover:animate-none")
-                    : "cursor-not-allowed border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground/40",
+                    : pick
+                      ? "border-warning/50 bg-warning/15 text-warning-foreground hover:bg-warning/25"
+                      : "cursor-not-allowed border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground/40",
                 over && "scale-105 ring-2 ring-success",
               )}
             >

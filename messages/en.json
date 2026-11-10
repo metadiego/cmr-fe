@@ -187,7 +187,9 @@
     "seriesDayDoesNotFit": "The train of {date} no longer fits at its time. Nothing was booked.",
     "seriesDaysInvalid": "Invalid series days.",
     "sheetFull": "Full on the call-center sheet",
-    "notAStartTime": "This service only starts on the hour: pick a whole hour"
+    "notAStartTime": "This service only starts on the hour: pick a whole hour",
+    "outsideHours": "Outside the center's hours",
+    "pastClosing": "Ends after the center closes"
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -272,7 +274,9 @@
     "recurringRemove": "Remove",
     "recurringConfirm": "Confirm {n} session(s)",
     "recurringConfirming": "Scheduling…",
-    "recurringSummary": "{booked} scheduled, {skipped} skipped"
+    "recurringSummary": "{booked} scheduled, {skipped} skipped",
+    "fullWarns": "Full: booked with a warning",
+    "trainSeriesOverbooked": "Overbooked"
   },
   "citas": {
     "calendario": {

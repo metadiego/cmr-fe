@@ -187,7 +187,9 @@
     "seriesDayDoesNotFit": "El tren del {date} ya no cabe a su hora. No se agendó nada.",
     "seriesDaysInvalid": "Días de la serie no válidos.",
     "sheetFull": "Lleno en la hoja del call center",
-    "notAStartTime": "Este servicio solo empieza en punto: elige una hora entera"
+    "notAStartTime": "Este servicio solo empieza en punto: elige una hora entera",
+    "outsideHours": "Fuera del horario del centro",
+    "pastClosing": "Termina después del cierre del centro"
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -272,7 +274,9 @@
     "recurringRemove": "Quitar",
     "recurringConfirm": "Confirmar {n} sesión(es)",
     "recurringConfirming": "Agendando…",
-    "recurringSummary": "{booked} agendadas, {skipped} omitidas"
+    "recurringSummary": "{booked} agendadas, {skipped} omitidas",
+    "fullWarns": "Lleno: se agenda con aviso",
+    "trainSeriesOverbooked": "Sobrecupo"
   },
   "citas": {
     "calendario": {
