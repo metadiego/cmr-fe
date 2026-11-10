@@ -1834,14 +1834,18 @@
     "col": {
       "servicio": "Servicio",
       "aplicados": "Aplicados",
-      "vendidos": "Vendidos"
+      "vendidos": "Vendidos",
+      "devueltos": "Devueltos"
     },
     "tip": {
       "nuevas": "Citas atendidas por primera vez (lo que pasó, no lo agendado).",
       "seguimientos": "Citas de seguimiento atendidas.",
       "aplicados": "Sesiones entregadas hoy en el frontdesk (el trabajo hecho).",
-      "vendidos": "Sesiones que prometieron las facturas del día (lo cobrado). No tiene que coincidir con aplicados."
-    }
+      "vendidos": "Sesiones que prometieron las facturas del día (lo cobrado). No tiene que coincidir con aplicados.",
+      "devueltos": "Sesiones devueltas por las devoluciones del día"
+    },
+    "devoluciones": "Devoluciones",
+    "ingresoNeto": "Ingreso neto"
   },
   "estadisticasServicios": {
     "title": "Estadísticas de Servicios",

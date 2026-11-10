@@ -1834,14 +1834,18 @@
     "col": {
       "servicio": "Service",
       "aplicados": "Applied",
-      "vendidos": "Sold"
+      "vendidos": "Sold",
+      "devueltos": "Returned"
     },
     "tip": {
       "nuevas": "First-time attended appointments (what happened, not what was scheduled).",
       "seguimientos": "Follow-up appointments attended.",
       "aplicados": "Sessions delivered today at the frontdesk (work done).",
-      "vendidos": "Sessions promised by today's invoices (what was billed). Need not match applied."
-    }
+      "vendidos": "Sessions promised by today's invoices (what was billed). Need not match applied.",
+      "devueltos": "Sessions given back by the day's refunds"
+    },
+    "devoluciones": "Refunds",
+    "ingresoNeto": "Net revenue"
   },
   "estadisticasServicios": {
     "title": "Service Statistics",

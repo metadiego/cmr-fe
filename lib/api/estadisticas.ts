@@ -53,11 +53,15 @@ export type EstadisticasServicios = {
 // `vendidos` = sesiones que prometieron las FACTURAS del día (no coinciden, y está bien). `ingresoBruto`
 // sale del MISMO sitio que el cuadre de caja → NO recalcular sumando la tabla (la tabla cuenta sesiones).
 // Solo vienen servicios con actividad (el BE no manda ceros); orden por nombre → respetar.
-export type EstDiariaServicio = { slug: string; name: string; applied: number; sold: number };
+// BE #541: `returned` = sessions given back by that day's refunds; `refunds`/`netRevenue` count refunds on
+// their refund date (net = the day's cash count).
+export type EstDiariaServicio = { slug: string; name: string; applied: number; sold: number; returned?: number };
 export type EstadisticasDiarias = {
   medicalCare: { newCount: number; followUpCount: number; total: number };
   services: EstDiariaServicio[];
   grossRevenue: number;
+  refunds?: number;
+  netRevenue?: number;
 };
 // GET /estadisticas/diarias?desde=YYYY-MM-DD[&hasta] — `hasta` opcional (por defecto = `desde`, un día).
 export function getEstadisticasDiarias(

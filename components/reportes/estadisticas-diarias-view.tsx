@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { revenueLines, showReturned } from "@/lib/estadisticas/daily-revenue";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, WhatsappIcon, Mail01Icon, Copy01Icon } from "@hugeicons/core-free-icons";
@@ -14,6 +15,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const REVENUE_LABEL = { gross: "ingresoBruto", refunds: "devoluciones", net: "ingresoNeto" } as const;
 const nf = new Intl.NumberFormat("en-US");
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -78,7 +80,7 @@ export function EstadisticasDiariasView() {
   // Reporte en TEXTO PLANO (para WhatsApp/Correo/Copiar): se lee en el móvil sin abrir nada.
   const texto = React.useMemo(() => {
     if (!data) return "";
-    const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue;
+    const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue && !data.refunds;
     const lineas = [`C.M.R. — ${gate.centroNombre}    ${rangoLabel}`, ""];
     if (vacio) { lineas.push(t("sinActividad")); return lineas.join("\n"); }
     lineas.push(`${t("atencionMedica")}   N: ${data.medicalCare.newCount}   S: ${data.medicalCare.followUpCount}   ${t("total")} ${data.medicalCare.total}`, "");
@@ -87,7 +89,7 @@ export function EstadisticasDiariasView() {
       data.services.forEach((s) => lineas.push(`  ${s.name}: ${s.applied} / ${s.sold}`));
       lineas.push("");
     }
-    lineas.push(`${t("ingresoBruto")}   ${money.format(data.grossRevenue ?? 0)}`);
+    revenueLines(data).forEach((l) => lineas.push(`${t(REVENUE_LABEL[l.key])}   ${money.format(l.amount)}`));
     return lineas.join("\n");
   }, [data, gate.centroNombre, rangoLabel, t]);
 
@@ -165,7 +167,7 @@ export function EstadisticasDiariasView() {
 }
 
 function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string; data: EstadisticasDiarias; t: (k: string) => string }) {
-  const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue;
+  const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue && !data.refunds;
   return (
     <div className="card rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       <div className="text-center">
@@ -197,6 +199,7 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
                     <th className="py-1 pr-3 font-semibold">{t("col.servicio")}</th>
                     <th className="r px-3 py-1 text-right font-semibold" title={t("tip.aplicados")}>{t("col.aplicados")}</th>
                     <th className="r px-3 py-1 text-right font-semibold" title={t("tip.vendidos")}>{t("col.vendidos")}</th>
+                    {showReturned(data) && <th className="r px-3 py-1 text-right font-semibold" title={t("tip.devueltos")}>{t("col.devueltos")}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -205,6 +208,7 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
                       <td className="py-1.5 pr-3 font-medium">{s.name}</td>
                       <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.applied)}</td>
                       <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.sold)}</td>
+                      {showReturned(data) && <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.returned ?? 0)}</td>}
                     </tr>
                   ))}
                 </tbody>
@@ -212,10 +216,14 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
             </div>
           )}
 
-          {/* Ingreso bruto */}
-          <div className="ingreso flex items-center justify-between border-t-2 border-foreground pt-3 text-base font-bold">
-            <span>{t("ingresoBruto")}</span>
-            <span className="tabular-nums">{money.format(data.grossRevenue ?? 0)}</span>
+          {/* Ingreso bruto · Devoluciones (−) · Ingreso NETO, the headline (BE #541; = the day's cash count). */}
+          <div className="ingreso space-y-1 border-t-2 border-foreground pt-3">
+            {revenueLines(data).map((l) => (
+              <div key={l.key} className={"flex items-center justify-between " + (l.headline ? "text-base font-bold" : "text-sm")}>
+                <span>{t(REVENUE_LABEL[l.key])}</span>
+                <span className={"tabular-nums " + (l.amount < 0 ? "text-destructive" : "")}>{money.format(l.amount)}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
