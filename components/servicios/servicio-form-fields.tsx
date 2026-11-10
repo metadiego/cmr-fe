@@ -69,3 +69,30 @@ export function Toggle({
     </div>
   );
 }
+
+// The service colour (calendar / board accent).
+export function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <Field label={label}>
+      <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-9 w-16 cursor-pointer rounded border bg-transparent" />
+    </Field>
+  );
+}
+
+// Minutes between the start times the service offers and accepts (BE #525, `startStepMinutes`): 60 =
+// on the hour only, like the call-center sheet for Láser / IV / Vit C. Empty = every slot. It does not
+// change how long the session takes.
+export function StartStepField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const t = useTranslations("servicios");
+  return (
+    <Field label={t("field.startStep")} hint={t("field.startStepHint")}>
+      <input
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ""))}
+        placeholder={t("field.startStepAny")}
+        className="h-9 w-full rounded-md border bg-transparent px-3 text-sm"
+      />
+    </Field>
+  );
+}

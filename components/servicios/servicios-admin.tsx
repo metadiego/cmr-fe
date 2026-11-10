@@ -20,7 +20,7 @@ import {
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { payloadBulkDirty } from "@/lib/servicios/bulk-diff";
-import { Field, Toggle, GrupoSelect } from "@/components/servicios/servicio-form-fields";
+import { ColorField, Field, Toggle, GrupoSelect, StartStepField } from "@/components/servicios/servicio-form-fields";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useMe, isAdmin } from "@/hooks/use-me";
@@ -397,6 +397,7 @@ type FormState = {
   badge: boolean;
   allowSessionFixWithoutPackage: boolean;
   activo: boolean;
+  startStep: string; // startStepMinutes as typed ("" = every slot)
 };
 const EMPTY: FormState = {
   clave: "",
@@ -410,6 +411,7 @@ const EMPTY: FormState = {
   badge: true,
   allowSessionFixWithoutPackage: false,
   activo: true,
+  startStep: "",
 };
 
 function ServicioForm({
@@ -460,6 +462,7 @@ function ServicioForm({
           badge: servicio.badge,
           allowSessionFixWithoutPackage: servicio.allowSessionFixWithoutPackage,
           activo: servicio.active,
+          startStep: servicio.startStepMinutes != null ? String(servicio.startStepMinutes) : "",
         }
       : EMPTY;
     setForm(inicialForm);
@@ -488,6 +491,7 @@ function ServicioForm({
       requiresNurse: form.requiereEnfermera,
       badge: form.badge,
       allowSessionFixWithoutPackage: form.allowSessionFixWithoutPackage,
+      startStepMinutes: Number(form.startStep) > 0 ? Number(form.startStep) : null,
     };
   }
 
@@ -597,14 +601,10 @@ function ServicioForm({
                 <Input inputMode="numeric" value={form.orden} onChange={(e) => set("orden", e.target.value)} placeholder="0" />
               </Field>
             </div>
-            <Field label={t("field.color")}>
-              <input
-                type="color"
-                value={form.color}
-                onChange={(e) => set("color", e.target.value)}
-                className="h-9 w-16 cursor-pointer rounded border bg-transparent"
-              />
-            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <ColorField label={t("field.color")} value={form.color} onChange={(v) => set("color", v)} />
+              <StartStepField value={form.startStep} onChange={(v) => set("startStep", v)} />
+            </div>
 
             <Field label={t("field.grupo")} hint={t("field.grupoHint")}>
               <GrupoSelect value={form.grupoFacturacionId} onChange={(id) => set("grupoFacturacionId", id)} />

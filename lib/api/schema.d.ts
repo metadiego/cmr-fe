@@ -48193,6 +48193,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/sesiones/agendar-tren": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Books the WHOLE patient train for an entry time: every leg at the slot the server plans again now, all or nothing. If a leg fails (e.g. no seat in the call-center sheet) the legs already made are released and deleted. Slot warnings in meta.warnings.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/agendar-tren`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["TrainBookingController_bookTrain[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sessions/book-train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Books the WHOLE patient train for an entry time: every leg at the slot the server plans again now, all or nothing. If a leg fails (e.g. no seat in the call-center sheet) the legs already made are released and deleted. Slot warnings in meta.warnings.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/book-train`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["TrainBookingController_bookTrain[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sesiones/agendar-tren": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Books the WHOLE patient train for an entry time: every leg at the slot the server plans again now, all or nothing. If a leg fails (e.g. no seat in the call-center sheet) the legs already made are released and deleted. Slot warnings in meta.warnings. */
+        post: operations["TrainBookingController_bookTrain[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sessions/book-train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Books the WHOLE patient train for an entry time: every leg at the slot the server plans again now, all or nothing. If a leg fails (e.g. no seat in the call-center sheet) the legs already made are released and deleted. Slot warnings in meta.warnings. */
+        post: operations["TrainBookingController_bookTrain[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sesiones/agendar-serie-del-tren": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Books a confirmed train SERIES (the `planned` days of POST /resources/train-series): every day re-planned server-side at its time through the one-train booking, ALL OR NOTHING for the whole series — a day that fails undoes every day already made (sheet seats released, sessions deleted). Slot warnings in meta.warnings.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/agendar-serie-del-tren`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["TrainBookingController_bookTrainSeries[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sessions/book-train-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Books a confirmed train SERIES (the `planned` days of POST /resources/train-series): every day re-planned server-side at its time through the one-train booking, ALL OR NOTHING for the whole series — a day that fails undoes every day already made (sheet seats released, sessions deleted). Slot warnings in meta.warnings.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/book-train-series`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["TrainBookingController_bookTrainSeries[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sesiones/agendar-serie-del-tren": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Books a confirmed train SERIES (the `planned` days of POST /resources/train-series): every day re-planned server-side at its time through the one-train booking, ALL OR NOTHING for the whole series — a day that fails undoes every day already made (sheet seats released, sessions deleted). Slot warnings in meta.warnings. */
+        post: operations["TrainBookingController_bookTrainSeries[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sessions/book-train-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Books a confirmed train SERIES (the `planned` days of POST /resources/train-series): every day re-planned server-side at its time through the one-train booking, ALL OR NOTHING for the whole series — a day that fails undoes every day already made (sheet seats released, sessions deleted). Slot warnings in meta.warnings. */
+        post: operations["TrainBookingController_bookTrainSeries[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/recursos": {
         parameters: {
             query?: never;
@@ -48471,7 +48623,7 @@ export interface paths {
          */
         get: operations["ResourcesController_getRecurringBookingConfig[0]_v1"];
         /**
-         * Cambia la preferencia del planificador de series para este centro.
+         * Changes this center's series planner preferences. Each field is optional: preferForwardTime (prefer a same-or-later time) and maxShiftMinutes (how far a train series may move a day's entry time; null = no limit).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/configuracion-de-serie`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48497,7 +48649,7 @@ export interface paths {
          */
         get: operations["ResourcesController_getRecurringBookingConfig[1]_v1"];
         /**
-         * Cambia la preferencia del planificador de series para este centro.
+         * Changes this center's series planner preferences. Each field is optional: preferForwardTime (prefer a same-or-later time) and maxShiftMinutes (how far a train series may move a day's entry time; null = no limit).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/recurring-booking-config`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48523,7 +48675,7 @@ export interface paths {
          */
         get: operations["ResourcesController_getRecurringBookingConfig[2]_v1"];
         /**
-         * Cambia la preferencia del planificador de series para este centro.
+         * Changes this center's series planner preferences. Each field is optional: preferForwardTime (prefer a same-or-later time) and maxShiftMinutes (how far a train series may move a day's entry time; null = no limit).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/configuracion-de-serie`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48549,7 +48701,7 @@ export interface paths {
          */
         get: operations["ResourcesController_getRecurringBookingConfig[3]_v1"];
         /**
-         * Cambia la preferencia del planificador de series para este centro.
+         * Changes this center's series planner preferences. Each field is optional: preferForwardTime (prefer a same-or-later time) and maxShiftMinutes (how far a train series may move a day's entry time; null = no limit).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/recurring-booking-config`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48570,7 +48722,7 @@ export interface paths {
         };
         /** Preferencia del planificador de series: ¿ajusta la hora hacia ADELANTE (mismo horario o después) cuando la pedida no tiene cupo, o hacia el hueco más cercano en cualquier dirección? Sin fila = adelante (el default). */
         get: operations["ResourcesController_getRecurringBookingConfig[4]_v2"];
-        /** Cambia la preferencia del planificador de series para este centro. */
+        /** Changes this center's series planner preferences. Each field is optional: preferForwardTime (prefer a same-or-later time) and maxShiftMinutes (how far a train series may move a day's entry time; null = no limit). */
         put: operations["ResourcesController_setRecurringBookingConfig[4]_v2"];
         post?: never;
         delete?: never;
@@ -48588,7 +48740,7 @@ export interface paths {
         };
         /** Preferencia del planificador de series: ¿ajusta la hora hacia ADELANTE (mismo horario o después) cuando la pedida no tiene cupo, o hacia el hueco más cercano en cualquier dirección? Sin fila = adelante (el default). */
         get: operations["ResourcesController_getRecurringBookingConfig[5]_v2"];
-        /** Cambia la preferencia del planificador de series para este centro. */
+        /** Changes this center's series planner preferences. Each field is optional: preferForwardTime (prefer a same-or-later time) and maxShiftMinutes (how far a train series may move a day's entry time; null = no limit). */
         put: operations["ResourcesController_setRecurringBookingConfig[5]_v2"];
         post?: never;
         delete?: never;
@@ -48606,7 +48758,7 @@ export interface paths {
         };
         /** Preferencia del planificador de series: ¿ajusta la hora hacia ADELANTE (mismo horario o después) cuando la pedida no tiene cupo, o hacia el hueco más cercano en cualquier dirección? Sin fila = adelante (el default). */
         get: operations["ResourcesController_getRecurringBookingConfig[6]_v2"];
-        /** Cambia la preferencia del planificador de series para este centro. */
+        /** Changes this center's series planner preferences. Each field is optional: preferForwardTime (prefer a same-or-later time) and maxShiftMinutes (how far a train series may move a day's entry time; null = no limit). */
         put: operations["ResourcesController_setRecurringBookingConfig[6]_v2"];
         post?: never;
         delete?: never;
@@ -48624,7 +48776,7 @@ export interface paths {
         };
         /** Preferencia del planificador de series: ¿ajusta la hora hacia ADELANTE (mismo horario o después) cuando la pedida no tiene cupo, o hacia el hueco más cercano en cualquier dirección? Sin fila = adelante (el default). */
         get: operations["ResourcesController_getRecurringBookingConfig[7]_v2"];
-        /** Cambia la preferencia del planificador de series para este centro. */
+        /** Changes this center's series planner preferences. Each field is optional: preferForwardTime (prefer a same-or-later time) and maxShiftMinutes (how far a train series may move a day's entry time; null = no limit). */
         put: operations["ResourcesController_setRecurringBookingConfig[7]_v2"];
         post?: never;
         delete?: never;
@@ -48799,7 +48951,7 @@ export interface paths {
          */
         get: operations["ResourcesController_ofService[0]_v1"];
         /**
-         * Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar.
+         * Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. A service may take SEVERAL lines, one per resource (NPT: the NPT room with a technician AND a nurse on a `kind: staff` resource); a slot fits only if every line fits. A repeated resource is a 400 SERVICE_RESOURCE_LINE_REPEATED and nothing is replaced.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/servicios/{serviceId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48825,7 +48977,7 @@ export interface paths {
          */
         get: operations["ResourcesController_ofService[1]_v1"];
         /**
-         * Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar.
+         * Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. A service may take SEVERAL lines, one per resource (NPT: the NPT room with a technician AND a nurse on a `kind: staff` resource); a slot fits only if every line fits. A repeated resource is a 400 SERVICE_RESOURCE_LINE_REPEATED and nothing is replaced.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/services/{serviceId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48851,7 +49003,7 @@ export interface paths {
          */
         get: operations["ResourcesController_ofService[2]_v1"];
         /**
-         * Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar.
+         * Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. A service may take SEVERAL lines, one per resource (NPT: the NPT room with a technician AND a nurse on a `kind: staff` resource); a slot fits only if every line fits. A repeated resource is a 400 SERVICE_RESOURCE_LINE_REPEATED and nothing is replaced.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/servicios/{serviceId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48877,7 +49029,7 @@ export interface paths {
          */
         get: operations["ResourcesController_ofService[3]_v1"];
         /**
-         * Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar.
+         * Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. A service may take SEVERAL lines, one per resource (NPT: the NPT room with a technician AND a nurse on a `kind: staff` resource); a slot fits only if every line fits. A repeated resource is a 400 SERVICE_RESOURCE_LINE_REPEATED and nothing is replaced.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/services/{serviceId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -48898,7 +49050,7 @@ export interface paths {
         };
         /** Qué recursos consume ese servicio, y cuánto. */
         get: operations["ResourcesController_ofService[4]_v2"];
-        /** Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. */
+        /** Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. A service may take SEVERAL lines, one per resource (NPT: the NPT room with a technician AND a nurse on a `kind: staff` resource); a slot fits only if every line fits. A repeated resource is a 400 SERVICE_RESOURCE_LINE_REPEATED and nothing is replaced. */
         put: operations["ResourcesController_setForService[4]_v2"];
         post?: never;
         delete?: never;
@@ -48916,7 +49068,7 @@ export interface paths {
         };
         /** Qué recursos consume ese servicio, y cuánto. */
         get: operations["ResourcesController_ofService[5]_v2"];
-        /** Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. */
+        /** Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. A service may take SEVERAL lines, one per resource (NPT: the NPT room with a technician AND a nurse on a `kind: staff` resource); a slot fits only if every line fits. A repeated resource is a 400 SERVICE_RESOURCE_LINE_REPEATED and nothing is replaced. */
         put: operations["ResourcesController_setForService[5]_v2"];
         post?: never;
         delete?: never;
@@ -48934,7 +49086,7 @@ export interface paths {
         };
         /** Qué recursos consume ese servicio, y cuánto. */
         get: operations["ResourcesController_ofService[6]_v2"];
-        /** Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. */
+        /** Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. A service may take SEVERAL lines, one per resource (NPT: the NPT room with a technician AND a nurse on a `kind: staff` resource); a slot fits only if every line fits. A repeated resource is a 400 SERVICE_RESOURCE_LINE_REPEATED and nothing is replaced. */
         put: operations["ResourcesController_setForService[6]_v2"];
         post?: never;
         delete?: never;
@@ -48952,7 +49104,7 @@ export interface paths {
         };
         /** Qué recursos consume ese servicio, y cuánto. */
         get: operations["ResourcesController_ofService[7]_v2"];
-        /** Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. */
+        /** Declara los recursos de un servicio. REEMPLAZA la lista entera: lo que no se manda deja de aplicar. A service may take SEVERAL lines, one per resource (NPT: the NPT room with a technician AND a nurse on a `kind: staff` resource); a slot fits only if every line fits. A repeated resource is a 400 SERVICE_RESOURCE_LINE_REPEATED and nothing is replaced. */
         put: operations["ResourcesController_setForService[7]_v2"];
         post?: never;
         delete?: never;
@@ -49121,7 +49273,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n.
+         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/disponibilidad`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49142,7 +49294,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n.
+         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/availability`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49163,7 +49315,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n.
+         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/disponibilidad`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49184,7 +49336,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n.
+         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/availability`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49204,7 +49356,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. */
+        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. */
         get: operations["ResourcesController_availability[4]_v2"];
         put?: never;
         post?: never;
@@ -49221,7 +49373,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. */
+        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. */
         get: operations["ResourcesController_availability[5]_v2"];
         put?: never;
         post?: never;
@@ -49238,7 +49390,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. */
+        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. */
         get: operations["ResourcesController_availability[6]_v2"];
         put?: never;
         post?: never;
@@ -49255,7 +49407,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. */
+        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. */
         get: operations["ResourcesController_availability[7]_v2"];
         put?: never;
         post?: never;
@@ -49411,6 +49563,310 @@ export interface paths {
         put?: never;
         /** Qué ocupa el DÍA COMPLETO del paciente: minutos por recurso con la regla de cada uno (la silla suma en paralelo, el room de NPT suma de verdad), el tiempo real del paciente en la clínica y los servicios sin recurso declarado. */
         post: operations["ResourcesController_patientDay[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recursos/tren-del-paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/tren-del-paciente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ResourcesController_patientTrain[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recursos/patient-train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/patient-train`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ResourcesController_patientTrain[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/tren-del-paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/tren-del-paciente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ResourcesController_patientTrain[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/patient-train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/patient-train`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ResourcesController_patientTrain[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/recursos/tren-del-paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
+        post: operations["ResourcesController_patientTrain[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/recursos/patient-train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
+        post: operations["ResourcesController_patientTrain[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/resources/tren-del-paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
+        post: operations["ResourcesController_patientTrain[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/resources/patient-train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
+        post: operations["ResourcesController_patientTrain[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recursos/serie-del-tren": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient TRAIN as a series (read-only preview): weekdays, a preferred entry time and each therapy with its OWN count. Each day carries only the therapies with sessions left; a day that does not fit moves to the nearest entry time within the center's maxShiftMinutes (same-or-later first), and a day with no time is skipped with its reason and replaced by the next selected weekday.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/serie-del-tren`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ResourcesController_trainSeries[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recursos/train-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient TRAIN as a series (read-only preview): weekdays, a preferred entry time and each therapy with its OWN count. Each day carries only the therapies with sessions left; a day that does not fit moves to the nearest entry time within the center's maxShiftMinutes (same-or-later first), and a day with no time is skipped with its reason and replaced by the next selected weekday.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/train-series`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ResourcesController_trainSeries[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/serie-del-tren": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient TRAIN as a series (read-only preview): weekdays, a preferred entry time and each therapy with its OWN count. Each day carries only the therapies with sessions left; a day that does not fit moves to the nearest entry time within the center's maxShiftMinutes (same-or-later first), and a day with no time is skipped with its reason and replaced by the next selected weekday.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/serie-del-tren`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ResourcesController_trainSeries[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/train-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient TRAIN as a series (read-only preview): weekdays, a preferred entry time and each therapy with its OWN count. Each day carries only the therapies with sessions left; a day that does not fit moves to the nearest entry time within the center's maxShiftMinutes (same-or-later first), and a day with no time is skipped with its reason and replaced by the next selected weekday.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/train-series`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ResourcesController_trainSeries[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/recursos/serie-del-tren": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The patient TRAIN as a series (read-only preview): weekdays, a preferred entry time and each therapy with its OWN count. Each day carries only the therapies with sessions left; a day that does not fit moves to the nearest entry time within the center's maxShiftMinutes (same-or-later first), and a day with no time is skipped with its reason and replaced by the next selected weekday. */
+        post: operations["ResourcesController_trainSeries[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/recursos/train-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The patient TRAIN as a series (read-only preview): weekdays, a preferred entry time and each therapy with its OWN count. Each day carries only the therapies with sessions left; a day that does not fit moves to the nearest entry time within the center's maxShiftMinutes (same-or-later first), and a day with no time is skipped with its reason and replaced by the next selected weekday. */
+        post: operations["ResourcesController_trainSeries[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/resources/serie-del-tren": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The patient TRAIN as a series (read-only preview): weekdays, a preferred entry time and each therapy with its OWN count. Each day carries only the therapies with sessions left; a day that does not fit moves to the nearest entry time within the center's maxShiftMinutes (same-or-later first), and a day with no time is skipped with its reason and replaced by the next selected weekday. */
+        post: operations["ResourcesController_trainSeries[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/resources/train-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The patient TRAIN as a series (read-only preview): weekdays, a preferred entry time and each therapy with its OWN count. Each day carries only the therapies with sessions left; a day that does not fit moves to the nearest entry time within the center's maxShiftMinutes (same-or-later first), and a day with no time is skipped with its reason and replaced by the next selected weekday. */
+        post: operations["ResourcesController_trainSeries[7]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -53077,6 +53533,334 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/caja/cuadres/{id}/adjuntos/url-subida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Step 1 of attaching the signed settlements: a signed URL to PUT the file to (private bucket)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/adjuntos/url-subida`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_attachmentUploadUrl[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/reconciliations/{id}/attachments/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Step 1 of attaching the signed settlements: a signed URL to PUT the file to (private bucket)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/attachments/upload-url`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_attachmentUploadUrl[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadres/{id}/adjuntos/url-subida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Step 1 of attaching the signed settlements: a signed URL to PUT the file to (private bucket)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/adjuntos/url-subida`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_attachmentUploadUrl[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/reconciliations/{id}/attachments/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Step 1 of attaching the signed settlements: a signed URL to PUT the file to (private bucket)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/attachments/upload-url`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_attachmentUploadUrl[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadres/{id}/adjuntos/url-subida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Step 1 of attaching the signed settlements: a signed URL to PUT the file to (private bucket) */
+        post: operations["CajaController_attachmentUploadUrl[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/reconciliations/{id}/attachments/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Step 1 of attaching the signed settlements: a signed URL to PUT the file to (private bucket) */
+        post: operations["CajaController_attachmentUploadUrl[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadres/{id}/adjuntos/url-subida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Step 1 of attaching the signed settlements: a signed URL to PUT the file to (private bucket) */
+        post: operations["CajaController_attachmentUploadUrl[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/reconciliations/{id}/attachments/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Step 1 of attaching the signed settlements: a signed URL to PUT the file to (private bucket) */
+        post: operations["CajaController_attachmentUploadUrl[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadres/{id}/adjuntos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The attachments of a sheet, newest first; each `url` is signed for 1 hour. History: never deleted.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/adjuntos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_attachments[0]_v1"];
+        put?: never;
+        /**
+         * Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/adjuntos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_registerAttachment[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/reconciliations/{id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The attachments of a sheet, newest first; each `url` is signed for 1 hour. History: never deleted.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/attachments`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_attachments[1]_v1"];
+        put?: never;
+        /**
+         * Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/attachments`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_registerAttachment[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadres/{id}/adjuntos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The attachments of a sheet, newest first; each `url` is signed for 1 hour. History: never deleted.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/adjuntos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_attachments[2]_v1"];
+        put?: never;
+        /**
+         * Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/adjuntos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_registerAttachment[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/reconciliations/{id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The attachments of a sheet, newest first; each `url` is signed for 1 hour. History: never deleted.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/attachments`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CajaController_attachments[3]_v1"];
+        put?: never;
+        /**
+         * Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/attachments`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_registerAttachment[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadres/{id}/adjuntos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The attachments of a sheet, newest first; each `url` is signed for 1 hour. History: never deleted. */
+        get: operations["CajaController_attachments[4]_v2"];
+        put?: never;
+        /** Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads) */
+        post: operations["CajaController_registerAttachment[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/reconciliations/{id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The attachments of a sheet, newest first; each `url` is signed for 1 hour. History: never deleted. */
+        get: operations["CajaController_attachments[5]_v2"];
+        put?: never;
+        /** Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads) */
+        post: operations["CajaController_registerAttachment[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadres/{id}/adjuntos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The attachments of a sheet, newest first; each `url` is signed for 1 hour. History: never deleted. */
+        get: operations["CajaController_attachments[6]_v2"];
+        put?: never;
+        /** Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads) */
+        post: operations["CajaController_registerAttachment[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/reconciliations/{id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The attachments of a sheet, newest first; each `url` is signed for 1 hour. History: never deleted. */
+        get: operations["CajaController_attachments[7]_v2"];
+        put?: never;
+        /** Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads) */
+        post: operations["CajaController_registerAttachment[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/caja/cuadres/{id}/conteo": {
         parameters: {
             query?: never;
@@ -54149,6 +54933,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/media/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/media/upload-url`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["MediaController_uploadUrl[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/url-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/media/url-upload`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["MediaController_uploadUrl[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/media/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MediaController_uploadUrl[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/media/url-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MediaController_uploadUrl[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/ahora-mismo/stream": {
         parameters: {
             query?: never;
@@ -55170,78 +56026,6 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["ApiKeysController_revoke_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/media/upload-url": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/media/upload-url`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["MediaController_uploadUrl[0]_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/media/url-upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/media/url-upload`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["MediaController_uploadUrl[1]_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/media/upload-url": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["MediaController_uploadUrl[2]_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/media/url-upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["MediaController_uploadUrl[3]_v2"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -57186,6 +57970,8 @@ export interface components {
             productoIds?: string[];
             /** @description Destino de escritura de un select-FK (p. ej. cita.medicoId), manteniendo el binding de display. */
             writeBinding?: string;
+            /** @description Select that can be set back to nobody: the FE offers «Unassigned» first and writes null. For resource columns (doctor, nurse, technician). See docs/specs/vaciar-recurso-asignado.md. */
+            clearable?: boolean;
             /** @description Binding de metadatos de la celda; lo resuelto viaja en `<clave>__meta`. Ej.: `usuario.meta` → { esLlave: true } cuando la factura la emitió una API key. */
             metaBinding?: string;
             /** @description Transición que dispara un toggle (clave en tablero_transiciones, p. ej. "presente"). */
@@ -60418,6 +61204,7 @@ export interface components {
             pushesToEhrOnPresente: boolean;
             /** @enum {string|null} */
             sheetSection: "LASER" | "IV" | null;
+            startStepMinutes: number | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -60459,6 +61246,8 @@ export interface components {
              * @enum {string|null}
              */
             sheetSection?: "LASER" | "IV" | null;
+            /** @description Minutes between the start times this service offers and accepts (60 = on the hour only, like the call-center sheet for Laser and the IV line). Null = every slot of the day. Does not change how long the session takes. */
+            startStepMinutes?: number | null;
             name?: string;
             color?: string | null;
             icon?: string | null;
@@ -60497,6 +61286,8 @@ export interface components {
              * @enum {string|null}
              */
             sheetSection?: "LASER" | "IV" | null;
+            /** @description Minutes between the start times this service offers and accepts (60 = on the hour only, like the call-center sheet for Laser and the IV line). Null = every slot of the day. Does not change how long the session takes. */
+            startStepMinutes?: number | null;
             name?: string;
             color?: string;
             icon?: string;
@@ -60783,13 +61574,73 @@ export interface components {
              */
             actorId?: string;
         };
+        BookTrainDto: {
+            /** Format: uuid */
+            patientId: string;
+            /**
+             * @description Day, YYYY-MM-DD.
+             * @example 2026-11-10
+             */
+            date: string;
+            /**
+             * @description The ENTRY time ("HH:mm"), one of the start times POST /resources/patient-train answered with fits:true. Each leg is booked at the slot the server plans again now.
+             * @example 09:00
+             */
+            time: string;
+            /** @description The therapies of the train. */
+            serviceIds: string[];
+            /** @description Areas per service id ({ "<laserId>": 4 }). */
+            areas?: Record<string, never>;
+            /** @description True = keep the asked order (must match what the grid was asked with). */
+            keepOrder?: boolean;
+            /**
+             * Format: uuid
+             * @description Center to book in (checked against the caller's frontdesk.create centers); defaults to the active one.
+             */
+            centerId?: string;
+            /**
+             * Format: uuid
+             * @description Staff member who books; defaults to the caller.
+             */
+            actorId?: string;
+        };
+        TrainSeriesDayDto: {
+            /** @example 2026-11-16 */
+            date: string;
+            /**
+             * @description That day's entry time, HH:mm.
+             * @example 09:00
+             */
+            time: string;
+            /** @description The therapies of that day's train. */
+            serviceIds: string[];
+        };
+        BookTrainSeriesDto: {
+            /** Format: uuid */
+            patientId: string;
+            days: components["schemas"]["TrainSeriesDayDto"][];
+            /** @description Areas per service id ({ "<laserId>": 4 }). */
+            areas?: Record<string, never>;
+            /** @description True = keep the asked order (as the plan was asked). */
+            keepOrder?: boolean;
+            /**
+             * Format: uuid
+             * @description Center to book in (checked against the caller's frontdesk.create centers); defaults to the active one.
+             */
+            centerId?: string;
+            /**
+             * Format: uuid
+             * @description Staff member who books; defaults to the caller.
+             */
+            actorId?: string;
+        };
         CreateResourceDto: {
             slug: string;
             name: string;
             labelKey?: string;
             capacity: number;
             /** @enum {string} */
-            kind?: "room" | "chair" | "machine" | "person";
+            kind?: "room" | "chair" | "machine" | "person" | "staff";
             /** @description El cargo que atiende este recurso; la gente de ese cargo es un POZO compartido entre recursos. */
             staffRole?: string | null;
             /** @description Por defecto, a cuántos pacientes lleva una persona a la vez aquí. Cada servicio lo puede cambiar. */
@@ -60800,6 +61651,8 @@ export interface components {
             /** @enum {string} */
             concurrency?: "sequential" | "simultaneous";
             maxMinutesPerPatient?: number | null;
+            /** @description Heavier resources anchor the patient train: their legs go first (docs/specs/tren-de-terapias.md). */
+            trainWeight?: number;
             active?: boolean;
         };
         ResourceEntity: {
@@ -60809,7 +61662,7 @@ export interface components {
             labelKey: string | null;
             capacity: number;
             /** @enum {string} */
-            kind: "person" | "room" | "chair" | "machine";
+            kind: "staff" | "person" | "room" | "chair" | "machine";
             staffId: string | null;
             staffIdRef?: Record<string, never>;
             staffRole: string | null;
@@ -60818,6 +61671,7 @@ export interface components {
             /** @enum {string} */
             concurrency: "sequential" | "simultaneous";
             maxMinutesPerPatient: number | null;
+            trainWeight: number;
             active: boolean;
             id: string;
             clinicId: string | null;
@@ -60830,7 +61684,10 @@ export interface components {
             enabled: boolean;
         };
         SetRecurringBookingConfigDto: {
-            preferForwardTime: boolean;
+            /** @description Prefer a same-or-later time when the requested one has no room. */
+            preferForwardTime?: boolean;
+            /** @description How far (minutes, either way) a series may move a day's entry time; null = any time of that day. */
+            maxShiftMinutes?: number | null;
         };
         ServiceResourceEntity: {
             clinicRef?: Record<string, never>;
@@ -60873,13 +61730,71 @@ export interface components {
             date?: string;
             time?: string;
         };
+        PatientTrainQueryDto: {
+            /**
+             * @description Day, YYYY-MM-DD.
+             * @example 2026-11-10
+             */
+            date: string;
+            /** @description The therapies of the train, in the order they were picked. The engine puts the heavier resources first unless keepOrder. */
+            serviceIds: string[];
+            /** @description Areas per service id ({ "<laserId>": 4 }); without them they come from the patient availability. */
+            areas?: Record<string, never>;
+            /**
+             * Format: uuid
+             * @description With the patient, areas come from what they bought.
+             */
+            patientId?: string;
+            /** @description True = keep the asked order; false (default) = heavier resources first, reordering if needed. */
+            keepOrder?: boolean;
+            centerIds?: string[];
+        };
+        TrainSeriesQueryDto: {
+            /** @description The therapies of the train. */
+            serviceIds: string[];
+            /**
+             * @description Preferred entry time, HH:mm.
+             * @example 09:00
+             */
+            preferredTime: string;
+            /**
+             * @description Weekdays that count, 0=Sunday…6=Saturday (same as the one-therapy series).
+             * @example [
+             *       1,
+             *       3,
+             *       5
+             *     ]
+             */
+            weekdays: number[];
+            /**
+             * @description First day, YYYY-MM-DD (today or later).
+             * @example 2026-11-16
+             */
+            startDate: string;
+            /**
+             * Format: uuid
+             * @description With the patient, counts come from what they bought.
+             */
+            patientId?: string;
+            /** @description Areas per service id ({ "<laserId>": 4 }). */
+            areas?: Record<string, never>;
+            /** @description Sessions per service id ({ "<laserId>": 12, "<nptId>": 1 }). Used where the availability is not known (per-area services, nothing bought); a lower number than what was bought wins. */
+            sessions?: Record<string, never>;
+            /** @description At most this many train days (1…36). */
+            days?: number;
+            /** @description Last day, YYYY-MM-DD. */
+            until?: string;
+            /** @description True = keep the asked order in every day. */
+            keepOrder?: boolean;
+            centerIds?: string[];
+        };
         UpdateResourceDto: {
             slug: string;
             name: string;
             labelKey?: string;
             capacity: number;
             /** @enum {string} */
-            kind?: "room" | "chair" | "machine" | "person";
+            kind?: "room" | "chair" | "machine" | "person" | "staff";
             /** @description El cargo que atiende este recurso; la gente de ese cargo es un POZO compartido entre recursos. */
             staffRole?: string | null;
             /** @description Por defecto, a cuántos pacientes lleva una persona a la vez aquí. Cada servicio lo puede cambiar. */
@@ -60890,6 +61805,8 @@ export interface components {
             /** @enum {string} */
             concurrency?: "sequential" | "simultaneous";
             maxMinutesPerPatient?: number | null;
+            /** @description Heavier resources anchor the patient train: their legs go first (docs/specs/tren-de-terapias.md). */
+            trainWeight?: number;
             active?: boolean;
         };
         CreatePanelDto: {
@@ -61226,6 +62143,75 @@ export interface components {
             voidedAt: string | null;
             voidReason: string | null;
         };
+        AttachmentUploadUrlRequestDto: {
+            /**
+             * @description MIME type of the file to upload. Accepted: image/jpeg, image/png, image/webp, application/pdf. Anything else: 400 cashReconciliation.error.attachmentTypeNotAllowed.
+             * @example image/jpeg
+             */
+            contentType: string;
+        };
+        AttachmentUploadUrlDto: {
+            /** @description Signed URL: PUT the file bytes here with the same Content-Type. Single use, short-lived. */
+            uploadUrl: string;
+            /**
+             * @description The object path to send to the register endpoint.
+             * @example <clinicId>/<reconciliationId>/<uuid>.jpg
+             */
+            path: string;
+        };
+        RegisterAttachmentDto: {
+            /** @description The `path` returned by upload-url for THIS reconciliation. Anything else: 400 cashReconciliation.error.attachmentPathInvalid. */
+            path: string;
+            /**
+             * @description The same MIME type used for the upload. Accepted: image/jpeg, image/png, image/webp, application/pdf.
+             * @example image/jpeg
+             */
+            contentType: string;
+        };
+        CashAttachmentDto: {
+            id: string;
+            clinicId: string;
+            reconciliationId: string;
+            /** @description Who actually uploaded it (staff id): the cashier or the manager who uploaded it for her. */
+            uploadedBy: string | null;
+            storagePath: string;
+            contentType: string;
+            /**
+             * @description OCR (later phase); null today.
+             * @enum {string|null}
+             */
+            ocrStatus: "pending" | "done" | "failed" | null;
+            /** @description OCR output; null today. */
+            ocrData: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CashAttachmentListItemDto: {
+            id: string;
+            clinicId: string;
+            reconciliationId: string;
+            /** @description Who actually uploaded it (staff id): the cashier or the manager who uploaded it for her. */
+            uploadedBy: string | null;
+            storagePath: string;
+            contentType: string;
+            /**
+             * @description OCR (later phase); null today.
+             * @enum {string|null}
+             */
+            ocrStatus: "pending" | "done" | "failed" | null;
+            /** @description OCR output; null today. */
+            ocrData: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description Signed read URL of the original file, valid 1 hour. Re-fetch the list to refresh it. null = the file could not be signed (missing in storage). */
+            url: string | null;
+            /** @description Name of who uploaded it; null when unknown (never the id). */
+            uploadedByName: string | null;
+        };
         AbrirCuadreDto: {
             /**
              * @description División del cuadre: consulta | general. Obligatoria para no mezclar ambas facturaciones.
@@ -61304,6 +62290,12 @@ export interface components {
             date?: string;
             /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
             centerIds?: string[];
+        };
+        RequestUploadUrlDto: {
+            /** @enum {string} */
+            kind: "avatar" | "background" | "logo";
+            contentType: string;
+            ext?: string;
         };
         RightNowSellerDto: {
             userId?: string | null;
@@ -61695,12 +62687,6 @@ export interface components {
             createdBy: string;
             /** Format: date-time */
             createdAt: string;
-        };
-        RequestUploadUrlDto: {
-            /** @enum {string} */
-            kind: "avatar" | "background" | "logo";
-            contentType: string;
-            ext?: string;
         };
     };
     responses: never;
@@ -111109,6 +112095,20 @@ export interface operations {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "CitasController_list[1]_v1": {
@@ -111177,6 +112177,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -111247,6 +112261,20 @@ export interface operations {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "CitasController_list[3]_v2": {
@@ -111315,6 +112343,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -113097,6 +114139,20 @@ export interface operations {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "CitasController_reagendar[1]_v1": {
@@ -113121,6 +114177,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -113147,6 +114217,20 @@ export interface operations {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "CitasController_reagendar[3]_v1": {
@@ -113171,6 +114255,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -113197,6 +114295,20 @@ export interface operations {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "CitasController_reagendar[5]_v2": {
@@ -113221,6 +114333,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -113247,6 +114373,20 @@ export interface operations {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "CitasController_reagendar[7]_v2": {
@@ -113271,6 +114411,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -123184,6 +124338,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
             409: {
                 headers: {
@@ -123215,6 +124376,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
             409: {
@@ -123248,6 +124416,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
             409: {
                 headers: {
@@ -123279,6 +124454,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
             409: {
@@ -123312,6 +124494,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
             409: {
                 headers: {
@@ -123343,6 +124532,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
             409: {
@@ -123376,6 +124572,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
             409: {
                 headers: {
@@ -123407,6 +124610,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
             409: {
@@ -123440,6 +124650,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
             409: {
                 headers: {
@@ -123471,6 +124688,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
             409: {
@@ -123504,6 +124728,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
             409: {
                 headers: {
@@ -123535,6 +124766,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
             409: {
@@ -123568,6 +124806,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
             409: {
                 headers: {
@@ -123599,6 +124844,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
             409: {
@@ -123632,6 +124884,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
             409: {
                 headers: {
@@ -123663,6 +124922,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description BODY_MEASUREMENT_VISIT_TAKES_NO_READINGS (bodyMeasurements.error.visitTakesNoReadings): only a visit whose service receives readings (GLP-1), not cancelled. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
             409: {
@@ -129632,6 +130898,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_listarSesiones[1]_v1": {
@@ -129684,6 +130964,20 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -129746,6 +131040,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_listarSesiones[3]_v2": {
@@ -129803,6 +131111,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_agendarMultiple[0]_v1": {
@@ -129819,6 +131141,20 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -129845,6 +131181,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_agendarMultiple[2]_v2": {
@@ -129866,6 +131216,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_agendarMultiple[3]_v2": {
@@ -129882,6 +131246,20 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -129910,6 +131288,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_reagendar[1]_v1": {
@@ -129928,6 +131320,20 @@ export interface operations {
         };
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -129956,6 +131362,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "FrontdeskController_reagendar[3]_v2": {
@@ -129974,6 +131394,20 @@ export interface operations {
         };
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -131748,8 +133182,19 @@ export interface operations {
                     "application/json": components["schemas"]["FrontdeskSesionEntity"];
                 };
             };
-            /** @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN */
+            /**
+             * @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -131780,8 +133225,19 @@ export interface operations {
                     "application/json": components["schemas"]["FrontdeskSesionEntity"];
                 };
             };
-            /** @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN */
+            /**
+             * @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -131812,8 +133268,19 @@ export interface operations {
                     "application/json": components["schemas"]["FrontdeskSesionEntity"];
                 };
             };
-            /** @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN */
+            /**
+             * @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -131844,8 +133311,19 @@ export interface operations {
                     "application/json": components["schemas"]["FrontdeskSesionEntity"];
                 };
             };
-            /** @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN */
+            /**
+             * @description FRONTDESK_REOPEN_ONLY_TODAY · FRONTDESK_REOPEN_PACKAGE_CLOSED · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -131966,6 +133444,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "SessionReopenController_reopenDay[1]_v1": {
@@ -131984,6 +133476,20 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -132012,6 +133518,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "SessionReopenController_reopenDay[3]_v2": {
@@ -132030,6 +133550,332 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TrainBookingController_bookTrain[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTrainDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description THERAPY_TRAIN_DOES_NOT_FIT (with reasonKey + serviceId) · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TrainBookingController_bookTrain[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTrainDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description THERAPY_TRAIN_DOES_NOT_FIT (with reasonKey + serviceId) · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TrainBookingController_bookTrain[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTrainDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description THERAPY_TRAIN_DOES_NOT_FIT (with reasonKey + serviceId) · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TrainBookingController_bookTrain[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTrainDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description THERAPY_TRAIN_DOES_NOT_FIT (with reasonKey + serviceId) · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TrainBookingController_bookTrainSeries[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTrainSeriesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description THERAPY_SERIES_DAY_DOES_NOT_FIT (date, reasonKey, serviceId) · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN (each with `date`)
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TrainBookingController_bookTrainSeries[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTrainSeriesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description THERAPY_SERIES_DAY_DOES_NOT_FIT (date, reasonKey, serviceId) · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN (each with `date`)
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TrainBookingController_bookTrainSeries[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTrainSeriesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description THERAPY_SERIES_DAY_DOES_NOT_FIT (date, reasonKey, serviceId) · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN (each with `date`)
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TrainBookingController_bookTrainSeries[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTrainSeriesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description THERAPY_SERIES_DAY_DOES_NOT_FIT (date, reasonKey, serviceId) · FRONTDESK_SESSION_SAME_DAY · SHEET_SLOT_TAKEN (each with `date`)
+             *
+             *     SHEET_SLOT_TAKEN (labelKey sheet.slotTaken): no free seat at that hour in the call-center sheet; nothing was booked.
+             */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SHEET_UNAVAILABLE (labelKey sheet.unavailable): the call-center sheet cannot be reached and the center’s sheet_down_policy is block; nothing was booked. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -132564,7 +134410,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132587,7 +134435,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132606,7 +134456,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132629,7 +134481,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132648,7 +134502,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132671,7 +134527,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132690,7 +134548,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132713,7 +134573,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132732,7 +134594,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132755,7 +134619,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132774,7 +134640,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132797,7 +134665,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132816,7 +134686,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132839,7 +134711,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132858,7 +134732,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -132881,7 +134757,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -133944,6 +135822,374 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["PatientDayQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_patientTrain[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientTrainQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_patientTrain[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientTrainQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_patientTrain[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientTrainQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_patientTrain[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientTrainQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_patientTrain[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientTrainQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_patientTrain[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientTrainQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_patientTrain[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientTrainQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_patientTrain[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientTrainQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_trainSeries[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainSeriesQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_trainSeries[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainSeriesQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_trainSeries[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainSeriesQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_trainSeries[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainSeriesQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_trainSeries[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainSeriesQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_trainSeries[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainSeriesQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_trainSeries[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainSeriesQueryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "ResourcesController_trainSeries[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainSeriesQueryDto"];
             };
         };
         responses: {
@@ -139697,6 +141943,646 @@ export interface operations {
             };
         };
     };
+    "CajaController_attachmentUploadUrl[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUploadUrlRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadUrlDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachmentUploadUrl[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUploadUrlRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadUrlDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachmentUploadUrl[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUploadUrlRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadUrlDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachmentUploadUrl[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUploadUrlRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadUrlDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachmentUploadUrl[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUploadUrlRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadUrlDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachmentUploadUrl[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUploadUrlRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadUrlDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachmentUploadUrl[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUploadUrlRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadUrlDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachmentUploadUrl[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachmentUploadUrlRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentUploadUrlDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachments[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentListItemDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_registerAttachment[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachments[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentListItemDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_registerAttachment[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachments[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentListItemDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_registerAttachment[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachments[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentListItemDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_registerAttachment[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachments[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentListItemDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_registerAttachment[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachments[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentListItemDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_registerAttachment[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachments[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentListItemDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_registerAttachment[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentDto"];
+                };
+            };
+        };
+    };
+    "CajaController_attachments[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentListItemDto"][];
+                };
+            };
+        };
+    };
+    "CajaController_registerAttachment[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashAttachmentDto"];
+                };
+            };
+        };
+    };
     "CajaController_contar[0]_v1": {
         parameters: {
             query?: never;
@@ -141198,6 +144084,90 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "MediaController_uploadUrl[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUploadUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MediaController_uploadUrl[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUploadUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MediaController_uploadUrl[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUploadUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MediaController_uploadUrl[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUploadUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -142786,90 +145756,6 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "MediaController_uploadUrl[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestUploadUrlDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "MediaController_uploadUrl[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestUploadUrlDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "MediaController_uploadUrl[2]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestUploadUrlDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "MediaController_uploadUrl[3]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestUploadUrlDto"];
-            };
-        };
-        responses: {
-            201: {
                 headers: {
                     [name: string]: unknown;
                 };

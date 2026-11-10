@@ -186,7 +186,8 @@
     "seriesStartInThePast": "La serie empieza hoy o después.",
     "seriesDayDoesNotFit": "El tren del {date} ya no cabe a su hora. No se agendó nada.",
     "seriesDaysInvalid": "Días de la serie no válidos.",
-    "sheetFull": "Lleno en la hoja del call center"
+    "sheetFull": "Lleno en la hoja del call center",
+    "notAStartTime": "Este servicio solo empieza en punto: elige una hora entera"
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -3308,7 +3309,10 @@
       "badge": "Mostrar contador",
       "allowSessionFixWithoutPackage": "Permitir fijar sesiones sin paquete",
       "allowSessionFixWithoutPackageHint": "En Frontdesk, deja corregir el número de sesión de un paciente en este servicio aunque no tenga ningún paquete comprado todavía.",
-      "activo": "Activo"
+      "activo": "Activo",
+      "startStep": "Minutos entre horas de inicio",
+      "startStepHint": "60 = solo en punto, como la hoja del call center. Vacío = cualquier hora del día. No cambia la duración.",
+      "startStepAny": "Cualquier hora"
     },
     "centro": {
       "todos": "Todos los centros"

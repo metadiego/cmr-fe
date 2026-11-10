@@ -186,7 +186,8 @@
     "seriesStartInThePast": "A series starts today or later.",
     "seriesDayDoesNotFit": "The train of {date} no longer fits at its time. Nothing was booked.",
     "seriesDaysInvalid": "Invalid series days.",
-    "sheetFull": "Full on the call-center sheet"
+    "sheetFull": "Full on the call-center sheet",
+    "notAStartTime": "This service only starts on the hour: pick a whole hour"
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -3308,7 +3309,10 @@
       "badge": "Show counter",
       "allowSessionFixWithoutPackage": "Allow fixing sessions without a package",
       "allowSessionFixWithoutPackageHint": "In Frontdesk, lets staff correct a patient's session count for this service even if they have no package purchased yet.",
-      "activo": "Active"
+      "activo": "Active",
+      "startStep": "Minutes between start times",
+      "startStepHint": "60 = on the hour only, like the call-center sheet. Empty = any slot of the day. It does not change the duration.",
+      "startStepAny": "Any time"
     },
     "centro": {
       "todos": "All centers"
