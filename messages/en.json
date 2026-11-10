@@ -2911,7 +2911,9 @@
     "originInvoice": "Original invoice #{number}",
     "refundOption": "Refund #{number} · ${amount}",
     "invoiceOption": "Invoice (original)",
-    "voided": "voided"
+    "voided": "voided",
+    "refunded": "Refunded",
+    "refund": "Refund"
   },
   "facturacion": {
     "title": "Bill consultation",
@@ -3155,7 +3157,8 @@
     "unitsAreasDays": "Quantity (areas × days)",
     "unitsAreasDaysHint": "Computed: areas × days. Not typed.",
     "packages": "Packages",
-    "packagesHint": "How many packages are sold (usually 1)."
+    "packagesHint": "How many packages are sold (usually 1).",
+    "returnedBadge": "Returned"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -5056,6 +5059,18 @@
       "INVOICE_CHANGE_PATIENT_SAME": "That is already this invoice's patient.",
       "INVOICE_CHANGE_PATIENT_UNKNOWN": "That patient does not exist in this center.",
       "INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT": "This is a consultation linked to an appointment: change the appointment's patient first."
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "tax": "Tax",
+      "shipping": "Shipping",
+      "total": "Total",
+      "paid": "Paid",
+      "refunded": "Refunded",
+      "balance": "Balance",
+      "payment": "Payment",
+      "refund": "Refund"
     }
   },
   "picker": {

@@ -2911,7 +2911,9 @@
     "originInvoice": "Factura de origen #{number}",
     "refundOption": "Devolución #{number} · ${amount}",
     "invoiceOption": "Factura (original)",
-    "voided": "anulada"
+    "voided": "anulada",
+    "refunded": "Reembolsado",
+    "refund": "Reembolso"
   },
   "facturacion": {
     "title": "Facturar consulta",
@@ -3155,7 +3157,8 @@
     "unitsAreasDays": "Cantidad (áreas × días)",
     "unitsAreasDaysHint": "Se calcula sola: áreas × días. No se escribe.",
     "packages": "Paquetes",
-    "packagesHint": "Cuántos paquetes se venden (normalmente 1)."
+    "packagesHint": "Cuántos paquetes se venden (normalmente 1).",
+    "returnedBadge": "Devuelta"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -5056,6 +5059,18 @@
       "INVOICE_CHANGE_PATIENT_SAME": "Ya es el paciente de esta factura.",
       "INVOICE_CHANGE_PATIENT_UNKNOWN": "Ese paciente no existe en este centro.",
       "INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT": "Es una consulta ligada a una cita: cambia primero el paciente de la cita."
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "tax": "Impuesto",
+      "shipping": "Envío",
+      "total": "Total",
+      "paid": "Pagado",
+      "refunded": "Reembolsado",
+      "balance": "Saldo",
+      "payment": "Pago",
+      "refund": "Reembolso"
     }
   },
   "picker": {
