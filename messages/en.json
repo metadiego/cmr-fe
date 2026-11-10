@@ -141,6 +141,8 @@
     "fStaffIdPlaceholder": "No person assigned",
     "fBlocksAgenda": "The resource is a person and blocks their agenda",
     "fBlocksAgendaHelp": "For the EMPOWER doctor: booking them blocks their consultation hours.",
+    "fTrainWeight": "Weight in the train",
+    "fTrainWeightHelp": "Scarce resources (laser rooms, IV chairs, the EMPOWER doctor) anchor the therapy train: the higher the weight, the earlier it goes.",
     "kind": {
       "room": "Room",
       "chair": "Chair",
@@ -159,7 +161,12 @@
     "full": "Full: no stations left at that time.",
     "noStaff": "No staff: nobody to provide it at that time.",
     "overMaxPerPatient": "Exceeds the per-patient minute cap.",
-    "holiday": "Holiday: the schedule is closed."
+    "holiday": "Holiday: the schedule is closed.",
+    "trainPastClosing": "Too late: the train would run past closing.",
+    "trainRollbackIncomplete": "A therapy failed and not everything could be undone: check the ones left booked.",
+    "trainOneCenter": "A train is booked in one center only.",
+    "trainDoesNotFit": "The whole train no longer fits at that time. Nothing was booked.",
+    "trainTimeNotOffered": "That entry time is not offered."
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -187,6 +194,11 @@
     "remaining": "{n} left",
     "addTherapy": "Add therapy",
     "hoursFor": "Hours · {service}",
+    "entryHours": "Entry hours",
+    "trainBlockedBy": "{reason} — {service}",
+    "trainEndsAt": "Leaves at {time}",
+    "keepOrder": "Keep my order",
+    "bookTrain": "Book the train ({n})",
     "pickCard": "Pick a therapy to see its hours",
     "dragHint": "Drag the card onto a time, or click",
     "noHour": "Pick a time to check the day fits",

@@ -141,6 +141,8 @@
     "fStaffIdPlaceholder": "Sin persona asignada",
     "fBlocksAgenda": "El recurso es una persona y bloquea su agenda",
     "fBlocksAgendaHelp": "Para la doctora de EMPOWER: al agendarla, se bloquean sus horas de consulta.",
+    "fTrainWeight": "Peso en el tren",
+    "fTrainWeightHelp": "Los recursos escasos (rooms de láser, sillas de suero, la doctora de EMPOWER) anclan el tren de terapias: cuanto más alto, antes va.",
     "kind": {
       "room": "Cuarto",
       "chair": "Silla",
@@ -159,7 +161,12 @@
     "full": "Lleno: no quedan puestos a esa hora.",
     "noStaff": "Sin personal: no hay quien lo dé a esa hora.",
     "overMaxPerPatient": "Se pasa del tope de minutos por paciente.",
-    "holiday": "Día festivo: la agenda está cerrada."
+    "holiday": "Día festivo: la agenda está cerrada.",
+    "trainPastClosing": "No da tiempo: el tren termina después del cierre.",
+    "trainRollbackIncomplete": "Falló una terapia y no se pudo deshacer todo: revisa las que quedaron agendadas.",
+    "trainOneCenter": "El tren se agenda en un solo centro.",
+    "trainDoesNotFit": "El tren completo ya no cabe a esa hora. No se agendó nada.",
+    "trainTimeNotOffered": "Esa hora de entrada no se ofrece."
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -187,6 +194,11 @@
     "remaining": "quedan {n}",
     "addTherapy": "Agregar terapia",
     "hoursFor": "Horas · {service}",
+    "entryHours": "Horas de entrada",
+    "trainBlockedBy": "{reason} — {service}",
+    "trainEndsAt": "Sale a las {time}",
+    "keepOrder": "Mantener mi orden",
+    "bookTrain": "Agendar el tren ({n})",
     "pickCard": "Elige una terapia para ver sus horas",
     "dragHint": "Arrastra la tarjeta a una hora o haz clic",
     "noHour": "Elige una hora para ver si el día cuadra",

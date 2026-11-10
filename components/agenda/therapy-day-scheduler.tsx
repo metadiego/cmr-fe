@@ -7,22 +7,12 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Cancel01Icon, DragDropIcon } from "@hugeicons/core-free-icons";
 
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import {
-  agendarVariosServicios,
-  getServiciosConSaldo,
-  listSesionesRango,
-  type ServicioConSaldo,
-  type Sesion,
-} from "@/lib/api/frontdesk";
-import {
-  getAvailability,
-  planPatientDay,
-  type Availability,
-  type PatientDayResult,
-} from "@/lib/api/resources";
+import { getServiciosConSaldo, listSesionesRango, type ServicioConSaldo, type Sesion } from "@/lib/api/frontdesk";
+import { bookTrain, planPatientTrain, type PatientTrain } from "@/lib/api/resources";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { todayPR, inDaysPR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
+import { ApiError } from "@/lib/api/types";
 import { getMyPreferences } from "@/lib/api/preferences";
 import { type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
@@ -31,12 +21,14 @@ import { PacienteSelect } from "@/components/citas/paciente-select";
 import { ExistingSessionsBadge } from "@/components/agenda/existing-sessions-badge";
 import { RecurringBookingModal } from "@/components/agenda/recurring-booking-modal";
 import { AddTherapySelect } from "@/components/agenda/add-therapy-select";
+import { TherapyTrainGrid, trainLegsText } from "@/components/agenda/therapy-train-grid";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlanSummarySkeleton, SlotGridSkeleton } from "@/components/agenda/therapy-day-skeleton";
+import { PlanSummarySkeleton } from "@/components/agenda/therapy-day-skeleton";
 
 // COCKPIT PARTIDO — la pieza que ve el mostrador al citar terapias (aprobado por el dueño 26-sep, sobre su
 // visión del 24). IZQUIERDA: paciente + récord (héroe) y las terapias del día como mini-tarjetas de color con
@@ -95,7 +87,8 @@ export function TherapyDayScheduler({
   const [selId, setSelId] = React.useState<string>(defaultServiceId ?? "");
   const [date, setDate] = React.useState(defaultDate ?? todayPR());
   const [time, setTime] = React.useState("");
-  const [dragOver, setDragOver] = React.useState<string | null>(null);
+  // Apagado por defecto: el motor pone primero lo más pesado (trainWeight) y reordena lo ligero.
+  const [keepOrder, setKeepOrder] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   // Which card's "schedule a series" modal is open (its serviceId), or null — additive-only feature,
   // fully independent from the single-date flow above.
@@ -146,23 +139,25 @@ export function TherapyDayScheduler({
   }, [upcomingRes.state]);
 
   const chosen = servicios.filter((s) => sel.has(s.id));
-  // Tarjeta activa (sus horas se muestran). Si la seleccionada ya no está, cae en la primera elegida.
+  // Tarjeta activa — solo para el resalte visual de la izquierda. Si la seleccionada ya no está, cae
+  // en la primera elegida.
   const selEff = sel.has(selId) ? selId : chosen[0]?.id ?? "";
   const serviceIds = React.useMemo(() => [...sel], [sel]);
+  const areasPayload: Record<string, number> = {};
+  for (const id of serviceIds) areasPayload[id] = areasOf(id);
 
-  // Huecos del servicio activo — parpadean los que caben (puesto + técnico). Cambia con fecha/servicio/áreas.
-  const availRes = useResource<Availability | null>(
-    () => (selEff ? getAvailability({ date, serviceId: selEff, areas: areasOf(selEff) }, centro) : Promise.resolve(null)),
-    [selEff, date, areas[selEff], centro],
+  // El TREN entero: horas de ENTRADA donde cabe todo lo marcado (una sola terapia también vale, mismo
+  // endpoint). Reemplaza `getAvailability` + `planPatientDay`: una llamada, el BE arma el orden y los
+  // tramos — nunca se calculan horas en el cliente. Handoff .personal/handoff-tren-de-terapias.md.
+  const trainRes = useResource<PatientTrain | null>(
+    () =>
+      serviceIds.length
+        ? planPatientTrain({ date, serviceIds, areas: areasPayload, patientId: paciente?.id, keepOrder }, centro)
+        : Promise.resolve(null),
+    [serviceIds.join(","), date, JSON.stringify(areasPayload), paciente?.id, keepOrder, centro],
   );
-  const avail = availRes.state.kind === "ok" ? availRes.state.data : null;
-
-  // El día completo a la hora elegida: minutos REALES en la clínica + avisos (bloqueo de la doctora).
-  const planRes = useResource<PatientDayResult | null>(
-    () => (time && serviceIds.length ? planPatientDay({ serviceIds, date, time }, centro) : Promise.resolve(null)),
-    [time, date, serviceIds.join(","), centro],
-  );
-  const plan = planRes.state.kind === "ok" ? planRes.state.data : null;
+  const train = trainRes.state.kind === "ok" ? trainRes.state.data : null;
+  const selectedSlot = train?.slots.find((s) => s.time === time) ?? null;
 
   function toggle(id: string) {
     setSel((prev) => {
@@ -186,27 +181,24 @@ export function TherapyDayScheduler({
     setDate(d);
     setTime("");
   }
-  function reason(sl: { fits: boolean; freeStations?: number; reasonKey?: string | null }) {
-    if (sl.fits) return sl.freeStations != null ? t("freeStations", { n: sl.freeStations }) : "";
-    if (sl.reasonKey && tRoot.has(sl.reasonKey)) return tRoot(sl.reasonKey);
-    return sl.reasonKey ?? "";
+  function reason(sl: { fits: boolean; reasonKey?: string | null; serviceId?: string | null }) {
+    const base = sl.reasonKey && tRoot.has(sl.reasonKey) ? tRoot(sl.reasonKey) : (sl.reasonKey ?? "");
+    const blocker = sl.serviceId ? servById.get(sl.serviceId)?.name : null;
+    return blocker ? t("trainBlockedBy", { reason: base, service: blocker }) : base;
   }
 
-  const canBook = !!paciente && sel.size > 0 && !!date && !submitting;
+  const canBook = !!paciente && sel.size > 0 && !!date && !!time && !submitting;
 
   async function book(close: boolean) {
-    if (!paciente || sel.size === 0) return;
+    if (!paciente || sel.size === 0 || !time) return;
     setSubmitting(true);
     try {
-      const { data, warnings } = await agendarVariosServicios(
-        { patientId: paciente.id, serviceIds: [...sel], dates: [date], time: time || undefined },
+      const { data, warnings } = await bookTrain(
+        { patientId: paciente.id, date, time, serviceIds: [...sel], areas: areasPayload, keepOrder },
         centro,
       );
-      const creadas = Array.isArray(data.creadas) ? data.creadas.length : 0;
-      const omitidas = Number(data.omitidas ?? 0);
-      toast.success(tp("resumen", { creadas, omitidas }));
+      toast.success(tp("resumen", { creadas: data.sessions.length, omitidas: 0 }));
       mostrarAvisos(warnings, tRoot);
-      if (data.aviso) toast.warning(tp("avisoDisponibilidad"));
       // «Agendar y seguir»: limpia selección/hora/áreas para el próximo grupo de terapias del MISMO
       // paciente/día, sin cerrar. El paciente se conserva a propósito. `areas` también se limpia: si
       // no, re-agregar el mismo servicio en la próxima ronda heredaba en silencio el número de áreas
@@ -219,13 +211,27 @@ export function TherapyDayScheduler({
       upcomingRes.refresh();
       onBooked?.({ close });
     } catch (err) {
-      toastError(err, tRoot);
+      if (err instanceof ApiError && err.code === "THERAPY_TRAIN_DOES_NOT_FIT") {
+        const reasonKey = typeof err.data?.reasonKey === "string" ? err.data.reasonKey : undefined;
+        const blockedId = typeof err.data?.serviceId === "string" ? err.data.serviceId : undefined;
+        toast.error(reason({ fits: false, reasonKey, serviceId: blockedId }) || tRoot("therapies.trainDoesNotFit"));
+        trainRes.refresh();
+      } else if (err instanceof ApiError && err.code === "THERAPY_TRAIN_ROLLBACK_INCOMPLETE") {
+        const left = Array.isArray(err.data?.left) ? (err.data.left as Array<{ serviceId?: string }>) : [];
+        const names = left.map((l) => (l.serviceId ? (servById.get(l.serviceId)?.name ?? l.serviceId) : "")).filter(Boolean);
+        toast.error(
+          names.length ? `${tRoot("therapies.trainRollbackIncomplete")}: ${names.join(", ")}` : tRoot("therapies.trainRollbackIncomplete"),
+          { duration: Infinity },
+        );
+        upcomingRes.refresh();
+      } else {
+        toastError(err, tRoot);
+      }
     } finally {
       setSubmitting(false);
     }
   }
 
-  const cap = avail?.resource?.capacity ?? 0;
   const dragHint = (
     <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
       <HugeiconsIcon icon={DragDropIcon} className="size-3.5" />
@@ -388,8 +394,7 @@ export function TherapyDayScheduler({
                             // Reagendar puede liberar o consumir un puesto en la fecha/hora que la
                             // tarjeta activa está mostrando ahora mismo — sin esto quedaban obsoletos.
                             upcomingRes.refresh();
-                            availRes.refresh();
-                            planRes.refresh();
+                            trainRes.refresh();
                           }}
                         />
                         {/* Additive-only entry point: opens the pattern-based bulk scheduler for THIS
@@ -413,114 +418,61 @@ export function TherapyDayScheduler({
           )}
         </aside>
 
-        {/* ————— DERECHA: horas del servicio activo ————— */}
-        {/* Borde izquierdo del MISMO color que la tarjeta activa (izquierda): antes solo el texto "Hours ·
-            X" decía cuál era, y con 2+ tarjetas de peso visual parecido no quedaba claro cuál correspondía
-            a este panel. El color es el vínculo visual entre ambos lados. */}
+        {/* ————— DERECHA: horas de ENTRADA del tren completo ————— */}
+        {/* Borde izquierdo del color de la primera tarjeta marcada: el vínculo visual con la izquierda.
+            Con 2+ terapias el panel ya no es de UNA tarjeta — es el tren entero (handoff tren-de-terapias). */}
         <section
           className="rounded-xl border-l-4 bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
-          style={{ borderLeftColor: selEff ? (servById.get(selEff)?.color ?? "#4a90d9") : "transparent" }}
+          style={{ borderLeftColor: chosen[0] ? (chosen[0].color ?? "#4a90d9") : "transparent" }}
         >
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-1.5 text-sm font-semibold">
-                {selEff && (
+                {chosen.map((s) => (
                   <span
+                    key={s.id}
                     aria-hidden
                     className="size-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: servById.get(selEff)?.color ?? "#4a90d9" }}
+                    style={{ backgroundColor: s.color ?? "#4a90d9" }}
                   />
-                )}
-                {selEff ? t("hoursFor", { service: servById.get(selEff)?.name ?? "" }) : t("pickCard")}
+                ))}
+                {chosen.length ? t("entryHours") : t("pickCard")}
               </div>
-              {selEff && availRes.state.kind === "loading" && <Skeleton aria-hidden className="mt-0.5 h-4 w-40" />}
-              {avail?.configured && (
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  {t("minutes", { n: avail.minutes })}
-                  {avail.resource ? ` · ${t("capacity", { n: avail.resource.capacity })}` : ""}
-                </div>
+              {chosen.length > 0 && trainRes.state.kind === "loading" && <Skeleton aria-hidden className="mt-0.5 h-4 w-40" />}
+              {train && train.patientMinutes > 0 && (
+                <div className="mt-0.5 text-xs text-muted-foreground">{t("minutes", { n: train.patientMinutes })}</div>
               )}
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">{t("date")}</span>
-              <DatePicker value={date} onChange={changeDate} className="w-auto" />
-            </label>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-sm">
+                <Switch checked={keepOrder} onCheckedChange={setKeepOrder} aria-label={t("keepOrder")} />
+                <span className="text-muted-foreground">{t("keepOrder")}</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">{t("date")}</span>
+                <DatePicker value={date} onChange={changeDate} className="w-auto" />
+              </label>
+            </div>
           </div>
 
-          {!selEff ? (
+          {!chosen.length ? (
             <p className="py-10 text-center text-sm text-muted-foreground">{t("pickCard")}</p>
-          ) : availRes.state.kind === "loading" ? (
-            <SlotGridSkeleton hint={dragHint} />
-          ) : availRes.state.kind === "fail" ? (
-            <p className="text-sm text-destructive">{availRes.state.message}</p>
-          ) : avail && !avail.configured ? (
-            <p className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-foreground">
-              {t("notConfigured")}
-            </p>
-          ) : avail ? (
-            <>
-              {dragHint}
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
-                {avail.slots.map((sl) => {
-                  const active = time === sl.time;
-                  const free = sl.freeStations ?? (sl.fits ? 1 : 0);
-                  const over = dragOver === sl.time;
-                  return (
-                    <button
-                      key={sl.time}
-                      type="button"
-                      disabled={!sl.fits}
-                      title={reason(sl)}
-                      onClick={() => sl.fits && setTime(sl.time)}
-                      onDragOver={(e) => {
-                        if (sl.fits) {
-                          e.preventDefault();
-                          setDragOver(sl.time);
-                        }
-                      }}
-                      onDragLeave={() => setDragOver((d) => (d === sl.time ? null : d))}
-                      onDrop={(e) => {
-                        if (!sl.fits) return;
-                        e.preventDefault();
-                        const id = e.dataTransfer.getData("text/plain");
-                        if (id) setSelId(id);
-                        setTime(sl.time);
-                        setDragOver(null);
-                      }}
-                      className={cn(
-                        "flex flex-col items-start rounded-lg border p-2 text-left transition-all",
-                        active
-                          ? "border-primary bg-primary text-primary-foreground shadow-md"
-                          : sl.fits
-                            ? cn("border-success/40 bg-success/10 hover:bg-success/20", blinkEnabled && "animate-pulse hover:animate-none")
-                            : "cursor-not-allowed border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground/40",
-                        over && "scale-105 ring-2 ring-success",
-                      )}
-                    >
-                      <span className="font-mono text-sm font-semibold tabular-nums">{sl.time}</span>
-                      {/* Barra de puestos: llenos vs libres */}
-                      {cap > 0 && sl.fits && (
-                        <span className="mt-1 flex gap-0.5">
-                          {Array.from({ length: cap }).map((_, i) => (
-                            <span
-                              key={i}
-                              className={cn(
-                                "h-1.5 w-2 rounded-sm",
-                                i < cap - free ? "bg-current opacity-30" : "bg-success",
-                              )}
-                            />
-                          ))}
-                        </span>
-                      )}
-                      <span className={cn("mt-1 text-[10px]", active ? "opacity-90" : "opacity-70")}>
-                        {sl.fits ? t("freeStations", { n: free }) : reason(sl)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          ) : null}
+          ) : (
+            <TherapyTrainGrid
+              train={train}
+              loading={trainRes.state.kind === "loading"}
+              error={trainRes.state.kind === "fail" ? trainRes.state.message : null}
+              time={time}
+              onPick={setTime}
+              onDrop={(id, t2) => {
+                if (id) setSelId(id);
+                setTime(t2);
+              }}
+              blinkEnabled={blinkEnabled}
+              servById={servById}
+              dragHint={dragHint}
+            />
+          )}
         </section>
       </div>
 
@@ -529,22 +481,26 @@ export function TherapyDayScheduler({
         <div className="min-w-0 space-y-1 text-sm">
           {!time ? (
             <p className="text-muted-foreground">{t("noHour")}</p>
-          ) : planRes.state.kind === "loading" ? (
+          ) : trainRes.state.kind === "loading" ? (
             <PlanSummarySkeleton />
-          ) : plan ? (
+          ) : selectedSlot && train ? (
             <>
               <div className="flex flex-wrap items-center gap-2">
-                {plan.ok ? <Badge variant="success">{t("fits")}</Badge> : <Badge variant="destructive">{t("noFits")}</Badge>}
+                {selectedSlot.fits ? <Badge variant="success">{t("fits")}</Badge> : <Badge variant="destructive">{t("noFits")}</Badge>}
                 <span className="font-medium">{t("startAt", { time })}</span>
-                <span className="text-muted-foreground">· {t("patientMinutes", { n: plan.minutosDelPaciente })}</span>
+                <span className="text-muted-foreground">· {t("patientMinutes", { n: train.patientMinutes })}</span>
               </div>
-              {!plan.ok && plan.reasonKey && (
-                <p className="text-destructive">{tRoot.has(plan.reasonKey) ? tRoot(plan.reasonKey) : plan.reasonKey}</p>
+              {selectedSlot.fits ? (
+                <p className="text-muted-foreground">{trainLegsText(selectedSlot, servById, "")}</p>
+              ) : (
+                <p className="text-destructive">{reason(selectedSlot)}</p>
               )}
-              {plan.sinRecurso.length > 0 && (
-                <p className="text-warning-foreground">{t("sinRecurso", { list: plan.sinRecurso.join(", ") })}</p>
+              {train.unconfiguredServiceIds.length > 0 && (
+                <p className="text-warning-foreground">
+                  {t("sinRecurso", { list: train.unconfiguredServiceIds.map((id) => servById.get(id)?.name ?? id).join(", ") })}
+                </p>
               )}
-              {plan.staffBlocks.map((b, i) => (
+              {selectedSlot.staffBlocks.map((b, i) => (
                 <p key={i} className="text-warning-foreground">{t("staffBlock", { from: b.from, to: b.to })}</p>
               ))}
             </>
@@ -578,8 +534,7 @@ export function TherapyDayScheduler({
           onOpenChange={(o) => !o && setRecurringFor(null)}
           onBooked={() => {
             upcomingRes.refresh();
-            availRes.refresh();
-            planRes.refresh();
+            trainRes.refresh();
           }}
         />
       )}

@@ -1,4 +1,5 @@
-import { apiFetch } from "./client";
+import { apiFetch, apiFetchEnvelope } from "./client";
+import type { ConWarnings, Sesion } from "./frontdesk";
 
 // Agenda de terapias por RECURSOS (cuarto/silla/persona), no por servicio. El cuello es el recurso:
 // APEX ocupa un room de láser; las sillas de suero admiten varias terapias a la vez. Contrato:
@@ -25,6 +26,9 @@ export interface Resource {
   effectiveStaffRole: string | null;
   staffId: string | null; // cuando el recurso ES una persona (la doctora de EMPOWER)
   blocksStaffAgenda: boolean; // si ocupa la agenda de consultas de esa persona
+  // Peso en el tren de terapias (BE PR #517): a más alto, antes va. Los recursos escasos (rooms de
+  // láser, sillas de suero, la doctora de EMPOWER) anclan el tren. Default 0.
+  trainWeight: number;
   active: boolean;
   // Servicios que consumen este recurso, con SUS minutos reales (PR cmr-be #371) — sin esto había
   // que entrar a "Consumption per service" uno por uno para ver cuánto dura cada terapia aquí.
@@ -149,6 +153,72 @@ export function planPatientDay(
   centroId?: string,
 ): Promise<PatientDayResult> {
   return apiFetch<PatientDayResult>(`/resources/patient-day`, { method: "POST", body: JSON.stringify(body) }, centroId);
+}
+
+// --- El tren de terapias: varias terapias desde UNA hora de entrada (BE PR #517) ---
+// `start` = hora exacta del tramo (para enseñar); `slot` = franja de 30' en la que se agenda de verdad.
+export interface TrainLegPlan {
+  serviceId: string;
+  start: string;
+  slot: string;
+  minutes: number;
+  parallel: boolean;
+  configured: boolean;
+}
+export interface TrainLegInfo {
+  serviceId: string;
+  configured: boolean;
+  minutes: number;
+  areas: number;
+  resourceId: string | null;
+  resourceSlug: string | null;
+  blocking: boolean;
+  trainWeight: number;
+}
+export interface TrainSlot {
+  time: string;
+  fits: boolean;
+  reasonKey?: string | null;
+  serviceId?: string | null; // qué terapia bloquea cuando no cabe
+  endsAt: string;
+  legs: TrainLegPlan[];
+  staffBlocks: PatientDayStaffBlock[];
+}
+export interface PatientTrain {
+  date: string;
+  order: "weight" | "asked";
+  legs: TrainLegInfo[];
+  unconfiguredServiceIds: string[];
+  patientMinutes: number;
+  slots: TrainSlot[];
+}
+export function planPatientTrain(
+  body: {
+    date: string;
+    serviceIds: string[];
+    areas?: Record<string, number>;
+    patientId?: string;
+    keepOrder?: boolean;
+  },
+  centroId?: string,
+): Promise<PatientTrain> {
+  return apiFetch<PatientTrain>(`/resources/patient-train`, { method: "POST", body: JSON.stringify(body) }, centroId);
+}
+
+// Agenda TODO el tren de una vez, todo o nada (POST /frontdesk/sessions/book-train). `time` = la hora
+// de entrada elegida en `planPatientTrain`; el BE agenda cada tramo en su `slot`, nunca el FE.
+export type BookTrainResult = { sessions: Sesion[]; train: TrainSlot };
+export function bookTrain(
+  payload: { patientId: string; date: string; time: string; serviceIds: string[]; areas?: Record<string, number>; keepOrder?: boolean },
+  centroId?: string,
+): Promise<ConWarnings<BookTrainResult>> {
+  return apiFetchEnvelope<BookTrainResult>(
+    `/frontdesk/sessions/book-train`,
+    { method: "POST", body: JSON.stringify(payload), headers: centroId ? { "X-Tenant-ID": centroId } : undefined },
+  ).then((env) => ({
+    data: env.data ?? { sessions: [], train: { time: payload.time, fits: false, endsAt: "", legs: [], staffBlocks: [] } },
+    warnings: env.meta.warnings ?? [],
+  }));
 }
 
 // --- Panorama del día por RECURSO × hora (GET /resources/day-occupancy) ---

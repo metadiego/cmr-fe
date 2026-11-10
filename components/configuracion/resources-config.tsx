@@ -219,12 +219,12 @@ function ResourcesTableSkeleton({ puedeEscribir }: { puedeEscribir: boolean }) {
 type Form = {
   slug: string; name: string; labelKey: string; kind: string;
   capacity: string; concurrency: ResourceConcurrency; maxMinutesPerPatient: string;
-  staffRole: string; staffId: string; blocksStaffAgenda: boolean;
+  staffRole: string; staffId: string; blocksStaffAgenda: boolean; trainWeight: string;
 };
 const EMPTY: Form = {
   slug: "", name: "", labelKey: "", kind: "room",
   capacity: "1", concurrency: "sequential", maxMinutesPerPatient: "",
-  staffRole: "", staffId: "", blocksStaffAgenda: false,
+  staffRole: "", staffId: "", blocksStaffAgenda: false, trainWeight: "0",
 };
 
 function ResourceDialog({ resource, centroId, onClose, onSaved }: {
@@ -240,6 +240,7 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
           capacity: String(resource.capacity), concurrency: resource.concurrency,
           maxMinutesPerPatient: resource.maxMinutesPerPatient != null ? String(resource.maxMinutesPerPatient) : "",
           staffRole: resource.staffRole ?? "", staffId: resource.staffId ?? "", blocksStaffAgenda: resource.blocksStaffAgenda,
+          trainWeight: String(resource.trainWeight ?? 0),
         }
       : EMPTY,
   );
@@ -257,6 +258,7 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
         maxMinutesPerPatient: form.maxMinutesPerPatient.trim() ? Number(form.maxMinutesPerPatient) : null,
         staffRole: form.staffRole.trim() || null,
         staffId: form.staffId.trim() || null, blocksStaffAgenda: form.blocksStaffAgenda,
+        trainWeight: form.trainWeight.trim() ? Number(form.trainWeight) : 0,
       };
       if (resource) await updateResource(resource.id, payload, centroId);
       else await createResource(payload, centroId);
@@ -317,6 +319,12 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
           </div>
           <Field label={t("fMaxMin")}><Input type="number" min={0} value={form.maxMinutesPerPatient} onChange={(e) => set("maxMinutesPerPatient", e.target.value)} placeholder={t("fMaxMinPlaceholder")} /></Field>
           <Field label={t("fStaffRole")}><Input value={form.staffRole} onChange={(e) => set("staffRole", e.target.value)} placeholder="tecnico" /></Field>
+          <div className="sm:col-span-2 grid gap-1.5">
+            <Field label={t("fTrainWeight")}>
+              <Input type="number" min={0} value={form.trainWeight} onChange={(e) => set("trainWeight", e.target.value)} />
+            </Field>
+            <p className="text-xs text-muted-foreground">{t("fTrainWeightHelp")}</p>
+          </div>
           {/* Solo cuando el recurso ES una persona (kind: person, p. ej. la doctora de EMPOWER): antes no
               había forma de elegirla, así que `staffId` siempre se guardaba null y el bloqueo de agenda
               (staffBlocks) nunca se activaba. Handoff HANDOFF-FE-staff-picker-recursos-persona. */}
