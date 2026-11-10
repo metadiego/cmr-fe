@@ -29,8 +29,6 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Tooltip } from "@/components/ui/tooltip";
 import { DataTable, type Column } from "@/components/kit/data-table";
-import { Campo, CopiableCampo } from "@/components/auditoria/audit-fields";
-import { ChangeLogList } from "@/components/change-log/change-log-list";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,13 +46,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { AuditDetailSheet } from "./audit-detail-sheet";
+import { agentTool, auditVia } from "@/lib/audit/via";
 
 // Fallback de dominios SOLO si /auditoria/facetas aún no cargó o viene vacío (el desplegable se
 // llena con facetas.dominios, que son los valores realmente presentes).
@@ -100,6 +93,7 @@ export function AuditoriaLog() {
   const [resultado, setResultado] = React.useState(TODOS);
   const [metodo, setMetodo] = React.useState(TODOS);
   const [clinicId, setClinicId] = React.useState(TODOS);
+  const [via, setVia] = React.useState(TODOS); // "rest" (the app) | "mcp" (Claude)
   // Chips (BE cmr-be): soloCambios = solo mutaciones; ocultarRuido = excluirErrorCode=RATE_LIMITED.
   // "Ocultar límite de tasa" arranca ENCENDIDO: el 81% de los errores son RATE_LIMITED (ruido).
   const [soloCambios, setSoloCambios] = React.useState(false);
@@ -167,6 +161,7 @@ export function AuditoriaLog() {
     userId: userId || undefined,
     entidadId: entidadId || undefined,
     clinicId: clinicId === TODOS ? undefined : clinicId,
+    channel: via === TODOS ? undefined : (via as "rest" | "mcp"),
     page,
     limit: 50,
   };
@@ -253,8 +248,21 @@ export function AuditoriaLog() {
       header: t("col.accion"),
       cell: (r) => (
         <Tooltip content={r.accion}>
-          <span className="text-sm">{frase(r)}</span>
+          {agentTool(r) ? (
+            <span className="font-mono text-xs">{agentTool(r)}</span>
+          ) : (
+            <span className="text-sm">{frase(r)}</span>
+          )}
         </Tooltip>
+      ),
+    },
+    {
+      key: "via",
+      header: t("col.via"),
+      cell: (r) => (
+        <Badge variant={auditVia(r) === "claude" ? "default" : "outline"} className="font-normal">
+          {t(`via.${auditVia(r)}`)}
+        </Badge>
       ),
     },
     {
@@ -340,6 +348,13 @@ export function AuditoriaLog() {
             { value: "error", label: t("resultadoError") },
           ])}
         </div>
+        <div className="space-y-1">
+          <Label className="text-xs">{t("col.via")}</Label>
+          {selectAll(via, onFilter(setVia), t("todos"), [
+            { value: "rest", label: t("via.app") },
+            { value: "mcp", label: t("via.claude") },
+          ])}
+        </div>
         {/* Acción (Controller.handler): la pregunta más afilada de una bitácora. Solo admin (las
             acciones son identificadores internos y el BE solo las expone con scope admin). */}
         {admin && accionesOpts.length > 0 ? (
@@ -421,10 +436,10 @@ export function AuditoriaLog() {
         labels={{ empty: t("vacio") }}
       />
 
-      <DetalleSheet
+      <AuditDetailSheet
         row={detalle}
         onClose={() => setDetalle(null)}
-        centroNombre={centroNombre}
+        centerName={centroNombre}
         onCopy={copiar}
         onEntity={(id) => { setEntidadId(id); setPage(1); setDetalle(null); }}
       />
@@ -548,71 +563,5 @@ function PurgaButton() {
         </AlertDialogContent>
       </AlertDialog>
     </>
-  );
-}
-
-// Panel lateral de detalle: todos los campos crudos + requestId/ip copiables + error completo.
-function DetalleSheet({
-  row,
-  onClose,
-  centroNombre,
-  onCopy,
-  onEntity,
-}: {
-  row: AuditRow | null;
-  onClose: () => void;
-  centroNombre: (id: string | null) => string;
-  onCopy: (txt: string) => void;
-  onEntity: (id: string) => void;
-}) {
-  const t = useTranslations("auditoria");
-  const format = useFormatter();
-  return (
-    <Sheet open={!!row} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
-        <SheetHeader className="border-b px-6 py-4">
-          <SheetTitle>{t("detalleTitulo")}</SheetTitle>
-          <SheetDescription>{row ? format.dateTime(new Date(row.createdAt), "dateAndTime") : ""}</SheetDescription>
-        </SheetHeader>
-        {row && (
-          <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5 text-sm">
-            <Campo label={t("col.accion")}>
-              <span className="font-mono text-xs">{row.accion}</span>
-            </Campo>
-            <Campo label={t("col.metodo")}>
-              <span className="font-mono text-xs">
-                {row.metodo} {row.ruta}
-              </span>
-            </Campo>
-            <Campo label={t("col.resultado")}>
-              <Badge variant={row.resultado === "error" ? "destructive" : "secondary"}>
-                {row.statusCode ?? row.resultado}
-              </Badge>
-            </Campo>
-            <Campo label={t("col.duracion")}>{row.durationMs != null ? `${row.durationMs} ms` : "—"}</Campo>
-            <Campo label={t("col.centro")}>{centroNombre(row.clinicId)}</Campo>
-            <Campo label={t("col.usuario")}>
-              {row.usuarioNombre ?? <span className="font-mono text-xs">{row.userId ?? "—"}</span>}
-              {row.userType ? <span className="ml-2 text-muted-foreground">({row.userType})</span> : null}
-            </Campo>
-            {row.entidadId ? (
-              <Campo label={t("entidadId")}>
-                <button type="button" onClick={() => onEntity(row.entidadId!)} className="font-mono text-xs hover:underline" title={t("filtrarPorEntidad")}>{row.entidadId}</button>
-              </Campo>
-            ) : null}
-            <CopiableCampo label="requestId" value={row.requestId} onCopy={onCopy} vacio={t("sinDato")} />
-            <CopiableCampo label="IP" value={row.ip} onCopy={onCopy} vacio={t("sinDato")} />
-            {/* Before / after of this request (BE #529: today only frontdesk sessions; empty elsewhere). */}
-            {row.requestId && row.resultado !== "error" ? <ChangeLogList filter={{ requestId: row.requestId }} pageSize={20} /> : null}
-            {row.resultado === "error" ? (
-              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3">
-                <p className="text-xs font-semibold text-destructive">{row.errorCode ?? t("error")}</p>
-                {row.errorMensaje ? <p className="mt-1 text-xs">{row.errorMensaje}</p> : null}
-              </div>
-            ) : null}
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
   );
 }

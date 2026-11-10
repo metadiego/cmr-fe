@@ -27,6 +27,11 @@ export interface AuditRow {
   errorCode: string | null;
   errorMensaje: string | null;
   meta: Record<string, unknown> | null;
+  // Door the action came through: "rest" (the app) | "mcp" (an AI agent such as Claude). The MCP
+  // tool and the OAuth client go with it. Optional: older backends do not send them.
+  channel?: "rest" | "mcp";
+  tool?: string | null;
+  clientId?: string | null;
 }
 
 // Todos opcionales. `userId` = authUserId. Filtros indexados (rápidos): createdAt(desde/hasta),
@@ -46,6 +51,9 @@ export interface AuditListParams {
   // NO ocultar las mutaciones correctas; total y paginación salen bien → NO replicar en el cliente.
   excluirErrorCode?: string;
   clinicId?: string;
+  // "mcp" = only what Claude (or another MCP client) did; "rest" = only the app.
+  channel?: "rest" | "mcp";
+  tool?: string;
   page?: number;
   limit?: number;
 }
