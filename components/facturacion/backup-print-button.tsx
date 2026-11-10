@@ -102,10 +102,9 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
       : health.kind === "printerDown"
         ? t(`backupPrinter.${health.state}`)
         : null;
+  // The «Usando el hub de respaldo…» note was removed (owner, 10-nov: «quitar eso»): it also fired when
+  // the main hub DID answer but saw the printer differently, and then said something false.
   const origin = hubOrigin(requestUrls[0]);
-  // Answered by a fallback hub: the main one (usually the printer's own PC) is down or its certificate
-  // is not accepted in THIS browser. Said out loud, because a fallback may not see the printer's power.
-  const viaFallback = (health.kind === "ready" || health.kind === "printerDown") && health.hub > 0;
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-0.5">
@@ -153,17 +152,6 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
               {t("backupHubOpen")}
             </a>
           )}
-        </p>
-      )}
-      {viaFallback && origin && (
-        <p className="flex flex-wrap items-center gap-x-2 px-3 text-[11px] text-warning-foreground" role="status">
-          <span>{t("backupHubFallbackNote", { hub: new URL(origin).host })}</span>
-          <a href={origin} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2" title={t("backupHubCertHint")}>
-            {t("backupHubOpenMain")}
-          </a>
-          <button type="button" onClick={retry} className="underline underline-offset-2">
-            {t("backupHubRetry")}
-          </button>
         </p>
       )}
     </div>
