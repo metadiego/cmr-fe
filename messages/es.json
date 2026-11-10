@@ -2375,7 +2375,8 @@
     },
     "live": "En vivo",
     "nuevaVentaEn": "Nueva venta en {centro}",
-    "colCentro": "Centro"
+    "colCentro": "Centro",
+    "searchAllDates": "Buscando en todas las fechas"
   },
   "facturacionTabs": {
     "facturas": "Facturas",

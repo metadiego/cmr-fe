@@ -2375,7 +2375,8 @@
     },
     "live": "Live",
     "nuevaVentaEn": "New sale in {centro}",
-    "colCentro": "Clinic"
+    "colCentro": "Clinic",
+    "searchAllDates": "Searching every date"
   },
   "facturacionTabs": {
     "facturas": "Invoices",

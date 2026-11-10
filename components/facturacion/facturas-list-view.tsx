@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { getFacturasTablero, getFacturasResumen, editarCabeceraFactura, type FacturaTablero, type FacturaTableroColumna, type FacturaTableroFila, type FacturasResumen } from "@/lib/api/facturas";
 import { getOpciones, type Opcion } from "@/lib/api/tablero";
+import { invoiceListRange } from "@/lib/facturacion/search-range";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
@@ -88,7 +89,9 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const [estado, setEstado] = React.useState(params.get("estado") ?? "");
   const [desde, setDesde] = React.useState(params.get("desde") ?? hoy);
   const [hasta, setHasta] = React.useState(params.get("hasta") ?? hoy);
-  const rangoEsHoy = desde === hoy && hasta === hoy;
+  // A search looks in every date (lib/facturacion/search-range.ts); the range applies only without one.
+  const rango = invoiceListRange(q, desde, hasta);
+  const rangoEsHoy = !rango.allDates && desde === hoy && hasta === hoy;
 
   React.useEffect(() => {
     const sp = new URLSearchParams();
@@ -105,14 +108,14 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const filter = useClinicFilter("factura.read");
   const readable = React.useMemo(() => filter.centers.map((c) => c.id), [filter.centers]);
   const { state, refresh } = useResource<FacturaTablero>(
-    () => getFacturasTablero({ q, status: estado, from: desde, to: hasta, context: contexto }, filter.choice),
+    () => getFacturasTablero({ q, status: estado, from: rango.from, to: rango.to, context: contexto }, filter.choice),
     [q, estado, desde, hasta, filter.choiceKey, contexto],
   );
 
   // Summary of the RANGE (server total): same filters and the same clinics as the list. The list paints
   // /invoices/board (resolved rows, no summary) → this is the only one with importe/exentas/cobradas.
   const resumenRes = useResource<FacturasResumen>(
-    () => getFacturasResumen({ q, status: estado, from: desde, to: hasta, context: contexto }, filter.choice),
+    () => getFacturasResumen({ q, status: estado, from: rango.from, to: rango.to, context: contexto }, filter.choice),
     [q, estado, desde, hasta, filter.choiceKey, contexto],
   );
   const resumen = resumenRes.state.kind === "ok" ? resumenRes.state.data : null;
@@ -240,7 +243,11 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
             </Select>
             <DatePicker value={desde} onChange={setDesde} aria-label={t("from")} className="h-8 w-[150px]" clearable />
             <DatePicker value={hasta} onChange={setHasta} aria-label={t("to")} className="h-8 w-[150px]" clearable />
-            {rangoEsHoy ? (
+            {rango.allDates ? (
+              <span className="inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                {t("searchAllDates")}
+              </span>
+            ) : rangoEsHoy ? (
               // Se ve que está filtrando por hoy + atajo para ampliar a todas las fechas (no lista corta muda).
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
                 {t("hoyChip", { fecha: formatFechaSolo(hoy) })}
