@@ -120,7 +120,7 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
           {state.data.map((r) => (
             <TableRow key={r.id} className={r.active ? "" : "opacity-50"}>
               <TableCell className="font-medium">{r.name}</TableCell>
-              <TableCell className="text-muted-foreground">{r.kind}</TableCell>
+              <TableCell className="text-muted-foreground">{t.has(`kind.${r.kind}`) ? t(`kind.${r.kind}`) : r.kind}</TableCell>
               <TableCell className="text-right tabular-nums">{r.capacity}</TableCell>
               <TableCell>{concLabel(r.concurrency)}</TableCell>
               <TableCell className="text-muted-foreground">
@@ -246,7 +246,10 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
   );
   const [busy, setBusy] = React.useState(false);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
-  const puedeGuardar = form.slug.trim() && form.name.trim() && Number(form.capacity) > 0;
+  // En un recurso `staff` (pozo de un cargo, BE PR #518) `staffRole` es obligatorio: es el cargo que
+  // el pozo representa (p. ej. "enfermera"). Sin él, el motor no sabe qué turnos mirar.
+  const puedeGuardar =
+    form.slug.trim() && form.name.trim() && Number(form.capacity) > 0 && (form.kind !== "staff" || form.staffRole.trim());
 
   async function guardar() {
     if (!puedeGuardar || busy) return;
@@ -254,7 +257,7 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
     try {
       const payload = {
         slug: form.slug.trim(), name: form.name.trim(), labelKey: form.labelKey.trim() || null,
-        kind: form.kind, capacity: Number(form.capacity), concurrency: form.concurrency,
+        kind: form.kind, capacity: form.kind === "staff" ? 1 : Number(form.capacity), concurrency: form.concurrency,
         maxMinutesPerPatient: form.maxMinutesPerPatient.trim() ? Number(form.maxMinutesPerPatient) : null,
         staffRole: form.staffRole.trim() || null,
         staffId: form.staffId.trim() || null, blocksStaffAgenda: form.blocksStaffAgenda,
@@ -300,10 +303,23 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
                 <SelectItem value="room">{t("kind.room")}</SelectItem>
                 <SelectItem value="chair">{t("kind.chair")}</SelectItem>
                 <SelectItem value="person">{t("kind.person")}</SelectItem>
+                <SelectItem value="machine">{t("kind.machine")}</SelectItem>
+                <SelectItem value="staff">{t("kind.staff")}</SelectItem>
               </SelectContent>
             </Select>
           </Field>
-          <Field label={t("fCapacity")}><Input type="number" min={1} value={form.capacity} onChange={(e) => set("capacity", e.target.value)} /></Field>
+          <div className="grid gap-1.5">
+            <Field label={t("fCapacity")}>
+              <Input
+                type="number"
+                min={1}
+                value={form.kind === "staff" ? "1" : form.capacity}
+                onChange={(e) => set("capacity", e.target.value)}
+                disabled={form.kind === "staff"}
+              />
+            </Field>
+            {form.kind === "staff" && <p className="text-xs text-muted-foreground">{t("kind.staffCapacityHelp")}</p>}
+          </div>
           <div className="sm:col-span-2 grid gap-1.5">
             <Field label={t("fConcurrency")}>
               <Select value={form.concurrency} onValueChange={(v) => set("concurrency", v as ResourceConcurrency)}>

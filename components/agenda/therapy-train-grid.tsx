@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import { type PatientTrain, type TrainSlot } from "@/lib/api/resources";
+import { type PatientTrain, type Resource, type TrainSlot } from "@/lib/api/resources";
 import { type Servicio } from "@/lib/api/servicios";
 import { cn } from "@/lib/utils";
 import { SlotGridSkeleton } from "@/components/agenda/therapy-day-skeleton";
@@ -32,6 +32,7 @@ export function TherapyTrainGrid({
   onDrop,
   blinkEnabled,
   servById,
+  recursosById,
   dragHint,
 }: {
   train: PatientTrain | null;
@@ -42,16 +43,23 @@ export function TherapyTrainGrid({
   onDrop: (serviceId: string, time: string) => void;
   blinkEnabled: boolean;
   servById: Map<string, Servicio>;
+  recursosById: Map<string, Resource>;
   dragHint: React.ReactNode;
 }) {
   const t = useTranslations("therapyPlanner");
   const tRoot = useTranslations();
   const [dragOver, setDragOver] = React.useState<string | null>(null);
 
+  // Con un servicio de varias líneas (BE PR #518, NPT: técnico Y enfermera), el `resourceId` dice cuál
+  // de las dos bloquea. Las dos formas combinadas: «Sin personal — Enfermería (NPT)».
   function reason(sl: TrainSlot): string {
     const base = sl.reasonKey && tRoot.has(sl.reasonKey) ? tRoot(sl.reasonKey) : (sl.reasonKey ?? "");
     const service = sl.serviceId ? servById.get(sl.serviceId)?.name : null;
-    return service ? t("trainBlockedBy", { reason: base, service }) : base;
+    const resource = sl.resourceId ? recursosById.get(sl.resourceId)?.name : null;
+    if (service && resource) return `${t("trainBlockedBy", { reason: base, service })} (${resource})`;
+    if (service) return t("trainBlockedBy", { reason: base, service });
+    if (resource) return t("blockedByResource", { reason: base, resource });
+    return base;
   }
 
   if (loading) return <SlotGridSkeleton hint={dragHint} />;

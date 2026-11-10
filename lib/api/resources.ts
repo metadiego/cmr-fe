@@ -8,7 +8,9 @@ import type { ConWarnings, Sesion } from "./frontdesk";
 // `simultaneous` = varias terapias a la vez (silla de suero, ocupa lo que dure la más larga).
 // `sequential` = del mismo paciente se SUMAN, una tras otra (room de NPT).
 export type ResourceConcurrency = "simultaneous" | "sequential";
-export type ResourceKind = "room" | "chair" | "person" | string;
+// `staff` = un pozo de gente de un cargo (la enfermería), no un sitio: su `capacity` no limita, el
+// techo es cuánta gente de `staffRole` hay de turno (BE PR #518). `machine` ya existía en el BE.
+export type ResourceKind = "room" | "chair" | "person" | "machine" | "staff" | string;
 
 export interface Resource {
   id: string;
@@ -95,6 +97,8 @@ export interface AvailabilitySlot {
   fits: boolean;
   freeStations?: number;
   reasonKey?: string | null;
+  // Con un servicio de varias líneas (BE PR #518), el recurso de la línea que bloquea.
+  resourceId?: string | null;
 }
 export interface Availability {
   configured: boolean; // false = el servicio no tiene recurso declarado → se cita como hoy, sin huecos
@@ -180,6 +184,7 @@ export interface TrainSlot {
   fits: boolean;
   reasonKey?: string | null;
   serviceId?: string | null; // qué terapia bloquea cuando no cabe
+  resourceId?: string | null; // con varias líneas (BE PR #518), qué recurso de esa terapia bloquea
   endsAt: string;
   legs: TrainLegPlan[];
   staffBlocks: PatientDayStaffBlock[];
@@ -229,7 +234,9 @@ export function bookTrain(
 export interface OccupancyCell {
   time: string; // "HH:mm"
   used: number;
-  free: number;
+  // null = sin techo: un recurso `staff` (BE PR #518) sin turnos cargados para ese cargo — el motor
+  // tampoco lo cierra (regla 5). Pintar «—», sin barra.
+  free: number | null;
   cappedBy: "stations" | "staff" | null;
 }
 export interface ResourceDayOccupancy {
@@ -241,7 +248,8 @@ export interface ResourceDayOccupancy {
   staffRole: string | null;
   staffOnShift: number | null; // gente de turno de ese cargo; null = sin techo humano (manda el puesto)
   cells: OccupancyCell[];
-  summary: { used: number; available: number; pct: number };
+  // `available`/`pct` null junto con `free: null` de las celdas: mismo motivo, sin techo humano.
+  summary: { used: number; available: number | null; pct: number | null };
 }
 export interface DayOccupancy {
   date: string;

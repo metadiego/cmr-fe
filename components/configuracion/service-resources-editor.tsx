@@ -47,8 +47,15 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
   }
 
   const recName = (id: string) => recursos.find((r) => r.id === id)?.name ?? id;
+  // Un recurso `staff` (pozo de un cargo, BE PR #518) no es un sitio: marcarlo en el selector para que
+  // no se confunda con un cuarto o silla.
+  const recLabel = (r: Resource) => (r.kind === "staff" ? `${r.name} ${t("staffSuffix")}` : r.name);
+  // Una línea por recurso (UQ_service_resources_pair en el BE): repetirlo da 400
+  // resources.lineRepeated y no reemplaza nada. No ofrecerlo ya evita el error en vez de solo mostrarlo.
+  const usedElsewhere = (i: number) => new Set(lines.filter((_, idx) => idx !== i).map((l) => l.resourceId));
   function addLine() {
-    const first = recursos[0]?.id ?? "";
+    const used = new Set(lines.map((l) => l.resourceId));
+    const first = recursos.find((r) => !used.has(r.id))?.id ?? recursos[0]?.id ?? "";
     setLines((ls) => [...ls, { resourceId: first, minutes: 10, per: "session", blocking: true, staffRole: null, patientsPerStaff: 1 }]);
   }
   // Cargo efectivo de la línea: el de la terapia, o el que hereda del recurso.
@@ -110,7 +117,9 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
                       <Select value={l.resourceId || undefined} onValueChange={(v) => patch(i, { resourceId: v })} disabled={!puedeEscribir}>
                         <SelectTrigger className="w-full"><SelectValue placeholder={recName(l.resourceId)} /></SelectTrigger>
                         <SelectContent>
-                          {recursos.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+                          {recursos
+                            .filter((r) => r.id === l.resourceId || !usedElsewhere(i).has(r.id))
+                            .map((r) => <SelectItem key={r.id} value={r.id}>{recLabel(r)}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </Field>
@@ -176,6 +185,7 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
               ))}
             </ul>
           )}
+          <p className="text-xs text-muted-foreground">{t("everyLineHelp")}</p>
           <p className="text-xs text-muted-foreground">{t("perHelp")} · {t("blockingHelp")} · {t("patientsPerStaffHelp")}</p>
           {puedeEscribir && (
             <div className="flex items-center justify-between">

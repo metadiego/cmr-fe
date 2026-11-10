@@ -55,17 +55,23 @@ export function ResourceOccupancyGrid({ fecha, centro }: { fecha: string; centro
                 <th className="sticky left-0 z-10 bg-card px-3 py-1.5 text-left align-middle font-normal">
                   <div className="flex items-center gap-2 whitespace-nowrap">
                     <span className="font-medium">{tRoot.has(r.labelKey) ? tRoot(r.labelKey) : r.name}</span>
-                    <span
-                      className={cn(
-                        "rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
-                        r.summary.pct >= 80 ? "bg-destructive/15 text-destructive"
-                          : r.summary.pct >= 50 ? "bg-warning/20 text-warning-foreground"
-                          : "bg-success/15 text-success-foreground",
-                      )}
-                      title={t("usedOf", { used: r.summary.used, available: r.summary.available })}
-                    >
-                      {r.summary.pct}%
-                    </span>
+                    {/* `pct` null = recurso `staff` sin turnos cargados (BE PR #518): sin techo humano,
+                        no hay cuello de botella que medir — «—» en vez de inventar un porcentaje. */}
+                    {r.summary.pct == null ? (
+                      <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">—</span>
+                    ) : (
+                      <span
+                        className={cn(
+                          "rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
+                          r.summary.pct >= 80 ? "bg-destructive/15 text-destructive"
+                            : r.summary.pct >= 50 ? "bg-warning/20 text-warning-foreground"
+                            : "bg-success/15 text-success-foreground",
+                        )}
+                        title={t("usedOf", { used: r.summary.used, available: r.summary.available ?? 0 })}
+                      >
+                        {r.summary.pct}%
+                      </span>
+                    )}
                     <span className="text-[10px] text-muted-foreground">·{t("cap", { n: r.capacity })}</span>
                   </div>
                 </th>
@@ -93,6 +99,15 @@ function Cell({
   isNow: boolean;
 }) {
   if (!cell) return <span className="block h-6" />;
+  // `free: null` = recurso `staff` sin turnos cargados (BE PR #518): sin techo, el motor tampoco la
+  // cierra. Neutral, no "lleno": sería mentir que no cabe cuando lo que falta es el dato de turnos.
+  if (cell.free == null) {
+    return (
+      <span className={cn("flex h-6 min-w-6 items-center justify-center rounded bg-muted/40 font-mono text-[11px] text-muted-foreground", isNow && "ring-1 ring-primary")}>
+        —
+      </span>
+    );
+  }
   const full = cell.free <= 0;
   const tone = !full
     ? "bg-success/15 text-success-foreground"

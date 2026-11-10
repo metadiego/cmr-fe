@@ -102,7 +102,9 @@
       "roleMedico": "Doctor",
       "patientsPerStaff": "Handles at once",
       "patientsPerStaffHelp": "\"Handles at once\": 1 = one-on-one with the patient; more than 1 = several at once (like the chambers)",
-      "laserWarning": "One-on-one with the patient: takes a whole technician; if it shares the role with laser, it steals stations."
+      "laserWarning": "One-on-one with the patient: takes a whole technician; if it shares the role with laser, it steals stations.",
+      "everyLineHelp": "Every line must fit at once: if any line lacks its station or its person, the time does not fit.",
+      "staffSuffix": "· staff"
     },
     "add": "New resource",
     "colName": "Name",
@@ -143,10 +145,15 @@
     "fBlocksAgendaHelp": "For the EMPOWER doctor: booking them blocks their consultation hours.",
     "fTrainWeight": "Weight in the train",
     "fTrainWeightHelp": "Scarce resources (laser rooms, IV chairs, the EMPOWER doctor) anchor the therapy train: the higher the weight, the earlier it goes.",
+    "nurses": "Nursing",
+    "lineRepeated": "That resource is already on another line of this service: merge them into one.",
     "kind": {
       "room": "Room",
       "chair": "Chair",
-      "person": "Person"
+      "person": "Person",
+      "machine": "Machine",
+      "staff": "Staff (a pool of one role)",
+      "staffCapacityHelp": "Does not limit: the ceiling is who of that role is on shift."
     },
     "concurrency": {
       "sequential": "Sequential",
@@ -196,6 +203,7 @@
     "hoursFor": "Hours · {service}",
     "entryHours": "Entry hours",
     "trainBlockedBy": "{reason} — {service}",
+    "blockedByResource": "{reason} — {resource}",
     "trainEndsAt": "Leaves at {time}",
     "keepOrder": "Keep my order",
     "bookTrain": "Book the train ({n})",

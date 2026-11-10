@@ -8,7 +8,7 @@ import { Cancel01Icon, DragDropIcon } from "@hugeicons/core-free-icons";
 
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getServiciosConSaldo, listSesionesRango, type ServicioConSaldo, type Sesion } from "@/lib/api/frontdesk";
-import { bookTrain, planPatientTrain, type PatientTrain } from "@/lib/api/resources";
+import { bookTrain, listResources, planPatientTrain, type PatientTrain, type Resource } from "@/lib/api/resources";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { todayPR, inDaysPR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
@@ -100,6 +100,12 @@ export function TherapyDayScheduler({
   const servicios = servRes.state.kind === "ok" ? servRes.state.data : [];
   const servById = React.useMemo(() => new Map(servicios.map((s) => [s.id, s])), [servicios]);
 
+  // Para nombrar el recurso que bloquea en un servicio de varias líneas (BE PR #518, NPT: técnico Y
+  // enfermera): «Sin personal — Enfermería», no solo el id crudo.
+  const recRes = useResource<Resource[]>(() => listResources(centro), [centro]);
+  const recursos = recRes.state.kind === "ok" ? recRes.state.data : [];
+  const recursosById = React.useMemo(() => new Map(recursos.map((r) => [r.id, r])), [recursos]);
+
   // Whether the free-slot indicators pulse — a layered preference (system→center→user→override),
   // not a code decision: this exact behavior was flipped by hand twice in one week (removed as a
   // suspected glitch, reverted the same day because the owner likes it). Default true so nobody who
@@ -181,10 +187,14 @@ export function TherapyDayScheduler({
     setDate(d);
     setTime("");
   }
-  function reason(sl: { fits: boolean; reasonKey?: string | null; serviceId?: string | null }) {
+  function reason(sl: { fits: boolean; reasonKey?: string | null; serviceId?: string | null; resourceId?: string | null }) {
     const base = sl.reasonKey && tRoot.has(sl.reasonKey) ? tRoot(sl.reasonKey) : (sl.reasonKey ?? "");
-    const blocker = sl.serviceId ? servById.get(sl.serviceId)?.name : null;
-    return blocker ? t("trainBlockedBy", { reason: base, service: blocker }) : base;
+    const service = sl.serviceId ? servById.get(sl.serviceId)?.name : null;
+    const resource = sl.resourceId ? recursosById.get(sl.resourceId)?.name : null;
+    if (service && resource) return `${t("trainBlockedBy", { reason: base, service })} (${resource})`;
+    if (service) return t("trainBlockedBy", { reason: base, service });
+    if (resource) return t("blockedByResource", { reason: base, resource });
+    return base;
   }
 
   const canBook = !!paciente && sel.size > 0 && !!date && !!time && !submitting;
@@ -214,7 +224,10 @@ export function TherapyDayScheduler({
       if (err instanceof ApiError && err.code === "THERAPY_TRAIN_DOES_NOT_FIT") {
         const reasonKey = typeof err.data?.reasonKey === "string" ? err.data.reasonKey : undefined;
         const blockedId = typeof err.data?.serviceId === "string" ? err.data.serviceId : undefined;
-        toast.error(reason({ fits: false, reasonKey, serviceId: blockedId }) || tRoot("therapies.trainDoesNotFit"));
+        const blockedResourceId = typeof err.data?.resourceId === "string" ? err.data.resourceId : undefined;
+        toast.error(
+          reason({ fits: false, reasonKey, serviceId: blockedId, resourceId: blockedResourceId }) || tRoot("therapies.trainDoesNotFit"),
+        );
         trainRes.refresh();
       } else if (err instanceof ApiError && err.code === "THERAPY_TRAIN_ROLLBACK_INCOMPLETE") {
         const left = Array.isArray(err.data?.left) ? (err.data.left as Array<{ serviceId?: string }>) : [];
@@ -470,6 +483,7 @@ export function TherapyDayScheduler({
               }}
               blinkEnabled={blinkEnabled}
               servById={servById}
+              recursosById={recursosById}
               dragHint={dragHint}
             />
           )}

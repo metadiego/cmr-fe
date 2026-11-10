@@ -102,7 +102,9 @@
       "roleMedico": "Médico",
       "patientsPerStaff": "Lleva a la vez",
       "patientsPerStaffHelp": "«Lleva a la vez»: 1 = se queda con el paciente; más de 1 = atiende a varios (como en las cámaras)",
-      "laserWarning": "1-a-1 con el paciente: ocupa un técnico completo; si comparte cargo con el láser, le resta puestos."
+      "laserWarning": "1-a-1 con el paciente: ocupa un técnico completo; si comparte cargo con el láser, le resta puestos.",
+      "everyLineHelp": "Cada línea tiene que caber a la vez: si falta el puesto o la persona de cualquiera, la hora no cabe.",
+      "staffSuffix": "· personal"
     },
     "add": "Nuevo recurso",
     "colName": "Nombre",
@@ -143,10 +145,15 @@
     "fBlocksAgendaHelp": "Para la doctora de EMPOWER: al agendarla, se bloquean sus horas de consulta.",
     "fTrainWeight": "Peso en el tren",
     "fTrainWeightHelp": "Los recursos escasos (rooms de láser, sillas de suero, la doctora de EMPOWER) anclan el tren de terapias: cuanto más alto, antes va.",
+    "nurses": "Enfermería",
+    "lineRepeated": "Ese recurso ya está en otra línea de este servicio: júntalas en una.",
     "kind": {
       "room": "Cuarto",
       "chair": "Silla",
-      "person": "Persona"
+      "person": "Persona",
+      "machine": "Máquina",
+      "staff": "Personal (pozo de un cargo)",
+      "staffCapacityHelp": "No limita: el techo es la gente de turno de ese cargo."
     },
     "concurrency": {
       "sequential": "Secuencial",
@@ -196,6 +203,7 @@
     "hoursFor": "Horas · {service}",
     "entryHours": "Horas de entrada",
     "trainBlockedBy": "{reason} — {service}",
+    "blockedByResource": "{reason} — {resource}",
     "trainEndsAt": "Sale a las {time}",
     "keepOrder": "Mantener mi orden",
     "bookTrain": "Agendar el tren ({n})",
