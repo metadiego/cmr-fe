@@ -26,6 +26,10 @@ export function safeNextPath(raw: string | null | undefined): string | null {
     return null
   }
   if (url.origin !== BASE) return null
+  // Dot segments collapse AFTER the checks above: "/.//evil.example" parses to the pathname
+  // "//evil.example", which any later new URL(next, origin) or redirect() reads as another host.
+  // So the NORMALIZED path is checked again, and that is what gets returned.
+  if (url.pathname.startsWith("//") || url.pathname.includes("\\")) return null
   if (url.pathname === LOGIN) return null
   return `${url.pathname}${url.search}`
 }
