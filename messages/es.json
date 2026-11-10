@@ -2188,7 +2188,8 @@
       "horaSalida": "Hora Salida:",
       "firma": "Firma del Paciente"
     },
-    "formatoPage": "Pág. {page}"
+    "formatoPage": "Pág. {page}",
+    "formatoFirmas": "Firmas:"
   },
   "programarCitas": {
     "title": "Programar citas",

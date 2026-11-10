@@ -8,6 +8,7 @@ test("legacyDay: MM-DD-YYYY like the legacy; anything else blank", () => {
   assert.equal(legacyDay("2026-11-10T14:00:00Z"), "11-10-2026");
   assert.equal(legacyDay(""), "");
   assert.equal(legacyDay(null), "");
+  assert.equal(legacyDay("2026-10-09", "/"), "10/09/2026", "the procedure sheets (APEX, Empower) use slashes");
 });
 
 test("cell: blank instead of a dash when the parameter has no value", () => {

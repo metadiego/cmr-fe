@@ -2188,7 +2188,8 @@
       "horaSalida": "Time out:",
       "firma": "Patient's signature"
     },
-    "formatoPage": "Page {page}"
+    "formatoPage": "Page {page}",
+    "formatoFirmas": "Signatures:"
   },
   "programarCitas": {
     "title": "Schedule sessions",

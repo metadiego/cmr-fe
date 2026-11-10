@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { imprimirFormato, LogoFormato, PieFormato } from "@/components/frontdesk/formato-parts";
 import { FormatoPaginado } from "@/components/frontdesk/formato-paginado";
 import { BodyCompositionSheet } from "@/components/frontdesk/body-composition-sheet";
+import { ProcedureSheet } from "@/components/frontdesk/procedure-sheet";
 import { splitInlineFields, chunkPairs } from "@/lib/formatos/inline-fields";
 import { rowsForPrint } from "@/lib/formatos/print-rows";
 import { controlHeaderLayout, splitControlTitle } from "@/lib/formatos/control-sheet";
@@ -86,6 +87,9 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   // sin ninguna línea para escribir — verificado en vivo contra GET /formats/terapia_camener/assembly.
   // External order forms reproduced sheet by sheet (landscape, own logo, watermark per page).
   if (d.layout === "paginas") return <FormatoPaginado d={d} label={label} onVolver={onVolver} />;
+  // The legacy procedure sheet (APEX, Empower RF, V-Tone, Morpheus8): fields in pairs + a coloured table.
+  if (esCampos && render.camposEnPares && secciones.some((s) => s.tipo === "tabla_tematica" && !!s.colorHeader))
+    return <ProcedureSheet d={d} label={label} onVolver={onVolver} />;
   // GLP-1 body composition (the two sections + the body image): its own one-page sheet, like the legacy.
   if (seccionComposicion && seccionMedidas && seccionComposicion.tipo === "campos" && seccionMedidas.tipo === "campos")
     return <BodyCompositionSheet d={d} label={label} composicion={seccionComposicion} medidas={seccionMedidas} onVolver={onVolver} />;
