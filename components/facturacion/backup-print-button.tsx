@@ -109,6 +109,12 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-0.5">
+      {/* Always say WHERE it prints (owner, 10-nov: «no veo la impresora a elegir»); a list only when there is a choice. */}
+      {printers.length === 1 && printer && (
+        <span className="px-3 text-[11px] text-muted-foreground">
+          {t("backupPrinterOn")} <b className="text-foreground">{printer.name}</b>
+        </span>
+      )}
       {printers.length > 1 && printer && (
         <label className="flex items-center gap-1.5 px-3 text-[11px] text-muted-foreground">
           {t("backupPrinterOn")}
