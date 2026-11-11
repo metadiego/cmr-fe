@@ -5397,7 +5397,13 @@
     "cancelled": "Cancelled",
     "presentAt": "Present {time}",
     "markPendingPresent": "Mark present (pending: {n})",
-    "markPresentHint": "Click to mark present"
+    "markPresentHint": "Click to mark present",
+    "filteredSections": {
+      "showingOnly": "Showing only: {service}",
+      "showingAll": "Showing all therapies",
+      "seeAll": "see all ({n} more)",
+      "onlyFiltered": "only {service}"
+    }
   },
   "salesPackages": {
     "title": "Sales packages",

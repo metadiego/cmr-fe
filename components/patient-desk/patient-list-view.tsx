@@ -20,6 +20,8 @@ interface Props {
   patients: PatientDay[]
   data: PatientDayData
   kind: PatientKind
+  /** The board's service filter: the selected patient's therapies show only that one (owner, 11-nov). */
+  serviceFilter?: string | null
   date: string
   centerId: string | undefined
   selectedId: string | null
@@ -34,6 +36,7 @@ export function PatientListView({
   patients,
   data,
   kind,
+  serviceFilter,
   date,
   centerId,
   selectedId,
@@ -123,9 +126,11 @@ export function PatientListView({
       <div className="min-w-0 overflow-y-auto rounded-lg bg-card p-4 ring-1 ring-foreground/10">
         {selected ? (
           <PatientDetail
+            key={selected.patientId}
             patient={selected}
             data={data}
             kind={kind}
+            serviceFilter={serviceFilter}
             date={date}
             centerId={centerId}
             onSchedule={onSchedule}

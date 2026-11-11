@@ -477,6 +477,7 @@ export function PatientDesk() {
           patients={patients}
           data={data}
           kind={kind}
+          serviceFilter={kind === "services" ? serviceFilter : null}
           date={date}
           centerId={gate.centro}
           selectedId={effectiveSelected}

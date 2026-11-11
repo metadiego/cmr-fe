@@ -5397,7 +5397,13 @@
     "cancelled": "Cancelada",
     "presentAt": "Presente {time}",
     "markPendingPresent": "Marcar presente (pendientes: {n})",
-    "markPresentHint": "Clic para marcar presente"
+    "markPresentHint": "Clic para marcar presente",
+    "filteredSections": {
+      "showingOnly": "Mostrando solo: {service}",
+      "showingAll": "Mostrando todas las terapias",
+      "seeAll": "ver todas ({n} más)",
+      "onlyFiltered": "solo {service}"
+    }
   },
   "salesPackages": {
     "title": "Paquetes de venta",

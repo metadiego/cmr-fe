@@ -16,11 +16,13 @@ import {
 import {
   pendingArrivals,
   patientSections,
+  visibleSections,
   serviceCancelledOnly,
   serviceConcluded,
   type PatientDay,
   type PatientKind,
 } from "@/lib/frontdesk/patient-day"
+import { FilteredSectionsHint } from "@/components/patient-desk/filtered-sections-hint"
 import type { PatientDayData } from "@/hooks/use-patient-day"
 import { presentPatient, undoPresentPatient } from "@/lib/api/frontdesk-queue"
 import { ejecutarAccion } from "@/lib/api/tablero"
@@ -150,6 +152,7 @@ export function PatientDetail({
   patient,
   data,
   kind = "all",
+  serviceFilter = null,
   date,
   centerId,
   onSchedule,
@@ -159,6 +162,7 @@ export function PatientDetail({
   patient: PatientDay
   data: PatientDayData
   kind?: PatientKind
+  serviceFilter?: string | null
   date: string
   centerId: string | undefined
   onSchedule: (r: ScheduleRequest) => void
@@ -173,6 +177,10 @@ export function PatientDetail({
       : data.consultationTab.name
     : t("consultation")
   const [presenceBusy, setPresenceBusy] = React.useState(false)
+  // Board's service filter → only that therapy, «ver todas» opens the rest (resets per patient: keyed by parent).
+  const [showAll, setShowAll] = React.useState(false)
+  const shown = visibleSections(patientSections(patient), kind === "services" ? serviceFilter : null, showAll)
+  const filteredName = patient.services.find((x) => x.serviceId === serviceFilter)?.name ?? ""
   // The consultation refused Presente for missing patient data: the same modal as the consultation
   // board asks for them, then retries. Services are never held by this (owner, 14-oct-2026).
   const [dataGate, setDataGate] = React.useState<{
@@ -501,8 +509,9 @@ export function PatientDetail({
         </div>
       </div>
 
-      {/* Sections in one order (lib: patientSections) — pending first unless a service filter rules. */}
-      {patientSections(patient).map((x) =>
+      {/* Sections in one order (lib: patientSections), narrowed to the board's service filter (visibleSections). */}
+      {shown.hidden > 0 || showAll ? <FilteredSectionsHint serviceName={filteredName} hidden={shown.hidden} showAll={showAll} onToggle={() => setShowAll((v) => !v)} /> : null}
+      {shown.sections.map((x) =>
         x.kind === "service"
           ? kind !== "consultation" && (
               <ServiceSessionsTable

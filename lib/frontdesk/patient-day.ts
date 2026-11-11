@@ -460,3 +460,18 @@ export function orderSections(
     }
   })
 }
+
+// With a SERVICE filter on the board, the selected patient's therapies show only the filtered one
+// (owner, 11-nov: «lo mejor es mostrar lo que se filtra»); `showAll` opens the rest without clearing the
+// filter. No filter (or the patient has none of it) → every section, unchanged. `hidden` = how many
+// sections the filter is holding back, for the «ver todas» hint.
+export function visibleSections(
+  sections: PatientSection[],
+  serviceFilter: string | null | undefined,
+  showAll: boolean
+): { sections: PatientSection[]; hidden: number } {
+  if (!serviceFilter || showAll) return { sections, hidden: 0 }
+  const only = sections.filter((x) => x.kind === "service" && x.service.serviceId === serviceFilter)
+  if (only.length === 0) return { sections, hidden: 0 }
+  return { sections: only, hidden: sections.length - only.length }
+}
