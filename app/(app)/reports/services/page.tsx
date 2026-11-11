@@ -97,7 +97,8 @@ export default function EstadisticasServiciosPage() {
     [data],
   );
   // Pestaña efectiva derivada (sin efecto): si la elegida ya no existe (cambió el rango), cae a GENERAL.
-  const tabEfectivo = tab === "general" || serviciosActivos.some((s) => s.slug === tab) ? tab : "general";
+  const tabEfectivo =
+    tab === "general" || serviciosActivos.some((s) => s.slug === tab) || (tab === "__vitals" && hasVitals(data?.vitals)) ? tab : "general";
 
   const emailImpresor = me.kind === "ok" ? (me.me.email ?? "") : "";
 
