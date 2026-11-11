@@ -3366,9 +3366,12 @@
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
+    "eyebrowScheduled": "Appointment",
     "title": "Add appointment",
     "subline": "Register a patient on today's board (created as confirmed).",
+    "sublineScheduled": "Book an appointment for another day.",
     "today": "Today",
+    "scheduledFor": "For",
     "patient": "Patient",
     "type": "Type",
     "doctor": "Doctor",
@@ -3378,8 +3381,14 @@
     "firstTime": "First visit",
     "notes": "Notes",
     "notesPlaceholder": "Reason / notes…",
+    "hasAppointment": "Already has an appointment on {date} with {doctor}",
+    "hasAppointmentNoDoctor": "Already has an appointment on {date}",
+    "reasonRequired": "Reason for the change",
+    "reasonRequiredPh": "Reason for the change (required)",
+    "moveTo": "Move to {date}",
     "cancel": "Cancel",
     "save": "Add to board",
+    "saveScheduled": "Book appointment",
     "retired": "Retired"
   },
   "precios": {

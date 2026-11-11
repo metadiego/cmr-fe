@@ -3366,9 +3366,12 @@
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
+    "eyebrowScheduled": "Cita",
     "title": "Agregar cita",
     "subline": "Registra un paciente en el tablero de hoy (queda confirmada).",
+    "sublineScheduled": "Agenda una cita para otro día.",
     "today": "Hoy",
+    "scheduledFor": "Para",
     "patient": "Paciente",
     "type": "Tipo",
     "doctor": "Médico",
@@ -3378,8 +3381,14 @@
     "firstTime": "Primera vez",
     "notes": "Observación",
     "notesPlaceholder": "Motivo / notas…",
+    "hasAppointment": "Ya tiene cita el {date} con {doctor}",
+    "hasAppointmentNoDoctor": "Ya tiene cita el {date}",
+    "reasonRequired": "Motivo del cambio",
+    "reasonRequiredPh": "Motivo del cambio (obligatorio)",
+    "moveTo": "Mover a {date}",
     "cancel": "Cancelar",
     "save": "Agregar al tablero",
+    "saveScheduled": "Agendar cita",
     "retired": "De baja"
   },
   "precios": {

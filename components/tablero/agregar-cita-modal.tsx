@@ -4,14 +4,25 @@ import * as React from "react";
 import { useTranslations, useFormatter } from "next-intl";
 
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
-import { createCita, getTiposCita, type TipoCita } from "@/lib/api/citas";
+import {
+  crearCitaAgenda,
+  getTiposCita,
+  listCitas,
+  reagendarCitaConAvisos,
+  type Cita,
+  type TipoCita,
+} from "@/lib/api/citas";
 import { getOpciones, type Opcion } from "@/lib/api/tablero";
 import { ApiError } from "@/lib/api/types";
 import { type EhrReadinessField } from "@/lib/api/ehr-integration";
 import { toastError } from "@/lib/api/errors";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { parseDayUTC, todayPR } from "@/lib/format/fecha";
+import { addDaysToDay, canReschedule, pickNextAppointment } from "@/lib/agenda/next-appointment";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
+import { useMe } from "@/hooks/use-me";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { PacienteSelect } from "@/components/citas/paciente-select";
+import { ReturnDatePicker } from "@/components/citas/return-date-picker";
 import { patientDoctorOption, type PatientDoctor } from "@/lib/medicos/patient-doctor-option";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,15 +39,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { TimePicker } from "@/components/ui/time-picker";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 
 const NO_MEDICO = "__none__";
 
-function todayISO(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 function fmtHoy(iso: string, format: ReturnType<typeof useFormatter>): string {
   const d = parseDayUTC(iso);
   return d ? format.dateTime(d, "dayWeekdayShort") : iso;
@@ -69,7 +79,9 @@ export function AgregarCitaModal({
   const t = useTranslations("agregarCita");
   const tRoot = useTranslations();
   const format = useFormatter();
-  const hoy = todayISO();
+  const me = useMe();
+  const actorId = me.kind === "ok" ? (me.me.staffId ?? undefined) : undefined;
+  const hoy = todayPR();
 
   const [tipos, setTipos] = React.useState<TipoCita[]>([]);
   const [medicos, setMedicos] = React.useState<Opcion[]>([]);
@@ -79,6 +91,41 @@ export function AgregarCitaModal({
   const [busy, setBusy] = React.useState(false);
   // Faltantes del EHR que devolvió el 400: abren el modal de datos. null = sin gate.
   const [ehrGate, setEhrGate] = React.useState<EhrReadinessField[] | null>(null);
+
+  // Fecha editable (handoff .personal/handoff-citar-consulta-cambiar-fecha.md): el chip «Hoy» abre
+  // un date picker (piso en HOY — nunca el año pasado, caso récord 15059). Elegir otra fecha deja de
+  // ser walk-in: aparece la hora, y si el paciente YA tiene una cita abierta, el guardado la MUEVE
+  // (reagendo explícito, motivo obligatorio) en vez de crear una duplicada.
+  const [fecha, setFecha] = React.useState(hoy);
+  const [hora, setHora] = React.useState("");
+  const [dateOpen, setDateOpen] = React.useState(false);
+  const [citaViva, setCitaViva] = React.useState<Cita | null>(null);
+  const [motivoMover, setMotivoMover] = React.useState("");
+
+  // Qué paciente+fecha hace válida la citaViva cargada; cambia → se limpia EN EL RENDER (nunca un
+  // setState síncrono dentro del efecto, react-hooks/set-state-in-effect) — el efecto de abajo solo
+  // hace la llamada async.
+  const citaVivaKey = paciente && fecha !== hoy ? `${paciente.id}|${fecha}` : null;
+  const [citaVivaFor, setCitaVivaFor] = React.useState<string | null>(null);
+  if (citaVivaKey !== citaVivaFor) {
+    setCitaVivaFor(citaVivaKey);
+    setCitaViva(null);
+  }
+
+  React.useEffect(() => {
+    if (!citaVivaKey || !paciente) return;
+    let active = true;
+    listCitas({ patientId: paciente.id, from: hoy }, centroId)
+      .then((r) => {
+        if (active) setCitaViva(pickNextAppointment(r.items ?? [], addDaysToDay(hoy, -1)));
+      })
+      .catch(() => active && setCitaViva(null));
+    return () => {
+      active = false;
+    };
+  }, [citaVivaKey, paciente, hoy, centroId]);
+
+  const moving = !!citaViva && citaViva.date !== fecha && canReschedule(citaViva);
 
   const nombrePaciente = (p: Paciente): string =>
     (p as { displayName?: string }).displayName || `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || p.id;
@@ -126,7 +173,7 @@ export function AgregarCitaModal({
   // botón bloqueado eran artefactos del FE. Si algún tipo lo exigiera de verdad, el BE responde 400 claro y
   // toastError lo muestra — no lo adivinamos aquí. Handoff walk-in-sin-medico-habilitar-el-boton.
   const medicoRequerido = false;
-  const canSubmit = !!paciente && !!tipoAuto && !busy;
+  const canSubmit = !!paciente && !!tipoAuto && !busy && (!moving || !!motivoMover.trim());
 
   // The patient's doctor may not serve at this center (`medicos` comes filtered to the active
   // center, see getOpciones above) — the POST is still correct, but the <Select> can't show a
@@ -142,17 +189,28 @@ export function AgregarCitaModal({
     if (!paciente || !tipoAuto) return;
     setBusy(true);
     try {
-      await createCita(
-        {
-          patientId: paciente.id,
-          appointmentTypeId: tipoAuto.id,
-          date: hoy,
-          status: "confirmada", // entra al tablero de atención de hoy
-          ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
-          ...(notas.trim() ? { notes: notas.trim() } : {}),
-        } as Parameters<typeof createCita>[0],
-        centroId,
-      );
+      if (moving && citaViva) {
+        const { advertencias } = await reagendarCitaConAvisos(
+          citaViva.id,
+          { date: fecha, time: hora || undefined, reason: motivoMover.trim(), actorId },
+          centroId,
+        );
+        mostrarAvisos(advertencias, tRoot);
+      } else {
+        const { advertencias } = await crearCitaAgenda(
+          {
+            patientId: paciente.id,
+            appointmentTypeId: tipoAuto.id,
+            date: fecha,
+            status: "confirmada", // entra al tablero de atención de ese día
+            ...(fecha !== hoy && hora ? { time: hora } : {}),
+            ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
+            ...(notas.trim() ? { notes: notas.trim() } : {}),
+          } as Parameters<typeof crearCitaAgenda>[0],
+          centroId,
+        );
+        mostrarAvisos(advertencias, tRoot);
+      }
       onSaved?.();
       onClose();
     } catch (err) {
@@ -177,14 +235,30 @@ export function AgregarCitaModal({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
         <div className="relative bg-gradient-to-br from-primary/12 via-primary/5 to-transparent px-6 pt-6 pb-5">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("eyebrow")}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">
+            {fecha === hoy ? t("eyebrow") : t("eyebrowScheduled")}
+          </span>
           <div className="flex items-center justify-between gap-3 pr-8">
             <DialogTitle className="text-xl leading-tight tracking-tight">{t("title")}</DialogTitle>
-            <span className="shrink-0 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary">
-              {t("today")} · {fmtHoy(hoy, format)}
-            </span>
+            {/* Chip de fecha clicable (handoff .personal/handoff-citar-consulta-cambiar-fecha.md): por
+                defecto hoy; ReturnDatePicker ya trae el piso en HOY, así nunca propone el año pasado. */}
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/25"
+                >
+                  {fecha === hoy ? t("today") : t("scheduledFor")} · {fmtHoy(fecha, format)}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-auto p-3">
+                <ReturnDatePicker value={fecha} onChange={(d) => { setFecha(d); setDateOpen(false); }} />
+              </PopoverContent>
+            </Popover>
           </div>
-          <DialogDescription className="mt-0.5 text-xs">{t("subline")}</DialogDescription>
+          <DialogDescription className="mt-0.5 text-xs">
+            {fecha === hoy ? t("subline") : t("sublineScheduled")}
+          </DialogDescription>
         </div>
 
         <div className="space-y-4 px-6 py-5">
@@ -208,6 +282,21 @@ export function AgregarCitaModal({
                 {tipoAuto.name}
               </span>
             </Field>
+          )}
+
+          {/* La HORA solo se pide al agendar para otro día — el walk-in de hoy no la necesita. */}
+          {fecha !== hoy && (
+            <Field label={t("time")}>
+              <TimePicker value={hora} onChange={setHora} />
+            </Field>
+          )}
+
+          {citaViva && citaViva.date !== fecha && (
+            <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+              {citaViva.doctorName
+                ? t("hasAppointment", { date: fmtHoy(citaViva.date, format), doctor: citaViva.doctorName })
+                : t("hasAppointmentNoDoctor", { date: fmtHoy(citaViva.date, format) })}
+            </div>
           )}
 
           {/* Médico del paciente (precargado). La HORA no se pide en el walk-in de hoy. */}
@@ -242,13 +331,19 @@ export function AgregarCitaModal({
 
           <AvisoDisponibilidad
             doctorId={medicoId !== NO_MEDICO ? medicoId : undefined}
-            date={hoy}
+            date={fecha}
             centro={centroId}
           />
 
-          <Field label={t("notes")}>
-            <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} placeholder={t("notesPlaceholder")} rows={2} />
-          </Field>
+          {moving ? (
+            <Field label={t("reasonRequired")}>
+              <Input value={motivoMover} onChange={(e) => setMotivoMover(e.target.value)} placeholder={t("reasonRequiredPh")} />
+            </Field>
+          ) : (
+            <Field label={t("notes")}>
+              <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} placeholder={t("notesPlaceholder")} rows={2} />
+            </Field>
+          )}
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t bg-muted/30 px-6 py-4">
@@ -256,7 +351,7 @@ export function AgregarCitaModal({
             {t("cancel")}
           </Button>
           <Button type="button" onClick={onGuardar} disabled={!canSubmit}>
-            {t("save")}
+            {moving ? t("moveTo", { date: fmtHoy(fecha, format) }) : fecha === hoy ? t("save") : t("saveScheduled")}
           </Button>
         </div>
       </DialogContent>

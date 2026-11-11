@@ -300,6 +300,21 @@ export function reagendarCita(
   );
 }
 
+// Reschedule returning cita + warnings (same envelope contract as crearCitaAgenda/actualizarCitaAgenda —
+// e.g. sheet.unavailable when the call-center sheet didn't take the new slot but the move went through).
+export async function reagendarCitaConAvisos(
+  id: string,
+  payload: Parameters<typeof reagendarCita>[1],
+  tenant?: string,
+): Promise<{ cita: Cita; advertencias: NonNullable<import("./types").ApiMeta["advertencias"]> }> {
+  const env = await apiFetchEnvelope<Cita>(
+    `/appointments/${id}/reschedule`,
+    { method: "POST", body: JSON.stringify(payload) },
+    tenant,
+  );
+  return { cita: env.data, advertencias: env.meta?.advertencias ?? [] };
+}
+
 // Appointment audit trail (GET /appointments/:id/history). The reschedule event
 // carries payload.antes / payload.despues (fecha, hora, centroId, medicoId).
 // `actorNombre` NO está en el mapa api-ingles → el BE lo sirve tal cual (español).
