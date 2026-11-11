@@ -2067,7 +2067,14 @@
       "enfermera": "Enfermería",
       "tecnico": "Técnico",
       "medico": "Médico"
-    }
+    },
+    "vitales": "Vitales",
+    "colVisitas": "Visitas",
+    "colPacientesDistintos": "Pacientes distintos",
+    "colTerapias": "Terapias",
+    "colTomas": "Tomas",
+    "tipVisitas": "Veces que la persona atendió una sesión (el legado lo llamaba «Pacientes #»)",
+    "tipTerapias": "Unidades aplicadas: áreas en láser, dosis en Vit C"
   },
   "frontdesk": {
     "title": "Centro de Pacientes",

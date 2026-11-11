@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { hasVitals, showTherapies } from "@/lib/estadisticas/services";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, Download04Icon } from "@hugeicons/core-free-icons";
 
-import { getEstadisticasServicios, type EstadisticasServicios, type EstServicio } from "@/lib/api/estadisticas";
+import { getEstadisticasServicios, type EstadisticasServicios, type EstServicio, type EstVitales } from "@/lib/api/estadisticas";
 import { useResource } from "@/hooks/use-resource";
 import { useReportClinics } from "@/hooks/use-report-clinics";
 import { useMe } from "@/hooks/use-me";
@@ -192,6 +193,7 @@ export default function EstadisticasServiciosPage() {
                     {serviciosActivos.map((s) => (
                       <TabsTrigger key={s.slug} value={s.slug}>{s.name}</TabsTrigger>
                     ))}
+                    {hasVitals(data.vitals) && <TabsTrigger value="__vitals">{t("vitales")}</TabsTrigger>}
                   </TabsList>
 
                   {/* GENERAL: matriz personal × servicio */}
@@ -236,6 +238,11 @@ export default function EstadisticasServiciosPage() {
                       <ServicioPanel servicio={s} />
                     </TabsContent>
                   ))}
+                  {hasVitals(data.vitals) && (
+                    <TabsContent value="__vitals" className="mt-4">
+                      <VitalesPanel vitals={data.vitals!} />
+                    </TabsContent>
+                  )}
                 </Tabs>
               </>
             )}
@@ -277,7 +284,9 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
       {servicio.roles.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("sinRoles")}</p>
       ) : (
-        servicio.roles.map((r) => (
+        servicio.roles.map((r) => {
+          const terapias = showTherapies(r.rows);
+          return (
           <section key={r.role} className="region">
             <h3 className="rol-cab mb-1.5 text-sm font-bold">
               {t.has(`rol.${r.role}`) ? t(`rol.${r.role}`) : capitalizar(r.role)}
@@ -289,8 +298,9 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
                   <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
                     <th className="px-3 py-2 font-semibold">#</th>
                     <th className="px-3 py-2 font-semibold">{t("colNombre")}</th>
-                    <th className="px-3 py-2 text-right font-semibold">{t("colParticipaciones")}</th>
-                    <th className="px-3 py-2 text-right font-semibold">{t("colPacientes")}</th>
+                    <th className="px-3 py-2 text-right font-semibold" title={t("tipVisitas")}>{t("colVisitas")}</th>
+                    <th className="px-3 py-2 text-right font-semibold">{t("colPacientesDistintos")}</th>
+                    {terapias && <th className="px-3 py-2 text-right font-semibold" title={t("tipTerapias")}>{t("colTerapias")}</th>}
                     <th className="px-3 py-2 text-right font-semibold">%</th>
                   </tr>
                 </thead>
@@ -303,16 +313,64 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
                         <td className={"px-3 py-2 font-medium " + (sinAsignar ? "italic text-muted-foreground" : "")}>{f.nombre}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{f.participaciones}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{f.pacientes}</td>
+                        {terapias && <td className="px-3 py-2 text-right tabular-nums">{f.therapies ?? "—"}</td>}
                         <td className="px-3 py-2 text-right tabular-nums">{pct(f.porcentaje)}</td>
                       </tr>
                     );
                   })}
+                  <tr className="border-t-2 font-semibold">
+                    <td className="px-3 py-2" />
+                    <td className="px-3 py-2">{t("colTotal")}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{r.participaciones}</td>
+                    <td className="px-3 py-2" />
+                    {terapias && <td className="px-3 py-2 text-right tabular-nums">{r.therapies ?? "—"}</td>}
+                    <td className="px-3 py-2 text-right tabular-nums">{pct(100)}</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </section>
-        ))
+          );
+        })
       )}
+    </div>
+  );
+}
+
+// «Vitales»: vital signs taken by each nurse at the medical appointments (BE #554).
+function VitalesPanel({ vitals }: { vitals: EstVitales }) {
+  const t = useTranslations("estadisticasServicios");
+  return (
+    <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+      <table className="w-full text-sm">
+        <thead className="bg-muted/60">
+          <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+            <th className="px-3 py-2 font-semibold">#</th>
+            <th className="px-3 py-2 font-semibold">{t("colNombre")}</th>
+            <th className="px-3 py-2 text-right font-semibold">{t("colTomas")}</th>
+            <th className="px-3 py-2 text-right font-semibold">{t("colPacientesDistintos")}</th>
+            <th className="px-3 py-2 text-right font-semibold">%</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {vitals.rows.map((f) => (
+            <tr key={f.staffId ?? `v-${f.position}`} className="hover:bg-muted/30">
+              <td className="px-3 py-2 tabular-nums text-muted-foreground">{f.position}</td>
+              <td className={"px-3 py-2 font-medium " + (f.staffId == null ? "italic text-muted-foreground" : "")}>{f.name}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{f.takings}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{f.patients}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{pct(f.share)}</td>
+            </tr>
+          ))}
+          <tr className="border-t-2 font-semibold">
+            <td className="px-3 py-2" />
+            <td className="px-3 py-2">{t("colTotal")}</td>
+            <td className="px-3 py-2 text-right tabular-nums">{vitals.takings}</td>
+            <td className="px-3 py-2 text-right tabular-nums">{vitals.patients}</td>
+            <td className="px-3 py-2 text-right tabular-nums">{pct(100)}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }

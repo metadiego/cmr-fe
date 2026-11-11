@@ -2067,7 +2067,14 @@
       "enfermera": "Nursing",
       "tecnico": "Technician",
       "medico": "Physician"
-    }
+    },
+    "vitales": "Vitals",
+    "colVisitas": "Visits",
+    "colPacientesDistintos": "Distinct patients",
+    "colTerapias": "Therapies",
+    "colTomas": "Takings",
+    "tipVisitas": "Sessions the person attended (the legacy called it «Pacientes #»)",
+    "tipTerapias": "Units applied: areas in laser, doses in Vit C"
   },
   "frontdesk": {
     "title": "Patient Center",

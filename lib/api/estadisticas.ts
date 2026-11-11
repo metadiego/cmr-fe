@@ -26,24 +26,33 @@ export type EstRolFila = {
   participaciones: number;
   pacientes: number;
   porcentaje: number;
+  // BE #554: units applied (areas in laser, doses in Vit C, 1 per visit elsewhere) and their share.
+  therapies?: number;
+  therapiesShare?: number;
 };
 // Un rol dentro de un servicio (enfermera, tecnico…). `participaciones` es el DIVISOR de los porcentajes.
 export type EstRol = {
   role: string;
   participaciones: number; // NO en el mapa → queda en español
+  therapies?: number; // BE #554: the role's total units
   rows: EstRolFila[]; // la clave `filas` se traduce a `rows`, pero su CONTENIDO no (bolsa opaca)
 };
+export type EstVitalesFila = { position: number; staffId: string | null; name: string; takings: number; patients: number; share: number };
+export type EstVitales = { takings: number; patients: number; rows: EstVitalesFila[] };
 export type EstServicio = {
   slug: string;
   name: string;
   sessions: number;
   participaciones: number; // NO en el mapa → queda en español
   patients: number;
+  therapies?: number; // BE #554
   roles: EstRol[]; // [] = el servicio no registró rol en el periodo (solo resumen)
 };
 export type EstadisticasServicios = {
   // `general` y `serviciosActivos` NO están en el mapa → quedan en español.
-  totals: { sessions: number; patients: number; participaciones: number; serviciosActivos: number };
+  totals: { sessions: number; patients: number; participaciones: number; serviciosActivos: number; therapies?: number };
+  // BE #554: vitals taken by each nurse at the medical appointments (the «Vitales» tab).
+  vitals?: EstVitales | null;
   general: EstGeneralFila[]; // ya ordenada por total desc
   services: EstServicio[]; // todos los del catálogo; pintar como pestaña los de sesiones > 0
 };
