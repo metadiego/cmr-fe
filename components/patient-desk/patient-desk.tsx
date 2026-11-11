@@ -243,18 +243,15 @@ export function PatientDesk() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title={t("title")}
-        count={data.live && <LiveBadge label={t("live")} />}
-      />
+      {/* Title only: on this sidebar destination the shell shows it, so PageHeader renders nothing.
+          The live badge sits in the toolbar instead of costing the page a row of its own. */}
+      <PageHeader title={t("title")} />
       {!gate.cargando && !gate.sinCentro && !gate.necesitaPicker && (
-        <div className="mb-3">
-          <EnTerapiaSinAsistirBanner centro={gate.centro} />
-        </div>
+        <EnTerapiaSinAsistirBanner centro={gate.centro} />
       )}
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[240px] flex-1 sm:max-w-md">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-40 flex-1 sm:max-w-md">
           <HugeiconsIcon
             icon={Search01Icon}
             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -382,6 +379,7 @@ export function PatientDesk() {
             </span>
           </span>
         )}
+        {data.live && <LiveBadge label={t("live")} />}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <LiveLocationWidget
             centroId={gate.centro}
@@ -450,10 +448,10 @@ export function PatientDesk() {
         </div>
       </div>
 
-      {/* The strip owns its bottom margin: on a day with no queue it renders nothing, and a wrapper
-          margin here left an empty band between the toolbar and the list. */}
+      {/* No margins here: PageContainer's gap spaces the rows, and a strip that renders nothing
+          (no queue today) adds no gap, so no empty band is left behind. */}
       {kind !== "consultation" && (
-        <TherapyQueueStrip centerId={gate.centro} date={date} className="mb-4" />
+        <TherapyQueueStrip centerId={gate.centro} date={date} />
       )}
 
       {gate.cargando ? (

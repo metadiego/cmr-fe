@@ -135,7 +135,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
             <DatePicker value={hasta} onChange={setHasta} aria-label={t("to")} className="h-8 w-[150px]" clearable />
           </ListToolbar>
 
-          <DataTable>
+          <DataTable fill>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("col.devolucion")}</TableHead>
