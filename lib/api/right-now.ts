@@ -137,12 +137,14 @@ export type RightNowCenters = {
   combinado: RightNowCombined;
 };
 
-// GET /right-now/centers — the top bar's clinic, or on «Ambos» every center the user may read (admin: all
-// active ones), as `centerIds` (oneCenterPath). `date` optional: without it each center reports ITS today.
-// No X-Tenant-ID: the scope is the user's centers, not one.
+// GET /right-now/centers — ALWAYS every center the user may read, never just the top bar's picked
+// clinic: the whole point of this screen is one combined view, per-center columns and all (owner,
+// 11-nov-2026 — the top bar left on one clinic was hiding the other center's column entirely, not
+// just its share of "Todos los centros"). `tenant: null` to oneCenterPath skips the top bar's
+// centerIds too, not just X-Tenant-ID. `date` optional: without it each center reports ITS today.
 export async function getRightNowCenters(date?: string): Promise<RightNowCenters> {
   const qs = date ? `?date=${encodeURIComponent(date)}` : "";
-  return apiFetch<RightNowCenters>(await oneCenterPath(`/right-now/centers${qs}`), {}, null);
+  return apiFetch<RightNowCenters>(await oneCenterPath(`/right-now/centers${qs}`, null), {}, null);
 }
 
 // SSE of invalidations (no snapshot in the event): on each one, refetch the snapshot (debounced).
