@@ -5,8 +5,9 @@ import { revenueLines, showReturned } from "@/lib/estadisticas/daily-revenue";
 import { dailyRowShowsUnits } from "@/lib/estadisticas/services";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PrinterIcon, WhatsappIcon, Mail01Icon, Copy01Icon } from "@hugeicons/core-free-icons";
+import { PrinterIcon, WhatsappIcon, Mail01Icon, Copy01Icon, Camera01Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
+import { toBlob } from "html-to-image";
 
 import { getEstadisticasDiarias, type EstadisticasDiarias } from "@/lib/api/estadisticas";
 import { getServicios } from "@/lib/api/servicios";
@@ -153,6 +154,36 @@ export function EstadisticasDiariasView() {
     try { await navigator.clipboard.writeText(texto); toast.success(t("copiado")); } catch { /* portapapeles bloqueado */ }
   }
 
+  const [snapshotBusy, setSnapshotBusy] = React.useState(false);
+  // Imagen de la tarjeta (no texto) para pegar directo en WhatsApp Web — pedido del dueño, 11-nov:
+  // el reporte de texto no se pega bien ahí. Copia al portapapeles si el navegador lo permite
+  // (ClipboardItem, requiere HTTPS); si no, descarga el PNG igual.
+  async function snapshot() {
+    const el = printRef.current;
+    if (!el || snapshotBusy) return;
+    setSnapshotBusy(true);
+    try {
+      const blob = await toBlob(el, { backgroundColor: "#ffffff", pixelRatio: 2 });
+      if (!blob) throw new Error("no blob");
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        toast.success(t("snapshotCopiado"));
+      } catch {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `estadisticas-diarias-${query.desde}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(t("snapshotDescargado"));
+      }
+    } catch {
+      toast.error(t("snapshotError"));
+    } finally {
+      setSnapshotBusy(false);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
@@ -162,6 +193,9 @@ export function EstadisticasDiariasView() {
           <Button variant="outline" size="sm" onClick={whatsapp} disabled={!texto}><HugeiconsIcon icon={WhatsappIcon} className="size-4" /> {t("whatsapp")}</Button>
           <Button variant="outline" size="sm" onClick={correo} disabled={!texto}><HugeiconsIcon icon={Mail01Icon} className="size-4" /> {t("correo")}</Button>
           <Button variant="outline" size="sm" onClick={copiar} disabled={!texto}><HugeiconsIcon icon={Copy01Icon} className="size-4" /> {t("copiar")}</Button>
+          <Button variant="outline" size="sm" onClick={snapshot} disabled={!data || snapshotBusy} title={t("snapshotTip")}>
+            <HugeiconsIcon icon={Camera01Icon} className="size-4" /> {t("snapshot")}
+          </Button>
         </div>
       </div>
 
