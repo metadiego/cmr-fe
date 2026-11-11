@@ -5594,6 +5594,18 @@
       "empty": "No calls recorded yet.",
       "unassigned": "Ext {extension} (unassigned)"
     },
+    "externalSource": {
+      "legacy": "Legacy data · {time}",
+      "stale": "No new legacy data since {time}"
+    },
+    "externalSourceConfig": {
+      "title": "Legacy plug",
+      "description": "Per center: when on, Right now shows sales, doctors, patients and services computed by the legacy system instead of ours.",
+      "lastReceived": "Last received: {time}",
+      "neverReceived": "Hasn't received anything yet.",
+      "enabled": "Legacy plug turned on for {center}.",
+      "disabled": "Legacy plug turned off for {center}."
+    },
     "noCenters": "You have no centers to view.",
     "error": "Could not load «Right now»."
   },

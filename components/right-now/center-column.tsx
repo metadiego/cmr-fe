@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import type { RightNowCenter } from "@/lib/api/right-now";
 import { getFacturasTablero, type FacturaTableroFila } from "@/lib/api/facturas";
@@ -9,6 +9,7 @@ import { useResource } from "@/hooks/use-resource";
 import { money } from "@/lib/caja/totales";
 import { cn } from "@/lib/utils";
 import { attendedSplit, topSellers } from "@/lib/right-now/view";
+import { externalSourceStale } from "@/lib/right-now/external-source";
 import { Empty, Panel, Pill, RankBadge, Stat } from "@/components/right-now/parts";
 import { ServicesPanel } from "@/components/right-now/services-panel";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -20,16 +21,34 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
   // El BE manda `labelKey` de la fila "sin médico" YA calificado (`rightNow.doctors.noDoctor`), igual
   // que el resto del motor de tableros — se resuelve con el traductor raíz, no el de este namespace.
   const tRoot = useTranslations();
+  const format = useFormatter();
   const sales = center.sales;
   const split = attendedSplit(center.patients);
   const sellers = topSellers(sales);
   const doctors = center.doctors ?? [];
+  const ext = center.externalSource;
+  const extStale = ext ? externalSourceStale(ext, now) : false;
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <h2 className="flex items-center gap-2 text-lg font-semibold">
         <span className="size-2 rounded-full bg-emerald-500" aria-hidden />
         {center.name}
+        {/* Centro enchufado al legado (handoff .personal/handoff-ahora-mismo-legado-bayamon.md):
+            `stale` del BE asume que el empujador sigue vivo; `extStale` además vigila el reloj de
+            la propia pantalla, por si el empujador murió y nunca llegó el SSE que lo diría. */}
+        {ext && (
+          <span
+            className={cn(
+              "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums",
+              extStale ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground",
+            )}
+          >
+            {extStale
+              ? t("externalSource.stale", { time: format.dateTime(new Date(ext.receivedAt), "time") })
+              : t("externalSource.legacy", { time: format.dateTime(new Date(ext.receivedAt), "time") })}
+          </span>
+        )}
       </h2>
 
       <Panel title={t("sales.title")} aside={<span className="text-xs text-muted-foreground">{t("sales.refunds", { n: sales?.refunds ?? 0 })}</span>}>

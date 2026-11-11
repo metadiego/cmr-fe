@@ -93,6 +93,21 @@ export type RightNowCalls = {
   ranking?: RightNowCallRankingRow[];
 };
 
+// Un centro enchufado al legado (BE PR feat/right-now-legacy-plug, handoff
+// .personal/handoff-ahora-mismo-legado-bayamon.md) trae esta marca junto a sales/doctors/patients/
+// services calculados allá. Ausente = cifras nuestras, como siempre. `stale` del BE asume que el
+// empujador sigue vivo; la pantalla además vigila `receivedAt` + `staleAfterMinutes` contra SU
+// propio reloj (el `now` que ya refresca cada 30 s), porque si el empujador muere no llega SSE y
+// `stale` se quedaría en false para siempre.
+export type RightNowExternalSource = {
+  source: string;
+  day: string;
+  generatedAt: string;
+  receivedAt: string;
+  staleAfterMinutes: number;
+  stale: boolean;
+};
+
 export type RightNowCenter = {
   clinicId: string;
   name: string;
@@ -106,6 +121,7 @@ export type RightNowCenter = {
   // PRIMER centro, por compatibilidad con el panel viejo — leer `combinado.calls`, no esto.
   calls?: RightNowCalls;
   alerts?: { total: number; bySeverity?: Record<string, number> };
+  externalSource?: RightNowExternalSource;
 };
 
 export type RightNowCombined = {
@@ -131,3 +147,31 @@ export async function getRightNowCenters(date?: string): Promise<RightNowCenters
 
 // SSE of invalidations (no snapshot in the event): on each one, refetch the snapshot (debounced).
 export const RIGHT_NOW_STREAM_PATH = "/api/v2/right-now/stream";
+
+// El interruptor del enchufe del legado, por centro (ahora-mismo.config). `lastSnapshot` deja ver,
+// antes de encender, si el empujador del legado está mandando algo. `GET` es `ahora-mismo.read`.
+export type RightNowExternalSourceConfig = {
+  clinicId: string;
+  name: string;
+  enabled: boolean;
+  staleAfterMinutes: number;
+  lastSnapshot: { source: string; day: string; generatedAt: string; receivedAt: string } | null;
+};
+
+export function getExternalSourceConfig(centerIds: string[]): Promise<RightNowExternalSourceConfig[]> {
+  const sp = new URLSearchParams();
+  for (const id of centerIds) sp.append("centerIds", id);
+  const qs = sp.toString();
+  return apiFetch<RightNowExternalSourceConfig[]>(`/right-now/external-source${qs ? `?${qs}` : ""}`);
+}
+
+export function setExternalSourceConfig(
+  centroId: string,
+  payload: { enabled: boolean; staleAfterMinutes?: number },
+): Promise<{ clinicId: string; previous: boolean; current: boolean }> {
+  const sp = new URLSearchParams({ centerIds: centroId });
+  return apiFetch<{ clinicId: string; previous: boolean; current: boolean }>(
+    `/right-now/external-source?${sp.toString()}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+  );
+}

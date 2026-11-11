@@ -14,6 +14,7 @@ import { LiveBadge } from "@/components/live-badge";
 import { cn } from "@/lib/utils";
 import { CenterColumn } from "@/components/right-now/center-column";
 import { CallsPanel } from "@/components/right-now/calls-panel";
+import { ExternalSourceSettingsButton } from "@/components/right-now/external-source-settings";
 
 // «Ahora mismo» — every office live, the legacy board rebuilt on the current design, full screen:
 // combined totals on top, then one column per center (from /right-now/centers, never a hardcoded
@@ -68,6 +69,14 @@ export function RightNowView() {
             {live ? <LiveBadge label={t("live")} /> : <span>{t("offline")}</span>}
             {updatedAt && <span>{t("updatedAt", { time: format.dateTime(new Date(updatedAt), "time") })}</span>}
           </span>
+        }
+        // El interruptor del enchufe del legado vive lejos de los usuarios de esta pantalla a
+        // propósito (handoff .personal/handoff-ahora-mismo-legado-bayamon.md): un botón aparte,
+        // visible solo con ahora-mismo.config — nunca entre las cifras que todos miran.
+        actions={
+          ready && can("ahora-mismo.config") && centers.length > 0 ? (
+            <ExternalSourceSettingsButton centerIds={centers.map((c) => c.clinicId)} />
+          ) : undefined
         }
       />
 

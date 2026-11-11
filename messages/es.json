@@ -5594,6 +5594,18 @@
       "empty": "Sin llamadas registradas todavía.",
       "unassigned": "Ext {extension} (sin asignar)"
     },
+    "externalSource": {
+      "legacy": "Datos del legado · {time}",
+      "stale": "Sin datos nuevos del legado desde {time}"
+    },
+    "externalSourceConfig": {
+      "title": "Enchufe del legado",
+      "description": "Por centro: cuando está encendido, Ahora mismo muestra ventas, médicos, pacientes y servicios calculados por el sistema legado en vez de los nuestros.",
+      "lastReceived": "Último recibido: {time}",
+      "neverReceived": "Todavía no ha recibido nada.",
+      "enabled": "Enchufe del legado encendido para {center}.",
+      "disabled": "Enchufe del legado apagado para {center}."
+    },
     "noCenters": "No tienes centros para ver.",
     "error": "No se pudo cargar «Ahora mismo»."
   },
