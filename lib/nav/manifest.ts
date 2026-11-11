@@ -87,12 +87,14 @@ export const NAV_MANIFEST: NavEntry[] = [
   // Month-end IVU-exonerated product invoices (handoff cash-product-sales-ivu-handoff.md §3, BE #470).
   { clave: "productos-exonerados", route: "/reports/exonerated-products", group: "reports", order: 6 },
   // Analítica (BE cmr-be#546/#550, spec docs/specs/analytics-screens.md, cmr-fe PR #122): ventas y
-  // asistencia combinables, pacientes y tasa de retorno. Sin clave seeded del BE todavía — un admin
-  // los da de alta desde el editor de menú cuando quiera mostrarlos (lib/nav-manifest.ts los ofrece).
-  { clave: "estadisticas-ventas", route: "/reports/sales-breakdown", group: "reports", order: 7 },
-  { clave: "estadisticas-asistencia", route: "/reports/attendance", group: "reports", order: 8 },
-  { clave: "estadisticas-pacientes", route: "/reports/patients-stats", group: "reports", order: 9 },
-  { clave: "tasa-retorno", route: "/reports/return-rate", group: "reports", order: 10 },
+  // asistencia combinables, pacientes y tasa de retorno. 11-nov-2026: ya seeded en el catálogo con
+  // estas claves (`analitica-*`, no las que se habían puesto aquí de entrada) — sin esta fila el
+  // agrupador (lib/nav/nav-groups.ts) no las reconoce y las cae a un bucket `be:g-servicios` aparte,
+  // que se pinta como un SEGUNDO "Servicios" duplicado al final del rail.
+  { clave: "analitica-ventas", route: "/reports/sales-breakdown", group: "reports", order: 7 },
+  { clave: "analitica-asistencia", route: "/reports/attendance", group: "reports", order: 8 },
+  { clave: "analitica-pacientes", route: "/reports/patients-stats", group: "reports", order: 9 },
+  { clave: "analitica-retorno", route: "/reports/return-rate", group: "reports", order: 10 },
   // Inventory
   { clave: "inventario-index", route: "/inventory", group: "inventory", order: 1 },
   { clave: "inventario-existencias", route: "/inventory/stock", group: "inventory", order: 2 },
