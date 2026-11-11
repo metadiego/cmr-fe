@@ -7,6 +7,8 @@ import { PrinterIcon, Alert02Icon } from "@hugeicons/core-free-icons";
 
 import type { ReporteDia, TributarioPartida } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
+import { CuadreDevoluciones, devolucionesPrintHtml } from "@/components/caja/cuadre-devoluciones";
+import { refundSplit } from "@/lib/caja/refunds-by-method";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { ProductSalesSection } from "@/components/caja/product-sales-section";
@@ -144,6 +146,12 @@ export function CuadreDetalle({
           colMonto: td("colMonto"),
           colDescuento: td("colDescuento"),
           colBase: td("colBase"),
+          cardSales: tp("cardSales"),
+          chargedRefunded: tp("chargedRefunded"),
+          colAntesDescuento: td("colAntesDescuento"),
+          colBaseNeta: td("colBaseNeta"),
+          colFacturaOrigen: td("colFacturaOrigen"),
+          colFormaReembolso: td("colFormaReembolso"),
           colImpuesto: td("colImpuesto"),
           colLineas: td("colLineas"),
           documentos: td("documentos"),
@@ -233,10 +241,11 @@ export function CuadreDetalle({
               <thead>
                 <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
                   <th className="px-4 py-2 text-left font-semibold">{td("partida")}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{td("colMonto")}</th>
+                  <th className="px-4 py-2 text-right font-semibold">{td("colAntesDescuento")}</th>
                   <th className="px-4 py-2 text-right font-semibold">{td("colDescuento")}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{td("colBase")}</th>
+                  <th className="px-4 py-2 text-right font-semibold">{td("colBaseNeta")}</th>
                   <th className="px-4 py-2 text-right font-semibold">{td("colImpuesto")}</th>
+                  <th className="px-4 py-2 text-right font-semibold">{td("colTotal")}</th>
                   <th className="px-4 py-2 text-right font-semibold">{td("colLineas")}</th>
                 </tr>
               </thead>
@@ -317,36 +326,8 @@ export function CuadreDetalle({
         )}
       </section>
 
-      {/* 3. Devoluciones del día — bloque aparte, en rojo, con signo. */}
-      {devoluciones.length > 0 && (
-        <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-          <h3 className="border-b border-destructive/20 px-4 py-2.5 text-sm font-semibold text-destructive">
-            {td("devoluciones")} <span className="font-normal">({devoluciones.length})</span>
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-2 text-left font-semibold">{td("colNumero")}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{td("colMonto")}</th>
-                  <th className="px-4 py-2 text-left font-semibold">{td("colMotivo")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {devoluciones.map((dev) => (
-                  <tr key={dev.id}>
-                    <td className="px-4 py-2 font-mono tabular-nums">{dev.number != null ? String(dev.number) : "—"}</td>
-                    <td className="px-4 py-2 text-right font-medium tabular-nums text-destructive">
-                      −{money(dev.refundedAmount)}
-                    </td>
-                    <td className="px-4 py-2 text-muted-foreground">{dev.reason || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+      {/* 3. Devoluciones del día — en rojo, con su factura de origen y su forma (components/caja/cuadre-devoluciones.tsx). */}
+      <CuadreDevoluciones devoluciones={devoluciones} />
     </div>
   );
 }
@@ -355,10 +336,11 @@ function TribRow({ label, p, dim }: { label: string; p: TributarioPartida; dim?:
   return (
     <tr className={dim ? "text-muted-foreground" : undefined}>
       <td className="px-4 py-2 font-medium">{label}</td>
-      <td className="px-4 py-2 text-right tabular-nums">{money(p.amount)}</td>
-      <td className="px-4 py-2 text-right tabular-nums">{money(p.discount)}</td>
+      <td className="px-4 py-2 text-right tabular-nums">{p.gross != null ? money(p.gross) : "—"}</td>
+      <td className="px-4 py-2 text-right tabular-nums">{p.discount ? `−${money(p.discount)}` : money(0)}</td>
       <td className="px-4 py-2 text-right tabular-nums">{money(p.base)}</td>
       <td className="px-4 py-2 text-right tabular-nums">{money(p.tax)}</td>
+      <td className="px-4 py-2 text-right font-medium tabular-nums">{money(p.amount)}</td>
       <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{p.lines}</td>
     </tr>
   );
@@ -445,7 +427,11 @@ function buildPrintHtml(args: {
   // (p.ej. VISA + MASTERCARD) + total. Antes solo se imprimía "Total tarjetas" sin este desglose.
   const metodoRows = (rows: typeof tarjetas) =>
     rows
-      .map((r) => `<tr><td>${esc(r.name)} <span class="dim">×${esc(r.quantity)}</span></td><td class="r mono">${esc(money(r.amount))}</td></tr>`)
+      .map((r) => {
+        const sp = refundSplit(r);
+        const note = sp ? `<br><span class="dim">${esc(L.chargedRefunded.replace("{charged}", money(sp.sales)).replace("{refunded}", money(sp.refunds)))}</span>` : "";
+        return `<tr><td>${esc(r.name)} <span class="dim">×${esc(r.quantity)}</span></td><td class="r mono">${esc(money(r.amount))}${note}</td></tr>`;
+      })
       .join("");
   const cardsBlock = `<h2>${esc(L.cards)}</h2>
     <table>
@@ -481,9 +467,11 @@ function buildPrintHtml(args: {
     [L.salesCash, money(s.salesCash)],
     [L.electronic, money(s.electronicas)],
     [L.totalCards, money(s.totalTarjetas)],
+    ...(reporte.detalle.cardSalesTotal != null ? [[L.cardSales, money(reporte.detalle.cardSalesTotal)]] : []),
     [L.totalCMA, money(s.totalDia), "strong"],
     [L.grossBilling, money(s.bruto)],
     [L.returns, money(s.devuelto)],
+    ...(reporte.detalle.refundsByMethod ?? []).map((m) => [`· ${m.name}`, `−${money(m.amount)}`]),
     [L.netBilling, money(s.neto), "strong"],
     [L.cashInDrawer, money(s.contado)],
     [L.deposit, money(s.aDepositar)],
@@ -493,12 +481,12 @@ function buildPrintHtml(args: {
     .join("");
 
   const tribRow = (label: string, p: TributarioPartida, dim = false) =>
-    `<tr class="${dim ? "dim" : ""}"><td>${esc(label)}</td><td class="r mono">${esc(money(p.amount))}</td><td class="r mono">${esc(money(p.discount))}</td><td class="r mono">${esc(money(p.base))}</td><td class="r mono">${esc(money(p.tax))}</td><td class="r mono">${esc(p.lines)}</td></tr>`;
+    `<tr class="${dim ? "dim" : ""}"><td>${esc(label)}</td><td class="r mono">${esc(p.gross != null ? money(p.gross) : "—")}</td><td class="r mono">${esc(p.discount ? "−" + money(p.discount) : money(0))}</td><td class="r mono">${esc(money(p.base))}</td><td class="r mono">${esc(money(p.tax))}</td><td class="r mono">${esc(money(p.amount))}</td><td class="r mono">${esc(p.lines)}</td></tr>`;
 
   const tribBlock = trib
     ? `<h2>${esc(L.tributario)}</h2>
        <table>
-         <thead><tr><th></th><th class="r">${esc(L.colMonto)}</th><th class="r">${esc(L.colDescuento)}</th><th class="r">${esc(L.colBase)}</th><th class="r">${esc(L.colImpuesto)}</th><th class="r">${esc(L.colLineas)}</th></tr></thead>
+         <thead><tr><th></th><th class="r">${esc(L.colAntesDescuento)}</th><th class="r">${esc(L.colDescuento)}</th><th class="r">${esc(L.colBaseNeta)}</th><th class="r">${esc(L.colImpuesto)}</th><th class="r">${esc(L.colTotal)}</th><th class="r">${esc(L.colLineas)}</th></tr></thead>
          <tbody>
            ${tribRow(L.gravado, trib.taxable)}
            ${tribRow(L.exento, trib.exempt)}
@@ -545,18 +533,7 @@ function buildPrintHtml(args: {
       <tbody>${docRows || `<tr><td colspan="${docConDivision ? 7 : 6}" class="dim">—</td></tr>`}</tbody>
     </table>`;
 
-  const devBlock = devoluciones.length
-    ? `<h2 class="rojo">${esc(L.devoluciones)} (${devoluciones.length})</h2>
-       <table>
-         <thead><tr><th>${esc(L.colNumero)}</th><th class="r">${esc(L.colMonto)}</th><th>${esc(L.colMotivo)}</th></tr></thead>
-         <tbody>${devoluciones
-           .map(
-             (d) =>
-               `<tr><td class="mono">${esc(d.number != null ? d.number : "—")}</td><td class="r mono rojo">−${esc(money(d.refundedAmount))}</td><td class="dim">${esc(d.reason || "—")}</td></tr>`,
-           )
-           .join("")}</tbody>
-       </table>`
-    : "";
+  const devBlock = devolucionesPrintHtml(devoluciones, L, esc);
 
   const subtitulo = divisionLabel ? `${esc(titulo)} — ${esc(divisionLabel)}` : esc(titulo);
   return `<!doctype html><html><head><meta charset="utf-8"><title>${subtitulo} ${esc(fechaLabel)}</title><style>${PRINT_CSS}</style></head><body>

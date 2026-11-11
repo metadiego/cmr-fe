@@ -4024,7 +4024,9 @@
         "ok": "cuadra",
         "short": "falta",
         "over": "sobra"
-      }
+      },
+      "cardSales": "Ventas en tarjetas (sin devoluciones)",
+      "chargedRefunded": "Cobrado {charged} · Devuelto −{refunded}"
     },
     "processClose": "Procesar cierre",
     "print": "Imprimir",
@@ -4082,7 +4084,11 @@
         "total": "Total del día",
         "col": "Facturador"
       },
-      "colFacturo": "Facturó"
+      "colFacturo": "Facturó",
+      "colAntesDescuento": "Antes del descuento",
+      "colBaseNeta": "Neto (base)",
+      "colFacturaOrigen": "Factura de origen",
+      "colFormaReembolso": "Forma de reembolso"
     },
     "cuadre_total": {
       "titulo": "Cuadre total",

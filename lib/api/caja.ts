@@ -42,7 +42,10 @@ export interface DetalleMetodoRow {
   slug: string;
   name: string;
   quantity: number;
-  amount: number;
+  amount: number; // net of the day's refunds (unchanged)
+  // BE #560: what was charged and what was refunded through this method (refunds positive).
+  sales?: number;
+  refunds?: number;
 }
 
 // Reporte del día (caja-reportes.service.ts → reporteDia). Fuente principal de la pantalla.
@@ -78,13 +81,16 @@ export interface ReporteDia {
   // del contenedor, no se traducen. Handoff cuadre-quien-facturo-por-cajero.
   porCajero?: Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
   detalle: {
-    efectivo: { quantity: number; amount: number };
+    efectivo: { quantity: number; amount: number; sales?: number; refunds?: number };
     tarjetas: DetalleMetodoRow[];
     otros: DetalleMetodoRow[];
     totalTarjetas: number;
     totalOtros: number;
     totalElectronicas: number;
     total: number;
+    // BE #560: cards WITHOUT refunds (to match the settlements) and the refunds per method.
+    cardSalesTotal?: number;
+    refundsByMethod?: Array<{ slug: string; name: string; amount: number }>;
   };
   pendientes: Array<{
     id: string;
@@ -122,6 +128,15 @@ export interface ReporteDia {
     invoiceId: string | null;
     refundedAmount: number;
     reason: string | null;
+    // BE #560: what accounting needs to reconcile each refund.
+    displayNumber?: string | null;
+    invoiceNumber?: string | null;
+    patient?: string | null;
+    medicalRecordNumber?: string | null;
+    refundMethod?: string | null;
+    refundMethodSlug?: string | null;
+    refundedTax?: number | null;
+    date?: string | null;
   }>;
   // Reconciliación lista para pintar (BE PR #389, `cuadre`→`reconciliation` en /api/v2): reemplaza
   // calcular "Diferencia (cuadra)" a mano en el FE. `contado:false` = nadie ha guardado un conteo
@@ -155,7 +170,8 @@ export interface ReporteDia {
 }
 // Una partida tributaria: monto facturado, descuento, base imponible, impuesto y nº de líneas.
 export interface TributarioPartida {
-  amount: number;
+  gross?: number; // BE #560: before the discount (invoice-wide discount spread onto lines included)
+  amount: number; // base + tax
   discount: number;
   base: number;
   tax: number;

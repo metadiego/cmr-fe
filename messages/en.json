@@ -4024,7 +4024,9 @@
         "ok": "balanced",
         "short": "short",
         "over": "over"
-      }
+      },
+      "cardSales": "Card sales (before refunds)",
+      "chargedRefunded": "Charged {charged} · Refunded −{refunded}"
     },
     "processClose": "Process close",
     "print": "Print",
@@ -4082,7 +4084,11 @@
         "total": "Day total",
         "col": "Biller"
       },
-      "colFacturo": "Billed by"
+      "colFacturo": "Billed by",
+      "colAntesDescuento": "Before discount",
+      "colBaseNeta": "Net (base)",
+      "colFacturaOrigen": "Original invoice",
+      "colFormaReembolso": "Refund method"
     },
     "cuadre_total": {
       "titulo": "Day total",

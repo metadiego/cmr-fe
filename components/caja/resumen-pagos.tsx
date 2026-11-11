@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { refundSplit } from "@/lib/caja/refunds-by-method";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { CajaDivision, ReporteDia } from "@/lib/api/caja";
@@ -99,7 +100,14 @@ export function ResumenPagos({
                   {row.name}
                   <span className="ml-1 text-xs text-muted-foreground">×{row.quantity}</span>
                 </span>
-                <span className="tabular-nums">{money(row.amount)}</span>
+                <span className="text-right">
+                  <span className="tabular-nums">{money(row.amount)}</span>
+                  {refundSplit(row) && (
+                    <span className="block text-[11px] text-muted-foreground">
+                      {tp("chargedRefunded", { charged: money(refundSplit(row)!.sales), refunded: money(refundSplit(row)!.refunds) })}
+                    </span>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
@@ -133,7 +141,14 @@ export function ResumenPagos({
                   {row.name}
                   <span className="ml-1 text-xs text-muted-foreground">×{row.quantity}</span>
                 </span>
-                <span className="tabular-nums">{money(row.amount)}</span>
+                <span className="text-right">
+                  <span className="tabular-nums">{money(row.amount)}</span>
+                  {refundSplit(row) && (
+                    <span className="block text-[11px] text-muted-foreground">
+                      {tp("chargedRefunded", { charged: money(refundSplit(row)!.sales), refunded: money(refundSplit(row)!.refunds) })}
+                    </span>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
@@ -147,10 +162,15 @@ export function ResumenPagos({
         <Row label={tp("salesCash")} value={money(salesCash)} />
         <Row label={tp("electronic")} value={money(detalle.totalElectronicas)} />
         <Row label={tp("totalCards")} value={money(detalle.totalTarjetas)} />
+        {/* Cards WITHOUT the day's refunds: what the settlements should show (BE #560). */}
+        {detalle.cardSalesTotal != null && <Row label={tp("cardSales")} value={money(detalle.cardSalesTotal)} />}
         <Row label={tp("totalCMA")} value={money(detalle.total)} strong />
         <div className="my-1 border-t" />
         <Row label={tp("grossBilling")} value={money(ventas.bruto)} />
         <Row label={tp("returns")} value={money(devoluciones.total)} />
+        {(detalle.refundsByMethod ?? []).map((m) => (
+          <Row key={m.slug} label={`· ${m.name}`} value={`−${money(m.amount)}`} />
+        ))}
         <Row label={tp("netBilling")} value={money(ventas.neto)} strong />
         <div className="my-1 border-t" />
         <Row label={tp("cashInDrawer")} value={money(contado)} />
