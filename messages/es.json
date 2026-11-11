@@ -705,7 +705,8 @@
         "ehrIntegration": "Integración con el EHR",
         "schedulingBridge": "Puente con Google Sheets",
         "pacientes": "Pacientes",
-        "numeracion": "Numeración"
+        "numeracion": "Numeración",
+        "caja": "Caja"
       },
       "frontdesk_autopresente": "Auto-presente al pagar",
       "auto_present_follow_up": "Auto-presente en seguimiento",
@@ -727,7 +728,8 @@
       "numeracion_presupuestos": "Presupuestos",
       "numeracion_record_paciente": "Récord de paciente",
       "numeracion_devoluciones": "Devoluciones",
-      "agenda_blocking_rules": "Qué bloquea al agendar"
+      "agenda_blocking_rules": "Qué bloquea al agendar",
+      "cash_count_mode": "Cómo se cuenta el efectivo"
     },
     "agendaRules": {
       "title": "Qué bloquea al agendar",
@@ -738,6 +740,11 @@
       "soloAvisa": "Solo avisa",
       "showOffStepStartsHelp": "Enseñar también las horas que no son de inicio del servicio (p. ej. las :30 en uno que empieza en punto); se agendan igual, con aviso."
     }
+  },
+  "cashCountMode": {
+    "title": "Cómo se cuenta el efectivo del día",
+    "help": "Flexible deja cada día elegir entre la suma de los cajeros o un conteo único, como hoy. Dos conteos cuenta consulta y general por separado, siempre sumados. Un solo conteo reemplaza los dos por uno de toda la caja.",
+    "guardado": "Guardado"
   },
   "tableroEditor": {
     "title": "Columnas del tablero",
@@ -1342,6 +1349,7 @@
   },
   "nav": {
     "agendaRules": "Qué bloquea al agendar",
+    "cashCountMode": "Cómo se cuenta el efectivo",
     "estadisticasVentas": "Ventas (analítica)",
     "estadisticasAsistencia": "Asistencia (analítica)",
     "estadisticasPacientes": "Pacientes (analítica)",
@@ -4129,7 +4137,18 @@
       },
       "suma_cajeros": "Se usa la suma de los cajeros",
       "conteo_unico": "Hacer un conteo único",
-      "descuadre": "El conteo del día difiere en {monto}"
+      "descuadre": "El conteo del día difiere en {monto}",
+      "divisionConsulta": "Consulta",
+      "divisionGeneral": "General",
+      "sinContarAviso": "Sin contar todavía"
+    },
+    "countMode": {
+      "divisionNotCounted": "Falta el conteo de {division}",
+      "singleCountNotUsed": "Hay un conteo único guardado que este centro no usa (cuenta por división)",
+      "dayNotCounted": "Falta el conteo único del día",
+      "flexible": "Flexible (lo de hoy)",
+      "split": "Dos conteos (consulta y general)",
+      "single": "Un solo conteo"
     },
     "cuadreGeneral": {
       "title": "Cuadre general",

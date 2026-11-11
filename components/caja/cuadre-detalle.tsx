@@ -51,7 +51,7 @@ export function CuadreDetalle({
   division?: string;
   fecha: string;
   centroNombre?: string;
-  reporte: ReporteDia;
+  reporte: Omit<ReporteDia, "countMode">;
   resumen: CuadreResumen;
   // Subtotales informativos configurables de tarjeta (p.ej. VISA + MASTERCARD), el mismo array que
   // ResumenPagos pinta en pantalla (lib/caja/totales.ts subtotalesTarjeta()) — faltaba en la hoja
@@ -404,7 +404,7 @@ function buildPrintHtml(args: {
   centroNombre: string;
   fechaLabel: string;
   resumen: CuadreResumen;
-  reporte: ReporteDia;
+  reporte: Omit<ReporteDia, "countMode">;
   subtotalesTarjeta: Array<{ label: string; monto: number }>;
   exoneradas: Array<{ id: string; numero: string | null; paciente: string | null }>;
   productSalesHtml?: string;

@@ -124,6 +124,7 @@ function PanelItemRow({ item, centro, onChanged }: { item: PanelItem; centro: st
   if (item.clave === "frontdeskConsultationOrder") return <OrdenRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   if (item.clave === "camposObligatorios") return <CamposRow item={item} label={label} />;
   if (item.clave === "blockingRules") return <AgendaRulesRow item={item} label={label} />;
+  if (item.clave === "countMode") return <CountModeRow item={item} label={label} />;
   if (item.tipo === "otro" && typeof item.valor === "number") return <NumeroRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   return null;
 }
@@ -354,6 +355,21 @@ function AgendaRulesRow({ item, label }: { item: PanelItem; label: string }) {
       <Label>{label}</Label>
       <Link href="/configuration/agenda-rules" className="text-xs font-medium text-primary hover:underline">
         {blockingRules.join(", ")}
+      </Link>
+    </div>
+  );
+}
+
+// Cómo se cuenta el efectivo del día (BE #566) — solo un link a su propia pantalla (lejos de los
+// usuarios del cuadre a propósito, handoff .personal/handoff-cuadre-uno-o-dos-conteos.md).
+function CountModeRow({ item, label }: { item: PanelItem; label: string }) {
+  const tRoot = useTranslations();
+  const mode = typeof item.valor === "string" ? item.valor : null;
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <Label>{label}</Label>
+      <Link href="/configuration/cash-count-mode" className="text-xs font-medium text-primary hover:underline">
+        {mode && tRoot.has(`caja.countMode.${mode}`) ? tRoot(`caja.countMode.${mode}`) : mode}
       </Link>
     </div>
   );

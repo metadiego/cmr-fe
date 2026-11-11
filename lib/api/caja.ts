@@ -167,6 +167,45 @@ export interface ReporteDia {
     exonerado: TributarioPartida;
     facturasExoneradas: string[]; // ids de factura → se cruzan con `documentos` para el nº
   };
+  // Modo de conteo del centro (BE #566, handoff .personal/handoff-cuadre-uno-o-dos-conteos.md).
+  // `countRequired:false` (centro `single`) = el conteo de ESTA división es respaldo, no obligatorio:
+  // el cajero no debe ver parpadear "sin contar" por no haberlo hecho. Ausente = BE viejo → como hoy.
+  countMode?: { mode: CashCountMode; countRequired: boolean };
+}
+
+// Modo de conteo de efectivo del centro (BE #566). `flexible` = hoy, sin cambios; `split` = dos
+// conteos (consulta + general) siempre sumados; `single` = un solo conteo de toda la caja.
+export type CashCountMode = "flexible" | "split" | "single";
+// OJO: claves en inglés ("consultation"/"general"), DISTINTAS de `CajaDivision` ("consulta"/"general")
+// que ya usa `?division=` en el resto de este archivo — no son el mismo campo, no se confunden.
+export type CountDivisionKey = "consultation" | "general";
+export interface CashCountModeWarning {
+  code: string;
+  labelKey: string;
+  division?: CountDivisionKey;
+}
+export interface CashCountModeStatus {
+  mode: CashCountMode;
+  complete: boolean;
+  warnings: CashCountModeWarning[];
+}
+export interface DivisionCountLine {
+  denominacionId: string;
+  valor: number;
+  cantidad: number;
+  monto: number;
+}
+export interface DivisionCount {
+  hasCount: boolean;
+  counted: number;
+  fund: number;
+  expected: number;
+  difference: number;
+  lines: DivisionCountLine[];
+}
+export interface DivisionCounts {
+  consultation: DivisionCount;
+  general: DivisionCount;
 }
 // Una partida tributaria: monto facturado, descuento, base imponible, impuesto y nº de líneas.
 export interface TributarioPartida {
@@ -410,9 +449,15 @@ export interface ComprobacionCuadreTotal {
 // Mismo árbol que ReporteDia (el BE reusa el reporte del día, con `division`/`userId` en null: las dos
 // divisiones juntas) más el estado del cuadre único y la comprobación. `documentos` trae la división de
 // cada factura (campo opcional en ReporteDia, siempre presente aquí).
-export interface CuadreTotalDia extends ReporteDia {
+// `countMode` aquí reemplaza el de ReporteDia: en el cuadre TOTAL es el del DÍA completo
+// ({mode, complete, warnings}), no el de una sola división ({mode, countRequired}).
+export interface CuadreTotalDia extends Omit<ReporteDia, "countMode"> {
   dayReconciliation: { id: string; status: CuadreTotalEstado; ownCount: boolean } | null;
   check: ComprobacionCuadreTotal;
+  // BE #566: con qué modo se cuenta este día. Un día CERRADO conserva el modo con el que se cerró
+  // (no cambia si tesorería enciende el interruptor después); al reabrir, vuelve al del centro.
+  countMode?: CashCountModeStatus;
+  divisionCounts?: DivisionCounts;
 }
 
 export function getReporteCuadreTotal(fecha: string): Promise<CuadreTotalDia> {
@@ -440,8 +485,35 @@ export function contarCuadreTotal(
   });
 }
 
-export function cerrarCuadreTotal(id: string): Promise<unknown> {
-  return apiFetch<unknown>(`/cash/total-reconciliation/${id}/close`, {
+// `countMode` null = la sesión no está en el centro de esa hoja (BE #566) → no mostrar avisos.
+export function cerrarCuadreTotal(id: string): Promise<{ countMode?: CashCountModeStatus | null }> {
+  return apiFetch<{ countMode?: CashCountModeStatus | null }>(`/cash/total-reconciliation/${id}/close`, {
     method: "POST",
+  });
+}
+
+// El interruptor por centro (BE #566): GET es de lectura abierta (caja.read basta, trae `modes` para
+// pintar las opciones sin inventarlas); PUT exige `caja.count_mode` (concesión explícita, ningún rol
+// la trae por defecto). Un centro por llamada — varios en `centerIds` da 400.
+export interface CashCountModeConfig {
+  clinicId: string;
+  clinicName: string;
+  mode: CashCountMode;
+  modes: CashCountMode[];
+}
+export function getCashCountMode(centerIds?: string[]): Promise<CashCountModeConfig[]> {
+  const sp = new URLSearchParams();
+  for (const id of centerIds ?? []) sp.append("centerIds", id);
+  const qs = sp.toString();
+  return apiFetch<CashCountModeConfig[]>(`/cash/count-mode${qs ? `?${qs}` : ""}`);
+}
+export function setCashCountMode(
+  centroId: string,
+  mode: CashCountMode,
+): Promise<{ clinicId: string; previous: CashCountMode; current: CashCountMode }> {
+  const sp = new URLSearchParams({ centerIds: centroId });
+  return apiFetch(`/cash/count-mode?${sp.toString()}`, {
+    method: "PUT",
+    body: JSON.stringify({ mode }),
   });
 }

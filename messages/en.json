@@ -705,7 +705,8 @@
         "ehrIntegration": "EHR integration",
         "schedulingBridge": "Google Sheets bridge",
         "pacientes": "Patients",
-        "numeracion": "Numbering"
+        "numeracion": "Numbering",
+        "caja": "Cash"
       },
       "frontdesk_autopresente": "Auto check-in on payment",
       "auto_present_follow_up": "Auto check-in on follow-up",
@@ -727,7 +728,8 @@
       "numeracion_presupuestos": "Quotes",
       "numeracion_record_paciente": "Patient record",
       "numeracion_devoluciones": "Returns",
-      "agenda_blocking_rules": "What blocks booking"
+      "agenda_blocking_rules": "What blocks booking",
+      "cash_count_mode": "How cash is counted"
     },
     "agendaRules": {
       "title": "What blocks booking",
@@ -738,6 +740,11 @@
       "soloAvisa": "Warns only",
       "showOffStepStartsHelp": "Also show the times off the service's start step (e.g. :30 on one that starts on the hour); they still book, with a warning."
     }
+  },
+  "cashCountMode": {
+    "title": "How the day's cash is counted",
+    "help": "Flexible leaves each day free to choose between the cashiers' sum or a single count, like today. Two counts counts consultation and general separately, always summed. One single count replaces the two with one of the whole drawer.",
+    "guardado": "Saved"
   },
   "tableroEditor": {
     "title": "Board columns",
@@ -1342,6 +1349,7 @@
   },
   "nav": {
     "agendaRules": "What blocks booking",
+    "cashCountMode": "How cash is counted",
     "estadisticasVentas": "Sales (analytics)",
     "estadisticasAsistencia": "Attendance (analytics)",
     "estadisticasPacientes": "Patients (analytics)",
@@ -4129,7 +4137,18 @@
       },
       "suma_cajeros": "Using the cashiers' sum",
       "conteo_unico": "Do a single count",
-      "descuadre": "The day count differs by {monto}"
+      "descuadre": "The day count differs by {monto}",
+      "divisionConsulta": "Consultation",
+      "divisionGeneral": "General",
+      "sinContarAviso": "Not counted yet"
+    },
+    "countMode": {
+      "divisionNotCounted": "Missing the {division} count",
+      "singleCountNotUsed": "There's a saved single count this center doesn't use (it counts per division)",
+      "dayNotCounted": "Missing the day's single count",
+      "flexible": "Flexible (today's)",
+      "split": "Two counts (consultation and general)",
+      "single": "One single count"
     },
     "cuadreGeneral": {
       "title": "General cash-up",

@@ -185,9 +185,16 @@ function Editor({
 }) {
   const t = useTranslations("caja.cuadre_total");
   const tCaja = useTranslations("caja");
+  const tRoot = useTranslations();
 
   const cerrado = esSoloLecturaCuadreTotal(reporte.dayReconciliation?.status);
-  const [contandoUnico, setContandoUnico] = React.useState(reporte.dayReconciliation?.ownCount ?? false);
+  // Modo de conteo del centro (BE #566): ausente = BE viejo o `flexible` → esta pantalla no cambia.
+  // `split` reemplaza la grilla editable por los dos paneles de división (abajo); `single` la deja
+  // siempre encendida, sin el botón para volver a "suma de cajeros" (no existe esa alternativa ahí).
+  const countMode = reporte.countMode?.mode ?? "flexible";
+  const esSplit = countMode === "split";
+  const esSingle = countMode === "single";
+  const [contandoUnico, setContandoUnico] = React.useState(reporte.dayReconciliation?.ownCount ?? esSingle);
   // El conteo único NO es para "cuadrar" desde cero: los cajeros ya contaron el suyo al cerrar su
   // propia caja (consulta/general). `conteoEfectivo.lines` del BE ya viene UNIFICADO — la suma de
   // esos conteos, o el override del gerente si ya hizo uno (owner, 05-nov-2026) — así que se siembra
@@ -202,7 +209,7 @@ function Editor({
   const [procesando, setProcesando] = React.useState(false);
 
   const puedeContarDia = !cerrado && (esHoy || puedeRetroactivo) && puedeContar;
-  const contarHabilitado = puedeContarDia && contandoUnico;
+  const contarHabilitado = !esSplit && puedeContarDia && contandoUnico;
   const autosave = useCuadreTotalAutosave(contarHabilitado, fecha, conteo, onReload);
 
   const subtotalesTarjeta = React.useMemo(
@@ -308,9 +315,23 @@ function Editor({
 
       <ComprobacionCuadreTotal check={reporte.check} ownCount={reporte.dayReconciliation?.ownCount ?? false} />
 
+      {/* Avisos del modo de conteo (BE #566): NUNCA deshabilitan el cierre, solo informan. */}
+      {(reporte.countMode?.warnings ?? []).map((w, i) => (
+        <div
+          key={`${w.code}-${i}`}
+          className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-foreground"
+        >
+          {w.division
+            ? tRoot(w.labelKey, { division: t(w.division === "consultation" ? "divisionConsulta" : "divisionGeneral") })
+            : tRoot(w.labelKey)}
+        </div>
+      ))}
+
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         <div className="space-y-4">
-          {puedeContarDia && (
+          {/* El botón de modo solo tiene sentido en `flexible`: en `split` no se usa (dos conteos
+              siempre sumados); en `single` es el único camino, sin alternativa que ofrecer. */}
+          {puedeContarDia && !esSplit && !esSingle && (
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-card px-4 py-2.5 ring-1 ring-foreground/10">
               <div className="flex items-center gap-2 text-sm">
                 <Badge variant={contandoUnico ? "default" : "secondary"}>
@@ -329,14 +350,37 @@ function Editor({
             </div>
           )}
 
-          <ConteoDenominaciones
-            denominaciones={denoms}
-            cantidades={conteo}
-            disabled={!contarHabilitado}
-            hint={!contandoUnico ? tCaja("count.consolidatedHint") : undefined}
-            saveState={contarHabilitado ? autosave.state : "idle"}
-            onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
-          />
+          {esSplit && reporte.divisionCounts ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ConteoDenominaciones
+                denominaciones={denoms}
+                cantidades={Object.fromEntries(reporte.divisionCounts.consultation.lines.map((l) => [l.denominacionId, l.cantidad]))}
+                disabled
+                fondo={reporte.divisionCounts.consultation.fund}
+                aDepositar={reporte.divisionCounts.consultation.counted - reporte.divisionCounts.consultation.fund}
+                hint={!reporte.divisionCounts.consultation.hasCount ? t("sinContarAviso") : undefined}
+                onChange={() => {}}
+              />
+              <ConteoDenominaciones
+                denominaciones={denoms}
+                cantidades={Object.fromEntries(reporte.divisionCounts.general.lines.map((l) => [l.denominacionId, l.cantidad]))}
+                disabled
+                fondo={reporte.divisionCounts.general.fund}
+                aDepositar={reporte.divisionCounts.general.counted - reporte.divisionCounts.general.fund}
+                hint={!reporte.divisionCounts.general.hasCount ? t("sinContarAviso") : undefined}
+                onChange={() => {}}
+              />
+            </div>
+          ) : (
+            <ConteoDenominaciones
+              denominaciones={denoms}
+              cantidades={conteo}
+              disabled={!contarHabilitado}
+              hint={!contandoUnico ? tCaja("count.consolidatedHint") : undefined}
+              saveState={contarHabilitado ? autosave.state : "idle"}
+              onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
+            />
+          )}
 
           <DesgloseCajeros
             cajeros={porCajero}

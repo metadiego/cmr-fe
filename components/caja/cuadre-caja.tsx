@@ -346,8 +346,10 @@ function Editor({
   const diferencia = cerrado ? (cuadreInicial?.difference ?? 0) : diferenciaEnVivo;
   const aDepositar = cerrado ? contado - inicio : contado - inicioEnVivo;
   // Nadie ha guardado un conteo real todavía: nunca el verde de "cuadra" (handoff
-  // cuadre-efectivo-sin-conteo-descuadra-handoff-fe.md).
-  const sinContar = !cerrado && vivo.sinContar;
+  // cuadre-efectivo-sin-conteo-descuadra-handoff-fe.md). EXCEPTO con `countRequired: false`
+  // (centro en modo `single`, BE #566): el conteo de esta división es respaldo, no obligatorio —
+  // no parpadear "sin contar" por no haberlo hecho. Ausente/`true` = como siempre.
+  const sinContar = !cerrado && vivo.sinContar && reporte.countMode?.countRequired !== false;
   const porCajero = reporte.porCajero ?? [];
 
   // Sign-off («Acepto»): the cashier signs her own sheet; caja.ver_todos signs any sheet as manager.
