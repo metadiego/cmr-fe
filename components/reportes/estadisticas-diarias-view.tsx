@@ -9,6 +9,7 @@ import { PrinterIcon, WhatsappIcon, Mail01Icon, Copy01Icon } from "@hugeicons/co
 import { toast } from "sonner";
 
 import { getEstadisticasDiarias, type EstadisticasDiarias } from "@/lib/api/estadisticas";
+import { getServicios } from "@/lib/api/servicios";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { Button } from "@/components/ui/button";
@@ -93,6 +94,18 @@ export function EstadisticasDiariasView() {
   const data = res.state.kind === "ok" ? res.state.data : null;
   const cargando = res.state.kind === "loading";
 
+  // Qué servicios declaran su propia unidad (owner's call, 11-nov: por configuración, NUNCA por
+  // nombre — ver lib/estadisticas/services.ts). Catálogo del centro activo, no del rango elegido.
+  const serviciosRes = useResource<ReadonlySet<string>>(
+    () =>
+      gate.centro
+        ? getServicios(gate.centro).then((ss) => new Set(ss.filter((s) => s.statisticsUnitKey).map((s) => s.slug)))
+        : Promise.resolve(new Set<string>()),
+    [gate.centro],
+  );
+  const serviciosData = serviciosRes.state.kind === "ok" ? serviciosRes.state.data : null;
+  const slugsConUnidad = React.useMemo(() => serviciosData ?? new Set<string>(), [serviciosData]);
+
   const rangoLabel = query.hasta && query.hasta !== query.desde ? `${fmtFecha(query.desde)} – ${fmtFecha(query.hasta)}` : fmtFecha(query.desde);
 
   // Reporte en TEXTO PLANO (para WhatsApp/Correo/Copiar): se lee en el móvil sin abrir nada.
@@ -105,16 +118,16 @@ export function EstadisticasDiariasView() {
     if (data.services.length) {
       lineas.push(`${t("servicios")}   (${t("col.aplicados")} / ${t("col.vendidos")})`);
       data.services.forEach((s) => {
-        const aplicado = dailyRowShowsUnits(s)
+        const aplicado = dailyRowShowsUnits(s.slug, slugsConUnidad)
           ? t("col.aplicadosUnidades", { visits: s.visits, therapies: s.therapies })
-          : String(s.visits);
+          : String(s.therapies);
         lineas.push(`  ${s.name}: ${aplicado} / ${s.sold}`);
       });
       lineas.push("");
     }
     revenueLines(data).forEach((l) => lineas.push(`${t(REVENUE_LABEL[l.key])}   ${money.format(l.amount)}`));
     return lineas.join("\n");
-  }, [data, gate.centroNombre, rangoLabel, t]);
+  }, [data, gate.centroNombre, rangoLabel, t, slugsConUnidad]);
 
   function imprimir() {
     const el = printRef.current;
@@ -184,7 +197,14 @@ export function EstadisticasDiariasView() {
           {/* Región imprimible: una sola tarjeta, la del centro activo. */}
           {data && (
             <div ref={printRef} className="mx-auto max-w-3xl">
-              <DiariaCard centro={gate.centroNombre} fecha={rangoLabel} data={data} t={t} verDevueltos={verDevueltos} />
+              <DiariaCard
+                centro={gate.centroNombre}
+                fecha={rangoLabel}
+                data={data}
+                t={t}
+                verDevueltos={verDevueltos}
+                slugsConUnidad={slugsConUnidad}
+              />
             </div>
           )}
         </>
@@ -199,12 +219,14 @@ function DiariaCard({
   data,
   t,
   verDevueltos,
+  slugsConUnidad,
 }: {
   centro: string;
   fecha: string;
   data: EstadisticasDiarias;
   t: (k: string, values?: Record<string, string | number>) => string;
   verDevueltos: boolean;
+  slugsConUnidad: ReadonlySet<string>;
 }) {
   const devueltos = verDevueltos && showReturned(data);
   const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue && !data.refunds;
@@ -248,11 +270,11 @@ function DiariaCard({
                       <td className="py-1.5 pr-3 font-medium">{s.name}</td>
                       <td
                         className="r px-3 py-1.5 text-right tabular-nums"
-                        title={dailyRowShowsUnits(s) ? t("tip.aplicadosUnidades") : undefined}
+                        title={dailyRowShowsUnits(s.slug, slugsConUnidad) ? t("tip.aplicadosUnidades") : undefined}
                       >
-                        {dailyRowShowsUnits(s)
+                        {dailyRowShowsUnits(s.slug, slugsConUnidad)
                           ? t("col.aplicadosUnidades", { visits: s.visits, therapies: s.therapies })
-                          : nf.format(s.visits)}
+                          : nf.format(s.therapies)}
                       </td>
                       <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.sold)}</td>
                       {devueltos && <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.returned ?? 0)}</td>}

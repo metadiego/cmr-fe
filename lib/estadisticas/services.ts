@@ -15,10 +15,12 @@ export function hasVitals(v: { rows?: readonly unknown[] } | null | undefined): 
 }
 
 /**
- * «Estadísticas Diarias» (BE #563): per service row, `visits` (patients) and `therapies` (units —
- * laser areas, Vit C/Intravenoso doses, 1 per visit elsewhere) only differ where the service
- * declared a `statisticsUnitKey`. A row where they match shows ONE number, same as before #563.
+ * «Estadísticas Diarias» (BE #563): a row shows «{visits} pac. / {therapies} u.» ONLY for the
+ * service(s) that declared a `statisticsUnitKey` (GET /services, owner's call, 11-nov — NEVER by
+ * name/slug: laser areas differ from visits too, but that split would confuse there, so it stays
+ * one number like before #563). Everything else keeps showing ONE number: `therapies` (areas for
+ * laser, the old `applied` semantics — see EstDiariaServicio in lib/api/estadisticas.ts).
  */
-export function dailyRowShowsUnits(s: { visits: number; therapies: number }): boolean {
-  return s.therapies !== s.visits;
+export function dailyRowShowsUnits(slug: string, slugsWithUnitKey: ReadonlySet<string>): boolean {
+  return slugsWithUnitKey.has(slug);
 }

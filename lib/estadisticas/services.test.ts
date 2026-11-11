@@ -18,10 +18,11 @@ test("Vitales tab only with rows", () => {
   assert.equal(hasVitals(undefined), false);
 });
 
-test("daily row: Vit C with one vial of 2 → shows visits AND units", () => {
-  assert.equal(dailyRowShowsUnits({ visits: 19, therapies: 20 }), true);
+test("daily row: the service declared statisticsUnitKey (Vit C) → shows visits AND units", () => {
+  assert.equal(dailyRowShowsUnits("vitc", new Set(["vitc"])), true);
 });
 
-test("daily row: 1 unit per visit (most services) → the number alone", () => {
-  assert.equal(dailyRowShowsUnits({ visits: 12, therapies: 12 }), false);
+test("daily row: laser areas differ from visits too, but it never declared a unit key → one number", () => {
+  assert.equal(dailyRowShowsUnits("laser", new Set(["vitc"])), false);
+  assert.equal(dailyRowShowsUnits("laser", new Set()), false);
 });

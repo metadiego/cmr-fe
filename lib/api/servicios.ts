@@ -13,6 +13,10 @@ import { apiFetch, oneCenterPath, tenantOf } from "./client";
 export type Servicio = components["schemas"]["ServicioEntity"] & {
   allowSessionFixWithoutPackage: boolean;
   pushesToEhrOnPresente: boolean;
+  // Dónde guarda sus unidades esta sesión (áreas, dosis…) — null la mayoría (1 por visita). BE #563,
+  // «Estadísticas Diarias» muestra «pac. / u.» SOLO en el servicio que lo declara (hoy: Sueroterapia
+  // Vit C, `statisticsUnitKey: "cantidad"`), nunca por nombre. Ver lib/estadisticas/services.ts.
+  statisticsUnitKey: string | null;
 };
 
 function asArray<T>(res: unknown): T[] {
