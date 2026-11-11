@@ -7,8 +7,9 @@ import type { RightNowCenter } from "@/lib/api/right-now";
 import { getFacturasTablero, type FacturaTableroFila } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
 import { money } from "@/lib/caja/totales";
+import { cn } from "@/lib/utils";
 import { attendedSplit, topSellers } from "@/lib/right-now/view";
-import { Empty, Panel, Stat } from "@/components/right-now/parts";
+import { Empty, Panel, Pill, RankBadge, Stat } from "@/components/right-now/parts";
 import { ServicesPanel } from "@/components/right-now/services-panel";
 import { Tooltip } from "@/components/ui/tooltip";
 
@@ -37,14 +38,12 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
         {sellers.length === 0 ? (
           <p className="mt-1 text-sm text-muted-foreground">{t("sales.noSellers")}</p>
         ) : (
-          <ol className="mt-1 space-y-1 text-sm">
+          <ol className="mt-1.5 space-y-1.5">
             {sellers.map((s, i) => (
-              <li key={s.userId} className="flex items-center justify-between gap-2">
-                <span className="min-w-0 truncate">
-                  <span className="mr-2 text-muted-foreground tabular-nums">{i + 1}.</span>
-                  {s.name ?? t("sales.unknownSeller")}
-                </span>
-                <span className="tabular-nums font-medium">{money(s.total)}</span>
+              <li key={s.userId} className="flex items-center gap-2 text-sm">
+                <RankBadge rank={i + 1} />
+                <span className="min-w-0 flex-1 truncate">{s.name ?? t("sales.unknownSeller")}</span>
+                <span className="tabular-nums font-semibold">{money(s.total)}</span>
               </li>
             ))}
           </ol>
@@ -71,51 +70,41 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
         {doctors.length === 0 ? (
           <Empty>{t("doctors.empty")}</Empty>
         ) : (
-          <div className="-mx-4 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-1.5 font-medium">{t("doctors.colDoctor")}</th>
-                  <th className="px-2 py-1.5 text-right font-medium">{t("doctors.colTotal")}</th>
-                  <th className="px-2 py-1.5 text-right font-medium">{t("doctors.colAttended")}</th>
-                  <th className="px-2 py-1.5 text-right font-medium">{t("doctors.colFirst")}</th>
-                  <th className="px-2 py-1.5 text-right font-medium">{t("doctors.colFollow")}</th>
-                  <th className="px-4 py-1.5 text-right font-medium">{t("doctors.colNet")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {doctors.map((d, i) => {
-                  // Fila de cierre "lo facturado sin médico" (handoff-ahora-mismo-sin-medico): sin
-                  // ranking (no es un médico) y atenuada; sin ella, la columna Facturado no sumaba la
-                  // venta del día completa.
-                  const sinMedico = !!d.labelKey;
-                  return (
-                    <tr key={d.doctorId ?? "no-doctor"} className={sinMedico ? "text-muted-foreground italic" : undefined}>
-                      <td className="px-4 py-1.5">
-                        {!sinMedico && <span className="mr-2 text-muted-foreground tabular-nums not-italic">{i + 1}.</span>}
-                        {sinMedico ? tRoot(d.labelKey!) : (d.name ?? "—")}
-                      </td>
-                      <td className="px-2 py-1.5 text-right tabular-nums">{sinMedico ? "—" : d.total}</td>
-                      <td className="px-2 py-1.5 text-right tabular-nums font-medium">{sinMedico ? "—" : d.attended}</td>
-                      <td className="px-2 py-1.5 text-right tabular-nums">{sinMedico ? "—" : d.firstVisit}</td>
-                      <td className="px-2 py-1.5 text-right tabular-nums">{sinMedico ? "—" : d.followUp}</td>
-                      <td className="px-4 py-1.5 text-right tabular-nums">
-                        {sinMedico ? (
-                          <Tooltip content={<PendingDoctorList clinicId={center.clinicId} date={center.date} />}>
-                            <span className="cursor-help underline decoration-dotted underline-offset-2">
-                              {money(d.net)}
-                            </span>
-                          </Tooltip>
-                        ) : (
-                          money(d.net)
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ul className="space-y-2">
+            {doctors.map((d, i) => {
+              // Fila de cierre "lo facturado sin médico" (handoff-ahora-mismo-sin-medico): sin
+              // ranking (no es un médico) y atenuada; sin ella, la columna Facturado no sumaba la
+              // venta del día completa.
+              const sinMedico = !!d.labelKey;
+              return (
+                <li key={d.doctorId ?? "no-doctor"} className="flex items-center gap-2 text-sm">
+                  {sinMedico ? <span className="size-5 shrink-0" aria-hidden /> : <RankBadge rank={i + 1} />}
+                  <span className={cn("min-w-0 flex-1 truncate", sinMedico && "italic text-muted-foreground")}>
+                    {sinMedico ? tRoot(d.labelKey!) : (d.name ?? "—")}
+                  </span>
+                  {!sinMedico && (
+                    <span className="hidden shrink-0 items-center gap-1 sm:flex">
+                      <Pill>{d.total} {t("doctors.colTotal")}</Pill>
+                      <Pill tone="success">{d.attended} {t("doctors.colAttended")}</Pill>
+                      <Pill tone="info">{d.firstVisit} {t("doctors.colFirst")}</Pill>
+                      <Pill>{d.followUp} {t("doctors.colFollow")}</Pill>
+                    </span>
+                  )}
+                  <span className="shrink-0 text-right font-semibold tabular-nums">
+                    {sinMedico ? (
+                      <Tooltip content={<PendingDoctorList clinicId={center.clinicId} date={center.date} />}>
+                        <span className="cursor-help underline decoration-dotted underline-offset-2">
+                          {money(d.net)}
+                        </span>
+                      </Tooltip>
+                    ) : (
+                      money(d.net)
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </Panel>
 

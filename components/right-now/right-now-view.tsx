@@ -11,7 +11,7 @@ import { useCitaStream as useLiveStream } from "@/hooks/use-cita-stream";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LiveBadge } from "@/components/live-badge";
-import { Stat } from "@/components/right-now/parts";
+import { cn } from "@/lib/utils";
 import { CenterColumn } from "@/components/right-now/center-column";
 import { CallsPanel } from "@/components/right-now/calls-panel";
 
@@ -81,17 +81,17 @@ export function RightNowView() {
         </div>
       ) : (
         <>
-          <section className="rounded-lg bg-card p-4 ring-1 ring-foreground/10 shadow-sm">
-            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("combined")}</div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 xl:grid-cols-8">
-              <Stat label={t("kpi.netSales")} value={money(combined?.sales?.neto ?? 0)} />
-              <Stat label={t("kpi.invoices")} value={combined?.sales?.invoices ?? 0} />
-              <Stat label={t("kpi.refunds")} value={combined?.sales?.refunds ?? 0} tone="muted" />
-              <Stat label={t("kpi.present")} value={combined?.patients?.present ?? 0} />
-              <Stat label={t("kpi.attended")} value={combined?.patients?.attended ?? 0} tone="success" />
-              <Stat label={t("kpi.pending")} value={combined?.patients?.pending ?? 0} tone="warning" />
-              <Stat label={t("kpi.calls")} value={combined?.calls?.consolidated?.total ?? 0} />
-              <Stat label={t("kpi.alerts")} value={combined?.alerts?.total ?? 0} tone={(combined?.alerts?.total ?? 0) > 0 ? "warning" : "muted"} />
+          <section className="overflow-hidden rounded-lg bg-primary text-primary-foreground shadow-sm">
+            <div className="px-4 pt-3 text-[11px] font-semibold uppercase tracking-wide text-primary-foreground/70">{t("combined")}</div>
+            <div className="grid grid-cols-2 gap-px bg-primary-foreground/10 p-px sm:grid-cols-4 xl:grid-cols-8">
+              <KpiTile label={t("kpi.netSales")} value={money(combined?.sales?.neto ?? 0)} />
+              <KpiTile label={t("kpi.invoices")} value={combined?.sales?.invoices ?? 0} />
+              <KpiTile label={t("kpi.refunds")} value={combined?.sales?.refunds ?? 0} dim />
+              <KpiTile label={t("kpi.present")} value={combined?.patients?.present ?? 0} />
+              <KpiTile label={t("kpi.attended")} value={combined?.patients?.attended ?? 0} accent="success" />
+              <KpiTile label={t("kpi.pending")} value={combined?.patients?.pending ?? 0} accent="warning" />
+              <KpiTile label={t("kpi.calls")} value={combined?.calls?.consolidated?.total ?? 0} accent="info" />
+              <KpiTile label={t("kpi.alerts")} value={combined?.alerts?.total ?? 0} accent={(combined?.alerts?.total ?? 0) > 0 ? "destructive" : undefined} />
             </div>
           </section>
 
@@ -112,5 +112,37 @@ export function RightNowView() {
         </>
       )}
     </PageContainer>
+  );
+}
+
+// One number in the combined banner: on the `bg-primary` strip, so a plain muted-foreground label
+// would vanish — every tile gets its own slightly-lighter backing instead of the page's card color,
+// and `accent` tints the VALUE for the ones that mean something is wrong/pending (never the label).
+function KpiTile({
+  label,
+  value,
+  accent,
+  dim,
+}: {
+  label: React.ReactNode;
+  value: React.ReactNode;
+  accent?: "success" | "warning" | "destructive" | "info";
+  dim?: boolean;
+}) {
+  const accentCls =
+    accent === "success"
+      ? "text-emerald-300"
+      : accent === "warning"
+        ? "text-amber-300"
+        : accent === "destructive"
+          ? "text-red-300"
+          : accent === "info"
+            ? "text-sky-300"
+            : "text-primary-foreground";
+  return (
+    <div className="min-w-0 bg-primary px-4 py-3">
+      <div className="truncate text-[11px] font-medium uppercase tracking-wide text-primary-foreground/60">{label}</div>
+      <div className={cn("text-xl font-bold tabular-nums", dim ? "text-primary-foreground/50" : accentCls)}>{value}</div>
+    </div>
   );
 }

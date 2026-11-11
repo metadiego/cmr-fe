@@ -58,3 +58,43 @@ export function Stat({
 export function Empty({ children }: { children: React.ReactNode }) {
   return <p className="rounded-md border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">{children}</p>;
 }
+
+// Numbered medal for a ranking row (owner, 11-nov: legacy's "Ahora Mismo" read denser/livelier than
+// ours — this + Pill below are the pieces that make a ranking scannable without a table). Top 3 get a
+// color; everyone else gets a plain number, same size so the list doesn't jump around.
+export function RankBadge({ rank }: { rank: number }) {
+  const cls =
+    rank === 1
+      ? "bg-amber-400 text-amber-950"
+      : rank === 2
+        ? "bg-slate-300 text-slate-800 dark:bg-slate-400 dark:text-slate-900"
+        : rank === 3
+          ? "bg-orange-400/80 text-orange-950"
+          : "bg-muted text-muted-foreground";
+  return (
+    <span className={cn("inline-flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold tabular-nums", cls)}>
+      {rank}
+    </span>
+  );
+}
+
+// Small colored count, inline with a row (replaces a whole table column with one glance-able chip).
+export function Pill({
+  children,
+  tone = "muted",
+}: {
+  children: React.ReactNode;
+  tone?: "success" | "warning" | "destructive" | "info" | "muted";
+}) {
+  const cls =
+    tone === "success"
+      ? "bg-success/15 text-success-foreground"
+      : tone === "warning"
+        ? "bg-warning/20 text-warning-foreground"
+        : tone === "destructive"
+          ? "bg-destructive/10 text-destructive"
+          : tone === "info"
+            ? "bg-info/15 text-info-foreground"
+            : "bg-muted text-muted-foreground";
+  return <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums", cls)}>{children}</span>;
+}

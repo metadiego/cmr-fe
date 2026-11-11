@@ -6,7 +6,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { RightNowService } from "@/lib/api/right-now";
 import { liveServices, minutesSince } from "@/lib/right-now/view";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Empty, Panel } from "@/components/right-now/parts";
+import { Empty, Panel, Pill } from "@/components/right-now/parts";
 
 // Specialised services of one center: waiting / in care / completed, and who is on duty. «En espera»
 // and «Completados» open their lists (arrival order / last first, as the BE sends them).
@@ -18,43 +18,30 @@ export function ServicesPanel({ services, now }: { services: RightNowService[] |
       {list.length === 0 ? (
         <Empty>{t("empty")}</Empty>
       ) : (
-        <div className="-mx-4 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-1.5 font-medium">{t("colService")}</th>
-                <th className="px-2 py-1.5 text-right font-medium">{t("colWaiting")}</th>
-                <th className="px-2 py-1.5 text-right font-medium">{t("colInCare")}</th>
-                <th className="px-2 py-1.5 text-right font-medium">{t("colCompleted")}</th>
-                <th className="px-4 py-1.5 font-medium">{t("colStaff")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {list.map((s) => (
-                <tr key={s.serviceId}>
-                  <td className="px-4 py-2">
-                    <span className="inline-flex items-center gap-2 font-medium">
-                      <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: s.color ?? "var(--muted-foreground)" }} aria-hidden />
-                      {s.name}
-                    </span>
-                  </td>
-                  <td className="px-2 py-2 text-right">
-                    <ListButton count={s.waiting} tone="warning" title={t("waitingList", { service: s.name })}>
-                      <WaitingList service={s} now={now} />
-                    </ListButton>
-                  </td>
-                  <td className="px-2 py-2 text-right tabular-nums">{s.inCare}</td>
-                  <td className="px-2 py-2 text-right">
-                    <ListButton count={s.completed} tone="success" title={t("completedList", { service: s.name })}>
-                      <CompletedList service={s} />
-                    </ListButton>
-                  </td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{s.staffOnDuty.join(", ") || "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {list.map((s) => (
+            <div key={s.serviceId} className="flex items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2">
+              <span className="inline-flex min-w-0 items-center gap-2 text-sm font-medium">
+                <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: s.color ?? "var(--muted-foreground)" }} aria-hidden />
+                <span className="truncate">{s.name}</span>
+              </span>
+              <span className="flex shrink-0 items-center gap-1">
+                <ListButton count={s.waiting} tone="warning" title={t("waitingList", { service: s.name })}>
+                  <WaitingList service={s} now={now} />
+                </ListButton>
+                <Pill tone="info">{s.inCare}</Pill>
+                <ListButton count={s.completed} tone="success" title={t("completedList", { service: s.name })}>
+                  <CompletedList service={s} />
+                </ListButton>
+              </span>
+            </div>
+          ))}
         </div>
+      )}
+      {list.some((s) => s.staffOnDuty.length > 0) && (
+        <p className="mt-2 truncate text-xs text-muted-foreground">
+          {list.filter((s) => s.staffOnDuty.length > 0).map((s) => `${s.name}: ${s.staffOnDuty.join(", ")}`).join(" · ")}
+        </p>
       )}
     </Panel>
   );
