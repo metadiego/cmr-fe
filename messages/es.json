@@ -2036,7 +2036,10 @@
       "devueltos": "Sesiones devueltas por las devoluciones del día"
     },
     "devoluciones": "Devoluciones",
-    "ingresoNeto": "Ingreso neto"
+    "ingresoNeto": "Ingreso neto",
+    "nuevos": "Nuevos",
+    "seguimiento": "Seguimiento",
+    "verDevueltos": "Mostrar devueltos por servicio"
   },
   "estadisticasServicios": {
     "title": "Estadísticas de Servicios",

@@ -67,6 +67,23 @@ export function EstadisticasDiariasView() {
   const [desde, setDesde] = React.useState(hoy);
   const [hasta, setHasta] = React.useState(hoy);
   const [query, setQuery] = React.useState({ desde: hoy, hasta: hoy });
+  // «Devueltos» per service: hidden by default (owner, 11-nov: it can confuse), kept as a view option —
+  // remembered in this browser only. The money block (bruto / devoluciones / neto) always shows.
+  const [verDevueltos, setVerDevueltos] = React.useState(() => {
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem("cmr.dailyStats.showReturned") === "1";
+    } catch {
+      return false;
+    }
+  });
+  function toggleDevueltos(v: boolean) {
+    setVerDevueltos(v);
+    try {
+      window.localStorage.setItem("cmr.dailyStats.showReturned", v ? "1" : "0");
+    } catch {
+      /* storage blocked: the choice lasts this visit */
+    }
+  }
 
   const res = useResource<EstadisticasDiarias | null>(
     () => (gate.centro ? getEstadisticasDiarias(query.desde, query.hasta || undefined, gate.centro) : Promise.resolve(null)),
@@ -83,7 +100,7 @@ export function EstadisticasDiariasView() {
     const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue && !data.refunds;
     const lineas = [`C.M.R. — ${gate.centroNombre}    ${rangoLabel}`, ""];
     if (vacio) { lineas.push(t("sinActividad")); return lineas.join("\n"); }
-    lineas.push(`${t("atencionMedica")}   N: ${data.medicalCare.newCount}   S: ${data.medicalCare.followUpCount}   ${t("total")} ${data.medicalCare.total}`, "");
+    lineas.push(`${t("atencionMedica")}   ${t("nuevos")}: ${data.medicalCare.newCount}   ${t("seguimiento")}: ${data.medicalCare.followUpCount}   ${t("total")} ${data.medicalCare.total}`, "");
     if (data.services.length) {
       lineas.push(`${t("servicios")}   (${t("col.aplicados")} / ${t("col.vendidos")})`);
       data.services.forEach((s) => lineas.push(`  ${s.name}: ${s.applied} / ${s.sold}`));
@@ -140,6 +157,10 @@ export function EstadisticasDiariasView() {
           <DatePicker value={hasta} min={desde} onChange={setHasta} className="h-9 w-[160px]" clearable />
         </label>
         <Button className="h-9" onClick={() => setQuery({ desde, hasta })}>{t("generar")}</Button>
+        <label className="ml-auto flex h-9 items-center gap-2 text-xs text-muted-foreground">
+          <input type="checkbox" checked={verDevueltos} onChange={(e) => toggleDevueltos(e.target.checked)} className="size-4" />
+          {t("verDevueltos")}
+        </label>
       </div>
 
       {gate.cargando ? (
@@ -157,7 +178,7 @@ export function EstadisticasDiariasView() {
           {/* Región imprimible: una sola tarjeta, la del centro activo. */}
           {data && (
             <div ref={printRef} className="mx-auto max-w-3xl">
-              <DiariaCard centro={gate.centroNombre} fecha={rangoLabel} data={data} t={t} />
+              <DiariaCard centro={gate.centroNombre} fecha={rangoLabel} data={data} t={t} verDevueltos={verDevueltos} />
             </div>
           )}
         </>
@@ -166,7 +187,8 @@ export function EstadisticasDiariasView() {
   );
 }
 
-function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string; data: EstadisticasDiarias; t: (k: string) => string }) {
+function DiariaCard({ centro, fecha, data, t, verDevueltos }: { centro: string; fecha: string; data: EstadisticasDiarias; t: (k: string) => string; verDevueltos: boolean }) {
+  const devueltos = verDevueltos && showReturned(data);
   const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue && !data.refunds;
   return (
     <div className="card rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
@@ -183,8 +205,8 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
           <div className="blk">
             <h3 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("atencionMedica")}</h3>
             <div className="am flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
-              <span title={t("tip.nuevas")}><span className="font-semibold">N:</span> {nf.format(data.medicalCare.newCount)}</span>
-              <span title={t("tip.seguimientos")}><span className="font-semibold">S:</span> {nf.format(data.medicalCare.followUpCount)}</span>
+              <span title={t("tip.nuevas")}><span className="font-semibold">{t("nuevos")}:</span> {nf.format(data.medicalCare.newCount)}</span>
+              <span title={t("tip.seguimientos")}><span className="font-semibold">{t("seguimiento")}:</span> {nf.format(data.medicalCare.followUpCount)}</span>
               <span className="ml-auto font-semibold">{t("total")} {nf.format(data.medicalCare.total)}</span>
             </div>
           </div>
@@ -199,7 +221,7 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
                     <th className="py-1 pr-3 font-semibold">{t("col.servicio")}</th>
                     <th className="r px-3 py-1 text-right font-semibold" title={t("tip.aplicados")}>{t("col.aplicados")}</th>
                     <th className="r px-3 py-1 text-right font-semibold" title={t("tip.vendidos")}>{t("col.vendidos")}</th>
-                    {showReturned(data) && <th className="r px-3 py-1 text-right font-semibold" title={t("tip.devueltos")}>{t("col.devueltos")}</th>}
+                    {devueltos && <th className="r px-3 py-1 text-right font-semibold" title={t("tip.devueltos")}>{t("col.devueltos")}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -208,7 +230,7 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
                       <td className="py-1.5 pr-3 font-medium">{s.name}</td>
                       <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.applied)}</td>
                       <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.sold)}</td>
-                      {showReturned(data) && <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.returned ?? 0)}</td>}
+                      {devueltos && <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.returned ?? 0)}</td>}
                     </tr>
                   ))}
                 </tbody>

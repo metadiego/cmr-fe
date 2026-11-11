@@ -2036,7 +2036,10 @@
       "devueltos": "Sessions given back by the day's refunds"
     },
     "devoluciones": "Refunds",
-    "ingresoNeto": "Net revenue"
+    "ingresoNeto": "Net revenue",
+    "nuevos": "New",
+    "seguimiento": "Follow-up",
+    "verDevueltos": "Show returned per service"
   },
   "estadisticasServicios": {
     "title": "Service Statistics",
