@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  signatureState,
   alreadySignedBy,
   figuresChanged,
   figuresOfReport,
@@ -106,4 +107,16 @@ test("signaturesPrintHtml: stamp over the line, label under it, escaped, red not
   assert.match(html, /Cajero — &lt;Ana&gt;/);
   assert.match(html, /firma-sello">&nbsp;<\/div><div class="firma">Gerente/);
   assert.equal(signaturesPrintHtml([]), "");
+});
+
+test("signatureState: moved and not acknowledged = red; acknowledged on today's figures = quiet; moved again = red (BE #565)", () => {
+  const signed = { dayTotal: 810, salesCash: 200, countedCash: 250, difference: 0 };
+  const now = { dayTotal: 810, salesCash: 360, countedCash: 250, difference: 0 };
+  const sig = { figures: signed, acknowledgedFigures: null } as unknown as Parameters<typeof signatureState>[0];
+  assert.deepEqual(signatureState(sig, signed), { changed: false, acknowledged: false });
+  assert.deepEqual(signatureState(sig, now), { changed: true, acknowledged: false });
+  const acked = { ...sig, acknowledgedFigures: now } as typeof sig;
+  assert.deepEqual(signatureState(acked, now), { changed: false, acknowledged: true });
+  assert.deepEqual(signatureState(acked, { ...now, salesCash: 400 }), { changed: true, acknowledged: false });
+  assert.deepEqual(signatureState(sig, null), { changed: false, acknowledged: false });
 });

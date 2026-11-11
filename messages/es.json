@@ -4219,7 +4219,12 @@
       "salesCash": "Efectivo de ventas",
       "countedCash": "Efectivo en caja",
       "difference": "Diferencia",
-      "signMine": "Firmar mi hoja"
+      "signMine": "Firmar mi hoja",
+      "acknowledge": "Acusar corrección",
+      "acknowledgeHint": "La hoja cambió después de esta firma. Confirma que las cifras corregidas son las buenas; queda el motivo, quién y cuándo.",
+      "acknowledgeReason": "Motivo (obligatorio): qué se corrigió y por qué",
+      "acknowledged": "Corrección acusada",
+      "acknowledgedNote": "Cifras corregidas · confirmado por {name} · {when}"
     },
     "attachments": {
       "title": "Settlements escaneado",

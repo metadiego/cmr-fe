@@ -28,6 +28,24 @@ export interface CashSignature {
   figures: SignedFigures;
   voidedAt: string | null;
   voidReason: string | null;
+  // BE #565: a manager acknowledged a correction of the signed figures (the figures as acknowledged).
+  acknowledgedFigures?: SignedFigures | null;
+  acknowledgedAt?: string | null;
+  acknowledgedBy?: string | null;
+  acknowledgedByName?: string | null;
+  acknowledgeReason?: string | null;
+}
+
+/**
+ * The BE's rule (BE #565): the sheet «changed» after the signature when the signed figures differ from
+ * today's AND nothing was acknowledged or the acknowledged ones differ too. `acknowledged` = it moved,
+ * but a manager confirmed exactly these figures — a quiet note, not the red warning.
+ */
+export function signatureState(s: CashSignature, now: SignedFigures | null): { changed: boolean; acknowledged: boolean } {
+  if (!now || !figuresChanged(s.figures, now)) return { changed: false, acknowledged: false };
+  const ack = s.acknowledgedFigures;
+  if (ack && !figuresChanged(ack, now)) return { changed: false, acknowledged: true };
+  return { changed: true, acknowledged: false };
 }
 
 const r2 = (n: unknown) => Math.round((Number(n) || 0) * 100) / 100;
@@ -101,6 +119,10 @@ export interface SignatureBlock {
   signature: CashSignature | null;
   /** The sheet moved after this signature: shown in red with the figures it accepted. */
   changed: boolean;
+  /** It moved, and a manager acknowledged the correction: «Cifras corregidas · confirmado por …». */
+  acknowledged: boolean;
+  /** The sheet this signature lives on (where an acknowledgement is posted). */
+  sheetId: string | null;
 }
 
 // The blocks of a sheet, as the BE email draws them: a cashier's sheet = «Cajero» + «Gerente»; a
@@ -113,13 +135,10 @@ export function signatureBlocks(args: {
   siblings?: Array<SiblingSheet & { signatures: CashSignature[]; now: SignedFigures | null }>;
 }): SignatureBlock[] {
   const { own, now, isCashierSheet, siblings = [] } = args;
-  const block = (key: string, role: SignOffRole, cashierName: string | null, s: CashSignature | null, current: SignedFigures | null): SignatureBlock => ({
-    key,
-    role,
-    cashierName,
-    signature: s,
-    changed: !!s && !!current && figuresChanged(s.figures, current),
-  });
+  const block = (key: string, role: SignOffRole, cashierName: string | null, s: CashSignature | null, current: SignedFigures | null): SignatureBlock => {
+    const st = s ? signatureState(s, current) : { changed: false, acknowledged: false };
+    return { key, role, cashierName, signature: s, changed: st.changed, acknowledged: st.acknowledged, sheetId: s?.reconciliationId ?? null };
+  };
   const supervisor = block("supervisor", "supervisor", null, liveSignature(own, "supervisor"), now);
   if (isCashierSheet) return [block("cashier", "cashier", null, liveSignature(own, "cashier"), now), supervisor];
   const cashiers = siblings.map((sib) => {
@@ -134,6 +153,8 @@ export interface PrintedSignature {
   label: string;
   line?: string;
   warning?: string;
+  /** A neutral note (an acknowledged correction). */
+  note?: string;
 }
 
 function esc(s: unknown): string {
@@ -149,7 +170,7 @@ export function signaturesPrintHtml(blocks: PrintedSignature[], statement?: stri
       (b) =>
         `<div class="firma-wrap"><div class="firma-sello">${b.line ? esc(b.line) : "&nbsp;"}${
           b.warning ? `<div class="rojo">${esc(b.warning)}</div>` : ""
-        }</div><div class="firma">${esc(b.label)}</div></div>`,
+        }${b.note ? `<div class="dim">${esc(b.note)}</div>` : ""}</div><div class="firma">${esc(b.label)}</div></div>`,
     )
     .join("");
   return `${statement ? `<p class="firma-texto">${esc(statement)}</p>` : ""}<div class="firmas">${cells}</div>`;

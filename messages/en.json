@@ -4219,7 +4219,12 @@
       "salesCash": "Cash sales",
       "countedCash": "Cash in drawer",
       "difference": "Difference",
-      "signMine": "Sign my sheet"
+      "signMine": "Sign my sheet",
+      "acknowledge": "Acknowledge correction",
+      "acknowledgeHint": "The sheet changed after this signature. Confirm the corrected figures are right; the reason, who and when are kept.",
+      "acknowledgeReason": "Reason (required): what was corrected and why",
+      "acknowledged": "Correction acknowledged",
+      "acknowledgedNote": "Figures corrected · confirmed by {name} · {when}"
     },
     "attachments": {
       "title": "Scanned settlements",

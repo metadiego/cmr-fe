@@ -6,10 +6,10 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CheckmarkBadge01Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 
-import { getCashSignatures, signCashSheet } from "@/lib/api/caja";
+import { acknowledgeCashSignature, getCashSignatures, signCashSheet } from "@/lib/api/caja";
 import { getCentroPreferences } from "@/lib/api/preferences";
 import { ApiError } from "@/lib/api/types";
-import { apiErrorMessage } from "@/lib/api/errors";
+import { apiErrorMessage, toastError } from "@/lib/api/errors";
 import { money } from "@/lib/caja/totales";
 import {
   alreadySignedBy,
@@ -23,6 +23,7 @@ import {
   type SignOffRole,
 } from "@/lib/caja/sign-off";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // «Firmar y aceptar» a cash sheet (BE #486, handoff docs/specs/cash-sign-off-handoff.md). Signing is a
@@ -58,6 +59,7 @@ type Loaded = {
 
 export function useCashSignOff(o: CashSignOffOptions) {
   const t = useTranslations("caja.signOff");
+  const tRoot = useTranslations();
   const format = useFormatter();
   const [loaded, setLoaded] = React.useState<Loaded | null>(null);
   const [failed, setFailed] = React.useState(false);
@@ -134,6 +136,13 @@ export function useCashSignOff(o: CashSignOffOptions) {
       b.signature && b.changed
         ? t("otherFigures", { total: money(b.signature.figures.dayTotal), difference: money(b.signature.figures.difference) })
         : undefined,
+    note:
+      b.signature && b.acknowledged
+        ? t("acknowledgedNote", {
+            name: b.signature.acknowledgedByName ?? "—",
+            when: b.signature.acknowledgedAt ? when(b.signature.acknowledgedAt) : "—",
+          })
+        : undefined,
   });
   const printed: PrintedSignature[] = blocks.map(words);
 
@@ -154,7 +163,21 @@ export function useCashSignOff(o: CashSignOffOptions) {
     }
   }
 
-  return { blocks, printed, words, statement: effectiveStatement, failed, loading: !loaded && !failed, sign };
+  // A manager acknowledges a correction of already-signed figures (BE #565): the 428 shield asks first.
+  async function acknowledge(b: SignatureBlock, reason: string): Promise<boolean> {
+    if (!b.signature || !b.sheetId) return false;
+    try {
+      await acknowledgeCashSignature(b.sheetId, b.signature.id, reason, centerId);
+      toast.success(t("acknowledged"));
+      setTick((n) => n + 1);
+      return true;
+    } catch (err) {
+      toastError(err, tRoot);
+      return false;
+    }
+  }
+
+  return { blocks, printed, words, statement: effectiveStatement, failed, loading: !loaded && !failed, sign, acknowledge };
 }
 
 export type CashSignOff = ReturnType<typeof useCashSignOff>;
@@ -177,6 +200,8 @@ export function CashSignOffPanel({
 }) {
   const t = useTranslations("caja.signOff");
   const [asking, setAsking] = React.useState<SignOffRole | null>(null);
+  const [ackBlock, setAckBlock] = React.useState<SignatureBlock | null>(null);
+  const [ackReason, setAckReason] = React.useState("");
   const [busy, setBusy] = React.useState(false);
 
   // A role someone ELSE already signed has no button (the BE would answer 409); one I signed = «sign again».
@@ -246,10 +271,41 @@ export function CashSignOffPanel({
                   <span>{w.warning}</span>
                 </div>
               )}
+              {w.note && <div className="mt-1 text-xs text-muted-foreground">{w.note}</div>}
+              {b.changed && canSignSupervisor && (
+                <Button size="sm" variant="outline" className="mt-2 h-7 text-xs" onClick={() => { setAckReason(""); setAckBlock(b); }}>
+                  {t("acknowledge")}
+                </Button>
+              )}
             </div>
           );
         })}
       </div>
+
+      <Dialog open={!!ackBlock} onOpenChange={(v) => !v && !busy && setAckBlock(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("acknowledge")}</DialogTitle>
+            <DialogDescription>{t("acknowledgeHint")}</DialogDescription>
+          </DialogHeader>
+          <Textarea value={ackReason} onChange={(e) => setAckReason(e.target.value)} rows={3} maxLength={500} placeholder={t("acknowledgeReason")} />
+          <DialogFooter>
+            <Button variant="ghost" disabled={busy} onClick={() => setAckBlock(null)}>{t("cancel")}</Button>
+            <Button
+              disabled={busy || ackReason.trim().length < 3}
+              onClick={async () => {
+                if (!ackBlock) return;
+                setBusy(true);
+                const ok = await signOff.acknowledge(ackBlock, ackReason.trim());
+                setBusy(false);
+                if (ok) setAckBlock(null);
+              }}
+            >
+              {t("acknowledge")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!asking} onOpenChange={(v) => !v && !busy && setAsking(null)}>
         <DialogContent className="sm:max-w-md">

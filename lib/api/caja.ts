@@ -305,6 +305,15 @@ export function signCashSheet(id: string, signAs: SignOffRole, centerId?: string
 }
 
 // Every signature of the sheet, voided ones included (history), oldest first.
+// BE #565: a manager acknowledges a correction of already-signed figures (caja.sign_as_manager; 428 shield
+// cash.signature.acknowledge; 409 CASH_FIGURES_NOT_CHANGED when the sheet did not move). Reason 3–500.
+export function acknowledgeCashSignature(id: string, signatureId: string, reason: string, centerId?: string | null): Promise<CashSignature> {
+  return apiFetch<CashSignature>(`/cash/reconciliations/${id}/signatures/${signatureId}/acknowledge${centerQs(centerId)}`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+}
+
 export function getCashSignatures(id: string, centerId?: string | null): Promise<CashSignature[]> {
   return apiFetch<CashSignature[]>(`/cash/reconciliations/${id}/signatures${centerQs(centerId)}`);
 }
