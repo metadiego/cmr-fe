@@ -400,6 +400,17 @@ export function anularFactura(facturaId: string, motivo: string, centroId?: stri
 export function getFormasPago(centroId?: string): Promise<FormaPago[]> {
   return apiFetch<FormaPago[]>(`/billing/payment-methods`, {}, centroId);
 }
+// The catalog's CRUD (admin): create, edit (name, isCash, carriesMoney, active) and deactivate — never
+// deleted, past payments point at it. BE #564 adds carriesMoney («Lleva dinero»).
+export function crearFormaPago(payload: components["schemas"]["CreateFormaPagoDto"]): Promise<FormaPago> {
+  return apiFetch<FormaPago>(`/billing/payment-methods`, { method: "POST", body: JSON.stringify(payload) });
+}
+export function actualizarFormaPago(id: string, payload: components["schemas"]["UpdateFormaPagoDto"]): Promise<FormaPago> {
+  return apiFetch<FormaPago>(`/billing/payment-methods/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+}
+export function desactivarFormaPago(id: string): Promise<unknown> {
+  return apiFetch(`/billing/payment-methods/${id}`, { method: "DELETE" });
+}
 
 // Enviar la factura por email (BE PR #106). Sin `email` usa el del paciente (400 si no hay ninguno).
 // RBAC notificaciones.create. El DTO no está tipado en swagger → shape del handoff.

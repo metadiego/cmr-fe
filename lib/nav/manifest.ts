@@ -130,6 +130,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   // grupo desde ahí (components/servicios/servicio-form-fields.tsx → GrupoSelect).
   { clave: "grupos-facturacion", route: "/configuration/billing-groups", group: "configuration", order: 3.5 },
   { clave: "config-factura", route: "/configuration/invoice", group: "configuration", order: 4 },
+  // BE #564: the payment-methods catalog («Lleva dinero»: Exonerada never counts as a payment).
+  { clave: "payment-methods", route: "/configuration/payment-methods", group: "configuration", order: 4.2 },
   { clave: "config-requeridos", route: "/configuration/required-fields", group: "configuration", order: 5 },
   { clave: "config-datos-paciente", route: "/configuration/patient-fields", group: "configuration", order: 6 },
   { clave: "config-formatos", route: "/configuration/formats", group: "configuration", order: 7 },

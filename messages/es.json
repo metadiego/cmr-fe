@@ -1467,7 +1467,8 @@
     "bodyMeasurementsUnlinked": "Medidas sin vincular",
     "changeLog": "Historial de cambios",
     "confirmationPolicies": "Confirmaciones",
-    "calendarAbsenceReview": "Ausencias por revisar"
+    "calendarAbsenceReview": "Ausencias por revisar",
+    "paymentMethods": "Formas de pago"
   },
   "admin": {
     "title": "Administración",
@@ -1991,7 +1992,8 @@
     "sin_grupo": "Sin grupo",
     "pago": {
       "excede_total": "El pago no puede pasar del total de la factura.",
-      "requiere_permiso_anular": "No tienes permiso para anular pagos."
+      "requiere_permiso_anular": "No tienes permiso para anular pagos.",
+      "forma_sin_dinero": "{formaPago} no lleva dinero: una consulta exonerada es un descuento del 100%, no un pago."
     },
     "kit": {
       "multiplicadoresInvalidos": "Las terapias (áreas × días) no se reparten exacto entre los kits de la línea."
@@ -3362,7 +3364,10 @@
     "unitsAreasDaysHint": "Se calcula sola: áreas × días. No se escribe.",
     "packages": "Paquetes",
     "packagesHint": "Cuántos paquetes se venden (normalmente 1).",
-    "returnedBadge": "Devuelta"
+    "returnedBadge": "Devuelta",
+    "error": {
+      "pago_supera_total": "Lo cobrado pasa del total de la factura (sobran {sobrante}). Anula el pago sobrante antes de emitir."
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -5896,6 +5901,28 @@
       "unclearHours": "Falta la hora",
       "staffNotInCenter": "Esa persona no trabaja en el centro del evento",
       "globalEvent": "Un evento de toda la empresa no es la ausencia de una persona"
+    }
+  },
+  "paymentMethods": {
+    "title": "Formas de pago",
+    "hint": "Las formas que la caja puede elegir. «Efectivo» cuenta en el cuadre; sin «Lleva dinero» (p. ej. Exonerada) nunca se ofrece como pago ni se suma a la caja.",
+    "saved": "Guardado",
+    "created": "Forma de pago creada",
+    "deactivateConfirm": "¿Desactivar «{name}»? Los pagos anteriores la conservan.",
+    "noMoney": "sin dinero",
+    "newName": "Nueva forma de pago",
+    "newSlug": "clave (opcional)",
+    "add": "Agregar",
+    "col": {
+      "name": "Forma",
+      "slug": "Clave",
+      "isCash": "Efectivo",
+      "carriesMoney": "Lleva dinero",
+      "active": "Activa"
+    },
+    "tip": {
+      "isCash": "Se cuenta como efectivo en el cuadre de caja",
+      "carriesMoney": "Apagado: no se puede cobrar con ella y el cuadre no la suma (Exonerada = descuento del 100%, no un pago)"
     }
   }
 }

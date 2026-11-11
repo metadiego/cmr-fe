@@ -57845,6 +57845,374 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ahora-mismo/fuente-externa/instantanea": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive the right-now figures of a day from an external system (the legacy until go-live).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo/fuente-externa/instantanea`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Machine to machine: a center API key with ahora-mismo.ingest. The center is the key's (X-Tenant-ID cannot move a clinic key). Keeps the latest per center and day; an older retry is ignored. Accepted while the switch is off, so the data can be checked before plugging; `enabled` tells the sender.
+         */
+        post: operations["AhoraMismoController_ingestExternalSnapshot[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ahora-mismo/external-source/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive the right-now figures of a day from an external system (the legacy until go-live).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo/external-source/snapshot`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Machine to machine: a center API key with ahora-mismo.ingest. The center is the key's (X-Tenant-ID cannot move a clinic key). Keeps the latest per center and day; an older retry is ignored. Accepted while the switch is off, so the data can be checked before plugging; `enabled` tells the sender.
+         */
+        post: operations["AhoraMismoController_ingestExternalSnapshot[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/right-now/fuente-externa/instantanea": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive the right-now figures of a day from an external system (the legacy until go-live).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now/fuente-externa/instantanea`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Machine to machine: a center API key with ahora-mismo.ingest. The center is the key's (X-Tenant-ID cannot move a clinic key). Keeps the latest per center and day; an older retry is ignored. Accepted while the switch is off, so the data can be checked before plugging; `enabled` tells the sender.
+         */
+        post: operations["AhoraMismoController_ingestExternalSnapshot[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/right-now/external-source/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive the right-now figures of a day from an external system (the legacy until go-live).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now/external-source/snapshot`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Machine to machine: a center API key with ahora-mismo.ingest. The center is the key's (X-Tenant-ID cannot move a clinic key). Keeps the latest per center and day; an older retry is ignored. Accepted while the switch is off, so the data can be checked before plugging; `enabled` tells the sender.
+         */
+        post: operations["AhoraMismoController_ingestExternalSnapshot[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/ahora-mismo/fuente-externa/instantanea": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive the right-now figures of a day from an external system (the legacy until go-live).
+         * @description Machine to machine: a center API key with ahora-mismo.ingest. The center is the key's (X-Tenant-ID cannot move a clinic key). Keeps the latest per center and day; an older retry is ignored. Accepted while the switch is off, so the data can be checked before plugging; `enabled` tells the sender.
+         */
+        post: operations["AhoraMismoController_ingestExternalSnapshot[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/ahora-mismo/external-source/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive the right-now figures of a day from an external system (the legacy until go-live).
+         * @description Machine to machine: a center API key with ahora-mismo.ingest. The center is the key's (X-Tenant-ID cannot move a clinic key). Keeps the latest per center and day; an older retry is ignored. Accepted while the switch is off, so the data can be checked before plugging; `enabled` tells the sender.
+         */
+        post: operations["AhoraMismoController_ingestExternalSnapshot[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/right-now/fuente-externa/instantanea": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive the right-now figures of a day from an external system (the legacy until go-live).
+         * @description Machine to machine: a center API key with ahora-mismo.ingest. The center is the key's (X-Tenant-ID cannot move a clinic key). Keeps the latest per center and day; an older retry is ignored. Accepted while the switch is off, so the data can be checked before plugging; `enabled` tells the sender.
+         */
+        post: operations["AhoraMismoController_ingestExternalSnapshot[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/right-now/external-source/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Receive the right-now figures of a day from an external system (the legacy until go-live).
+         * @description Machine to machine: a center API key with ahora-mismo.ingest. The center is the key's (X-Tenant-ID cannot move a clinic key). Keeps the latest per center and day; an older retry is ignored. Accepted while the switch is off, so the data can be checked before plugging; `enabled` tells the sender.
+         */
+        post: operations["AhoraMismoController_ingestExternalSnapshot[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ahora-mismo/fuente-externa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Whether each center shows external (legacy) figures, and when the last ones arrived.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo/fuente-externa`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AhoraMismoController_externalSources[0]_v1"];
+        /**
+         * Turn a center's external (legacy) figures on or off. Off = the board is ours again, nothing to clean.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo/fuente-externa`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges ahora-mismo.externalSource into the center preferences (the rest of the layer is kept) and returns the previous value, to revert.
+         */
+        put: operations["AhoraMismoController_setExternalSource[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ahora-mismo/external-source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Whether each center shows external (legacy) figures, and when the last ones arrived.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo/external-source`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AhoraMismoController_externalSources[1]_v1"];
+        /**
+         * Turn a center's external (legacy) figures on or off. Off = the board is ours again, nothing to clean.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo/external-source`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges ahora-mismo.externalSource into the center preferences (the rest of the layer is kept) and returns the previous value, to revert.
+         */
+        put: operations["AhoraMismoController_setExternalSource[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/right-now/fuente-externa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Whether each center shows external (legacy) figures, and when the last ones arrived.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now/fuente-externa`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AhoraMismoController_externalSources[2]_v1"];
+        /**
+         * Turn a center's external (legacy) figures on or off. Off = the board is ours again, nothing to clean.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now/fuente-externa`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges ahora-mismo.externalSource into the center preferences (the rest of the layer is kept) and returns the previous value, to revert.
+         */
+        put: operations["AhoraMismoController_setExternalSource[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/right-now/external-source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Whether each center shows external (legacy) figures, and when the last ones arrived.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now/external-source`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AhoraMismoController_externalSources[3]_v1"];
+        /**
+         * Turn a center's external (legacy) figures on or off. Off = the board is ours again, nothing to clean.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now/external-source`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges ahora-mismo.externalSource into the center preferences (the rest of the layer is kept) and returns the previous value, to revert.
+         */
+        put: operations["AhoraMismoController_setExternalSource[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/ahora-mismo/fuente-externa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether each center shows external (legacy) figures, and when the last ones arrived. */
+        get: operations["AhoraMismoController_externalSources[4]_v2"];
+        /**
+         * Turn a center's external (legacy) figures on or off. Off = the board is ours again, nothing to clean.
+         * @description Merges ahora-mismo.externalSource into the center preferences (the rest of the layer is kept) and returns the previous value, to revert.
+         */
+        put: operations["AhoraMismoController_setExternalSource[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/ahora-mismo/external-source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether each center shows external (legacy) figures, and when the last ones arrived. */
+        get: operations["AhoraMismoController_externalSources[5]_v2"];
+        /**
+         * Turn a center's external (legacy) figures on or off. Off = the board is ours again, nothing to clean.
+         * @description Merges ahora-mismo.externalSource into the center preferences (the rest of the layer is kept) and returns the previous value, to revert.
+         */
+        put: operations["AhoraMismoController_setExternalSource[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/right-now/fuente-externa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether each center shows external (legacy) figures, and when the last ones arrived. */
+        get: operations["AhoraMismoController_externalSources[6]_v2"];
+        /**
+         * Turn a center's external (legacy) figures on or off. Off = the board is ours again, nothing to clean.
+         * @description Merges ahora-mismo.externalSource into the center preferences (the rest of the layer is kept) and returns the previous value, to revert.
+         */
+        put: operations["AhoraMismoController_setExternalSource[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/right-now/external-source": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether each center shows external (legacy) figures, and when the last ones arrived. */
+        get: operations["AhoraMismoController_externalSources[7]_v2"];
+        /**
+         * Turn a center's external (legacy) figures on or off. Off = the board is ours again, nothing to clean.
+         * @description Merges ahora-mismo.externalSource into the center preferences (the rest of the layer is kept) and returns the previous value, to revert.
+         */
+        put: operations["AhoraMismoController_setExternalSource[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/laser/parametros": {
         parameters: {
             query?: never;
@@ -59339,12 +59707,33 @@ export interface components {
             labelKey: string;
             name: string;
             isCash: boolean;
+            carriesMoney: boolean;
             active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        CreateFormaPagoDto: {
+            /** @description Stable unique key, e.g. visa. */
+            slug: string;
+            /** @description i18n key of the label. */
+            labelKey: string;
+            /** @description Readable name. */
+            name: string;
+            /** @description Counts as cash in the cash count. */
+            isCash?: boolean;
+            /** @description False = carries no money (e.g. Exonerada): payments with it are refused and the cash count never adds them. Default true. */
+            carriesMoney?: boolean;
+        };
+        UpdateFormaPagoDto: {
+            labelKey?: string;
+            name?: string;
+            isCash?: boolean;
+            /** @description False = carries no money (e.g. Exonerada). */
+            carriesMoney?: boolean;
+            active?: boolean;
         };
         UpdateGrupoFacturacionDto: {
             /**
@@ -60222,7 +60611,7 @@ export interface components {
             extension: string;
         };
         SetStaffPhoneExtensionsDto: {
-            extensiones: components["schemas"]["StaffPhoneExtensionDto"][];
+            extensions: components["schemas"]["StaffPhoneExtensionDto"][];
         };
         CreatePersonalDto: {
             /**
@@ -65077,6 +65466,29 @@ export interface components {
             consolidated: components["schemas"]["RightNowCallTallyDto"];
             ranking: components["schemas"]["RightNowOperatorDto"][];
         };
+        RightNowExternalSourceMarkerDto: {
+            /** @example legacy */
+            source: string;
+            /** @example 2026-11-11 */
+            day: string;
+            /**
+             * Format: date-time
+             * @description When the sender computed the figures.
+             */
+            generatedAt: string;
+            /**
+             * Format: date-time
+             * @description When the API last received them.
+             */
+            receivedAt: string;
+            /**
+             * @description The center setting: a screen turns the marker stale on its own clock once receivedAt is older than this (no event arrives when the sender dies).
+             * @example 5
+             */
+            staleAfterMinutes: number;
+            /** @description True when today and nothing arrived for longer than staleAfterMinutes: the figures are not live. */
+            stale: boolean;
+        };
         RightNowSnapshotDto: {
             /** @example 2026-11-04 */
             date: string;
@@ -65098,6 +65510,7 @@ export interface components {
             services?: components["schemas"]["RightNowServiceDto"][];
             prescriptions?: components["schemas"]["RightNowPrescriptionsDto"];
             calls?: components["schemas"]["RightNowCallsDto"];
+            externalSource?: components["schemas"]["RightNowExternalSourceMarkerDto"];
         };
         RightNowCenterSnapshotDto: {
             /** @example 2026-11-04 */
@@ -65120,6 +65533,7 @@ export interface components {
             services?: components["schemas"]["RightNowServiceDto"][];
             prescriptions?: components["schemas"]["RightNowPrescriptionsDto"];
             calls?: components["schemas"]["RightNowCallsDto"];
+            externalSource?: components["schemas"]["RightNowExternalSourceMarkerDto"];
             clinicId: string;
             name: string;
         };
@@ -65131,6 +65545,133 @@ export interface components {
             combinado: {
                 [key: string]: unknown;
             };
+        };
+        LegacyDepartmentDto: {
+            /** @example consulta */
+            key: string;
+            invoices: number;
+            amount: number;
+        };
+        LegacyRefundsDto: {
+            count: number;
+            amount: number;
+        };
+        LegacySellerDto: {
+            department: string;
+            login: string;
+            name?: string | null;
+            invoices: number;
+            amount: number;
+        };
+        LegacySalesDto: {
+            departments: components["schemas"]["LegacyDepartmentDto"][];
+            refunds: components["schemas"]["LegacyRefundsDto"];
+            sellers: components["schemas"]["LegacySellerDto"][];
+        };
+        LegacyPatientsDto: {
+            present: number;
+            firstVisit: number;
+            followUp: number;
+            attended: number;
+        };
+        LegacyDoctorDto: {
+            code: string;
+            name?: string | null;
+            appointments: number;
+            attended: number;
+            firstVisit: number;
+            followUp: number;
+            billed: number;
+            refunded: number;
+        };
+        LegacyWaitingDto: {
+            medicalRecordNumber?: string | null;
+            patient?: string | null;
+            since?: string | null;
+        };
+        LegacyCompletedDto: {
+            medicalRecordNumber?: string | null;
+            patient?: string | null;
+            attendedBy?: string | null;
+            startedAt?: string | null;
+            endedAt?: string | null;
+        };
+        LegacyServiceDto: {
+            id: string;
+            name: string;
+            color?: string | null;
+            total: number;
+            waiting: number;
+            inCare: number;
+            completed: number;
+            staffOnDuty: string[];
+            waitingList: components["schemas"]["LegacyWaitingDto"][];
+            completedList: components["schemas"]["LegacyCompletedDto"][];
+        };
+        LegacyRightNowPayloadDto: {
+            sales: components["schemas"]["LegacySalesDto"];
+            patients: components["schemas"]["LegacyPatientsDto"];
+            doctors: components["schemas"]["LegacyDoctorDto"][];
+            services: components["schemas"]["LegacyServiceDto"][];
+        };
+        ExternalSnapshotDto: {
+            /**
+             * @example legacy
+             * @enum {string}
+             */
+            source: "legacy";
+            /**
+             * @description Local day of the figures (the center's time zone).
+             * @example 2026-11-11
+             */
+            day: string;
+            /** @description When the sender computed the figures (ISO). */
+            generatedAt: string;
+            payload: components["schemas"]["LegacyRightNowPayloadDto"];
+        };
+        RightNowExternalSnapshotResultDto: {
+            clinicId: string;
+            /** @example 2026-11-11 */
+            day: string;
+            /** @description False when an older retry arrived after newer figures (ignored). */
+            stored: boolean;
+            /** @description Whether the center's switch is on (the board shows these figures). */
+            enabled: boolean;
+        };
+        RightNowExternalSnapshotInfoDto: {
+            /** @example legacy */
+            source: string;
+            /** @example 2026-11-11 */
+            day: string;
+            /** Format: date-time */
+            generatedAt: string;
+            /** Format: date-time */
+            receivedAt: string;
+        };
+        RightNowExternalSourceStatusDto: {
+            enabled: boolean;
+            /** @example 5 */
+            staleAfterMinutes: number;
+            clinicId: string;
+            name: string;
+            /** @description The last snapshot received (any day); null = nothing ever arrived. */
+            lastSnapshot?: components["schemas"]["RightNowExternalSnapshotInfoDto"] | null;
+        };
+        ExternalSourceSwitchDto: {
+            /** @description On = this center's board shows the external figures (except calls). */
+            enabled: boolean;
+            /** @description Minutes without a push after which the board marks the figures stale. Default 5. */
+            staleAfterMinutes?: number;
+        };
+        RightNowExternalSourceSettingsDto: {
+            enabled: boolean;
+            /** @example 5 */
+            staleAfterMinutes: number;
+        };
+        RightNowExternalSourceSwitchResultDto: {
+            clinicId: string;
+            previous: components["schemas"]["RightNowExternalSourceSettingsDto"];
+            current: components["schemas"]["RightNowExternalSourceSettingsDto"];
         };
         LaserParametroEntity: {
             pathology: string;
@@ -79611,7 +80152,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFormaPagoDto"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -79649,7 +80194,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFormaPagoDto"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -79687,7 +80236,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFormaPagoDto"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -79725,7 +80278,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFormaPagoDto"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -79746,7 +80303,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFormaPagoDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -79788,7 +80349,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFormaPagoDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -79830,7 +80395,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFormaPagoDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -79872,7 +80441,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFormaPagoDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -151376,6 +151949,574 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RightNowCentersDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_ingestExternalSnapshot[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSnapshotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSnapshotResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_ingestExternalSnapshot[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSnapshotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSnapshotResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_ingestExternalSnapshot[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSnapshotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSnapshotResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_ingestExternalSnapshot[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSnapshotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSnapshotResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_ingestExternalSnapshot[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSnapshotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSnapshotResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_ingestExternalSnapshot[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSnapshotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSnapshotResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_ingestExternalSnapshot[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSnapshotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSnapshotResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_ingestExternalSnapshot[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSnapshotDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSnapshotResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_externalSources[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceStatusDto"][];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_setExternalSource[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSourceSwitchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceSwitchResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_externalSources[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceStatusDto"][];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_setExternalSource[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSourceSwitchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceSwitchResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_externalSources[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceStatusDto"][];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_setExternalSource[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSourceSwitchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceSwitchResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_externalSources[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceStatusDto"][];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_setExternalSource[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSourceSwitchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceSwitchResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_externalSources[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceStatusDto"][];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_setExternalSource[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSourceSwitchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceSwitchResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_externalSources[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceStatusDto"][];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_setExternalSource[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSourceSwitchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceSwitchResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_externalSources[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceStatusDto"][];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_setExternalSource[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSourceSwitchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceSwitchResultDto"];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_externalSources[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceStatusDto"][];
+                };
+            };
+        };
+    };
+    "AhoraMismoController_setExternalSource[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalSourceSwitchDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RightNowExternalSourceSwitchResultDto"];
                 };
             };
         };

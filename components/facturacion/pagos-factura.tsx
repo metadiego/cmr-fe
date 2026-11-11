@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { pickableMethods } from "@/lib/factura/payment-methods";
 import { useTranslations } from "next-intl";
 
 import {
@@ -293,7 +294,7 @@ function PagoEditRow({
         <Select value={formaId} onValueChange={setFormaId}>
           <SelectTrigger size="sm" className="h-8 flex-1"><SelectValue placeholder={t("method")} /></SelectTrigger>
           <SelectContent>
-            {formas.filter((f) => f.active !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}
+            {pickableMethods(formas).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -371,7 +372,7 @@ function PagoAddRow({
       <Select value={formaId} onValueChange={onPickForma}>
         <SelectTrigger size="sm" className="h-8 w-full"><SelectValue placeholder={t("method")} /></SelectTrigger>
         <SelectContent>
-          {formas.filter((f) => f.active !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}
+          {pickableMethods(formas).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}
         </SelectContent>
       </Select>
       {esTarjeta && (

@@ -5,7 +5,15 @@ import { CONFIRMATION_DECLINED } from "./confirm-action";
 
 // Minimal shape of a next-intl translator: t(key) → string. Kept loose so any
 // namespace's `useTranslations(...)` result can be passed.
-type Translate = (key: string) => string;
+type Translate = (key: string, values?: Record<string, string | number>) => string;
+
+// The BE puts an error's own values next to its labelKey (e.g. {formaPago}, {sobrante}): pass the plain
+// ones to the translator so «{formaPago} no lleva dinero» reads with the real name.
+function errorValues(err: ApiError): Record<string, string | number> {
+  const out: Record<string, string | number> = {};
+  for (const [k, v] of Object.entries(err.data ?? {})) if (typeof v === "string" || typeof v === "number") out[k] = v;
+  return out;
+}
 
 // Uniform error string for toasts/inline messages across the app.
 export function apiErrorMessage(err: unknown): string {
@@ -41,7 +49,12 @@ function baseErrorLabel(err: unknown, t?: Translate): string {
     if (m && m !== "common.rateLimited") return m;
   }
   if (err instanceof ApiError && err.labelKey && t) {
-    const translated = t(err.labelKey);
+    let translated: string;
+    try {
+      translated = t(err.labelKey, errorValues(err));
+    } catch {
+      translated = err.labelKey;
+    }
     // next-intl returns the key itself on a miss → fall back to la traducción por código o al mensaje.
     if (translated && translated !== err.labelKey) return translated;
   }

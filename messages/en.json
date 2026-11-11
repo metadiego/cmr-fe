@@ -1467,7 +1467,8 @@
     "bodyMeasurementsUnlinked": "Unlinked measurements",
     "changeLog": "Change history",
     "confirmationPolicies": "Confirmations",
-    "calendarAbsenceReview": "Absences to review"
+    "calendarAbsenceReview": "Absences to review",
+    "paymentMethods": "Payment methods"
   },
   "admin": {
     "title": "Administration",
@@ -1991,7 +1992,8 @@
     "sin_grupo": "No group",
     "pago": {
       "excede_total": "The payment cannot exceed the invoice total.",
-      "requiere_permiso_anular": "You do not have permission to void payments."
+      "requiere_permiso_anular": "You do not have permission to void payments.",
+      "forma_sin_dinero": "{formaPago} carries no money: an exonerated consultation is a 100% discount, not a payment."
     },
     "kit": {
       "multiplicadoresInvalidos": "The therapies (areas × days) don't split evenly among the line's kits."
@@ -3362,7 +3364,10 @@
     "unitsAreasDaysHint": "Computed: areas × days. Not typed.",
     "packages": "Packages",
     "packagesHint": "How many packages are sold (usually 1).",
-    "returnedBadge": "Returned"
+    "returnedBadge": "Returned",
+    "error": {
+      "pago_supera_total": "The money taken is above the invoice total ({sobrante} over). Void the extra payment before issuing."
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -5896,6 +5901,28 @@
       "unclearHours": "The hour is missing",
       "staffNotInCenter": "That person does not work in this event's center",
       "globalEvent": "A company-wide event is not one person's absence"
+    }
+  },
+  "paymentMethods": {
+    "title": "Payment methods",
+    "hint": "The methods the cashier can pick. «Cash» counts in the cash count; without «Carries money» (e.g. Exonerada) it is never offered as a payment nor added to the cash count.",
+    "saved": "Saved",
+    "created": "Payment method created",
+    "deactivateConfirm": "Deactivate «{name}»? Past payments keep it.",
+    "noMoney": "no money",
+    "newName": "New payment method",
+    "newSlug": "key (optional)",
+    "add": "Add",
+    "col": {
+      "name": "Method",
+      "slug": "Key",
+      "isCash": "Cash",
+      "carriesMoney": "Carries money",
+      "active": "Active"
+    },
+    "tip": {
+      "isCash": "Counted as cash in the cash count",
+      "carriesMoney": "Off: it cannot take a payment and the cash count never adds it (Exonerada = a 100% discount, not a payment)"
     }
   }
 }
