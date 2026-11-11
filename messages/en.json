@@ -9,6 +9,168 @@
       "many": "{count, plural, one {# clinic} other {# clinics}}",
       "total": "{label} ({scope})",
       "covers": "Covers: {scope}"
+    },
+    "analytics": {
+      "none": "Unassigned",
+      "dim": {
+        "clinic": "Clinic",
+        "day": "Day",
+        "month": "Month",
+        "weekday": "Day of week",
+        "hour": "Hour",
+        "doctor": "Doctor",
+        "seller": "Seller",
+        "product": "Product",
+        "patient": "Patient",
+        "source": "Source",
+        "paymentMethod": "Payment method",
+        "division": "Division",
+        "kind": "Kind",
+        "service": "Service",
+        "technician": "Technician",
+        "visitType": "Visit type",
+        "channel": "Channel",
+        "status": "Status"
+      },
+      "weekday": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "kind": {
+        "appointment": "Appointment",
+        "therapy": "Therapy"
+      }
+    },
+    "salesBreakdown": {
+      "title": "Sales",
+      "help": "Invoiced by 1 to 3 cuts at once. Gross/Refunds/Net is what was INVOICED; Hour and Payment method is what was COLLECTED (payments) and does not combine with Product.",
+      "cutBy": "Cut by",
+      "from": "From",
+      "to": "To",
+      "search": "Search",
+      "exportCsv": "Export CSV",
+      "col": {
+        "invoices": "Invoices",
+        "patients": "Patients",
+        "gross": "Gross",
+        "refunds": "Refunds",
+        "net": "Net",
+        "quantity": "Quantity"
+      },
+      "totals": "Totals",
+      "empty": "No sales in that range.",
+      "truncated": "{n} additional rows were left out — narrow the range or add another cut.",
+      "pickAtLeastOne": "Pick at least one cut.",
+      "productWithPaymentCut": "Product cannot combine with Hour or Payment method (those are what was collected, not invoiced)."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "help": "Appointments and therapies by 1 to 3 cuts. A future range shows who's coming (scheduled); a past range not marked yet counts as pending.",
+      "cutBy": "Cut by",
+      "from": "From",
+      "to": "To",
+      "search": "Search",
+      "col": {
+        "events": "Events",
+        "attended": "Attended",
+        "noShows": "No-shows",
+        "cancelled": "Cancelled",
+        "scheduled": "Scheduled",
+        "unrecorded": "Unmarked",
+        "patients": "Patients",
+        "attendedPatients": "Patients who attended"
+      },
+      "totals": "Totals",
+      "empty": "No events in that range.",
+      "truncated": "{n} additional rows were left out — narrow the range or add another cut.",
+      "pickAtLeastOne": "Pick at least one cut."
+    },
+    "patientsStats": {
+      "title": "Patients",
+      "help": "Visits and spend per patient in the range. \"Lapsed\" = no visit in N days and nothing scheduled.",
+      "from": "From",
+      "to": "To",
+      "search": "Search",
+      "minVisits": "Frequent (≥ visits)",
+      "lapsedDays": "Lapsed (days without a visit)",
+      "newOnly": "New only",
+      "col": {
+        "patient": "Patient",
+        "visits": "Visits",
+        "therapies": "Therapies",
+        "firstVisit": "First visit",
+        "lastVisit": "Last visit",
+        "nextVisit": "Next visit",
+        "avgDays": "Avg. days between visits",
+        "spend": "Spend",
+        "isNew": "New"
+      },
+      "distribution": "Distribution by visit count",
+      "empty": "No patients in that range.",
+      "truncated": "Showing the first {shown} of {total} patients — narrow the range or raise the filters.",
+      "viewPatient": "View record"
+    },
+    "returnRate": {
+      "title": "Return rate",
+      "help": "Of those whose return window is over, how many came back within the chosen days. \"Pending\" hasn't decided yet: the window is still open.",
+      "from": "From",
+      "to": "To",
+      "withinDays": "Return within (days)",
+      "cutBy": "Cut by",
+      "none": "No cut",
+      "search": "Search",
+      "col": {
+        "cohort": "Cohort",
+        "returned": "Returned",
+        "notReturned": "Did not return",
+        "pending": "Pending",
+        "rate": "Rate",
+        "avgDays": "Avg. days to return"
+      },
+      "totals": "Totals",
+      "empty": "No cohort in that range.",
+      "noRate": "—"
+    },
+    "patientAttendanceTab": {
+      "title": "Attendance",
+      "firstVisit": "First visit",
+      "lastVisit": "Last visit",
+      "avgDays": "Avg. days between visits",
+      "visitsTotal": "Visits",
+      "visitsAppointments": "Appointments",
+      "visitsTherapies": "Therapies",
+      "visitsDays": "Distinct days",
+      "noShows": "No-shows",
+      "cancelled": "Cancelled",
+      "unrecorded": "Unmarked",
+      "therapiesTitle": "Therapies",
+      "col": {
+        "service": "Service",
+        "sessions": "Sessions",
+        "first": "First",
+        "last": "Last",
+        "product": "Product",
+        "total": "Total",
+        "delivered": "Delivered",
+        "returned": "Returned",
+        "transferred": "Transferred",
+        "remaining": "Remaining",
+        "invoices": "Invoices",
+        "gross": "Gross",
+        "refunds": "Refunds",
+        "net": "Net"
+      },
+      "visitsByMonthTitle": "Visits by month",
+      "upcomingTitle": "Upcoming appointments",
+      "upcomingEmpty": "No upcoming appointments.",
+      "packagesTitle": "Packages",
+      "spendTitle": "Spend",
+      "empty": "No recorded visits."
     }
   },
   "ehrIntegration": {
@@ -979,7 +1141,8 @@
       "appointments": "Appointments",
       "therapies": "Therapies",
       "billing": "Billing",
-      "protocolChange": "Protocol change"
+      "protocolChange": "Protocol change",
+      "attendance": "Attendance"
     },
     "hub": {
       "clinic": "Clinic",
@@ -1179,6 +1342,10 @@
   },
   "nav": {
     "agendaRules": "What blocks booking",
+    "estadisticasVentas": "Sales (analytics)",
+    "estadisticasAsistencia": "Attendance (analytics)",
+    "estadisticasPacientes": "Patients (analytics)",
+    "tasaRetorno": "Return rate",
     "home": "Home",
     "appointments": "Appointments",
     "signIn": "Sign in",

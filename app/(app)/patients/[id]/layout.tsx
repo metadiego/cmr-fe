@@ -46,6 +46,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import { CertificacionGastos } from "@/components/clientes/certificacion-gastos";
 import { FichaCitas, FichaTerapias, FichaFacturacion, FichaUltimaVisita } from "@/components/clientes/ficha-tabs";
+import { FichaAsistencia } from "@/components/clientes/ficha-asistencia";
 import { FichaCambioProtocolo } from "@/components/clientes/ficha-cambio-protocolo";
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import { OldRecordSuggestionBanner } from "@/components/clientes/old-record-suggestion-banner";
@@ -148,12 +149,14 @@ function PacienteDetail({
   const puedeCitas = can("citas.read");
   const puedeFrontdesk = can("frontdesk.read");
   const puedeProtocolo = can("tratamiento.cambio_protocolo");
+  const puedeAsistencia = can("estadisticas.read");
   const [requestedTab, selectTab] = useTabRoute(PATIENT_TABS);
   // A tab this person may not see (e.g. a shared link to /billing) opens the summary instead.
   const allowed: Record<(typeof PATIENT_TABS.tabs)[number], boolean> = {
     summary: true,
     appointments: puedeCitas,
     therapies: puedeFrontdesk,
+    attendance: puedeAsistencia,
     billing: puedeFactura,
     documents: puedeFactura,
     "protocol-change": puedeProtocolo,
@@ -307,6 +310,7 @@ function PacienteDetail({
           <TabsTrigger value="summary">{t("tabs.summary")}</TabsTrigger>
           {puedeCitas && <TabsTrigger value="appointments">{t("tabs.appointments")}</TabsTrigger>}
           {puedeFrontdesk && <TabsTrigger value="therapies">{t("tabs.therapies")}</TabsTrigger>}
+          {puedeAsistencia && <TabsTrigger value="attendance">{t("tabs.attendance")}</TabsTrigger>}
           {puedeFactura && <TabsTrigger value="billing">{t("tabs.billing")}</TabsTrigger>}
           {puedeFactura && <TabsTrigger value="documents">{t("tabs.documents")}</TabsTrigger>}
           {puedeProtocolo && <TabsTrigger value="protocol-change">{t("tabs.protocolChange")}</TabsTrigger>}
@@ -351,6 +355,9 @@ function PacienteDetail({
         )}
         {puedeFrontdesk && (
           <TabsContent value="therapies"><FichaTerapias pacienteId={p.id} pacienteNombre={fullName(p)} record={p.medicalRecordNumber} centro={centroId} /></TabsContent>
+        )}
+        {puedeAsistencia && (
+          <TabsContent value="attendance"><FichaAsistencia pacienteId={p.id} centro={centroId} /></TabsContent>
         )}
         {puedeFactura && (
           <TabsContent value="billing"><FichaFacturacion pacienteId={p.id} centro={centroId} /></TabsContent>

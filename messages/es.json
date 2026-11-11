@@ -9,6 +9,168 @@
       "many": "{count, plural, one {# centro} other {# centros}}",
       "total": "{label} ({scope})",
       "covers": "Cubre: {scope}"
+    },
+    "analytics": {
+      "none": "Sin asignar",
+      "dim": {
+        "clinic": "Centro",
+        "day": "Día",
+        "month": "Mes",
+        "weekday": "Día de la semana",
+        "hour": "Hora",
+        "doctor": "Médico",
+        "seller": "Vendedor",
+        "product": "Producto",
+        "patient": "Paciente",
+        "source": "Origen",
+        "paymentMethod": "Forma de pago",
+        "division": "División",
+        "kind": "Tipo",
+        "service": "Servicio",
+        "technician": "Técnico",
+        "visitType": "Tipo de visita",
+        "channel": "Canal",
+        "status": "Estado"
+      },
+      "weekday": {
+        "monday": "Lunes",
+        "tuesday": "Martes",
+        "wednesday": "Miércoles",
+        "thursday": "Jueves",
+        "friday": "Viernes",
+        "saturday": "Sábado",
+        "sunday": "Domingo"
+      },
+      "kind": {
+        "appointment": "Cita médica",
+        "therapy": "Terapia"
+      }
+    },
+    "salesBreakdown": {
+      "title": "Ventas",
+      "help": "Factura por 1 a 3 cortes a la vez. Bruto/Devoluciones/Neto es lo FACTURADO; Hora y Forma de pago es lo COBRADO (pagos) y no se combinan con Producto.",
+      "cutBy": "Cortar por",
+      "from": "Desde",
+      "to": "Hasta",
+      "search": "Buscar",
+      "exportCsv": "Exportar CSV",
+      "col": {
+        "invoices": "Facturas",
+        "patients": "Pacientes",
+        "gross": "Bruto",
+        "refunds": "Devoluciones",
+        "net": "Neto",
+        "quantity": "Cantidad"
+      },
+      "totals": "Totales",
+      "empty": "Sin ventas en ese rango.",
+      "truncated": "Se omitieron {n} filas adicionales — acota el rango o agrega otro corte.",
+      "pickAtLeastOne": "Elige al menos un corte.",
+      "productWithPaymentCut": "Producto no se puede combinar con Hora ni Forma de pago (son lo cobrado, no lo facturado)."
+    },
+    "attendance": {
+      "title": "Asistencia",
+      "help": "Citas y terapias por 1 a 3 cortes. Un rango futuro muestra quién vendrá (programadas); un rango pasado sin marcar cuenta como pendiente.",
+      "cutBy": "Cortar por",
+      "from": "Desde",
+      "to": "Hasta",
+      "search": "Buscar",
+      "col": {
+        "events": "Eventos",
+        "attended": "Asistió",
+        "noShows": "No asistió",
+        "cancelled": "Canceladas",
+        "scheduled": "Programadas",
+        "unrecorded": "Sin marcar",
+        "patients": "Pacientes",
+        "attendedPatients": "Pacientes que asistieron"
+      },
+      "totals": "Totales",
+      "empty": "Sin eventos en ese rango.",
+      "truncated": "Se omitieron {n} filas adicionales — acota el rango o agrega otro corte.",
+      "pickAtLeastOne": "Elige al menos un corte."
+    },
+    "patientsStats": {
+      "title": "Pacientes",
+      "help": "Visitas y gasto por paciente en el rango. \"Perdidos\" = sin visita hace N días y nada agendado.",
+      "from": "Desde",
+      "to": "Hasta",
+      "search": "Buscar",
+      "minVisits": "Frecuentes (≥ visitas)",
+      "lapsedDays": "Perdidos (días sin visitar)",
+      "newOnly": "Solo nuevos",
+      "col": {
+        "patient": "Paciente",
+        "visits": "Visitas",
+        "therapies": "Terapias",
+        "firstVisit": "Primera visita",
+        "lastVisit": "Última visita",
+        "nextVisit": "Próxima visita",
+        "avgDays": "Días prom. entre visitas",
+        "spend": "Gasto",
+        "isNew": "Nuevo"
+      },
+      "distribution": "Distribución por nº de visitas",
+      "empty": "Sin pacientes en ese rango.",
+      "truncated": "Mostrando los primeros {shown} de {total} pacientes — acota el rango o sube los filtros.",
+      "viewPatient": "Ver ficha"
+    },
+    "returnRate": {
+      "title": "Tasa de retorno",
+      "help": "De quienes terminaron su ventana de retorno, cuántos volvieron dentro de los días elegidos. \"Pendiente\" todavía no decide: la ventana sigue abierta.",
+      "from": "Desde",
+      "to": "Hasta",
+      "withinDays": "Volver dentro de (días)",
+      "cutBy": "Cortar por",
+      "none": "Sin corte",
+      "search": "Buscar",
+      "col": {
+        "cohort": "Cohorte",
+        "returned": "Volvieron",
+        "notReturned": "No volvieron",
+        "pending": "Pendientes",
+        "rate": "Tasa",
+        "avgDays": "Días prom. a volver"
+      },
+      "totals": "Totales",
+      "empty": "Sin cohorte en ese rango.",
+      "noRate": "—"
+    },
+    "patientAttendanceTab": {
+      "title": "Asistencia",
+      "firstVisit": "Primera visita",
+      "lastVisit": "Última visita",
+      "avgDays": "Días prom. entre visitas",
+      "visitsTotal": "Visitas",
+      "visitsAppointments": "Citas",
+      "visitsTherapies": "Terapias",
+      "visitsDays": "Días distintos",
+      "noShows": "No asistió",
+      "cancelled": "Canceladas",
+      "unrecorded": "Sin marcar",
+      "therapiesTitle": "Terapias",
+      "col": {
+        "service": "Servicio",
+        "sessions": "Sesiones",
+        "first": "Primera",
+        "last": "Última",
+        "product": "Producto",
+        "total": "Total",
+        "delivered": "Entregado",
+        "returned": "Devuelto",
+        "transferred": "Transferido",
+        "remaining": "Restante",
+        "invoices": "Facturas",
+        "gross": "Bruto",
+        "refunds": "Devoluciones",
+        "net": "Neto"
+      },
+      "visitsByMonthTitle": "Visitas por mes",
+      "upcomingTitle": "Próximas citas",
+      "upcomingEmpty": "Sin citas próximas.",
+      "packagesTitle": "Paquetes",
+      "spendTitle": "Gasto",
+      "empty": "Sin visitas registradas."
     }
   },
   "ehrIntegration": {
@@ -979,7 +1141,8 @@
       "appointments": "Citas",
       "therapies": "Terapias",
       "billing": "Facturación",
-      "protocolChange": "Cambio de protocolo"
+      "protocolChange": "Cambio de protocolo",
+      "attendance": "Asistencia"
     },
     "hub": {
       "clinic": "Centro",
@@ -1179,6 +1342,10 @@
   },
   "nav": {
     "agendaRules": "Qué bloquea al agendar",
+    "estadisticasVentas": "Ventas (analítica)",
+    "estadisticasAsistencia": "Asistencia (analítica)",
+    "estadisticasPacientes": "Pacientes (analítica)",
+    "tasaRetorno": "Tasa de retorno",
     "home": "Inicio",
     "appointments": "Citas",
     "signIn": "Iniciar sesión",

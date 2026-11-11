@@ -23,7 +23,7 @@ const BILLING_LEGACY = { facturas: "invoices", devoluciones: "returns", caja: "c
 
 export const PATIENT_TABS = {
   pattern: "/patients/[id]",
-  tabs: ["summary", "appointments", "therapies", "billing", "documents", "protocol-change"],
+  tabs: ["summary", "appointments", "therapies", "attendance", "billing", "documents", "protocol-change"],
 } as const satisfies TabRoute;
 
 export const BILLING_GENERAL_TABS = {

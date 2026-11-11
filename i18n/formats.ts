@@ -54,6 +54,8 @@ export const formats = {
     dayLong: { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" },
     // Calendar headers: "septiembre de 2026" / "September 2026"
     monthYear: { month: "long", year: "numeric", timeZone: "UTC" },
+    // Narrow chart/bar labels, month only: "sept" / "Sep"
+    monthShort: { month: "short", timeZone: "UTC" },
     // Day-view heading: "jueves, 4 de septiembre de 2026" / "Thursday, September 4, 2026"
     dayWeekdayLong: {
       weekday: "long",
