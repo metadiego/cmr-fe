@@ -19,7 +19,13 @@ export function ConteoDenominaciones({
   disabled,
   hint,
   saveState = "idle",
+  fondo,
+  aDepositar,
 }: {
+  /** Opening float and what goes to the bank (counted − float): shown next to the total so the float is
+   *  not read as sales (Sheila, Caguas 10-nov: «$140 contado = $50 fondo + $90 ventas en efectivo»). */
+  fondo?: number;
+  aDepositar?: number;
   denominaciones: Denominacion[];
   cantidades: Record<string, number>;
   onChange: (denominacionId: string, cantidad: number) => void;
@@ -104,6 +110,18 @@ export function ConteoDenominaciones({
             <span className="text-sm font-semibold">{t("total")}</span>
             <span className="text-base font-semibold tabular-nums">{money(total)}</span>
           </div>
+          {fondo != null && aDepositar != null && (
+            <div className={cn("space-y-1 border-t px-4 py-2.5 text-sm", disabled && "opacity-70")}>
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span>{t("openingFloat")}</span>
+                <span className="tabular-nums">{money(fondo)}</span>
+              </div>
+              <div className="flex items-center justify-between font-semibold">
+                <span>{t("cashToDeposit")}</span>
+                <span className="tabular-nums">{money(aDepositar)}</span>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

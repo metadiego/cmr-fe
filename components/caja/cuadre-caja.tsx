@@ -471,6 +471,8 @@ function Editor({
             disabled={!contarHabilitado}
             hint={hint}
             saveState={contarHabilitado ? autosave.state : "idle"}
+            fondo={cerrado ? inicio : inicioEnVivo}
+            aDepositar={aDepositar}
             onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
           />
 

@@ -3967,7 +3967,9 @@
       "cashiersSumHint": "Read only: the sum of each cashier's count.",
       "countMyself": "Do a single count",
       "backToSum": "Back to the cashiers' sum",
-      "backToSumConfirm": "The manager's count will be cleared and the cashiers' sum used."
+      "backToSumConfirm": "The manager's count will be cleared and the cashiers' sum used.",
+      "openingFloat": "Opening float",
+      "cashToDeposit": "Cash sales (to deposit)"
     },
     "petty": "Petty cash",
     "summary": {
