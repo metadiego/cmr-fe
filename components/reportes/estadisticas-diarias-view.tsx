@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { revenueLines, showReturned } from "@/lib/estadisticas/daily-revenue";
+import { dailyRowShowsUnits } from "@/lib/estadisticas/services";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, WhatsappIcon, Mail01Icon, Copy01Icon } from "@hugeicons/core-free-icons";
@@ -103,7 +104,12 @@ export function EstadisticasDiariasView() {
     lineas.push(`${t("atencionMedica")}   ${t("nuevos")}: ${data.medicalCare.newCount}   ${t("seguimiento")}: ${data.medicalCare.followUpCount}   ${t("total")} ${data.medicalCare.total}`, "");
     if (data.services.length) {
       lineas.push(`${t("servicios")}   (${t("col.aplicados")} / ${t("col.vendidos")})`);
-      data.services.forEach((s) => lineas.push(`  ${s.name}: ${s.applied} / ${s.sold}`));
+      data.services.forEach((s) => {
+        const aplicado = dailyRowShowsUnits(s)
+          ? t("col.aplicadosUnidades", { visits: s.visits, therapies: s.therapies })
+          : String(s.visits);
+        lineas.push(`  ${s.name}: ${aplicado} / ${s.sold}`);
+      });
       lineas.push("");
     }
     revenueLines(data).forEach((l) => lineas.push(`${t(REVENUE_LABEL[l.key])}   ${money.format(l.amount)}`));
@@ -187,7 +193,19 @@ export function EstadisticasDiariasView() {
   );
 }
 
-function DiariaCard({ centro, fecha, data, t, verDevueltos }: { centro: string; fecha: string; data: EstadisticasDiarias; t: (k: string) => string; verDevueltos: boolean }) {
+function DiariaCard({
+  centro,
+  fecha,
+  data,
+  t,
+  verDevueltos,
+}: {
+  centro: string;
+  fecha: string;
+  data: EstadisticasDiarias;
+  t: (k: string, values?: Record<string, string | number>) => string;
+  verDevueltos: boolean;
+}) {
   const devueltos = verDevueltos && showReturned(data);
   const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue && !data.refunds;
   return (
@@ -228,7 +246,14 @@ function DiariaCard({ centro, fecha, data, t, verDevueltos }: { centro: string; 
                   {data.services.map((s) => (
                     <tr key={s.slug}>
                       <td className="py-1.5 pr-3 font-medium">{s.name}</td>
-                      <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.applied)}</td>
+                      <td
+                        className="r px-3 py-1.5 text-right tabular-nums"
+                        title={dailyRowShowsUnits(s) ? t("tip.aplicadosUnidades") : undefined}
+                      >
+                        {dailyRowShowsUnits(s)
+                          ? t("col.aplicadosUnidades", { visits: s.visits, therapies: s.therapies })
+                          : nf.format(s.visits)}
+                      </td>
                       <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.sold)}</td>
                       {devueltos && <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.returned ?? 0)}</td>}
                     </tr>

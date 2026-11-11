@@ -64,7 +64,20 @@ export type EstadisticasServicios = {
 // Solo vienen servicios con actividad (el BE no manda ceros); orden por nombre → respetar.
 // BE #541: `returned` = sessions given back by that day's refunds; `refunds`/`netRevenue` count refunds on
 // their refund date (net = the day's cash count).
-export type EstDiariaServicio = { slug: string; name: string; applied: number; sold: number; returned?: number };
+// BE #563: `applied` stopped being a patient count back at BE #551 (it is units — same drift the sibling
+// report already had, see EstServicio.therapies below). `visits` is the real patient/session count;
+// `therapies` is the units (areas in laser, doses in Vit C/Intravenoso where the service declares
+// `statisticsUnitKey`, 1 per visit elsewhere) — same figure as `/estadisticas/servicios`'s `therapies`.
+// Always present (0 when nothing happened). Screen: dailyRowShowsUnits (lib/estadisticas/services.ts).
+export type EstDiariaServicio = {
+  slug: string;
+  name: string;
+  applied: number;
+  sold: number;
+  returned?: number;
+  visits: number;
+  therapies: number;
+};
 export type EstadisticasDiarias = {
   medicalCare: { newCount: number; followUpCount: number; total: number };
   services: EstDiariaServicio[];

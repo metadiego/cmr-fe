@@ -2028,6 +2028,7 @@
     "col": {
       "servicio": "Servicio",
       "aplicados": "Aplicados",
+      "aplicadosUnidades": "{visits} pac. / {therapies} u.",
       "vendidos": "Vendidos",
       "devueltos": "Devueltos"
     },
@@ -2035,6 +2036,7 @@
       "nuevas": "Citas atendidas por primera vez (lo que pasó, no lo agendado).",
       "seguimientos": "Citas de seguimiento atendidas.",
       "aplicados": "Sesiones entregadas hoy en el frontdesk (el trabajo hecho).",
+      "aplicadosUnidades": "Pacientes atendidos / unidades aplicadas (áreas en láser, viales o dosis donde el servicio las declara).",
       "vendidos": "Sesiones que prometieron las facturas del día (lo cobrado). No tiene que coincidir con aplicados.",
       "devueltos": "Sesiones devueltas por las devoluciones del día"
     },

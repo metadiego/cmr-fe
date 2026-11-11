@@ -2028,6 +2028,7 @@
     "col": {
       "servicio": "Service",
       "aplicados": "Applied",
+      "aplicadosUnidades": "{visits} pts / {therapies} u.",
       "vendidos": "Sold",
       "devueltos": "Returned"
     },
@@ -2035,6 +2036,7 @@
       "nuevas": "First-time attended appointments (what happened, not what was scheduled).",
       "seguimientos": "Follow-up appointments attended.",
       "aplicados": "Sessions delivered today at the frontdesk (work done).",
+      "aplicadosUnidades": "Patients attended / units applied (laser areas, vials or doses where the service declares them).",
       "vendidos": "Sessions promised by today's invoices (what was billed). Need not match applied.",
       "devueltos": "Sessions given back by the day's refunds"
     },

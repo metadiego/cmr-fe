@@ -13,3 +13,12 @@ export function showTherapies(rows: readonly Row[]): boolean {
 export function hasVitals(v: { rows?: readonly unknown[] } | null | undefined): boolean {
   return Array.isArray(v?.rows) && v.rows.length > 0;
 }
+
+/**
+ * «Estadísticas Diarias» (BE #563): per service row, `visits` (patients) and `therapies` (units —
+ * laser areas, Vit C/Intravenoso doses, 1 per visit elsewhere) only differ where the service
+ * declared a `statisticsUnitKey`. A row where they match shows ONE number, same as before #563.
+ */
+export function dailyRowShowsUnits(s: { visits: number; therapies: number }): boolean {
+  return s.therapies !== s.visits;
+}
