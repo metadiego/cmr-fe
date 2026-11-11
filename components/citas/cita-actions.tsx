@@ -23,6 +23,7 @@ import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { getAgendaDia, type AgendaDia } from "@/lib/api/agenda-dia";
 import { toastError } from "@/lib/api/errors";
+import { todayPR } from "@/lib/format/fecha";
 import { slotAvailability } from "@/lib/agenda/slot-availability";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
@@ -356,7 +357,11 @@ function RescheduleDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>{t("date")}</Label>
-              <DatePicker value={fecha} onChange={setFecha} />
+              {/* The year dropdown goes 110 years back by default (date-picker.tsx, for birth dates) — a
+                  reschedule has no business reaching the past. Record 15059, 2026-11-11: a misclick two
+                  rows up the year list sent an appointment to 2025 (the sheet rejected it as 404, but
+                  nothing stopped the local save). Handoff .personal/handoff-hoja-caida-avisar-o-bloquear.md. */}
+              <DatePicker value={fecha} onChange={setFecha} min={todayPR()} />
             </div>
             <div className="space-y-1.5">
               <Label>{t("time")}</Label>

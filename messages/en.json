@@ -4948,7 +4948,11 @@
       "workEnd": "End time",
       "externalCode": "External center code",
       "selectCode": "Pick a code",
-      "none": "None"
+      "none": "None",
+      "sheetDownPolicy": "If the call-center sheet does not respond",
+      "sheetDownPolicyHelp": "With the sheet reservation on: what to do when booking if the sheet does not answer.",
+      "sheetDownPolicyAllow": "Warn and book",
+      "sheetDownPolicyBlock": "Block"
     },
     "doctorMappings": {
       "title": "Doctor mapping",
@@ -5684,6 +5688,7 @@
   "sheet": {
     "slotTaken": "That hour no longer has a seat on the call-center sheet",
     "unavailable": "The call-center sheet is not answering; nothing was booked",
+    "unavailableWarn": "The call-center sheet did not answer; the appointment was saved here but not on the sheet",
     "noOwnerCode": "The patient has no portfolio owner with a code on the sheet",
     "ownerNoteFailed": "The portfolio owner could not be noted on the sheet",
     "down": "The call-center sheet is not answering: availability may be out of date",

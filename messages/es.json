@@ -4948,7 +4948,11 @@
       "workEnd": "Hora de fin",
       "externalCode": "Código de centro externo",
       "selectCode": "Elige un código",
-      "none": "Ninguno"
+      "none": "Ninguno",
+      "sheetDownPolicy": "Si la hoja del call center no responde",
+      "sheetDownPolicyHelp": "Con la reserva en la hoja encendida: qué hacer al agendar si la hoja no contesta.",
+      "sheetDownPolicyAllow": "Avisar y agendar",
+      "sheetDownPolicyBlock": "Bloquear"
     },
     "doctorMappings": {
       "title": "Mapeo de médicos",
@@ -5684,6 +5688,7 @@
   "sheet": {
     "slotTaken": "Esa hora ya no tiene asiento en la hoja del call center",
     "unavailable": "La hoja del call center no responde; no se agendó",
+    "unavailableWarn": "La hoja del call center no respondió; la cita se guardó aquí pero no en la hoja",
     "noOwnerCode": "El paciente no tiene dueño de cartera con código en la hoja",
     "ownerNoteFailed": "No se pudo anotar el dueño de cartera en la hoja",
     "down": "La hoja del call center no responde: la disponibilidad puede no estar al día",

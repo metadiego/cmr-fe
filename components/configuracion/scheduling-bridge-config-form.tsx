@@ -152,6 +152,20 @@ export function SchedulingBridgeConfigForm({
         </div>
       </Field>
 
+      <Field label={t("sheetDownPolicy")} hint={t("sheetDownPolicyHelp")}>
+        <Select
+          value={draft.sheetDownPolicy}
+          onValueChange={(v) => patch({ sheetDownPolicy: v as BridgeConfig["sheetDownPolicy"] })}
+          disabled={!puedeEscribir}
+        >
+          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="allow">{t("sheetDownPolicyAllow")}</SelectItem>
+            <SelectItem value="block">{t("sheetDownPolicyBlock")}</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+
       {puedeEscribir && (
         <Button onClick={onSave} disabled={busy}>
           {busy ? tc("saving") : tc("save")}
