@@ -5045,7 +5045,14 @@
     "ehrActualizado": "EHR role updated.",
     "centroOrigen": "Home clinic: {nombre}",
     "centrosColumna": "Clinic(s)",
-    "extension": "Extension (phone system)"
+    "extension": "Extension (phone system)",
+    "extensionesTitulo": "Telephony",
+    "extensionesVacio": "No extensions.",
+    "extensionesCentral": "PBX (e.g. ucm-bayamon, 3cx)",
+    "extensionesAgregar": "Add PBX",
+    "extensionesQuitar": "Remove",
+    "extensionesGuardar": "Save extensions",
+    "extensionesCentralDuplicada": "Each PBX can only appear once."
   },
   "acciones": {
     "subtitle": "Their whole history, without leaving here.",
@@ -5548,7 +5555,8 @@
       "colName": "Operator",
       "colAnswered": "Answered",
       "colOutbound": "Outbound",
-      "empty": "No calls recorded yet."
+      "empty": "No calls recorded yet.",
+      "unassigned": "Ext {extension} (unassigned)"
     },
     "noCenters": "You have no centers to view.",
     "error": "Could not load «Right now»."

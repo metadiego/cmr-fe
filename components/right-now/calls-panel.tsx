@@ -1,21 +1,22 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import type { RightNowCenter, RightNowCallTotals } from "@/lib/api/right-now";
+import type { RightNowCalls } from "@/lib/api/right-now";
 import { ratePct } from "@/lib/right-now/view";
 import { Panel, Pill, RankBadge, Stat } from "@/components/right-now/parts";
 
-// Calls across centers: the consolidated totals, each PBX, and the operators' ranking (named by the
-// staff record's extension). Shown with its zeros until the PBX agent pushes calls (handoff).
-export function CallsPanel({ consolidated, centers }: { consolidated: RightNowCallTotals | undefined; centers: RightNowCenter[] }) {
+// Calls: ONE call center for the whole org (BE #553, handoff .personal/handoff-extensiones-por-
+// central.md) — same block whatever center the top bar has chosen. Reads ONLY `combinado.calls`, not
+// `centers[].calls` (the BE still mirrors it onto the first center for a transition period; told the
+// BE when this stopped mattering). A ranking row is a PERSON now (staffId), summed across both PBXes.
+export function CallsPanel({ calls }: { calls: RightNowCalls | undefined }) {
   const t = useTranslations("rightNow.calls");
-  const c = consolidated ?? { total: 0, inbound: 0, outbound: 0, missed: 0, answerRate: 0 };
-  const byPbx = centers.flatMap((x) => x.calls?.byPbx ?? []);
-  const ranking = centers
-    .flatMap((x) => x.calls?.ranking ?? [])
-    .sort((a, b) => b.answered + b.outbound - (a.answered + a.outbound));
+  const c = calls?.consolidated ?? { total: 0, inbound: 0, outbound: 0, missed: 0, answerRate: 0 };
+  const byPbx = calls?.byPbx ?? [];
+  const ranking = [...(calls?.ranking ?? [])].sort((a, b) => b.answered + b.outbound - (a.answered + a.outbound));
 
   return (
     <Panel title={t("title")}>
@@ -58,11 +59,19 @@ export function CallsPanel({ consolidated, centers }: { consolidated: RightNowCa
           ) : (
             <ul className="space-y-1.5">
               {ranking.slice(0, 8).map((r, i) => (
-                <li key={r.extension} className="flex items-center gap-2 text-sm">
+                <li key={r.staffId ?? r.extension} className="flex items-center gap-2 text-sm">
                   <RankBadge rank={i + 1} />
                   <span className="min-w-0 flex-1 truncate">
-                    {r.name ?? r.extension}
-                    {r.name && <span className="ml-1 text-xs text-muted-foreground">#{r.extension}</span>}
+                    {r.name ? (
+                      <>
+                        {r.name}
+                        <span className="ml-1 text-xs text-muted-foreground">#{r.extension}</span>
+                      </>
+                    ) : (
+                      <Link href="/configuration/staff" className="text-primary hover:underline">
+                        {t("unassigned", { extension: r.extension })}
+                      </Link>
+                    )}
                   </span>
                   <Pill tone="success">{r.answered} {t("colAnswered")}</Pill>
                   <Pill tone="info">{r.outbound} {t("colOutbound")}</Pill>

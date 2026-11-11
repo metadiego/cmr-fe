@@ -111,6 +111,22 @@ export function updatePersonal(
   return apiFetch<Personal>(`/staff/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
 }
 
+// Una extensión por central telefónica (BE #553, handoff .personal/handoff-extensiones-por-central.md):
+// reemplaza el campo suelto `extension` (deprecado, sigue de espejo de `ucm-bayamon` mientras el FE migra).
+export type StaffExtension = { pbx: string; extension: string };
+export function getStaffExtensions(id: string, centroId?: string): Promise<StaffExtension[]> {
+  return apiFetch<StaffExtension[]>(`/staff/${id}/extensions`, {}, centroId);
+}
+// Manda la lista COMPLETA: lo que no venga se quita, `[]` las quita todas. 409 si otra persona ya
+// tiene esa extensión en esa central (el `message` del error nombra cuál).
+export function setStaffExtensions(id: string, extensions: StaffExtension[], centroId?: string): Promise<StaffExtension[]> {
+  return apiFetch<StaffExtension[]>(
+    `/staff/${id}/extensions`,
+    { method: "PUT", body: JSON.stringify({ extensions }) },
+    centroId,
+  );
+}
+
 // Alta de personal (POST /staff). `name` es lo único obligatorio; los centros se asignan aparte con
 // updatePersonalCentros (regla del BE: sin centros no aparece en selects). Handoff personal-crud-completo.
 export function createPersonal(payload: StaffEditable, centroId?: string): Promise<Personal> {

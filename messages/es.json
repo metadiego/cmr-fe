@@ -5045,7 +5045,14 @@
     "ehrActualizado": "Rol del EHR actualizado.",
     "centroOrigen": "Centro de origen: {nombre}",
     "centrosColumna": "Centro(s)",
-    "extension": "Extensión (central telefónica)"
+    "extension": "Extensión (central telefónica)",
+    "extensionesTitulo": "Telefonía",
+    "extensionesVacio": "Sin extensiones.",
+    "extensionesCentral": "Central (p. ej. ucm-bayamon, 3cx)",
+    "extensionesAgregar": "Añadir central",
+    "extensionesQuitar": "Quitar",
+    "extensionesGuardar": "Guardar extensiones",
+    "extensionesCentralDuplicada": "Cada central solo puede aparecer una vez."
   },
   "acciones": {
     "subtitle": "Todo su historial, sin salir de aquí.",
@@ -5548,7 +5555,8 @@
       "colName": "Operadora",
       "colAnswered": "Contestadas",
       "colOutbound": "Salientes",
-      "empty": "Sin llamadas registradas todavía."
+      "empty": "Sin llamadas registradas todavía.",
+      "unassigned": "Ext {extension} (sin asignar)"
     },
     "noCenters": "No tienes centros para ver.",
     "error": "No se pudo cargar «Ahora mismo»."

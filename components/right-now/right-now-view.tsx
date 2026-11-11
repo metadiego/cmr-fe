@@ -108,7 +108,7 @@ export function RightNowView() {
             </div>
           )}
 
-          <CallsPanel consolidated={combined?.calls?.consolidated} centers={centers} />
+          <CallsPanel calls={combined?.calls} />
         </>
       )}
     </PageContainer>

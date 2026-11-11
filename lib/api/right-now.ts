@@ -75,10 +75,22 @@ export type RightNowCallTotals = {
   answerRate: number; // 0..1
 };
 
+// Una fila del ranking = una PERSONA (BE #553, handoff .personal/handoff-extensiones-por-central.md):
+// antes era una extensión suelta. `staffId:null` = extensión sin dueño todavía (pintar "sin asignar").
+// `extension` ya viene combinada ("805 / 2224"); `extensions` trae el desglose por central si hace
+// falta mostrarlo como chips.
+export type RightNowCallRankingRow = {
+  staffId: string | null;
+  name: string | null;
+  extension: string;
+  extensions: { pbx: string; extension: string }[];
+  answered: number;
+  outbound: number;
+};
 export type RightNowCalls = {
   byPbx?: ({ pbx: string } & RightNowCallTotals)[];
   consolidated?: RightNowCallTotals;
-  ranking?: { extension: string; name: string | null; answered: number; outbound: number }[];
+  ranking?: RightNowCallRankingRow[];
 };
 
 export type RightNowCenter = {
@@ -90,6 +102,8 @@ export type RightNowCenter = {
   doctors?: RightNowDoctor[];
   services?: RightNowService[];
   prescriptions?: RightNowPrescriptions;
+  // El call center es UNO solo para toda la organización (#553): esta copia solo sobrevive en el
+  // PRIMER centro, por compatibilidad con el panel viejo — leer `combinado.calls`, no esto.
   calls?: RightNowCalls;
   alerts?: { total: number; bySeverity?: Record<string, number> };
 };
@@ -97,7 +111,7 @@ export type RightNowCenter = {
 export type RightNowCombined = {
   sales?: Omit<RightNowSales, "sellers" | "megagrupos">;
   patients?: RightNowPatients;
-  calls?: { consolidated?: RightNowCallTotals };
+  calls?: RightNowCalls;
   alerts?: { total: number };
 };
 
