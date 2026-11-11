@@ -331,7 +331,8 @@
       "useSuggested": "Use suggested"
     },
     "medico_requerido_en_consulta": "To enter consultation the appointment needs an assigned doctor.",
-    "datos_requeridos_para_presente": "The patient is missing required data to be marked present."
+    "datos_requeridos_para_presente": "The patient is missing required data to be marked present.",
+    "closedByHoliday": "Holiday: the schedule is closed"
   },
   "tableroBoard": {
     "live": "Live",
@@ -563,7 +564,17 @@
       "numeracion_facturas": "Invoices",
       "numeracion_presupuestos": "Quotes",
       "numeracion_record_paciente": "Patient record",
-      "numeracion_devoluciones": "Returns"
+      "numeracion_devoluciones": "Returns",
+      "agenda_blocking_rules": "What blocks booking"
+    },
+    "agendaRules": {
+      "title": "What blocks booking",
+      "help": "The holiday blocks by default. Everything else (capacity, hours, start step, per-patient cap) can be left as warn-only: the booking still happens, with a non-blocking warning.",
+      "guardado": "Saved",
+      "valorPorDefecto": "This center hasn't set it — default value (only the holiday blocks).",
+      "bloquea": "Blocks",
+      "soloAvisa": "Warns only",
+      "showOffStepStartsHelp": "Also show the times off the service's start step (e.g. :30 on one that starts on the hour); they still book, with a warning."
     }
   },
   "tableroEditor": {
@@ -752,7 +763,16 @@
       "variantDropdown": "List",
       "variantChips": "Grid",
       "fullInSheet": "Full on the sheet"
-    }
+    },
+    "rule": {
+      "capacity": "No room (stations or staff)",
+      "closing": "Outside the center's hours",
+      "startStep": "Outside the service's start step",
+      "maxPerPatient": "Exceeds the per-patient minute cap",
+      "holiday": "Holiday",
+      "unknown": "Another schedule rule"
+    },
+    "showOffStepStarts": "Show times off the start step"
   },
   "appointments": {
     "title": "Appointments",
@@ -1158,6 +1178,7 @@
     "expand": "Expand"
   },
   "nav": {
+    "agendaRules": "What blocks booking",
     "home": "Home",
     "appointments": "Appointments",
     "signIn": "Sign in",

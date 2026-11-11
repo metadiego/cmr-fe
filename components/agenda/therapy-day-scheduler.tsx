@@ -201,8 +201,10 @@ export function TherapyDayScheduler({
     setDate(d);
     setTime("");
   }
-  function reason(sl: { fits: boolean; reasonKey?: string | null; serviceId?: string | null; resourceId?: string | null }) {
-    const base = sl.reasonKey && tRoot.has(sl.reasonKey) ? tRoot(sl.reasonKey) : (sl.reasonKey ?? "");
+  // BE #547: `reasonKeys` trae TODOS los motivos (antes solo el primero en `reasonKey`).
+  function reason(sl: { fits: boolean; reasonKey?: string | null; reasonKeys?: string[]; serviceId?: string | null; resourceId?: string | null }) {
+    const keys = sl.reasonKeys?.length ? sl.reasonKeys : sl.reasonKey ? [sl.reasonKey] : [];
+    const base = keys.map((k) => (tRoot.has(k) ? tRoot(k) : k)).join(" · ");
     const service = sl.serviceId ? servById.get(sl.serviceId)?.name : null;
     const resource = sl.resourceId ? recursosById.get(sl.resourceId)?.name : null;
     if (service && resource) return `${t("trainBlockedBy", { reason: base, service })} (${resource})`;
@@ -217,12 +219,13 @@ export function TherapyDayScheduler({
     if (!paciente || sel.size === 0 || !time) return;
     setSubmitting(true);
     try {
-      const { data, warnings } = await bookTrain(
+      const { data, warnings, advertencias } = await bookTrain(
         { patientId: paciente.id, date, time, serviceIds: [...sel], areas: areasPayload, keepOrder },
         centro,
       );
       toast.success(tp("resumen", { creadas: data.sessions.length, omitidas: 0 }));
       mostrarAvisos(warnings, tRoot);
+      mostrarAvisos(advertencias, tRoot); // BE #547: la reserva avisó alguna regla no bloqueante, ya se guardó
       // «Agendar y seguir»: limpia selección/hora/áreas para el próximo grupo de terapias del MISMO
       // paciente/día, sin cerrar. El paciente se conserva a propósito. `areas` también se limpia: si
       // no, re-agregar el mismo servicio en la próxima ronda heredaba en silencio el número de áreas
@@ -237,10 +240,11 @@ export function TherapyDayScheduler({
     } catch (err) {
       if (err instanceof ApiError && err.code === "THERAPY_TRAIN_DOES_NOT_FIT") {
         const reasonKey = typeof err.data?.reasonKey === "string" ? err.data.reasonKey : undefined;
+        const reasonKeys = Array.isArray(err.data?.reasonKeys) ? (err.data.reasonKeys as string[]) : undefined;
         const blockedId = typeof err.data?.serviceId === "string" ? err.data.serviceId : undefined;
         const blockedResourceId = typeof err.data?.resourceId === "string" ? err.data.resourceId : undefined;
         toast.error(
-          reason({ fits: false, reasonKey, serviceId: blockedId, resourceId: blockedResourceId }) || tRoot("therapies.trainDoesNotFit"),
+          reason({ fits: false, reasonKey, reasonKeys, serviceId: blockedId, resourceId: blockedResourceId }) || tRoot("therapies.trainDoesNotFit"),
         );
         trainRes.refresh();
       } else if (err instanceof ApiError && err.code === "THERAPY_TRAIN_ROLLBACK_INCOMPLETE") {

@@ -53,8 +53,10 @@ export function TherapyTrainGrid({
 
   // Con un servicio de varias líneas (BE PR #518, NPT: técnico Y enfermera), el `resourceId` dice cuál
   // de las dos bloquea. Las dos formas combinadas: «Sin personal — Enfermería (NPT)».
+  // BE #547: `reasonKeys` trae TODOS los motivos de la hora (antes solo el primero en `reasonKey`).
   function reason(sl: TrainSlot): string {
-    const base = sl.reasonKey && tRoot.has(sl.reasonKey) ? tRoot(sl.reasonKey) : (sl.reasonKey ?? "");
+    const keys = sl.reasonKeys?.length ? sl.reasonKeys : sl.reasonKey ? [sl.reasonKey] : [];
+    const base = keys.map((k) => (tRoot.has(k) ? tRoot(k) : k)).join(" · ");
     const service = sl.serviceId ? servById.get(sl.serviceId)?.name : null;
     const resource = sl.resourceId ? recursosById.get(sl.resourceId)?.name : null;
     if (service && resource) return `${t("trainBlockedBy", { reason: base, service })} (${resource})`;
@@ -75,7 +77,7 @@ export function TherapyTrainGrid({
           const active = time === sl.time;
           const over = dragOver === sl.time;
           const endsAtText = sl.fits ? t("trainEndsAt", { time: sl.endsAt }) : "";
-          const pick = slotPickable(sl); // a full slot warns, it does not block (lib/agenda/slot-pick.ts)
+          const pick = slotPickable(sl); // BE's `selectable` decides; only a blocking rule disables (lib/agenda/slot-pick.ts)
           return (
             <button
               key={sl.time}

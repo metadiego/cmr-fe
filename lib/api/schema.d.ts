@@ -19955,6 +19955,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/agenda/reglas/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The center's booking rules: which ones block (`blockingRules`), whether the center set them (`configured`) and the catalog (`rules`: key, labelKey, the reasonKeys that break it, blocks). Default: only the holiday blocks.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/agenda/reglas/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BookingRulesController_get[0]_v1"];
+        /**
+         * Sets which rules block a booking in the center. Writes only agenda.blockingRules of the center's preferences; the rest stays.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/agenda/reglas/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["BookingRulesController_set[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agenda/rules/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The center's booking rules: which ones block (`blockingRules`), whether the center set them (`configured`) and the catalog (`rules`: key, labelKey, the reasonKeys that break it, blocks). Default: only the holiday blocks.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/agenda/rules/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BookingRulesController_get[1]_v1"];
+        /**
+         * Sets which rules block a booking in the center. Writes only agenda.blockingRules of the center's preferences; the rest stays.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/agenda/rules/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["BookingRulesController_set[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/agenda/reglas/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The center's booking rules: which ones block (`blockingRules`), whether the center set them (`configured`) and the catalog (`rules`: key, labelKey, the reasonKeys that break it, blocks). Default: only the holiday blocks. */
+        get: operations["BookingRulesController_get[2]_v2"];
+        /** Sets which rules block a booking in the center. Writes only agenda.blockingRules of the center's preferences; the rest stays. */
+        put: operations["BookingRulesController_set[2]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/agenda/rules/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The center's booking rules: which ones block (`blockingRules`), whether the center set them (`configured`) and the catalog (`rules`: key, labelKey, the reasonKeys that break it, blocks). Default: only the holiday blocks. */
+        get: operations["BookingRulesController_get[3]_v2"];
+        /** Sets which rules block a booking in the center. Writes only agenda.blockingRules of the center's preferences; the rest stays. */
+        put: operations["BookingRulesController_set[3]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/ehr-integration/patients/{patientId}/readiness": {
         parameters: {
             query?: never;
@@ -49729,7 +49817,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día.
+         * El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. `notAStartTimes` = the columns off the finest start step (marked, not hidden, unless the start-step rule blocks in the center).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/ocupacion-del-dia`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49750,7 +49838,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día.
+         * El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. `notAStartTimes` = the columns off the finest start step (marked, not hidden, unless the start-step rule blocks in the center).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/day-occupancy`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49771,7 +49859,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día.
+         * El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. `notAStartTimes` = the columns off the finest start step (marked, not hidden, unless the start-step rule blocks in the center).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/ocupacion-del-dia`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49792,7 +49880,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día.
+         * El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. `notAStartTimes` = the columns off the finest start step (marked, not hidden, unless the start-step rule blocks in the center).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/day-occupancy`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49812,7 +49900,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. */
+        /** El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. `notAStartTimes` = the columns off the finest start step (marked, not hidden, unless the start-step rule blocks in the center). */
         get: operations["ResourcesController_dayOccupancy[4]_v2"];
         put?: never;
         post?: never;
@@ -49829,7 +49917,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. */
+        /** El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. `notAStartTimes` = the columns off the finest start step (marked, not hidden, unless the start-step rule blocks in the center). */
         get: operations["ResourcesController_dayOccupancy[5]_v2"];
         put?: never;
         post?: never;
@@ -49846,7 +49934,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. */
+        /** El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. `notAStartTimes` = the columns off the finest start step (marked, not hidden, unless the start-step rule blocks in the center). */
         get: operations["ResourcesController_dayOccupancy[6]_v2"];
         put?: never;
         post?: never;
@@ -49863,7 +49951,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. */
+        /** El día entero de un vistazo: cada RECURSO por cada hora, sin elegir servicio. Cada celda dice lo usado, lo libre y QUIÉN pone el techo (`stations` = sin puestos, `staff` = sin gente de turno), más el resumen de puestos-hora del día. `notAStartTimes` = the columns off the finest start step (marked, not hidden, unless the start-step rule blocks in the center). */
         get: operations["ResourcesController_dayOccupancy[7]_v2"];
         put?: never;
         post?: never;
@@ -49881,7 +49969,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line.
+         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. A time that breaks a rule (ends after closing, off the start step, full, holiday) is MARKED, not hidden: fits:false, its reasonKey and `selectable` (true = it can be booked with a warning; false = that rule blocks in the center, agenda.blockingRules). Where closing or the start step block, those times are left out as before.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/disponibilidad`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49902,7 +49990,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line.
+         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. A time that breaks a rule (ends after closing, off the start step, full, holiday) is MARKED, not hidden: fits:false, its reasonKey and `selectable` (true = it can be booked with a warning; false = that rule blocks in the center, agenda.blockingRules). Where closing or the start step block, those times are left out as before.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/availability`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49923,7 +50011,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line.
+         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. A time that breaks a rule (ends after closing, off the start step, full, holiday) is MARKED, not hidden: fits:false, its reasonKey and `selectable` (true = it can be booked with a warning; false = that rule blocks in the center, agenda.blockingRules). Where closing or the start step block, those times are left out as before.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/disponibilidad`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49944,7 +50032,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line.
+         * A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. A time that breaks a rule (ends after closing, off the start step, full, holiday) is MARKED, not hidden: fits:false, its reasonKey and `selectable` (true = it can be booked with a warning; false = that rule blocks in the center, agenda.blockingRules). Where closing or the start step block, those times are left out as before.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/availability`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -49964,7 +50052,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. */
+        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. A time that breaks a rule (ends after closing, off the start step, full, holiday) is MARKED, not hidden: fits:false, its reasonKey and `selectable` (true = it can be booked with a warning; false = that rule blocks in the center, agenda.blockingRules). Where closing or the start step block, those times are left out as before. */
         get: operations["ResourcesController_availability[4]_v2"];
         put?: never;
         post?: never;
@@ -49981,7 +50069,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. */
+        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. A time that breaks a rule (ends after closing, off the start step, full, holiday) is MARKED, not hidden: fits:false, its reasonKey and `selectable` (true = it can be booked with a warning; false = that rule blocks in the center, agenda.blockingRules). Where closing or the start step block, those times are left out as before. */
         get: operations["ResourcesController_availability[5]_v2"];
         put?: never;
         post?: never;
@@ -49998,7 +50086,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. */
+        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. A time that breaks a rule (ends after closing, off the start step, full, holiday) is MARKED, not hidden: fits:false, its reasonKey and `selectable` (true = it can be booked with a warning; false = that rule blocks in the center, agenda.blockingRules). Where closing or the start step block, those times are left out as before. */
         get: operations["ResourcesController_availability[6]_v2"];
         put?: never;
         post?: never;
@@ -50015,7 +50103,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. */
+        /** A qué horas de ese día CABE el paciente para esa terapia. Cada hueco dice si cabe, cuántos puestos quedan y, si no cabe, el motivo como clave i18n. With several lines (NPT: room + nurse) every line is judged; a slot that does not fit also carries `resourceId`, the resource of the blocking line. A time that breaks a rule (ends after closing, off the start step, full, holiday) is MARKED, not hidden: fits:false, its reasonKey and `selectable` (true = it can be booked with a warning; false = that rule blocks in the center, agenda.blockingRules). Where closing or the start step block, those times are left out as before. */
         get: operations["ResourcesController_availability[7]_v2"];
         put?: never;
         post?: never;
@@ -50187,7 +50275,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
+         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` (every reason in `reasonKeys`), the `serviceId` that blocks and `selectable` (true = bookable with a warning). Entries off the start step or ending after closing come back marked unless that rule blocks in the center. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/tren-del-paciente`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50208,7 +50296,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
+         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` (every reason in `reasonKeys`), the `serviceId` that blocks and `selectable` (true = bookable with a warning). Entries off the start step or ending after closing come back marked unless that rule blocks in the center. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/recursos/patient-train`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50229,7 +50317,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
+         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` (every reason in `reasonKeys`), the `serviceId` that blocks and `selectable` (true = bookable with a warning). Entries off the start step or ending after closing come back marked unless that rule blocks in the center. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/tren-del-paciente`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50250,7 +50338,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
+         * The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` (every reason in `reasonKeys`), the `serviceId` that blocks and `selectable` (true = bookable with a warning). Entries off the start step or ending after closing come back marked unless that rule blocks in the center. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/resources/patient-train`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -50270,7 +50358,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
+        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` (every reason in `reasonKeys`), the `serviceId` that blocks and `selectable` (true = bookable with a warning). Entries off the start step or ending after closing come back marked unless that rule blocks in the center. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
         post: operations["ResourcesController_patientTrain[4]_v2"];
         delete?: never;
         options?: never;
@@ -50287,7 +50375,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
+        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` (every reason in `reasonKeys`), the `serviceId` that blocks and `selectable` (true = bookable with a warning). Entries off the start step or ending after closing come back marked unless that rule blocks in the center. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
         post: operations["ResourcesController_patientTrain[5]_v2"];
         delete?: never;
         options?: never;
@@ -50304,7 +50392,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
+        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` (every reason in `reasonKeys`), the `serviceId` that blocks and `selectable` (true = bookable with a warning). Entries off the start step or ending after closing come back marked unless that rule blocks in the center. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
         post: operations["ResourcesController_patientTrain[6]_v2"];
         delete?: never;
         options?: never;
@@ -50321,7 +50409,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` and the `serviceId` that blocks. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
+        /** The patient TRAIN: several therapies chained from ONE entry time. For each start time of the day, whether the WHOLE train fits, the planned start of each leg (`start`) and the half-hour slot it is booked in (`slot`), and when it does not fit the i18n `reasonKey` (every reason in `reasonKeys`), the `serviceId` that blocks and `selectable` (true = bookable with a warning). Entries off the start step or ending after closing come back marked unless that rule blocks in the center. Heavier resources (`trainWeight`) go first unless `keepOrder`; the IV chair pair runs together; non-blocking legs ride in parallel; a service with no resource never blocks. */
         post: operations["ResourcesController_patientTrain[7]_v2"];
         delete?: never;
         options?: never;
@@ -59047,6 +59135,17 @@ export interface components {
             validUntil?: string;
             name?: string;
         };
+        SetBookingRulesDto: {
+            /**
+             * @description The rules that block a booking in this center; every other broken rule books anyway and comes back as a warning in meta.advertencias. [] = nothing blocks, not even the holiday. Unset = only the holiday blocks.
+             * @example [
+             *       "holiday"
+             *     ]
+             */
+            blockingRules: ("capacity" | "closing" | "startStep" | "maxPerPatient" | "holiday")[];
+            /** @description Whether the availability views (grid, train, day overview) list the starts off a service's start step, marked fits:false + therapies.notAStartTime + selectable. Default false (hidden). A booking at such a time books with the startStep warning either way. Left out = it keeps its value. */
+            showOffStepStarts?: boolean;
+        };
         LinkEhrPatientDto: {
             /** Format: uuid */
             ehrPatientId: string;
@@ -62397,7 +62496,7 @@ export interface components {
              */
             date: string;
             /**
-             * @description The ENTRY time ("HH:mm"), one of the start times POST /resources/patient-train answered with fits:true. Each leg is booked at the slot the server plans again now.
+             * @description The ENTRY time ("HH:mm"), one POST /resources/patient-train answered with fits:true or selectable:true (then it is booked with a warning in meta.advertencias). Each leg is booked at the slot the server plans again now.
              * @example 09:00
              */
             time: string;
@@ -92641,6 +92740,190 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["UpsertPreferenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BookingRulesController_get[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BookingRulesController_set[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetBookingRulesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BookingRulesController_get[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BookingRulesController_set[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetBookingRulesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BookingRulesController_get[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BookingRulesController_set[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetBookingRulesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BookingRulesController_get[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BookingRulesController_set[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetBookingRulesDto"];
             };
         };
         responses: {
@@ -137486,7 +137769,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -137511,7 +137796,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -137536,7 +137823,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -137561,7 +137850,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -137586,7 +137877,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -137611,7 +137904,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -137636,7 +137931,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -137661,7 +137958,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

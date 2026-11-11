@@ -123,6 +123,7 @@ function PanelItemRow({ item, centro, onChanged }: { item: PanelItem; centro: st
   if (item.tipo === "numeracion") return <NumeracionRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   if (item.clave === "frontdeskConsultationOrder") return <OrdenRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   if (item.clave === "camposObligatorios") return <CamposRow item={item} label={label} />;
+  if (item.clave === "blockingRules") return <AgendaRulesRow item={item} label={label} />;
   if (item.tipo === "otro" && typeof item.valor === "number") return <NumeroRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   return null;
 }
@@ -339,6 +340,20 @@ function CamposRow({ item, label }: { item: PanelItem; label: string }) {
       <Label>{label}</Label>
       <Link href="/configuration/patient-fields" className="text-xs font-medium text-primary hover:underline">
         {campos.length > 0 ? campos.join(", ") : t("ninguno")}
+      </Link>
+    </div>
+  );
+}
+
+// `valor` es la lista de reglas que bloquean (BE #547) — demasiadas con su propio texto para un
+// Switch inline: enlaza a su propia pantalla (components/configuracion/agenda-rules-admin.tsx).
+function AgendaRulesRow({ item, label }: { item: PanelItem; label: string }) {
+  const blockingRules = Array.isArray(item.valor) ? (item.valor as string[]) : [];
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <Label>{label}</Label>
+      <Link href="/configuration/agenda-rules" className="text-xs font-medium text-primary hover:underline">
+        {blockingRules.join(", ")}
       </Link>
     </div>
   );

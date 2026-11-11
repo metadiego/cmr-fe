@@ -222,7 +222,7 @@ export function ProgramarCitasModal({
     try {
       const hora = horaSel || undefined; // opcional; el BE descuenta el cupo de esa franja (no bloquea)
       // UNA sola llamada agenda el CRUCE completo: cada servicio marcado en cada fecha.
-      const { data, warnings } = await agendarVariosServicios(
+      const { data, warnings, advertencias } = await agendarVariosServicios(
         { patientId: pacienteId, serviceIds: [...servicioIds], dates: fechasEff, time: hora },
         centro,
       );
@@ -231,6 +231,7 @@ export function ProgramarCitasModal({
       // Resumen honesto: qué se agendó y qué se omitió por existir ya (el BE devuelve ambos).
       toast.success(t("resumen", { creadas, omitidas }));
       mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo por (servicio, fecha) — no bloquea
+      mostrarAvisos(advertencias, tRoot); // BE #547: día saltado por feriado u otra regla que bloquea
       if (data.aviso) toast.warning(t("avisoDisponibilidad")); // disponibilidad excedida por servicio — no bloquea
       const sinAsiento = noSeatDays(data); // days the call-center sheet had no seat for (BE #521)
       if (sinAsiento.length) toast.warning(tRoot("sheet.noSeatDays", { days: sinAsiento.map((d) => formatFechaSolo(d)).join(", ") }), { duration: 10000 });

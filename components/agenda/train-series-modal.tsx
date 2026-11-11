@@ -120,8 +120,10 @@ export function TrainSeriesModal({
     setPlan(null);
   }
 
+  // BE #547: `reasonKeys` trae todos los motivos (antes solo el primero en `reasonKey`).
   function reasonText(day: TrainSeriesDay): string {
-    const base = day.reasonKey && tRoot.has(day.reasonKey) ? tRoot(day.reasonKey) : (day.reasonKey ?? "");
+    const keys = day.reasonKeys?.length ? day.reasonKeys : day.reasonKey ? [day.reasonKey] : [];
+    const base = keys.map((k) => (tRoot.has(k) ? tRoot(k) : k)).join(" · ");
     const service = day.serviceId ? servById.get(day.serviceId)?.name : null;
     return service ? t("trainBlockedBy", { reason: base, service }) : base;
   }
@@ -193,11 +195,12 @@ export function TrainSeriesModal({
     if (planned.length === 0) return;
     setConfirming(true);
     try {
-      const { data, warnings } = await bookTrainSeries(
+      const { data, warnings, advertencias } = await bookTrainSeries(
         { patientId, areas, keepOrder, days: planned.map((d) => ({ date: d.date, time: d.time, serviceIds: d.serviceIds })) },
         centro,
       );
       mostrarAvisos(warnings, tRoot);
+      mostrarAvisos(advertencias, tRoot); // BE #547: regla no bloqueante avisada tras guardar
       toast.success(t("trainSeriesBooked", { n: data.booked, days: data.days.length }));
       onBooked();
       onOpenChange(false);

@@ -331,7 +331,8 @@
       "useSuggested": "Usar sugerida"
     },
     "medico_requerido_en_consulta": "Para entrar en consulta la cita necesita un médico asignado.",
-    "datos_requeridos_para_presente": "Faltan datos obligatorios del paciente para marcarlo presente."
+    "datos_requeridos_para_presente": "Faltan datos obligatorios del paciente para marcarlo presente.",
+    "closedByHoliday": "Día feriado: la agenda está cerrada"
   },
   "tableroBoard": {
     "live": "En vivo",
@@ -563,7 +564,17 @@
       "numeracion_facturas": "Facturas",
       "numeracion_presupuestos": "Presupuestos",
       "numeracion_record_paciente": "Récord de paciente",
-      "numeracion_devoluciones": "Devoluciones"
+      "numeracion_devoluciones": "Devoluciones",
+      "agenda_blocking_rules": "Qué bloquea al agendar"
+    },
+    "agendaRules": {
+      "title": "Qué bloquea al agendar",
+      "help": "El feriado bloquea por defecto. Todo lo demás (capacidad, horario, paso de inicio, tope por paciente) se puede dejar en solo avisa: la reserva se hace igual y queda un aviso no bloqueante.",
+      "guardado": "Guardado",
+      "valorPorDefecto": "Este centro no lo ha configurado — valor por defecto (solo el feriado bloquea).",
+      "bloquea": "Bloquea",
+      "soloAvisa": "Solo avisa",
+      "showOffStepStartsHelp": "Enseñar también las horas que no son de inicio del servicio (p. ej. las :30 en uno que empieza en punto); se agendan igual, con aviso."
     }
   },
   "tableroEditor": {
@@ -752,7 +763,16 @@
       "variantDropdown": "Lista",
       "variantChips": "Rejilla",
       "fullInSheet": "Lleno en la hoja"
-    }
+    },
+    "rule": {
+      "capacity": "Sin cupo (puestos o personal)",
+      "closing": "Fuera del horario del centro",
+      "startStep": "Fuera del paso de inicio del servicio",
+      "maxPerPatient": "Pasa el tope de minutos por paciente",
+      "holiday": "Día feriado",
+      "unknown": "Otra regla de la agenda"
+    },
+    "showOffStepStarts": "Enseñar horas fuera del paso"
   },
   "appointments": {
     "title": "Citas",
@@ -1158,6 +1178,7 @@
     "expand": "Expandir"
   },
   "nav": {
+    "agendaRules": "Qué bloquea al agendar",
     "home": "Inicio",
     "appointments": "Citas",
     "signIn": "Iniciar sesión",

@@ -1,6 +1,7 @@
 import { apiFetch, apiFetchEnvelope } from "./client";
 import type { SheetCheck } from "@/lib/agenda/sheet";
 import type { ConWarnings, Sesion } from "./frontdesk";
+import type { ApiWarning } from "./types";
 
 // Agenda de terapias por RECURSOS (cuarto/silla/persona), no por servicio. El cuello es el recurso:
 // APEX ocupa un room de láser; las sillas de suero admiten varias terapias a la vez. Contrato:
@@ -98,6 +99,11 @@ export interface AvailabilitySlot {
   fits: boolean;
   freeStations?: number;
   reasonKey?: string | null;
+  // BE #547 (avisar, nunca bloquear): TODOS los motivos de una hora que no cabe (antes solo el primero
+  // en `reasonKey`). `selectable` ya decide si se puede elegir — el centro configura qué regla bloquea
+  // (GET/PUT /agenda/rules/:centerId); el FE no vuelve a calcularlo (ver lib/agenda/slot-pick.ts).
+  reasonKeys?: string[];
+  selectable?: boolean;
   // Con un servicio de varias líneas (BE PR #518), el recurso de la línea que bloquea.
   resourceId?: string | null;
 }
@@ -191,6 +197,9 @@ export interface TrainSlot {
   time: string;
   fits: boolean;
   reasonKey?: string | null;
+  // BE #547: todos los motivos de esa hora (ver AvailabilitySlot.reasonKeys) + si se puede elegir.
+  reasonKeys?: string[];
+  selectable?: boolean;
   serviceId?: string | null; // qué terapia bloquea cuando no cabe
   resourceId?: string | null; // con varias líneas (BE PR #518), qué recurso de esa terapia bloquea
   endsAt: string;
@@ -222,16 +231,20 @@ export function planPatientTrain(
 // Agenda TODO el tren de una vez, todo o nada (POST /frontdesk/sessions/book-train). `time` = la hora
 // de entrada elegida en `planPatientTrain`; el BE agenda cada tramo en su `slot`, nunca el FE.
 export type BookTrainResult = { sessions: Sesion[]; train: TrainSlot };
+// BE #547: además de `meta.warnings` (cupo), una reserva que rompe una regla que SOLO avisa (fuera de
+// paso, pasa del cierre…) trae `meta.advertencias` (BOOKING_RULE_BROKEN / THERAPY_TRAIN_OVERBOOKED).
+// La reserva YA se hizo: mostrar con mostrarAvisos, nunca como error.
 export function bookTrain(
   payload: { patientId: string; date: string; time: string; serviceIds: string[]; areas?: Record<string, number>; keepOrder?: boolean },
   centroId?: string,
-): Promise<ConWarnings<BookTrainResult>> {
+): Promise<ConWarnings<BookTrainResult> & { advertencias: ApiWarning[] }> {
   return apiFetchEnvelope<BookTrainResult>(
     `/frontdesk/sessions/book-train`,
     { method: "POST", body: JSON.stringify(payload), headers: centroId ? { "X-Tenant-ID": centroId } : undefined },
   ).then((env) => ({
     data: env.data ?? { sessions: [], train: { time: payload.time, fits: false, endsAt: "", legs: [], staffBlocks: [] } },
     warnings: env.meta.warnings ?? [],
+    advertencias: env.meta.advertencias ?? [],
   }));
 }
 
@@ -245,6 +258,9 @@ export interface TrainSeriesDay {
   adjusted?: boolean;
   // BE #533: a day with no room is still planned at the preferred time, flagged, with its reasonKey.
   overbooked?: boolean;
+  // BE #547: un aviso THERAPY_TRAIN_OVERBOOKED por REGLA ese día, cada uno con su reasonKey — aquí van
+  // todos juntos (antes solo el primero en `reasonKey`).
+  reasonKeys?: string[];
   shiftMinutes?: number;
   serviceIds: string[];
   endsAt?: string;
@@ -285,6 +301,7 @@ export function planTrainSeries(
 }
 
 export type BookTrainSeriesResult = { days: Array<{ date: string; time: string; sessions: Sesion[] }>; booked: number };
+// Mismo aviso no bloqueante que bookTrain — ver su comentario.
 export function bookTrainSeries(
   body: {
     patientId: string;
@@ -293,13 +310,14 @@ export function bookTrainSeries(
     days: Array<{ date: string; time: string; serviceIds: string[] }>;
   },
   centroId?: string,
-): Promise<ConWarnings<BookTrainSeriesResult>> {
+): Promise<ConWarnings<BookTrainSeriesResult> & { advertencias: ApiWarning[] }> {
   return apiFetchEnvelope<BookTrainSeriesResult>(
     `/frontdesk/sessions/book-train-series`,
     { method: "POST", body: JSON.stringify(body), headers: centroId ? { "X-Tenant-ID": centroId } : undefined },
   ).then((env) => ({
     data: env.data ?? { days: [], booked: 0 },
     warnings: env.meta.warnings ?? [],
+    advertencias: env.meta.advertencias ?? [],
   }));
 }
 
@@ -334,14 +352,20 @@ export interface ResourceDayOccupancy {
 export interface DayOccupancy {
   date: string;
   slots: string[]; // "07:00"…"17:00" — las genera el BE, NO inventarlas
+  // BE #547: solo con `showOffStepStarts`, las franjas de `slots` que están fuera del paso de inicio
+  // del servicio (p. ej. las :30 con `start_step_minutes:60`) — pintarlas atenuadas, no ocultarlas:
+  // ya están en `slots`. Sin el parámetro, siempre `[]` (comportamiento de hoy, solo horas en punto).
+  notAStartTimes?: string[];
   resources: ResourceDayOccupancy[];
 }
 export function getDayOccupancy(
   date: string,
   centroId?: string,
   centerIds?: string[],
+  showOffStepStarts?: boolean,
 ): Promise<DayOccupancy> {
   const sp = new URLSearchParams({ date });
   for (const c of centerIds ?? []) sp.append("centerIds", c);
+  if (showOffStepStarts) sp.set("showOffStepStarts", "true");
   return apiFetch<DayOccupancy>(`/resources/day-occupancy?${sp.toString()}`, {}, centroId);
 }

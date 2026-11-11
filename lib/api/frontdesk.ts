@@ -95,39 +95,39 @@ export async function crearSesion(
 
 // ——— AGENDAR (programar citas de servicio) — BE en prod 2026-07-23 ———
 
-// Agenda VARIAS fechas de un servicio para un paciente (una cita por fecha). El BE avisa si excede la
-// disponibilidad (no bloquea). Devuelve las sesiones creadas (o un resumen).
+// Agenda VARIAS fechas de un servicio (una cita por fecha); el BE avisa si excede disponibilidad (no bloquea).
 export type AgendarMultiplePayload = components["schemas"]["AgendarMultipleDto"];
 export async function agendarMultiple(
   payload: AgendarMultiplePayload,
   centroId?: string,
-): Promise<ConWarnings<unknown>> {
+): Promise<ConWarnings<unknown> & { advertencias: ApiWarning[] }> {
   const env = await apiFetchEnvelope<unknown>(`/frontdesk/sesiones/agendar-multiple`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
-  return { data: env.data, warnings: env.meta.warnings ?? [] };
+  return { data: env.data, warnings: env.meta.warnings ?? [], advertencias: env.meta.advertencias ?? [] }; // BE #547: avisa, no bloquea
 }
 
 // Agenda VARIOS servicios en VARIAS fechas (el cruce completo) para un paciente, en UNA sola llamada
-// (POST /frontdesk/sessions/book-multiple), en inglés: `serviceIds` y `dates`. Devuelve `creadas`
-// (sesiones nuevas) y `omitidas` (pares ya existentes: idempotente), + avisos de cupo y disponibilidad
-// excedida (data.aviso). Nunca bloquea. Handoff citar-varios-servicios.
+// (POST /frontdesk/sessions/book-multiple), en inglés: `serviceIds` y `dates`. Devuelve `creadas`/`omitidas`
+// (idempotente) + avisos de cupo y disponibilidad excedida. Nunca bloquea. Handoff citar-varios-servicios.
 export type BookMultipleResult = { creadas: Sesion[]; omitidas: number; aviso: unknown | null };
 export async function agendarVariosServicios(
   // Handoff citar-varios-servicios / citar-marcar-los-servicios-con-saldo.
   payload: { patientId: string; serviceIds: string[]; dates: string[]; time?: string },
   centroId?: string,
-): Promise<ConWarnings<BookMultipleResult>> {
+): Promise<ConWarnings<BookMultipleResult> & { advertencias: ApiWarning[] }> {
   const env = await apiFetchEnvelope<BookMultipleResultRaw<Sesion>>(`/frontdesk/sessions/book-multiple`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
+  // `advertencias` (BE #547): BOOKING_DAY_SKIPPED — un día se saltó por una regla que bloquea; el resto sí se agendó.
   return {
     data: normalizeBookMultipleResult(env.data),
     warnings: env.meta.warnings ?? [],
+    advertencias: env.meta.advertencias ?? [],
   };
 }
 

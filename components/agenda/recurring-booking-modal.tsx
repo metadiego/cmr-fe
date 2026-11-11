@@ -190,10 +190,10 @@ export function RecurringBookingModal({
     const noSeat: string[] = []; // days the call-center sheet had no seat for (BE #521)
     for (const [groupTime, dates] of byTime) {
       try {
-        const { data, warnings } = await agendarMultiple({ patientId, serviceId, dates, time: groupTime }, centro);
+        const { data, warnings, advertencias } = await agendarMultiple({ patientId, serviceId, dates, time: groupTime }, centro);
         noSeat.push(...noSeatDays(data));
         booked += dates.length;
-        allWarnings.push(...warnings);
+        allWarnings.push(...warnings, ...advertencias); // BE #547: regla no bloqueante avisada tras guardar
       } catch (err) {
         failedGroups++;
         toastError(err, tRoot);

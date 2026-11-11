@@ -25,6 +25,7 @@ import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slo
 import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
 import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
 import { toastError } from "@/lib/api/errors";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { datosFaltantesDe } from "@/lib/api/ehr-gate";
 import type { EhrReadinessField } from "@/lib/api/ehr-integration";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
@@ -304,9 +305,9 @@ export function CitaModal({
         : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
       if (effectiveCentro) setActiveCentro(effectiveCentro);
       toast.success(isEdit ? t("updated") : t("created"));
-      for (const a of advertencias) {
-        if (a.labelKey) toast.warning(tRoot(a.labelKey));
-      }
+      // BE #547: interpola fecha/hora/opensAt/etc. en el labelKey (antes se perdían). No bloquea: la
+      // cita ya se guardó.
+      mostrarAvisos(advertencias, tRoot);
       // One live appointment per patient: the BE MOVED the existing one instead of creating a second.
       // Say so, or it looks like nothing happened.
       if (!isEdit && saved?.rescheduledFromId) void avisarReagendo(saved.rescheduledFromId);
