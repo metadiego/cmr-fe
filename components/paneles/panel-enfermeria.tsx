@@ -2,16 +2,19 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { VolumeHighIcon } from "@hugeicons/core-free-icons";
+import { VolumeHighIcon, ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 import {
   getPanelDefinicion,
   getPanelNotificaciones,
   aceptarNotificacion,
   cancelarNotificacion,
+  guardarOrdenPersonal,
   type PanelDefinicion,
   type PanelNotificacion,
+  type PanelPersonal,
 } from "@/lib/api/paneles";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -76,6 +79,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const { can } = useCan();
   const puedeAceptar = can("panel.aceptar");
   const puedeCancelar = can("panel.notificar");
+  const puedeOrdenar = can("panel.config");
 
   const defRes = useResource<PanelDefinicion>(() => getPanelDefinicion(CLAVE, centro), [centro]);
   const [notifs, setNotifs] = React.useState<PanelNotificacion[]>([]);
@@ -119,9 +123,64 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     if (actual && alarma.armado.current) alarma.start(tonoDe(audioActual)); else alarma.stop();
   }, [actual, audioActual, alarma]);
 
-  const personal = def?.staff ?? [];
+  // Orden de las tarjetas (cmr-be#549): optimista, con vuelta atrás si falla. Mientras `ordenLocal`
+  // exista manda sobre `def.staff`; se descarta en cuanto llega una definición fresca (ya trae el
+  // orden del BE, confirmado o el de un evento SSE concurrente).
+  const [ordenLocal, setOrdenLocal] = React.useState<PanelPersonal[] | null>(null);
+  // Ajuste en render (no efecto: evita el cascading-render que marca react-hooks/set-state-in-effect),
+  // mismo patrón que `prevHoraKey` en cita-modal.tsx: una `def` nueva (fresca del BE o de un SSE) manda
+  // sobre cualquier orden optimista a medio confirmar.
+  const [prevDef, setPrevDef] = React.useState(def);
+  if (def !== prevDef) { setPrevDef(def); setOrdenLocal(null); }
+  const personal = ordenLocal ?? def?.staff ?? [];
   const estatusById = new Map((def?.statuses ?? []).map((e) => [e.staffId, e]));
   const contByPersona = new Map((def?.counters ?? []).map((c) => [c.staffId, c]));
+
+  async function guardarOrden(arr: PanelPersonal[], antes: PanelPersonal[]) {
+    setOrdenLocal(arr);
+    try {
+      const { staff, advertencias } = await guardarOrdenPersonal(
+        CLAVE,
+        arr.map((p, i) => ({ staffId: p.id, sortOrder: i })),
+        centro,
+      );
+      setOrdenLocal(staff);
+      const omitidos = advertencias.find((a) => a.code === "PANEL_STAFF_NOT_ELIGIBLE");
+      if (omitidos) {
+        const n = Array.isArray(omitidos.staffIds) ? omitidos.staffIds.length : 1;
+        toast.warning(t("staffOrder.notEligible", { n }));
+      }
+    } catch (e) {
+      setOrdenLocal(antes);
+      toastError(e, tRoot);
+    }
+  }
+  const [dragId, setDragId] = React.useState<string | null>(null);
+  const [overId, setOverId] = React.useState<string | null>(null);
+  function soltarEn(targetId: string) {
+    setOverId(null);
+    if (!dragId || dragId === targetId) return setDragId(null);
+    const antes = personal;
+    const arr = [...antes];
+    const from = arr.findIndex((p) => p.id === dragId);
+    const to = arr.findIndex((p) => p.id === targetId);
+    setDragId(null);
+    if (from < 0 || to < 0) return;
+    const [moved] = arr.splice(from, 1);
+    arr.splice(to, 0, moved);
+    void guardarOrden(arr, antes);
+  }
+  // Teclado/tablet: el DnD nativo no funciona en táctil — mueve una posición y guarda igual.
+  function moverA(id: string, delta: -1 | 1) {
+    const antes = personal;
+    const arr = [...antes];
+    const from = arr.findIndex((p) => p.id === id);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= arr.length) return;
+    const [moved] = arr.splice(from, 1);
+    arr.splice(to, 0, moved);
+    void guardarOrden(arr, antes);
+  }
 
   async function aceptar(notifId: string, personalId: string) {
     try { await aceptarNotificacion(notifId, personalId, centro); refetch(); }
@@ -163,7 +222,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
             </div>
             {s.visible ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {personal.map((p) => {
+                {personal.map((p, i) => {
                   const cont = contByPersona.get(p.id);
                   const nSec = cont?.bySection?.[s.clave] ?? 0;
                   const est = estatusById.get(p.id);
@@ -173,7 +232,17 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                   return (
                     <div
                       key={p.id}
-                      className="flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
+                      draggable={puedeOrdenar}
+                      onDragStart={() => setDragId(p.id)}
+                      onDragEnd={() => { setDragId(null); setOverId(null); }}
+                      onDragOver={(e) => { if (puedeOrdenar && dragId) { e.preventDefault(); setOverId(p.id); } }}
+                      onDrop={() => soltarEn(p.id)}
+                      className={
+                        "flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 " +
+                        (puedeOrdenar ? "cursor-grab " : "") +
+                        (overId === p.id && dragId ? "ring-2 ring-primary " : "") +
+                        (dragId === p.id ? "opacity-50" : "")
+                      }
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-2.5">
@@ -205,6 +274,28 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                         <span className="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
                           {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
                         </span>
+                      )}
+                      {puedeOrdenar && (
+                        <div className="flex justify-end gap-1 border-t border-foreground/5 pt-1.5">
+                          <button
+                            type="button"
+                            aria-label={t("staffOrder.up")}
+                            disabled={i === 0}
+                            onClick={() => moverA(p.id, -1)}
+                            className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                          >
+                            <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={t("staffOrder.down")}
+                            disabled={i === personal.length - 1}
+                            onClick={() => moverA(p.id, 1)}
+                            className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                          >
+                            <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   );

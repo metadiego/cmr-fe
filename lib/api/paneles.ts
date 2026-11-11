@@ -1,4 +1,5 @@
 import { apiFetch, apiFetchEnvelope } from "./client";
+import type { ApiWarning } from "./types";
 
 // Paneles operativos (data-driven). El primero: Panel de Enfermería (vitales/intravenoso).
 // Contrato: /api/v1/paneles/* (tag `paneles`). Realtime por SSE /frontdesk/stream
@@ -222,4 +223,23 @@ export function reordenarSecciones(
     { method: "PUT", body: JSON.stringify({ ordenes }) },
     centroId,
   );
+}
+
+// PUT /paneles/:clave/staff-order — ordena las tarjetas del personal (arrastrar y soltar), por panel y
+// centro (cmr-be#549, handoff .personal/handoff-orden-de-enfermeras-en-el-panel.md). REEMPLAZA el orden
+// entero: mandar siempre la lista completa de `def.staff` en el orden nuevo (`orders: []` = volver al
+// orden por nombre). `staffId`/`sortOrder` NO se traducen (igual en v1 y v2). Alguien de la lista que ya
+// no tiene tarjeta se omite y vuelve en `meta.advertencias` (`PANEL_STAFF_NOT_ELIGIBLE`) — por eso usa
+// apiFetchEnvelope, no apiFetch (que solo da `.data`).
+export async function guardarOrdenPersonal(
+  clave: string,
+  orders: { staffId: string; sortOrder: number }[],
+  centroId?: string,
+): Promise<{ staff: PanelPersonal[]; advertencias: ApiWarning[] }> {
+  const env = await apiFetchEnvelope<PanelPersonal[]>(
+    `/panels/${clave}/staff-order`,
+    { method: "PUT", body: JSON.stringify({ orders }) },
+    centroId,
+  );
+  return { staff: env.data ?? [], advertencias: env.meta?.advertencias ?? [] };
 }

@@ -4108,6 +4108,11 @@
       "reset": "Reset (available)",
       "actuales": "Current statuses",
       "sin": "No status right now"
+    },
+    "staffOrder": {
+      "notEligible": "{n, plural, one {# person is no longer on the panel and was removed from the order} other {# people are no longer on the panel and were removed from the order}}",
+      "up": "Move up",
+      "down": "Move down"
     }
   },
   "requeridos": {
@@ -4262,7 +4267,8 @@
     "vigencia_invalida": "The end date is before the start date"
   },
   "tenant": {
-    "no_encontrado": "The selected center does not exist"
+    "no_encontrado": "The selected center does not exist",
+    "oneCenterOnly": "This operation is for one center only"
   },
   "persistencia": {
     "guardado": "Saved",

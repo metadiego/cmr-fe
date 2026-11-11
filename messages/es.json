@@ -4108,6 +4108,11 @@
       "reset": "Reset (disponible)",
       "actuales": "Estatus actuales",
       "sin": "Sin estatus ahora"
+    },
+    "staffOrder": {
+      "notEligible": "{n, plural, one {# persona ya no está en el panel y se quitó del orden} other {# personas ya no están en el panel y se quitaron del orden}}",
+      "up": "Subir",
+      "down": "Bajar"
     }
   },
   "requeridos": {
@@ -4262,7 +4267,8 @@
     "vigencia_invalida": "La fecha final de vigencia es anterior a la inicial"
   },
   "tenant": {
-    "no_encontrado": "El centro seleccionado no existe"
+    "no_encontrado": "El centro seleccionado no existe",
+    "oneCenterOnly": "Esta operación es de un solo centro"
   },
   "persistencia": {
     "guardado": "Guardado",

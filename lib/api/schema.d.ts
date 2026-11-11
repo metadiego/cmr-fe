@@ -51401,6 +51401,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/paneles/{clave}/orden-personal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Saves the ORDER of the panel staff cards (drag and drop), per panel and per center. Replaces the whole order in one transaction; staff not listed go after, in the previous order. Staff of this center without a card any more are skipped and reported in meta.advertencias. ONE center: centerIds[0] (panel.config checked THERE) or the session center. Returns the staff in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/orden-personal`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PanelesController_saveStaffOrder[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/staff-order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Saves the ORDER of the panel staff cards (drag and drop), per panel and per center. Replaces the whole order in one transaction; staff not listed go after, in the previous order. Staff of this center without a card any more are skipped and reported in meta.advertencias. ONE center: centerIds[0] (panel.config checked THERE) or the session center. Returns the staff in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/staff-order`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PanelesController_saveStaffOrder[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/panels/{clave}/orden-personal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Saves the ORDER of the panel staff cards (drag and drop), per panel and per center. Replaces the whole order in one transaction; staff not listed go after, in the previous order. Staff of this center without a card any more are skipped and reported in meta.advertencias. ONE center: centerIds[0] (panel.config checked THERE) or the session center. Returns the staff in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/orden-personal`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PanelesController_saveStaffOrder[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/panels/{clave}/staff-order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Saves the ORDER of the panel staff cards (drag and drop), per panel and per center. Replaces the whole order in one transaction; staff not listed go after, in the previous order. Staff of this center without a card any more are skipped and reported in meta.advertencias. ONE center: centerIds[0] (panel.config checked THERE) or the session center. Returns the staff in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/staff-order`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PanelesController_saveStaffOrder[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/paneles/{clave}/orden-personal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Saves the ORDER of the panel staff cards (drag and drop), per panel and per center. Replaces the whole order in one transaction; staff not listed go after, in the previous order. Staff of this center without a card any more are skipped and reported in meta.advertencias. ONE center: centerIds[0] (panel.config checked THERE) or the session center. Returns the staff in order. */
+        put: operations["PanelesController_saveStaffOrder[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/paneles/{clave}/staff-order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Saves the ORDER of the panel staff cards (drag and drop), per panel and per center. Replaces the whole order in one transaction; staff not listed go after, in the previous order. Staff of this center without a card any more are skipped and reported in meta.advertencias. ONE center: centerIds[0] (panel.config checked THERE) or the session center. Returns the staff in order. */
+        put: operations["PanelesController_saveStaffOrder[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/panels/{clave}/orden-personal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Saves the ORDER of the panel staff cards (drag and drop), per panel and per center. Replaces the whole order in one transaction; staff not listed go after, in the previous order. Staff of this center without a card any more are skipped and reported in meta.advertencias. ONE center: centerIds[0] (panel.config checked THERE) or the session center. Returns the staff in order. */
+        put: operations["PanelesController_saveStaffOrder[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/panels/{clave}/staff-order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Saves the ORDER of the panel staff cards (drag and drop), per panel and per center. Replaces the whole order in one transaction; staff not listed go after, in the previous order. Staff of this center without a card any more are skipped and reported in meta.advertencias. ONE center: centerIds[0] (panel.config checked THERE) or the session center. Returns the staff in order. */
+        put: operations["PanelesController_saveStaffOrder[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/paneles/{clave}/notificar": {
         parameters: {
             query?: never;
@@ -62567,6 +62719,19 @@ export interface components {
             capacity?: string;
             audio?: string;
             active?: boolean;
+        };
+        PanelStaffOrderDto: {
+            /**
+             * Format: uuid
+             * @description Staff member (staff.id); must be eligible staff of this panel in the target center.
+             */
+            staffId: string;
+            /** @description Position of the card (0 = first). */
+            sortOrder: number;
+        };
+        ReorderPanelStaffDto: {
+            /** @description Every card in its position. Applied in one transaction; an empty list goes back to the order by name. */
+            orders: components["schemas"]["PanelStaffOrderDto"][];
         };
         NotificarPanelDto: {
             /** @description Clave de la sección del panel (p. ej. vitales). */
@@ -139719,6 +139884,214 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PanelesController_saveStaffOrder[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPanelStaffDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PanelesController_saveStaffOrder[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPanelStaffDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PanelesController_saveStaffOrder[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPanelStaffDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PanelesController_saveStaffOrder[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPanelStaffDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PanelesController_saveStaffOrder[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPanelStaffDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PanelesController_saveStaffOrder[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPanelStaffDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PanelesController_saveStaffOrder[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPanelStaffDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PanelesController_saveStaffOrder[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPanelStaffDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
