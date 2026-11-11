@@ -1466,7 +1466,8 @@
     "bothCenters": "AMBOS",
     "bodyMeasurementsUnlinked": "Medidas sin vincular",
     "changeLog": "Historial de cambios",
-    "confirmationPolicies": "Confirmaciones"
+    "confirmationPolicies": "Confirmaciones",
+    "calendarAbsenceReview": "Ausencias por revisar"
   },
   "admin": {
     "title": "Administración",
@@ -5167,11 +5168,15 @@
     "dateOk": "Esa fecha sirve.",
     "suggested": "Sugerida",
     "noSlot": "sin hueco en 60 días",
-    "holidaysNote": "Los feriados son compartidos (globales o del centro); se configuran en Agenda/Configuración."
+    "holidaysNote": "Los feriados son compartidos (globales o del centro); se configuran en Agenda/Configuración.",
+    "fromTime": "Desde la hora",
+    "toTime": "Hasta la hora",
+    "hoursInvalid": "La hora de fin debe ser posterior a la de inicio"
   },
   "disponibilidad": {
     "ausencia": {
-      "rango_invalido": "El rango de la ausencia es inválido (fin antes del inicio)."
+      "rango_invalido": "El rango de la ausencia es inválido (fin antes del inicio).",
+      "horas_invalidas": "La hora de fin debe ser posterior a la de inicio"
     }
   },
   "serviceDay": {
@@ -5772,7 +5777,13 @@
       "reschedule": "Reagendada",
       "edit": "Editada",
       "delete": "Eliminada",
-      "status": "Cambio de estado"
+      "status": "Cambio de estado",
+      "absence_create": "Ausencia creada",
+      "absence_link": "Ausencia ligada",
+      "absence_cancel": "Ausencia cancelada",
+      "absence_restore": "Ausencia restaurada",
+      "absence_edit": "Ausencia editada",
+      "absence_delete": "Ausencia borrada"
     },
     "field": {
       "estado": "Estado",
@@ -5801,6 +5812,50 @@
       "superseded": "Alguien cambió esos campos después: deshaz primero el cambio posterior",
       "alreadyUndone": "Ese cambio ya se deshizo",
       "notUndoable": "Ese cambio no se puede deshacer"
+    }
+  },
+  "calendar": {
+    "absence": {
+      "linked": "Ausencia",
+      "remove": "Quitar la ausencia",
+      "removed": "Ausencia quitada",
+      "vacation": "Vacaciones",
+      "leave": "Permiso",
+      "until": "llega {time}",
+      "from": "se va {time}",
+      "between": "ausente {from}–{until}",
+      "wholeDay": "Todo el día",
+      "question": "¿Ausencia de {name} · {when}?",
+      "questionNoName": "¿Ausencia · {when}?",
+      "pick": "Elegir persona",
+      "accept": "Aceptar",
+      "notAbsence": "No es ausencia",
+      "accepted": "Ausencia registrada",
+      "dismissed": "Marcado como no ausencia",
+      "afterSave": "Se podrá aceptar al guardar",
+      "noPermission": "No tienes permiso para revisar ausencias.",
+      "reviewHint": "Eventos del calendario que parecen vacaciones o permisos. Al aceptarlos, la persona sale del personal disponible.",
+      "count": "{n, plural, one {# por revisar} other {# por revisar}}",
+      "since": "Desde",
+      "acceptAllHigh": "Aceptar las de confianza alta ({n})",
+      "acceptedMany": "{n, plural, one {# ausencia registrada} other {# ausencias registradas}}",
+      "reviewEmpty": "Nada por revisar",
+      "high": "Alta",
+      "low": "Baja",
+      "col": {
+        "date": "Fecha",
+        "title": "Evento",
+        "person": "Persona",
+        "kind": "Tipo",
+        "hours": "Horas",
+        "confidence": "Confianza"
+      },
+      "ambiguousStaff": "Hay varias personas con ese nombre",
+      "noStaff": "No encontré a esa persona en el centro",
+      "unclear": "Es un cambio de día o falta confirmar",
+      "unclearHours": "Falta la hora",
+      "staffNotInCenter": "Esa persona no trabaja en el centro del evento",
+      "globalEvent": "Un evento de toda la empresa no es la ausencia de una persona"
     }
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { isMine } from "@/lib/auth/who-did-it";
+import { useCan } from "@/hooks/use-can";
 import * as React from "react";
 import { sentenceCase } from "@/lib/format/text";
 import { useFormatter, useTranslations, useLocale } from "next-intl";
@@ -56,6 +57,7 @@ export function Calendario() {
   const locale = useLocale();
   const format = useFormatter();
   const me = useMe();
+  const { can } = useCan(); // calendario.absences: accept / dismiss the absence chip (BE #558)
 
   // Every clinic where the person holds calendario.read, narrowed by the clinic filter (handoff
   // clinic-read-scope); company-wide events always come along. A new event is born in ONE clinic.
@@ -315,6 +317,7 @@ export function Calendario() {
           inicial={modal}
           puedeEditar={modal.evento ? puedeTocar(modal.evento, updIds) : puedeCrear}
           puedeBorrar={modal.evento ? puedeTocar(modal.evento, delIds) : false}
+          puedeAusencias={can("calendario.absences")}
           createCenters={create.centers}
           defaultClinicId={create.defaultClinicId}
           showClinic={showClinic}

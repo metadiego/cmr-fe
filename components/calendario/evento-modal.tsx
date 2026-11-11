@@ -13,6 +13,8 @@ import {
   type CrearEventoPayload,
 } from "@/lib/api/calendario";
 import { apiErrorLabel } from "@/lib/api/errors";
+import { suggestAbsence, type AbsenceSuggestion, type EventWithAbsence, type LinkedAbsence } from "@/lib/api/calendar-absences";
+import { AbsenceChip } from "@/components/calendario/absence-chip";
 import { CreateClinicField } from "@/components/kit/create-clinic-field";
 import { createClinicReady } from "@/lib/create-clinic";
 import { isClinicViewAll } from "@/lib/tenant";
@@ -33,8 +35,10 @@ import {
 // its clinic, shown read-only when the screen spans several (`showClinic`).
 
 export function EventoModal({
-  inicial, cats, catLabel, puedeEditar, puedeBorrar, createCenters, defaultClinicId, showClinic, clinicLabel, onClose, onSaved, tRoot, tc, t,
+  inicial, cats, catLabel, puedeEditar, puedeBorrar, puedeAusencias, createCenters, defaultClinicId, showClinic, clinicLabel, onClose, onSaved, tRoot, tc, t,
 }: {
+  /** calendario.absences: accept / dismiss the absence chip (BE #558); without it the chip only informs. */
+  puedeAusencias: boolean;
   inicial: { evento?: CalendarioEvento; dia: string };
   cats: CalendarioCategoria[];
   catLabel: (c?: CalendarioCategoria) => string;
@@ -51,7 +55,12 @@ export function EventoModal({
   tc: ReturnType<typeof useTranslations>;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const ev = inicial.evento;
+  // After saving a NEW event that reads like an absence, the modal stays open on it with the chip.
+  const [savedEv, setSavedEv] = React.useState<EventWithAbsence | null>(null);
+  const ev = (savedEv ?? inicial.evento) as EventWithAbsence | undefined;
+  const [absence, setAbsence] = React.useState<LinkedAbsence | null>(ev?.absence ?? null);
+  const [suggestion, setSuggestion] = React.useState<AbsenceSuggestion | null>(null);
+  const [absenceDone, setAbsenceDone] = React.useState(false);
   const [titulo, setTitulo] = React.useState(ev?.title ?? "");
   const [dia, setDia] = React.useState(ev?.day ?? inicial.dia);
   const [diaFin, setDiaFin] = React.useState(ev?.endDay ?? "");
@@ -68,6 +77,25 @@ export function EventoModal({
   const clinicReady = !!ev || createClinicReady(createClinic, createCenters.length, isClinicViewAll());
   const soloLectura = !puedeEditar;
 
+  // What the title seems to say (debounced; writes nothing). Not for a linked event or a company-wide one.
+  React.useEffect(() => {
+    if (absence || absenceDone || esGlobal || ev?.origin === "staff_absence" || titulo.trim().length < 3 || !dia) return;
+    let alive = true;
+    const h = setTimeout(() => {
+      suggestAbsence({
+        titulo: titulo.trim(), dia, diaFin: diaFin || null,
+        hora: todoDia ? null : hora || null, horaFin: todoDia ? null : horaFin || null,
+        centroId: ev?.clinicId ?? (createClinic || null),
+      })
+        .then((s) => alive && setSuggestion(s ?? null))
+        .catch(() => alive && setSuggestion(null));
+    }, 400);
+    return () => {
+      alive = false;
+      clearTimeout(h);
+    };
+  }, [titulo, dia, diaFin, todoDia, hora, horaFin, esGlobal, absence, absenceDone, ev?.origin, ev?.clinicId, createClinic]);
+
   async function guardar() {
     if (soloLectura || !titulo.trim() || busy || !clinicReady) return;
     setBusy(true);
@@ -79,9 +107,14 @@ export function EventoModal({
     };
     try {
       // The clinic travels only on CREATE; editing never moves an event to another clinic.
-      if (ev) await actualizarEvento(ev.id, payload);
-      else await crearEvento(createClinic ? { ...payload, centerId: createClinic } : payload);
+      const saved = (ev ? await actualizarEvento(ev.id, payload) : await crearEvento(createClinic ? { ...payload, centerId: createClinic } : payload)) as EventWithAbsence;
       toast.success(t("guardado"));
+      // A new event that reads like an absence: stay on it so the chip can be accepted (never blocks).
+      if (!ev && !saved.absence && saved.absenceSuggestion) {
+        setSavedEv(saved);
+        setSuggestion(saved.absenceSuggestion);
+        return;
+      }
       onSaved();
     } catch (e) {
       toast.error(apiErrorLabel(e, tRoot));
@@ -105,7 +138,7 @@ export function EventoModal({
   }
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={(o) => !o && (savedEv || absenceDone ? onSaved() : onClose())}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{ev ? t("editarTitulo") : t("nuevoTitulo")}</DialogTitle>
@@ -113,6 +146,18 @@ export function EventoModal({
         </DialogHeader>
         <div className="space-y-3 text-sm">
           <Campo label={t("field.titulo")}><Input value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={soloLectura} autoFocus /></Campo>
+          <AbsenceChip
+            eventId={ev?.origin === "staff_absence" ? null : (ev?.id ?? null)}
+            centerId={ev?.clinicId ?? null}
+            absence={absence}
+            suggestion={absenceDone ? null : suggestion}
+            canManage={puedeAusencias}
+            onChanged={(linked) => {
+              setAbsence(linked);
+              setAbsenceDone(true);
+              if (!linked) setSuggestion(null);
+            }}
+          />
           <div className="grid grid-cols-2 gap-3">
             <Campo label={t("field.dia")}><DatePicker value={dia} onChange={setDia} disabled={soloLectura} /></Campo>
             <Campo label={t("field.diaFin")}><DatePicker value={diaFin} onChange={setDiaFin} disabled={soloLectura} clearable /></Campo>
@@ -140,7 +185,7 @@ export function EventoModal({
           <div className="flex justify-between gap-2 pt-1">
             <div>{ev && puedeBorrar && <Button variant="outline" size="sm" onClick={borrar} disabled={busy} className="text-destructive">{tc("delete")}</Button>}</div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={onClose} disabled={busy}>{tc("cancel")}</Button>
+              <Button variant="outline" size="sm" onClick={savedEv || absenceDone ? onSaved : onClose} disabled={busy}>{savedEv ? tc("close") : tc("cancel")}</Button>
               {!soloLectura && <Button size="sm" onClick={guardar} disabled={busy || !titulo.trim() || !clinicReady}>{busy ? tc("loading") : tc("save")}</Button>}
             </div>
           </div>

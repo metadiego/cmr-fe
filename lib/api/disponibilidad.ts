@@ -55,6 +55,9 @@ export interface DoctorAbsence {
   kind: "vacation" | "leave";
   startDate: string;
   endDate: string;
+  // BE #558: part of the day — away FROM startTime (leaves at 16:00) and/or UNTIL endTime (arrives 11:00).
+  startTime?: string | null;
+  endTime?: string | null;
   reason?: string | null;
   active: boolean;
 }
@@ -63,6 +66,8 @@ export interface DoctorAbsencePayload {
   kind: "vacation" | "leave";
   startDate: string;
   endDate: string;
+  startTime?: string;
+  endTime?: string;
   reason?: string;
   active?: boolean;
 }

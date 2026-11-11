@@ -51,6 +51,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "citas", route: "/scheduling/appointments", group: "scheduling", order: 1 },
   { clave: "cupos", route: "/scheduling/slots", group: "scheduling", order: 2 },
   { clave: "calendario", route: "/scheduling/calendar", group: "scheduling", order: 3 },
+  // BE #558: calendar events that read like an absence, to accept or dismiss (BE path /calendario/ausencias).
+  { clave: "calendar-absence-review", route: "/scheduling/absences", group: "scheduling", order: 3.5 },
   { clave: "atencion", route: "/boards/atencion", group: "scheduling", order: 4 }, // board surfaced in scheduling
   { clave: "therapy-day", route: "/scheduling/therapy-day", group: "scheduling", order: 5 },
   // Services: front desk, Patient Center (patient desk) above Patients (owner, 02-nov-2026), Nursing Panel;

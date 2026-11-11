@@ -1466,7 +1466,8 @@
     "bothCenters": "BOTH",
     "bodyMeasurementsUnlinked": "Unlinked measurements",
     "changeLog": "Change history",
-    "confirmationPolicies": "Confirmations"
+    "confirmationPolicies": "Confirmations",
+    "calendarAbsenceReview": "Absences to review"
   },
   "admin": {
     "title": "Administration",
@@ -5167,11 +5168,15 @@
     "dateOk": "That date works.",
     "suggested": "Suggested",
     "noSlot": "no slot in 60 days",
-    "holidaysNote": "Holidays are shared (global or per center); configured in Agenda/Configuration."
+    "holidaysNote": "Holidays are shared (global or per center); configured in Agenda/Configuration.",
+    "fromTime": "From time",
+    "toTime": "Until time",
+    "hoursInvalid": "The end time must be after the start time"
   },
   "disponibilidad": {
     "ausencia": {
-      "rango_invalido": "The absence range is invalid (end before start)."
+      "rango_invalido": "The absence range is invalid (end before start).",
+      "horas_invalidas": "The end time must be after the start time"
     }
   },
   "serviceDay": {
@@ -5772,7 +5777,13 @@
       "reschedule": "Rescheduled",
       "edit": "Edited",
       "delete": "Deleted",
-      "status": "Status change"
+      "status": "Status change",
+      "absence_create": "Absence created",
+      "absence_link": "Absence linked",
+      "absence_cancel": "Absence cancelled",
+      "absence_restore": "Absence restored",
+      "absence_edit": "Absence edited",
+      "absence_delete": "Absence deleted"
     },
     "field": {
       "estado": "Status",
@@ -5801,6 +5812,50 @@
       "superseded": "Someone changed those fields later: undo the later change first",
       "alreadyUndone": "That change was already undone",
       "notUndoable": "That change cannot be undone"
+    }
+  },
+  "calendar": {
+    "absence": {
+      "linked": "Absence",
+      "remove": "Remove the absence",
+      "removed": "Absence removed",
+      "vacation": "Vacation",
+      "leave": "Leave",
+      "until": "arrives {time}",
+      "from": "leaves {time}",
+      "between": "away {from}–{until}",
+      "wholeDay": "All day",
+      "question": "Absence of {name} · {when}?",
+      "questionNoName": "Absence · {when}?",
+      "pick": "Pick the person",
+      "accept": "Accept",
+      "notAbsence": "Not an absence",
+      "accepted": "Absence recorded",
+      "dismissed": "Marked as not an absence",
+      "afterSave": "Can be accepted once saved",
+      "noPermission": "You do not have permission to review absences.",
+      "reviewHint": "Calendar events that look like vacation or leave. Accepting takes the person out of available staff.",
+      "count": "{n, plural, one {# to review} other {# to review}}",
+      "since": "From",
+      "acceptAllHigh": "Accept the high-confidence ones ({n})",
+      "acceptedMany": "{n, plural, one {# absence recorded} other {# absences recorded}}",
+      "reviewEmpty": "Nothing to review",
+      "high": "High",
+      "low": "Low",
+      "col": {
+        "date": "Date",
+        "title": "Event",
+        "person": "Person",
+        "kind": "Kind",
+        "hours": "Hours",
+        "confidence": "Confidence"
+      },
+      "ambiguousStaff": "More than one person has that name",
+      "noStaff": "No one by that name in this center",
+      "unclear": "A day swap or still to be confirmed",
+      "unclearHours": "The hour is missing",
+      "staffNotInCenter": "That person does not work in this event's center",
+      "globalEvent": "A company-wide event is not one person's absence"
     }
   }
 }

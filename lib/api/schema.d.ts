@@ -1483,7 +1483,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota).
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/servicios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1504,7 +1504,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota).
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/services`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1525,7 +1525,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota).
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/servicios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1546,7 +1546,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota).
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/services`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1566,7 +1566,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[4]_v2"];
         put?: never;
         post?: never;
@@ -1583,7 +1583,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[5]_v2"];
         put?: never;
         post?: never;
@@ -1600,7 +1600,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[6]_v2"];
         put?: never;
         post?: never;
@@ -1617,8 +1617,1040 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/ventas-desglose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ventas de un periodo desglosadas por centro, día, mes, hora, médico o producto
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/ventas-desglose`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por fila: facturas, pacientes distintos, bruto, devoluciones y neto (y unidades en `product`), más una fila total. Mismas reglas que los reportes de facturación: una devolución cuenta en SU fecha y SU centro. `hour` = cuándo se COBRÓ (pagos), hora de Puerto Rico. De todos los centros donde se tiene estadisticas.read (centerIds acota). Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_salesBreakdown[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/sales-breakdown": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ventas de un periodo desglosadas por centro, día, mes, hora, médico o producto
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/sales-breakdown`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por fila: facturas, pacientes distintos, bruto, devoluciones y neto (y unidades en `product`), más una fila total. Mismas reglas que los reportes de facturación: una devolución cuenta en SU fecha y SU centro. `hour` = cuándo se COBRÓ (pagos), hora de Puerto Rico. De todos los centros donde se tiene estadisticas.read (centerIds acota). Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_salesBreakdown[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/ventas-desglose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ventas de un periodo desglosadas por centro, día, mes, hora, médico o producto
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/ventas-desglose`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por fila: facturas, pacientes distintos, bruto, devoluciones y neto (y unidades en `product`), más una fila total. Mismas reglas que los reportes de facturación: una devolución cuenta en SU fecha y SU centro. `hour` = cuándo se COBRÓ (pagos), hora de Puerto Rico. De todos los centros donde se tiene estadisticas.read (centerIds acota). Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_salesBreakdown[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/sales-breakdown": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ventas de un periodo desglosadas por centro, día, mes, hora, médico o producto
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/sales-breakdown`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por fila: facturas, pacientes distintos, bruto, devoluciones y neto (y unidades en `product`), más una fila total. Mismas reglas que los reportes de facturación: una devolución cuenta en SU fecha y SU centro. `hour` = cuándo se COBRÓ (pagos), hora de Puerto Rico. De todos los centros donde se tiene estadisticas.read (centerIds acota). Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_salesBreakdown[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/ventas-desglose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ventas de un periodo desglosadas por centro, día, mes, hora, médico o producto
+         * @description Por fila: facturas, pacientes distintos, bruto, devoluciones y neto (y unidades en `product`), más una fila total. Mismas reglas que los reportes de facturación: una devolución cuenta en SU fecha y SU centro. `hour` = cuándo se COBRÓ (pagos), hora de Puerto Rico. De todos los centros donde se tiene estadisticas.read (centerIds acota). Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_salesBreakdown[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/sales-breakdown": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ventas de un periodo desglosadas por centro, día, mes, hora, médico o producto
+         * @description Por fila: facturas, pacientes distintos, bruto, devoluciones y neto (y unidades en `product`), más una fila total. Mismas reglas que los reportes de facturación: una devolución cuenta en SU fecha y SU centro. `hour` = cuándo se COBRÓ (pagos), hora de Puerto Rico. De todos los centros donde se tiene estadisticas.read (centerIds acota). Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_salesBreakdown[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/ventas-desglose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ventas de un periodo desglosadas por centro, día, mes, hora, médico o producto
+         * @description Por fila: facturas, pacientes distintos, bruto, devoluciones y neto (y unidades en `product`), más una fila total. Mismas reglas que los reportes de facturación: una devolución cuenta en SU fecha y SU centro. `hour` = cuándo se COBRÓ (pagos), hora de Puerto Rico. De todos los centros donde se tiene estadisticas.read (centerIds acota). Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_salesBreakdown[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/sales-breakdown": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ventas de un periodo desglosadas por centro, día, mes, hora, médico o producto
+         * @description Por fila: facturas, pacientes distintos, bruto, devoluciones y neto (y unidades en `product`), más una fila total. Mismas reglas que los reportes de facturación: una devolución cuenta en SU fecha y SU centro. `hour` = cuándo se COBRÓ (pagos), hora de Puerto Rico. De todos los centros donde se tiene estadisticas.read (centerIds acota). Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_salesBreakdown[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/flujo-pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes distintos que vinieron, compraron, nuevos y recurrentes, por periodo
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/flujo-pacientes`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Vino = cualquier visita (cita que llegó al centro o sesión de frontdesk). Nuevo = su primera visita en la vida está en el rango (sin visitas antes, en ningún centro). Compró = factura emitida en el rango. Por total, centro, día o mes. Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_patientFlow[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/patient-flow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes distintos que vinieron, compraron, nuevos y recurrentes, por periodo
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/patient-flow`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Vino = cualquier visita (cita que llegó al centro o sesión de frontdesk). Nuevo = su primera visita en la vida está en el rango (sin visitas antes, en ningún centro). Compró = factura emitida en el rango. Por total, centro, día o mes. Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_patientFlow[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/flujo-pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes distintos que vinieron, compraron, nuevos y recurrentes, por periodo
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/flujo-pacientes`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Vino = cualquier visita (cita que llegó al centro o sesión de frontdesk). Nuevo = su primera visita en la vida está en el rango (sin visitas antes, en ningún centro). Compró = factura emitida en el rango. Por total, centro, día o mes. Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_patientFlow[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/patient-flow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes distintos que vinieron, compraron, nuevos y recurrentes, por periodo
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/patient-flow`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Vino = cualquier visita (cita que llegó al centro o sesión de frontdesk). Nuevo = su primera visita en la vida está en el rango (sin visitas antes, en ningún centro). Compró = factura emitida en el rango. Por total, centro, día o mes. Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_patientFlow[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/flujo-pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes distintos que vinieron, compraron, nuevos y recurrentes, por periodo
+         * @description Vino = cualquier visita (cita que llegó al centro o sesión de frontdesk). Nuevo = su primera visita en la vida está en el rango (sin visitas antes, en ningún centro). Compró = factura emitida en el rango. Por total, centro, día o mes. Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_patientFlow[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/patient-flow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes distintos que vinieron, compraron, nuevos y recurrentes, por periodo
+         * @description Vino = cualquier visita (cita que llegó al centro o sesión de frontdesk). Nuevo = su primera visita en la vida está en el rango (sin visitas antes, en ningún centro). Compró = factura emitida en el rango. Por total, centro, día o mes. Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_patientFlow[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/flujo-pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes distintos que vinieron, compraron, nuevos y recurrentes, por periodo
+         * @description Vino = cualquier visita (cita que llegó al centro o sesión de frontdesk). Nuevo = su primera visita en la vida está en el rango (sin visitas antes, en ningún centro). Compró = factura emitida en el rango. Por total, centro, día o mes. Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_patientFlow[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/patient-flow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes distintos que vinieron, compraron, nuevos y recurrentes, por periodo
+         * @description Vino = cualquier visita (cita que llegó al centro o sesión de frontdesk). Nuevo = su primera visita en la vida está en el rango (sin visitas antes, en ningún centro). Compró = factura emitida en el rango. Por total, centro, día o mes. Ver docs/specs/reporting-breakdowns.md.
+         */
+        get: operations["EstadisticasController_patientFlow[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/asistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Visitas (citas y terapias) cortadas por 1 a 3 dimensiones
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/asistencia`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por fila: eventos, atendidos, no-shows, cancelados, agendados (por venir), sin registrar (pendientes de días pasados), pacientes distintos y pacientes atendidos. Un rango futuro responde «quién vendrá».
+         */
+        get: operations["AnalyticsController_attendance[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Visitas (citas y terapias) cortadas por 1 a 3 dimensiones
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/attendance`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por fila: eventos, atendidos, no-shows, cancelados, agendados (por venir), sin registrar (pendientes de días pasados), pacientes distintos y pacientes atendidos. Un rango futuro responde «quién vendrá».
+         */
+        get: operations["AnalyticsController_attendance[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/asistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Visitas (citas y terapias) cortadas por 1 a 3 dimensiones
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/asistencia`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por fila: eventos, atendidos, no-shows, cancelados, agendados (por venir), sin registrar (pendientes de días pasados), pacientes distintos y pacientes atendidos. Un rango futuro responde «quién vendrá».
+         */
+        get: operations["AnalyticsController_attendance[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Visitas (citas y terapias) cortadas por 1 a 3 dimensiones
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/attendance`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por fila: eventos, atendidos, no-shows, cancelados, agendados (por venir), sin registrar (pendientes de días pasados), pacientes distintos y pacientes atendidos. Un rango futuro responde «quién vendrá».
+         */
+        get: operations["AnalyticsController_attendance[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/asistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Visitas (citas y terapias) cortadas por 1 a 3 dimensiones
+         * @description Por fila: eventos, atendidos, no-shows, cancelados, agendados (por venir), sin registrar (pendientes de días pasados), pacientes distintos y pacientes atendidos. Un rango futuro responde «quién vendrá».
+         */
+        get: operations["AnalyticsController_attendance[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Visitas (citas y terapias) cortadas por 1 a 3 dimensiones
+         * @description Por fila: eventos, atendidos, no-shows, cancelados, agendados (por venir), sin registrar (pendientes de días pasados), pacientes distintos y pacientes atendidos. Un rango futuro responde «quién vendrá».
+         */
+        get: operations["AnalyticsController_attendance[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/asistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Visitas (citas y terapias) cortadas por 1 a 3 dimensiones
+         * @description Por fila: eventos, atendidos, no-shows, cancelados, agendados (por venir), sin registrar (pendientes de días pasados), pacientes distintos y pacientes atendidos. Un rango futuro responde «quién vendrá».
+         */
+        get: operations["AnalyticsController_attendance[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Visitas (citas y terapias) cortadas por 1 a 3 dimensiones
+         * @description Por fila: eventos, atendidos, no-shows, cancelados, agendados (por venir), sin registrar (pendientes de días pasados), pacientes distintos y pacientes atendidos. Un rango futuro responde «quién vendrá».
+         */
+        get: operations["AnalyticsController_attendance[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes que vinieron en el periodo, con su frecuencia
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/pacientes`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Visitas, terapias, primera/última visita de su vida, próxima visita, media de días entre visitas y gasto neto; filtros minVisits, lapsedDays (sin visita en N días y nada agendado), newOnly; y la distribución de pacientes por número de visitas.
+         */
+        get: operations["AnalyticsController_patients[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/patients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes que vinieron en el periodo, con su frecuencia
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/patients`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Visitas, terapias, primera/última visita de su vida, próxima visita, media de días entre visitas y gasto neto; filtros minVisits, lapsedDays (sin visita en N días y nada agendado), newOnly; y la distribución de pacientes por número de visitas.
+         */
+        get: operations["AnalyticsController_patients[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes que vinieron en el periodo, con su frecuencia
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/pacientes`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Visitas, terapias, primera/última visita de su vida, próxima visita, media de días entre visitas y gasto neto; filtros minVisits, lapsedDays (sin visita en N días y nada agendado), newOnly; y la distribución de pacientes por número de visitas.
+         */
+        get: operations["AnalyticsController_patients[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/patients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes que vinieron en el periodo, con su frecuencia
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/patients`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Visitas, terapias, primera/última visita de su vida, próxima visita, media de días entre visitas y gasto neto; filtros minVisits, lapsedDays (sin visita en N días y nada agendado), newOnly; y la distribución de pacientes por número de visitas.
+         */
+        get: operations["AnalyticsController_patients[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes que vinieron en el periodo, con su frecuencia
+         * @description Visitas, terapias, primera/última visita de su vida, próxima visita, media de días entre visitas y gasto neto; filtros minVisits, lapsedDays (sin visita en N días y nada agendado), newOnly; y la distribución de pacientes por número de visitas.
+         */
+        get: operations["AnalyticsController_patients[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/patients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes que vinieron en el periodo, con su frecuencia
+         * @description Visitas, terapias, primera/última visita de su vida, próxima visita, media de días entre visitas y gasto neto; filtros minVisits, lapsedDays (sin visita en N días y nada agendado), newOnly; y la distribución de pacientes por número de visitas.
+         */
+        get: operations["AnalyticsController_patients[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/pacientes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes que vinieron en el periodo, con su frecuencia
+         * @description Visitas, terapias, primera/última visita de su vida, próxima visita, media de días entre visitas y gasto neto; filtros minVisits, lapsedDays (sin visita en N días y nada agendado), newOnly; y la distribución de pacientes por número de visitas.
+         */
+        get: operations["AnalyticsController_patients[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/patients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pacientes que vinieron en el periodo, con su frecuencia
+         * @description Visitas, terapias, primera/última visita de su vida, próxima visita, media de días entre visitas y gasto neto; filtros minVisits, lapsedDays (sin visita en N días y nada agendado), newOnly; y la distribución de pacientes por número de visitas.
+         */
+        get: operations["AnalyticsController_patients[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/pacientes/{id}/asistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ficha de asistencia de un paciente
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/pacientes/{id}/asistencia`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Primera y última visita, visitas por tipo, terapias recibidas por servicio, media de días entre visitas, visitas por mes, próximas visitas, paquetes con sesiones restantes y gasto. Solo de los centros legibles.
+         */
+        get: operations["AnalyticsController_patient[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/patients/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ficha de asistencia de un paciente
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/patients/{id}/attendance`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Primera y última visita, visitas por tipo, terapias recibidas por servicio, media de días entre visitas, visitas por mes, próximas visitas, paquetes con sesiones restantes y gasto. Solo de los centros legibles.
+         */
+        get: operations["AnalyticsController_patient[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/pacientes/{id}/asistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ficha de asistencia de un paciente
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/pacientes/{id}/asistencia`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Primera y última visita, visitas por tipo, terapias recibidas por servicio, media de días entre visitas, visitas por mes, próximas visitas, paquetes con sesiones restantes y gasto. Solo de los centros legibles.
+         */
+        get: operations["AnalyticsController_patient[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/patients/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ficha de asistencia de un paciente
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/patients/{id}/attendance`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Primera y última visita, visitas por tipo, terapias recibidas por servicio, media de días entre visitas, visitas por mes, próximas visitas, paquetes con sesiones restantes y gasto. Solo de los centros legibles.
+         */
+        get: operations["AnalyticsController_patient[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/pacientes/{id}/asistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ficha de asistencia de un paciente
+         * @description Primera y última visita, visitas por tipo, terapias recibidas por servicio, media de días entre visitas, visitas por mes, próximas visitas, paquetes con sesiones restantes y gasto. Solo de los centros legibles.
+         */
+        get: operations["AnalyticsController_patient[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/patients/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ficha de asistencia de un paciente
+         * @description Primera y última visita, visitas por tipo, terapias recibidas por servicio, media de días entre visitas, visitas por mes, próximas visitas, paquetes con sesiones restantes y gasto. Solo de los centros legibles.
+         */
+        get: operations["AnalyticsController_patient[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/pacientes/{id}/asistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ficha de asistencia de un paciente
+         * @description Primera y última visita, visitas por tipo, terapias recibidas por servicio, media de días entre visitas, visitas por mes, próximas visitas, paquetes con sesiones restantes y gasto. Solo de los centros legibles.
+         */
+        get: operations["AnalyticsController_patient[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/patients/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ficha de asistencia de un paciente
+         * @description Primera y última visita, visitas por tipo, terapias recibidas por servicio, media de días entre visitas, visitas por mes, próximas visitas, paquetes con sesiones restantes y gasto. Solo de los centros legibles.
+         */
+        get: operations["AnalyticsController_patient[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/tasa-de-retorno": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tasa de retorno: de los que vinieron, quién volvió en N días
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/tasa-de-retorno`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Cohorte = pacientes que vinieron en el rango (cohort=new: solo nuevos). Volvió = otra visita en los withinDays días siguientes a su primera visita del rango, en cualquier centro. pending = su ventana aún no terminó (no cuentan en la tasa).
+         */
+        get: operations["AnalyticsController_returnRate[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/estadisticas/return-rate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tasa de retorno: de los que vinieron, quién volvió en N días
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/return-rate`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Cohorte = pacientes que vinieron en el rango (cohort=new: solo nuevos). Volvió = otra visita en los withinDays días siguientes a su primera visita del rango, en cualquier centro. pending = su ventana aún no terminó (no cuentan en la tasa).
+         */
+        get: operations["AnalyticsController_returnRate[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/tasa-de-retorno": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tasa de retorno: de los que vinieron, quién volvió en N días
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/tasa-de-retorno`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Cohorte = pacientes que vinieron en el rango (cohort=new: solo nuevos). Volvió = otra visita en los withinDays días siguientes a su primera visita del rango, en cualquier centro. pending = su ventana aún no terminó (no cuentan en la tasa).
+         */
+        get: operations["AnalyticsController_returnRate[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/statistics/return-rate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tasa de retorno: de los que vinieron, quién volvió en N días
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/return-rate`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Cohorte = pacientes que vinieron en el rango (cohort=new: solo nuevos). Volvió = otra visita en los withinDays días siguientes a su primera visita del rango, en cualquier centro. pending = su ventana aún no terminó (no cuentan en la tasa).
+         */
+        get: operations["AnalyticsController_returnRate[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/tasa-de-retorno": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tasa de retorno: de los que vinieron, quién volvió en N días
+         * @description Cohorte = pacientes que vinieron en el rango (cohort=new: solo nuevos). Volvió = otra visita en los withinDays días siguientes a su primera visita del rango, en cualquier centro. pending = su ventana aún no terminó (no cuentan en la tasa).
+         */
+        get: operations["AnalyticsController_returnRate[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/estadisticas/return-rate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tasa de retorno: de los que vinieron, quién volvió en N días
+         * @description Cohorte = pacientes que vinieron en el rango (cohort=new: solo nuevos). Volvió = otra visita en los withinDays días siguientes a su primera visita del rango, en cualquier centro. pending = su ventana aún no terminó (no cuentan en la tasa).
+         */
+        get: operations["AnalyticsController_returnRate[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/tasa-de-retorno": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tasa de retorno: de los que vinieron, quién volvió en N días
+         * @description Cohorte = pacientes que vinieron en el rango (cohort=new: solo nuevos). Volvió = otra visita en los withinDays días siguientes a su primera visita del rango, en cualquier centro. pending = su ventana aún no terminó (no cuentan en la tasa).
+         */
+        get: operations["AnalyticsController_returnRate[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/statistics/return-rate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tasa de retorno: de los que vinieron, quién volvió en N días
+         * @description Cohorte = pacientes que vinieron en el rango (cohort=new: solo nuevos). Volvió = otra visita en los withinDays días siguientes a su primera visita del rango, en cualquier centro. pending = su ventana aún no terminó (no cuentan en la tasa).
+         */
+        get: operations["AnalyticsController_returnRate[7]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -16432,6 +17464,182 @@ export interface paths {
         get: operations["PersonalController_centrosDeLaFicha[7]_v2"];
         /** Centros donde la persona aparece en los selects (frontdesk, facturación, citas). Lista completa de los encendidos; al menos uno. */
         put: operations["PersonalController_setCentros[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/extensiones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Extensiones de la persona, una por central (ucm-bayamon, 3cx). Globales: un solo call center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/extensiones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PersonalController_extensiones[0]_v1"];
+        /**
+         * Fija la lista COMPLETA de extensiones por central ([] las quita). 409 si otra persona ya tiene esa extensión en esa central.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/extensiones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setExtensiones[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/extensions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Extensiones de la persona, una por central (ucm-bayamon, 3cx). Globales: un solo call center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/extensions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PersonalController_extensiones[1]_v1"];
+        /**
+         * Fija la lista COMPLETA de extensiones por central ([] las quita). 409 si otra persona ya tiene esa extensión en esa central.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/extensions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setExtensiones[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/extensiones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Extensiones de la persona, una por central (ucm-bayamon, 3cx). Globales: un solo call center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/extensiones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PersonalController_extensiones[2]_v1"];
+        /**
+         * Fija la lista COMPLETA de extensiones por central ([] las quita). 409 si otra persona ya tiene esa extensión en esa central.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/extensiones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setExtensiones[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/extensions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Extensiones de la persona, una por central (ucm-bayamon, 3cx). Globales: un solo call center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/extensions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PersonalController_extensiones[3]_v1"];
+        /**
+         * Fija la lista COMPLETA de extensiones por central ([] las quita). 409 si otra persona ya tiene esa extensión en esa central.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/extensions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setExtensiones[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/extensiones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Extensiones de la persona, una por central (ucm-bayamon, 3cx). Globales: un solo call center. */
+        get: operations["PersonalController_extensiones[4]_v2"];
+        /** Fija la lista COMPLETA de extensiones por central ([] las quita). 409 si otra persona ya tiene esa extensión en esa central. */
+        put: operations["PersonalController_setExtensiones[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/extensions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Extensiones de la persona, una por central (ucm-bayamon, 3cx). Globales: un solo call center. */
+        get: operations["PersonalController_extensiones[5]_v2"];
+        /** Fija la lista COMPLETA de extensiones por central ([] las quita). 409 si otra persona ya tiene esa extensión en esa central. */
+        put: operations["PersonalController_setExtensiones[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/extensiones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Extensiones de la persona, una por central (ucm-bayamon, 3cx). Globales: un solo call center. */
+        get: operations["PersonalController_extensiones[6]_v2"];
+        /** Fija la lista COMPLETA de extensiones por central ([] las quita). 409 si otra persona ya tiene esa extensión en esa central. */
+        put: operations["PersonalController_setExtensiones[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/extensions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Extensiones de la persona, una por central (ucm-bayamon, 3cx). Globales: un solo call center. */
+        get: operations["PersonalController_extensiones[7]_v2"];
+        /** Fija la lista COMPLETA de extensiones por central ([] las quita). 409 si otra persona ya tiene esa extensión en esa central. */
+        put: operations["PersonalController_setExtensiones[7]_v2"];
         post?: never;
         delete?: never;
         options?: never;
@@ -39327,6 +40535,486 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/calendario/ausencias/sugerencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reads a staff absence out of a calendar title (person, vacation/leave, hours) for the pre-filled chip. Only suggests: nothing is written. Null when the title is not about someone being away.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/ausencias/sugerencia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CalendarAbsencesController_suggest[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendario/absences/suggestion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reads a staff absence out of a calendar title (person, vacation/leave, hours) for the pre-filled chip. Only suggests: nothing is written. Null when the title is not about someone being away.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/absences/suggestion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CalendarAbsencesController_suggest[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar/ausencias/sugerencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reads a staff absence out of a calendar title (person, vacation/leave, hours) for the pre-filled chip. Only suggests: nothing is written. Null when the title is not about someone being away.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/ausencias/sugerencia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CalendarAbsencesController_suggest[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar/absences/suggestion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reads a staff absence out of a calendar title (person, vacation/leave, hours) for the pre-filled chip. Only suggests: nothing is written. Null when the title is not about someone being away.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/absences/suggestion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CalendarAbsencesController_suggest[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendario/ausencias/sugerencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reads a staff absence out of a calendar title (person, vacation/leave, hours) for the pre-filled chip. Only suggests: nothing is written. Null when the title is not about someone being away. */
+        get: operations["CalendarAbsencesController_suggest[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendario/absences/suggestion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reads a staff absence out of a calendar title (person, vacation/leave, hours) for the pre-filled chip. Only suggests: nothing is written. Null when the title is not about someone being away. */
+        get: operations["CalendarAbsencesController_suggest[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendar/ausencias/sugerencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reads a staff absence out of a calendar title (person, vacation/leave, hours) for the pre-filled chip. Only suggests: nothing is written. Null when the title is not about someone being away. */
+        get: operations["CalendarAbsencesController_suggest[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendar/absences/suggestion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Reads a staff absence out of a calendar title (person, vacation/leave, hours) for the pre-filled chip. Only suggests: nothing is written. Null when the title is not about someone being away. */
+        get: operations["CalendarAbsencesController_suggest[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendario/ausencias/revision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Events from `desde` that look like a staff absence but are not linked nor dismissed, each with its suggestion (confidence high/low and why). Every center where the caller holds calendario.absences, narrowed by centerIds.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/ausencias/revision`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CalendarAbsencesController_review[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendario/absences/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Events from `desde` that look like a staff absence but are not linked nor dismissed, each with its suggestion (confidence high/low and why). Every center where the caller holds calendario.absences, narrowed by centerIds.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/absences/review`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CalendarAbsencesController_review[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar/ausencias/revision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Events from `desde` that look like a staff absence but are not linked nor dismissed, each with its suggestion (confidence high/low and why). Every center where the caller holds calendario.absences, narrowed by centerIds.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/ausencias/revision`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CalendarAbsencesController_review[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar/absences/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Events from `desde` that look like a staff absence but are not linked nor dismissed, each with its suggestion (confidence high/low and why). Every center where the caller holds calendario.absences, narrowed by centerIds.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/absences/review`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CalendarAbsencesController_review[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendario/ausencias/revision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Events from `desde` that look like a staff absence but are not linked nor dismissed, each with its suggestion (confidence high/low and why). Every center where the caller holds calendario.absences, narrowed by centerIds. */
+        get: operations["CalendarAbsencesController_review[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendario/absences/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Events from `desde` that look like a staff absence but are not linked nor dismissed, each with its suggestion (confidence high/low and why). Every center where the caller holds calendario.absences, narrowed by centerIds. */
+        get: operations["CalendarAbsencesController_review[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendar/ausencias/revision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Events from `desde` that look like a staff absence but are not linked nor dismissed, each with its suggestion (confidence high/low and why). Every center where the caller holds calendario.absences, narrowed by centerIds. */
+        get: operations["CalendarAbsencesController_review[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendar/absences/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Events from `desde` that look like a staff absence but are not linked nor dismissed, each with its suggestion (confidence high/low and why). Every center where the caller holds calendario.absences, narrowed by centerIds. */
+        get: operations["CalendarAbsencesController_review[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendario/eventos/{id}/ausencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Links the event to a staff absence (accepting or correcting the chip): one absence per event, with the event's dates, written in the event's center with calendario.absences there. The person leaves available staff for those days/hours.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/eventos/{id}/ausencia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["CalendarAbsencesController_link[0]_v1"];
+        post?: never;
+        /**
+         * Not an absence (or not this one): cancels the linked absence (kept for history) and stops suggesting it for this event.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/eventos/{id}/ausencia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CalendarAbsencesController_dismiss[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendario/events/{id}/absence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Links the event to a staff absence (accepting or correcting the chip): one absence per event, with the event's dates, written in the event's center with calendario.absences there. The person leaves available staff for those days/hours.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/events/{id}/absence`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["CalendarAbsencesController_link[1]_v1"];
+        post?: never;
+        /**
+         * Not an absence (or not this one): cancels the linked absence (kept for history) and stops suggesting it for this event.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendario/events/{id}/absence`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CalendarAbsencesController_dismiss[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar/eventos/{id}/ausencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Links the event to a staff absence (accepting or correcting the chip): one absence per event, with the event's dates, written in the event's center with calendario.absences there. The person leaves available staff for those days/hours.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/eventos/{id}/ausencia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["CalendarAbsencesController_link[2]_v1"];
+        post?: never;
+        /**
+         * Not an absence (or not this one): cancels the linked absence (kept for history) and stops suggesting it for this event.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/eventos/{id}/ausencia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CalendarAbsencesController_dismiss[2]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/calendar/events/{id}/absence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Links the event to a staff absence (accepting or correcting the chip): one absence per event, with the event's dates, written in the event's center with calendario.absences there. The person leaves available staff for those days/hours.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/events/{id}/absence`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["CalendarAbsencesController_link[3]_v1"];
+        post?: never;
+        /**
+         * Not an absence (or not this one): cancels the linked absence (kept for history) and stops suggesting it for this event.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/calendar/events/{id}/absence`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CalendarAbsencesController_dismiss[3]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendario/eventos/{id}/ausencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Links the event to a staff absence (accepting or correcting the chip): one absence per event, with the event's dates, written in the event's center with calendario.absences there. The person leaves available staff for those days/hours. */
+        put: operations["CalendarAbsencesController_link[4]_v2"];
+        post?: never;
+        /** Not an absence (or not this one): cancels the linked absence (kept for history) and stops suggesting it for this event. */
+        delete: operations["CalendarAbsencesController_dismiss[4]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendario/events/{id}/absence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Links the event to a staff absence (accepting or correcting the chip): one absence per event, with the event's dates, written in the event's center with calendario.absences there. The person leaves available staff for those days/hours. */
+        put: operations["CalendarAbsencesController_link[5]_v2"];
+        post?: never;
+        /** Not an absence (or not this one): cancels the linked absence (kept for history) and stops suggesting it for this event. */
+        delete: operations["CalendarAbsencesController_dismiss[5]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendar/eventos/{id}/ausencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Links the event to a staff absence (accepting or correcting the chip): one absence per event, with the event's dates, written in the event's center with calendario.absences there. The person leaves available staff for those days/hours. */
+        put: operations["CalendarAbsencesController_link[6]_v2"];
+        post?: never;
+        /** Not an absence (or not this one): cancels the linked absence (kept for history) and stops suggesting it for this event. */
+        delete: operations["CalendarAbsencesController_dismiss[6]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/calendar/events/{id}/absence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Links the event to a staff absence (accepting or correcting the chip): one absence per event, with the event's dates, written in the event's center with calendario.absences there. The person leaves available staff for those days/hours. */
+        put: operations["CalendarAbsencesController_link[7]_v2"];
+        post?: never;
+        /** Not an absence (or not this one): cancels the linked absence (kept for history) and stops suggesting it for this event. */
+        delete: operations["CalendarAbsencesController_dismiss[7]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/callcenter/eventos": {
         parameters: {
             query?: never;
@@ -39425,7 +41113,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/en-vivo`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
+         *     Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo; cada fila con clinicName.
          */
         get: operations["CallcenterController_enVivo[0]_v1"];
         put?: never;
@@ -39448,7 +41136,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/live-at`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
+         *     Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo; cada fila con clinicName.
          */
         get: operations["CallcenterController_enVivo[1]_v1"];
         put?: never;
@@ -39468,7 +41156,7 @@ export interface paths {
         };
         /**
          * Estado actual de cada extensión.
-         * @description Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
+         * @description Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo; cada fila con clinicName.
          */
         get: operations["CallcenterController_enVivo[2]_v2"];
         put?: never;
@@ -39488,7 +41176,7 @@ export interface paths {
         };
         /**
          * Estado actual de cada extensión.
-         * @description Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
+         * @description Una fila por extensión, sobrescrita por el último latido del agente. `actualizadoEn` dice si el dato sigue vivo: si el agente murió, la pantalla debe decir «sin datos» en vez de enseñar lo de hace una hora como si fuera de ahora. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo; cada fila con clinicName.
          */
         get: operations["CallcenterController_enVivo[3]_v2"];
         put?: never;
@@ -39511,7 +41199,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/llamadas`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     El dato estable del callcenter: efectivas contra perdidas. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
+         *     El dato estable del callcenter: efectivas contra perdidas. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo.
          */
         get: operations["CallcenterController_llamadas[0]_v1"];
         put?: never;
@@ -39534,7 +41222,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/calls`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     El dato estable del callcenter: efectivas contra perdidas. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
+         *     El dato estable del callcenter: efectivas contra perdidas. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo.
          */
         get: operations["CallcenterController_llamadas[1]_v1"];
         put?: never;
@@ -39554,7 +41242,7 @@ export interface paths {
         };
         /**
          * Llamadas terminadas (CDR) de un rango.
-         * @description El dato estable del callcenter: efectivas contra perdidas. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
+         * @description El dato estable del callcenter: efectivas contra perdidas. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo.
          */
         get: operations["CallcenterController_llamadas[2]_v2"];
         put?: never;
@@ -39574,7 +41262,7 @@ export interface paths {
         };
         /**
          * Llamadas terminadas (CDR) de un rango.
-         * @description El dato estable del callcenter: efectivas contra perdidas. De todos los centros donde se tiene callcenter.read (centerIds acota); cada fila con clinicName.
+         * @description El dato estable del callcenter: efectivas contra perdidas. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo.
          */
         get: operations["CallcenterController_llamadas[3]_v2"];
         put?: never;
@@ -57047,6 +58735,7 @@ export interface components {
             logoUrl?: string;
             frontdeskAutoPresent?: boolean;
         };
+        Object: Record<string, never>;
         TransferirTratamientoDto: {
             /** Format: uuid */
             destinationClinicId: string;
@@ -58520,7 +60209,27 @@ export interface components {
             flagTypeId: string;
             note?: string;
         };
+        StaffPhoneExtensionDto: {
+            /**
+             * @description La central tal como la reporta su agente en calls.pbx (ucm-bayamon, 3cx). / The PBX as its agent reports it (v2: `pbx`).
+             * @example 3cx
+             */
+            pbx: string;
+            /**
+             * @description Extension number, digits only.
+             * @example 805
+             */
+            extension: string;
+        };
+        SetStaffPhoneExtensionsDto: {
+            extensiones: components["schemas"]["StaffPhoneExtensionDto"][];
+        };
         CreatePersonalDto: {
+            /**
+             * @deprecated
+             * @description Deprecated: one extension, no PBX. Use PUT /staff/:id/extensions (one per PBX).
+             */
+            extension?: string;
             /** @description Iniciales (4 letras). Si no se manda, se arman del nombre y el apellido. */
             initials?: string;
             /**
@@ -58539,8 +60248,6 @@ export interface components {
             /** Format: email */
             email?: string;
             legacyCode?: string;
-            /** @description Phone extension on the call center PBX (names the operator in «Ahora mismo»). */
-            extension?: string;
             /**
              * @description Color con el que se pinta a esta persona en los tableros. Es un dato suyo y se edita como el
              *     resto: no tener dónde cambiarlo obligaba a tocar la base a mano.
@@ -58617,6 +60324,11 @@ export interface components {
         UpdatePersonalDto: {
             /** @description Legacy login/code (e.g. CRIVERA). Empty string clears it. Unique per clinic. */
             legacyCode?: string;
+            /**
+             * @deprecated
+             * @description Deprecated: one extension, no PBX. Use PUT /staff/:id/extensions (one per PBX).
+             */
+            extension?: string;
             /** @description Iniciales (4 letras). Si no se manda, se arman del nombre y el apellido. */
             initials?: string;
             /**
@@ -58639,8 +60351,6 @@ export interface components {
             /** Format: email */
             email?: string;
             active?: boolean;
-            /** @description Phone extension on the call center PBX (names the operator in «Ahora mismo»). */
-            extension?: string;
             /**
              * @description Color con el que se pinta a esta persona en los tableros. Es un dato suyo y se edita como el
              *     resto: no tener dónde cambiarlo obligaba a tocar la base a mano.
@@ -61424,6 +63134,10 @@ export interface components {
             kind: "vacation" | "leave";
             startDate: string;
             endDate: string;
+            /** @description HH:mm from which they are away each day (leaving early at 16:00); absent = from the start. */
+            startTime?: string;
+            /** @description HH:mm until which they are away each day (arriving late at 11:00); absent = to the end. */
+            endTime?: string;
             reason?: string;
             active?: boolean;
         };
@@ -61439,6 +63153,10 @@ export interface components {
             kind?: "vacation" | "leave";
             startDate?: string;
             endDate?: string;
+            /** @description HH:mm from which they are away each day (leaving early at 16:00); absent = from the start. */
+            startTime?: string;
+            /** @description HH:mm until which they are away each day (arriving late at 11:00); absent = to the end. */
+            endTime?: string;
             reason?: string;
             active?: boolean;
         };
@@ -61472,6 +63190,7 @@ export interface components {
             description: string | null;
             categoryId: string | null;
             categoriaIdRef?: Record<string, never>;
+            absenceDismissed: boolean;
             isGlobal: boolean;
             createdBy: string | null;
             creadoPorRef?: Record<string, never>;
@@ -61523,6 +63242,19 @@ export interface components {
             labelKey?: string;
             color?: string;
             active?: boolean;
+        };
+        LinkCalendarAbsenceDto: {
+            /** @description HH:mm from which they are away each day (leaving early); absent = from the start of the day. */
+            startTime?: string;
+            /** @description HH:mm until which they are away each day (arriving late); absent = to the end of the day. */
+            endTime?: string;
+            /**
+             * Format: uuid
+             * @description The person who is away: staff of the event's center.
+             */
+            staffId: string;
+            /** @enum {string} */
+            kind: "vacation" | "leave";
         };
         IngestaDto: {
             /**
@@ -62002,7 +63734,6 @@ export interface components {
             centerId?: string;
             items: components["schemas"]["PickTicketLineDto"][];
         };
-        Object: Record<string, never>;
         SetMonitorScheduleDto: {
             /**
              * @description ISO weekdays, 1 = Monday … 7 = Sunday.
@@ -63322,8 +65053,21 @@ export interface components {
             /** @description Answered inbound / inbound, 0..1. */
             answerRate: number;
         };
-        RightNowOperatorDto: {
+        RightNowOperatorExtensionDto: {
+            /** @example 3cx */
+            pbx: string;
+            /** @example 805 */
             extension: string;
+        };
+        RightNowOperatorDto: {
+            /** @description Staff id; null for an extension nobody owns. */
+            staffId?: string | null;
+            /**
+             * @description Her extensions joined with " / ", ordered by PBX. Kept for compatibility: `extensions` is the data.
+             * @example 805 / 2224
+             */
+            extension: string;
+            extensions: components["schemas"]["RightNowOperatorExtensionDto"][];
             name?: string | null;
             answered: number;
             outbound: number;
@@ -66530,6 +68274,1390 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "EstadisticasController_salesBreakdown[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour (when it was PAID), doctor, seller (who charged it), product, patient, source, paymentMethod, division. hour and paymentMethod read the payments and cannot be combined with product. */
+                by: components["schemas"]["Object"][];
+                /** @description consulta | general. Omitted = both. */
+                context?: "general" | "consulta";
+                /** @description Only these doctors (comma separated ids). */
+                doctorIds?: string[];
+                /** @description Only these sellers (comma separated ids). */
+                sellerIds?: string[];
+                /** @description Only these products (comma separated ids). */
+                productIds?: string[];
+                /** @description Only this patient. */
+                patientId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "EstadisticasController_salesBreakdown[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour (when it was PAID), doctor, seller (who charged it), product, patient, source, paymentMethod, division. hour and paymentMethod read the payments and cannot be combined with product. */
+                by: components["schemas"]["Object"][];
+                /** @description consulta | general. Omitted = both. */
+                context?: "general" | "consulta";
+                /** @description Only these doctors (comma separated ids). */
+                doctorIds?: string[];
+                /** @description Only these sellers (comma separated ids). */
+                sellerIds?: string[];
+                /** @description Only these products (comma separated ids). */
+                productIds?: string[];
+                /** @description Only this patient. */
+                patientId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "EstadisticasController_salesBreakdown[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour (when it was PAID), doctor, seller (who charged it), product, patient, source, paymentMethod, division. hour and paymentMethod read the payments and cannot be combined with product. */
+                by: components["schemas"]["Object"][];
+                /** @description consulta | general. Omitted = both. */
+                context?: "general" | "consulta";
+                /** @description Only these doctors (comma separated ids). */
+                doctorIds?: string[];
+                /** @description Only these sellers (comma separated ids). */
+                sellerIds?: string[];
+                /** @description Only these products (comma separated ids). */
+                productIds?: string[];
+                /** @description Only this patient. */
+                patientId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "EstadisticasController_salesBreakdown[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour (when it was PAID), doctor, seller (who charged it), product, patient, source, paymentMethod, division. hour and paymentMethod read the payments and cannot be combined with product. */
+                by: components["schemas"]["Object"][];
+                /** @description consulta | general. Omitted = both. */
+                context?: "general" | "consulta";
+                /** @description Only these doctors (comma separated ids). */
+                doctorIds?: string[];
+                /** @description Only these sellers (comma separated ids). */
+                sellerIds?: string[];
+                /** @description Only these products (comma separated ids). */
+                productIds?: string[];
+                /** @description Only this patient. */
+                patientId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "EstadisticasController_salesBreakdown[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour (when it was PAID), doctor, seller (who charged it), product, patient, source, paymentMethod, division. hour and paymentMethod read the payments and cannot be combined with product. */
+                by: components["schemas"]["Object"][];
+                /** @description consulta | general. Omitted = both. */
+                context?: "general" | "consulta";
+                /** @description Only these doctors (comma separated ids). */
+                doctorIds?: string[];
+                /** @description Only these sellers (comma separated ids). */
+                sellerIds?: string[];
+                /** @description Only these products (comma separated ids). */
+                productIds?: string[];
+                /** @description Only this patient. */
+                patientId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "EstadisticasController_salesBreakdown[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour (when it was PAID), doctor, seller (who charged it), product, patient, source, paymentMethod, division. hour and paymentMethod read the payments and cannot be combined with product. */
+                by: components["schemas"]["Object"][];
+                /** @description consulta | general. Omitted = both. */
+                context?: "general" | "consulta";
+                /** @description Only these doctors (comma separated ids). */
+                doctorIds?: string[];
+                /** @description Only these sellers (comma separated ids). */
+                sellerIds?: string[];
+                /** @description Only these products (comma separated ids). */
+                productIds?: string[];
+                /** @description Only this patient. */
+                patientId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "EstadisticasController_salesBreakdown[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour (when it was PAID), doctor, seller (who charged it), product, patient, source, paymentMethod, division. hour and paymentMethod read the payments and cannot be combined with product. */
+                by: components["schemas"]["Object"][];
+                /** @description consulta | general. Omitted = both. */
+                context?: "general" | "consulta";
+                /** @description Only these doctors (comma separated ids). */
+                doctorIds?: string[];
+                /** @description Only these sellers (comma separated ids). */
+                sellerIds?: string[];
+                /** @description Only these products (comma separated ids). */
+                productIds?: string[];
+                /** @description Only this patient. */
+                patientId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "EstadisticasController_salesBreakdown[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour (when it was PAID), doctor, seller (who charged it), product, patient, source, paymentMethod, division. hour and paymentMethod read the payments and cannot be combined with product. */
+                by: components["schemas"]["Object"][];
+                /** @description consulta | general. Omitted = both. */
+                context?: "general" | "consulta";
+                /** @description Only these doctors (comma separated ids). */
+                doctorIds?: string[];
+                /** @description Only these sellers (comma separated ids). */
+                sellerIds?: string[];
+                /** @description Only these products (comma separated ids). */
+                productIds?: string[];
+                /** @description Only this patient. */
+                patientId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "EstadisticasController_patientFlow[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                by?: "total" | "clinic" | "day" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EstadisticasController_patientFlow[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                by?: "total" | "clinic" | "day" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EstadisticasController_patientFlow[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                by?: "total" | "clinic" | "day" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EstadisticasController_patientFlow[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                by?: "total" | "clinic" | "day" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EstadisticasController_patientFlow[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                by?: "total" | "clinic" | "day" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EstadisticasController_patientFlow[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                by?: "total" | "clinic" | "day" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EstadisticasController_patientFlow[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                by?: "total" | "clinic" | "day" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EstadisticasController_patientFlow[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                by?: "total" | "clinic" | "day" | "month";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AnalyticsController_attendance[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour, kind (appointment|therapy), service, doctor, technician, visitType (new|follow_up), channel, status, patient. */
+                by: components["schemas"]["Object"][];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_attendance[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour, kind (appointment|therapy), service, doctor, technician, visitType (new|follow_up), channel, status, patient. */
+                by: components["schemas"]["Object"][];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_attendance[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour, kind (appointment|therapy), service, doctor, technician, visitType (new|follow_up), channel, status, patient. */
+                by: components["schemas"]["Object"][];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_attendance[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour, kind (appointment|therapy), service, doctor, technician, visitType (new|follow_up), channel, status, patient. */
+                by: components["schemas"]["Object"][];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_attendance[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour, kind (appointment|therapy), service, doctor, technician, visitType (new|follow_up), channel, status, patient. */
+                by: components["schemas"]["Object"][];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_attendance[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour, kind (appointment|therapy), service, doctor, technician, visitType (new|follow_up), channel, status, patient. */
+                by: components["schemas"]["Object"][];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_attendance[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour, kind (appointment|therapy), service, doctor, technician, visitType (new|follow_up), channel, status, patient. */
+                by: components["schemas"]["Object"][];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_attendance[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description 1 to 3 cuts, comma separated: clinic, day, month, weekday, hour, kind (appointment|therapy), service, doctor, technician, visitType (new|follow_up), channel, status, patient. */
+                by: components["schemas"]["Object"][];
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patients[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Only patients with at least this many visits in the range. */
+                minVisits?: number;
+                /** @description Only patients with no visit in this many days and nothing booked. */
+                lapsedDays?: number;
+                /** @description Only patients whose first visit ever is in the range. */
+                newOnly?: boolean;
+                sort?: "visits" | "spend" | "lastVisit";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patients[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Only patients with at least this many visits in the range. */
+                minVisits?: number;
+                /** @description Only patients with no visit in this many days and nothing booked. */
+                lapsedDays?: number;
+                /** @description Only patients whose first visit ever is in the range. */
+                newOnly?: boolean;
+                sort?: "visits" | "spend" | "lastVisit";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patients[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Only patients with at least this many visits in the range. */
+                minVisits?: number;
+                /** @description Only patients with no visit in this many days and nothing booked. */
+                lapsedDays?: number;
+                /** @description Only patients whose first visit ever is in the range. */
+                newOnly?: boolean;
+                sort?: "visits" | "spend" | "lastVisit";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patients[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Only patients with at least this many visits in the range. */
+                minVisits?: number;
+                /** @description Only patients with no visit in this many days and nothing booked. */
+                lapsedDays?: number;
+                /** @description Only patients whose first visit ever is in the range. */
+                newOnly?: boolean;
+                sort?: "visits" | "spend" | "lastVisit";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patients[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Only patients with at least this many visits in the range. */
+                minVisits?: number;
+                /** @description Only patients with no visit in this many days and nothing booked. */
+                lapsedDays?: number;
+                /** @description Only patients whose first visit ever is in the range. */
+                newOnly?: boolean;
+                sort?: "visits" | "spend" | "lastVisit";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patients[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Only patients with at least this many visits in the range. */
+                minVisits?: number;
+                /** @description Only patients with no visit in this many days and nothing booked. */
+                lapsedDays?: number;
+                /** @description Only patients whose first visit ever is in the range. */
+                newOnly?: boolean;
+                sort?: "visits" | "spend" | "lastVisit";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patients[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Only patients with at least this many visits in the range. */
+                minVisits?: number;
+                /** @description Only patients with no visit in this many days and nothing booked. */
+                lapsedDays?: number;
+                /** @description Only patients whose first visit ever is in the range. */
+                newOnly?: boolean;
+                sort?: "visits" | "spend" | "lastVisit";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patients[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Only patients with at least this many visits in the range. */
+                minVisits?: number;
+                /** @description Only patients with no visit in this many days and nothing booked. */
+                lapsedDays?: number;
+                /** @description Only patients whose first visit ever is in the range. */
+                newOnly?: boolean;
+                sort?: "visits" | "spend" | "lastVisit";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patient[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patient[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patient[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patient[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patient[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patient[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patient[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_patient[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_returnRate[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Came back within this many days. */
+                withinDays?: number;
+                cohort?: "all" | "new";
+                by?: "clinic" | "month" | "service" | "doctor" | "kind";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_returnRate[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Came back within this many days. */
+                withinDays?: number;
+                cohort?: "all" | "new";
+                by?: "clinic" | "month" | "service" | "doctor" | "kind";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_returnRate[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Came back within this many days. */
+                withinDays?: number;
+                cohort?: "all" | "new";
+                by?: "clinic" | "month" | "service" | "doctor" | "kind";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_returnRate[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Came back within this many days. */
+                withinDays?: number;
+                cohort?: "all" | "new";
+                by?: "clinic" | "month" | "service" | "doctor" | "kind";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_returnRate[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Came back within this many days. */
+                withinDays?: number;
+                cohort?: "all" | "new";
+                by?: "clinic" | "month" | "service" | "doctor" | "kind";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_returnRate[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Came back within this many days. */
+                withinDays?: number;
+                cohort?: "all" | "new";
+                by?: "clinic" | "month" | "service" | "doctor" | "kind";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_returnRate[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Came back within this many days. */
+                withinDays?: number;
+                cohort?: "all" | "new";
+                by?: "clinic" | "month" | "service" | "doctor" | "kind";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AnalyticsController_returnRate[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                from: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                to: string;
+                /** @description Came back within this many days. */
+                withinDays?: number;
+                cohort?: "all" | "new";
+                by?: "clinic" | "month" | "service" | "doctor" | "kind";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -87401,6 +90529,422 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
+    "PersonalController_extensiones[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_setExtensiones[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPhoneExtensionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_extensiones[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_setExtensiones[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPhoneExtensionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_extensiones[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_setExtensiones[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPhoneExtensionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_extensiones[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_setExtensiones[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPhoneExtensionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_extensiones[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_setExtensiones[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPhoneExtensionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_extensiones[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_setExtensiones[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPhoneExtensionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_extensiones[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_setExtensiones[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPhoneExtensionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_extensiones[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PersonalController_setExtensiones[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPhoneExtensionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -121573,6 +125117,782 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CategoriaEventoEntity"];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_suggest[0]_v1": {
+        parameters: {
+            query: {
+                title: string;
+                day: string;
+                endDay?: string;
+                time?: string;
+                endTime?: string;
+                /** @description Whose staff to match against: absent = the session's center. */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_suggest[1]_v1": {
+        parameters: {
+            query: {
+                title: string;
+                day: string;
+                endDay?: string;
+                time?: string;
+                endTime?: string;
+                /** @description Whose staff to match against: absent = the session's center. */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_suggest[2]_v1": {
+        parameters: {
+            query: {
+                title: string;
+                day: string;
+                endDay?: string;
+                time?: string;
+                endTime?: string;
+                /** @description Whose staff to match against: absent = the session's center. */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_suggest[3]_v1": {
+        parameters: {
+            query: {
+                title: string;
+                day: string;
+                endDay?: string;
+                time?: string;
+                endTime?: string;
+                /** @description Whose staff to match against: absent = the session's center. */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_suggest[4]_v2": {
+        parameters: {
+            query: {
+                title: string;
+                day: string;
+                endDay?: string;
+                time?: string;
+                endTime?: string;
+                /** @description Whose staff to match against: absent = the session's center. */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_suggest[5]_v2": {
+        parameters: {
+            query: {
+                title: string;
+                day: string;
+                endDay?: string;
+                time?: string;
+                endTime?: string;
+                /** @description Whose staff to match against: absent = the session's center. */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_suggest[6]_v2": {
+        parameters: {
+            query: {
+                title: string;
+                day: string;
+                endDay?: string;
+                time?: string;
+                endTime?: string;
+                /** @description Whose staff to match against: absent = the session's center. */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_suggest[7]_v2": {
+        parameters: {
+            query: {
+                title: string;
+                day: string;
+                endDay?: string;
+                time?: string;
+                endTime?: string;
+                /** @description Whose staff to match against: absent = the session's center. */
+                centerId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_review[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_review[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_review[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_review[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_review[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_review[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_review[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_review[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                from: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_link[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkCalendarAbsenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_dismiss[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_link[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkCalendarAbsenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_dismiss[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_link[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkCalendarAbsenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_dismiss[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_link[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkCalendarAbsenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_dismiss[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_link[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkCalendarAbsenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_dismiss[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_link[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkCalendarAbsenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_dismiss[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_link[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkCalendarAbsenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_dismiss[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_link[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkCalendarAbsenceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CalendarAbsencesController_dismiss[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };
