@@ -34,6 +34,7 @@ import {
 } from "@/lib/api/facturas";
 import { listTiposPrecio, listImpuestos, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
 import { PersonalizarKitDialog } from "@/components/facturacion/personalizar-kit-dialog";
+import { AddKitComponent } from "@/components/facturacion/add-kit-component";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
@@ -629,6 +630,9 @@ function Editor({
                         >
                           {t("opcionales")}
                         </button>
+                      )}
+                      {!esBorrador && esKit(it) && can("factura.kit_agregar") && (
+                        <AddKitComponent invoiceId={id} itemId={it.id} centerId={centro} disabled={busy} onDone={() => run(async () => {})} />
                       )}
                       {esBorrador && esKit(it) && (
                         <button

@@ -2004,7 +2004,15 @@
       "forma_sin_dinero": "{formaPago} no lleva dinero: una consulta exonerada es un descuento del 100%, no un pago."
     },
     "kit": {
-      "multiplicadoresInvalidos": "Las terapias (áreas × días) no se reparten exacto entre los kits de la línea."
+      "multiplicadoresInvalidos": "Las terapias (áreas × días) no se reparten exacto entre los kits de la línea.",
+      "componente": {
+        "motivoRequerido": "Escribe el motivo (de 3 a 500 caracteres).",
+        "soloEmitida": "Solo se agrega un componente a una factura emitida.",
+        "noEsKit": "Esa línea no es un kit.",
+        "noEsOpcional": "Ese componente no es un opcional de este kit.",
+        "yaIncluido": "Ese componente ya está incluido en el kit.",
+        "kitPersonalizado": "El kit de esta línea fue personalizado; corrígelo desde «Personalizar kit»."
+      }
     }
   },
   "zona": {
@@ -3268,7 +3276,13 @@
       "agregarComponente": "Agregar componente",
       "buscarProducto": "Buscar producto…",
       "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto.",
-      "terapias": "Terapias"
+      "terapias": "Terapias",
+      "addComponentIssued": "Agregar componente (sin cambiar el monto)",
+      "addComponentIssuedHint": "Para un opcional que quedó fuera por error. La factura sigue emitida, el total no cambia y se crean sus sesiones.",
+      "addComponentConfirm": "Agregar componente",
+      "componentAdded": "Componente agregado al kit",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué se agrega (obligatorio)"
     },
     "imprimirNoEmitida": "La factura no se emitió al imprimir.",
     "corregirImpuesto": {
@@ -5800,7 +5814,8 @@
       "undoPresent": "Deshacer presente",
       "undoChange": "Deshacer el cambio",
       "voidInvoice": "Anular la factura",
-      "voidRefund": "Anular la devolución"
+      "voidRefund": "Anular la devolución",
+      "addKitComponent": "Agregar un componente al kit de una factura emitida"
     },
     "effect": {
       "returnsPackageSession": "Devuelve la sesión al paquete",
@@ -5812,7 +5827,8 @@
       "sessionCancelled": "La sesión queda cancelada",
       "backToPending": "La sesión vuelve a pendiente",
       "invoiceVoided": "La factura queda anulada",
-      "refundVoided": "La devolución queda anulada"
+      "refundVoided": "La devolución queda anulada",
+      "kitComponentAdded": "El componente se agrega al kit y se crean sus sesiones; el monto de la factura no cambia."
     },
     "policies": {
       "title": "Confirmaciones",
@@ -5869,7 +5885,8 @@
       "invoice_line_add": "Línea agregada",
       "invoice_line_edit": "Línea editada",
       "invoice_line_multipliers": "Áreas / días cambiados",
-      "invoice_line_remove": "Línea quitada"
+      "invoice_line_remove": "Línea quitada",
+      "invoice_line_component_added": "Componente agregado al kit"
     },
     "field": {
       "estado": "Estado",

@@ -317,6 +317,25 @@ export interface ItemOpcional {
 export function getItemOpcionales(facturaId: string, itemId: string, centroId?: string): Promise<ItemOpcional[]> {
   return apiFetch<ItemOpcional[]>(`/invoices/${facturaId}/items/${itemId}/optional-items`, {}, centroId);
 }
+// BE #574: adds an optional left out of a kit line of an ISSUED invoice, without changing the amount.
+// Guarded by the 428 shield (invoice.kit.add_component), answered by the shared confirm dialog. The body
+// keeps `componenteId` as the DTO names it. 201 → { invoice, added: [{ sku, sessions }] }.
+export interface AddKitComponentResult {
+  invoice: FacturaConItems;
+  added: { sku: string; sessions: number }[];
+}
+export function addKitComponent(
+  facturaId: string,
+  itemId: string,
+  payload: { componenteId: string; reason: string },
+  centroId?: string,
+): Promise<AddKitComponentResult> {
+  return apiFetch<AddKitComponentResult>(
+    `/invoices/${facturaId}/items/${itemId}/add-component`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
 // incluidos = ids de componentes que quedan marcados. El BE re-precifica la línea (base + Σ incluidos)
 // y recomputa los totales; devuelve la factura proyectada (total en vivo). La clave `incluidos` NO está en
 // el mapa api-ingles → se envía tal cual (el BE no la traduce y el DTO la espera en español).

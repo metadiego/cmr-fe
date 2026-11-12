@@ -2004,7 +2004,15 @@
       "forma_sin_dinero": "{formaPago} carries no money: an exonerated consultation is a 100% discount, not a payment."
     },
     "kit": {
-      "multiplicadoresInvalidos": "The therapies (areas × days) don't split evenly among the line's kits."
+      "multiplicadoresInvalidos": "The therapies (areas × days) don't split evenly among the line's kits.",
+      "componente": {
+        "motivoRequerido": "Write the reason (3 to 500 characters).",
+        "soloEmitida": "A component can only be added to an issued invoice.",
+        "noEsKit": "That line is not a kit.",
+        "noEsOpcional": "That component is not an optional of this kit.",
+        "yaIncluido": "That component is already included in the kit.",
+        "kitPersonalizado": "This line’s kit was customized; fix it from «Customize kit»."
+      }
     }
   },
   "zona": {
@@ -3268,7 +3276,13 @@
       "agregarComponente": "Add component",
       "buscarProducto": "Search product…",
       "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe.",
-      "terapias": "Therapies"
+      "terapias": "Therapies",
+      "addComponentIssued": "Add component (amount unchanged)",
+      "addComponentIssuedHint": "For an optional left out by mistake. The invoice stays issued, the total does not change and its sessions are created.",
+      "addComponentConfirm": "Add component",
+      "componentAdded": "Component added to the kit",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why it is added (required)"
     },
     "imprimirNoEmitida": "The invoice was not issued when printing.",
     "corregirImpuesto": {
@@ -5800,7 +5814,8 @@
       "undoPresent": "Undo present",
       "undoChange": "Undo the change",
       "voidInvoice": "Void the invoice",
-      "voidRefund": "Void the refund"
+      "voidRefund": "Void the refund",
+      "addKitComponent": "Add a component to the kit of an issued invoice"
     },
     "effect": {
       "returnsPackageSession": "Returns the session to the package",
@@ -5812,7 +5827,8 @@
       "sessionCancelled": "The session is cancelled",
       "backToPending": "The session goes back to pending",
       "invoiceVoided": "The invoice is voided",
-      "refundVoided": "The refund is voided"
+      "refundVoided": "The refund is voided",
+      "kitComponentAdded": "The component is added to the kit and its sessions are created; the invoice amount does not change."
     },
     "policies": {
       "title": "Confirmations",
@@ -5869,7 +5885,8 @@
       "invoice_line_add": "Line added",
       "invoice_line_edit": "Line edited",
       "invoice_line_multipliers": "Areas / days changed",
-      "invoice_line_remove": "Line removed"
+      "invoice_line_remove": "Line removed",
+      "invoice_line_component_added": "Component added to the kit"
     },
     "field": {
       "estado": "Status",
