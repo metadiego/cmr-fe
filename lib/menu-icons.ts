@@ -24,6 +24,7 @@ import {
   Radar01Icon,
   BinocularsIcon,
   BubbleChatIcon,
+  InternetAntenna04Icon,
 } from "@hugeicons/core-free-icons";
 
 export type MenuIconObj = typeof Home01Icon;
@@ -53,6 +54,7 @@ export const MENU_ICONS: { name: string; icon: MenuIconObj }[] = [
   { name: "radar", icon: Radar01Icon },
   { name: "binoculars", icon: BinocularsIcon },
   { name: "chat", icon: BubbleChatIcon },
+  { name: "tower", icon: InternetAntenna04Icon },
 ];
 
 const MAP: Record<string, MenuIconObj> = Object.fromEntries(

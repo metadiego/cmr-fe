@@ -34,7 +34,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
   { key: "billing", labelKey: "nav.grupo.billing", icon: "invoice", order: 3 },
   { key: "reports", labelKey: "nav.grupo.reports", icon: "chart", order: 4 },
   { key: "inventory", labelKey: "nav.grupo.inventory", icon: "package", order: 5 },
-  { key: "communications", labelKey: "nav.grupo.communications", icon: "chat", order: 6 },
+  { key: "communications", labelKey: "nav.grupo.communications", icon: "tower", order: 6 },
   { key: "admin", labelKey: "nav.grupo.admin", icon: "users", order: 7 },
   { key: "configuration", labelKey: "nav.grupo.configuration", icon: "settings", order: 8 },
 ];
