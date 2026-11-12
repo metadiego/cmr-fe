@@ -155,15 +155,29 @@ export function EstadisticasDiariasView() {
   }
 
   const [snapshotBusy, setSnapshotBusy] = React.useState(false);
-  // Imagen de la tarjeta (no texto) para pegar directo en WhatsApp Web — pedido del dueño, 11-nov:
-  // el reporte de texto no se pega bien ahí. Copia al portapapeles si el navegador lo permite
-  // (ClipboardItem, requiere HTTPS); si no, descarga el PNG igual.
+  // Imagen de la tarjeta (no texto) para pegar directo en WhatsApp Web — pedido del dueño, 11-nov.
+  // NO se captura el nodo en pantalla: sus colores de Tailwind v4 resuelven a oklch()/lab() (verificado:
+  // getComputedStyle da "lab(100 0 0)"), que el rasterizador SVG de html-to-image devuelve en blanco,
+  // sin lanzar ningún error (bug real, encontrado por el dueño pegando una imagen en blanco). Se arma el
+  // MISMO HTML que ya usa Imprimir (el.innerHTML + PRINT_CSS, colores planos, cero oklch) en un iframe
+  // aislado, y se fotografía ESO — ya probado por años en Imprimir, no un camino nuevo.
   async function snapshot() {
     const el = printRef.current;
     if (!el || snapshotBusy) return;
     setSnapshotBusy(true);
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.style.cssText = "position:fixed;left:-9999px;top:0;width:820px;height:1400px;border:0;";
+    document.body.appendChild(iframe);
     try {
-      const blob = await toBlob(el, { backgroundColor: "#ffffff", pixelRatio: 2 });
+      const doc = iframe.contentDocument;
+      if (!doc) throw new Error("no iframe document");
+      doc.open();
+      doc.write(`<!doctype html><html><head><meta charset="utf-8"><style>${PRINT_CSS}</style></head><body>${el.innerHTML}</body></html>`);
+      doc.close();
+      await new Promise((resolve) => setTimeout(resolve, 50)); // deja pintar el iframe antes de fotografiarlo
+      const target = doc.querySelector(".card") ?? doc.body;
+      const blob = await toBlob(target as HTMLElement, { backgroundColor: "#ffffff", pixelRatio: 2 });
       if (!blob) throw new Error("no blob");
       try {
         await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
@@ -180,6 +194,7 @@ export function EstadisticasDiariasView() {
     } catch {
       toast.error(t("snapshotError"));
     } finally {
+      document.body.removeChild(iframe);
       setSnapshotBusy(false);
     }
   }
