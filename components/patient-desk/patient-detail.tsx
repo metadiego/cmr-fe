@@ -84,7 +84,7 @@ export function PatientChips({
       ? tRoot(data.consultationTab.labelKey)
       : data.consultationTab.name
     : t("consultation")
-  // A concluded service (every session attended) is painted gray.
+  // A concluded service (every session attended) keeps its color and gets a green check.
   const chip = (
     key: string,
     color: string | null,
@@ -97,18 +97,22 @@ export function PatientChips({
       key={key}
       className={
         "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
-        (concluded ? "bg-muted text-muted-foreground" : "bg-background")
+        (concluded ? "border-success/50 bg-success/10" : "bg-background")
       }
     >
       <span
         className="size-2 rounded-full"
         style={{
-          backgroundColor:
-            concluded || !color ? "var(--muted-foreground)" : color,
+          backgroundColor: color || "var(--muted-foreground)",
         }}
         aria-hidden
       />
       <span className="uppercase">{name}</span>
+      {concluded && (
+        <span className="text-success-foreground" aria-label={t("serviceDone")}>
+          ✓
+        </span>
+      )}
       {!compact && status && (
         <span
           className="rounded-full px-1.5 text-[10px]"

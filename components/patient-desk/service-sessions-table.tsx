@@ -176,26 +176,28 @@ export function ServiceSessionsTable({
     <section
       className={cn(
         "overflow-hidden rounded-lg ring-1 ring-foreground/10",
-        (concluded || cancelledOnly) && "bg-muted/50 grayscale"
+        // Concluded keeps its own colors (owner, 12-nov: gray read as disabled or cancelled); a green
+        // ring and the «Atendido» badge say it is done. Only a cancelled-only service goes gray.
+        cancelledOnly && "bg-muted/50 grayscale",
+        concluded && !cancelledOnly && "ring-2 ring-success/60"
       )}
     >
       <header className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
         <span
           className="size-2.5 rounded-full"
           style={{
-            backgroundColor:
-              concluded || !color ? "var(--muted-foreground)" : color,
+            backgroundColor: color || "var(--muted-foreground)",
           }}
           aria-hidden
         />
-        <h3
-          className={cn(
-            "text-sm font-semibold tracking-wide uppercase",
-            concluded && "text-muted-foreground"
-          )}
-        >
+        <h3 className="text-sm font-semibold tracking-wide uppercase">
           {name}
         </h3>
+        {concluded && !cancelledOnly && (
+          <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success-foreground">
+            ✓ {t("serviceDone")}
+          </span>
+        )}
         {board || cancelledOnly ? (
           <span className="text-xs text-muted-foreground">
             {cancelledOnly

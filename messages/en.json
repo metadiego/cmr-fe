@@ -5442,7 +5442,8 @@
       "showingAll": "Showing all therapies",
       "seeAll": "see all ({n} more)",
       "onlyFiltered": "only {service}"
-    }
+    },
+    "serviceDone": "Done"
   },
   "salesPackages": {
     "title": "Sales packages",

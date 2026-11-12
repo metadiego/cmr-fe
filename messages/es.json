@@ -5442,7 +5442,8 @@
       "showingAll": "Mostrando todas las terapias",
       "seeAll": "ver todas ({n} más)",
       "onlyFiltered": "solo {service}"
-    }
+    },
+    "serviceDone": "Atendido"
   },
   "salesPackages": {
     "title": "Paquetes de venta",
