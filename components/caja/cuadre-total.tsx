@@ -42,7 +42,7 @@ import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-of
 import { figuresOfReport, SIGN_AS_SUPERVISOR } from "@/lib/caja/sign-off";
 import type { CajaDivision } from "@/lib/api/caja";
 import { ComprobacionCuadreTotal } from "@/components/caja/comprobacion-cuadre-total";
-import { CashCountModeAdmin } from "@/components/configuracion/cash-count-mode-admin";
+import { CashCountModeQuickButton } from "@/components/configuracion/cash-count-mode-admin";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -80,14 +80,18 @@ export function CuadreTotal() {
 
   return (
     <PageContainer>
-      <PageHeader title={t("titulo")} description={t("help")} />
-
-      {/* Copia del control de Configuración (owner, 11-nov-2026): acceso rápido aquí mismo para
-          quien tiene el permiso, sin salir de la pantalla operativa — la de Configuración se queda
-          igual, no se quita. Mismo componente, mismos datos; no hay una segunda fuente de verdad. */}
-      {!loadingGate && !gate.sinCentro && !gate.necesitaPicker && can("caja.count_mode") && (
-        <CashCountModeAdmin centroId={gate.centro} puedeEscribir />
-      )}
+      <PageHeader
+        title={t("titulo")}
+        description={t("help")}
+        // Un engranaje, no una tarjeta fija (owner, 11-nov-2026): esta pantalla termina impresa
+        // (ver «Imprimir cuadre» abajo), así que el control no ocupa área de la hoja — mismo
+        // componente/datos que en Configuración, solo un camino más corto hasta él.
+        actions={
+          !loadingGate && !gate.sinCentro && !gate.necesitaPicker && can("caja.count_mode") ? (
+            <CashCountModeQuickButton centroId={gate.centro} />
+          ) : undefined
+        }
+      />
 
       {!loadingGate && gate.sinCentro && (
         <p className="text-sm text-muted-foreground">{tCaja("sinCentro")}</p>
