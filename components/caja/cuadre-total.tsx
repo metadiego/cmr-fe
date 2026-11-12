@@ -366,7 +366,7 @@ function Editor({
             <div className="grid gap-4 sm:grid-cols-2">
               <ConteoDenominaciones
                 denominaciones={denoms}
-                cantidades={Object.fromEntries(reporte.divisionCounts.consultation.lines.map((l) => [l.denominacionId, l.cantidad]))}
+                cantidades={Object.fromEntries(reporte.divisionCounts.consultation.lines.map((l) => [l.denominationId, l.quantity]))}
                 disabled
                 fondo={reporte.divisionCounts.consultation.fund}
                 aDepositar={reporte.divisionCounts.consultation.counted - reporte.divisionCounts.consultation.fund}
@@ -375,7 +375,7 @@ function Editor({
               />
               <ConteoDenominaciones
                 denominaciones={denoms}
-                cantidades={Object.fromEntries(reporte.divisionCounts.general.lines.map((l) => [l.denominacionId, l.cantidad]))}
+                cantidades={Object.fromEntries(reporte.divisionCounts.general.lines.map((l) => [l.denominationId, l.quantity]))}
                 disabled
                 fondo={reporte.divisionCounts.general.fund}
                 aDepositar={reporte.divisionCounts.general.counted - reporte.divisionCounts.general.fund}

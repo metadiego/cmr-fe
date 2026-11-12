@@ -1,9 +1,9 @@
 import { money } from "./totales.ts";
 
-// Una línea de conteo, normalizada: las dos fuentes del BE la nombran distinto (conteoEfectivo.lines:
-// denominationId/value/quantity/amount en inglés; divisionCounts.*.lines: denominacionId/valor/
-// cantidad/monto en español — BE #566, handoff .personal/handoff-cuadre-uno-o-dos-conteos.md). El
-// llamador normaliza a esta forma ANTES de pedir la tabla, para no repetir el mapeo en cada sitio.
+// Una línea de conteo, normalizada: ambas fuentes del BE (conteoEfectivo.lines y
+// divisionCounts.*.lines, BE #566) usan los mismos nombres en inglés
+// (denominationId/value/quantity/amount) — el llamador igual normaliza a esta forma
+// ANTES de pedir la tabla, para no repetir el mapeo en cada sitio.
 export type ConteoLineaSimple = { key: string; quantity: number; value: number; amount: number };
 
 function esc(s: unknown): string {

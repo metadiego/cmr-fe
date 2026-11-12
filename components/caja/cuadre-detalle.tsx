@@ -92,7 +92,7 @@ export function CuadreDetalle({
   const conteoPanels: ConteoEfectivoPanel[] = divisionCounts
     ? (["consultation", "general"] as const).map((k) => ({
         title: `${td("conteoEfectivo")} · ${t(`division.${k === "consultation" ? "consulta" : "general"}`)}`,
-        lines: divisionCounts[k].lines.map((l) => ({ key: l.denominacionId, quantity: l.cantidad, value: l.valor, amount: l.monto })),
+        lines: divisionCounts[k].lines.map((l) => ({ key: l.denominationId, quantity: l.quantity, value: l.value, amount: l.amount })),
         total: divisionCounts[k].hasCount ? divisionCounts[k].counted : null,
       }))
     : [
@@ -450,7 +450,7 @@ function buildPrintHtml(args: {
         .map((k) =>
           conteoTableHtml({
             title: `${L.conteoEfectivo} · ${k === "consultation" ? (divisionLabels?.consulta ?? "") : (divisionLabels?.general ?? "")}`,
-            lines: divisionCounts[k].lines.map((l) => ({ key: l.denominacionId, quantity: l.cantidad, value: l.valor, amount: l.monto })),
+            lines: divisionCounts[k].lines.map((l) => ({ key: l.denominationId, quantity: l.quantity, value: l.value, amount: l.amount })),
             total: divisionCounts[k].hasCount ? divisionCounts[k].counted : null,
             labels: tableLabels,
           }),

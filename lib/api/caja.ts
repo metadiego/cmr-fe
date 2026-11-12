@@ -190,10 +190,10 @@ export interface CashCountModeStatus {
   warnings: CashCountModeWarning[];
 }
 export interface DivisionCountLine {
-  denominacionId: string;
-  valor: number;
-  cantidad: number;
-  monto: number;
+  denominationId: string;
+  value: number;
+  quantity: number;
+  amount: number;
 }
 export interface DivisionCount {
   hasCount: boolean;
