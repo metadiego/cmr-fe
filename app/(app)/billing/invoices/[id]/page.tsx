@@ -49,6 +49,7 @@ import { ReopenInvoiceButton, InvoiceReopenings } from "@/components/facturacion
 import { ChangeInvoicePatientButton } from "@/components/facturacion/invoice-change-patient";
 import { IssueButton } from "@/components/facturacion/issue-button";
 import { AddItem } from "@/components/facturacion/invoice-add-item";
+import { LineMultipliersEditor } from "@/components/facturacion/line-multipliers-editor";
 import { Lbl } from "@/components/facturacion/field-label";
 import { AddSalesPackage, PackageEvidence, PackageSavingsRow } from "@/components/facturacion/sales-package-parts";
 import { sellSalesPackage } from "@/lib/api/sales-packages";
@@ -639,9 +640,16 @@ function Editor({
                         </button>
                       )}
                       {/* Desglose de multiplicadores (láser: días × áreas) — data-driven */}
-                      {multsDe(it) && (
+                      {multsDe(it) && (esBorrador && !isPackageLine(it) ? (
+                        <LineMultipliersEditor
+                          key={JSON.stringify(multsDe(it))}
+                          multipliers={multsDe(it)!}
+                          disabled={busy}
+                          onSave={(meta) => run(() => actualizarItem(id, it.id, { meta }, centro))}
+                        />
+                      ) : (
                         <span className="block text-[11px] text-muted-foreground">({multTexto(multsDe(it)!)})</span>
-                      )}
+                      ))}
                       {/* Impuestos de la línea DISCRIMINADOS (Estatal + Municipal + los que haya). N renglones,
                           data-driven: recorre el array del BE, no cablea dos. Handoff IVU compuesto. */}
                       {impuestosDeLinea(it).length > 0 && (

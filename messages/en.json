@@ -3381,8 +3381,11 @@
     "packagesHint": "How many packages are sold (usually 1).",
     "returnedBadge": "Returned",
     "error": {
-      "pago_supera_total": "The money taken is above the invoice total ({sobrante} over). Void the extra payment before issuing."
-    }
+      "pago_supera_total": "The money taken is above the invoice total ({sobrante} over). Void the extra payment before issuing.",
+      "multiplicador_invalido": "{field}: must be a whole number of 1 or more.",
+      "meta_solo_borrador": "Areas and days can only be changed on a draft invoice."
+    },
+    "multipliersEditHint": "Fix areas or days here: saved when you leave the field."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -5861,7 +5864,11 @@
       "absence_cancel": "Absence cancelled",
       "absence_restore": "Absence restored",
       "absence_edit": "Absence edited",
-      "absence_delete": "Absence deleted"
+      "absence_delete": "Absence deleted",
+      "invoice_line_add": "Line added",
+      "invoice_line_edit": "Line edited",
+      "invoice_line_multipliers": "Areas / days changed",
+      "invoice_line_remove": "Line removed"
     },
     "field": {
       "estado": "Status",

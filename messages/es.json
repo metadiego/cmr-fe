@@ -3381,8 +3381,11 @@
     "packagesHint": "Cuántos paquetes se venden (normalmente 1).",
     "returnedBadge": "Devuelta",
     "error": {
-      "pago_supera_total": "Lo cobrado pasa del total de la factura (sobran {sobrante}). Anula el pago sobrante antes de emitir."
-    }
+      "pago_supera_total": "Lo cobrado pasa del total de la factura (sobran {sobrante}). Anula el pago sobrante antes de emitir.",
+      "multiplicador_invalido": "{field}: debe ser un número entero de 1 o más.",
+      "meta_solo_borrador": "Las áreas y los días solo se corrigen en una factura en borrador."
+    },
+    "multipliersEditHint": "Corrige áreas o días aquí: se guarda al salir del campo."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -5861,7 +5864,11 @@
       "absence_cancel": "Ausencia cancelada",
       "absence_restore": "Ausencia restaurada",
       "absence_edit": "Ausencia editada",
-      "absence_delete": "Ausencia borrada"
+      "absence_delete": "Ausencia borrada",
+      "invoice_line_add": "Línea agregada",
+      "invoice_line_edit": "Línea editada",
+      "invoice_line_multipliers": "Áreas / días cambiados",
+      "invoice_line_remove": "Línea quitada"
     },
     "field": {
       "estado": "Estado",
