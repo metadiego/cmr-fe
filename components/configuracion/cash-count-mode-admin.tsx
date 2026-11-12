@@ -7,13 +7,7 @@ import { toast } from "sonner";
 import { getCashCountMode, setCashCountMode, type CashCountMode } from "@/lib/api/caja";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 // Un centro, su modo de conteo (BE #566). `modes` viene del GET — se pinta de ahí, nunca a mano
 // (el handoff es explícito: no inventar las opciones). Sin `puedeEscribir`: solo lectura.
@@ -55,14 +49,24 @@ export function CashCountModeAdmin({
       <h3 className="text-sm font-medium">{t("title")}</h3>
       <p className="text-xs text-muted-foreground">{t("help")}</p>
       {puedeEscribir ? (
-        <Select value={row.mode} onValueChange={(v) => void cambiar(v as CashCountMode)} disabled={busy}>
-          <SelectTrigger className="w-full sm:w-96"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {row.modes.map((m) => (
-              <SelectItem key={m} value={m}>{tRoot(`caja.countMode.${m}`)}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap gap-2">
+          {row.modes.map((m) => (
+            <button
+              key={m}
+              type="button"
+              disabled={busy}
+              onClick={() => void cambiar(m)}
+              className={cn(
+                "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-60",
+                m === row.mode
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted",
+              )}
+            >
+              {tRoot(`caja.countMode.${m}`)}
+            </button>
+          ))}
+        </div>
       ) : (
         <p className="text-sm font-medium">{tRoot(`caja.countMode.${row.mode}`)}</p>
       )}
