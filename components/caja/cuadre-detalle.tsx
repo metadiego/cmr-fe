@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, Alert02Icon } from "@hugeicons/core-free-icons";
 
-import type { ReporteDia, TributarioPartida } from "@/lib/api/caja";
+import type { ReporteDia, TributarioPartida, DivisionCounts } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
 import { CuadreDevoluciones, devolucionesPrintHtml } from "@/components/caja/cuadre-devoluciones";
 import { refundSplit } from "@/lib/caja/refunds-by-method";
@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { ProductSalesSection } from "@/components/caja/product-sales-section";
 import { productSalesPrintHtml, type ProductSalesPrintLabels } from "@/lib/caja/product-sales-print";
 import { signaturesPrintHtml, type PrintedSignature } from "@/lib/caja/sign-off";
+import { ConteoEfectivoSection, type ConteoEfectivoPanel } from "@/components/caja/conteo-efectivo-section";
+import { conteoTableHtml } from "@/lib/caja/conteo-table-print";
 
 // Números de la caja (modelo CMA) que también van en la hoja impresa.
 export interface CuadreResumen {
@@ -40,6 +42,7 @@ export function CuadreDetalle({
   reporte,
   resumen,
   subtotalesTarjeta,
+  divisionCounts,
   firmas,
   firmaTexto,
 }: {
@@ -57,6 +60,10 @@ export function CuadreDetalle({
   // ResumenPagos pinta en pantalla (lib/caja/totales.ts subtotalesTarjeta()) — faltaba en la hoja
   // impresa, que solo traía "Total tarjetas" sin desglose. Ausente = sin esa sección.
   subtotalesTarjeta?: Array<{ clave: string; labelKey: string; nombre: string; monto: number }>;
+  // Modo `split` (BE #566): dos conteos (consulta/general) en vez del único consolidado, EN PANTALLA
+  // Y en lo impreso — es la hoja que se entrega, tenía que salir ahí (owner, 11-nov-2026). Ausente =
+  // como siempre, un solo conteo.
+  divisionCounts?: DivisionCounts;
   // Sign-off blocks already put into words (components/caja/cash-sign-off.tsx): «Aceptado por … · when»
   // over each line. Absent = the two blank lines of before.
   firmas?: PrintedSignature[];
@@ -81,6 +88,21 @@ export function CuadreDetalle({
     () => [...(conteo?.lines ?? [])].sort((a, b) => b.value - a.value),
     [conteo],
   );
+  // Uno (de siempre) o dos paneles (modo `split`, BE #566) — ver ConteoEfectivoSection.
+  const conteoPanels: ConteoEfectivoPanel[] = divisionCounts
+    ? (["consultation", "general"] as const).map((k) => ({
+        title: `${td("conteoEfectivo")} · ${t(`division.${k === "consultation" ? "consulta" : "general"}`)}`,
+        lines: divisionCounts[k].lines.map((l) => ({ key: l.denominacionId, quantity: l.cantidad, value: l.valor, amount: l.monto })),
+        total: divisionCounts[k].hasCount ? divisionCounts[k].counted : null,
+      }))
+    : [
+        {
+          title: td("conteoEfectivo"),
+          subtitle: conteo && conteo.cajeros > 1 ? td("cajerosSumados", { n: conteo.cajeros }) : undefined,
+          lines: conteoLineas.map((l, i) => ({ key: l.denominationId ?? `${l.value}-${i}`, quantity: l.quantity, value: l.value, amount: l.amount })),
+          total: conteo ? conteo.total : null,
+        },
+      ];
 
   // Cruce id → documento, para nombrar las facturas exoneradas (nº + paciente) que el BE da por id.
   const docPorId = React.useMemo(() => {
@@ -112,6 +134,7 @@ export function CuadreDetalle({
         resumen,
         reporte,
         subtotalesTarjeta: subtotalesTarjetaResueltos,
+        divisionCounts,
         exoneradas,
         firmasHtml: firmas?.length ? signaturesPrintHtml(firmas, firmaTexto) : undefined,
         productSalesHtml: reporte.productSales
@@ -189,48 +212,17 @@ export function CuadreDetalle({
         </Button>
       </div>
 
-      {/* 0. Conteo de efectivo (sellado / consolidado): cantidad · valor · monto, de mayor a menor. */}
-      <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-        <h3 className="flex items-center justify-between border-b px-4 py-2.5 text-sm font-semibold">
-          <span>{td("conteoEfectivo")}</span>
-          {conteo && conteo.cajeros > 1 && (
-            <span className="text-xs font-normal text-muted-foreground">{td("cajerosSumados", { n: conteo.cajeros })}</span>
-          )}
-        </h3>
-        {!conteo ? (
-          <p className="px-4 py-3 text-sm text-muted-foreground">{td("sinConteo")}</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-2 text-right font-semibold">{td("colCantidad")}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{td("colValor")}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{td("colMonto")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {conteoLineas.length === 0 && (
-                  <tr><td colSpan={3} className="px-4 py-3 text-center text-muted-foreground">{td("sinConteo")}</td></tr>
-                )}
-                {conteoLineas.map((l, i) => (
-                  <tr key={l.denominationId ?? `${l.value}-${i}`}>
-                    <td className="px-4 py-2 text-right tabular-nums">{l.quantity}</td>
-                    <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{money(l.value)}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">{money(l.amount)}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2">
-                  <td className="px-4 py-2 text-right text-xs uppercase tracking-wide text-muted-foreground" colSpan={2}>{td("conteoTotal")}</td>
-                  <td className="px-4 py-2 text-right font-semibold tabular-nums">{money(conteo.total)}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        )}
-      </section>
+      {/* 0. Conteo de efectivo: uno (sellado/consolidado) o dos (modo `split`, BE #566). */}
+      <ConteoEfectivoSection
+        panels={conteoPanels}
+        labels={{
+          colCantidad: td("colCantidad"),
+          colValor: td("colValor"),
+          colMonto: td("colMonto"),
+          conteoTotal: td("conteoTotal"),
+          sinConteo: td("sinConteo"),
+        }}
+      />
 
       {/* 1. Bloque tributario */}
       {trib && (
@@ -409,16 +401,18 @@ function buildPrintHtml(args: {
   exoneradas: Array<{ id: string; numero: string | null; paciente: string | null }>;
   productSalesHtml?: string;
   firmasHtml?: string;
-  // Etiquetas para la columna «División» de la tabla de documentos (solo el cuadre TOTAL del día la usa).
+  // Etiquetas para la columna «División» de la tabla de documentos (solo el cuadre TOTAL del día la usa)
+  // Y para el título de cada panel de conteo en modo `split` — mismas etiquetas, mismo significado.
   divisionLabels?: { consulta: string; general: string };
+  // Modo `split` (BE #566): dos paneles de conteo (consulta/general) en vez del único consolidado.
+  divisionCounts?: DivisionCounts;
   L: PrintLabels;
 }): string {
-  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, subtotalesTarjeta, exoneradas, divisionLabels, L, productSalesHtml, firmasHtml } = args;
+  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, subtotalesTarjeta, exoneradas, divisionLabels, divisionCounts, L, productSalesHtml, firmasHtml } = args;
   const trib = reporte.tributario;
   const documentos = reporte.documentos ?? [];
   const devoluciones = reporte.devolucionesDetalle ?? [];
   const conteo = reporte.conteoEfectivo ?? null;
-  const conteoLineas = [...(conteo?.lines ?? [])].sort((a, b) => b.value - a.value);
   const hayExonerado = !!trib && trib.exonerado.amount > 0;
   const tarjetas = reporte.detalle.tarjetas;
   const otros = reporte.detalle.otros;
@@ -448,19 +442,26 @@ function buildPrintHtml(args: {
       <tbody>${otros.length ? metodoRows(otros) : `<tr><td class="dim">${esc(L.noOther)}</td><td></td></tr>`}</tbody>
     </table>`;
 
-  const conteoBlock = `<h2>${esc(L.conteoEfectivo)}</h2>${
-    !conteo
-      ? `<p class="dim">${esc(L.sinConteo)}</p>`
-      : `<table class="conteo"><thead><tr><th class="r">${esc(L.colCantidad)}</th><th class="r">${esc(L.colValor)}</th><th class="r">${esc(L.colMonto)}</th></tr></thead>
-         <tbody>${
-           conteoLineas.length
-             ? conteoLineas
-                 .map((l) => `<tr><td class="r mono">${esc(l.quantity)}</td><td class="r mono dim">${esc(money(l.value))}</td><td class="r mono">${esc(money(l.amount))}</td></tr>`)
-                 .join("")
-             : `<tr><td colspan="3" class="dim">${esc(L.sinConteo)}</td></tr>`
-         }</tbody>
-         <tfoot><tr class="tot"><td colspan="2" class="r dim">${esc(L.conteoTotal)}</td><td class="r mono">${esc(money(conteo.total))}</td></tr></tfoot></table>`
-  }`;
+  // Uno (de siempre) o dos bloques de conteo (modo `split`, BE #566) — mismo helper que la pantalla,
+  // para que lo impreso diga exactamente lo mismo que lo que ya vio quien cerró la caja.
+  const tableLabels = { colCantidad: L.colCantidad, colValor: L.colValor, colMonto: L.colMonto, conteoTotal: L.conteoTotal, sinConteo: L.sinConteo };
+  const conteoBlock = divisionCounts
+    ? (["consultation", "general"] as const)
+        .map((k) =>
+          conteoTableHtml({
+            title: `${L.conteoEfectivo} · ${k === "consultation" ? (divisionLabels?.consulta ?? "") : (divisionLabels?.general ?? "")}`,
+            lines: divisionCounts[k].lines.map((l) => ({ key: l.denominacionId, quantity: l.cantidad, value: l.valor, amount: l.monto })),
+            total: divisionCounts[k].hasCount ? divisionCounts[k].counted : null,
+            labels: tableLabels,
+          }),
+        )
+        .join("")
+    : conteoTableHtml({
+        title: L.conteoEfectivo,
+        lines: (conteo?.lines ?? []).map((l, i) => ({ key: l.denominationId ?? `${l.value}-${i}`, quantity: l.quantity, value: l.value, amount: l.amount })),
+        total: conteo ? conteo.total : null,
+        labels: tableLabels,
+      });
 
   const resumenRows = [
     [L.opening, money(s.inicio)],
