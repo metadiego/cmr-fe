@@ -3288,7 +3288,7 @@
       "exportCsv": "Export CSV",
       "div": {
         "todas": "All",
-        "general": "General",
+        "general": "Services & Products",
         "consulta": "Consultations"
       },
       "atajo": {
@@ -3324,7 +3324,7 @@
       "exportCsv": "Export CSV",
       "div": {
         "todas": "All",
-        "general": "General",
+        "general": "Services & Products",
         "consulta": "Consultations"
       },
       "atajo": {
@@ -3957,7 +3957,7 @@
     "sinCentro": "You have no centers assigned.",
     "division": {
       "consulta": "Consultation",
-      "general": "General"
+      "general": "Services & Products"
     },
     "scope": {
       "label": "Cashier",
@@ -4127,7 +4127,7 @@
       "comprobacion": {
         "titulo": "Check",
         "consulta": "Consultation",
-        "general": "General",
+        "general": "Services & Products",
         "suma": "Sum",
         "dia": "Day",
         "esperado": "Expected",
@@ -4139,7 +4139,7 @@
       "conteo_unico": "Do a single count",
       "descuadre": "The day count differs by {monto}",
       "divisionConsulta": "Consultation",
-      "divisionGeneral": "General",
+      "divisionGeneral": "Services & Products",
       "sinContarAviso": "Not counted yet"
     },
     "countMode": {

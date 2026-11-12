@@ -3288,7 +3288,7 @@
       "exportCsv": "Exportar CSV",
       "div": {
         "todas": "Todas",
-        "general": "General",
+        "general": "Servicios & Productos",
         "consulta": "Consultas"
       },
       "atajo": {
@@ -3324,7 +3324,7 @@
       "exportCsv": "Exportar CSV",
       "div": {
         "todas": "Todas",
-        "general": "General",
+        "general": "Servicios & Productos",
         "consulta": "Consultas"
       },
       "atajo": {
@@ -3957,7 +3957,7 @@
     "sinCentro": "No tienes centros asignados.",
     "division": {
       "consulta": "Consulta",
-      "general": "General"
+      "general": "Servicios & Productos"
     },
     "scope": {
       "label": "Cajero",
@@ -4127,7 +4127,7 @@
       "comprobacion": {
         "titulo": "Comprobación",
         "consulta": "Consulta",
-        "general": "General",
+        "general": "Servicios & Productos",
         "suma": "Suma",
         "dia": "Día",
         "esperado": "Esperado",
@@ -4139,7 +4139,7 @@
       "conteo_unico": "Hacer un conteo único",
       "descuadre": "El conteo del día difiere en {monto}",
       "divisionConsulta": "Consulta",
-      "divisionGeneral": "General",
+      "divisionGeneral": "Servicios & Productos",
       "sinContarAviso": "Sin contar todavía"
     },
     "countMode": {
