@@ -12,7 +12,7 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LiveBadge } from "@/components/live-badge";
 import { cn } from "@/lib/utils";
-import { CenterColumn } from "@/components/right-now/center-column";
+import { CENTER_COLUMN_SECTIONS, CenterColumn } from "@/components/right-now/center-column";
 import { CallsPanel } from "@/components/right-now/calls-panel";
 import { ExternalSourceSettingsButton } from "@/components/right-now/external-source-settings";
 
@@ -107,14 +107,27 @@ export function RightNowView() {
           {centers.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("noCenters")}</p>
           ) : (
-            <div
-              className="grid gap-6"
-              style={{ gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, 34rem), 1fr))` }}
-            >
-              {centers.map((c) => (
-                <CenterColumn key={c.clinicId} center={c} now={now} />
-              ))}
-            </div>
+            <>
+              {/* Mismo umbral que antes decidía auto-fit (N * 34rem + gaps): por debajo, los centros se
+                  apilan en orden natural; a partir de ahí, cada centro es una columna y sus bloques
+                  (Ventas, Pacientes, Médicos, Servicios, Recetas) comparten fila con los del resto —
+                  así «Ventas» de un centro nunca queda más alto o más bajo que el del otro. */}
+              <style>{`
+                .rightnow-centers { display: grid; gap: 1.5rem; }
+                @media (min-width: ${centers.length * 34 + (centers.length - 1) * 1.5}rem) {
+                  .rightnow-centers {
+                    grid-template-columns: repeat(${centers.length}, minmax(min(100%, 34rem), 1fr));
+                    grid-auto-flow: column;
+                    grid-template-rows: repeat(${CENTER_COLUMN_SECTIONS}, auto);
+                  }
+                }
+              `}</style>
+              <div className="rightnow-centers">
+                {centers.map((c) => (
+                  <CenterColumn key={c.clinicId} center={c} now={now} />
+                ))}
+              </div>
+            </>
           )}
 
           <CallsPanel calls={combined?.calls} />

@@ -14,8 +14,12 @@ import { Empty, Panel, Pill, RankBadge, Stat } from "@/components/right-now/part
 import { ServicesPanel } from "@/components/right-now/services-panel";
 import { Tooltip } from "@/components/ui/tooltip";
 
-// One center's column on the «Ahora mismo» board, as the legacy screen had it: sales, consultation
-// patients, the doctors' ranking, prescriptions (shown even while empty) and the services.
+// One center's six blocks on the «Ahora mismo» board, as the legacy screen had it: sales,
+// consultation patients, the doctors' ranking, services and prescriptions (shown even while empty).
+// Returned flat (no wrapping column div) so right-now-view's shared grid can line up each block with
+// its counterpart in every other center — same row, same height, stretched to the tallest one.
+export const CENTER_COLUMN_SECTIONS = 6;
+
 export function CenterColumn({ center, now }: { center: RightNowCenter; now: number }) {
   const t = useTranslations("rightNow");
   // El BE manda `labelKey` de la fila "sin médico" YA calificado (`rightNow.doctors.noDoctor`), igual
@@ -46,8 +50,8 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
   const extStale = ext ? externalSourceStale(ext, now) : false;
 
   return (
-    <div className="flex min-w-0 flex-col gap-4">
-      <h2 className="flex items-center gap-2 text-lg font-semibold">
+    <>
+      <h2 className="flex min-w-0 items-center gap-2 text-lg font-semibold">
         <span className="size-2 rounded-full bg-emerald-500" aria-hidden />
         {center.name}
         {/* Centro enchufado al legado (handoff .personal/handoff-ahora-mismo-legado-bayamon.md):
@@ -176,7 +180,7 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
           <Empty>{t("prescriptions.empty")}</Empty>
         )}
       </Panel>
-    </div>
+    </>
   );
 }
 
