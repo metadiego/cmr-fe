@@ -517,3 +517,28 @@ export function setCashCountMode(
     body: JSON.stringify({ mode }),
   });
 }
+
+// «Procesar cierre» switch per center (BE #575). GET with caja.read; PUT with caja.count_mode on that
+// center, one center per call. With false the two close endpoints answer 409 CASH_CLOSE_DISABLED
+// (caja.error.closeDisabled): the button is hidden here and the API refuses it too.
+export interface CashCloseSetting {
+  clinicId: string;
+  clinicName: string;
+  closeEnabled: boolean;
+}
+export function getCashCloseSetting(centerIds?: string[]): Promise<CashCloseSetting[]> {
+  const sp = new URLSearchParams();
+  for (const id of centerIds ?? []) sp.append("centerIds", id);
+  const qs = sp.toString();
+  return apiFetch<CashCloseSetting[]>(`/cash/close-setting${qs ? `?${qs}` : ""}`);
+}
+export function setCashCloseSetting(
+  centroId: string,
+  closeEnabled: boolean,
+): Promise<{ clinicId: string; previous: boolean; current: boolean }> {
+  const sp = new URLSearchParams({ centerIds: centroId });
+  return apiFetch(`/cash/close-setting?${sp.toString()}`, {
+    method: "PUT",
+    body: JSON.stringify({ closeEnabled }),
+  });
+}

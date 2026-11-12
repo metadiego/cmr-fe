@@ -44,6 +44,7 @@ import type { CajaDivision } from "@/lib/api/caja";
 import { ComprobacionCuadreTotal } from "@/components/caja/comprobacion-cuadre-total";
 import { CashCountModeQuickButton } from "@/components/configuracion/cash-count-mode-admin";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
+import { useCashCloseEnabled } from "@/components/configuracion/cash-close-setting";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
@@ -200,6 +201,7 @@ function Editor({
   const tRoot = useTranslations();
 
   const cerrado = esSoloLecturaCuadreTotal(reporte.dayReconciliation?.status);
+  const closeEnabled = useCashCloseEnabled(centroId); // BE #575: the center can turn the close off
   // Modo de conteo del centro (BE #566): ausente = BE viejo o `flexible` → esta pantalla no cambia.
   // `split` reemplaza la grilla editable por los dos paneles de división (abajo); `single` la deja
   // siempre encendida, sin el botón para volver a "suma de cajeros" (no existe esa alternativa ahí).
@@ -424,7 +426,7 @@ function Editor({
           sinContar={!reporte.conteoEfectivo}
           cerrado={cerrado}
           cerradoEn={null}
-          canProcesar={!cerrado && puedeCerrarPermiso}
+          canProcesar={!cerrado && puedeCerrarPermiso && closeEnabled}
           procesando={procesando}
           onProcesar={procesarCierre}
           onExport={exportar}

@@ -729,7 +729,8 @@
       "numeracion_record_paciente": "Patient record",
       "numeracion_devoluciones": "Returns",
       "agenda_blocking_rules": "What blocks booking",
-      "cash_count_mode": "How cash is counted"
+      "cash_count_mode": "How cash is counted",
+      "cash_close_enabled": "Show «Process close»"
     },
     "agendaRules": {
       "title": "What blocks booking",
@@ -4290,6 +4291,9 @@
       "inGeneral": "Today you took payments in Services & Products: your sheet and signature are in that count, not this one.",
       "goConsulta": "Go to the Consultation cash count",
       "goGeneral": "Go to the Services & Products count"
+    },
+    "error": {
+      "closeDisabled": "Closing the cash count is turned off for this center."
     }
   },
   "gruposFacturacion": {
@@ -5983,5 +5987,9 @@
       "isCash": "Counted as cash in the cash count",
       "carriesMoney": "Off: it cannot take a payment and the cash count never adds it (Exonerada = a 100% discount, not a payment)"
     }
+  },
+  "cashCloseSetting": {
+    "help": "Off, the button does not appear on the cashier count or the total count, and the system does not allow closing. Already closed counts and «Reopen» do not change.",
+    "saved": "Saved"
   }
 }

@@ -49,6 +49,7 @@ import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
 import { CuadreAttachments, CuadreAttachmentsOverview } from "@/components/caja/cuadre-attachments";
 import { CuadreScopeSelector } from "@/components/caja/cuadre-scope-selector";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
+import { useCashCloseEnabled } from "@/components/configuracion/cash-close-setting";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -284,6 +285,7 @@ function Editor({
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
   const cerrado = cuadreInicial?.status === "cerrado";
+  const closeEnabled = useCashCloseEnabled(centro); // BE #575: the center can turn the close off
   // Counting: not closed, today (or caja.retroactivo), and a concrete cashier — or the consolidated,
   // only for caja.ver_todos once the manager chose to do ONE count (else it is the read-only sum).
   const [managerCounting, setManagerCounting] = React.useState(managerCounted);
@@ -533,7 +535,7 @@ function Editor({
           sinContar={sinContar}
           cerrado={cerrado}
           cerradoEn={cuadreInicial?.closedAt ?? null}
-          canProcesar={contarHabilitado && canCerrar}
+          canProcesar={contarHabilitado && canCerrar && closeEnabled}
           procesando={procesando}
           onProcesar={procesarCierre}
           onExport={exportar}

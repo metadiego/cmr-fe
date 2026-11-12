@@ -729,7 +729,8 @@
       "numeracion_record_paciente": "Récord de paciente",
       "numeracion_devoluciones": "Devoluciones",
       "agenda_blocking_rules": "Qué bloquea al agendar",
-      "cash_count_mode": "Cómo se cuenta el efectivo"
+      "cash_count_mode": "Cómo se cuenta el efectivo",
+      "cash_close_enabled": "Mostrar «Procesar cierre»"
     },
     "agendaRules": {
       "title": "Qué bloquea al agendar",
@@ -4290,6 +4291,9 @@
       "inGeneral": "Hoy cobraste en Servicios & Productos: tu hoja y tu firma están en ese cuadre, no en este.",
       "goConsulta": "Ir al cuadre de Consulta",
       "goGeneral": "Ir al cuadre de Servicios & Productos"
+    },
+    "error": {
+      "closeDisabled": "El cierre de caja está desactivado en este centro."
     }
   },
   "gruposFacturacion": {
@@ -5983,5 +5987,9 @@
       "isCash": "Se cuenta como efectivo en el cuadre de caja",
       "carriesMoney": "Apagado: no se puede cobrar con ella y el cuadre no la suma (Exonerada = descuento del 100%, no un pago)"
     }
+  },
+  "cashCloseSetting": {
+    "help": "Apagado, el botón no aparece en el cuadre del cajero ni en el cuadre total, y el sistema no deja cerrar. Lo ya cerrado y «Reabrir» no cambian.",
+    "saved": "Guardado"
   }
 }
