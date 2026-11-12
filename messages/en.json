@@ -3951,7 +3951,7 @@
   },
   "caja": {
     "title": "Cash count",
-    "help": "Count the cash and reconcile the day's drawer, keeping consultation and general apart.",
+    "help": "Count the cash and balance the day's register, keeping Consultation apart from Services & Products.",
     "date": "Date",
     "loading": "Loading…",
     "sinCentro": "You have no centers assigned.",
@@ -4147,15 +4147,15 @@
       "singleCountNotUsed": "There's a saved single count this center doesn't use (it counts per division)",
       "dayNotCounted": "Missing the day's single count",
       "flexible": "Flexible (today's)",
-      "split": "Two counts (consultation and general)",
+      "split": "Two counts (Consultation and Services & Products)",
       "single": "One single count"
     },
     "cuadreGeneral": {
       "title": "General cash-up",
-      "help": "Daily sales by division and payment method. General bundles products, IV and laser; Consultation is separate. The general total sums both.",
+      "help": "The day's sales by division and payment method. Services & Products covers products, IV and laser; Consultation is separate. The grand total adds both.",
       "fecha": "Date",
       "buscar": "Search",
-      "general": "General billing",
+      "general": "Services & Products",
       "consulta": "Consultation billing",
       "totalGeneral": "General total",
       "efectivo": "Cash",
@@ -4269,9 +4269,9 @@
     },
     "otherDivision": {
       "inConsulta": "You billed in Consultation today: your sheet and your signature are in the Consultation cash count, not this one.",
-      "inGeneral": "You billed in General today: your sheet and your signature are in the General cash count, not this one.",
+      "inGeneral": "Today you took payments in Services & Products: your sheet and signature are in that count, not this one.",
       "goConsulta": "Go to the Consultation cash count",
-      "goGeneral": "Go to the General cash count"
+      "goGeneral": "Go to the Services & Products count"
     }
   },
   "gruposFacturacion": {

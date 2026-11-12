@@ -3951,7 +3951,7 @@
   },
   "caja": {
     "title": "Cuadre de caja",
-    "help": "Cuenta el efectivo y cuadra la caja del día, separando consulta de general.",
+    "help": "Cuenta el efectivo y cuadra la caja del día, separando Consulta de Servicios & Productos.",
     "date": "Fecha",
     "loading": "Cargando…",
     "sinCentro": "No tienes centros asignados.",
@@ -4147,15 +4147,15 @@
       "singleCountNotUsed": "Hay un conteo único guardado que este centro no usa (cuenta por división)",
       "dayNotCounted": "Falta el conteo único del día",
       "flexible": "Flexible (lo de hoy)",
-      "split": "Dos conteos (consulta y general)",
+      "split": "Dos conteos (Consulta y Servicios & Productos)",
       "single": "Un solo conteo"
     },
     "cuadreGeneral": {
       "title": "Cuadre general",
-      "help": "Ventas del día por división y forma de pago. General reúne productos, suero y láser; Consulta va aparte. El total general suma las dos.",
+      "help": "Ventas del día por división y forma de pago. Servicios & Productos reúne productos, suero y láser; Consulta va aparte. El total general suma las dos.",
       "fecha": "Fecha",
       "buscar": "Buscar",
-      "general": "Facturación general",
+      "general": "Servicios & Productos",
       "consulta": "Facturación consulta",
       "totalGeneral": "Total general",
       "efectivo": "Efectivo",
@@ -4269,9 +4269,9 @@
     },
     "otherDivision": {
       "inConsulta": "Hoy cobraste en Consulta: tu hoja y tu firma están en el cuadre de Consulta, no en este.",
-      "inGeneral": "Hoy cobraste en General: tu hoja y tu firma están en el cuadre General, no en este.",
+      "inGeneral": "Hoy cobraste en Servicios & Productos: tu hoja y tu firma están en ese cuadre, no en este.",
       "goConsulta": "Ir al cuadre de Consulta",
-      "goGeneral": "Ir al cuadre General"
+      "goGeneral": "Ir al cuadre de Servicios & Productos"
     }
   },
   "gruposFacturacion": {
