@@ -4015,7 +4015,8 @@
       "backToSum": "Back to the cashiers' sum",
       "backToSumConfirm": "The manager's count will be cleared and the cashiers' sum used.",
       "openingFloat": "Opening float",
-      "cashToDeposit": "Cash sales (to deposit)"
+      "cashToDeposit": "Cash sales (to deposit)",
+      "titleFor": "Cash count {division}"
     },
     "petty": "Petty cash",
     "summary": {

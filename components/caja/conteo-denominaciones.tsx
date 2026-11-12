@@ -21,7 +21,10 @@ export function ConteoDenominaciones({
   saveState = "idle",
   fondo,
   aDepositar,
+  division,
 }: {
+  /** Split-mode count of one division: the title names it («Conteo de efectivo Consulta»). */
+  division?: string;
   /** Opening float and what goes to the bank (counted − float): shown next to the total so the float is
    *  not read as sales (Sheila, Caguas 10-nov: «$140 contado = $50 fondo + $90 ventas en efectivo»). */
   fondo?: number;
@@ -52,7 +55,7 @@ export function ConteoDenominaciones({
     <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="border-b px-4 py-3">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold">{t("title")}</h3>
+          <h3 className="text-sm font-semibold">{division ? t("titleFor", { division }) : t("title")}</h3>
           {saveState !== "idle" && (
             <span className={"text-xs " + (saveState === "error" ? "text-destructive" : "text-muted-foreground")}>
               {t(saveState === "saving" ? "saving" : saveState === "saved" ? "saved" : "saveError")}

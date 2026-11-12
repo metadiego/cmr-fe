@@ -4015,7 +4015,8 @@
       "backToSum": "Volver a la suma de los cajeros",
       "backToSumConfirm": "Se borrará el conteo del gerente y se usará la suma de los cajeros.",
       "openingFloat": "Fondo inicial",
-      "cashToDeposit": "Ventas en efectivo (a depositar)"
+      "cashToDeposit": "Ventas en efectivo (a depositar)",
+      "titleFor": "Conteo de efectivo {division}"
     },
     "petty": "Caja chica (petty)",
     "summary": {

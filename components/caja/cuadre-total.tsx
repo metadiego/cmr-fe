@@ -365,6 +365,7 @@ function Editor({
           {esSplit && reporte.divisionCounts ? (
             <div className="grid gap-4 sm:grid-cols-2">
               <ConteoDenominaciones
+                division={tCaja("division.consulta")}
                 denominaciones={denoms}
                 cantidades={Object.fromEntries(reporte.divisionCounts.consultation.lines.map((l) => [l.denominationId, l.quantity]))}
                 disabled
@@ -374,6 +375,7 @@ function Editor({
                 onChange={() => {}}
               />
               <ConteoDenominaciones
+                division={tCaja("division.general")}
                 denominaciones={denoms}
                 cantidades={Object.fromEntries(reporte.divisionCounts.general.lines.map((l) => [l.denominationId, l.quantity]))}
                 disabled
