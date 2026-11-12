@@ -35,3 +35,28 @@ líneas y no deja rastro en el registro de cambios.
 
 En la fila de la línea (borrador), Áreas y Días pasan a ser campos editables inline; al salir del campo
 se manda el PUT con `meta`. Cantidad efectiva sigue siendo de solo lectura y el total sale del BE.
+
+## Respuesta del BE (12-nov-2026) — en producción, BE #572
+
+`PUT /api/v2/invoices/:id/items/:itemId` con `{ "meta": { "areas": 5 } }`. Comprobado en producción:
+Swagger lista `meta` en `UpdateItemDto`, y un PUT con `meta` contra ids inexistentes responde 404, no 400.
+
+- **Solo en borrador.**
+  - En una factura emitida responde 400 con `labelKey`/`messageKey` = `facturacion.error.meta_solo_borrador`.
+  - Una línea de paquete de venta responde 409 `SALES_PACKAGE_LINE_LOCKED`, con `labelKey`
+    `salesPackage.lineLocked`.
+- **Multiplicador inválido** (que no sea un entero ≥ 1): responde 400 con `labelKey`/`messageKey` =
+  `facturacion.error.multiplicador_invalido` y `field` = la clave.
+- **Claves de `meta`:** las mismas del alta, en español (`areas`, `dias`). En v2 `meta` es opaco y no se
+  traduce.
+- **Se fusiona** con el `meta` de la línea: no hace falta reenviar las demás claves.
+- **Respuesta:** la línea, con el mismo `id`. Los nombres de v2 están tomados de una respuesta real:
+  `quantity`, `cantidadEfectiva` (sin traducir), `sessions`, `unitPrice`, `total`, `taxAmount`,
+  `meta.multiplicadores`.
+  - Los totales de cabecera se recalculan; vuelve a leer la factura (`GET /v2/invoices/:id`).
+  - Las sesiones son los DÍAS, y `quantity` (lo comprado) no cambia.
+- **Registro de cambios:**
+  - El tipo de entidad es `invoice_line`.
+  - Las acciones son `invoice_line_add`, `invoice_line_edit`, `invoice_line_multipliers` e
+    `invoice_line_remove`; hacen falta las claves i18n `changeLog.action.*`.
+- **MCP:** `set_item_multipliers`.
