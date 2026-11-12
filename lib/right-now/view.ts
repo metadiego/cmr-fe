@@ -1,5 +1,5 @@
 // Pure helpers of the «Ahora mismo» screen (kept out of the components so they are tested).
-import type { RightNowPatients, RightNowSales, RightNowService } from "../api/right-now.ts";
+import type { RightNowDoctor, RightNowPatients, RightNowSales, RightNowService } from "../api/right-now.ts";
 
 // The N best sellers by total (the BE already sends them, but the order is the screen's promise).
 export function topSellers(sales: RightNowSales | undefined, n = 3) {
@@ -30,4 +30,20 @@ export function minutesSince(iso: string | null | undefined, now: number): numbe
   if (!iso) return null;
   const t = Date.parse(iso);
   return Number.isNaN(t) ? null : Math.max(0, Math.floor((now - t) / 60000));
+}
+
+// The doctors' ranking (owner, 12-nov): by AMOUNT billed by default, or by patients attended; the
+// «sin médico» closing row (labelKey) always stays last, it is not a doctor. Ties: the other measure,
+// then the name.
+export type DoctorOrder = "amount" | "attended";
+export function sortDoctors(list: readonly RightNowDoctor[], by: DoctorOrder): RightNowDoctor[] {
+  const doctors = list.filter((d) => !d.labelKey);
+  const closing = list.filter((d) => !!d.labelKey);
+  const key = (d: RightNowDoctor) => (by === "amount" ? [d.net, d.attended] : [d.attended, d.net]);
+  doctors.sort((a, b) => {
+    const [a1, a2] = key(a);
+    const [b1, b2] = key(b);
+    return b1 - a1 || b2 - a2 || String(a.name ?? "").localeCompare(String(b.name ?? ""));
+  });
+  return [...doctors, ...closing];
 }

@@ -8,7 +8,7 @@ import { getFacturasTablero, type FacturaTableroFila } from "@/lib/api/facturas"
 import { useResource } from "@/hooks/use-resource";
 import { money } from "@/lib/caja/totales";
 import { cn } from "@/lib/utils";
-import { attendedSplit, topSellers } from "@/lib/right-now/view";
+import { attendedSplit, sortDoctors, topSellers, type DoctorOrder } from "@/lib/right-now/view";
 import { externalSourceStale } from "@/lib/right-now/external-source";
 import { Empty, Panel, Pill, RankBadge, Stat } from "@/components/right-now/parts";
 import { ServicesPanel } from "@/components/right-now/services-panel";
@@ -25,7 +25,23 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
   const sales = center.sales;
   const split = attendedSplit(center.patients);
   const sellers = topSellers(sales);
-  const doctors = center.doctors ?? [];
+  // By amount (default) or by attended — the owner's choice, remembered in this browser.
+  const [order, setOrder] = React.useState<DoctorOrder>(() => {
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem("cmr.rightNow.doctorOrder") === "attended" ? "attended" : "amount";
+    } catch {
+      return "amount";
+    }
+  });
+  const pickOrder = (o: DoctorOrder) => {
+    setOrder(o);
+    try {
+      window.localStorage.setItem("cmr.rightNow.doctorOrder", o);
+    } catch {
+      /* storage blocked: lasts this visit */
+    }
+  };
+  const doctors = sortDoctors(center.doctors ?? [], order);
   const ext = center.externalSource;
   const extStale = ext ? externalSourceStale(ext, now) : false;
 
@@ -85,7 +101,24 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
         </div>
       </Panel>
 
-      <Panel title={t("doctors.title")}>
+      <Panel
+        title={t("doctors.title")}
+        aside={
+          <span className="flex items-center gap-1 text-[11px] font-normal normal-case tracking-normal text-muted-foreground">
+            {(["amount", "attended"] as const).map((o) => (
+              <button
+                key={o}
+                type="button"
+                onClick={() => pickOrder(o)}
+                aria-pressed={order === o}
+                className={cn("rounded px-1.5 py-0.5", order === o ? "bg-muted font-medium text-foreground" : "hover:text-foreground")}
+              >
+                {t(o === "amount" ? "doctors.byAmount" : "doctors.byAttended")}
+              </button>
+            ))}
+          </span>
+        }
+      >
         {doctors.length === 0 ? (
           <Empty>{t("doctors.empty")}</Empty>
         ) : (

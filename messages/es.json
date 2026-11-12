@@ -5600,7 +5600,9 @@
       "noDoctor": "Sin médico",
       "pendingDoctor": "Pacientes nuevos en espera de que se les asigne médico",
       "pendingDoctorEmpty": "Ninguna factura sin médico ahora mismo.",
-      "pendingDoctorLoading": "Buscando…"
+      "pendingDoctorLoading": "Buscando…",
+      "byAmount": "Por monto",
+      "byAttended": "Por atendidos"
     },
     "prescriptions": {
       "title": "Recetas",

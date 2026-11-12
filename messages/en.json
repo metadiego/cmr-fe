@@ -5600,7 +5600,9 @@
       "noDoctor": "No doctor",
       "pendingDoctor": "New patients waiting for a doctor to be assigned",
       "pendingDoctorEmpty": "No doctor-less invoice right now.",
-      "pendingDoctorLoading": "Looking…"
+      "pendingDoctorLoading": "Looking…",
+      "byAmount": "By amount",
+      "byAttended": "By attended"
     },
     "prescriptions": {
       "title": "Prescriptions",
