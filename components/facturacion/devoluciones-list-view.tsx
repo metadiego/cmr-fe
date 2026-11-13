@@ -153,7 +153,11 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
               {!loading && state.kind === "fail" && <TableError colSpan={colCount}>{tRoot("common.error")}</TableError>}
               {!loading && state.kind === "ok" && rows.length === 0 && <TableEmpty colSpan={colCount}>{t("empty")}</TableEmpty>}
               {!loading && rows.map((d) => (
-                <TableRow key={d.id}>
+                <TableRow
+                  key={d.id}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/billing/invoices/${d.invoiceId}/returns/${d.id}${d.clinicId ? `?centro=${encodeURIComponent(d.clinicId)}` : ""}`)}
+                >
                   <TableCell>
                     <span className="block font-mono font-medium tabular-nums">{d.displayNumber ?? "—"}</span>
                     {d.invoiceNumber && (
@@ -179,6 +183,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => router.push(`/billing/invoices/${d.invoiceId}/returns/${d.id}${d.clinicId ? `?centro=${encodeURIComponent(d.clinicId)}` : ""}`)}>{t("verDevolucion")}</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => router.push(`/billing/invoices/${d.invoiceId}/returns/${d.id}/receipt${d.clinicId ? `?centro=${encodeURIComponent(d.clinicId)}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => router.push(invoiceDetailHref(d.invoiceId, d.clinicId))}>{t("verFactura")}</DropdownMenuItem>
                           {d.status === "activa" && can("factura.devolver") && (

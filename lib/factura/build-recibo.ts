@@ -45,6 +45,8 @@ export type Recibo = {
   tipoDocumento?: "factura" | "devolucion" | "presupuesto";
   /** A refund's receipt: the invoice it comes from («Factura de origen #L006875»). */
   facturaOrigen?: string | null;
+  /** A refund's own reason (`d.reason`) — not printed on the paper, only on «Ver devolución». */
+  motivo?: string | null;
   numeroDisplay: string;
   fecha: string;
   estado: string;
@@ -70,6 +72,14 @@ export type Recibo = {
 };
 
 const num = (v: unknown) => Number(v ?? 0);
+
+// Cantidad devuelta de una línea: `quantity`, o `sessions` cuando aquella es 0 — una devolución de un
+// paquete de sesiones (HILT, MLS, …) se descuenta por sesiones, no por unidades. Expuesta aparte
+// (no solo usada dentro de buildReciboDevolucion) para quien solo necesita el número, como la sección
+// «Devoluciones» de la factura. cmr-be-48, refund D-000028/invoice 001232, Caguas.
+export function cantidadDevuelta(it: { quantity?: number | null; sessions?: number | null }): number {
+  return num(it.quantity) || num(it.sessions) || 1;
+}
 
 function paqueteDe(it: { salesPackageId?: string | null; meta?: unknown }): ReciboItem["paquete"] | undefined {
   const e = packageEvidence(it);
@@ -214,10 +224,7 @@ export function buildReciboDevolucion(
 ): Recibo {
   const items: ReciboItem[] = (d.items ?? []).map((it) => {
     const base = num(it.amount);
-    // Devolución de un paquete de sesiones (HILT, MLS, …): el BE manda `quantity: 0` porque lo que
-    // se devolvió fueron sesiones, no unidades — sin este respaldo el papel decía «0 … $300» en vez
-    // de «2 x $150». cmr-be-48, refund D-000028/invoice 001232, Caguas.
-    const cant = num(it.quantity) || num(it.sessions) || 1;
+    const cant = cantidadDevuelta(it);
     return {
       cantidad: cant,
       // El BE manda la descripción; el mapa de la factura de origen es el respaldo.
@@ -241,6 +248,7 @@ export function buildReciboDevolucion(
     tipoDocumento: "devolucion",
     numeroDisplay: d.displayNumber ?? "—",
     facturaOrigen: d.invoiceNumber ?? null,
+    motivo: d.reason ?? null,
     fecha: d.date ?? "",
     estado: String(d.status ?? ""),
     anulada: String(d.status ?? "") === "anulada",

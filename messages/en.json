@@ -3947,6 +3947,15 @@
     "anularBody": "The return will be voided. Recorded with your user.",
     "anularReason": "Void reason",
     "anuladaOk": "Return voided",
+    "verDevolucion": "View return",
+    "sectionTitle": "Returns ({count})",
+    "fromInvoiceLabel": "Origin invoice",
+    "atendidoPor": "Handled by",
+    "colCantidad": "Quantity",
+    "colPrecio": "Price",
+    "colMonto": "Amount",
+    "formaReembolso": "Refund method",
+    "sinReembolso": "No refund method recorded",
     "estado": {
       "activa": "Active",
       "anulada": "Voided"

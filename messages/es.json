@@ -3947,6 +3947,15 @@
     "anularBody": "La devolución quedará anulada. Se registra con tu usuario.",
     "anularReason": "Motivo de la anulación",
     "anuladaOk": "Devolución anulada",
+    "verDevolucion": "Ver devolución",
+    "sectionTitle": "Devoluciones ({count})",
+    "fromInvoiceLabel": "Factura de origen",
+    "atendidoPor": "Atendido por",
+    "colCantidad": "Cantidad",
+    "colPrecio": "Precio",
+    "colMonto": "Monto",
+    "formaReembolso": "Forma de reembolso",
+    "sinReembolso": "Sin reembolso registrado",
     "estado": {
       "activa": "Activa",
       "anulada": "Anulada"

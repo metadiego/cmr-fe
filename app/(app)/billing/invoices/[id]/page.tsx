@@ -47,6 +47,7 @@ import { ShellCrumb } from "@/components/shell-crumb";
 import { InvoiceHeaderDialog as CabeceraDialog } from "@/components/facturacion/invoice-header-dialog";
 import { RegenerarDisponibilidadDialog } from "@/components/facturacion/regenerar-disponibilidad-dialog";
 import { ReopenInvoiceButton, InvoiceReopenings } from "@/components/facturacion/invoice-reopen";
+import { InvoiceRefundsSection } from "@/components/facturacion/invoice-refunds-section";
 import { ChangeInvoicePatientButton } from "@/components/facturacion/invoice-change-patient";
 import { IssueButton } from "@/components/facturacion/issue-button";
 import { AddItem } from "@/components/facturacion/invoice-add-item";
@@ -414,6 +415,7 @@ export default function FacturacionPage() {
       />
 
       <InvoiceReopenings invoiceId={id} centerId={centro} invoice={factura} />
+      <InvoiceRefundsSection invoiceId={id} centerId={centro} />
     </PageContainer>
   );
 }
