@@ -4386,7 +4386,28 @@
       "typeNotAllowed": "Solo se aceptan fotos (JPG, PNG, WEBP) o PDF.",
       "tooLarge": "El archivo pesa más de 20 MB.",
       "pickCashier": "Elige un cajero para adjuntar su settlements",
-      "count": "{n, plural, one {# adjunto} other {# adjuntos}}"
+      "count": "{n, plural, one {# adjunto} other {# adjuntos}}",
+      "scan": "Escanear",
+      "scanDialogTitle": "Escanear settlements",
+      "scanScanner": "Escáner",
+      "scanOptions": "Opciones",
+      "scanSource": "Origen",
+      "scanSourceAdf": "Bandeja",
+      "scanSourcePlaten": "Cristal",
+      "scanDuplex": "Doble cara",
+      "scanColorMode": "Color",
+      "scanColorBw": "Blanco y negro",
+      "scanColorGray": "Gris",
+      "scanColorRgb": "Color",
+      "scanResolution": "Resolución",
+      "scanStart": "Escanear",
+      "scanRetry": "Reintentar",
+      "scanCancel": "Cancelar",
+      "scanWaiting": "Esperando al escáner…",
+      "scanning": "Escaneando…",
+      "scanDone": "Escaneado",
+      "scanFailed": "No se pudo escanear",
+      "scanExpired": "El escaneo caducó: nadie lo tomó a tiempo"
     },
     "otherDivision": {
       "inConsulta": "Hoy cobraste en Consulta: tu hoja y tu firma están en el cuadre de Consulta, no en este.",
@@ -4752,7 +4773,22 @@
     "printerDiscard": "Descartar",
     "printerSaved": "Impresora «{name}» guardada.",
     "printerRemoved": "Impresora «{name}» quitada.",
-    "printerRemoveConfirm": "¿Quitar la impresora «{name}»? Los equipos que la usaban pasarán a la primera de la lista."
+    "printerRemoveConfirm": "¿Quitar la impresora «{name}»? Los equipos que la usaban pasarán a la primera de la lista.",
+    "scannersTitle": "Escáneres de este centro",
+    "scannersHelp": "El botón «Escanear» del cuadre los ofrece a elegir. Necesita la URL eSCL del escáner (p. ej. https://192.130.80.164/eSCL).",
+    "scannersEmpty": "Todavía no hay escáneres. Añade el primero.",
+    "scannerAdd": "Añadir escáner",
+    "scannerName": "Nombre",
+    "scannerNamePlaceholder": "Recepción Caguas…",
+    "scannerUrl": "URL eSCL",
+    "scannerUrlPlaceholder": "https://192.130.80.164/eSCL",
+    "scannerActive": "Activo",
+    "scannerSave": "Guardar escáner",
+    "scannerCreate": "Crear escáner",
+    "scannerRemove": "Quitar escáner",
+    "scannerSaved": "Escáner «{name}» guardado.",
+    "scannerRemoved": "Escáner «{name}» quitado.",
+    "scannerRemoveConfirm": "¿Quitar el escáner «{name}»? Ya no se podrá elegir desde el cuadre."
   },
   "numeracion": {
     "title": "Numeración de documentos",
@@ -5402,7 +5438,13 @@
     "font": "Fuente",
     "fontNone": "Sin cambio",
     "fontA": "Normal (A)",
-    "fontB": "Pequeña (B)"
+    "fontB": "Pequeña (B)",
+    "scannerInvalid": "El campo {field} del escáner no es válido.",
+    "scannerNotFound": "Ese escáner ya no existe."
+  },
+  "cashScan": {
+    "scannerNotFound": "Ese escáner no existe o no está activo en este centro.",
+    "invalidSettings": "La opción {field} del escaneo no es válida."
   },
   "cashReconciliation": {
     "error": {

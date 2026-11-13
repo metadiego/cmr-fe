@@ -4386,7 +4386,28 @@
       "typeNotAllowed": "Only photos (JPG, PNG, WEBP) or PDF are accepted.",
       "tooLarge": "The file is over 20MB.",
       "pickCashier": "Pick a cashier to attach their settlements",
-      "count": "{n, plural, one {# attachment} other {# attachments}}"
+      "count": "{n, plural, one {# attachment} other {# attachments}}",
+      "scan": "Scan",
+      "scanDialogTitle": "Scan settlements",
+      "scanScanner": "Scanner",
+      "scanOptions": "Options",
+      "scanSource": "Source",
+      "scanSourceAdf": "Feeder",
+      "scanSourcePlaten": "Glass",
+      "scanDuplex": "Double-sided",
+      "scanColorMode": "Color",
+      "scanColorBw": "Black and white",
+      "scanColorGray": "Grayscale",
+      "scanColorRgb": "Color",
+      "scanResolution": "Resolution",
+      "scanStart": "Scan",
+      "scanRetry": "Retry",
+      "scanCancel": "Cancel",
+      "scanWaiting": "Waiting for the scanner…",
+      "scanning": "Scanning…",
+      "scanDone": "Scanned",
+      "scanFailed": "Could not scan",
+      "scanExpired": "The scan expired: nobody picked it up in time"
     },
     "otherDivision": {
       "inConsulta": "You billed in Consultation today: your sheet and your signature are in the Consultation cash count, not this one.",
@@ -4752,7 +4773,22 @@
     "printerDiscard": "Discard",
     "printerSaved": "Printer «{name}» saved.",
     "printerRemoved": "Printer «{name}» removed.",
-    "printerRemoveConfirm": "Remove printer «{name}»? Machines that used it will move to the first one in the list."
+    "printerRemoveConfirm": "Remove printer «{name}»? Machines that used it will move to the first one in the list.",
+    "scannersTitle": "Scanners of this center",
+    "scannersHelp": "The «Scan» button on the cash sheet offers them to pick from. Needs the scanner's eSCL URL (e.g. https://192.130.80.164/eSCL).",
+    "scannersEmpty": "No scanners yet. Add the first one.",
+    "scannerAdd": "Add scanner",
+    "scannerName": "Name",
+    "scannerNamePlaceholder": "Caguas front desk…",
+    "scannerUrl": "eSCL URL",
+    "scannerUrlPlaceholder": "https://192.130.80.164/eSCL",
+    "scannerActive": "Active",
+    "scannerSave": "Save scanner",
+    "scannerCreate": "Create scanner",
+    "scannerRemove": "Remove scanner",
+    "scannerSaved": "Scanner «{name}» saved.",
+    "scannerRemoved": "Scanner «{name}» removed.",
+    "scannerRemoveConfirm": "Remove scanner «{name}»? It will no longer be selectable from the cash sheet."
   },
   "numeracion": {
     "title": "Document numbering",
@@ -5402,7 +5438,13 @@
     "font": "Font",
     "fontNone": "Unchanged",
     "fontA": "Normal (A)",
-    "fontB": "Small (B)"
+    "fontB": "Small (B)",
+    "scannerInvalid": "The scanner's {field} field is not valid.",
+    "scannerNotFound": "That scanner no longer exists."
+  },
+  "cashScan": {
+    "scannerNotFound": "That scanner does not exist or is not active in this center.",
+    "invalidSettings": "The scan's {field} option is not valid."
   },
   "cashReconciliation": {
     "error": {
