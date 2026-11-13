@@ -147,6 +147,19 @@ test("el paciente del recibo de devolución se compone igual que en la factura",
   );
 });
 
+test("devolución de un paquete de sesiones: quantity 0 no imprime «0 … $300», usa sessions", () => {
+  // cmr-be-48, refund D-000028/invoice 001232 (Caguas): el BE manda quantity:0 porque lo devuelto
+  // fueron sesiones, no unidades — HILT salió «0 … $300» en vez de «2 x $150».
+  const d = {
+    ...(devolucionBase as object),
+    items: [{ invoiceItemId: "li-2", productId: "p-hilt", quantity: 0, sessions: 2, amount: 300, description: "HILT" }],
+  } as never;
+  const [linea] = buildReciboDevolucion(d).items;
+  assert.equal(linea.cantidad, 2);
+  assert.equal(linea.precioUnitario, 150);
+  assert.equal(linea.total, 300);
+});
+
 // Sales packages (handoff paquetes-de-venta, 14-oct-2026): the REAL line the BE returns.
 const LINEA_PAQUETE = {
   description: "LASER INTRAVENOSO - ENDO · Láser IV · 12 terapias",

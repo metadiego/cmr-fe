@@ -214,15 +214,18 @@ export function buildReciboDevolucion(
 ): Recibo {
   const items: ReciboItem[] = (d.items ?? []).map((it) => {
     const base = num(it.amount);
-    const cant = num(it.quantity) || 1;
+    // Devolución de un paquete de sesiones (HILT, MLS, …): el BE manda `quantity: 0` porque lo que
+    // se devolvió fueron sesiones, no unidades — sin este respaldo el papel decía «0 … $300» en vez
+    // de «2 x $150». cmr-be-48, refund D-000028/invoice 001232, Caguas.
+    const cant = num(it.quantity) || num(it.sessions) || 1;
     return {
-      cantidad: num(it.quantity),
+      cantidad: cant,
       // El BE manda la descripción; el mapa de la factura de origen es el respaldo.
       descripcion:
         (it as { description?: string | null }).description?.trim() ||
         nombres[it.invoiceItemId] ||
         "—",
-      precioUnitario: cant ? base / cant : base,
+      precioUnitario: base / cant,
       descuento: 0,
       total: base, // base pre-impuesto por línea; el impuesto va al pie, igual que la factura
     };
