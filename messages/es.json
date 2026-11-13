@@ -1061,6 +1061,33 @@
     "reactivate": "Reactivar",
     "deactivated": "Paciente desactivado.",
     "reactivated": "Paciente reactivado.",
+    "merge": {
+      "action": "Fusionar con…",
+      "title": "Fusionar con otra ficha",
+      "hint": "Todo el historial pasa a la ficha BUENA; la otra desaparece.",
+      "searchPlaceholder": "Buscar la otra ficha por nombre o récord…",
+      "searchHint": "Escribe al menos 2 letras.",
+      "whichIsGood": "¿Cuál es la ficha BUENA?",
+      "colTable": "Tabla",
+      "colRows": "Filas",
+      "table": {
+        "invoices": "Facturas",
+        "appointments": "Citas",
+        "sessions": "Sesiones",
+        "packages": "Paquetes"
+      },
+      "policy": {
+        "drop-duplicate-row": "Se queda la fila de la ficha buena",
+        "retire-duplicate-appointment": "La cita viva de la duplicada queda como reprogramada",
+        "abort": "No se puede resolver automáticamente"
+      },
+      "changesPastReportsWarning": "El dinero y los cuadres no cambian. Cambian los conteos de personas de periodos pasados: meses {months}.",
+      "acceptPastReportImpact": "Entiendo que esto cambia conteos de periodos pasados",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué se fusionan estas dos fichas",
+      "merge": "Fusionar",
+      "mergedOk": "Fichas fusionadas"
+    },
     "confirmDeactivateTitle": "¿Desactivar paciente?",
     "confirmDeactivateBody": "{name} dejará de aparecer en la lista. Su historial se conserva y puedes reactivarlo después.",
     "yearsOld": "{age} años",
@@ -4021,6 +4048,11 @@
       "reimbursementMismatch": "Los reembolsos no suman el monto devuelto",
       "blocked": "El centro no permite guardar este cambio"
     }
+  },
+  "patientMerge": {
+    "same": "No se puede fusionar una ficha consigo misma",
+    "conflict": "Hay algo sin resolver antes de fusionar",
+    "changesPastReports": "Esto cambia conteos de periodos pasados — hay que aceptarlo antes de fusionar"
   },
   "caja": {
     "title": "Cuadre de caja",

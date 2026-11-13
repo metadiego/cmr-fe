@@ -1061,6 +1061,33 @@
     "reactivate": "Reactivate",
     "deactivated": "Patient deactivated.",
     "reactivated": "Patient reactivated.",
+    "merge": {
+      "action": "Merge with…",
+      "title": "Merge with another record",
+      "hint": "All history moves to the GOOD record; the other one disappears.",
+      "searchPlaceholder": "Search the other record by name or record #…",
+      "searchHint": "Type at least 2 letters.",
+      "whichIsGood": "Which is the GOOD record?",
+      "colTable": "Table",
+      "colRows": "Rows",
+      "table": {
+        "invoices": "Invoices",
+        "appointments": "Appointments",
+        "sessions": "Sessions",
+        "packages": "Packages"
+      },
+      "policy": {
+        "drop-duplicate-row": "The good record's row stays",
+        "retire-duplicate-appointment": "The duplicate's live appointment is marked rescheduled",
+        "abort": "Cannot resolve automatically"
+      },
+      "changesPastReportsWarning": "Money and cash sheets don't change. Past-period PEOPLE counts do: months {months}.",
+      "acceptPastReportImpact": "I understand this changes past-period counts",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why these two records are being merged",
+      "merge": "Merge",
+      "mergedOk": "Records merged"
+    },
     "confirmDeactivateTitle": "Deactivate patient?",
     "confirmDeactivateBody": "{name} will no longer appear in the list. Their history is kept and you can reactivate them later.",
     "yearsOld": "{age} years old",
@@ -4021,6 +4048,11 @@
       "reimbursementMismatch": "The reimbursements don't add up to the refunded amount",
       "blocked": "This center does not allow saving this change"
     }
+  },
+  "patientMerge": {
+    "same": "A record cannot be merged with itself",
+    "conflict": "Something needs to be resolved before merging",
+    "changesPastReports": "This changes past-period counts — it must be accepted before merging"
   },
   "caja": {
     "title": "Cash count",
