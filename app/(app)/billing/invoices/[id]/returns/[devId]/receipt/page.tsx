@@ -8,6 +8,10 @@ import { loadRefundRecibo } from "@/lib/api/refund-receipt";
 import type { Recibo } from "@/lib/factura/build-recibo";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { ReceiptPaperSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
+import { BackupPrintButton } from "@/components/facturacion/backup-print-button";
+import { loadLogoRaster } from "@/lib/print/load-logo";
+import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
+import { buildReceiptText } from "@/lib/print/receipt-labels";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -22,6 +26,7 @@ export default function ReciboDevolucionPage() {
   const id = String(params.id);
   const devId = String(params.devId);
   const centro = search.get("centro") ?? undefined;
+  const t = useTranslations("receipt");
   const tRoot = useTranslations();
 
   const [recibo, setRecibo] = React.useState<Recibo | null>(null);
@@ -39,6 +44,14 @@ export default function ReciboDevolucionPage() {
       active = false;
     };
   }, [id, devId, centro, tRoot]);
+
+  // Bytes for the hub's backup print path: the SAME recibo the paper draws, rasterized exactly like
+  // the invoice receipt's own hub button (components/facturacion/receipt-print-dialog.tsx).
+  const buildBytes = React.useCallback(async () => {
+    if (!recibo) throw new Error("recibo not loaded");
+    const logo = await loadLogoRaster(recibo.logoUrl ?? "/img/logo_cmr.png", RECEIPT_LOGO_MAX_HEIGHT_MM);
+    return receiptToEscPos(recibo, buildReceiptText(t, tRoot), logo);
+  }, [recibo, t, tRoot]);
 
   // While loading, the real frame (back/print) stays and the paper is a skeleton of the same width.
   if (!loading && !recibo) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("facturacion.notFound")}</p>;
@@ -60,6 +73,11 @@ export default function ReciboDevolucionPage() {
           {recibo ? <ReciboTermico recibo={recibo} /> : <ReceiptPaperSkeleton />}
         </div>
       </div>
+      {recibo && (
+        <div className="mt-3 flex justify-end no-print">
+          <BackupPrintButton centerId={centro} buildBytes={buildBytes} />
+        </div>
+      )}
     </div>
   );
 }
