@@ -5,7 +5,18 @@ import { env } from "@/lib/env";
 import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { handleSessionExpired } from "@/lib/auth/session-expired";
 import { oneCenterIds, type CenterChoice } from "@/lib/clinic-read-scope";
-import { askConfirmation, CONFIRM_HEADER, CONFIRMATION_DECLINED, readConfirmation } from "./confirm-action";
+import {
+  askConfirmation,
+  askPastDayReason,
+  CONFIRM_HEADER,
+  CONFIRMATION_DECLINED,
+  CHANGE_REASON_HEADER,
+  PAST_DAY_ACTION,
+  notifyPastDayChanged,
+  readConfirmation,
+  readPastDayConfirmation,
+  readPastDayReasonRequired,
+} from "./confirm-action";
 import {
   ApiError,
   type ApiEnvelope,
@@ -124,18 +135,61 @@ async function rawRequest<T>(
   let body: unknown =
     res.status === 204 ? null : await res.json().catch(() => null);
 
-  // The safety shield (428 ACTION_REQUIRES_CONFIRMATION, lib/api/confirm-action.ts): ask, and on «Aceptar»
-  // repeat the SAME request once with X-Confirm-Action. «Cancelar» → nothing was written.
-  const shield = readConfirmation(res.status, (body as ApiErrorShape | null)?.error);
-  if (shield) {
-    if (!(await askConfirmation(shield))) {
-      throw new ApiError(CONFIRMATION_DECLINED, "Not confirmed", 428, undefined, undefined, (body as ApiErrorShape | null)?.error);
+  // The safety shield (428 ACTION_REQUIRES_CONFIRMATION, lib/api/confirm-action.ts): ask, and on
+  // «Aceptar» repeat the SAME request with X-Confirm-Action. A LOOP, not a single retry: the past-day
+  // guard (BE PR #582-583) can make the SAME write need a reason first (400, no header at all) and
+  // THEN the usual confirmation (428) once it has one — and a write can need its generic confirmation
+  // AND the past-day one, in either order. Confirmed actions accumulate comma-joined
+  // (`X-Confirm-Action: invoice.void,cash.past_day.modify`); the reason, once given, rides every
+  // retry after it (`X-Change-Reason`). Bounded so a BE bug can't loop forever.
+  const confirmedActions = new Set<string>();
+  let changeReason: string | null = null;
+  for (let attempt = 0; attempt < 4 && !res.ok; attempt++) {
+    const errBody = (body as ApiErrorShape | null)?.error;
+
+    const reasonReq = readPastDayReasonRequired(res.status, errBody);
+    if (reasonReq) {
+      const picked = await askPastDayReason({ day: reasonReq.day });
+      if (!picked) {
+        throw new ApiError(CONFIRMATION_DECLINED, "Not confirmed", res.status, undefined, undefined, errBody);
+      }
+      changeReason = picked.reason;
+    } else {
+      const pastDayShield = readPastDayConfirmation(res.status, errBody);
+      if (pastDayShield) {
+        const picked = await askPastDayReason({ ...pastDayShield, reason: changeReason ?? undefined });
+        if (!picked) {
+          throw new ApiError(CONFIRMATION_DECLINED, "Not confirmed", 428, undefined, undefined, errBody);
+        }
+        changeReason = picked.reason;
+        confirmedActions.add(PAST_DAY_ACTION);
+      } else {
+        const shield = readConfirmation(res.status, errBody);
+        if (!shield) break; // not a confirmation-shaped error — let it fall through and throw below
+        if (!(await askConfirmation(shield))) {
+          throw new ApiError(CONFIRMATION_DECLINED, "Not confirmed", 428, undefined, undefined, errBody);
+        }
+        confirmedActions.add(shield.action);
+      }
     }
-    const confirmed = { ...init, headers: { ...(init.headers as Record<string, string> | undefined), [CONFIRM_HEADER]: shield.action } };
-    init = confirmed;
+
+    init = {
+      ...init,
+      headers: {
+        ...(init.headers as Record<string, string> | undefined),
+        ...(confirmedActions.size ? { [CONFIRM_HEADER]: Array.from(confirmedActions).join(",") } : {}),
+        ...(changeReason ? { [CHANGE_REASON_HEADER]: encodeURIComponent(changeReason) } : {}),
+      },
+    };
     ({ res } = await doFetch());
     body = res.status === 204 ? null : await res.json().catch(() => null);
   }
+
+  // Aviso silencioso (no bloquea nada, ya se escribió): la hoja de un día ya firmado cambió.
+  const advertencias = (body as { meta?: { advertencias?: Array<{ code?: string; labelKey?: string; day?: string; action?: string }> } } | null)?.meta?.advertencias;
+  advertencias?.forEach((w) => {
+    if (w.code === "CASH_PAST_DAY_CHANGED") notifyPastDayChanged(w);
+  });
 
   if (!res.ok) {
     const err = (body as ApiErrorShape | null)?.error;

@@ -4054,6 +4054,20 @@
     "conflict": "Hay algo sin resolver antes de fusionar",
     "changesPastReports": "Esto cambia conteos de periodos pasados — hay que aceptarlo antes de fusionar"
   },
+  "cash": {
+    "pastDay": {
+      "locked": "El cuadre del {day} ya está cerrado. Pídele a un gerente que lo corrija.",
+      "reasonRequired": "Hace falta un motivo para cambiar el cuadre del {day}",
+      "changed": "Cambiaste el cuadre del {day}; los firmantes tendrán que acusar la corrección",
+      "dateAndCenterRequired": "Hace falta la fecha y el centro",
+      "dialogTitle": "Vas a cambiar el cuadre del {day}",
+      "alreadySigned": "Ya lo firmaron:",
+      "deltaTotal": "Total",
+      "reasonLabel": "Motivo del cambio",
+      "confirmButton": "Sí, cambiar el cuadre del {day}",
+      "canModifyWarning": "Esta factura es del {day}, que ya tiene cuadre: cualquier cambio altera ese cuadre"
+    }
+  },
   "caja": {
     "title": "Cuadre de caja",
     "help": "Cuenta el efectivo y cuadra la caja del día, separando Consulta de Servicios & Productos.",
@@ -5908,7 +5922,8 @@
       "undoChange": "Deshacer el cambio",
       "voidInvoice": "Anular la factura",
       "voidRefund": "Anular la devolución",
-      "addKitComponent": "Agregar un componente al kit de una factura emitida"
+      "addKitComponent": "Agregar un componente al kit de una factura emitida",
+      "modifyPastCashDay": "Vas a cambiar el cuadre del {day}"
     },
     "effect": {
       "returnsPackageSession": "Devuelve la sesión al paquete",
@@ -5921,7 +5936,8 @@
       "backToPending": "La sesión vuelve a pendiente",
       "invoiceVoided": "La factura queda anulada",
       "refundVoided": "La devolución queda anulada",
-      "kitComponentAdded": "El componente se agrega al kit y se crean sus sesiones; el monto de la factura no cambia."
+      "kitComponentAdded": "El componente se agrega al kit y se crean sus sesiones; el monto de la factura no cambia.",
+      "pastCashDayChanges": "Las firmas de ese día pedirán acusar la corrección"
     },
     "policies": {
       "title": "Confirmaciones",

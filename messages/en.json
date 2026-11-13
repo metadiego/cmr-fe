@@ -4054,6 +4054,20 @@
     "conflict": "Something needs to be resolved before merging",
     "changesPastReports": "This changes past-period counts — it must be accepted before merging"
   },
+  "cash": {
+    "pastDay": {
+      "locked": "The {day} cash sheet is already closed. Ask a manager to correct it.",
+      "reasonRequired": "A reason is needed to change the {day} cash sheet",
+      "changed": "You changed the {day} cash sheet; signers will be asked to acknowledge the correction",
+      "dateAndCenterRequired": "Date and center are required",
+      "dialogTitle": "You're about to change the {day} cash sheet",
+      "alreadySigned": "Already signed by:",
+      "deltaTotal": "Total",
+      "reasonLabel": "Reason for the change",
+      "confirmButton": "Yes, change the {day} cash sheet",
+      "canModifyWarning": "This invoice is from {day}, which already has a cash sheet: any change alters it"
+    }
+  },
   "caja": {
     "title": "Cash count",
     "help": "Count the cash and balance the day's register, keeping Consultation apart from Services & Products.",
@@ -5908,7 +5922,8 @@
       "undoChange": "Undo the change",
       "voidInvoice": "Void the invoice",
       "voidRefund": "Void the refund",
-      "addKitComponent": "Add a component to the kit of an issued invoice"
+      "addKitComponent": "Add a component to the kit of an issued invoice",
+      "modifyPastCashDay": "You're about to change the {day} cash sheet"
     },
     "effect": {
       "returnsPackageSession": "Returns the session to the package",
@@ -5921,7 +5936,8 @@
       "backToPending": "The session goes back to pending",
       "invoiceVoided": "The invoice is voided",
       "refundVoided": "The refund is voided",
-      "kitComponentAdded": "The component is added to the kit and its sessions are created; the invoice amount does not change."
+      "kitComponentAdded": "The component is added to the kit and its sessions are created; the invoice amount does not change.",
+      "pastCashDayChanges": "That day's signatures will ask to acknowledge the correction"
     },
     "policies": {
       "title": "Confirmations",

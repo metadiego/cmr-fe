@@ -58,6 +58,7 @@ export function PagosFactura({
   saldo,
   montoAbonado,
   esBorrador = false,
+  pastCashDay = null,
 }: {
   pagos: FacturaPago[];
   formas: FormaPago[];
@@ -68,6 +69,8 @@ export function PagosFactura({
   saldo: number;
   montoAbonado: number;
   esBorrador?: boolean;
+  // BE PR #582-583: solo el `day` hace falta aquí, para el tooltip del pago bloqueado.
+  pastCashDay?: { day: string } | null;
 }) {
   const t = useTranslations("pagosFactura");
   const router = useRouter();
@@ -132,6 +135,7 @@ export function PagosFactura({
                 formas={formas}
                 puedeEditar={puedeEditar}
                 busy={busy}
+                pastCashDay={pastCashDay}
                 onEdit={() => setEditId(p.id ?? null)}
                 onAnular={() => onAnular(p)}
               />
@@ -201,6 +205,7 @@ function PagoViewRow({
   formas,
   puedeEditar,
   busy,
+  pastCashDay,
   onEdit,
   onAnular,
 }: {
@@ -208,6 +213,7 @@ function PagoViewRow({
   formas: FormaPago[];
   puedeEditar: boolean;
   busy: boolean;
+  pastCashDay?: { day: string } | null;
   onEdit: () => void;
   onAnular: () => void;
 }) {
@@ -234,24 +240,31 @@ function PagoViewRow({
       <span className={"shrink-0 tabular-nums font-medium " + (esReembolso ? "text-destructive" : "")}>
         {esReembolso ? "−" : ""}{money(pago.amount)}
       </span>
-      {puedeEditar && (
-        <span className="flex shrink-0 items-center">
-          <Button type="button" variant="ghost" size="icon" className="size-7" disabled={busy} aria-label={t("edit")} onClick={onEdit}>
-            <HugeiconsIcon icon={Edit02Icon} className="size-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-7 text-destructive"
-            disabled={busy}
-            aria-label={t("void")}
-            onClick={() => setConfirmAnular(true)}
-          >
-            <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
-          </Button>
-        </span>
-      )}
+      {puedeEditar && (() => {
+        // BE PR #582-583: este pago toca el cuadre de un día pasado ya cerrado — ni anular ni
+        // corregir, aunque la factura sea de hoy. Handoff .personal/handoff-bloqueo-dias-pasados.md.
+        const bloqueado = !!pago.pastDayLocked;
+        const titulo = bloqueado ? tRoot("cash.pastDay.locked", { day: pastCashDay?.day ?? "" }) : undefined;
+        return (
+          <span className="flex shrink-0 items-center">
+            <Button type="button" variant="ghost" size="icon" className="size-7" disabled={busy || bloqueado} title={titulo} aria-label={t("edit")} onClick={onEdit}>
+              <HugeiconsIcon icon={Edit02Icon} className="size-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-7 text-destructive"
+              disabled={busy || bloqueado}
+              title={titulo}
+              aria-label={t("void")}
+              onClick={() => setConfirmAnular(true)}
+            >
+              <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
+            </Button>
+          </span>
+        );
+      })()}
 
       <AlertDialog open={confirmAnular} onOpenChange={(o) => !o && setConfirmAnular(false)}>
         <AlertDialogContent>

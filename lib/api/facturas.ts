@@ -50,6 +50,9 @@ export type FacturaPago = {
   type?: "pago" | "reembolso" | string; // pago = abono de la factura; reembolso = de una devolución
   refundId?: string | null; // liga el reembolso a su devolución (solo type=reembolso)
   date?: string | null;
+  // BE PR #582-583 (handoff .personal/handoff-bloqueo-dias-pasados.md): anular/corregir este pago
+  // concreto tocaría el cuadre de un día pasado ya firmado — deshabilitar aunque la factura sea de hoy.
+  pastDayLocked?: boolean;
 };
 
 // Factura + líneas + proyección enriquecida de GET /invoices/:id (patient/doctor/empresa/payments/emisor…).
@@ -71,6 +74,10 @@ export type FacturaConItems = Omit<Factura, "createdBy" | "issuedBy"> & {
   // integración, no una persona (no ofrecer corregirlo como empleado). Handoff usuario-de-la-factura.
   emisor?: { id?: string; profileId?: string | null; name?: string | null; esLlave?: boolean } | null;
   createdBy?: { id?: string; profileId?: string | null; name?: string | null; esLlave?: boolean } | null;
+  // BE PR #582-583: el cuadre del día de esta factura, SI ya tiene uno (handoff
+  // .personal/handoff-bloqueo-dias-pasados.md). `locked` deshabilita anular/corregir/reabrir/cambiar
+  // paciente/anular factura/editar; `canModify` solo avisa (quien tiene `caja.past_day.modify`).
+  pastCashDay?: { day: string; reconciled: boolean; locked: boolean; canModify: boolean } | null;
   issuedBy?: { id?: string; profileId?: string | null; name?: string | null; esLlave?: boolean } | null;
   emitidaEn?: string | null;
   displayNumber?: string | null;

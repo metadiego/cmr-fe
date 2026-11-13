@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/refund-detail";
 import type { FormaPago } from "@/lib/api/facturas";
 import type { Perfil } from "@/lib/api/profiles";
+import { getCashPastDayCheck, type CashPastDayCheck } from "@/lib/api/caja";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +64,27 @@ export function RefundEditorBody({
   const [notes, setNotes] = React.useState(detail.notes ?? "");
   const [userId, setUserId] = React.useState(detail.userId ?? "");
   const [changeReason, setChangeReason] = React.useState("");
+
+  // BE PR #582-583 (handoff .personal/handoff-bloqueo-dias-pasados.md): esta devolución no tiene su
+  // propio `pastCashDay` en el GET — se consulta aparte. `locked` apaga Guardar con el aviso; el
+  // 403/428 reales los sigue poniendo el BE si esto quedó desactualizado (fecha cambiada a mano).
+  const [pastDay, setPastDay] = React.useState<CashPastDayCheck | null>(null);
+  const pastDayKey = centro && date ? `${centro}|${date}` : null;
+  const [seenPastDayKey, setSeenPastDayKey] = React.useState<string | null>(null);
+  if (pastDayKey !== seenPastDayKey) {
+    setSeenPastDayKey(pastDayKey);
+    setPastDay(null);
+  }
+  React.useEffect(() => {
+    if (!pastDayKey || !centro || !date) return;
+    let active = true;
+    getCashPastDayCheck(date, centro)
+      .then((r) => active && setPastDay(r))
+      .catch(() => active && setPastDay(null));
+    return () => {
+      active = false;
+    };
+  }, [pastDayKey, centro, date]);
 
   const [lineState, setLineState] = React.useState<Record<string, LineState>>(() => {
     const m: Record<string, LineState> = {};
@@ -142,7 +164,7 @@ export function RefundEditorBody({
   }, [sim]);
 
   const preview = sim?.result;
-  const blocked = (preview?.blocks?.length ?? 0) > 0;
+  const blocked = (preview?.blocks?.length ?? 0) > 0 || !!pastDay?.locked;
   const target = preview?.refundedAmount ?? detail.refundedAmount;
 
   const [busy, setBusy] = React.useState(false);
@@ -216,12 +238,12 @@ export function RefundEditorBody({
           <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
             <Row label={t("col.monto")} value={money(preview.refundedAmount)} />
             <Row label={te("invoiceStatus")} value={tRoot.has(`facturacionList.estado.${preview.invoiceStatus}`) ? tRoot(`facturacionList.estado.${preview.invoiceStatus}`) : preview.invoiceStatus} />
-            {preview.packages.length > 0 && (
+            {(preview.packages?.length ?? 0) > 0 && (
               <div className="sm:col-span-2 text-xs text-muted-foreground">
                 {preview.packages.map((p, i) => <p key={i}>{te("packageEffect", { sessions: p.refundedSessions, status: p.status })}</p>)}
               </div>
             )}
-            {preview.inventory.length > 0 && (
+            {(preview.inventory?.length ?? 0) > 0 && (
               <div className="sm:col-span-2 text-xs text-muted-foreground">
                 {preview.inventory.map((inv, i) => <p key={i}>{te("inventoryEffect", { delta: inv.delta })}</p>)}
               </div>
@@ -230,7 +252,21 @@ export function RefundEditorBody({
         </Card>
       )}
 
-      {blocked && (
+      {pastDay?.locked && (
+        <Alert variant="destructive">
+          <AlertDescription className="flex items-start gap-1.5">
+            <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
+            <span>{tRoot("cash.pastDay.locked", { day: pastDay.day })}</span>
+          </AlertDescription>
+        </Alert>
+      )}
+      {pastDay?.canModify && !pastDay.locked && (
+        <Alert variant="warning">
+          <AlertDescription>{tRoot("cash.pastDay.canModifyWarning", { day: pastDay.day })}</AlertDescription>
+        </Alert>
+      )}
+
+      {blocked && (preview?.blocks?.length ?? 0) > 0 && (
         <Alert variant="destructive">
           <AlertDescription className="flex items-start gap-1.5">
             <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
