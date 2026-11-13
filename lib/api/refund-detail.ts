@@ -75,8 +75,18 @@ export type RefundBalance = {
   suggestedUnitAmount: number | null;
   packageStatus?: string | null;
 };
+// cmr-be-48, 13-nov: BE PR #583 (del dueño) quitó la traducción GLOBAL de `paquetes`→`packages` y
+// `entregadas`→`delivered` en /api/v2 porque rompía frontdesk — así que estos DOS campos, nada más,
+// vuelven en español aquí mientras el resto de la respuesta sigue en inglés. Se acepta cualquiera de
+// los dos nombres en vez de asumir uno: no se sabe si esto es temporal o permanente.
+function normalizeBalance(b: RefundBalance & { entregadas?: number }): RefundBalance {
+  return { ...b, delivered: b.delivered ?? b.entregadas ?? 0 };
+}
 export function getRefundDetail(facturaId: string, devolucionId: string, centroId?: string): Promise<RefundDetail> {
-  return apiFetch<RefundDetail>(`/invoices/${facturaId}/refunds/${devolucionId}`, {}, centroId);
+  return apiFetch<RefundDetail>(`/invoices/${facturaId}/refunds/${devolucionId}`, {}, centroId).then((d) => ({
+    ...d,
+    balances: d.balances?.map(normalizeBalance),
+  }));
 }
 
 // Editar la devolución ENTERA: simular (no escribe) y guardar comparten el mismo cuerpo y la misma
@@ -136,12 +146,14 @@ async function callRefundEdit(
   body: RefundEditBody,
   centroId?: string,
 ): Promise<RefundEditResponse> {
-  const envelope = await apiFetchEnvelope<RefundEditResult>(
+  const envelope = await apiFetchEnvelope<RefundEditResult & { paquetes?: RefundEditResult["packages"] }>(
     `/invoices/${facturaId}/refunds/${devolucionId}${suffix}`,
     { method, body: JSON.stringify(body) },
     centroId,
   );
-  return { result: envelope.data, warnings: (envelope.meta.warnings as RefundEditWarning[] | undefined) ?? [] };
+  // `packages`/`paquetes` — ver nota sobre BE PR #583 encima de normalizeBalance.
+  const result: RefundEditResult = { ...envelope.data, packages: envelope.data.packages ?? envelope.data.paquetes ?? [] };
+  return { result, warnings: (envelope.meta.warnings as RefundEditWarning[] | undefined) ?? [] };
 }
 
 // No escribe nada — vista previa en vivo.
