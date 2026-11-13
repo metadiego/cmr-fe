@@ -15,6 +15,7 @@ import {
   alreadySignedBy,
   readSignOffStatement,
   signatureBlocks,
+  signatureChangeFigures,
   type CashSignature,
   type PrintedSignature,
   type SiblingSheet,
@@ -132,10 +133,16 @@ export function useCashSignOff(o: CashSignOffOptions) {
   const words = (b: SignatureBlock) => ({
     label: label(b),
     line: b.signature ? t("acceptedBy", { name: b.signature.signerName, when: when(b.signature.signedAt) }) : undefined,
-    warning:
-      b.signature && b.changed
-        ? t("otherFigures", { total: money(b.signature.figures.dayTotal), difference: money(b.signature.figures.difference) })
-        : undefined,
+    warning: (() => {
+      const f = signatureChangeFigures(b);
+      if (!f) return undefined;
+      return [
+        t("otherFigures", { signed: money(f.signed), now: money(f.now), delta: money(f.delta) }),
+        f.signedDifference != null ? t("signedDifference", { difference: money(f.signedDifference) }) : null,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+    })(),
     note:
       b.signature && b.acknowledged
         ? t("acknowledgedNote", {

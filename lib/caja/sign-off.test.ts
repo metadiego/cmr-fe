@@ -9,6 +9,7 @@ import {
   liveSignature,
   readSignOffStatement,
   signatureBlocks,
+  signatureChangeFigures,
   signaturesPrintHtml,
   type CashSignature,
   type SignedFigures,
@@ -76,6 +77,26 @@ test("signatureBlocks: a cashier's sheet is Cajero + Gerente, red when the sheet
     ["cashier", null, true, true],
     ["supervisor", null, false, false],
   ]);
+});
+
+test("signatureChangeFigures: signed vs today's total + delta, not the cash difference AT signing", () => {
+  // Owner, 13-nov: «Firmado con otras cifras: total $42,245.91 · diferencia $0.00» read as "nothing
+  // changed" — `difference` there was the cash difference when accepted (0, it cuadró that day), not
+  // how much the day total moved since (it dropped $220 after a payment got corrected).
+  const [block] = signatureBlocks({ own: [sig({ figures: { ...figs, dayTotal: 42245.91, difference: 0 } })], now: { ...figs, dayTotal: 42025.91, difference: 0 }, isCashierSheet: true });
+  assert.deepEqual(signatureChangeFigures(block), { signed: 42245.91, now: 42025.91, delta: -220, signedDifference: null });
+});
+
+test("signatureChangeFigures: the cash difference at signing shows ONLY when it was non-zero", () => {
+  const [block] = signatureBlocks({ own: [sig({ figures: { ...figs, dayTotal: 500, difference: 5 } })], now: { ...figs, dayTotal: 535, difference: 5 }, isCashierSheet: true });
+  assert.deepEqual(signatureChangeFigures(block), { signed: 500, now: 535, delta: 35, signedDifference: 5 });
+});
+
+test("signatureChangeFigures: null when nothing changed, or unsigned", () => {
+  const [unchanged] = signatureBlocks({ own: [sig({})], now: figs, isCashierSheet: true });
+  assert.equal(signatureChangeFigures(unchanged), null);
+  const [unsigned] = signatureBlocks({ own: [], now: figs, isCashierSheet: true });
+  assert.equal(signatureChangeFigures(unsigned), null);
 });
 
 test("signatureBlocks: consolidated/total = one block per cashier sheet (judged on ITS figures) + Gerente", () => {

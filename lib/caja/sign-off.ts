@@ -123,6 +123,27 @@ export interface SignatureBlock {
   acknowledged: boolean;
   /** The sheet this signature lives on (where an acknowledgement is posted). */
   sheetId: string | null;
+  /** Today's figures for THIS block (own `now` or the sibling's) — null for an unsigned/no-data block.
+   * Needed to say "signed with $X · today $Y · change −$Z", not just the signed figures alone (owner,
+   * 13-nov: "diferencia $0.00" read as "nothing changed" when `difference` is the CASH difference at
+   * signing time, not the delta since). */
+  now: SignedFigures | null;
+}
+
+/**
+ * What a "signed with other figures" warning needs to say: the signed total, today's total, the
+ * delta between them, and — ONLY if non-zero — the cash difference that was true at signing time
+ * (NOT the delta: that was the bug, owner 13-nov — "diferencia $0.00" at signing read as "nothing
+ * changed" when the day total had actually moved $220). Null when there is nothing to warn about.
+ */
+export function signatureChangeFigures(b: SignatureBlock): { signed: number; now: number; delta: number; signedDifference: number | null } | null {
+  if (!b.signature || !b.changed || !b.now) return null;
+  return {
+    signed: b.signature.figures.dayTotal,
+    now: b.now.dayTotal,
+    delta: r2(b.now.dayTotal - b.signature.figures.dayTotal),
+    signedDifference: b.signature.figures.difference !== 0 ? b.signature.figures.difference : null,
+  };
 }
 
 // The blocks of a sheet, as the BE email draws them: a cashier's sheet = «Cajero» + «Gerente»; a
@@ -137,7 +158,7 @@ export function signatureBlocks(args: {
   const { own, now, isCashierSheet, siblings = [] } = args;
   const block = (key: string, role: SignOffRole, cashierName: string | null, s: CashSignature | null, current: SignedFigures | null): SignatureBlock => {
     const st = s ? signatureState(s, current) : { changed: false, acknowledged: false };
-    return { key, role, cashierName, signature: s, changed: st.changed, acknowledged: st.acknowledged, sheetId: s?.reconciliationId ?? null };
+    return { key, role, cashierName, signature: s, changed: st.changed, acknowledged: st.acknowledged, sheetId: s?.reconciliationId ?? null, now: current };
   };
   const supervisor = block("supervisor", "supervisor", null, liveSignature(own, "supervisor"), now);
   if (isCashierSheet) return [block("cashier", "cashier", null, liveSignature(own, "cashier"), now), supervisor];
