@@ -12,6 +12,16 @@ type Devolucion = NonNullable<ReporteDia["devolucionesDetalle"]>[number];
 
 const numero = (d: Devolucion) => d.displayNumber || (d.number != null ? String(d.number) : "—");
 
+// «Forma de reembolso»: una entrada por método CON su monto (BE PR #578) — cualquier cantidad, no un
+// par fijo. `refundMethod` (texto ya unido, p. ej. "Visa + Cheque") es el respaldo de cuando el BE
+// todavía no mandaba `refundMethods`. Real: Caguas 13-nov-2026, D-000028 → "Visa $320.00 · Cheque $120.00".
+function formaReembolso(d: Devolucion): string {
+  if (d.refundMethods && d.refundMethods.length > 0) {
+    return d.refundMethods.map((m) => `${m.method} ${money(m.amount)}`).join(" · ");
+  }
+  return d.refundMethod || "—";
+}
+
 export function CuadreDevoluciones({ devoluciones }: { devoluciones: Devolucion[] }) {
   const td = useTranslations("caja.detalle");
   if (devoluciones.length === 0) return null;
@@ -41,7 +51,7 @@ export function CuadreDevoluciones({ devoluciones }: { devoluciones: Devolucion[
                   {dev.patient || "—"}
                   {dev.medicalRecordNumber && <span className="ml-1 text-xs text-muted-foreground">#{dev.medicalRecordNumber}</span>}
                 </td>
-                <td className="px-4 py-2">{dev.refundMethod || "—"}</td>
+                <td className="px-4 py-2">{formaReembolso(dev)}</td>
                 <td className="px-4 py-2 text-right font-medium tabular-nums text-destructive">−{money(dev.refundedAmount)}</td>
                 <td className="px-4 py-2 text-muted-foreground">{dev.reason || "—"}</td>
               </tr>
@@ -63,7 +73,7 @@ export function devolucionesPrintHtml(
   const rows = devoluciones
     .map(
       (d) =>
-        `<tr><td class="mono">${esc(numero(d))}</td><td class="mono">${esc(d.invoiceNumber || "—")}</td><td>${esc(d.patient || "—")}${d.medicalRecordNumber ? ` <span class="dim">#${esc(d.medicalRecordNumber)}</span>` : ""}</td><td>${esc(d.refundMethod || "—")}</td><td class="r mono rojo">−${esc(money(d.refundedAmount))}</td><td class="dim">${esc(d.reason || "—")}</td></tr>`,
+        `<tr><td class="mono">${esc(numero(d))}</td><td class="mono">${esc(d.invoiceNumber || "—")}</td><td>${esc(d.patient || "—")}${d.medicalRecordNumber ? ` <span class="dim">#${esc(d.medicalRecordNumber)}</span>` : ""}</td><td>${esc(formaReembolso(d))}</td><td class="r mono rojo">−${esc(money(d.refundedAmount))}</td><td class="dim">${esc(d.reason || "—")}</td></tr>`,
     )
     .join("");
   return `<h2 class="rojo">${esc(L.devoluciones)} (${devoluciones.length})</h2>

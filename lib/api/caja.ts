@@ -135,6 +135,10 @@ export interface ReporteDia {
     medicalRecordNumber?: string | null;
     refundMethod?: string | null;
     refundMethodSlug?: string | null;
+    // BE PR #578: una entrada por cada reembolso ACTIVO, cualquier cantidad (reembolso dividido en
+    // varias formas) — `refundMethod` queda de respaldo (texto ya unido, p. ej. "Visa + Cheque") para
+    // cuando el BE no lo manda. Siempre que venga no vacío, se pinta ESTE, no el texto unido.
+    refundMethods?: Array<{ method: string; slug?: string | null; amount: number }> | null;
     refundedTax?: number | null;
     date?: string | null;
   }>;
