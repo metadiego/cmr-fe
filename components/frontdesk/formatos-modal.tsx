@@ -74,7 +74,7 @@ export function FormatosModal({
   // factura NO es la fuente — un cambio de protocolo no la genera, solo mueve la disponibilidad. El paquete
   // se cruza por nombre/sku del producto (contiene "mls"/"hilt").
   const dispRes = useResource<PaqueteDisponibilidad[]>(
-    () => (open && servicioId && pacienteId ? getDisponibilidadServicio(servicioId, pacienteId, centro).then((d) => d.paquetes) : Promise.resolve([])),
+    () => (open && servicioId && pacienteId ? getDisponibilidadServicio(servicioId, pacienteId, centro).then((d) => d.paquetes ?? []) : Promise.resolve([])),
     [open, servicioId, pacienteId, centro],
   );
   const paquetes = dispRes.state.kind === "ok" ? dispRes.state.data : [];
