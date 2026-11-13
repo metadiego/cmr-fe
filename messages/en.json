@@ -3959,18 +3959,33 @@
     "formaReembolso": "Refund method",
     "sinReembolso": "No refund method recorded",
     "notas": "Notes",
-    "editarTitle": "Edit return",
-    "editadaOk": "Return updated",
-    "gapAviso": "Missing where {monto} was reimbursed from",
-    "reparar": "Repair reimbursement",
-    "repararTitle": "Repair reimbursement",
-    "repararBody": "The total must add up to exactly {total}.",
-    "repararMotivoPlaceholder": "Reason for the repair",
-    "reparadaOk": "Reimbursement repaired",
     "colMetodo": "Method",
     "agregarLinea": "Add line",
     "anuladaInfo": "Voided on {fecha} by {quien}.",
     "anuladaPor": "Voided by {quien} on {fecha}",
+    "editor": {
+      "tabEditor": "Editor",
+      "tabHistory": "History",
+      "headerTitle": "Header",
+      "linesTitle": "Lines",
+      "colConcepto": "Concept",
+      "colVendidas": "Sold",
+      "colEntregadas": "Delivered",
+      "colDevueltasOtras": "Refunded elsewhere",
+      "colDevolvible": "Refundable",
+      "colCantidad": "Quantity",
+      "colMonto": "Amount",
+      "savedOk": "Return updated",
+      "previewTitle": "Preview",
+      "previewCalculating": "calculating…",
+      "invoiceStatus": "Invoice status",
+      "packageEffect": "{sessions} session(s) return to the package · {status}",
+      "inventoryEffect": "Inventory movement: {delta}",
+      "changeReason": "Reason for the change",
+      "changeReasonPlaceholder": "Why this return is being edited",
+      "historyLoading": "Loading history…",
+      "historyEmpty": "No changes recorded."
+    },
     "estado": {
       "activa": "Active",
       "anulada": "Voided"
@@ -3994,7 +4009,18 @@
   "refund": {
     "reimbursementSumMismatch": "Reimbursements must add up to {expected}; they added up to {received}",
     "notActive": "The return is voided; it cannot be repaired",
-    "reimbursementViaRefund": "That payment is the reimbursement of an active return — void it from the return, not from here"
+    "reimbursementViaRefund": "That payment is the reimbursement of an active return — void it from the return, not from here",
+    "edit": {
+      "exceedsRefundable": "Asking for {requested}, but only {available} is still refundable",
+      "exceedsPaid": "Refunds ({refunds}) exceed what was paid ({paid})",
+      "cashDayClosed": "The {date} cash sheet is already closed",
+      "packageReplaced": "The package was closed by a protocol change",
+      "packageVoided": "The package is voided",
+      "amountAboveLine": "Refunding more than the line cost",
+      "componentNeedsAmount": "Enter the component's amount",
+      "reimbursementMismatch": "The reimbursements don't add up to the refunded amount",
+      "blocked": "This center does not allow saving this change"
+    }
   },
   "caja": {
     "title": "Cash count",

@@ -3959,18 +3959,33 @@
     "formaReembolso": "Forma de reembolso",
     "sinReembolso": "Sin reembolso registrado",
     "notas": "Notas",
-    "editarTitle": "Editar devolución",
-    "editadaOk": "Devolución actualizada",
-    "gapAviso": "Falta registrar por dónde se devolvieron {monto}",
-    "reparar": "Reparar reembolso",
-    "repararTitle": "Reparar reembolso",
-    "repararBody": "El total debe sumar {total} exacto.",
-    "repararMotivoPlaceholder": "Motivo de la reparación",
-    "reparadaOk": "Reembolso reparado",
     "colMetodo": "Forma",
     "agregarLinea": "Agregar línea",
     "anuladaInfo": "Anulada el {fecha} por {quien}.",
     "anuladaPor": "Anulado por {quien} el {fecha}",
+    "editor": {
+      "tabEditor": "Editor",
+      "tabHistory": "Historial",
+      "headerTitle": "Cabecera",
+      "linesTitle": "Líneas",
+      "colConcepto": "Concepto",
+      "colVendidas": "Vendidas",
+      "colEntregadas": "Entregadas",
+      "colDevueltasOtras": "Devueltas en otras",
+      "colDevolvible": "Devolvible",
+      "colCantidad": "Cantidad",
+      "colMonto": "Monto",
+      "savedOk": "Devolución actualizada",
+      "previewTitle": "Vista previa",
+      "previewCalculating": "calculando…",
+      "invoiceStatus": "Estado de la factura",
+      "packageEffect": "{sessions} sesión(es) vuelven al paquete · {status}",
+      "inventoryEffect": "Movimiento de inventario: {delta}",
+      "changeReason": "Motivo del cambio",
+      "changeReasonPlaceholder": "Por qué se edita esta devolución",
+      "historyLoading": "Cargando historial…",
+      "historyEmpty": "Sin cambios registrados."
+    },
     "estado": {
       "activa": "Activa",
       "anulada": "Anulada"
@@ -3994,7 +4009,18 @@
   "refund": {
     "reimbursementSumMismatch": "Los reembolsos deben sumar {expected}; sumaron {received}",
     "notActive": "La devolución está anulada; no se puede reparar",
-    "reimbursementViaRefund": "Ese pago es el reembolso de una devolución activa — anúlalo desde la devolución, no desde aquí"
+    "reimbursementViaRefund": "Ese pago es el reembolso de una devolución activa — anúlalo desde la devolución, no desde aquí",
+    "edit": {
+      "exceedsRefundable": "Pide {requested}, pero solo quedan {available} por devolver",
+      "exceedsPaid": "Las devoluciones ({refunds}) superan lo pagado ({paid})",
+      "cashDayClosed": "El cuadre del {date} ya está cerrado",
+      "packageReplaced": "El paquete se cerró por un cambio de protocolo",
+      "packageVoided": "El paquete está anulado",
+      "amountAboveLine": "Devuelve más de lo que costó la línea",
+      "componentNeedsAmount": "Escribe el monto del componente",
+      "reimbursementMismatch": "Los reembolsos no suman el monto devuelto",
+      "blocked": "El centro no permite guardar este cambio"
+    }
   },
   "caja": {
     "title": "Cuadre de caja",
