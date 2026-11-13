@@ -266,11 +266,16 @@ export function buildReciboDevolucion(
     total,
     montoAbonado: 0,
     saldo: 0,
-    // El reembolso se muestra como "pago" del recibo (forma + monto), si el BE ya lo resolvió.
-    // `formaReembolso` NO está en el mapa api-ingles → el BE la deja en español.
-    pagos: d.formaReembolso
-      ? [{ formaPagoNombre: d.formaReembolso, clave: clavePorFormaNombre[d.formaReembolso], monto: total }]
-      : [],
+    // El reembolso se muestra como "pago" del recibo: una línea POR CADA forma (BE PR #579) — un
+    // reembolso dividido (Visa $320 + Cheque $120) antes salía «Visa $440.00», la forma del PRIMER pago
+    // con el TOTAL de todos. `formaReembolso` (texto ya unido) es el respaldo de cuando `reimbursements`
+    // no viene o viene vacío. cmr-be-48, refund D-000028/invoice 001232, Caguas.
+    pagos:
+      d.reimbursements && d.reimbursements.length > 0
+        ? d.reimbursements.map((r) => ({ formaPagoNombre: r.paymentMethodName, clave: clavePorFormaNombre[r.paymentMethodName], monto: num(r.amount) }))
+        : d.formaReembolso
+          ? [{ formaPagoNombre: d.formaReembolso, clave: clavePorFormaNombre[d.formaReembolso], monto: total }]
+          : [],
     atendidoPor: d.emisor?.name ?? undefined,
   };
 }

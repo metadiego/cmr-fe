@@ -467,6 +467,11 @@ export type ReciboDevolucion = {
   refundedAmount: number; // total con impuesto
   refundedTax: number;
   formaReembolso: string | null;
+  // BE PR #579: una entrada por reembolso ACTIVO, cualquier cantidad (reembolso dividido en varias
+  // formas) — `formaReembolso` queda de respaldo (texto ya unido) para cuando esto no venga o venga
+  // vacío. `reimbursements` NO está en el mapa api-ingles porque api-ingles solo traduce CLAVES, no
+  // VALORES del array — pero el nombre de la clave sí viene ya en inglés del v2, se declara tal cual.
+  reimbursements?: Array<{ paymentMethodName: string; amount: number }> | null;
   reason: string | null;
   items: ReciboDevolucionItem[];
   patient: { firstName?: string; lastName?: string | null; medicalRecordNumber?: string | null; documentId?: string | null } | null;

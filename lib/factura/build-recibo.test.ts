@@ -140,6 +140,27 @@ test("el reembolso se muestra como el pago del recibo", () => {
   assert.deepEqual(r.pagos.map((p) => [p.formaPagoNombre, p.monto]), [["Efectivo", 170.46]]);
 });
 
+test("un reembolso dividido en 2 formas imprime una línea por cada una, no «el primero + el total»", () => {
+  // cmr-be-48, refund D-000028/invoice 001232 (Caguas): antes salía «Visa $440.00» (la forma del
+  // primer reembolso, con el monto TOTAL) en vez de Visa $320 + Cheque $120.
+  const d = {
+    ...(devolucionBase as object),
+    refundedAmount: 440,
+    reimbursements: [
+      { paymentMethodName: "Visa", amount: 320 },
+      { paymentMethodName: "Cheque", amount: 120 },
+    ],
+  } as never;
+  const r = buildReciboDevolucion(d);
+  assert.deepEqual(r.pagos.map((p) => [p.formaPagoNombre, p.monto]), [["Visa", 320], ["Cheque", 120]]);
+});
+
+test("reimbursements vacío cae al formaReembolso de siempre, no deja el recibo sin pago", () => {
+  const d = { ...(devolucionBase as object), reimbursements: [] } as never;
+  const r = buildReciboDevolucion(d);
+  assert.deepEqual(r.pagos.map((p) => [p.formaPagoNombre, p.monto]), [["Efectivo", 170.46]]);
+});
+
 test("el paciente del recibo de devolución se compone igual que en la factura", () => {
   assert.equal(
     buildReciboDevolucion(devolucionBase).paciente.nombre,
