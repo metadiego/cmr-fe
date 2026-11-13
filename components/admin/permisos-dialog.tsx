@@ -11,6 +11,7 @@ import {
   type Permiso,
 } from "@/lib/api/rbac"
 import { apiErrorMessage } from "@/lib/api/errors"
+import { isAdminRole } from "@/lib/access/role-keys"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -35,6 +36,8 @@ export function PermisosDialog({
 }) {
   const t = useTranslations("admin.rbac")
   const tc = useTranslations("admin")
+  // The admin role holds full access and cannot be edited (the backend answers 400 rbac.adminRoleFixed).
+  const fixed = isAdminRole(role)
   const [selected, setSelected] = React.useState<Set<string>>(new Set())
   const [loaded, setLoaded] = React.useState(false)
   const [submitting, setSubmitting] = React.useState(false)
@@ -90,7 +93,7 @@ export function PermisosDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("permisosTitle", { role: role?.name ?? "" })}</DialogTitle>
-          <DialogDescription>{t("permisosHelp")}</DialogDescription>
+          <DialogDescription>{fixed ? t("adminRoleFixed") : t("permisosHelp")}</DialogDescription>
         </DialogHeader>
 
         {!loaded && <p className="text-sm text-muted-foreground">{t("loading")}</p>}
@@ -104,6 +107,7 @@ export function PermisosDialog({
                     <label key={p.slug} className="flex items-center gap-2 text-sm">
                       <Checkbox
                         checked={selected.has(p.slug)}
+                        disabled={fixed}
                         onCheckedChange={(v) => toggle(p.slug, v === true)}
                       />
                       <span className="font-mono text-xs">{p.action}</span>
@@ -118,7 +122,7 @@ export function PermisosDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {tc("cancel")}
           </Button>
-          <Button onClick={onSubmit} disabled={submitting || !loaded}>
+          <Button onClick={onSubmit} disabled={submitting || !loaded || fixed}>
             {submitting ? t("saving") : t("save")}
           </Button>
         </DialogFooter>

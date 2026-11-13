@@ -44,6 +44,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
 
 export type ScheduleRequest = {
   pacienteId: string
@@ -256,7 +257,7 @@ export function PatientDetail({
         const results = await Promise.allSettled(
           pendingConsultIds.map((id) =>
             ejecutarAccion(
-              { boardSlug: "atencion", entityId: id, action: "presente" },
+              { boardSlug: CONSULTATION_BOARD, entityId: id, action: "presente" },
               centerId
             )
           )
@@ -296,7 +297,7 @@ export function PatientDetail({
     try {
       for (const id of consultIds)
         await ejecutarAccion(
-          { boardSlug: "atencion", entityId: id, action: "presente" },
+          { boardSlug: CONSULTATION_BOARD, entityId: id, action: "presente" },
           centerId
         )
     } catch (err) {
@@ -323,7 +324,7 @@ export function PatientDetail({
           presentConsultIds.map((id) =>
             ejecutarAccion(
               {
-                boardSlug: "atencion",
+                boardSlug: CONSULTATION_BOARD,
                 entityId: id,
                 action: "volver_confirmada",
               },

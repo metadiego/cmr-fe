@@ -146,7 +146,7 @@ export interface FrontdeskTab {
   slug: string;
   name: string;
   labelKey: string;
-  boardSlug: string; // "servicios" | "atencion"
+  boardSlug: string; // "servicios" | "atencion" ("frontdesk_consultation" after cmr-be #557: compare with isConsultationBoard)
   entity: string; // "sesion" | "cita"
   serviceId: string | null;
   sortOrder: number;

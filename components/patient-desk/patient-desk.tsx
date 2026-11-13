@@ -61,6 +61,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
 
 // Patient desk — the frontdesk turned around (alternative to /boards/frontdesk, which stays as is):
 // the day's patients first, services and consultation together; pick one to see and work all their
@@ -521,7 +522,7 @@ export function PatientDesk() {
 
       {addingConsultation.open && (
         <AddConsultationModal
-          tablero="atencion"
+          tablero={CONSULTATION_BOARD}
           centroId={gate.centro}
           lockedPatient={
             addingConsultation.pacienteId

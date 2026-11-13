@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board";
 
 // Sections of a staff record (app/(app)/configuration/staff/page.tsx). `centro` is the PERSON's home
 // clinic (`persona.clinicId`), never a screen clinic: every read and write here runs in that clinic.
@@ -143,7 +144,7 @@ function ConsultaInitialTab({ persona, centro }: { persona: Personal; centro?: s
   const [busy, setBusy] = React.useState(false);
   const sucio = (valor === AS_IS ? null : valor) !== actual;
   const defRes = useResource<TableroDefinicion>(
-    () => (centro ? getDefinicion("atencion", centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
+    () => (centro ? getDefinicion(CONSULTATION_BOARD, centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
     [centro],
   );
   const estados = defRes.state.kind === "ok" ? defRes.state.data.statuses : [];

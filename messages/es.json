@@ -1576,7 +1576,8 @@
       "menuRolSinPermiso": "visible para todos",
       "confirmDelete": "¿Eliminar el rol {role}? Los usuarios que lo tengan lo perderán.",
       "todosLosCentros": "Opera en todos los centros",
-      "todosLosCentrosAyuda": "Quien reciba este rol lo hereda; el rol se asigna global (no a un centro)."
+      "todosLosCentrosAyuda": "Quien reciba este rol lo hereda; el rol se asigna global (no a un centro).",
+      "adminRoleFixed": "El rol Administrador tiene acceso total y no se edita."
     },
     "access": {
       "title": "Accesos del usuario",
@@ -5965,6 +5966,8 @@
       "voidInvoice": "Anular la factura",
       "voidRefund": "Anular la devolución",
       "addKitComponent": "Agregar un componente al kit de una factura emitida",
+      "adminGrant": "Dar acceso total (rol Administrador)",
+      "adminRevoke": "Quitar el acceso total (rol Administrador)",
       "modifyPastCashDay": "Vas a cambiar el cuadre del {day}"
     },
     "effect": {
@@ -5979,6 +5982,8 @@
       "invoiceVoided": "La factura queda anulada",
       "refundVoided": "La devolución queda anulada",
       "kitComponentAdded": "El componente se agrega al kit y se crean sus sesiones; el monto de la factura no cambia.",
+      "fullAccessEveryCenter": "Esta persona podrá hacer todo, en todos los centros",
+      "loosesFullAccess": "Esta persona pierde el acceso total",
       "pastCashDayChanges": "Las firmas de ese día pedirán acusar la corrección"
     },
     "policies": {
@@ -6137,5 +6142,20 @@
   "cashCloseSetting": {
     "help": "Apagado, el botón no aparece en el cuadre del cajero ni en el cuadre total, y el sistema no deja cerrar. Lo ya cerrado y «Reabrir» no cambian.",
     "saved": "Guardado"
+  },
+  "auth": {
+    "full_access_required": "Gestionar usuarios, roles, permisos y API keys requiere acceso total (un administrador)."
+  },
+  "rbac": {
+    "lastAdmin": "Es el último administrador: da el rol a otra persona antes.",
+    "adminIsGlobal": "El rol Administrador se asigna para todos los centros, nunca para uno solo.",
+    "adminPersonRequired": "Solo un administrador, entrando como persona (no con una API key), puede dar o quitar el rol Administrador.",
+    "adminTargetNeedsAdmin": "Solo un administrador puede cambiar la cuenta de otro administrador.",
+    "adminRoleFixed": "El rol Administrador tiene acceso total y no se edita.",
+    "fullAccessOnlyAdmin": "El acceso total («*») es solo del rol Administrador."
+  },
+  "apiKeys": {
+    "clinicKeyTooBroad": "Una API key de un centro no puede llevar acceso total ni permisos de gestión de accesos.",
+    "beyondCreator": "Una API key no puede tener permisos que su creador no tiene."
   }
 }

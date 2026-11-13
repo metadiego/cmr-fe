@@ -3,13 +3,15 @@
 import { useTranslations } from "next-intl";
 
 import { useCan } from "@/hooks/use-can";
-import { useMe } from "@/hooks/use-me";
+import { isAdmin, useMe } from "@/hooks/use-me";
+import { hasRole } from "@/lib/access/role-keys";
 import { AuditoriaLog } from "@/components/auditoria/auditoria-log";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
-// Roles que el BE exige para /auditoria (además del permiso auditoria.read). Gate cosmético: sin esto,
-// un usuario con el permiso pero sin el rol recibía el 403 del BE como error genérico de tabla.
-const ROLES_AUDITORIA = ["admin", "super_admin", "gerente"];
+// Before cmr-be #557 /auditoria also demands a role (admin or manager) besides auditoria.read. Cosmetic
+// gate: without it a person with the permission but not the role got the backend's 403 as a table error.
+// The role is compared through hasRole, so the old key ("gerente") and the new one ("manager") both pass.
+const AUDIT_ROLE = "manager";
 
 // Monitoreo → Auditoría. Bitácora automática del sistema (BE: AuditLogController, ya en prod).
 // Ancho completo como /admin (no max-w): tabla densa que aprovecha toda la pantalla.
@@ -18,7 +20,7 @@ export default function AuditoriaPage() {
   const { can, ready } = useCan();
   const me = useMe();
   const tieneRol =
-    me.kind === "ok" && (me.me.isMaster || me.me.roles.some((r) => ROLES_AUDITORIA.includes(r)));
+    me.kind === "ok" && (isAdmin(me.me) || hasRole(me.me.roles, AUDIT_ROLE));
   const autorizado = can("auditoria.read") && tieneRol;
 
   return (

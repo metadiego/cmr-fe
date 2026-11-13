@@ -1576,7 +1576,8 @@
       "menuRolSinPermiso": "visible to everyone",
       "confirmDelete": "Delete role {role}? Users holding it will lose it.",
       "todosLosCentros": "Operates in all centers",
-      "todosLosCentrosAyuda": "Whoever gets this role inherits it; the role is assigned globally (not to a center)."
+      "todosLosCentrosAyuda": "Whoever gets this role inherits it; the role is assigned globally (not to a center).",
+      "adminRoleFixed": "The Administrator role has full access and cannot be edited."
     },
     "access": {
       "title": "User access",
@@ -5965,6 +5966,8 @@
       "voidInvoice": "Void the invoice",
       "voidRefund": "Void the refund",
       "addKitComponent": "Add a component to the kit of an issued invoice",
+      "adminGrant": "Give full access (Administrator role)",
+      "adminRevoke": "Take away full access (Administrator role)",
       "modifyPastCashDay": "You're about to change the {day} cash sheet"
     },
     "effect": {
@@ -5979,6 +5982,8 @@
       "invoiceVoided": "The invoice is voided",
       "refundVoided": "The refund is voided",
       "kitComponentAdded": "The component is added to the kit and its sessions are created; the invoice amount does not change.",
+      "fullAccessEveryCenter": "This person will be able to do everything, in every center",
+      "loosesFullAccess": "This person loses full access",
       "pastCashDayChanges": "That day's signatures will ask to acknowledge the correction"
     },
     "policies": {
@@ -6137,5 +6142,20 @@
   "cashCloseSetting": {
     "help": "Off, the button does not appear on the cashier count or the total count, and the system does not allow closing. Already closed counts and «Reopen» do not change.",
     "saved": "Saved"
+  },
+  "auth": {
+    "full_access_required": "Managing users, roles, permissions and API keys requires full access (an administrator)."
+  },
+  "rbac": {
+    "lastAdmin": "This is the last administrator: give the role to someone else first.",
+    "adminIsGlobal": "The Administrator role is given for every center, never for one.",
+    "adminPersonRequired": "Only an administrator signed in as a person (not an API key) can give or take away the Administrator role.",
+    "adminTargetNeedsAdmin": "Only an administrator can change another administrator's account.",
+    "adminRoleFixed": "The Administrator role has full access and cannot be edited.",
+    "fullAccessOnlyAdmin": "Full access (\"*\") belongs to the Administrator role only."
+  },
+  "apiKeys": {
+    "clinicKeyTooBroad": "A center API key cannot carry full access or access-management permissions.",
+    "beyondCreator": "An API key cannot have permissions its creator does not have."
   }
 }

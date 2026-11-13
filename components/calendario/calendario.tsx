@@ -11,7 +11,7 @@ import { ArrowLeft01Icon, ArrowRight01Icon, Add01Icon, Globe02Icon } from "@huge
 import { getEventos, getCategorias, type CalendarioEvento, type CalendarioCategoria } from "@/lib/api/calendario";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { useResource } from "@/hooks/use-resource";
-import { useMe } from "@/hooks/use-me";
+import { isAdmin, useMe } from "@/hooks/use-me";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { useCreateClinic } from "@/hooks/use-create-clinic";
 import { EventoModal } from "@/components/calendario/evento-modal";
@@ -77,7 +77,7 @@ export function Calendario() {
   // «Cada uno toca lo suyo»: editar/borrar solo eventos PROPIOS, salvo admin. Los del legado no traen
   // autor (creadoPor null, legacyId) → solo admin. El BE re-comprueba (403 con motivo), así que esto solo
   // evita ofrecer un botón que va a fallar. Handoff calendario-selector-de-centro §«Cada uno toca lo suyo».
-  const esAdmin = me.kind === "ok" && (me.me.isMaster || me.me.accessMode === "admin" || me.me.roles.some((r) => r === "admin" || r === "super_admin"));
+  const esAdmin = me.kind === "ok" && isAdmin(me.me);
   // The author is the PERSON (staff id), not the login or the profile: see lib/auth/who-did-it.ts.
   const esMio = (ev?: CalendarioEvento) => isMine(ev?.createdBy, me.kind === "ok" ? me.me : null);
   // Staff absences are projected read-only rows (see lib/api/calendario.ts): they don't belong to

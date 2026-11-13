@@ -11,5 +11,8 @@ import type { Me } from "@/lib/api/auth";
  */
 export function puedeVerTodosLosCentros(me: Me | null | undefined): boolean {
   if (!me) return false;
+  // cmr-be #557 on: isAdmin is the only signal. Before it: master or the "admin" access mode (an admin
+  // ROLE alone did not open the combined view, the backend answered 409).
+  if (typeof me.isAdmin === "boolean") return me.isAdmin;
   return me.isMaster === true || me.accessMode === "admin";
 }
