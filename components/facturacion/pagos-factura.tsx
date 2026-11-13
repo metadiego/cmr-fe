@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { pickableMethods } from "@/lib/factura/payment-methods";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import {
   repararPago,
@@ -11,6 +13,7 @@ import {
   type FacturaPago,
   type FormaPago,
 } from "@/lib/api/facturas";
+import { ApiError } from "@/lib/api/types";
 import { useCan } from "@/hooks/use-can";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 import { topePago, pagoExcede } from "@/lib/facturacion/tope-pago";
@@ -67,6 +70,7 @@ export function PagosFactura({
   esBorrador?: boolean;
 }) {
   const t = useTranslations("pagosFactura");
+  const router = useRouter();
   const { can } = useCan();
   // La puerta REST de editar/anular un pago es `factura.update`; el estado se comprueba en el server:
   // en borrador cualquiera que puede tocar la factura corrige su propio abono; ya emitida exige
@@ -78,6 +82,23 @@ export function PagosFactura({
   const pagado = saldo <= 0.001;
   // Total = lo abonado + lo que falta. Sirve de tope: un abono no puede hacer que lo abonado exceda el total.
   const total = montoAbonado + saldo;
+
+  // Anular el reembolso de una devolución ACTIVA desde aquí ya no se permite (BE PR #577): el BE
+  // responde 400 REFUND_REIMBURSEMENT_VIA_REFUND. En vez del toast genérico, uno con enlace a la
+  // devolución (p.refundId) — ahí es donde se repara. Handoff .personal/handoff-reparar-devolucion.md.
+  function onAnular(p: FacturaPago) {
+    run(() =>
+      anularPago(id, p.id!, t("motivoAnulacion"), centro).catch((err) => {
+        if (err instanceof ApiError && err.code === "REFUND_REIMBURSEMENT_VIA_REFUND" && p.refundId) {
+          toast.error(t("viaRefundTitle"), {
+            action: { label: t("viaRefundLink"), onClick: () => router.push(`/billing/invoices/${id}/returns/${p.refundId}${centro ? `?centro=${centro}` : ""}`) },
+          });
+          return;
+        }
+        throw err;
+      }),
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -112,7 +133,7 @@ export function PagosFactura({
                 puedeEditar={puedeEditar}
                 busy={busy}
                 onEdit={() => setEditId(p.id ?? null)}
-                onAnular={() => run(() => anularPago(id, p.id!, t("motivoAnulacion"), centro))}
+                onAnular={() => onAnular(p)}
               />
             ),
           )}

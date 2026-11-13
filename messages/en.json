@@ -2509,7 +2509,9 @@
     "exceedsTotal": "Cannot exceed the total (max {max})",
     "splitHint": "To split across methods, add one payment per method (max {max})",
     "settled": "Paid in full",
-    "overpaid": "Overpaid"
+    "overpaid": "Overpaid",
+    "viaRefundTitle": "That reimbursement belongs to a return",
+    "viaRefundLink": "Go to the return"
   },
   "formasPago": {
     "efectivo": "Cash",
@@ -3956,6 +3958,19 @@
     "colMonto": "Amount",
     "formaReembolso": "Refund method",
     "sinReembolso": "No refund method recorded",
+    "notas": "Notes",
+    "editarTitle": "Edit return",
+    "editadaOk": "Return updated",
+    "gapAviso": "Missing where {monto} was reimbursed from",
+    "reparar": "Repair reimbursement",
+    "repararTitle": "Repair reimbursement",
+    "repararBody": "The total must add up to exactly {total}.",
+    "repararMotivoPlaceholder": "Reason for the repair",
+    "reparadaOk": "Reimbursement repaired",
+    "colMetodo": "Method",
+    "agregarLinea": "Add line",
+    "anuladaInfo": "Voided on {fecha} by {quien}.",
+    "anuladaPor": "Voided by {quien} on {fecha}",
     "estado": {
       "activa": "Active",
       "anulada": "Voided"
@@ -3975,6 +3990,11 @@
       "acciones": "Actions",
       "centro": "Clinic"
     }
+  },
+  "refund": {
+    "reimbursementSumMismatch": "Reimbursements must add up to {expected}; they added up to {received}",
+    "notActive": "The return is voided; it cannot be repaired",
+    "reimbursementViaRefund": "That payment is the reimbursement of an active return — void it from the return, not from here"
   },
   "caja": {
     "title": "Cash count",

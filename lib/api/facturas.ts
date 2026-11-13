@@ -481,6 +481,9 @@ export function getReciboDevolucion(
   return apiFetch<ReciboDevolucion>(`/invoices/${facturaId}/refunds/${devolucionId}/receipt`, {}, centroId);
 }
 
+// El detalle propio de una devolución (reparar motivo/notas/reembolsos, BE PR #577) vive en su propio
+// archivo, lib/api/refund-detail.ts — este ya rozaba el techo de 600 líneas.
+
 // Registrar una devolución (total o parcial) de una factura. items = líneas a devolver.
 export function devolverFactura(facturaId: string, payload: DevolverPayload, centroId?: string): Promise<FacturaConItems> {
   return apiFetch<FacturaConItems>(`/invoices/${facturaId}/refund`, { method: "POST", body: JSON.stringify(payload) }, centroId);

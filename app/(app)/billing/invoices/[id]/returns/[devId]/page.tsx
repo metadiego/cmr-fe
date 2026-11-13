@@ -6,13 +6,14 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PrinterIcon, ArrowLeft01Icon, Cancel01Icon, InvoiceIcon } from "@hugeicons/core-free-icons";
+import { PrinterIcon, ArrowLeft01Icon, Cancel01Icon, InvoiceIcon, Edit02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 
-import { loadRefundRecibo } from "@/lib/api/refund-receipt";
-import type { Recibo } from "@/lib/factura/build-recibo";
-import { listDevolucionesDeFactura, anularDevolucion, type Devolucion } from "@/lib/api/facturas";
+import { anularDevolucion, getFormasPago, type FormaPago } from "@/lib/api/facturas";
+import { getRefundDetail, type RefundDetail } from "@/lib/api/refund-detail";
+import { cantidadDevuelta } from "@/lib/factura/build-recibo";
 import { invoiceDetailHref } from "@/lib/facturacion/invoice-clinics";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { toastError } from "@/lib/api/errors";
@@ -21,7 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ReturnSummarySkeleton } from "@/components/facturacion/invoice-return-skeleton";
+import { EditRefundDialog, RepairReimbursementsDialog } from "@/components/facturacion/refund-repair";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -36,9 +39,11 @@ const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
 
 // «Ver devolución» — el detalle PROPIO de una devolución (D-000028), acción principal de su fila en
 // la lista. Antes lo único que se podía VER era la factura de origen («Ver factura», ahora acción
-// secundaria), que muestra lo VENDIDO (3 y 3), nunca lo DEVUELTO (2 HILT y 2 MLS) — para el dueño eso
-// era «la devolución tiene 3». Mismo loader que el recibo impreso (loadRefundRecibo), misma cantidad
-// devuelta (quantity, o sessions si aquella es 0, desde 3ca63bb). Handoff .personal/handoff-ver-devolucion.md.
+// secundaria), que muestra lo VENDIDO (3 y 3), nunca lo DEVUELTO (2 HILT y 2 MLS).
+// Desde BE PR #577 (handoff .personal/handoff-reparar-devolucion.md) usa el detalle propio
+// (GET /invoices/:id/refunds/:refundId), no el recibo: trae notas, TODOS los reembolsos (anulados
+// incluidos) y `reimbursementGap`, y permite editar motivo/notas y reparar por dónde salió el dinero.
+// El recibo IMPRESO (botón «Imprimir») sigue en su propia ruta, sin tocar.
 export default function DevolucionDetallePage() {
   const params = useParams<{ id: string; devId: string }>();
   const search = useSearchParams();
@@ -51,18 +56,16 @@ export default function DevolucionDetallePage() {
   const tRoot = useTranslations();
   const format = useFormatter();
   const { can } = useCan();
+  const puedeReparar = can("factura.refund.repair");
 
-  const { state, refresh } = useResource<Recibo>(() => loadRefundRecibo(id, devId, centro), [id, devId, centro]);
-  // Solo para el «tipo» (total/parcial): el recibo no lo trae, la lista de la factura sí. Nunca
-  // bloquea la pantalla si falla — es un dato secundario de la cabecera.
-  const tipoRes = useResource<Devolucion | undefined>(
-    () => listDevolucionesDeFactura(id, centro).then((rows) => rows.find((r) => r.id === devId)),
-    [id, devId, centro],
-  );
-  const tipo = tipoRes.state.kind === "ok" ? tipoRes.state.data?.type : undefined;
+  const { state, refresh } = useResource<RefundDetail>(() => getRefundDetail(id, devId, centro), [id, devId, centro]);
+  const formasRes = useResource<FormaPago[]>(() => getFormasPago(centro), [centro]);
+  const formas = formasRes.state.kind === "ok" ? formasRes.state.data : [];
 
   const [anular, setAnular] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
+  const [editar, setEditar] = React.useState(false);
+  const [reparar, setReparar] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
 
   async function confirmarAnular() {
@@ -81,7 +84,7 @@ export default function DevolucionDetallePage() {
     }
   }
 
-  const recibo = state.kind === "ok" ? state.data : null;
+  const refund = state.kind === "ok" ? state.data : null;
   const backHref = `/billing/invoices/${id}${centro ? `?centro=${centro}` : ""}`;
   const printHref = `/billing/invoices/${id}/returns/${devId}/receipt${centro ? `?centro=${centro}` : ""}`;
 
@@ -94,7 +97,7 @@ export default function DevolucionDetallePage() {
 
       {state.kind === "loading" ? (
         <ReturnSummarySkeleton />
-      ) : state.kind === "fail" || !recibo ? (
+      ) : state.kind === "fail" || !refund ? (
         <p className="text-sm text-destructive">{state.kind === "fail" ? state.message : tRoot("facturacion.notFound")}</p>
       ) : (
         <>
@@ -102,12 +105,18 @@ export default function DevolucionDetallePage() {
             title={
               <>
                 <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("verDevolucion")}</span>
-                {recibo.numeroDisplay}
+                {refund.displayNumber}
               </>
             }
-            count={<Badge variant={recibo.estado === "anulada" ? "destructive" : "success"}>{tEstado.has(recibo.estado) ? tEstado(recibo.estado) : recibo.estado || "—"}</Badge>}
+            count={<Badge variant={refund.status === "anulada" ? "destructive" : "success"}>{tEstado.has(refund.status) ? tEstado(refund.status) : refund.status || "—"}</Badge>}
             actions={
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                {puedeReparar && refund.status === "activa" && (
+                  <Button variant="outline" size="sm" onClick={() => setEditar(true)}>
+                    <HugeiconsIcon icon={Edit02Icon} className="size-4" />
+                    {tRoot("common.edit")}
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" asChild>
                   <Link href={printHref}>
                     <HugeiconsIcon icon={PrinterIcon} className="size-4" />
@@ -118,7 +127,7 @@ export default function DevolucionDetallePage() {
                   <HugeiconsIcon icon={InvoiceIcon} className="size-4" />
                   {t("verFactura")}
                 </Button>
-                {recibo.estado === "activa" && can("factura.devolver") && (
+                {refund.status === "activa" && can("factura.devolver") && (
                   <Button variant="outline" size="sm" onClick={() => setAnular(true)}>
                     <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
                     {t("anular")}
@@ -128,20 +137,44 @@ export default function DevolucionDetallePage() {
             }
           />
 
+          {refund.status === "anulada" && (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {t("anuladaInfo", { fecha: formatFechaSolo(refund.cancelledAt) || "—", quien: refund.cancelledByName || "—" })}
+                {refund.cancellationReason && <span className="block">{refund.cancellationReason}</span>}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {refund.status === "activa" && Math.abs(refund.reimbursementGap) > 0.005 && (
+            <Alert variant="warning">
+              <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5">
+                  <HugeiconsIcon icon={Alert02Icon} className="size-4" />
+                  {t("gapAviso", { monto: money(Math.abs(refund.reimbursementGap)) })}
+                </span>
+                {puedeReparar && (
+                  <Button size="sm" onClick={() => setReparar(true)}>{t("reparar")}</Button>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="mt-2 grid gap-5 lg:grid-cols-[1fr_20rem]">
             <section className="space-y-4">
               <Card>
                 <CardContent className="grid grid-cols-2 gap-x-6 gap-y-3 pt-6 sm:grid-cols-3">
-                  <Field label={t("col.fecha")} value={recibo.fecha ? format.dateTime(new Date(recibo.fecha), "dayShort") : "—"} />
-                  {tipo && <Field label={t("col.tipo")} value={t(`tipo.${tipo}`)} />}
+                  <Field label={t("col.fecha")} value={refund.date ? format.dateTime(new Date(refund.date), "dayShort") : "—"} />
+                  <Field label={t("col.tipo")} value={tRoot.has(`devoluciones.tipo.${refund.type}`) ? t(`tipo.${refund.type}`) : refund.type} />
                   <Field
                     label={t("fromInvoiceLabel")}
-                    value={recibo.facturaOrigen ?? "—"}
-                    href={recibo.facturaOrigen ? invoiceDetailHref(id, centro) : undefined}
+                    value={refund.invoiceNumber ?? "—"}
+                    href={refund.invoiceNumber ? invoiceDetailHref(id, centro) : undefined}
                   />
-                  <Field label={tRoot("facturacion.patient")} value={recibo.paciente.nombre || "—"} />
-                  <Field label={t("col.motivo")} value={recibo.motivo || "—"} />
-                  <Field label={t("atendidoPor")} value={recibo.atendidoPor || "—"} />
+                  <Field label={tRoot("facturacion.patient")} value={refund.patient?.displayName || "—"} />
+                  <Field label={t("col.motivo")} value={refund.reason || "—"} />
+                  <Field label={t("atendidoPor")} value={refund.userName || "—"} />
+                  {refund.notes && <Field label={t("notas")} value={refund.notes} />}
                 </CardContent>
               </Card>
 
@@ -157,12 +190,12 @@ export default function DevolucionDetallePage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {recibo.items.map((it, i) => (
-                        <tr key={i}>
-                          <td className="py-2">{it.descripcion}</td>
-                          <td className="py-2 text-right tabular-nums">{it.cantidad}</td>
-                          <td className="py-2 text-right tabular-nums text-muted-foreground">{money(it.precioUnitario)}</td>
-                          <td className="py-2 text-right font-medium tabular-nums">{money(it.total)}</td>
+                      {refund.items.map((it) => (
+                        <tr key={it.id}>
+                          <td className="py-2">{it.description}</td>
+                          <td className="py-2 text-right tabular-nums">{cantidadDevuelta(it)}</td>
+                          <td className="py-2 text-right tabular-nums text-muted-foreground">{money(it.unitPrice)}</td>
+                          <td className="py-2 text-right font-medium tabular-nums">{money(it.amount)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -174,21 +207,43 @@ export default function DevolucionDetallePage() {
             <aside className="space-y-3 lg:sticky lg:top-6 h-fit">
               <Card>
                 <CardContent className="space-y-2 pt-6">
-                  <Row label={tRoot("facturacion.subtotal")} value={money(recibo.subtotal)} />
-                  <Row label={tRoot("facturacion.tax")} value={money(recibo.impuesto)} />
-                  <Row label={tRoot("facturacion.total")} value={money(recibo.total)} strong />
+                  <Row label={tRoot("facturacion.subtotal")} value={money(refund.refundedAmount - refund.refundedTax)} />
+                  <Row label={tRoot("facturacion.tax")} value={money(refund.refundedTax)} />
+                  <Row label={tRoot("facturacion.total")} value={money(refund.refundedAmount)} strong />
                   <div className="mt-2 border-t pt-2">
                     <span className="text-xs font-medium text-muted-foreground">{t("formaReembolso")}</span>
-                    <p className="text-sm">
-                      {recibo.pagos.length > 0
-                        ? formaPagoLabel(tRoot, recibo.pagos[0].clave, recibo.pagos[0].formaPagoNombre)
-                        : t("sinReembolso")}
-                    </p>
+                    {refund.reimbursements.length === 0 ? (
+                      <p className="text-sm">{t("sinReembolso")}</p>
+                    ) : (
+                      <ul className="mt-1 space-y-1.5">
+                        {refund.reimbursements.map((r) => (
+                          <li key={r.id} className={"text-sm " + (r.status === "anulado" ? "text-muted-foreground line-through decoration-destructive/60" : "")}>
+                            <span className="flex justify-between gap-2">
+                              <span>{formaPagoLabel(tRoot, formas.find((f) => f.id === r.paymentMethodId)?.slug, r.paymentMethodName)}</span>
+                              <span className="tabular-nums">{money(r.amount)}</span>
+                            </span>
+                            {r.status === "anulado" && (
+                              <span className="block text-xs no-underline">
+                                {t("anuladaPor", { quien: r.cancelledByName || "—", fecha: formatFechaSolo(r.cancelledAt) || "—" })}
+                                {r.cancellationReason ? ` · ${r.cancellationReason}` : ""}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             </aside>
           </div>
+        </>
+      )}
+
+      {refund && (
+        <>
+          <EditRefundDialog open={editar} onOpenChange={setEditar} refund={refund} invoiceId={id} centro={centro} onSaved={refresh} />
+          <RepairReimbursementsDialog open={reparar} onOpenChange={setReparar} refund={refund} formas={formas} invoiceId={id} centro={centro} onSaved={refresh} />
         </>
       )}
 

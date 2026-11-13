@@ -2509,7 +2509,9 @@
     "exceedsTotal": "No puede exceder el total (máx {max})",
     "splitHint": "Para dividir en varias formas, agrega un pago por cada una (máx {max})",
     "settled": "Saldado",
-    "overpaid": "Sobre-abonado"
+    "overpaid": "Sobre-abonado",
+    "viaRefundTitle": "Ese reembolso pertenece a una devolución",
+    "viaRefundLink": "Ir a la devolución"
   },
   "formasPago": {
     "efectivo": "Efectivo",
@@ -3956,6 +3958,19 @@
     "colMonto": "Monto",
     "formaReembolso": "Forma de reembolso",
     "sinReembolso": "Sin reembolso registrado",
+    "notas": "Notas",
+    "editarTitle": "Editar devolución",
+    "editadaOk": "Devolución actualizada",
+    "gapAviso": "Falta registrar por dónde se devolvieron {monto}",
+    "reparar": "Reparar reembolso",
+    "repararTitle": "Reparar reembolso",
+    "repararBody": "El total debe sumar {total} exacto.",
+    "repararMotivoPlaceholder": "Motivo de la reparación",
+    "reparadaOk": "Reembolso reparado",
+    "colMetodo": "Forma",
+    "agregarLinea": "Agregar línea",
+    "anuladaInfo": "Anulada el {fecha} por {quien}.",
+    "anuladaPor": "Anulado por {quien} el {fecha}",
     "estado": {
       "activa": "Activa",
       "anulada": "Anulada"
@@ -3975,6 +3990,11 @@
       "acciones": "Acciones",
       "centro": "Centro"
     }
+  },
+  "refund": {
+    "reimbursementSumMismatch": "Los reembolsos deben sumar {expected}; sumaron {received}",
+    "notActive": "La devolución está anulada; no se puede reparar",
+    "reimbursementViaRefund": "Ese pago es el reembolso de una devolución activa — anúlalo desde la devolución, no desde aquí"
   },
   "caja": {
     "title": "Cuadre de caja",
