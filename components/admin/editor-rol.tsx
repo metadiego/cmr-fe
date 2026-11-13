@@ -16,6 +16,7 @@ import {
   type ProfileMenuItem,
 } from "@/lib/api/rbac"
 import { apiErrorMessage } from "@/lib/api/errors"
+import { isAdminRole } from "@/lib/access/role-keys"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -65,6 +66,8 @@ export function EditorRolUnificado() {
   // salvo que la nueva carga arranque).
   const [loadError, setLoadError] = React.useState<{ forRole: string; message: string } | null>(null)
   const loadingRole = !!roleId && tree?.forRole !== roleId && loadError?.forRole !== roleId
+  // The admin role holds full access and cannot be edited (the backend answers 400 rbac.adminRoleFixed).
+  const fixed = isAdminRole(roles?.find((r) => r.id === roleId))
 
   React.useEffect(() => {
     let active = true
@@ -248,7 +251,8 @@ export function EditorRolUnificado() {
           <div className="rounded-md bg-card px-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
             {tree.nodes.map((n) => renderNode(n, 1))}
           </div>
-          <Button onClick={onSubmit} disabled={submitting}>
+          {fixed && <p className="text-sm text-muted-foreground">{tRoot("admin.rbac.adminRoleFixed")}</p>}
+          <Button onClick={onSubmit} disabled={submitting || fixed}>
             {submitting ? t("saving") : t("save")}
           </Button>
         </>

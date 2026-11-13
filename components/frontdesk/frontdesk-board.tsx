@@ -51,6 +51,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 import { LiveBadge } from "@/components/live-badge";
+import { CONSULTATION_BOARD, isConsultationBoard } from "@/lib/frontdesk/consultation-board";
 
 // ————————————————————————————————————————————————————————————————————————————
 // Frontdesk del día (F4): tabs por servicio (data-driven /servicios) + KPIs-filtro + tabla dinámica
@@ -136,15 +137,14 @@ export function FrontdeskBoard() {
         .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
     [servRes.state],
   );
-  // Pestañas del frontdesk (BE): las de servicio coinciden por slug con `servicios`; esta solo AÑADE la de
-  // Consulta (boardSlug "atencion"), que monta el tablero de Atención que ya existe. Degrada a null si el
-  // endpoint no responde → el frontdesk queda EXACTAMENTE como antes. Handoff consulta-como-pestana-del-frontdesk.
+  // Frontdesk tabs (BE): this only ADDS Consulta (boardSlug "atencion", "frontdesk_consultation" after cmr-be #557). Null if the
+  // endpoint fails → the frontdesk stays EXACTLY as before. Handoff consulta-como-pestana-del-frontdesk.
   const tabsRes = useResource<FrontdeskTab[]>(
     () => (gate.centro ? getFrontdeskTabs(gate.centro).catch(() => []) : Promise.resolve([])),
     [gate.centro],
   );
   const consultaTab = React.useMemo(
-    () => (tabsRes.state.kind === "ok" ? tabsRes.state.data.find((tb) => tb.boardSlug === "atencion") ?? null : null),
+    () => (tabsRes.state.kind === "ok" ? tabsRes.state.data.find((tb) => isConsultationBoard(tb.boardSlug)) ?? null : null),
     [tabsRes.state],
   );
   const [tab, setTab, consultaInitialEstado] = useFrontdeskTab(gate.centro, consultaTab); // handoff aterrizar-en-consulta
@@ -533,7 +533,7 @@ export function FrontdeskBoard() {
         <>
           {isConsulta ? (
             /* "Volver" al facturar se autodetecta de la URL. El buscador de arriba ("Viendo: X") también filtra este tablero. */
-            <GenericBoard tablero="atencion" initialEstado={consultaInitialEstado} pacienteFiltro={pacienteFiltro ? { id: pacienteFiltro.id, nombre: filtroPacienteNombre } : null} q={q} />
+            <GenericBoard tablero={CONSULTATION_BOARD} initialEstado={consultaInitialEstado} pacienteFiltro={pacienteFiltro ? { id: pacienteFiltro.id, nombre: filtroPacienteNombre } : null} q={q} />
           ) : (
           <>
           {/* KPIs = filtros */}

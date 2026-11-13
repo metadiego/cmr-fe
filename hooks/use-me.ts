@@ -1,6 +1,7 @@
 "use client";
 
 import { type Me } from "@/lib/api/auth";
+import { isAdmin as isFullAccess } from "@/lib/access/role-keys";
 import { type MeState, useMeContext, useMeFetch } from "@/components/me-provider";
 
 export type { MeState };
@@ -16,5 +17,5 @@ export function useMe(): MeState {
 }
 
 export function isAdmin(me: Me): boolean {
-  return me.isMaster || me.roles.includes("admin");
+  return isFullAccess(me);
 }

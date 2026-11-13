@@ -27,6 +27,7 @@ import {
 } from "@/lib/frontdesk/patient-day"
 import { useResource } from "@/hooks/use-resource"
 import { useCitaStream as useLiveStream } from "@/hooks/use-cita-stream"
+import { CONSULTATION_BOARD, isConsultationBoard } from "@/lib/frontdesk/consultation-board"
 
 export interface PatientDayData {
   patients: PatientDay[]
@@ -77,7 +78,7 @@ export function usePatientDay(
   const consultDefRes = useResource<BoardDefinition | null>(
     () =>
       centerId
-        ? getBoardDefinition("atencion", centerId).catch(() => null)
+        ? getBoardDefinition(CONSULTATION_BOARD, centerId).catch(() => null)
         : Promise.resolve(null),
     [centerId]
   )
@@ -104,7 +105,7 @@ export function usePatientDay(
   const consultRes = useResource<BoardRows | null>(
     () =>
       centerId
-        ? getBoardRows("atencion", date, { centroId: centerId })
+        ? getBoardRows(CONSULTATION_BOARD, date, { centroId: centerId })
             .then((data) => {
               lastConsult.current = { key: dayKey, data }
               return data
@@ -219,7 +220,7 @@ export function usePatientDay(
     consultations,
     consultationDefinition:
       consultDefRes.state.kind === "ok" ? consultDefRes.state.data : null,
-    consultationTab: tabs.find((t) => t.boardSlug === "atencion") ?? null,
+    consultationTab: tabs.find((t) => isConsultationBoard(t.boardSlug)) ?? null,
     loading:
       sessionsRes.state.kind === "loading" ||
       tabsRes.state.kind === "loading" ||

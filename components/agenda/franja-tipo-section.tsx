@@ -17,6 +17,7 @@ import { CeldaEditable } from "@/components/tablero/celda-editable";
 import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
 import { Cell } from "@/components/agenda/tablero-dinamico";
 import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
+import { frontdeskChannel } from "@/lib/frontdesk/consultation-board";
 
 // A cita's cell: the SAME logic the classic and the new view both use (no duplication). Estado =
 // inline selector; editable columns = CeldaEditable; accion = reserved; everything else = read-only Cell.
@@ -96,7 +97,7 @@ function OrigenBadge({ fila }: { fila: CitaFila }) {
   const bridge = fila.origenLegacy === "scheduling-server";
   return (
     <span
-      title={fila.canal ? t("origenCanal", { canal: String(fila.canal) }) : undefined}
+      title={fila.canal ? t("origenCanal", { canal: String(frontdeskChannel(String(fila.canal))) }) : undefined}
       className={cn(
         "rounded px-1.5 py-px text-[10px] font-medium ring-1",
         bridge ? "bg-sky-500/10 text-sky-700 ring-sky-500/30 dark:text-sky-300" : "bg-muted text-muted-foreground ring-foreground/10",

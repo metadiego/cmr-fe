@@ -25,6 +25,7 @@ import {
   AccionesModal as RowActions,
   type AccionItem as ActionItem,
 } from "@/components/tablero/acciones-modal"
+import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
 
 interface Props {
   board: BoardRows
@@ -71,7 +72,7 @@ export function ConsultationRows({
     let active = true
     Promise.all(
       selects.map((c) =>
-        getColumnOptions("atencion", c.clave, centerId)
+        getColumnOptions(CONSULTATION_BOARD, c.clave, centerId)
           .then((o) => [c.clave, o] as const)
           .catch(() => [c.clave, [] as Option[]] as const)
       )
@@ -124,7 +125,7 @@ export function ConsultationRows({
                   <NotifyBell
                     col={notify}
                     fila={row}
-                    tablero="atencion"
+                    tablero={CONSULTATION_BOARD}
                     centroId={centerId}
                     optionsByCol={options}
                     onRefresh={onChanged}
@@ -140,7 +141,7 @@ export function ConsultationRows({
           leadWidths
           columnas={columns}
           filas={rows}
-          tablero="atencion"
+          tablero={CONSULTATION_BOARD}
           centroId={centerId}
           onRefresh={onChanged}
           optionsByCol={options}
