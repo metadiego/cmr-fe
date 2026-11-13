@@ -110,7 +110,7 @@ export function FichaAsistencia({ pacienteId, centro }: { pacienteId: string; ce
       </section>
 
       {/* Paquetes */}
-      {d.packages.length > 0 && (
+      {(d.packages ?? []).length > 0 && (
         <section>
           <h3 className="mb-2 text-sm font-semibold">{t("packagesTitle")}</h3>
           <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
@@ -126,7 +126,7 @@ export function FichaAsistencia({ pacienteId, centro }: { pacienteId: string; ce
                 </tr>
               </thead>
               <tbody>
-                {d.packages.map((p) => (
+                {(d.packages ?? []).map((p) => (
                   <tr key={p.productId} className="border-t">
                     <td className="px-3 py-2 font-medium">{p.productName}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{p.total}</td>

@@ -12,6 +12,7 @@ import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { MeProvider } from "@/components/me-provider";
 import { ConfirmActionHost } from "@/components/confirm-action-host";
+import { PastDayConfirmHost } from "@/components/caja/past-day-confirm-host";
 import { MenuProvider } from "@/components/menu-provider";
 import { TooltipProvider } from "@/components/ui/tooltip-radix";
 import {
@@ -65,6 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MenuProvider>
         <ShellChrome>{children}</ShellChrome>
         <ConfirmActionHost />
+        <PastDayConfirmHost />
       </MenuProvider>
     </MeProvider>
   );

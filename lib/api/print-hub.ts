@@ -52,3 +52,39 @@ export function deletePrinter(centerId: string, id: string): Promise<unknown> {
 export function getPrintHubForPrinting(centerId: string): Promise<PrintHubForPrinting> {
   return apiFetch<PrintHubForPrinting>("/me/print-hub", { headers: { "X-Tenant-ID": centerId } });
 }
+
+// Escáneres del hub (BE PR #586, handoff .personal/handoff-escanear-al-cuadre.md): NO está desplegado
+// todavía (CI del BE bloqueado por facturación) — tipado a mano contra el handoff, sin Swagger propio.
+// Independiente de printers/hubUrls: un centro puede tener escáneres sin tener impresoras configuradas.
+export interface PrintHubScanner {
+  id: string;
+  name: string;
+  esclUrl: string;
+  documentFormat: string;
+  active: boolean;
+  sortOrder: number;
+}
+export interface CreateScannerPayload {
+  name: string;
+  esclUrl: string;
+  documentFormat?: string;
+  active?: boolean;
+  sortOrder?: number;
+}
+export type UpdateScannerPayload = Partial<CreateScannerPayload>;
+
+export function listScanners(centerId: string): Promise<PrintHubScanner[]> {
+  return apiFetch<PrintHubScanner[]>(`/print-hubs/${centerId}/scanners`);
+}
+
+export function createScanner(centerId: string, payload: CreateScannerPayload): Promise<PrintHubScanner> {
+  return apiFetch<PrintHubScanner>(`/print-hubs/${centerId}/scanners`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export function updateScanner(centerId: string, id: string, payload: UpdateScannerPayload): Promise<PrintHubScanner> {
+  return apiFetch<PrintHubScanner>(`/print-hubs/${centerId}/scanners/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+}
+
+export function deleteScanner(centerId: string, id: string): Promise<unknown> {
+  return apiFetch<unknown>(`/print-hubs/${centerId}/scanners/${id}`, { method: "DELETE" });
+}

@@ -402,6 +402,15 @@ export default function FacturacionPage() {
         }}
       />
 
+      {/* BE PR #582-583 (handoff .personal/handoff-bloqueo-dias-pasados.md): la factura es de un día
+          que ya tiene cuadre — `locked` ya deshabilita los botones uno por uno; esto es el aviso FIJO
+          para quien SÍ puede tocarlo (`canModify`, gerente/admin), para que no se le escape. */}
+      {factura.pastCashDay?.canModify && !factura.pastCashDay.locked && (
+        <Alert variant="warning" className="no-print text-xs">
+          <AlertDescription>{tRoot("cash.pastDay.canModifyWarning", { day: factura.pastCashDay.day })}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Editor keyeado por updatedAt → tras guardar, remonta con los valores del servidor. */}
       <Editor
         key={String(factura.updatedAt ?? factura.id)}
@@ -792,7 +801,7 @@ function Editor({
           <CardSection>
             {/* Primero se cobra, después se emite: el cobro es el paso PREVIO a emitir (regla
                 cobrar-antes-de-emitir). El BE ya acepta pagos en borrador. */}
-            <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} />
+            <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} pastCashDay={factura.pastCashDay} />
           </CardSection>
           <CardFooter className="mt-auto flex-col items-stretch pb-4">
             {/* Emitir solo cuando está SALDADA (nada por cobrar). Cortesía / 100% de descuento = total 0
@@ -810,7 +819,7 @@ function Editor({
           </CardFooter>
           </>
         ) : (
-          <CardSection><PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} /></CardSection>
+          <CardSection><PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} pastCashDay={factura.pastCashDay} /></CardSection>
         )}
       </Card>
 

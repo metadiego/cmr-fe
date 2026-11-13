@@ -1061,6 +1061,33 @@
     "reactivate": "Reactivate",
     "deactivated": "Patient deactivated.",
     "reactivated": "Patient reactivated.",
+    "merge": {
+      "action": "Merge with…",
+      "title": "Merge with another record",
+      "hint": "All history moves to the GOOD record; the other one disappears.",
+      "searchPlaceholder": "Search the other record by name or record #…",
+      "searchHint": "Type at least 2 letters.",
+      "whichIsGood": "Which is the GOOD record?",
+      "colTable": "Table",
+      "colRows": "Rows",
+      "table": {
+        "invoices": "Invoices",
+        "appointments": "Appointments",
+        "sessions": "Sessions",
+        "packages": "Packages"
+      },
+      "policy": {
+        "drop-duplicate-row": "The good record's row stays",
+        "retire-duplicate-appointment": "The duplicate's live appointment is marked rescheduled",
+        "abort": "Cannot resolve automatically"
+      },
+      "changesPastReportsWarning": "Money and cash sheets don't change. Past-period PEOPLE counts do: months {months}.",
+      "acceptPastReportImpact": "I understand this changes past-period counts",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why these two records are being merged",
+      "merge": "Merge",
+      "mergedOk": "Records merged"
+    },
     "confirmDeactivateTitle": "Deactivate patient?",
     "confirmDeactivateBody": "{name} will no longer appear in the list. Their history is kept and you can reactivate them later.",
     "yearsOld": "{age} years old",
@@ -3960,18 +3987,33 @@
     "formaReembolso": "Refund method",
     "sinReembolso": "No refund method recorded",
     "notas": "Notes",
-    "editarTitle": "Edit return",
-    "editadaOk": "Return updated",
-    "gapAviso": "Missing where {monto} was reimbursed from",
-    "reparar": "Repair reimbursement",
-    "repararTitle": "Repair reimbursement",
-    "repararBody": "The total must add up to exactly {total}.",
-    "repararMotivoPlaceholder": "Reason for the repair",
-    "reparadaOk": "Reimbursement repaired",
     "colMetodo": "Method",
     "agregarLinea": "Add line",
     "anuladaInfo": "Voided on {fecha} by {quien}.",
     "anuladaPor": "Voided by {quien} on {fecha}",
+    "editor": {
+      "tabEditor": "Editor",
+      "tabHistory": "History",
+      "headerTitle": "Header",
+      "linesTitle": "Lines",
+      "colConcepto": "Concept",
+      "colVendidas": "Sold",
+      "colEntregadas": "Delivered",
+      "colDevueltasOtras": "Refunded elsewhere",
+      "colDevolvible": "Refundable",
+      "colCantidad": "Quantity",
+      "colMonto": "Amount",
+      "savedOk": "Return updated",
+      "previewTitle": "Preview",
+      "previewCalculating": "calculating…",
+      "invoiceStatus": "Invoice status",
+      "packageEffect": "{sessions} session(s) return to the package · {status}",
+      "inventoryEffect": "Inventory movement: {delta}",
+      "changeReason": "Reason for the change",
+      "changeReasonPlaceholder": "Why this return is being edited",
+      "historyLoading": "Loading history…",
+      "historyEmpty": "No changes recorded."
+    },
     "estado": {
       "activa": "Active",
       "anulada": "Voided"
@@ -3995,7 +4037,37 @@
   "refund": {
     "reimbursementSumMismatch": "Reimbursements must add up to {expected}; they added up to {received}",
     "notActive": "The return is voided; it cannot be repaired",
-    "reimbursementViaRefund": "That payment is the reimbursement of an active return — void it from the return, not from here"
+    "reimbursementViaRefund": "That payment is the reimbursement of an active return — void it from the return, not from here",
+    "edit": {
+      "exceedsRefundable": "Asking for {requested}, but only {available} is still refundable",
+      "exceedsPaid": "Refunds ({refunds}) exceed what was paid ({paid})",
+      "cashDayClosed": "The {date} cash sheet is already closed",
+      "packageReplaced": "The package was closed by a protocol change",
+      "packageVoided": "The package is voided",
+      "amountAboveLine": "Refunding more than the line cost",
+      "componentNeedsAmount": "Enter the component's amount",
+      "reimbursementMismatch": "The reimbursements don't add up to the refunded amount",
+      "blocked": "This center does not allow saving this change"
+    }
+  },
+  "patientMerge": {
+    "same": "A record cannot be merged with itself",
+    "conflict": "Something needs to be resolved before merging",
+    "changesPastReports": "This changes past-period counts — it must be accepted before merging"
+  },
+  "cash": {
+    "pastDay": {
+      "locked": "The {day} cash sheet is already closed. Ask a manager to correct it.",
+      "reasonRequired": "A reason is needed to change the {day} cash sheet",
+      "changed": "You changed the {day} cash sheet; signers will be asked to acknowledge the correction",
+      "dateAndCenterRequired": "Date and center are required",
+      "dialogTitle": "You're about to change the {day} cash sheet",
+      "alreadySigned": "Already signed by:",
+      "deltaTotal": "Total",
+      "reasonLabel": "Reason for the change",
+      "confirmButton": "Yes, change the {day} cash sheet",
+      "canModifyWarning": "This invoice is from {day}, which already has a cash sheet: any change alters it"
+    }
   },
   "caja": {
     "title": "Cash count",
@@ -4315,7 +4387,28 @@
       "typeNotAllowed": "Only photos (JPG, PNG, WEBP) or PDF are accepted.",
       "tooLarge": "The file is over 20MB.",
       "pickCashier": "Pick a cashier to attach their settlements",
-      "count": "{n, plural, one {# attachment} other {# attachments}}"
+      "count": "{n, plural, one {# attachment} other {# attachments}}",
+      "scan": "Scan",
+      "scanDialogTitle": "Scan settlements",
+      "scanScanner": "Scanner",
+      "scanOptions": "Options",
+      "scanSource": "Source",
+      "scanSourceAdf": "Feeder",
+      "scanSourcePlaten": "Glass",
+      "scanDuplex": "Double-sided",
+      "scanColorMode": "Color",
+      "scanColorBw": "Black and white",
+      "scanColorGray": "Grayscale",
+      "scanColorRgb": "Color",
+      "scanResolution": "Resolution",
+      "scanStart": "Scan",
+      "scanRetry": "Retry",
+      "scanCancel": "Cancel",
+      "scanWaiting": "Waiting for the scanner…",
+      "scanning": "Scanning…",
+      "scanDone": "Scanned",
+      "scanFailed": "Could not scan",
+      "scanExpired": "The scan expired: nobody picked it up in time"
     },
     "otherDivision": {
       "inConsulta": "You billed in Consultation today: your sheet and your signature are in the Consultation cash count, not this one.",
@@ -4681,7 +4774,22 @@
     "printerDiscard": "Discard",
     "printerSaved": "Printer «{name}» saved.",
     "printerRemoved": "Printer «{name}» removed.",
-    "printerRemoveConfirm": "Remove printer «{name}»? Machines that used it will move to the first one in the list."
+    "printerRemoveConfirm": "Remove printer «{name}»? Machines that used it will move to the first one in the list.",
+    "scannersTitle": "Scanners of this center",
+    "scannersHelp": "The «Scan» button on the cash sheet offers them to pick from. Needs the scanner's eSCL URL (e.g. https://192.130.80.164/eSCL).",
+    "scannersEmpty": "No scanners yet. Add the first one.",
+    "scannerAdd": "Add scanner",
+    "scannerName": "Name",
+    "scannerNamePlaceholder": "Caguas front desk…",
+    "scannerUrl": "eSCL URL",
+    "scannerUrlPlaceholder": "https://192.130.80.164/eSCL",
+    "scannerActive": "Active",
+    "scannerSave": "Save scanner",
+    "scannerCreate": "Create scanner",
+    "scannerRemove": "Remove scanner",
+    "scannerSaved": "Scanner «{name}» saved.",
+    "scannerRemoved": "Scanner «{name}» removed.",
+    "scannerRemoveConfirm": "Remove scanner «{name}»? It will no longer be selectable from the cash sheet."
   },
   "numeracion": {
     "title": "Document numbering",
@@ -5331,7 +5439,13 @@
     "font": "Font",
     "fontNone": "Unchanged",
     "fontA": "Normal (A)",
-    "fontB": "Small (B)"
+    "fontB": "Small (B)",
+    "scannerInvalid": "The scanner's {field} field is not valid.",
+    "scannerNotFound": "That scanner no longer exists."
+  },
+  "cashScan": {
+    "scannerNotFound": "That scanner does not exist or is not active in this center.",
+    "invalidSettings": "The scan's {field} option is not valid."
   },
   "cashReconciliation": {
     "error": {
@@ -5853,7 +5967,8 @@
       "voidRefund": "Void the refund",
       "addKitComponent": "Add a component to the kit of an issued invoice",
       "adminGrant": "Give full access (Administrator role)",
-      "adminRevoke": "Take away full access (Administrator role)"
+      "adminRevoke": "Take away full access (Administrator role)",
+      "modifyPastCashDay": "You're about to change the {day} cash sheet"
     },
     "effect": {
       "returnsPackageSession": "Returns the session to the package",
@@ -5868,7 +5983,8 @@
       "refundVoided": "The refund is voided",
       "kitComponentAdded": "The component is added to the kit and its sessions are created; the invoice amount does not change.",
       "fullAccessEveryCenter": "This person will be able to do everything, in every center",
-      "loosesFullAccess": "This person loses full access"
+      "loosesFullAccess": "This person loses full access",
+      "pastCashDayChanges": "That day's signatures will ask to acknowledge the correction"
     },
     "policies": {
       "title": "Confirmations",

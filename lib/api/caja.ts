@@ -546,3 +546,12 @@ export function setCashCloseSetting(
     body: JSON.stringify({ closeEnabled }),
   });
 }
+
+// «El cuadre de un día pasado no se toca sin autorización» (BE PR #582-583, handoff
+// .personal/handoff-bloqueo-dias-pasados.md): para pantallas que no tienen su propio `pastCashDay`
+// en el GET principal (p. ej. la devolución) — `centerIds[0]` es obligatorio.
+export type CashPastDayCheck = { day: string; reconciled: boolean; locked: boolean; canModify: boolean };
+export function getCashPastDayCheck(fecha: string, centroId: string): Promise<CashPastDayCheck> {
+  const sp = new URLSearchParams({ fecha, centerIds: centroId });
+  return apiFetch<CashPastDayCheck>(`/cash/past-day-check?${sp.toString()}`);
+}

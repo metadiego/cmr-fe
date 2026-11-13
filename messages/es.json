@@ -1061,6 +1061,33 @@
     "reactivate": "Reactivar",
     "deactivated": "Paciente desactivado.",
     "reactivated": "Paciente reactivado.",
+    "merge": {
+      "action": "Fusionar con…",
+      "title": "Fusionar con otra ficha",
+      "hint": "Todo el historial pasa a la ficha BUENA; la otra desaparece.",
+      "searchPlaceholder": "Buscar la otra ficha por nombre o récord…",
+      "searchHint": "Escribe al menos 2 letras.",
+      "whichIsGood": "¿Cuál es la ficha BUENA?",
+      "colTable": "Tabla",
+      "colRows": "Filas",
+      "table": {
+        "invoices": "Facturas",
+        "appointments": "Citas",
+        "sessions": "Sesiones",
+        "packages": "Paquetes"
+      },
+      "policy": {
+        "drop-duplicate-row": "Se queda la fila de la ficha buena",
+        "retire-duplicate-appointment": "La cita viva de la duplicada queda como reprogramada",
+        "abort": "No se puede resolver automáticamente"
+      },
+      "changesPastReportsWarning": "El dinero y los cuadres no cambian. Cambian los conteos de personas de periodos pasados: meses {months}.",
+      "acceptPastReportImpact": "Entiendo que esto cambia conteos de periodos pasados",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué se fusionan estas dos fichas",
+      "merge": "Fusionar",
+      "mergedOk": "Fichas fusionadas"
+    },
     "confirmDeactivateTitle": "¿Desactivar paciente?",
     "confirmDeactivateBody": "{name} dejará de aparecer en la lista. Su historial se conserva y puedes reactivarlo después.",
     "yearsOld": "{age} años",
@@ -3960,18 +3987,33 @@
     "formaReembolso": "Forma de reembolso",
     "sinReembolso": "Sin reembolso registrado",
     "notas": "Notas",
-    "editarTitle": "Editar devolución",
-    "editadaOk": "Devolución actualizada",
-    "gapAviso": "Falta registrar por dónde se devolvieron {monto}",
-    "reparar": "Reparar reembolso",
-    "repararTitle": "Reparar reembolso",
-    "repararBody": "El total debe sumar {total} exacto.",
-    "repararMotivoPlaceholder": "Motivo de la reparación",
-    "reparadaOk": "Reembolso reparado",
     "colMetodo": "Forma",
     "agregarLinea": "Agregar línea",
     "anuladaInfo": "Anulada el {fecha} por {quien}.",
     "anuladaPor": "Anulado por {quien} el {fecha}",
+    "editor": {
+      "tabEditor": "Editor",
+      "tabHistory": "Historial",
+      "headerTitle": "Cabecera",
+      "linesTitle": "Líneas",
+      "colConcepto": "Concepto",
+      "colVendidas": "Vendidas",
+      "colEntregadas": "Entregadas",
+      "colDevueltasOtras": "Devueltas en otras",
+      "colDevolvible": "Devolvible",
+      "colCantidad": "Cantidad",
+      "colMonto": "Monto",
+      "savedOk": "Devolución actualizada",
+      "previewTitle": "Vista previa",
+      "previewCalculating": "calculando…",
+      "invoiceStatus": "Estado de la factura",
+      "packageEffect": "{sessions} sesión(es) vuelven al paquete · {status}",
+      "inventoryEffect": "Movimiento de inventario: {delta}",
+      "changeReason": "Motivo del cambio",
+      "changeReasonPlaceholder": "Por qué se edita esta devolución",
+      "historyLoading": "Cargando historial…",
+      "historyEmpty": "Sin cambios registrados."
+    },
     "estado": {
       "activa": "Activa",
       "anulada": "Anulada"
@@ -3995,7 +4037,37 @@
   "refund": {
     "reimbursementSumMismatch": "Los reembolsos deben sumar {expected}; sumaron {received}",
     "notActive": "La devolución está anulada; no se puede reparar",
-    "reimbursementViaRefund": "Ese pago es el reembolso de una devolución activa — anúlalo desde la devolución, no desde aquí"
+    "reimbursementViaRefund": "Ese pago es el reembolso de una devolución activa — anúlalo desde la devolución, no desde aquí",
+    "edit": {
+      "exceedsRefundable": "Pide {requested}, pero solo quedan {available} por devolver",
+      "exceedsPaid": "Las devoluciones ({refunds}) superan lo pagado ({paid})",
+      "cashDayClosed": "El cuadre del {date} ya está cerrado",
+      "packageReplaced": "El paquete se cerró por un cambio de protocolo",
+      "packageVoided": "El paquete está anulado",
+      "amountAboveLine": "Devuelve más de lo que costó la línea",
+      "componentNeedsAmount": "Escribe el monto del componente",
+      "reimbursementMismatch": "Los reembolsos no suman el monto devuelto",
+      "blocked": "El centro no permite guardar este cambio"
+    }
+  },
+  "patientMerge": {
+    "same": "No se puede fusionar una ficha consigo misma",
+    "conflict": "Hay algo sin resolver antes de fusionar",
+    "changesPastReports": "Esto cambia conteos de periodos pasados — hay que aceptarlo antes de fusionar"
+  },
+  "cash": {
+    "pastDay": {
+      "locked": "El cuadre del {day} ya está cerrado. Pídele a un gerente que lo corrija.",
+      "reasonRequired": "Hace falta un motivo para cambiar el cuadre del {day}",
+      "changed": "Cambiaste el cuadre del {day}; los firmantes tendrán que acusar la corrección",
+      "dateAndCenterRequired": "Hace falta la fecha y el centro",
+      "dialogTitle": "Vas a cambiar el cuadre del {day}",
+      "alreadySigned": "Ya lo firmaron:",
+      "deltaTotal": "Total",
+      "reasonLabel": "Motivo del cambio",
+      "confirmButton": "Sí, cambiar el cuadre del {day}",
+      "canModifyWarning": "Esta factura es del {day}, que ya tiene cuadre: cualquier cambio altera ese cuadre"
+    }
   },
   "caja": {
     "title": "Cuadre de caja",
@@ -4315,7 +4387,28 @@
       "typeNotAllowed": "Solo se aceptan fotos (JPG, PNG, WEBP) o PDF.",
       "tooLarge": "El archivo pesa más de 20 MB.",
       "pickCashier": "Elige un cajero para adjuntar su settlements",
-      "count": "{n, plural, one {# adjunto} other {# adjuntos}}"
+      "count": "{n, plural, one {# adjunto} other {# adjuntos}}",
+      "scan": "Escanear",
+      "scanDialogTitle": "Escanear settlements",
+      "scanScanner": "Escáner",
+      "scanOptions": "Opciones",
+      "scanSource": "Origen",
+      "scanSourceAdf": "Bandeja",
+      "scanSourcePlaten": "Cristal",
+      "scanDuplex": "Doble cara",
+      "scanColorMode": "Color",
+      "scanColorBw": "Blanco y negro",
+      "scanColorGray": "Gris",
+      "scanColorRgb": "Color",
+      "scanResolution": "Resolución",
+      "scanStart": "Escanear",
+      "scanRetry": "Reintentar",
+      "scanCancel": "Cancelar",
+      "scanWaiting": "Esperando al escáner…",
+      "scanning": "Escaneando…",
+      "scanDone": "Escaneado",
+      "scanFailed": "No se pudo escanear",
+      "scanExpired": "El escaneo caducó: nadie lo tomó a tiempo"
     },
     "otherDivision": {
       "inConsulta": "Hoy cobraste en Consulta: tu hoja y tu firma están en el cuadre de Consulta, no en este.",
@@ -4681,7 +4774,22 @@
     "printerDiscard": "Descartar",
     "printerSaved": "Impresora «{name}» guardada.",
     "printerRemoved": "Impresora «{name}» quitada.",
-    "printerRemoveConfirm": "¿Quitar la impresora «{name}»? Los equipos que la usaban pasarán a la primera de la lista."
+    "printerRemoveConfirm": "¿Quitar la impresora «{name}»? Los equipos que la usaban pasarán a la primera de la lista.",
+    "scannersTitle": "Escáneres de este centro",
+    "scannersHelp": "El botón «Escanear» del cuadre los ofrece a elegir. Necesita la URL eSCL del escáner (p. ej. https://192.130.80.164/eSCL).",
+    "scannersEmpty": "Todavía no hay escáneres. Añade el primero.",
+    "scannerAdd": "Añadir escáner",
+    "scannerName": "Nombre",
+    "scannerNamePlaceholder": "Recepción Caguas…",
+    "scannerUrl": "URL eSCL",
+    "scannerUrlPlaceholder": "https://192.130.80.164/eSCL",
+    "scannerActive": "Activo",
+    "scannerSave": "Guardar escáner",
+    "scannerCreate": "Crear escáner",
+    "scannerRemove": "Quitar escáner",
+    "scannerSaved": "Escáner «{name}» guardado.",
+    "scannerRemoved": "Escáner «{name}» quitado.",
+    "scannerRemoveConfirm": "¿Quitar el escáner «{name}»? Ya no se podrá elegir desde el cuadre."
   },
   "numeracion": {
     "title": "Numeración de documentos",
@@ -5331,7 +5439,13 @@
     "font": "Fuente",
     "fontNone": "Sin cambio",
     "fontA": "Normal (A)",
-    "fontB": "Pequeña (B)"
+    "fontB": "Pequeña (B)",
+    "scannerInvalid": "El campo {field} del escáner no es válido.",
+    "scannerNotFound": "Ese escáner ya no existe."
+  },
+  "cashScan": {
+    "scannerNotFound": "Ese escáner no existe o no está activo en este centro.",
+    "invalidSettings": "La opción {field} del escaneo no es válida."
   },
   "cashReconciliation": {
     "error": {
@@ -5853,7 +5967,8 @@
       "voidRefund": "Anular la devolución",
       "addKitComponent": "Agregar un componente al kit de una factura emitida",
       "adminGrant": "Dar acceso total (rol Administrador)",
-      "adminRevoke": "Quitar el acceso total (rol Administrador)"
+      "adminRevoke": "Quitar el acceso total (rol Administrador)",
+      "modifyPastCashDay": "Vas a cambiar el cuadre del {day}"
     },
     "effect": {
       "returnsPackageSession": "Devuelve la sesión al paquete",
@@ -5868,7 +5983,8 @@
       "refundVoided": "La devolución queda anulada",
       "kitComponentAdded": "El componente se agrega al kit y se crean sus sesiones; el monto de la factura no cambia.",
       "fullAccessEveryCenter": "Esta persona podrá hacer todo, en todos los centros",
-      "loosesFullAccess": "Esta persona pierde el acceso total"
+      "loosesFullAccess": "Esta persona pierde el acceso total",
+      "pastCashDayChanges": "Las firmas de ese día pedirán acusar la corrección"
     },
     "policies": {
       "title": "Confirmaciones",

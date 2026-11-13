@@ -17,6 +17,7 @@ import {
   type CashReconciliationAttachmentListed,
 } from "@/lib/api/caja";
 import { toastError } from "@/lib/api/errors";
+import { CuadreScanButton } from "@/components/caja/cuadre-scan-button";
 import { Button } from "@/components/ui/button";
 
 // Settlements escaneado del cuadre (BE PR #516, handoff .personal/handoff-cuadre-adjuntar-settlements.md):
@@ -80,10 +81,13 @@ export function CuadreAttachments({
     <div className="space-y-2 rounded-lg border bg-card p-4">
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-semibold">{t("title")}</p>
-        <Button type="button" size="sm" variant="outline" disabled={uploading} onClick={() => inputRef.current?.click()}>
-          <HugeiconsIcon icon={Attachment01Icon} className="size-4" />
-          {uploading ? t("uploading") : t("add")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <CuadreScanButton reconciliationId={reconciliationId} centroId={centroId} onScanned={() => setGen((g) => g + 1)} />
+          <Button type="button" size="sm" variant="outline" disabled={uploading} onClick={() => inputRef.current?.click()}>
+            <HugeiconsIcon icon={Attachment01Icon} className="size-4" />
+            {uploading ? t("uploading") : t("add")}
+          </Button>
+        </div>
         <input
           ref={inputRef}
           type="file"

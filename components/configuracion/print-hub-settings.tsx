@@ -6,10 +6,11 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon } from "@hugeicons/core-free-icons";
 
-import { deletePrintHub, getPrintHub, setPrintHub, type CenterPrinter } from "@/lib/api/print-hub";
+import { deletePrintHub, getPrintHub, listScanners, setPrintHub, type CenterPrinter, type PrintHubScanner } from "@/lib/api/print-hub";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { hubOrigin } from "@/lib/print/hub-target";
 import { PrintHubPrinterCard } from "@/components/configuracion/print-hub-printer-card";
+import { PrintHubScannerCard } from "@/components/configuracion/print-hub-scanner-card";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +58,8 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
   const [printers, setPrinters] = React.useState<CenterPrinter[]>([]);
   const [drafts, setDrafts] = React.useState<number[]>([]);
   const [busy, setBusy] = React.useState<"save" | "delete" | null>(null);
+  const [scanners, setScanners] = React.useState<PrintHubScanner[]>([]);
+  const [scannerDrafts, setScannerDrafts] = React.useState<number[]>([]);
 
   React.useEffect(() => {
     if (!canRead) return;
@@ -72,6 +75,19 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
         setLoad("ok");
       })
       .catch(() => active && setLoad("fail"));
+    return () => {
+      active = false;
+    };
+  }, [centerId, canRead]);
+
+  // Los escáneres son un recurso aparte del hub de impresión (no dependen de `exists`): un centro
+  // puede tener escáneres sin tener impresoras configuradas.
+  React.useEffect(() => {
+    if (!canRead) return;
+    let active = true;
+    listScanners(centerId)
+      .then((list) => active && setScanners(list))
+      .catch(() => {});
     return () => {
       active = false;
     };
@@ -260,6 +276,49 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
           {canEdit && (
             <Button type="button" variant="outline" size="sm" onClick={() => setDrafts((ds) => [...ds, Date.now()])}>
               {t("printerAdd")}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Escáneres: botón «Escanear» del cuadre (handoff .personal/handoff-escanear-al-cuadre.md). */}
+      {canRead && (
+        <div className="space-y-3 border-t pt-4">
+          <div>
+            <h4 className="text-sm font-medium">{t("scannersTitle")}</h4>
+            <p className="text-xs text-muted-foreground">{t("scannersHelp")}</p>
+          </div>
+          {scanners.map((s, i) => (
+            <PrintHubScannerCard
+              key={s.id}
+              centerId={centerId}
+              scanner={s}
+              sortOrder={i}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              onSaved={(saved) => setScanners((list) => list.map((x) => (x.id === saved.id ? saved : x)))}
+              onDeleted={() => setScanners((list) => list.filter((x) => x.id !== s.id))}
+            />
+          ))}
+          {scannerDrafts.map((d) => (
+            <PrintHubScannerCard
+              key={`draft-${d}`}
+              centerId={centerId}
+              scanner={null}
+              sortOrder={scanners.length}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              onSaved={(saved) => {
+                setScanners((list) => [...list, saved]);
+                setScannerDrafts((ds) => ds.filter((x) => x !== d));
+              }}
+              onDeleted={() => setScannerDrafts((ds) => ds.filter((x) => x !== d))}
+            />
+          ))}
+          {scanners.length === 0 && scannerDrafts.length === 0 && <p className="text-sm text-muted-foreground">{t("scannersEmpty")}</p>}
+          {canEdit && (
+            <Button type="button" variant="outline" size="sm" onClick={() => setScannerDrafts((ds) => [...ds, Date.now()])}>
+              {t("scannerAdd")}
             </Button>
           )}
         </div>

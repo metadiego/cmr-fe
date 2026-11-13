@@ -50,6 +50,7 @@ import { FichaAsistencia } from "@/components/clientes/ficha-asistencia";
 import { FichaCambioProtocolo } from "@/components/clientes/ficha-cambio-protocolo";
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import { OldRecordSuggestionBanner } from "@/components/clientes/old-record-suggestion-banner";
+import { PatientMergeButton } from "@/components/clientes/patient-merge-dialog";
 import {
   fullName,
   initials,
@@ -246,6 +247,13 @@ function PacienteDetail({
                     <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
                     {t("edit")}
                   </Button>
+                </Can>
+                <Can permiso="pacientes.merge">
+                  <PatientMergeButton
+                    current={{ id: p.id, name: fullName(p), record: p.medicalRecordNumber ?? null }}
+                    centerId={centroId}
+                    onMerged={onChanged}
+                  />
                 </Can>
                 {p.active && (
                   <Can permiso="pacientes.delete">
