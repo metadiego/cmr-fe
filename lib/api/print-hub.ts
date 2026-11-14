@@ -56,11 +56,15 @@ export function getPrintHubForPrinting(centerId: string): Promise<PrintHubForPri
 // Escáneres del hub (BE PR #586, handoff .personal/handoff-escanear-al-cuadre.md): NO está desplegado
 // todavía (CI del BE bloqueado por facturación) — tipado a mano contra el handoff, sin Swagger propio.
 // Independiente de printers/hubUrls: un centro puede tener escáneres sin tener impresoras configuradas.
+// `defaultSource` (BE PR #592): el BE lo usa en /scans y /scans/preview cuando el pedido no manda
+// `source` explícito — el diálogo de Escanear debe precargarlo en vez de asumir "adf" a secas.
+export type ScannerSource = "adf" | "platen";
 export interface PrintHubScanner {
   id: string;
   name: string;
   esclUrl: string;
   documentFormat: string;
+  defaultSource: ScannerSource;
   active: boolean;
   sortOrder: number;
 }
@@ -68,6 +72,7 @@ export interface CreateScannerPayload {
   name: string;
   esclUrl: string;
   documentFormat?: string;
+  defaultSource?: ScannerSource;
   active?: boolean;
   sortOrder?: number;
 }

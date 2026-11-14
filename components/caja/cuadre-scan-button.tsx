@@ -50,6 +50,7 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
   const [open, setOpen] = React.useState(false);
   const [scannerId, setScannerId] = React.useState("");
   const [seenScannersKey, setSeenScannersKey] = React.useState<string | null>(null);
+  const [seenScannerId, setSeenScannerId] = React.useState<string | null>(null);
   const [options, setOptions] = React.useState<Options>(DEFAULT_OPTIONS);
   const [cropEnabled, setCropEnabled] = React.useState(false);
   const [advanced, setAdvanced] = React.useState(false);
@@ -79,6 +80,13 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
     setSeenScannersKey(scannersKey);
     const saved = centroId ? window.localStorage.getItem(LAST_SCANNER_KEY(centroId)) : null;
     setScannerId(saved && scanners!.some((s) => s.id === saved) ? saved : (scanners![0]?.id ?? ""));
+  }
+  // El escáner trae su propio `defaultSource` (BE PR #592) — se precarga en vez de asumir "adf", y se
+  // vuelve a precargar si el usuario cambia de escáner (no si solo cambia otra opción).
+  if (scannerId && scannerId !== seenScannerId) {
+    setSeenScannerId(scannerId);
+    const matched = scanners?.find((s) => s.id === scannerId);
+    if (matched) setOptions((o) => ({ ...o, source: matched.defaultSource }));
   }
 
   // Mientras haya un trabajo pending/scanning (preview o final), consulta cada 2s; se detiene solo al

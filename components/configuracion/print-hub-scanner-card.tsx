@@ -4,20 +4,23 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { createScanner, deleteScanner, updateScanner, type PrintHubScanner } from "@/lib/api/print-hub";
+import { createScanner, deleteScanner, updateScanner, type PrintHubScanner, type ScannerSource } from "@/lib/api/print-hub";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
 interface Form {
   name: string;
   esclUrl: string;
+  defaultSource: ScannerSource;
   active: boolean;
 }
 
-const fromScanner = (s: PrintHubScanner | null): Form => (s ? { name: s.name, esclUrl: s.esclUrl, active: s.active } : { name: "", esclUrl: "", active: true });
+const fromScanner = (s: PrintHubScanner | null): Form =>
+  s ? { name: s.name, esclUrl: s.esclUrl, defaultSource: s.defaultSource, active: s.active } : { name: "", esclUrl: "", defaultSource: "adf", active: true };
 
 interface Props {
   centerId: string;
@@ -40,14 +43,14 @@ export function PrintHubScannerCard({ centerId, scanner, sortOrder, canEdit, can
   const [form, setForm] = React.useState<Form>(() => fromScanner(scanner));
   const [busy, setBusy] = React.useState<"save" | "delete" | null>(null);
 
-  const setField = (k: keyof Omit<Form, "active">) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const setField = (k: "name" | "esclUrl") => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const complete = !!form.name.trim() && !!form.esclUrl.trim();
   const dirty = JSON.stringify(form) !== JSON.stringify(fromScanner(scanner));
   const id = scanner?.id ?? "new";
 
   async function save() {
     setBusy("save");
-    const body = { name: form.name.trim(), esclUrl: form.esclUrl.trim(), active: form.active, sortOrder };
+    const body = { name: form.name.trim(), esclUrl: form.esclUrl.trim(), defaultSource: form.defaultSource, active: form.active, sortOrder };
     try {
       const saved = scanner ? await updateScanner(centerId, scanner.id, body) : await createScanner(centerId, body);
       toast.success(t("scannerSaved", { name: saved.name }));
@@ -86,10 +89,22 @@ export function PrintHubScannerCard({ centerId, scanner, sortOrder, canEdit, can
             <Input id={`su-${id}`} value={form.esclUrl} onChange={setField("esclUrl")} placeholder={t("scannerUrlPlaceholder")} />
           </div>
         </div>
-        <label className="flex items-center gap-2 text-sm">
-          <Switch checked={form.active} onCheckedChange={(v) => setForm((f) => ({ ...f, active: v }))} />
-          {t("scannerActive")}
-        </label>
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr] sm:items-end">
+          <div className="space-y-1.5">
+            <Label htmlFor={`ss-${id}`}>{t("scannerDefaultSource")}</Label>
+            <Select value={form.defaultSource} onValueChange={(v) => setForm((f) => ({ ...f, defaultSource: v as ScannerSource }))}>
+              <SelectTrigger id={`ss-${id}`} size="sm" className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="adf">{t("scannerSourceAdf")}</SelectItem>
+                <SelectItem value="platen">{t("scannerSourcePlaten")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <Switch checked={form.active} onCheckedChange={(v) => setForm((f) => ({ ...f, active: v }))} />
+            {t("scannerActive")}
+          </label>
+        </div>
       </fieldset>
 
       <div className="flex flex-wrap gap-2">
