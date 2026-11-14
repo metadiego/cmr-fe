@@ -13,6 +13,24 @@ export const ATTACHMENT_PRINT_CSS = `
 .attach-page iframe.attach-asset{width:100%;height:100vh;border:none;display:block}
 `;
 
+// Un adjunto PDF/foto pegado como página extra tarda en cargar (viene de Supabase Storage, no del
+// propio documento) — esperar su load/error antes de imprimir, con un tope para que uno que falle o
+// tarde no trabe la impresión del resto.
+export function waitForAttachmentPages(doc: Document): Promise<void> {
+  const nodos = Array.from(doc.querySelectorAll<HTMLElement>("[data-attach]"));
+  if (nodos.length === 0) return Promise.resolve();
+  return Promise.all(
+    nodos.map(
+      (el) =>
+        new Promise<void>((resolve) => {
+          el.addEventListener("load", () => resolve(), { once: true });
+          el.addEventListener("error", () => resolve(), { once: true });
+          setTimeout(resolve, 6000);
+        }),
+    ),
+  ).then(() => undefined);
+}
+
 export function attachmentPagesHtml(attachments: Array<{ url: string | null; contentType: string }>): string {
   return attachments
     .filter((a) => a.url)

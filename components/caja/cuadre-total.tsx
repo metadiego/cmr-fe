@@ -37,6 +37,8 @@ import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
+import { CuadreAttachmentsDia } from "@/components/caja/cuadre-attachments-dia";
+import { getDayAttachments } from "@/lib/caja/day-attachments";
 import { CashEmailPanel } from "@/components/caja/cash-email-panel";
 import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-off";
 import { figuresOfReport, SIGN_AS_SUPERVISOR } from "@/lib/caja/sign-off";
@@ -221,6 +223,20 @@ function Editor({
     );
   });
   const [procesando, setProcesando] = React.useState(false);
+
+  // Settlements escaneado del día (owner, 14-nov-2026): sin un reconciliationId propio, se mezclan
+  // los de TODOS los cuadres del día — para mostrarlos (CuadreAttachmentsDia, abajo) y para que
+  // «Imprimir cuadre» los pegue también aquí (lib/caja/day-attachments.ts).
+  const [dayAttachments, setDayAttachments] = React.useState<Array<{ url: string | null; contentType: string }>>([]);
+  React.useEffect(() => {
+    let active = true;
+    getDayAttachments(fecha, centroId)
+      .then((list) => active && setDayAttachments(list.filter((a) => a.url).map((a) => ({ url: a.url, contentType: a.contentType }))))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [fecha, centroId]);
 
   const puedeContarDia = !cerrado && (esHoy || puedeRetroactivo) && puedeContar;
   const contarHabilitado = !esSplit && puedeContarDia && contandoUnico;
@@ -437,6 +453,8 @@ function Editor({
 
       <CashSignOffPanel signOff={signOff} now={signNow} meId={null} canSignCashier={false} canSignSupervisor={puedeFirmarGerente} />
 
+      <CuadreAttachmentsDia fecha={fecha} centroId={centroId} />
+
       <CuadreDetalle
         titulo={t("tituloImpreso")}
         firmas={signOff.printed}
@@ -446,6 +464,7 @@ function Editor({
         reporte={reporte}
         subtotalesTarjeta={subtotalesTarjeta}
         divisionCounts={reporte.divisionCounts}
+        attachmentsOverride={dayAttachments}
         resumen={{
           inicio: reporte.check.day.fund,
           salesCash: reporte.detalle.efectivo.amount,

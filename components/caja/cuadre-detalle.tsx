@@ -7,7 +7,7 @@ import { PrinterIcon, Alert02Icon } from "@hugeicons/core-free-icons";
 
 import { listCashAttachments, type ReporteDia, type TributarioPartida, type DivisionCounts } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
-import { ATTACHMENT_PRINT_CSS, attachmentPagesHtml } from "@/lib/caja/attachment-print";
+import { ATTACHMENT_PRINT_CSS, attachmentPagesHtml, waitForAttachmentPages } from "@/lib/caja/attachment-print";
 import { CuadreDevoluciones, devolucionesPrintHtml } from "@/components/caja/cuadre-devoluciones";
 import { refundSplit } from "@/lib/caja/refunds-by-method";
 import { formatFechaSolo } from "@/lib/format/fecha";
@@ -48,6 +48,7 @@ export function CuadreDetalle({
   firmaTexto,
   reconciliationId,
   centroId,
+  attachmentsOverride,
 }: {
   // Título de la hoja impresa; default = t("title") ("Cuadre de caja"). El cuadre TOTAL del día
   // (handoff cuadre-unico-del-dia) pasa el suyo propio ("Cuadre total del día").
@@ -72,10 +73,13 @@ export function CuadreDetalle({
   firmas?: PrintedSignature[];
   firmaTexto?: string;
   // Settlements escaneado (owner, 14-nov-2026): si el cuadre tiene adjuntos, «Imprimir cuadre» los
-  // pega como página(s) extra del MISMO trabajo de impresión (no un diálogo aparte). Ausente =
-  // sin sección de adjuntos (p.ej. el cuadre TOTAL del día no tiene un reconciliationId propio).
+  // pega como página(s) extra del MISMO trabajo de impresión (no un diálogo aparte).
   reconciliationId?: string;
   centroId?: string | null;
+  // Para el cuadre TOTAL del día (sin un solo reconciliationId propio): la lista YA mezclada de todos
+  // los cuadres del día (lib/caja/day-attachments.ts) — presente, se usa tal cual sin el fetch de
+  // arriba.
+  attachmentsOverride?: Array<{ url: string | null; contentType: string }>;
 }) {
   const t = useTranslations("caja");
   const tp = useTranslations("caja.payments");
@@ -129,17 +133,18 @@ export function CuadreDetalle({
     monto: s.monto,
   }));
 
-  const [attachments, setAttachments] = React.useState<Array<{ url: string | null; contentType: string }>>([]);
+  const [fetchedAttachments, setFetchedAttachments] = React.useState<Array<{ url: string | null; contentType: string }>>([]);
   React.useEffect(() => {
-    if (!reconciliationId) return;
+    if (!reconciliationId || attachmentsOverride) return;
     let active = true;
     listCashAttachments(reconciliationId, centroId)
-      .then((list) => active && setAttachments(list.filter((a) => a.url).map((a) => ({ url: a.url, contentType: a.contentType }))))
+      .then((list) => active && setFetchedAttachments(list.filter((a) => a.url).map((a) => ({ url: a.url, contentType: a.contentType }))))
       .catch(() => {});
     return () => {
       active = false;
     };
-  }, [reconciliationId, centroId]);
+  }, [reconciliationId, centroId, attachmentsOverride]);
+  const attachments = attachmentsOverride ?? fetchedAttachments;
 
   function imprimir() {
     if (typeof window === "undefined") return;
@@ -219,24 +224,7 @@ export function CuadreDetalle({
     );
     w.document.close();
     w.focus();
-    // Un adjunto PDF/foto pegado como página extra tarda en cargar (viene de Supabase Storage, no del
-    // propio documento) — esperar su load/error antes de imprimir, con un tope para que uno que falle
-    // o tarde no trabe la impresión del resto.
-    function esperarAdjuntos(): Promise<void> {
-      const nodos = Array.from(w!.document.querySelectorAll<HTMLElement>("[data-attach]"));
-      if (nodos.length === 0) return Promise.resolve();
-      return Promise.all(
-        nodos.map(
-          (el) =>
-            new Promise<void>((resolve) => {
-              el.addEventListener("load", () => resolve(), { once: true });
-              el.addEventListener("error", () => resolve(), { once: true });
-              setTimeout(resolve, 6000);
-            }),
-        ),
-      ).then(() => undefined);
-    }
-    const go = () => void esperarAdjuntos().then(() => w.print());
+    const go = () => void waitForAttachmentPages(w.document).then(() => w.print());
     if (w.document.readyState === "complete") go();
     else w.onload = go;
   }
