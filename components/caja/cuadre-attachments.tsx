@@ -143,9 +143,10 @@ export function CuadreAttachments({
 
 // Consolidated / not-yet-opened: no single reconciliationId to attach to. Lists the day's cashiers
 // with how many settlements each already has (one listCashAttachments per cuadre — no bulk endpoint,
-// and a day's cashier count is small) and a button that hands scope back to the caller (onPick),
-// same pattern as CashSignOffPanel's onSignMine. Handoff: owner couldn't find the button at all on
-// the consolidated view (it rendered nothing, buried at the bottom of CuadreDetalle).
+// and a day's cashier count is small). "Adjuntar" hands scope back to the caller (onPick), same
+// pattern as CashSignOffPanel's onSignMine. «Escanear» (owner, 14-nov-2026) does NOT switch scope —
+// CuadreScanButton already takes its own reconciliationId/centroId, so it scans straight from here;
+// a manager landing on the consolidated view (the normal case) would otherwise never see it at all.
 export function CuadreAttachmentsOverview({
   cuadres,
   cajeros,
@@ -195,6 +196,7 @@ export function CuadreAttachmentsOverview({
               <span className="truncate">{cajeros.find((c) => c.userId === r.userId)?.name ?? r.userId}</span>
               <span className="flex shrink-0 items-center gap-2">
                 {n > 0 && <span className="text-xs text-muted-foreground">{t("count", { n })}</span>}
+                <CuadreScanButton reconciliationId={r.id} centroId={centroId} onScanned={() => setCounts((c) => ({ ...c, [r.userId]: (c[r.userId] ?? 0) + 1 }))} />
                 <Button type="button" size="sm" variant="outline" onClick={() => onPick(r.userId)}>
                   <HugeiconsIcon icon={Attachment01Icon} className="size-4" />
                   {t("add")}
