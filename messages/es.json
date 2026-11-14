@@ -1690,7 +1690,8 @@
       "status": "Estado",
       "actions": "Acciones",
       "roles": "Rol(es)",
-      "centros": "Centro(s)"
+      "centros": "Centro(s)",
+      "user": "Usuario"
     },
     "approve": "Aprobar",
     "reject": "Rechazar",
@@ -1742,22 +1743,31 @@
         "guardar": "Cambiar email",
         "guardando": "Cambiando…",
         "ok": "Email de acceso actualizado"
+      },
+      "adminBadge": "Administrador",
+      "allCenters": "Todos los centros",
+      "filterAll": "Todos",
+      "status": {
+        "aprobado": "Aprobado",
+        "pendiente": "Pendiente",
+        "suspendido": "Suspendido",
+        "rechazado": "Rechazado"
       }
     },
     "invite": {
       "title": "Invitar usuario",
       "description": "Crea el usuario y su perfil aprobado en un paso.",
-      "persona": "¿Es alguien que ya está dado de alta?",
-      "personaHint": "Opcional. Engancha la cuenta a esa persona y conserva su historial.",
+      "persona": "¿Ya tiene ficha de personal (médico, técnico…)?",
+      "personaHint": "Si ya trabaja aquí, elígelo para no duplicarlo. Su historial queda con la cuenta.",
       "personaPlaceholder": "Elige la persona (o déjalo vacío)",
-      "personaNadie": "Nadie — cuenta nueva sin ficha",
+      "personaNadie": "No — persona nueva",
       "personaEnlazando": "Se enlazará a: {nombre} (conserva su historial)",
+      "suggestion": "{nombre} ya tiene ficha de personal en {centro}. ¿Es esta persona?",
+      "suggestionNoCenter": "{nombre} ya tiene ficha de personal. ¿Es esta persona?",
+      "suggestionLink": "Sí, enlazar",
       "email": "Email",
       "name": "Nombre",
       "lastName": "Apellido",
-      "accessMode": "Modo de acceso",
-      "operativo": "Operativo",
-      "gerencial": "Gerencial",
       "submit": "Invitar",
       "submitting": "Invitando…",
       "success": "{email} invitado.",
@@ -1773,12 +1783,16 @@
       "done": "Listo",
       "centro": "Centro",
       "centroPlaceholder": "Elige un centro",
+      "centroTodos": "Todos los centros ({n})",
       "centroHint": "Opcional; sin centro el usuario no podrá entrar hasta que se le asigne uno.",
       "temporal": "Acceso temporal a este centro",
       "vigenteHasta": "Vigente hasta",
       "rol": "Rol",
       "rolPlaceholder": "Elige un rol",
       "rolHint": "Opcional. Si eliges rol SIN centro, el rol aplica en TODOS los centros.",
+      "rolAdminHint": "Para hacerlo administrador, dale el rol Administrador desde sus accesos una vez creado.",
+      "centerFailed": "El usuario se creó, pero no se pudo darle acceso a {centro}. Añádelo desde sus centros.",
+      "roleFailed": "El usuario se creó, pero no se pudo asignarle el rol. Asígnalo desde sus accesos.",
       "clone": {
         "label": "Clonar de (opcional)",
         "hint": "Copia su acceso ahora mismo. Después, cada usuario se administra por separado.",
@@ -1790,7 +1804,6 @@
         "roles": "{n} roles ({ya} ya tenía)",
         "permisos": "{n} excepciones ({ya} ya tenía)",
         "centros": "{n} centros ({ya} ya tenía)",
-        "modo": "El usuario pasa a modo {modo} (solo lectura), como el original.",
         "ok": "Acceso copiado de {origen}.",
         "falloAviso": "El usuario se creó, pero no se pudo copiar el acceso. Reintenta desde su ficha de accesos."
       }

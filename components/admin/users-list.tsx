@@ -15,6 +15,23 @@ import {
 import { toastError } from "@/lib/api/errors"
 import { useCan } from "@/hooks/use-can"
 import { useResource } from "@/hooks/use-resource"
+import { cn } from "@/lib/utils"
+import {
+  USER_STATUSES,
+  countByStatus,
+  filterUsers,
+  userInitials,
+  type UserStatusFilter,
+} from "@/lib/admin/users-filter"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Building01Icon,
+  MoreHorizontalIcon,
+  Search01Icon,
+  Shield01Icon,
+  SquareLock02Icon,
+  UserAdd01Icon,
+} from "@hugeicons/core-free-icons"
 import { CodigoAccesoDialog } from "@/components/admin/codigo-acceso-dialog"
 import { CambiarEmailDialog } from "@/components/admin/cambiar-email-dialog"
 import { Button } from "@/components/ui/button"
@@ -32,15 +49,22 @@ import { AccessDialog } from "@/components/admin/access-dialog"
 import { ProfileCentrosDialog } from "@/components/admin/profile-centros-dialog"
 import { ProfileEditDialog } from "@/components/admin/profile-edit-dialog"
 
-// Badge de estado con semántica de color (aprobado=ok, suspendido/rechazado=alerta).
-function EstadoBadge({ estado }: { estado: string }) {
-  const variant =
-    estado === "aprobado"
-      ? ("secondary" as const)
-      : estado === "pendiente"
-        ? ("outline" as const)
-        : ("destructive" as const)
-  return <Badge variant={variant}>{estado}</Badge>
+// Status as a soft badge with a colored dot (approved = success, pending = warning, else destructive).
+const STATUS_TONE: Record<string, { badge: string; dot: string }> = {
+  aprobado: { badge: "bg-success/10 text-success", dot: "bg-success" },
+  pendiente: { badge: "bg-warning text-warning-foreground", dot: "bg-warning-foreground" },
+  suspendido: { badge: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+  rechazado: { badge: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+}
+
+function StatusBadge({ status, label }: { status: string; label: string }) {
+  const tone = STATUS_TONE[status] ?? STATUS_TONE.pendiente
+  return (
+    <Badge variant="ghost" className={cn("gap-1.5", tone.badge)}>
+      <span aria-hidden className={cn("size-1.5 rounded-full", tone.dot)} />
+      {label}
+    </Badge>
+  )
 }
 
 export function UsersList() {
@@ -72,27 +96,16 @@ export function UsersList() {
     }
   }
 
-  // Búsqueda client-side sobre email/nombre/rol/centro (la lista es corta).
-  const filtered = React.useMemo(() => {
-    if (state.kind !== "ok") return state
-    const term = q.trim().toLowerCase()
-    if (!term) return state
-    return {
-      ...state,
-      data: state.data.filter((p) =>
-        [
-          p.email,
-          p.name,
-          p.lastName ?? "",
-          ...(p.roles?.map((r) => r.name) ?? []),
-          ...(p.centers?.map((c) => c.name ?? "") ?? []),
-        ]
-          .join(" ")
-          .toLowerCase()
-          .includes(term)
-      ),
-    }
-  }, [state, q])
+  const [status, setStatus] = React.useState<UserStatusFilter>("all")
+  // Client-side search and status filter (the list is short).
+  const all = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state])
+  const counts = React.useMemo(() => countByStatus(all), [all])
+  const filtered = React.useMemo(
+    () => (state.kind === "ok" ? { ...state, data: filterUsers(state.data, q, status) } : state),
+    [state, q, status]
+  )
+  const statusLabel = (s: string) =>
+    (USER_STATUSES as readonly string[]).includes(s) ? t(`users.status.${s}`) : s
 
   async function toggleSuspension(p: Perfil) {
     if (busyId) return // evita el doble POST (el 2º daría 409)
@@ -115,13 +128,19 @@ export function UsersList() {
 
   const columns: Column<Perfil>[] = [
     {
-      key: "email",
-      header: t("columns.email"),
+      key: "user",
+      header: t("columns.user"),
+      loadingShape: "avatar",
       cell: (p) => (
-        <div className="min-w-0">
-          <div className="truncate font-medium">{p.email}</div>
-          <div className="truncate text-xs text-muted-foreground">
-            {[p.name, p.lastName].filter(Boolean).join(" ")}
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+            {userInitials(p)}
+          </span>
+          <div className="min-w-0">
+            <div className="truncate font-medium">
+              {[p.name, p.lastName].filter(Boolean).join(" ") || p.email}
+            </div>
+            <div className="truncate text-xs text-muted-foreground">{p.email}</div>
           </div>
         </div>
       ),
@@ -131,7 +150,10 @@ export function UsersList() {
       header: t("columns.roles"),
       cell: (p) =>
         p.isMaster ? (
-          <Badge>master</Badge>
+          <Badge className="gap-1">
+            <HugeiconsIcon icon={Shield01Icon} data-icon="inline-start" />
+            {t("users.adminBadge")}
+          </Badge>
         ) : p.roles?.length ? (
           <div className="flex flex-wrap gap-1">
             {p.roles.map((r) => (
@@ -141,9 +163,7 @@ export function UsersList() {
             ))}
           </div>
         ) : (
-          <span className="text-xs text-muted-foreground">
-            {t("users.sinRol")}
-          </span>
+          <span className="text-xs text-muted-foreground">{t("users.sinRol")}</span>
         ),
     },
     {
@@ -154,16 +174,13 @@ export function UsersList() {
         if (!activos.length)
           return (
             <span className="text-xs text-muted-foreground">
-              {t("users.sinCentro")}
+              {p.isMaster ? t("users.allCenters") : t("users.sinCentro")}
             </span>
           )
         return (
           <div className="flex flex-wrap gap-1">
             {activos.map((c) => (
-              <Badge
-                key={c.asignacionId}
-                variant={c.type === "temporal" ? "outline" : "secondary"}
-              >
+              <Badge key={c.asignacionId} variant="outline">
                 {c.name ?? c.centerId.slice(0, 8)}
                 {c.type === "temporal" && c.validUntil
                   ? ` · ${t("users.hasta", { fecha: c.validUntil })}`
@@ -175,35 +192,28 @@ export function UsersList() {
       },
     },
     {
-      key: "accessMode",
-      header: t("columns.accessMode"),
-      cell: (p) => (p.isMaster ? "master" : p.accessMode),
-    },
-    {
       key: "status",
       header: t("columns.status"),
-      cell: (p) => <EstadoBadge estado={p.status} />,
+      cell: (p) => <StatusBadge status={p.status ?? ""} label={statusLabel(p.status ?? "")} />,
     },
     {
       key: "actions",
-      header: t("columns.actions"),
+      header: <span className="sr-only">{t("columns.actions")}</span>,
       align: "right",
       cell: (p) => (
-        <div className="flex justify-end gap-2">
-          <Button size="sm" variant="outline" onClick={() => setAccessFor(p)}>
+        <div className="flex items-center justify-end gap-1">
+          <Button size="sm" variant="ghost" onClick={() => setAccessFor(p)}>
+            <HugeiconsIcon icon={SquareLock02Icon} data-icon="inline-start" />
             {t("users.access")}
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setCentrosFor(p)}>
+          <Button size="sm" variant="ghost" onClick={() => setCentrosFor(p)}>
+            <HugeiconsIcon icon={Building01Icon} data-icon="inline-start" />
             {t("users.centros")}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label={t("users.masAcciones")}
-              >
-                <span aria-hidden>⋯</span>
+              <Button size="icon-sm" variant="ghost" aria-label={t("users.masAcciones")}>
+                <HugeiconsIcon icon={MoreHorizontalIcon} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -247,14 +257,44 @@ export function UsersList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={t("users.buscar")}
-          className="max-w-xs"
-        />
-        <Button size="sm" onClick={() => setInviteOpen(true)}>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative w-full max-w-xs">
+          <HugeiconsIcon
+            icon={Search01Icon}
+            className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={t("users.buscar")}
+            className="pl-8"
+          />
+        </div>
+        <div
+          role="group"
+          aria-label={t("columns.status")}
+          className="inline-flex items-center gap-0.5 rounded-lg bg-muted p-0.5"
+        >
+          {(["all", ...USER_STATUSES] as UserStatusFilter[])
+            .filter((s) => s === "all" || counts[s] > 0)
+            .map((s) => (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={status === s}
+                onClick={() => setStatus(s)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
+                  status === s && "bg-background text-foreground shadow-sm"
+                )}
+              >
+                {s === "all" ? t("users.filterAll") : statusLabel(s)}
+                <span className="tabular-nums text-muted-foreground">{counts[s]}</span>
+              </button>
+            ))}
+        </div>
+        <Button size="sm" className="ml-auto" onClick={() => setInviteOpen(true)}>
+          <HugeiconsIcon icon={UserAdd01Icon} data-icon="inline-start" />
           {t("users.invite")}
         </Button>
       </div>
@@ -264,8 +304,9 @@ export function UsersList() {
         state={filtered}
         getRowKey={(p) => p.id}
         onReload={reload}
+        fill
         labels={{
-          empty: q.trim() ? t("users.sinResultados") : t("users.empty"),
+          empty: q.trim() || status !== "all" ? t("users.sinResultados") : t("users.empty"),
         }}
       />
 
