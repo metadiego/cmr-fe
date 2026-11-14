@@ -27,6 +27,11 @@ export function CuadreScanCrop({
 }) {
   const t = useTranslations("caja.attachments");
   const imgRef = React.useRef<HTMLImageElement>(null);
+  // Congela el rect del <img> al empezar a arrastrar: si algo mueve el diálogo a mitad de arrastre
+  // (el diálogo de Radix se recentra solo ante CUALQUIER cambio de alto, como el texto de abajo
+  // apareciendo), volver a leer getBoundingClientRect() en cada pointermove haría que la selección
+  // "saltara" — el bug real que reportó el dueño ("se mueve", no se puede fijar el área).
+  const dragRectRef = React.useRef<DOMRect | null>(null);
   const [drag, setDrag] = React.useState<Drag | null>(null);
   const [imgW, setImgW] = React.useState(0);
   const [imgH, setImgH] = React.useState(0);
@@ -44,14 +49,15 @@ export function CuadreScanCrop({
   function pointerDown(e: React.PointerEvent) {
     if (busy) return;
     const rect = imgRef.current!.getBoundingClientRect();
+    dragRectRef.current = rect;
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     setDrag({ startX: x, startY: y, x, y, w: 0, h: 0 });
     (e.target as Element).setPointerCapture(e.pointerId);
   }
   function pointerMove(e: React.PointerEvent) {
-    if (!drag || busy) return;
-    const rect = imgRef.current!.getBoundingClientRect();
+    if (!drag || busy || !dragRectRef.current) return;
+    const rect = dragRectRef.current;
     const cx = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
     const cy = Math.min(Math.max(e.clientY - rect.top, 0), rect.height);
     const x = Math.min(drag.startX, cx);
@@ -89,11 +95,11 @@ export function CuadreScanCrop({
           <div className="pointer-events-none absolute border-2 border-primary bg-primary/10" style={{ left: drag.x, top: drag.y, width: drag.w, height: drag.h }} />
         )}
       </div>
-      {region && (
-        <p className="font-mono text-xs text-muted-foreground">
-          {t("cropRegionDebug", { x: region.x, y: region.y, width: region.width, height: region.height })}
-        </p>
-      )}
+      {/* Siempre montado, nunca condicional: aparecer/desaparecer cambiaría el alto del diálogo y lo
+          recentraría a mitad de arrastre (la causa real del bug). */}
+      <p className="min-h-4 font-mono text-xs text-muted-foreground">
+        {region ? t("cropRegionDebug", { x: region.x, y: region.y, width: region.width, height: region.height }) : " "}
+      </p>
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>{t("scanCancel")}</Button>
         <Button type="button" variant="outline" onClick={onRetake} disabled={busy}>{t("cropRetake")}</Button>
