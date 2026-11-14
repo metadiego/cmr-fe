@@ -34,7 +34,7 @@ export function StaffList({
         <Input value={q} onChange={(e) => onQChange(e.target.value)} placeholder={t("buscar")} className="h-9 pl-8" />
       </div>
       {loading && <p className="text-sm text-muted-foreground">{t("cargando")}</p>}
-      <ul className="max-h-[70vh] space-y-1 overflow-auto">
+      <ul className="max-h-[70vh] min-h-0 flex-1 space-y-1 overflow-auto lg:max-h-none">
         {people.map((p) => {
           const on = p.id === selectedId;
           return (

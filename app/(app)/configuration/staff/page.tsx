@@ -20,6 +20,7 @@ import { EhrLinkSection } from "@/components/personal/ehr-link-section";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
+import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 import { useCreateClinic } from "@/hooks/use-create-clinic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MedicoDisponibilidad } from "@/components/personal/medico-disponibilidad";
@@ -71,6 +72,10 @@ export function StaffPanel() {
 
   const [q, setQ] = React.useState("");
   const [selId, setSelId] = React.useState<string>("");
+  // On desktop the screen fits the window: the list and the record each scroll inside their card,
+  // the page itself does not. On narrow screens (no height) the page scrolls as usual.
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const fillHeight = useFillViewportHeight(gridRef);
 
   // Capacidades: derivadas de los valores REALES del personal (no hay catálogo aparte en el handoff).
   const capacidadOpciones = React.useMemo(
@@ -95,9 +100,13 @@ export function StaffPanel() {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
+      <div
+        ref={gridRef}
+        style={fillHeight ? { height: fillHeight } : undefined}
+        className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr] lg:grid-rows-[minmax(0,1fr)]"
+      >
         {/* Lista */}
-        <aside className="flex flex-col gap-3 self-start rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+        <aside className="flex min-h-0 flex-col gap-3 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="flex flex-wrap items-center justify-between gap-2">
             {create.canCreate && <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>}
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -119,7 +128,7 @@ export function StaffPanel() {
         </aside>
 
         {/* Ficha */}
-        <section>
+        <section className="min-h-0">
           {sel ? (
             <FichaPersonal
               key={sel.id}
@@ -136,7 +145,7 @@ export function StaffPanel() {
               onEhrChanged={() => ehrLinksRes.reload()}
             />
           ) : (
-            <div className="flex min-h-[40vh] items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
+            <div className="flex h-full min-h-[40vh] items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
               {t("elegirPersona")}
             </div>
           )}
@@ -198,7 +207,7 @@ function FichaPersonal({
   const puedeProduccion = esMedico && can("citas.read");
 
   return (
-    <div className="space-y-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+    <div className="h-full space-y-6 overflow-y-auto rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       {/* Identidad */}
       <div className="flex items-center gap-3">
         <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
