@@ -56,13 +56,20 @@ export function CuadreScanCrop({
     (e.target as Element).setPointerCapture(e.pointerId);
   }
   function pointerMove(e: React.PointerEvent) {
-    if (!drag || busy || !dragRectRef.current) return;
+    // e.buttons === 0 = el botón ya se soltó. `setPointerCapture` en un mouse NO se libera solo al
+    // soltar el botón (a diferencia de la captura implícita de siempre) — sin este freno, mover el
+    // mouse hacia «Escanear esta área» DESPUÉS de soltar seguía llegando aquí como si se siguiera
+    // arrastrando, y la selección «se movía» justo al ir a confirmarla (lo que reportó el dueño).
+    if (!drag || busy || !dragRectRef.current || e.buttons === 0) return;
     const rect = dragRectRef.current;
     const cx = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
     const cy = Math.min(Math.max(e.clientY - rect.top, 0), rect.height);
     const x = Math.min(drag.startX, cx);
     const y = Math.min(drag.startY, cy);
     setDrag({ ...drag, x, y, w: Math.abs(cx - drag.startX), h: Math.abs(cy - drag.startY) });
+  }
+  function pointerUp(e: React.PointerEvent) {
+    if ((e.target as Element).hasPointerCapture?.(e.pointerId)) (e.target as Element).releasePointerCapture(e.pointerId);
   }
 
   function confirmSelection() {
@@ -76,7 +83,8 @@ export function CuadreScanCrop({
         className="relative inline-block touch-none select-none"
         onPointerDown={pointerDown}
         onPointerMove={pointerMove}
-        onPointerUp={() => {}}
+        onPointerUp={pointerUp}
+        onPointerCancel={pointerUp}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada efímera (10 min); no vale la pena el remote-pattern de next/image para esto. */}
         <img
