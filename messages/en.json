@@ -1690,7 +1690,8 @@
       "status": "Status",
       "actions": "Actions",
       "roles": "Role(s)",
-      "centros": "Center(s)"
+      "centros": "Center(s)",
+      "user": "User"
     },
     "approve": "Approve",
     "reject": "Reject",
@@ -1742,6 +1743,15 @@
         "guardar": "Change email",
         "guardando": "Changing…",
         "ok": "Access email updated"
+      },
+      "adminBadge": "Administrator",
+      "allCenters": "All centers",
+      "filterAll": "All",
+      "status": {
+        "aprobado": "Approved",
+        "pendiente": "Pending",
+        "suspendido": "Suspended",
+        "rechazado": "Rejected"
       }
     },
     "invite": {

@@ -97,7 +97,7 @@ export function StaffPanel() {
     <>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
         {/* Lista */}
-        <aside className="space-y-2">
+        <aside className="flex flex-col gap-3 self-start rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="flex flex-wrap items-center justify-between gap-2">
             {create.canCreate && <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>}
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
