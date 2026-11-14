@@ -108,6 +108,16 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     onInvalidate: refetch,
   });
 
+  // Red de seguridad (owner, 14-nov-2026): el SSE solo avisa de "panel_notificacion" (aceptar/cancelar
+  // una notificación) — un cambio de secciones o de orden del personal (configuración, otra pantalla)
+  // no emite evento ninguno, así que un kiosco YA conectado se quedaba viejo hasta recargar a mano.
+  // Mientras el BE no mande esos eventos también, se refresca sola cada 30s, sin tocar el esqueleto.
+  React.useEffect(() => {
+    if (!centro) return;
+    const id = setInterval(refetch, 30_000);
+    return () => clearInterval(id);
+  }, [centro, refetch]);
+
   // Cola: la más antigua primero. La alarma suena mientras haya avisos pendientes.
   const pendientes = notifs;
   const actual = pendientes[0] ?? null;
