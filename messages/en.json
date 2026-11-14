@@ -1515,7 +1515,6 @@
     "tabs": {
       "personal": "Staff",
       "pending": "Pending",
-      "users": "Users",
       "centers": "Centers",
       "theme": "Theme",
       "roles": "Roles",
@@ -1690,8 +1689,7 @@
       "status": "Status",
       "actions": "Actions",
       "roles": "Role(s)",
-      "centros": "Center(s)",
-      "user": "User"
+      "centros": "Center(s)"
     },
     "approve": "Approve",
     "reject": "Reject",
@@ -1705,8 +1703,6 @@
     "cancel": "Cancel",
     "users": {
       "invite": "Invite user",
-      "empty": "No users yet.",
-      "assign": "Assign center",
       "access": "Access",
       "centros": "Centers",
       "editar": "Edit user",
@@ -1714,12 +1710,10 @@
       "reactivar": "Reactivate",
       "suspendido": "User suspended",
       "reactivado": "User reactivated",
-      "buscar": "Search by email, name, role or center…",
       "sinRol": "No role",
       "sinCentro": "No center",
       "hasta": "until {fecha}",
       "masAcciones": "More actions",
-      "sinResultados": "No user matches the search.",
       "generarCodigo": "Generate access code",
       "codigo": {
         "titulo": "Access code",
@@ -1746,7 +1740,6 @@
       },
       "adminBadge": "Administrator",
       "allCenters": "All centers",
-      "filterAll": "All",
       "status": {
         "aprobado": "Approved",
         "pendiente": "Pending",
@@ -5276,8 +5269,6 @@
     "guardando": "Saving…",
     "guardado": "Saved",
     "acceso": "System access",
-    "aprobado": "approved",
-    "verUsuario": "View user",
     "sinCuentaAyuda": "No login account.",
     "darAcceso": "Grant system access",
     "darAccesoTitulo": "Grant access to {nombre}",
@@ -5322,7 +5313,15 @@
     "responsibilities": "Responsibilities",
     "responsibilitiesHelp": "Decide which lists the person appears in (doctors, nurses, technicians, operators…). «Doctor» also shows their agenda, patients and production tabs.",
     "nameRequired": "The name is required.",
-    "unsavedChanges": "Unsaved changes"
+    "unsavedChanges": "Unsaved changes",
+    "accessFilter": "System access",
+    "access": {
+      "all": "All",
+      "withAccess": "With access",
+      "noAccess": "No access",
+      "suspended": "Suspended"
+    },
+    "suspendida": "access suspended"
   },
   "acciones": {
     "subtitle": "Their whole history, without leaving here.",

@@ -1515,7 +1515,6 @@
     "tabs": {
       "personal": "Personal",
       "pending": "Pendientes",
-      "users": "Usuarios",
       "centers": "Centros",
       "theme": "Tema",
       "roles": "Roles",
@@ -1690,8 +1689,7 @@
       "status": "Estado",
       "actions": "Acciones",
       "roles": "Rol(es)",
-      "centros": "Centro(s)",
-      "user": "Usuario"
+      "centros": "Centro(s)"
     },
     "approve": "Aprobar",
     "reject": "Rechazar",
@@ -1705,8 +1703,6 @@
     "cancel": "Cancelar",
     "users": {
       "invite": "Invitar usuario",
-      "empty": "Aún no hay usuarios.",
-      "assign": "Asignar centro",
       "access": "Accesos",
       "centros": "Centros",
       "editar": "Editar usuario",
@@ -1714,12 +1710,10 @@
       "reactivar": "Reactivar",
       "suspendido": "Usuario suspendido",
       "reactivado": "Usuario reactivado",
-      "buscar": "Buscar por email, nombre, rol o centro…",
       "sinRol": "Sin rol",
       "sinCentro": "Sin centro",
       "hasta": "hasta {fecha}",
       "masAcciones": "Más acciones",
-      "sinResultados": "Ningún usuario coincide con la búsqueda.",
       "generarCodigo": "Generar código de acceso",
       "codigo": {
         "titulo": "Código de acceso",
@@ -1746,7 +1740,6 @@
       },
       "adminBadge": "Administrador",
       "allCenters": "Todos los centros",
-      "filterAll": "Todos",
       "status": {
         "aprobado": "Aprobado",
         "pendiente": "Pendiente",
@@ -5276,8 +5269,6 @@
     "guardando": "Guardando…",
     "guardado": "Guardado",
     "acceso": "Acceso al sistema",
-    "aprobado": "aprobado",
-    "verUsuario": "Ver usuario",
     "sinCuentaAyuda": "Sin cuenta de acceso.",
     "darAcceso": "Dar acceso al sistema",
     "darAccesoTitulo": "Dar acceso a {nombre}",
@@ -5322,7 +5313,15 @@
     "responsibilities": "Responsabilidades",
     "responsibilitiesHelp": "Deciden en qué listas aparece la persona (médicos, enfermeras, técnicos, operadoras…). «Médico» además muestra sus pestañas de agenda, pacientes y producción.",
     "nameRequired": "El nombre es obligatorio.",
-    "unsavedChanges": "Cambios sin guardar"
+    "unsavedChanges": "Cambios sin guardar",
+    "accessFilter": "Acceso al sistema",
+    "access": {
+      "all": "Todos",
+      "withAccess": "Con acceso",
+      "noAccess": "Sin acceso",
+      "suspended": "Suspendidos"
+    },
+    "suspendida": "acceso suspendido"
   },
   "acciones": {
     "subtitle": "Todo su historial, sin salir de aquí.",
