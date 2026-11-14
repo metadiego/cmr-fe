@@ -89,10 +89,13 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   // Los contadores del día YA vienen en la definición → sin llamada aparte (dedup). En cada evento
   // SSE se recarga la definición (trae contadores frescos) + las notificaciones pendientes.
   // Silent refresh: a live event must not drop the wall back to its skeleton.
+  // Depends on the STABLE `refresh`, not on `defRes` (a new object every render): with `defRes` the
+  // 30 s safety-net interval below was torn down and re-armed on every render and could never fire.
+  const { refresh: refrescarDef } = defRes;
   const refetch = React.useCallback(() => {
-    defRes.refresh();
+    refrescarDef();
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
-  }, [defRes, centro]);
+  }, [refrescarDef, centro]);
   // Carga inicial (una vez montado, patrón sin setState-en-render).
   React.useEffect(() => {
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
