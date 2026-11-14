@@ -6,17 +6,19 @@ import { toast } from "sonner";
 
 import {
   inviteUser,
+  assignCenter,
   getProfiles,
   type InviteResponse,
   type Perfil,
 } from "@/lib/api/profiles";
 import { getCenters } from "@/lib/api/centers";
-import { getRoles, clonarAccesoDe } from "@/lib/api/rbac";
+import { getRoles, clonarAccesoDe, assignRoleToProfile } from "@/lib/api/rbac";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useMe, isAdmin } from "@/hooks/use-me";
 import { isAdminRole } from "@/lib/access/role-keys";
+import { ALL_CENTERS, planInvite, suggestStaff } from "@/lib/admin/invite";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { EmailInput } from "@/components/email-input";
@@ -110,6 +112,11 @@ export function InviteDialog({
     .filter((p) => p.profileId == null && p.active !== false)
     .sort((a, b) => `${a.name} ${a.lastName ?? ""}`.localeCompare(`${b.name} ${b.lastName ?? ""}`));
 
+  // A staff record without a login whose name matches what was typed: offered so the admin links it
+  // instead of creating the same person twice.
+  const suggested = personalId ? null : suggestStaff(sinCuenta, nombre, apellido);
+  const centerName = (id?: string | null) => centros.find((c) => c.id === id)?.name ?? "";
+
   // Al elegir una persona: prellenar nombre/apellido (mismos datos, no re-teclear) y fijar su centro
   // (evita el error "es de otro centro"). Todo queda editable.
   function pickPersonal(id: string) {
@@ -147,13 +154,15 @@ export function InviteDialog({
   async function onSubmit() {
     if (!email.trim() || !nombre.trim()) return;
     setSubmitting(true);
+    const linked = sinCuenta.find((p) => p.id === personalId);
+    const plan = planInvite(centroId, centros.map((c) => c.id), rolClave, linked?.clinicId);
     try {
       const res = await inviteUser({
         email: email.trim(),
         name: nombre.trim(),
         lastName: apellido.trim() || undefined,
-        centerId: centroId || undefined,
-        rolClave: rolClave || undefined,
+        centerId: plan.inviteCenterId,
+        rolClave: plan.inviteRole,
         // Enganchar a la persona ya dada de alta (conserva su historial). Sin esto, cuenta sin ficha.
         staffId: personalId || undefined,
         tipoAsignacion: centroId && temporal ? "temporal" : undefined,
@@ -161,6 +170,27 @@ export function InviteDialog({
         redirectTo: `${window.location.origin}/auth/set-password`,
       });
       toast.success(t("success", { email: res.email }));
+      // "All centers": the invite carried one center; the rest and the role (with no center, so it
+      // applies everywhere) are granted now. The user already exists, so a failure is a warning.
+      const warnings: string[] = [];
+      for (const centerId of plan.extraCenterIds) {
+        try {
+          await assignCenter(res.id, {
+            centerId,
+            type: temporal ? "temporal" : undefined,
+            validUntil: temporal ? vigenteHasta || undefined : undefined,
+          });
+        } catch {
+          warnings.push(t("centerFailed", { centro: centerName(centerId) }));
+        }
+      }
+      if (plan.globalRole) {
+        try {
+          await assignRoleToProfile(res.id, plan.globalRole);
+        } catch {
+          warnings.push(t("roleFailed"));
+        }
+      }
       // «Clonar de»: el perfil ya existe → ahora se copia el acceso del origen. Falla la clonación pero no
       // el alta: el usuario queda creado y se avisa aparte (se puede reintentar la clonación por su ficha).
       if (origenPerfilId) {
@@ -180,7 +210,7 @@ export function InviteDialog({
         }
       }
       onInvited?.();
-      setResult(res);
+      setResult(warnings.length ? { ...res, avisos: [...(res.avisos ?? []), ...warnings] } : res);
     } catch (err) {
       // Los errores del enlace (persona ya con cuenta / de otro centro / no existe) llegan con labelKey;
       // toastError los traduce. Llegan ANTES de crear la cuenta → se puede reintentar sin dejar nada a medias.
@@ -254,6 +284,23 @@ export function InviteDialog({
                   onChange={(e) => setApellido(e.target.value)}
                 />
               </Field>
+              {suggested && (
+                <div className="flex items-center justify-between gap-3 rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
+                  <span>
+                    {centerName(suggested.clinicId)
+                      ? t("suggestion", {
+                          nombre: `${suggested.name} ${suggested.lastName ?? ""}`.trim(),
+                          centro: centerName(suggested.clinicId),
+                        })
+                      : t("suggestionNoCenter", {
+                          nombre: `${suggested.name} ${suggested.lastName ?? ""}`.trim(),
+                        })}
+                  </span>
+                  <Button size="sm" variant="outline" onClick={() => pickPersonal(suggested.id)}>
+                    {t("suggestionLink")}
+                  </Button>
+                </div>
+              )}
               <Field label={t("centro")} hint={t("centroHint")}>
                 <Select
                   value={centroId || undefined}
@@ -263,6 +310,11 @@ export function InviteDialog({
                     <SelectValue placeholder={t("centroPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
+                    {centros.length > 1 && (
+                      <SelectItem value={ALL_CENTERS}>
+                        {t("centroTodos", { n: centros.length })}
+                      </SelectItem>
+                    )}
                     {centros.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
