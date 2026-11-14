@@ -4,18 +4,28 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { FrontdeskColumna, Sesion } from "@/lib/api/frontdesk";
+import { getSessionSheet } from "@/lib/api/frontdesk-sheet";
 import { Input } from "@/components/ui/input";
 
 // Celda de MEDICIÓN (número con unidad, p. ej. aplicadas/cantidad): auto-guarda mientras se edita
 // (debounced) sin esperar el blur. Extraído de fila-sesion.tsx.
+//
+// APLICADAS (BE PR #598, handoff laser-sesion-del-dia-y-areas): si la visita no tiene nada guardado
+// todavía, se precarga `sheet.areas` de la hoja de la visita como valor PROPUESTO (visible, editable,
+// marcado con un halo + tooltip) — nunca se escribe solo por abrir el tablero: recién se guarda cuando
+// el usuario confirma (sale del campo) o lo edita, igual que cualquier otro valor tecleado a mano.
 export function MedicionCell({
   col,
   sesion,
+  sessionId,
+  centroId,
   disabled,
   onSave,
 }: {
   col: FrontdeskColumna;
   sesion?: Sesion;
+  sessionId?: string;
+  centroId?: string;
   disabled: boolean;
   onSave: (valor: number) => void;
 }) {
@@ -23,17 +33,28 @@ export function MedicionCell({
   const r = (col.render ?? {}) as { dato?: string; unidadKey?: string; min?: number; max?: number; paso?: number };
   const dato = r.dato ?? col.clave;
   const actual = (sesion?.data as Record<string, unknown> | null | undefined)?.[dato];
-  const [val, setVal] = React.useState(actual != null ? String(actual) : "");
-  // SINCRONIZAR con el valor persistido cuando cambia (la sesión llega tarde por el fetch, o el board
-  // se refresca tras guardar) — patrón "ajustar estado al cambiar la prop". Antes `val` se fijaba una
-  // sola vez y quedaba vacío aunque el BE tuviera el dato → parecía que "no persistía". No se pisa lo
-  // que el usuario está escribiendo (solo si el input NO está enfocado).
-  const [visto, setVisto] = React.useState(actual);
+
+  const [propuesto, setPropuesto] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    if (dato !== "aplicadas" || actual != null || propuesto != null || !sessionId) return;
+    getSessionSheet(sessionId, centroId)
+      .then((h) => setPropuesto(h.areas ?? null))
+      .catch(() => {});
+  }, [dato, actual, propuesto, sessionId, centroId]);
+
+  const fuente = actual ?? (propuesto != null ? propuesto : undefined);
+  const [val, setVal] = React.useState(fuente != null ? String(fuente) : "");
+  // SINCRONIZAR con el valor persistido (o el propuesto, mientras no haya nada persistido) cuando
+  // cambia — patrón "ajustar estado al cambiar la prop". Antes `val` se fijaba una sola vez y quedaba
+  // vacío aunque el BE tuviera el dato → parecía que "no persistía". No se pisa lo que el usuario está
+  // escribiendo (solo si el input NO está enfocado).
+  const [visto, setVisto] = React.useState(fuente);
   const [focused, setFocused] = React.useState(false);
-  if (actual !== visto && !focused) {
-    setVisto(actual);
-    setVal(actual != null ? String(actual) : "");
+  if (fuente !== visto && !focused) {
+    setVisto(fuente);
+    setVal(fuente != null ? String(fuente) : "");
   }
+  const esPropuesto = actual == null && propuesto != null && val === String(propuesto);
 
   const commit = () => {
     setFocused(false);
@@ -69,8 +90,9 @@ export function MedicionCell({
         onChange={(e) => setVal(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
-        className="h-7 w-20 text-right tabular-nums"
+        className={"h-7 w-20 text-right tabular-nums" + (esPropuesto ? " border-dashed text-muted-foreground" : "")}
         aria-label={tRoot(col.labelKey)}
+        title={esPropuesto ? tRoot("frontdesk.aplicadasPropuesto") : undefined}
       />
       {r.unidadKey && <span className="text-xs text-muted-foreground">{tRoot(r.unidadKey)}</span>}
     </span>

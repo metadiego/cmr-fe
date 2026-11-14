@@ -2166,7 +2166,8 @@
     "saldoError": "Could not load availability",
     "sinPaquetes": "No pending packages",
     "pendienteTotal": "Total pending",
-    "sesionXdeN": "Session {x} of {n}",
+    "sesionXdeN": "Next: {x} of {n}",
+    "aplicadasPropuesto": "Suggested from availability — confirm or edit",
     "mult": {
       "dias": "days",
       "areas": "areas",
@@ -3620,11 +3621,15 @@
       "badge": "Show counter",
       "allowSessionFixWithoutPackage": "Allow fixing sessions without a package",
       "allowSessionFixWithoutPackageHint": "In Frontdesk, lets staff correct a patient's session count for this service even if they have no package purchased yet.",
+      "primaryPackageRule": "Session number when it consumes several packages",
+      "primaryPackageRuleHint": "Which package numbers the visit when the service uses more than one at once (e.g. laser: MLS + HILT together).",
       "activo": "Active",
       "startStep": "Minutes between start times",
       "startStepHint": "60 = on the hour only, like the call-center sheet. Empty = any slot of the day. It does not change the duration.",
       "startStepAny": "Any time"
     },
+    "primaryPackageRuleRow": "Per row (each package counts its own session)",
+    "primaryPackageRuleMostDelivered": "The one with the most delivered (e.g. MLS over the HILT anchor)",
     "centro": {
       "todos": "All centers"
     },

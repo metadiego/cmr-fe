@@ -2166,7 +2166,8 @@
     "saldoError": "No se pudo cargar la disponibilidad",
     "sinPaquetes": "Sin paquetes pendientes",
     "pendienteTotal": "Pendiente total",
-    "sesionXdeN": "Sesión {x} de {n}",
+    "sesionXdeN": "Próxima: {x} de {n}",
+    "aplicadasPropuesto": "Sugerido desde la disponibilidad — confirma o edita",
     "mult": {
       "dias": "días",
       "areas": "áreas",
@@ -3620,11 +3621,15 @@
       "badge": "Mostrar contador",
       "allowSessionFixWithoutPackage": "Permitir fijar sesiones sin paquete",
       "allowSessionFixWithoutPackageHint": "En Frontdesk, deja corregir el número de sesión de un paciente en este servicio aunque no tenga ningún paquete comprado todavía.",
+      "primaryPackageRule": "Número de sesión cuando consume varios paquetes",
+      "primaryPackageRuleHint": "Cuál paquete numera la visita cuando el servicio usa más de uno a la vez (p. ej. láser: MLS + HILT juntos).",
       "activo": "Activo",
       "startStep": "Minutos entre horas de inicio",
       "startStepHint": "60 = solo en punto, como la hoja del call center. Vacío = cualquier hora del día. No cambia la duración.",
       "startStepAny": "Cualquier hora"
     },
+    "primaryPackageRuleRow": "Por renglón (cada paquete cuenta su propia sesión)",
+    "primaryPackageRuleMostDelivered": "El que tiene más entregas (p. ej. MLS sobre el ancla HILT)",
     "centro": {
       "todos": "Todos los centros"
     },

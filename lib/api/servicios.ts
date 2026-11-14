@@ -17,6 +17,11 @@ export type Servicio = components["schemas"]["ServicioEntity"] & {
   // «Estadísticas Diarias» muestra «pac. / u.» SOLO en el servicio que lo declara (hoy: Sueroterapia
   // Vit C, `statisticsUnitKey: "cantidad"`), nunca por nombre. Ver lib/estadisticas/services.ts.
   statisticsUnitKey: string | null;
+  // Cómo numerar la SESIÓN cuando la visita consume más de un paquete a la vez (BE #598): "row" (cada
+  // paquete cuenta su propio renglón, el default histórico) o "most_delivered" (el paquete con más
+  // entregas numera la visita, p. ej. láser: MLS sobre el ancla HILT). Handoff
+  // laser-sesion-del-dia-y-areas-handoff-be.md.
+  primaryPackageRule: "row" | "most_delivered";
 };
 
 function asArray<T>(res: unknown): T[] {
@@ -25,12 +30,14 @@ function asArray<T>(res: unknown): T[] {
   return Array.isArray(items) ? (items as T[]) : [];
 }
 
-// `allowSessionFixWithoutPackage` hand-added for the same reason as `Servicio` above.
+// `allowSessionFixWithoutPackage`/`primaryPackageRule` hand-added for the same reason as `Servicio` above.
 export type CreateServicioPayload = components["schemas"]["CreateServicioDto"] & {
   allowSessionFixWithoutPackage?: boolean;
+  primaryPackageRule?: "row" | "most_delivered";
 };
 export type UpdateServicioPayload = components["schemas"]["UpdateServicioDto"] & {
   allowSessionFixWithoutPackage?: boolean;
+  primaryPackageRule?: "row" | "most_delivered";
 };
 export type UpdateServicioPorClavePayload = components["schemas"]["UpdateServicioPorClaveDto"];
 

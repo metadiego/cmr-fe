@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import type { LaserTipo } from "@/lib/api/laser";
 import { getDisponibilidadServicio, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
+import { getSessionSheet, type SessionSheet } from "@/lib/api/frontdesk-sheet";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
@@ -65,7 +66,9 @@ export function FormatosModal({
   const cfg = React.useMemo(() => parseAcciones(formAcciones), [formAcciones]);
   const [report, setReport] = React.useState<ReportAccion | null>(null);
   const [generado, setGenerado] = React.useState(false);
-  const [sesion, setSesion] = React.useState<string>("");
+  // Sesión: null = usar el "n/n" AUTOMÁTICO (hoja de la visita → el paquete que corresponde al
+  // formato, HILT/MLS; si no casa, el `display` de la hoja). Editable por si acaso (override).
+  const [sesionOverride, setSesionOverride] = React.useState<string | null>(null);
   const [areasOverride, setAreasOverride] = React.useState<string | null>(null); // null = usar el de la disponibilidad
   // Enviar el técnico (ya conocido) al impreso, o dejarlo en blanco para llenar a mano como el papel.
   const [enviarTecnico, setEnviarTecnico] = React.useState(true);
@@ -79,8 +82,17 @@ export function FormatosModal({
   );
   const paquetes = dispRes.state.kind === "ok" ? dispRes.state.data : [];
 
+  // Hoja de la visita (BE #598, handoff laser-sesion-del-dia-y-areas): de aquí sale la SESIÓN del
+  // paquete correcto (MLS vs HILT, no el ancla "1/12" de la fila cuando la visita de hoy es la otra) y
+  // el respaldo de ÁREAS cuando la disponibilidad no las trae.
+  const sheetRes = useResource<SessionSheet | null>(
+    () => (open && sesionId ? getSessionSheet(sesionId, centro) : Promise.resolve(null)),
+    [open, sesionId, centro],
+  );
+  const sheet = sheetRes.state.kind === "ok" ? sheetRes.state.data : null;
+
   function elegir(r: ReportAccion) {
-    setSesion(String(sesionNN ?? "")); // n/n de la fila
+    setSesionOverride(null); // nace automática (hoja de la visita)
     setAreasOverride(null); // nacen del dato de la disponibilidad
     setReport(r);
     setGenerado(false);
@@ -96,11 +108,17 @@ export function FormatosModal({
   const tipo = ((report?.id || report?.function || report?.action || "") as string).toLowerCase() as LaserTipo;
   const esFormato = tipo === "hilt" || tipo === "mls";
   const pkg = tipo ? paquetes.find((p) => `${p.productoNombre ?? ""} ${p.sku ?? ""}`.toLowerCase().includes(tipo)) : undefined;
-  const areasAuto = pkg?.multiplicadores?.areas;
-  // Áreas DERIVADAS de la disponibilidad (editable: override manual tiene precedencia). Si el paquete NO trae
-  // áreas (p. ej. tras un cambio de protocolo a una terapia sin áreas), se deja VACÍO — nunca un 1 inventado
-  // (regla del BE: la respuesta del handoff).
+  // Áreas DERIVADAS, en orden: multiplicadores del paquete (disponibilidad) y, si no hay, `sheet.areas`
+  // (hoja de la visita). Editable: override manual tiene precedencia. Si ninguna trae áreas (p. ej. tras
+  // un cambio de protocolo a una terapia sin áreas), se deja VACÍO — nunca un 1 inventado (regla del BE).
+  const areasAuto = pkg?.multiplicadores?.areas ?? sheet?.areas ?? undefined;
   const areas = areasOverride ?? (areasAuto != null ? String(areasAuto) : "");
+  // Sesión DERIVADA: el "n/n" del paquete de la hoja que corresponde a este formato (HILT → el renglón
+  // cuyo sku/productName contiene "hilt"; MLS → el otro); si no casa, el `display` de la hoja; si la
+  // hoja todavía no llegó, el "n/n" de la fila (mismo orden que pedía el handoff).
+  const sheetPkg = tipo ? sheet?.packages.find((p) => `${p.productName ?? ""} ${p.sku ?? ""}`.toLowerCase().includes(tipo)) : undefined;
+  const sesionAuto = sheetPkg?.xy ?? sheet?.display ?? String(sesionNN ?? "");
+  const sesion = sesionOverride ?? sesionAuto;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -159,7 +177,7 @@ export function FormatosModal({
               <div className="space-y-1">
                 {/* Sesión como "n/n" (p. ej. 1/12): texto, nace puesta desde la fila, editable por si acaso. */}
                 <Label htmlFor="fmt-sesion">{t("colSesion")}</Label>
-                <Input id="fmt-sesion" inputMode="numeric" placeholder="n/n" value={sesion} onChange={(e) => setSesion(e.target.value)} />
+                <Input id="fmt-sesion" inputMode="numeric" placeholder="n/n" value={sesion} onChange={(e) => setSesionOverride(e.target.value)} />
               </div>
               <div className="space-y-1">
                 {/* Áreas por formato desde la DISPONIBILIDAD (MLS 4, HILT 2), editable. */}

@@ -13,6 +13,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Field/Toggle/GrupoSelect: piezas genéricas del formulario de servicio, extraídas de
 // servicios-admin.tsx (que vive en su ceiling de DEBT) para hacerle lugar a un campo nuevo sin
@@ -35,6 +45,66 @@ export function GrupoSelect({ value, onChange }: { value: string; onChange: (id:
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+// Cómo numerar la visita cuando el servicio consume más de un paquete a la vez (BE #598, p. ej.
+// láser: MLS + HILT juntos). "row" = cada paquete cuenta su propio renglón (default histórico);
+// "most_delivered" = el paquete con más entregas numera la visita.
+export function PrimaryPackageRuleSelect({
+  value,
+  onChange,
+}: {
+  value: "row" | "most_delivered";
+  onChange: (v: "row" | "most_delivered") => void;
+}) {
+  const t = useTranslations("servicios");
+  return (
+    <Field label={t("field.primaryPackageRule")} hint={t("field.primaryPackageRuleHint")}>
+      <Select value={value} onValueChange={(v) => onChange(v as "row" | "most_delivered")}>
+        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="row">{t("primaryPackageRuleRow")}</SelectItem>
+          <SelectItem value="most_delivered">{t("primaryPackageRuleMostDelivered")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </Field>
+  );
+}
+
+// Confirmación de edición multicentro: deja claro a cuántos/qué centros aplica, antes de tocarlos.
+export function MultiConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  body,
+  confirmLabel,
+  cancelLabel,
+  submitting,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  title: string;
+  body: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  submitting: boolean;
+  onConfirm: () => void;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{body}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} disabled={submitting}>{confirmLabel}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

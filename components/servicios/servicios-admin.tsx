@@ -20,7 +20,7 @@ import {
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { payloadBulkDirty } from "@/lib/servicios/bulk-diff";
-import { ColorField, Field, Toggle, GrupoSelect, StartStepField } from "@/components/servicios/servicio-form-fields";
+import { ColorField, Field, Toggle, GrupoSelect, StartStepField, PrimaryPackageRuleSelect, MultiConfirmDialog } from "@/components/servicios/servicio-form-fields";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useMe, isAdmin } from "@/hooks/use-me";
@@ -44,16 +44,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
@@ -396,6 +386,7 @@ type FormState = {
   requiereEnfermera: boolean;
   badge: boolean;
   allowSessionFixWithoutPackage: boolean;
+  primaryPackageRule: "row" | "most_delivered";
   activo: boolean;
   startStep: string; // startStepMinutes as typed ("" = every slot)
 };
@@ -410,6 +401,7 @@ const EMPTY: FormState = {
   requiereEnfermera: false,
   badge: true,
   allowSessionFixWithoutPackage: false,
+  primaryPackageRule: "row",
   activo: true,
   startStep: "",
 };
@@ -461,6 +453,7 @@ function ServicioForm({
           requiereEnfermera: servicio.requiresNurse,
           badge: servicio.badge,
           allowSessionFixWithoutPackage: servicio.allowSessionFixWithoutPackage,
+          primaryPackageRule: servicio.primaryPackageRule ?? "row",
           activo: servicio.active,
           startStep: servicio.startStepMinutes != null ? String(servicio.startStepMinutes) : "",
         }
@@ -491,6 +484,7 @@ function ServicioForm({
       requiresNurse: form.requiereEnfermera,
       badge: form.badge,
       allowSessionFixWithoutPackage: form.allowSessionFixWithoutPackage,
+      primaryPackageRule: form.primaryPackageRule,
       startStepMinutes: Number(form.startStep) > 0 ? Number(form.startStep) : null,
     };
   }
@@ -627,6 +621,10 @@ function ServicioForm({
                 onChange={(v) => set("allowSessionFixWithoutPackage", v)}
               />
             )}
+            {/* Igual que allowSessionFixWithoutPackage: es por centro, no entra en "aplicar a todos". */}
+            {!editandoTodos && (
+              <PrimaryPackageRuleSelect value={form.primaryPackageRule} onChange={(v) => set("primaryPackageRule", v)} />
+            )}
             {/* Activo NO se edita en multicentro (es por centro); sí en un-centro. */}
             {isEdit && !editandoTodos && <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />}
           </div>
@@ -638,23 +636,16 @@ function ServicioForm({
         </SheetContent>
       </Sheet>
 
-      {/* Confirmación de edición multicentro: deja claro a cuántos/qué centros aplica. */}
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("multiConfirmTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("multiConfirmBody", { n: afectados.length, centros: nombresCentros })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={guardarTodos} disabled={submitting}>
-              {t("multiConfirmOk")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <MultiConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={t("multiConfirmTitle")}
+        body={t("multiConfirmBody", { n: afectados.length, centros: nombresCentros })}
+        confirmLabel={t("multiConfirmOk")}
+        cancelLabel={tc("cancel")}
+        submitting={submitting}
+        onConfirm={guardarTodos}
+      />
     </>
   );
 }

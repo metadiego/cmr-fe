@@ -354,8 +354,8 @@ export function FilaSesion({
     if (c.tipo === "medicion" && c.render) {
       return (
         <MedicionCell
-          col={c}
-          sesion={sesion}
+          col={c} sesion={sesion}
+          sessionId={sesion?.id} centroId={centro}
           disabled={busy || cancelada}
           onSave={(valor) => run(() => guardarCelda(c.clave, valor, etiquetaCol(c)))}
         />
