@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { VolumeHighIcon, ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 import {
   getPanelDefinicion,
@@ -22,7 +22,6 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { colorForName } from "@/lib/frontdesk/color";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingRegion } from "@/components/kit/skeletons";
 import { createNursingAlarm, type AlarmTone, type NursingAlarm } from "@/lib/panel/nursing-alarm";
@@ -46,21 +45,16 @@ function tinteHex(color?: string | null): string | undefined {
 }
 
 // Alarm ON by default (lib/panel/nursing-alarm.ts). If the browser keeps the sound blocked until a
-// gesture, the FIRST touch/click/key anywhere on the page unlocks it; the button is only a visible hint.
+// gesture, the FIRST touch/click/key anywhere on the page unlocks it. There is no sound button at all.
 function useAlarma() {
   const ref = React.useRef<NursingAlarm | null>(null);
-  const [bloqueado, setBloqueado] = React.useState(false);
   React.useEffect(() => {
     const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const alarm = createNursingAlarm({ createContext: () => new AC() });
     ref.current = alarm;
-    // Deferred (not a synchronous setState inside the effect).
-    queueMicrotask(() => setBloqueado(alarm.needsGesture()));
     const desbloquear = () => {
       void alarm.unlock().then(() => {
-        const sigue = alarm.needsGesture();
-        setBloqueado(sigue);
-        if (!sigue) quitar();
+        if (!alarm.needsGesture()) quitar();
       });
     };
     const eventos = ["pointerdown", "keydown", "touchstart"] as const;
@@ -70,7 +64,7 @@ function useAlarma() {
   }, []);
   const start = React.useCallback((tono: AlarmTone) => ref.current?.start(tono), []);
   const stop = React.useCallback(() => ref.current?.stop(), []);
-  return { bloqueado, start, stop };
+  return { start, stop };
 }
 
 export function PanelEnfermeria({ centro }: { centro?: string }) {
@@ -210,16 +204,11 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     <PageContainer>
       <PageHeader title={tRoot(def?.panel.labelKey ?? "panel.enfermeria")} />
 
-      {/* Toolbar: no filters on this kiosk; live status + the sound activation sit on the right. */}
+      {/* Toolbar: no filters on this kiosk; only the live status on the right. The sound has NO button: it is
+          always on, and if the browser holds it until a gesture, the first touch anywhere unlocks it (owner, 14-nov). */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
-          {alarma.bloqueado && (
-            <Button variant="outline" title={t("activarSonido")}>
-              <HugeiconsIcon icon={VolumeHighIcon} data-icon="inline-start" />
-              {t("activarSonido")}
-            </Button>
-          )}
         </div>
       </div>
 
