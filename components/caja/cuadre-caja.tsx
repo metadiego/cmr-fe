@@ -570,6 +570,8 @@ function Editor({
         subtotalesTarjeta={subtotalesTarjeta}
         firmas={signOff.printed}
         firmaTexto={signOff.statement}
+        reconciliationId={cuadreInicial?.id}
+        centroId={centro}
         resumen={{
           inicio,
           salesCash,
