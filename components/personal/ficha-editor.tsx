@@ -23,11 +23,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import { useSaveSection } from "@/components/personal/save-group";
+import { normalizeResponsibilities, sameResponsibilities, showsSpecialty } from "@/lib/personal/responsibilities";
 
-// Editor COMPLETO de la ficha de personal (handoff personal-crud-completo): identidad (nombre, apellido,
-// especialidad, teléfono, email, sexo, color) + cargo + capacidades, con un único Guardar. La baja/reactivar
-// (active) es su propio botón para que sea un gesto consciente. `initials` NO se edita: el BE las recalcula.
-// Los centros van en su bloque aparte (regla del BE: endpoint propio).
+// The editable fields of a staff record: identity, job title and responsibilities. Saved by the record's
+// single "Save" (save-group.tsx). Phone, sex and color are not shown: nothing reads them and nobody
+// filled them (production, 14-nov-2026); the API still accepts them. Specialty only for doctors.
+// `initials` is not edited: the BE recomputes it. Centers have their own section (own endpoint).
 const NO_CARGO = "__none__";
 
 export function FichaEditor({
@@ -35,75 +37,105 @@ export function FichaEditor({
   cargoCatalogo,
   capacidadOpciones,
   centro,
-  onChanged,
 }: {
   persona: Personal;
   cargoCatalogo: CargoCatalogo[];
   capacidadOpciones: string[];
   centro?: string;
-  onChanged: () => void;
 }) {
   const t = useTranslations("personalFicha");
   const tRoot = useTranslations();
-  const p = persona as Personal & { sex?: string | null; color?: string | null };
   const [name, setName] = React.useState(persona.name ?? "");
   const [lastName, setLastName] = React.useState(persona.lastName ?? "");
   const [specialty, setSpecialty] = React.useState(persona.specialty ?? "");
-  const [phone, setPhone] = React.useState(persona.phone ?? "");
   const [email, setEmail] = React.useState(persona.email ?? "");
-  const [sex, setSex] = React.useState(p.sex ?? "");
-  const [color, setColor] = React.useState(p.color || "#4a90d9");
   const [cargo, setCargo] = React.useState(persona.jobTitle ?? "");
-  const [caps, setCaps] = React.useState<string[]>(persona.capabilities ?? []);
-  const [busy, setBusy] = React.useState(false);
+  const [caps, setCaps] = React.useState<string[]>(() => normalizeResponsibilities(persona.capabilities));
 
-  const cargoLabel = (clave: string) => {
-    const c = cargoCatalogo.find((x) => x.slug === clave);
-    if (c?.labelKey && tRoot.has(c.labelKey)) return tRoot(c.labelKey);
-    return c?.name ?? clave;
+  const label = (slug: string) => {
+    const c = cargoCatalogo.find((x) => x.slug === slug);
+    const key = c?.labelKey || `personal.cargo.${slug}`;
+    if (tRoot.has(key)) return tRoot(key);
+    return c?.name ?? slug;
   };
   const claves = cargoCatalogo.map((c) => c.slug);
   const cargos = cargo && !claves.includes(cargo) ? [...claves, cargo] : claves;
+  const options = [...new Set([...capacidadOpciones, ...caps])];
   const toggleCap = (c: string) => setCaps((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+  const withSpecialty = showsSpecialty(cargo, caps, persona.specialty);
 
   const norm = (s: string) => s.trim();
-  const sucio =
+  const dirty =
     norm(name) !== (persona.name ?? "") ||
     norm(lastName) !== (persona.lastName ?? "") ||
     norm(specialty) !== (persona.specialty ?? "") ||
-    norm(phone) !== (persona.phone ?? "") ||
     norm(email) !== (persona.email ?? "") ||
-    (sex || "") !== (p.sex ?? "") ||
-    (color || "") !== (p.color ?? "") ||
     cargo !== (persona.jobTitle ?? "") ||
-    JSON.stringify([...caps].sort()) !== JSON.stringify([...(persona.capabilities ?? [])].sort());
+    !sameResponsibilities(caps, persona.capabilities);
 
-  async function guardar() {
-    if (busy || !sucio || !norm(name)) return;
-    setBusy(true);
-    try {
-      const payload: StaffEditable = {
-        name: norm(name),
-        lastName: norm(lastName) || null,
-        specialty: norm(specialty) || null,
-        phone: norm(phone) || null,
-        email: norm(email) || null,
-        sex: sex || null,
-        color: color || undefined,
-        jobTitle: cargo || null,
-        capabilities: caps,
-      };
-      await updatePersonal(persona.id, payload, centro);
-      toast.success(t("guardado"));
-      onChanged();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+  useSaveSection("fields", dirty, async () => {
+    if (!norm(name)) throw new Error(t("nameRequired"));
+    const payload: StaffEditable = {
+      name: norm(name),
+      lastName: norm(lastName) || null,
+      specialty: norm(specialty) || null,
+      email: norm(email) || null,
+      jobTitle: cargo || null,
+      capabilities: caps,
+    };
+    await updatePersonal(persona.id, payload, centro);
+  });
 
-  async function cambiarActivo(active: boolean) {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Campo label={t("nombre")}><Input value={name} onChange={(e) => setName(e.target.value)} /></Campo>
+        <Campo label={t("apellido")}><Input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Campo>
+        <Campo label={t("email")}><EmailInput value={email} onValueChange={setEmail} /></Campo>
+        <Campo label={t("cargo")}>
+          <Select value={cargo || undefined} onValueChange={(v) => setCargo(v === NO_CARGO ? "" : v)}>
+            <SelectTrigger className="w-full"><SelectValue placeholder={t("cargoPlaceholder")} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NO_CARGO}>{t("cargoPlaceholder")}</SelectItem>
+              {cargos.map((c) => <SelectItem key={c} value={c}>{label(c)}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Campo>
+        {withSpecialty && (
+          <Campo label={t("especialidad")}><Input value={specialty} onChange={(e) => setSpecialty(e.target.value)} /></Campo>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <div className="space-y-0.5">
+          <Label>{t("responsibilities")}</Label>
+          <p className="text-xs text-muted-foreground">{t("responsibilitiesHelp")}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {options.map((c) => {
+            const on = caps.includes(c);
+            return (
+              <button key={c} type="button" aria-pressed={on} onClick={() => toggleCap(c)} className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
+              )}>{on ? "✓ " : ""}{label(c)}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      <StaffExtensionsSection staffId={persona.id} centro={centro} />
+    </div>
+  );
+}
+
+/** Deactivate / reactivate: its own deliberate action, not part of "Save". */
+export function StaffActiveButton({ persona, centro, onChanged }: { persona: Personal; centro?: string; onChanged: () => void }) {
+  const t = useTranslations("personalFicha");
+  const tRoot = useTranslations();
+  const [busy, setBusy] = React.useState(false);
+
+  async function setActive(active: boolean) {
     if (busy) return;
     setBusy(true);
     try {
@@ -117,88 +149,44 @@ export function FichaEditor({
     }
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Campo label={t("nombre")}><Input value={name} onChange={(e) => setName(e.target.value)} /></Campo>
-        <Campo label={t("apellido")}><Input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Campo>
-        <Campo label={t("email")}><EmailInput value={email} onValueChange={setEmail} /></Campo>
-        <Campo label={t("telefono")}><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></Campo>
-        <Campo label={t("especialidad")}><Input value={specialty} onChange={(e) => setSpecialty(e.target.value)} /></Campo>
-        <Campo label={t("sexo")}>
-          <Select value={sex || undefined} onValueChange={setSex}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="f">{t("sexoF")}</SelectItem>
-              <SelectItem value="m">{t("sexoM")}</SelectItem>
-            </SelectContent>
-          </Select>
-        </Campo>
-        <Campo label={t("cargo")}>
-          <Select value={cargo || undefined} onValueChange={(v) => setCargo(v === NO_CARGO ? "" : v)}>
-            <SelectTrigger className="w-full"><SelectValue placeholder={t("cargoPlaceholder")} /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NO_CARGO}>{t("cargoPlaceholder")}</SelectItem>
-              {cargos.map((c) => <SelectItem key={c} value={c}>{cargoLabel(c)}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </Campo>
-        <Campo label={t("color")}>
-          <div className="flex items-center gap-2">
-            <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-9 w-12 cursor-pointer rounded border bg-transparent p-0.5" aria-label={t("color")} />
-            <span className="font-mono text-xs text-muted-foreground">{color}</span>
-          </div>
-        </Campo>
-      </div>
-
-      <div className="grid gap-2">
-        <Label>{t("capacidades")}</Label>
-        <div className="flex flex-wrap gap-2">
-          {capacidadOpciones.map((c) => {
-            const on = caps.includes(c);
-            return (
-              <button key={c} type="button" onClick={() => toggleCap(c)} className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
-              )}>{c}</button>
-            );
-          })}
-        </div>
-      </div>
-
-      <StaffExtensionsSection staffId={persona.id} centro={centro} />
-
-      <div className="flex items-center justify-between border-t pt-3">
-        {persona.active === false ? (
-          <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => cambiarActivo(true)}>{t("reactivar")}</Button>
-        ) : (
-          <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" disabled={busy} onClick={() => cambiarActivo(false)}>{t("darDeBaja")}</Button>
-        )}
-        <Button size="sm" onClick={guardar} disabled={!sucio || busy || !norm(name)}>{busy ? t("guardando") : t("guardarCambios")}</Button>
-      </div>
-    </div>
+  return persona.active === false ? (
+    <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => setActive(true)}>{t("reactivar")}</Button>
+  ) : (
+    <Button type="button" variant="ghost" size="sm" className="text-destructive hover:text-destructive" disabled={busy} onClick={() => setActive(false)}>{t("darDeBaja")}</Button>
   );
 }
 
-// Una extensión por central telefónica (BE #553, handoff .personal/handoff-extensiones-por-central.md):
-// reemplaza el campo suelto «Extensión» (deprecado, el BE lo sigue espejando con `ucm-bayamon` mientras
-// el FE migre). Guarda APARTE del resto de la ficha: `PUT .../extensions` reemplaza la lista entera, no
-// tiene nada que ver con `sucio`/`guardar` de arriba. Centrales conocidas sugeridas por datalist, pero
-// es dato libre (otra central nueva se puede escribir igual).
+// One extension per phone system (BE #553): replaces the loose "extension" field (deprecated; the BE
+// still mirrors it from `ucm-bayamon`). Its own endpoint, `PUT .../extensions`, replaces the whole list;
+// it saves with the record's single "Save". Known phone systems are suggested, any other can be typed.
 const CENTRALES_CONOCIDAS = ["ucm-bayamon", "3cx"];
+type ExtensionRow = StaffExtension;
+const cleanRows = (rows: ExtensionRow[]) =>
+  rows.map((r) => ({ pbx: r.pbx.trim().toLowerCase(), extension: r.extension.trim() })).filter((r) => r.pbx && r.extension);
+
 function StaffExtensionsSection({ staffId, centro }: { staffId: string; centro?: string }) {
   const t = useTranslations("personalFicha");
   const tRoot = useTranslations();
   const res = useResource<StaffExtension[]>(() => getStaffExtensions(staffId, centro), [staffId, centro]);
   const [rows, setRows] = React.useState<StaffExtension[] | null>(null);
   const [prevData, setPrevData] = React.useState<StaffExtension[] | null>(null);
-  const [busy, setBusy] = React.useState(false);
+  const [saved, setSaved] = React.useState<StaffExtension[]>([]);
   const data = res.state.kind === "ok" ? res.state.data : null;
-  // Ajuste en render (no efecto): una carga fresca manda sobre lo que se estaba editando.
+  // Adjusted during render (no effect): a fresh load replaces whatever was being edited.
   if (data !== prevData) {
     setPrevData(data);
     setRows(data);
+    setSaved(data ?? []);
   }
+
+  const dirty = rows !== null && JSON.stringify(cleanRows(rows)) !== JSON.stringify(cleanRows(saved));
+  useSaveSection("extensions", dirty, async () => {
+    const clean = cleanRows(rows ?? []);
+    if (new Set(clean.map((r) => r.pbx)).size !== clean.length) throw new Error(t("extensionesCentralDuplicada"));
+    const result = await setStaffExtensions(staffId, clean, centro);
+    setRows(result);
+    setSaved(result);
+  });
 
   if (res.state.kind === "loading" || rows === null) return <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
   if (res.state.kind === "fail") return <p className="text-sm text-destructive">{res.state.message}</p>;
@@ -206,36 +194,15 @@ function StaffExtensionsSection({ staffId, centro }: { staffId: string; centro?:
   function setRow(i: number, patch: Partial<StaffExtension>) {
     setRows((prev) => (prev ?? []).map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   }
-  function quitar(i: number) {
+  function remove(i: number) {
     setRows((prev) => (prev ?? []).filter((_, idx) => idx !== i));
   }
-  function agregar() {
+  function add() {
     setRows((prev) => [...(prev ?? []), { pbx: "", extension: "" }]);
   }
 
-  async function guardar() {
-    const limpio = (rows ?? [])
-      .map((r) => ({ pbx: r.pbx.trim().toLowerCase(), extension: r.extension.trim() }))
-      .filter((r) => r.pbx && r.extension);
-    const claves = new Set(limpio.map((r) => r.pbx));
-    if (claves.size !== limpio.length) {
-      toast.error(t("extensionesCentralDuplicada"));
-      return;
-    }
-    setBusy(true);
-    try {
-      const guardado = await setStaffExtensions(staffId, limpio, centro);
-      setRows(guardado);
-      toast.success(t("guardado"));
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
-    <div className="space-y-2 border-t pt-3">
+    <div className="space-y-2 border-t pt-4">
       <Label>{t("extensionesTitulo")}</Label>
       <datalist id="centrales-conocidas">
         {CENTRALES_CONOCIDAS.map((c) => <option key={c} value={c} />)}
@@ -259,18 +226,15 @@ function StaffExtensionsSection({ staffId, centro }: { staffId: string; centro?:
               onChange={(e) => setRow(i, { extension: e.target.value })}
               className="w-32"
             />
-            <Button type="button" variant="ghost" size="icon" className="size-8 shrink-0 text-muted-foreground" onClick={() => quitar(i)} aria-label={t("extensionesQuitar")}>
+            <Button type="button" variant="ghost" size="icon" className="size-8 shrink-0 text-muted-foreground" onClick={() => remove(i)} aria-label={t("extensionesQuitar")}>
               <HugeiconsIcon icon={Delete02Icon} className="size-4" />
             </Button>
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between">
-        <Button type="button" variant="outline" size="sm" onClick={agregar}>
-          <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("extensionesAgregar")}
-        </Button>
-        <Button type="button" size="sm" disabled={busy} onClick={guardar}>{busy ? t("guardando") : t("extensionesGuardar")}</Button>
-      </div>
+      <Button type="button" variant="outline" size="sm" onClick={add}>
+        <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("extensionesAgregar")}
+      </Button>
     </div>
   );
 }

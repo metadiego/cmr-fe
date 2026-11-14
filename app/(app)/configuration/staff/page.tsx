@@ -7,7 +7,9 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { UserAccountIcon } from "@hugeicons/core-free-icons";
 
 import { listPersonalAll, getCargos, type Personal, type PersonalEnAlcance, type CargoCatalogo } from "@/lib/api/personal";
-import { FichaEditor } from "@/components/personal/ficha-editor";
+import { FichaEditor, StaffActiveButton } from "@/components/personal/ficha-editor";
+import { SaveGroup } from "@/components/personal/save-group";
+import { normalizeResponsibilities, responsibilityOptions, showsConsultaPreferences } from "@/lib/personal/responsibilities";
 import { NuevoPersonalDialog } from "@/components/personal/nuevo-personal-dialog";
 import { StaffList } from "@/components/personal/staff-list";
 import { CentrosDePersona, FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
@@ -77,11 +79,8 @@ export function StaffPanel() {
   const gridRef = React.useRef<HTMLDivElement>(null);
   const fillHeight = useFillViewportHeight(gridRef);
 
-  // Capacidades: derivadas de los valores REALES del personal (no hay catálogo aparte en el handoff).
-  const capacidadOpciones = React.useMemo(
-    () => [...new Set(personal.flatMap((p) => p.capabilities ?? []))].sort(),
-    [personal],
-  );
+  // Responsibilities offered: every tag in use by real staff (there is no separate catalogue).
+  const capacidadOpciones = React.useMemo(() => responsibilityOptions(personal), [personal]);
 
   const filtrados = personal
     .filter((p) => {
@@ -141,7 +140,7 @@ export function StaffPanel() {
               ehrCenterIds={ehrCenterIds}
               centro={selClinic}
               centroNombre={filter.showColumn ? (sel.clinicName ?? filter.nameOf(selClinic)) : ""}
-              onChanged={() => listRes.reload()}
+              onChanged={() => listRes.refresh()}
               onEhrChanged={() => ehrLinksRes.reload()}
             />
           ) : (
@@ -201,7 +200,7 @@ function FichaPersonal({
   // Hub de USUARIO en la MISMA pantalla (sin ir «más adentro»): la ficha, y —solo para quien hace
   // consultas, es decir tiene la capacidad «medico»— su agenda, pacientes y producción. La disponibilidad
   // (horarios, días libres, permisos, vacaciones) es para TODO usuario por igual. Ver hub-de-usuario-medicos.
-  const esMedico = (persona.capabilities ?? []).includes("medico");
+  const esMedico = normalizeResponsibilities(persona.capabilities).includes("medico");
   const puedeAgenda = esMedico && can("citas.read");
   const puedePacientes = esMedico && can("pacientes.read");
   const puedeProduccion = esMedico && can("citas.read");
@@ -230,40 +229,39 @@ function FichaPersonal({
           {puedeProduccion && <TabsTrigger value="produccion">{tRoot("medicoHub.tabs.production")}</TabsTrigger>}
         </TabsList>
 
-        <TabsContent value="ficha" className="space-y-6 pt-2">
-          {/* Ficha completa: identidad + cargo + capacidades + color + baja/reactivar (handoff personal-crud-completo). */}
-          <FichaEditor persona={persona} cargoCatalogo={cargoCatalogo} capacidadOpciones={capacidadOpciones} centro={centro} onChanged={onChanged} />
+        <TabsContent value="ficha" className="pt-2">
+          {/* One "Save" for every section below (save-group.tsx); deactivate is its own action. */}
+          <SaveGroup onSaved={onChanged} footerStart={<StaffActiveButton persona={persona} centro={centro} onChanged={onChanged} />}>
+            <div className="space-y-6">
+              <FichaEditor persona={persona} cargoCatalogo={cargoCatalogo} capacidadOpciones={capacidadOpciones} centro={centro} />
 
-          {/* Centros de servicio: donde la persona sale en los desplegables. El BE devuelve TODOS los centros
-              con un `activo` por cada uno (ya resuelto, sin replicar reglas). Marca/desmarca y guarda. */}
-          <CentrosDePersona persona={persona} centro={centro} />
+              {/* Service centers: where the person appears in the dropdowns. */}
+              <CentrosDePersona persona={persona} centro={centro} />
 
-          {/* Aterrizar en Consulta al entrar a Frontdesk (handoff aterrizar-en-consulta-handoff-fe):
-              BE PR #386 EN REVISIÓN, sin desplegar a esta fecha — el interruptor guarda su propio PUT,
-              separado de cargo/capacidades, para que un 400 de "campo desconocido" de hoy no toque nada
-              más. Mientras el BE no despliegue, esto no hace nada observable (el campo no existe). */}
-          <FrontdeskConsultaPreferencia persona={persona} centro={centro} />
+              {/* Front-desk preferences, only for front-desk staff (or whoever already has one set). */}
+              {showsConsultaPreferences(persona) && <FrontdeskConsultaPreferencia persona={persona} centro={centro} />}
 
-          {/* Acceso al sistema */}
-          <div className="border-t pt-4">
-            <Label className="mb-2 block">{t("acceso")}</Label>
-            {persona.profileId ? (
-              <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
-                <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
-                <span>{persona.email || t("conCuenta")}{persona.profileId ? ` · ${t("aprobado")}` : ""}</span>
-                <Link href="/admin" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
+              {/* System access */}
+              <div className="border-t pt-4">
+                <Label className="mb-2 block">{t("acceso")}</Label>
+                {persona.profileId ? (
+                  <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
+                    <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
+                    <span>{persona.email || t("conCuenta")} · {t("aprobado")}</span>
+                    <Link href="/admin/users" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
+                    <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
-                <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
-              </div>
-            )}
-          </div>
 
-          {/* Vincular con el EHR: en TODA ficha, sin excepción (decisión del dueño, 01-oct-2026) —
-              cualquier cargo puede necesitar la cuenta, no se gatea por capacidad/rol. */}
-          <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centerIds={ehrCenterIds} centro={centro} onChanged={onEhrChanged} />
+              {/* EHR account: on every record (owner, 01-oct-2026): any job title may need it. */}
+              <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centerIds={ehrCenterIds} centro={centro} onChanged={onEhrChanged} />
+            </div>
+          </SaveGroup>
         </TabsContent>
 
         <TabsContent value="disponibilidad" className="pt-2">
