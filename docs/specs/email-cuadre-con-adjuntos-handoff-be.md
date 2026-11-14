@@ -18,3 +18,13 @@ backend (el FE no tiene preferencia aquí, ambos resuelven el mismo pedido del d
 ## FE
 Sin cambios pendientes de este lado — `enviarCuadreEmail` ya manda `id`/`emails`; nada que agregar en
 el body a menos que el backend pida algo explícito (p. ej. un flag `incluirAdjuntos`).
+
+## Actualización 14-nov — el cuadre TOTAL del día también
+
+BE #594 ya resolvió esto para `POST /cash/reconciliations/:id/email` (un solo cuadre). El dueño pide
+lo mismo para el cuadre TOTAL del día: `enviarCuadreTotalEmail` → `POST /cash/total-reconciliation/email`.
+Ese cuadre no tiene un solo `reconciliationId` propio — el FE ya resolvió el lado de pantalla/impresión
+mezclando los adjuntos de TODOS los cuadres del día (`lib/caja/day-attachments.ts`, mismo criterio que
+`GET /cash/reconciliations/:id/attachments` por cuadre, agregado del lado del cliente). Pedido: que el
+email del cuadre TOTAL haga esa misma mezcla del lado del backend y la mande igual que #594 (páginas
+extra del PDF o adjuntos aparte, lo que sea más simple).
