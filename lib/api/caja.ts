@@ -315,7 +315,17 @@ export function cerrarCuadre(id: string): Promise<CuadreConItems> {
 // The sheet by email FOR REAL (BE #478): HTML body + PDF attachment. `emails` empty = the center's
 // default list (preference caja.emailRecipients). Answers ONLY when the SMTP server accepted it; 503
 // MAIL_NOT_CONFIGURED / 502 MAIL_NOT_SENT / 400 no recipients come back as ApiError.
-export type CashEmailSent = { sent: boolean; to: string[]; messageId: string | null; notificationId: string };
+// `attachmentsIncluded`/`attachmentsSkipped` (BE PR #594-595): el correo manda los settlements
+// escaneados del cuadre (o, en el cuadre TOTAL del día, los de TODOS los cuadres de ese día) como
+// adjuntos aparte — tope 15MB, lo que no cupo o no se pudo leer queda afuera y se cuenta aquí.
+export type CashEmailSent = {
+  sent: boolean;
+  to: string[];
+  messageId: string | null;
+  notificationId: string;
+  attachmentsIncluded?: number;
+  attachmentsSkipped?: number;
+};
 
 function centerQs(centerId?: string | null): string {
   return centerId ? `?centerIds=${encodeURIComponent(centerId)}` : "";

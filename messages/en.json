@@ -4350,6 +4350,8 @@
       "saveDefault": "Save as the center's list",
       "defaultSaved": "Center list saved",
       "sentTo": "Sent to {to}",
+      "attachmentsCount": "with {n, plural, one {# attachment} other {# attachments}}",
+      "attachmentsSkipped": "{n, plural, one {# attachment could not be included} other {# attachments could not be included}}",
       "notSent": "The mail server did not accept the message. It was not sent.",
       "notConfigured": "The server has no email configured. It was not sent.",
       "noRecipients": "Say who to send it to: no recipients and no center list."

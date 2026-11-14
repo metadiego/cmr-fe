@@ -59,9 +59,12 @@ export function CashEmailPanel({
     try {
       const r = await send(emails);
       if (r?.sent) {
-        const msg = t("sentTo", { to: (r.to ?? []).join(", ") });
+        const partes = [t("sentTo", { to: (r.to ?? []).join(", ") })];
+        if (r.attachmentsIncluded) partes.push(t("attachmentsCount", { n: r.attachmentsIncluded }));
+        const msg = partes.join(" ");
         setResult({ ok: true, msg });
         toast.success(msg);
+        if (r.attachmentsSkipped) toast.warning(t("attachmentsSkipped", { n: r.attachmentsSkipped }));
       } else {
         setResult({ ok: false, msg: t("notSent") });
       }
