@@ -1755,9 +1755,6 @@
       "email": "Email",
       "name": "Nombre",
       "lastName": "Apellido",
-      "accessMode": "Modo de acceso",
-      "operativo": "Operativo",
-      "gerencial": "Gerencial",
       "submit": "Invitar",
       "submitting": "Invitando…",
       "success": "{email} invitado.",
@@ -1779,6 +1776,7 @@
       "rol": "Rol",
       "rolPlaceholder": "Elige un rol",
       "rolHint": "Opcional. Si eliges rol SIN centro, el rol aplica en TODOS los centros.",
+      "rolAdminHint": "Para hacerlo administrador, dale el rol Administrador desde sus accesos una vez creado.",
       "clone": {
         "label": "Clonar de (opcional)",
         "hint": "Copia su acceso ahora mismo. Después, cada usuario se administra por separado.",
@@ -1790,7 +1788,6 @@
         "roles": "{n} roles ({ya} ya tenía)",
         "permisos": "{n} excepciones ({ya} ya tenía)",
         "centros": "{n} centros ({ya} ya tenía)",
-        "modo": "El usuario pasa a modo {modo} (solo lectura), como el original.",
         "ok": "Acceso copiado de {origen}.",
         "falloAviso": "El usuario se creó, pero no se pudo copiar el acceso. Reintenta desde su ficha de accesos."
       }

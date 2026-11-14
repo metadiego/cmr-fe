@@ -1755,9 +1755,6 @@
       "email": "Email",
       "name": "First name",
       "lastName": "Last name",
-      "accessMode": "Access mode",
-      "operativo": "Operational",
-      "gerencial": "Managerial",
       "submit": "Invite",
       "submitting": "Inviting…",
       "success": "{email} invited.",
@@ -1779,6 +1776,7 @@
       "rol": "Role",
       "rolPlaceholder": "Pick a role",
       "rolHint": "Optional. Choosing a role WITHOUT a center grants it in ALL centers.",
+      "rolAdminHint": "To make them an administrator, give them the Administrator role from their access once created.",
       "clone": {
         "label": "Clone from (optional)",
         "hint": "Copies their access right now. After that, each user is managed separately.",
@@ -1790,7 +1788,6 @@
         "roles": "{n} roles ({ya} already had)",
         "permisos": "{n} exceptions ({ya} already had)",
         "centros": "{n} centers ({ya} already had)",
-        "modo": "The user switches to {modo} mode (read-only), like the original.",
         "ok": "Access copied from {origen}.",
         "falloAviso": "The user was created, but access could not be copied. Retry from their access sheet."
       }
