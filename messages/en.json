@@ -4428,6 +4428,7 @@
       "cropRetake": "Retake preview",
       "cropFullPage": "Scan everything",
       "cropUseSelection": "Scan this area",
+      "cropRegionDebug": "Area: x={x}, y={y}, width={width}, height={height} (1/300″)",
       "delete": "Delete",
       "deleteConfirmTitle": "Delete this attachment",
       "deleteConfirmDesc": "It's removed from the cash sheet's list; this can't be undone from here.",

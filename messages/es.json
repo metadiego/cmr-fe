@@ -4428,6 +4428,7 @@
       "cropRetake": "Repetir vista previa",
       "cropFullPage": "Escanear todo",
       "cropUseSelection": "Escanear esta área",
+      "cropRegionDebug": "Área: x={x}, y={y}, ancho={width}, alto={height} (1/300″)",
       "delete": "Eliminar",
       "deleteConfirmTitle": "Eliminar este adjunto",
       "deleteConfirmDesc": "Se quita de la lista del cuadre; no se puede deshacer desde aquí.",

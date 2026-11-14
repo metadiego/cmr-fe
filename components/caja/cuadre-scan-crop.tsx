@@ -28,7 +28,18 @@ export function CuadreScanCrop({
   const t = useTranslations("caja.attachments");
   const imgRef = React.useRef<HTMLImageElement>(null);
   const [drag, setDrag] = React.useState<Drag | null>(null);
+  const [imgW, setImgW] = React.useState(0);
+  const [imgH, setImgH] = React.useState(0);
   const hasSelection = !!drag && drag.w >= 4 && drag.h >= 4;
+  const region =
+    hasSelection && imgW && imgH
+      ? {
+          x: Math.round((drag.x * CASH_SCAN_PAGE_UNITS.width) / imgW),
+          y: Math.round((drag.y * CASH_SCAN_PAGE_UNITS.height) / imgH),
+          width: Math.max(CASH_SCAN_MIN_REGION, Math.round((drag.w * CASH_SCAN_PAGE_UNITS.width) / imgW)),
+          height: Math.max(CASH_SCAN_MIN_REGION, Math.round((drag.h * CASH_SCAN_PAGE_UNITS.height) / imgH)),
+        }
+      : null;
 
   function pointerDown(e: React.PointerEvent) {
     if (busy) return;
@@ -49,14 +60,6 @@ export function CuadreScanCrop({
   }
 
   function confirmSelection() {
-    if (!hasSelection || !imgRef.current) return onConfirm(null);
-    const rect = imgRef.current.getBoundingClientRect();
-    const region: CashScanRegion = {
-      x: Math.round((drag.x * CASH_SCAN_PAGE_UNITS.width) / rect.width),
-      y: Math.round((drag.y * CASH_SCAN_PAGE_UNITS.height) / rect.height),
-      width: Math.max(CASH_SCAN_MIN_REGION, Math.round((drag.w * CASH_SCAN_PAGE_UNITS.width) / rect.width)),
-      height: Math.max(CASH_SCAN_MIN_REGION, Math.round((drag.h * CASH_SCAN_PAGE_UNITS.height) / rect.height)),
-    };
     onConfirm(region);
   }
 
@@ -70,11 +73,27 @@ export function CuadreScanCrop({
         onPointerUp={() => {}}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada efímera (10 min); no vale la pena el remote-pattern de next/image para esto. */}
-        <img ref={imgRef} src={previewUrl} alt="" className="block max-h-[60vh] max-w-full rounded-md border" draggable={false} />
+        <img
+          ref={imgRef}
+          src={previewUrl}
+          alt=""
+          className="block max-h-[60vh] max-w-full rounded-md border"
+          draggable={false}
+          onLoad={(e) => {
+            const r = e.currentTarget.getBoundingClientRect();
+            setImgW(r.width);
+            setImgH(r.height);
+          }}
+        />
         {drag && (drag.w > 2 || drag.h > 2) && (
           <div className="pointer-events-none absolute border-2 border-primary bg-primary/10" style={{ left: drag.x, top: drag.y, width: drag.w, height: drag.h }} />
         )}
       </div>
+      {region && (
+        <p className="font-mono text-xs text-muted-foreground">
+          {t("cropRegionDebug", { x: region.x, y: region.y, width: region.width, height: region.height })}
+        </p>
+      )}
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>{t("scanCancel")}</Button>
         <Button type="button" variant="outline" onClick={onRetake} disabled={busy}>{t("cropRetake")}</Button>
