@@ -21,6 +21,14 @@ import { Tooltip } from "@/components/ui/tooltip";
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+const horaDe = (iso: string) => new Date(iso).toLocaleTimeString("es-PR", { hour: "2-digit", minute: "2-digit" });
+
+// Minutos válidos del catálogo (BE PR #596: `durationOptions`, p.ej. Descanso [10,15,30,45,60]) —
+// enteros positivos, sin repetir, de menor a mayor. Vacío = ese estatus no pide duración (se aplica
+// directo, como antes).
+function duracionesDe(tipo: NurseStatusTipo): number[] {
+  return [...new Set((tipo.durationOptions ?? []).filter((n): n is number => Number.isInteger(n) && n > 0))].sort((a, b) => a - b);
+}
 
 // Botón "Estatus de enfermera" COMPARTIDO (frontdesk + panel de enfermería): trigger con burbuja roja =
 // cuántas enfermeras tienen estatus AHORA, y un modal para ponerlo/quitarlo. La parrilla recorre el
@@ -47,6 +55,11 @@ export function NurseStatusButton({
   const [sel, setSel] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [gen, setGen] = React.useState(0);
+  // Estatus con `durationOptions` (BE PR #596): se elige el tipo primero, y mientras no se escoja
+  // duración (o "Sin límite") no se aplica nada todavía. Se limpia al cambiar de enfermera o cerrar
+  // el panel (en los propios onChange/onOpenChange, abajo) — no tiene sentido dejarla pendiente para
+  // otra persona.
+  const [pendienteDuracion, setPendienteDuracion] = React.useState<NurseStatusTipo | null>(null);
 
   // El estatus VIVO se pide siempre (para la burbuja), aunque el modal esté cerrado; refresca tras poner/quitar.
   React.useEffect(() => {
@@ -71,12 +84,13 @@ export function NurseStatusButton({
   const tipoLabel = (x: NurseStatusTipo) => (tRoot.has(x.labelKey) ? tRoot(x.labelKey) : x.name);
   const nombreDe = (a: NurseStatusActual) => a.personalNombre ?? roster.find((r) => r.id === a.staffId)?.nombre ?? a.staffId.slice(0, 8);
 
-  async function aplicar(personalId: string, statusTipoId: string | null) {
+  async function aplicar(personalId: string, statusTipoId: string | null, durationMinutes?: number) {
     if (!personalId) return;
     setBusy(true);
     try {
-      await setNurseStatus({ staffId: personalId, statusTypeId: statusTipoId ?? undefined }, centro);
+      await setNurseStatus({ staffId: personalId, statusTypeId: statusTipoId ?? undefined, durationMinutes }, centro);
       setGen((g) => g + 1);
+      setPendienteDuracion(null);
       onChanged?.();
     } catch (err) {
       toastError(err, tRoot);
@@ -86,7 +100,7 @@ export function NurseStatusButton({
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={(v) => { setOpen(v); setPendienteDuracion(null); }}>
       <Tooltip content={t("nurseTitle")}>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="relative" aria-label={t("nurseTitle")}>
@@ -108,7 +122,7 @@ export function NurseStatusButton({
         <div className="mt-4 space-y-3">
           <select
             value={sel}
-            onChange={(e) => setSel(e.target.value)}
+            onChange={(e) => { setSel(e.target.value); setPendienteDuracion(null); }}
             className="w-full rounded-md border bg-background px-3 py-2 text-sm"
           >
             <option value="">{t("nurseElegir")}</option>
@@ -125,7 +139,7 @@ export function NurseStatusButton({
                   key={x.id}
                   type="button"
                   disabled={!sel || busy}
-                  onClick={() => aplicar(sel, x.id)}
+                  onClick={() => (duracionesDe(x).length > 0 ? setPendienteDuracion(x) : aplicar(sel, x.id))}
                   className="rounded-md border px-2 py-1.5 text-xs font-medium transition-colors disabled:opacity-40"
                   style={x.color ? { borderColor: x.color, color: x.color } : undefined}
                 >
@@ -133,6 +147,38 @@ export function NurseStatusButton({
                 </button>
               ))}
           </div>
+
+          {/* Duración del estatus elegido (BE PR #596): un botón por opción del catálogo + "Sin límite". */}
+          {pendienteDuracion && (
+            <div className="space-y-2 rounded-md border p-2.5">
+              <p className="text-xs font-medium">{t("nurseElegirDuracion", { tipo: tipoLabel(pendienteDuracion) })}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {duracionesDe(pendienteDuracion).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    disabled={busy}
+                    onClick={() => aplicar(sel, pendienteDuracion.id, m)}
+                    className="min-w-12 flex-1 rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-40"
+                  >
+                    {t("nurseMinutos", { n: m })}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => aplicar(sel, pendienteDuracion.id)}
+                  className="min-w-12 flex-1 rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-40"
+                >
+                  {t("nurseSinLimite")}
+                </button>
+              </div>
+              <button type="button" disabled={busy} onClick={() => setPendienteDuracion(null)} className="text-xs text-muted-foreground underline underline-offset-2">
+                {tRoot("common.cancel")}
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
             disabled={!sel || busy}
@@ -155,7 +201,10 @@ export function NurseStatusButton({
               const label = tipo ? tipoLabel(tipo) : a.statusTypeId ?? "";
               return (
                 <li key={a.staffId} className="flex items-center justify-between gap-2 rounded-md bg-card px-2 py-1.5 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-                  <span className="min-w-0 truncate">{nombreDe(a)}</span>
+                  <span className="min-w-0 truncate">
+                    {nombreDe(a)}
+                    {a.expiresAt && <span className="ml-1.5 text-xs text-muted-foreground">{t("nurseHasta", { hora: horaDe(a.expiresAt) })}</span>}
+                  </span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="rounded-full px-2 py-0.5 text-[11px] font-medium" style={color ? { backgroundColor: `${color}22`, color } : undefined}>
                       {label}
