@@ -424,6 +424,17 @@ export function listCashAttachments(id: string, centerId?: string | null): Promi
   return apiFetch<CashReconciliationAttachmentListed[]>(`/cash/reconciliations/${id}/attachments${centerQs(centerId)}`);
 }
 
+// Eliminar un adjunto (BE PR #588, handoff docs/specs/eliminar-adjunto-cuadre-handoff-be.md). Permiso
+// `cash_attachment.delete` (dominio propio, NO `caja.ver_todos`: lo corrigió el BE al cerrar el
+// handoff — admin lo tiene por `*`, billing no). 428 `cash.attachment.delete` lo maneja apiFetch solo.
+// `motivo` obligatorio (3–500).
+export function deleteCashAttachment(id: string, attachmentId: string, motivo: string, centerId?: string | null): Promise<{ id: string; deleted: boolean }> {
+  return apiFetch<{ id: string; deleted: boolean }>(`/cash/reconciliations/${id}/attachments/${attachmentId}${centerQs(centerId)}`, {
+    method: "DELETE",
+    body: JSON.stringify({ motivo }),
+  });
+}
+
 // ---- Cuadre TOTAL del día (handoff cuadre-unico-del-dia, cmr-be #457, en prod desde 04-nov-2026) --
 // Las DOS divisiones + todos los cajeros, un solo conteo opcional, comprobado contra la suma de los
 // cuadres individuales. Rutas confirmadas leyendo /api/docs-json de prod (no están en schema.d.ts: el

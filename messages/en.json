@@ -4408,7 +4408,19 @@
       "scanning": "Scanning…",
       "scanDone": "Scanned",
       "scanFailed": "Could not scan",
-      "scanExpired": "The scan expired: nobody picked it up in time"
+      "scanExpired": "The scan expired: nobody picked it up in time",
+      "delete": "Delete",
+      "deleteConfirmTitle": "Delete this attachment",
+      "deleteConfirmDesc": "It's removed from the cash sheet's list; this can't be undone from here.",
+      "deleteReasonLabel": "Reason (required)",
+      "deleteReasonPlaceholder": "Why it's being deleted…",
+      "deleteCancel": "Cancel",
+      "deleteConfirm": "Delete attachment",
+      "deleted": "Attachment deleted"
+    },
+    "attachment": {
+      "notFound": "That attachment no longer exists on this cash sheet.",
+      "reasonRequired": "Write the reason before deleting."
     },
     "otherDivision": {
       "inConsulta": "You billed in Consultation today: your sheet and your signature are in the Consultation cash count, not this one.",

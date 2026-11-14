@@ -4408,7 +4408,19 @@
       "scanning": "Escaneando…",
       "scanDone": "Escaneado",
       "scanFailed": "No se pudo escanear",
-      "scanExpired": "El escaneo caducó: nadie lo tomó a tiempo"
+      "scanExpired": "El escaneo caducó: nadie lo tomó a tiempo",
+      "delete": "Eliminar",
+      "deleteConfirmTitle": "Eliminar este adjunto",
+      "deleteConfirmDesc": "Se quita de la lista del cuadre; no se puede deshacer desde aquí.",
+      "deleteReasonLabel": "Motivo (obligatorio)",
+      "deleteReasonPlaceholder": "Por qué se elimina…",
+      "deleteCancel": "Cancelar",
+      "deleteConfirm": "Eliminar adjunto",
+      "deleted": "Adjunto eliminado"
+    },
+    "attachment": {
+      "notFound": "Ese adjunto ya no existe en este cuadre.",
+      "reasonRequired": "Escribe el motivo antes de eliminar."
     },
     "otherDivision": {
       "inConsulta": "Hoy cobraste en Consulta: tu hoja y tu firma están en el cuadre de Consulta, no en este.",

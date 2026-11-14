@@ -17,7 +17,9 @@ import {
   type CashReconciliationAttachmentListed,
 } from "@/lib/api/caja";
 import { toastError } from "@/lib/api/errors";
+import { useCan } from "@/hooks/use-can";
 import { CuadreScanButton } from "@/components/caja/cuadre-scan-button";
+import { CuadreAttachmentDeleteButton } from "@/components/caja/cuadre-attachment-delete-button";
 import { Button } from "@/components/ui/button";
 
 // Settlements escaneado del cuadre (BE PR #516, handoff .personal/handoff-cuadre-adjuntar-settlements.md):
@@ -34,6 +36,8 @@ export function CuadreAttachments({
   const t = useTranslations("caja.attachments");
   const tRoot = useTranslations();
   const format = useFormatter();
+  const { can } = useCan();
+  const canDelete = can("cash_attachment.delete");
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [items, setItems] = React.useState<CashReconciliationAttachmentListed[] | null>(null);
   const [failed, setFailed] = React.useState(false);
@@ -121,6 +125,14 @@ export function CuadreAttachments({
               <span className="shrink-0 text-xs text-muted-foreground">
                 {t("uploadedBy", { name: a.uploadedByName ?? t("uploadedByUnknown") })}
               </span>
+              {canDelete && (
+                <CuadreAttachmentDeleteButton
+                  reconciliationId={reconciliationId}
+                  centroId={centroId}
+                  attachmentId={a.id}
+                  onDeleted={() => setGen((g) => g + 1)}
+                />
+              )}
             </li>
           ))}
         </ul>
