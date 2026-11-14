@@ -25,19 +25,18 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingRegion } from "@/components/kit/skeletons";
+import { createNursingAlarm, type AlarmTone, type NursingAlarm } from "@/lib/panel/nursing-alarm";
 
 const CLAVE = "enfermeria";
 
-// Tono por SECCIÓN: el nombre lógico (`panel_secciones.audio`) decide cómo suena, para que la enfermera
-// sepa cuál sonó sin mirar la pantalla. Se distinguen de verdad (una quinta + otro timbre, no 880 vs 900).
-// Un nombre desconocido NUNCA queda mudo: cae al tono por defecto. El BE nombra, el FE resuelve el sonido.
-type Tono = { hz: number; tipo: OscillatorType };
-const TONO_DEFAULT: Tono = { hz: 880, tipo: "sine" };
-const TONOS: Record<string, Tono> = {
+// Tone per SECTION: the logical name (`panel_secciones.audio`) decides how it sounds, so the nurse
+// knows which one rang without looking. An unknown name is NEVER silent: it falls back to the default.
+const TONO_DEFAULT: AlarmTone = { hz: 880, tipo: "sine" };
+const TONOS: Record<string, AlarmTone> = {
   vitales: { hz: 880, tipo: "sine" },
-  intravenoso: { hz: 587, tipo: "triangle" }, // más grave y con otro timbre
+  intravenoso: { hz: 587, tipo: "triangle" }, // lower and with another timbre
 };
-function tonoDe(audio?: string | null): Tono {
+function tonoDe(audio?: string | null): AlarmTone {
   return (audio && TONOS[audio]) || TONO_DEFAULT;
 }
 
@@ -46,31 +45,32 @@ function tinteHex(color?: string | null): string | undefined {
   return color && /^#[0-9a-f]{6}$/i.test(color) ? `${color}1f` : undefined;
 }
 
-// Alarma sin assets: beep en loop con WebAudio (requiere un primer gesto por autoplay del navegador).
+// Alarm ON by default (lib/panel/nursing-alarm.ts). If the browser keeps the sound blocked until a
+// gesture, the FIRST touch/click/key anywhere on the page unlocks it; the button is only a visible hint.
 function useAlarma() {
-  const ctxRef = React.useRef<AudioContext | null>(null);
-  const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
-  const tonoRef = React.useRef<Tono>(TONO_DEFAULT);
-  const armado = React.useRef(false);
-  const armar = () => {
-    if (armado.current) return;
-    try { ctxRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)(); armado.current = true; } catch { /* noop */ }
-  };
-  const beep = () => {
-    const ctx = ctxRef.current; if (!ctx) return;
-    const o = ctx.createOscillator(); const g = ctx.createGain();
-    // Tono de la sección del aviso actual (se actualiza en cada start; el loop lo lee en cada beep).
-    o.frequency.value = tonoRef.current.hz; o.type = tonoRef.current.tipo; o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-    o.start(); o.stop(ctx.currentTime + 0.42);
-  };
-  // `tono` se aplica SIEMPRE (aunque el loop ya esté sonando, para que un cambio de sección se oiga).
-  const start = (tono?: Tono) => { tonoRef.current = tono ?? TONO_DEFAULT; if (timerRef.current || !armado.current) return; beep(); timerRef.current = setInterval(beep, 1200); };
-  const stop = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
-  React.useEffect(() => () => stop(), []);
-  return { armar, armado, start, stop };
+  const ref = React.useRef<NursingAlarm | null>(null);
+  const [bloqueado, setBloqueado] = React.useState(false);
+  React.useEffect(() => {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const alarm = createNursingAlarm({ createContext: () => new AC() });
+    ref.current = alarm;
+    // Deferred (not a synchronous setState inside the effect).
+    queueMicrotask(() => setBloqueado(alarm.needsGesture()));
+    const desbloquear = () => {
+      void alarm.unlock().then(() => {
+        const sigue = alarm.needsGesture();
+        setBloqueado(sigue);
+        if (!sigue) quitar();
+      });
+    };
+    const eventos = ["pointerdown", "keydown", "touchstart"] as const;
+    const quitar = () => eventos.forEach((e) => document.removeEventListener(e, desbloquear, true));
+    eventos.forEach((e) => document.addEventListener(e, desbloquear, true));
+    return () => { quitar(); alarm.stop(); ref.current = null; };
+  }, []);
+  const start = React.useCallback((tono: AlarmTone) => ref.current?.start(tono), []);
+  const stop = React.useCallback(() => ref.current?.stop(), []);
+  return { bloqueado, start, stop };
 }
 
 export function PanelEnfermeria({ centro }: { centro?: string }) {
@@ -84,6 +84,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const defRes = useResource<PanelDefinicion>(() => getPanelDefinicion(CLAVE, centro), [centro]);
   const [notifs, setNotifs] = React.useState<PanelNotificacion[]>([]);
   const alarma = useAlarma();
+  const { start: sonar, stop: callar } = alarma;
 
   // Los contadores del día YA vienen en la definición → sin llamada aparte (dedup). En cada evento
   // SSE se recarga la definición (trae contadores frescos) + las notificaciones pendientes.
@@ -120,8 +121,8 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     (secciones.find((s) => s.id === actual?.sectionId) ?? secciones.find((s) => s.clave === actual?.seccion))?.audio ??
     null;
   React.useEffect(() => {
-    if (actual && alarma.armado.current) alarma.start(tonoDe(audioActual)); else alarma.stop();
-  }, [actual, audioActual, alarma]);
+    if (actual) sonar(tonoDe(audioActual)); else callar();
+  }, [actual, audioActual, sonar, callar]);
 
   // Orden de las tarjetas (cmr-be#549): optimista, con vuelta atrás si falla. Mientras `ordenLocal`
   // exista manda sobre `def.staff`; se descarta en cuanto llega una definición fresca (ya trae el
@@ -200,8 +201,8 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
       <div className="flex flex-wrap items-center gap-2">
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
-          {!alarma.armado.current && (
-            <Button variant="outline" onClick={alarma.armar} title={t("activarSonido")}>
+          {alarma.bloqueado && (
+            <Button variant="outline" title={t("activarSonido")}>
               <HugeiconsIcon icon={VolumeHighIcon} data-icon="inline-start" />
               {t("activarSonido")}
             </Button>
