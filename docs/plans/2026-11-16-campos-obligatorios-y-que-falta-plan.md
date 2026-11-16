@@ -42,7 +42,7 @@ area each, that move every dialog onto the kit and delete its hand-built copies.
 | PR | Branch | Scope | Files |
 |---|---|---|---|
 | 1 | `feat/forms-kit` | Kit: `lib/forms/*`, `components/kit/*`, `ConfirmHost`, i18n | new + `form-dialog.tsx`, `app-shell.tsx`, messages |
-| 2 | `feat/forms-frontdesk-patients` | Frontdesk, board (tablero), patient desk & patients | 31 |
+| 2 | `feat/forms-desk-patients` | Patient desk (incl. the front desk dialogs it shares), board (tablero) & patients | 30 |
 | 3 | `feat/forms-billing-cash` | Billing & cash | 22 |
 | 4 | `feat/forms-admin-config` | Users, access, staff & configuration (+ retire `FormDialog.canSubmit`) | 33 |
 | 5 | `feat/forms-rest` | Inventory, services, audit, formats, auth | 20 |
@@ -53,10 +53,27 @@ Order set by the owner on 16-nov. PRs 2–5 and 7 depend only on PR 1. Each bran
 `main`.
 
 **Because the agenda PR is deferred,** two things carry temporary exceptions until it lands:
-- **PR 5's final sweep** ignores `components/agenda/*`, `components/citas/*` and `components/calendario/*`. Those files keep their local `Field` copies and two `window.confirm`s for now.
+- **PR 5's final sweep** ignores `components/agenda/*`, `components/citas/*` and `components/calendario/*` (plus the two deprecated front desk files, below). Those files keep their local `Field` copies and two `window.confirm`s for now.
 - **PR 6's lint rule** lists `components/agenda/recurring-booking-modal.tsx` and `components/calendario/evento-modal.tsx` as named exceptions. PR 7 deletes those exceptions in the same commit that removes their `window.confirm`.
 
 ---
+
+## Deprecated: `/boards/frontdesk` (owner, 16-nov)
+
+The service-based front desk (`/boards/frontdesk`, `components/frontdesk/frontdesk-board.tsx`) is
+deprecated in favour of the patient desk (`/boards/patient-desk`). It is **not updated** by any PR in
+this plan. Deprecated in this plan only: the app menu does not change.
+
+Not touched, because only `/boards/frontdesk` reaches them (traced from every `page.tsx`/`layout.tsx`, 16-nov):
+- `components/frontdesk/frontdesk-board.tsx`
+- `components/frontdesk/programar-citas-modal.tsx`
+
+All other `components/frontdesk/*` dialogs are also reached from the patient desk, the generic
+board or the patient file, so they are migrated in PR 2.
+
+The sweeps and lint exceptions treat these two files like the deferred agenda files:
+- PR 5's final sweep skips them.
+- PR 6's lint rule needs no exception for them, because neither calls `window.confirm`; re-check with `grep` before PR 6.
 
 ## PR 1 — The kit
 
@@ -274,20 +291,21 @@ Each PR ends with:
 
 ---
 
-## PR 2 — Frontdesk, board, patient desk & patients (`feat/forms-frontdesk-patients`)
+## PR 2 — Patient desk, board & patients (`feat/forms-desk-patients`)
 
-One PR (owner, 16-nov). Commit per area in this order — frontdesk, board, patient desk, patients — so the review can go area by area.
+One PR (owner, 16-nov). Commit per area in this order — shared desk dialogs, board, patient desk, patients — so the review can go area by area.
 
-### Frontdesk
+### Shared desk dialogs (live in `components/frontdesk/`, used by the patient desk)
+The patient desk renders `fila-sesion` (via `service-sessions-table`), which opens these, so they are migrated even though `/boards/frontdesk` is deprecated (owner, 16-nov). The deprecated front desk picks up the new UI where it uses them, as a side effect.
+
 Task R on each file in `components/frontdesk/`:
-- `compras-modal`, `confirm-deshacer-dialog`, `corregir-disponibilidad-dialog`, `dosis-aviso-dialog`
-- `formatos-modal`, `frontdesk-board` (`DEBT` 816), `historial-modal`, `nurse-status-button`
-- `panel-notificar-modal`, `programar-citas-modal`, `row-menu`, `sesiones-cell`, `technician-status-button`
-
-Also check `fila-sesion.tsx` (`DEBT` 723) for dialogs it renders inline.
+- `fila-sesion` (`DEBT` 723), `compras-modal`, `confirm-deshacer-dialog`, `corregir-disponibilidad-dialog`
+- `dosis-aviso-dialog`, `formatos-modal`, `historial-modal`, `nurse-status-button`
+- `panel-notificar-modal`, `row-menu`, `sesiones-cell`, `technician-status-button`
 
 ### Board, patient desk & patients
-- `components/tablero/`: `acciones-modal`, `agregar-cita-modal`, `celda-toggle-icon`, `ehr-readiness-modal`, `historial-dialog`, `nueva-cita-modal`, `tablero-acciones`
+- `components/tablero/`: `acciones-modal`, `agregar-cita-modal`, `celda-toggle-icon`, `ehr-readiness-modal`, `historial-dialog`, `tablero-acciones`
+- `components/tablero/nueva-cita-modal.tsx` (451 lines) is imported by nothing: delete it rather than migrate, if the owner agrees (asked 16-nov); otherwise skip it
 - `components/patient-desk/`: `patient-desk`, `therapy-queue-strip`
 
 - `components/clientes/`: `acciones-paciente-sheet`, `ficha-facturacion`, `ficha-tabs`, `old-record-suggestion-banner`, `paciente-form-sheet` (`DEBT` 550), `patient-merge-dialog`, `cambio-protocolo-form`
@@ -334,7 +352,7 @@ Last task: `grep -rn "canSubmit" components app` must show no `FormDialog` user.
 - `components/change-log/change-log-sheet.tsx`
 - `components/auth/forgot-password-dialog.tsx`
 
-Final sweep before opening the PR. Each grep must return nothing outside `components/kit`, `components/ui` and the deferred agenda files (`components/agenda/*`, `components/citas/*`, `components/calendario/*`):
+Final sweep before opening the PR. Each grep must return nothing outside `components/kit`, `components/ui` and the deferred agenda files (`components/agenda/*`, `components/citas/*`, `components/calendario/*`) and the deprecated `components/frontdesk/frontdesk-board.tsx` and `components/frontdesk/programar-citas-modal.tsx`:
 - `grep -rnE "^function (Field|FieldRow|Lbl)\b" components app`
 - `grep -rnE "window\.confirm|[^.a-zA-Z]confirm\(" components app` (excluding `useConfirm` callers)
 
