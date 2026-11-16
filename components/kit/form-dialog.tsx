@@ -45,7 +45,11 @@ export function FormDialog(p: FormShellProps & { size?: FormSize }) {
           <DialogTitle>{p.title}</DialogTitle>
           {p.description && <DialogDescription>{p.description}</DialogDescription>}
         </DialogHeader>
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-1 -mx-1" onKeyDown={onKeyDown}>
+        {/* Padding + negative margin keep focus rings from being clipped by overflow-y-auto. */}
+        <div
+          className="-mx-1 -my-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-1 py-1"
+          onKeyDown={onKeyDown}
+        >
           {p.children}
         </div>
         {footer}

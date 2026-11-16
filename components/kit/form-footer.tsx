@@ -12,6 +12,8 @@ export type FooterAction = {
   label: string;
   onClick: () => void;
   variant?: React.ComponentProps<typeof Button>["variant"];
+  /** When any action sets `busy`, only those show the submitting label. */
+  busy?: boolean;
 };
 
 /** Hint above the buttons; primaries are disabled by `missing`/`blocked`/`submitting`. */
@@ -44,8 +46,14 @@ export function FormFooter({
   const t = useTranslations("common");
   const generated = useId();
   const id = hintId ?? `${generated}-hint`;
-  const { disabled, hint } = footerState({ missing, reason, blocked, submitting });
+  const { disabled, hint } = footerState({
+    missing,
+    reason,
+    blocked,
+    submitting,
+  });
   const actions = Array.isArray(primary) ? primary : [primary];
+  const anyBusy = actions.some((a) => a.busy);
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
@@ -68,7 +76,7 @@ export function FormFooter({
             disabled={disabled}
             aria-describedby={hint ? id : undefined}
           >
-            {submitting ? (submittingLabel ?? t("saving")) : a.label}
+            {submitting && (anyBusy ? a.busy : true) ? (submittingLabel ?? t("saving")) : a.label}
           </Button>
         ))}
       </div>

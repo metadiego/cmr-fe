@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { footerState } from "@/lib/forms/missing";
 import { shouldSubmitOnEnter } from "@/lib/forms/enter";
-import { FormFooter } from "./form-footer";
+import { FormFooter, type FooterAction } from "./form-footer";
 
 /** Props shared by FormDialog and FormSheet. */
 export type FormShellProps = {
@@ -14,7 +14,10 @@ export type FormShellProps = {
   title: string;
   description?: string;
   children: ReactNode;
+  /** Enter submits through this. With `actions`, make it the action you want Enter to trigger. */
   onSubmit: () => void | Promise<void>;
+  /** Replaces the single submit button; all actions share missing/blocked/submitting. */
+  actions?: FooterAction[];
   submitLabel?: string;
   submittingLabel?: string;
   cancelLabel?: string;
@@ -33,7 +36,12 @@ export function useFormShell(p: FormShellProps) {
   const hintId = `${useId()}-hint`;
   const submitting = !!p.submitting;
   const blocked = !!p.blocked || p.canSubmit === false;
-  const { disabled } = footerState({ missing: p.missing, reason: p.reason, blocked, submitting });
+  const { disabled } = footerState({
+    missing: p.missing,
+    reason: p.reason,
+    blocked,
+    submitting,
+  });
 
   const onOpenChange = (o: boolean) => {
     if (!o && submitting) return;
@@ -47,7 +55,7 @@ export function useFormShell(p: FormShellProps) {
   };
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     // Portalled content (Select options, popovers, nested dialogs) bubbles through React but is not in the body.
-    if (e.defaultPrevented || !e.currentTarget.contains(e.target as Node)) return;
+    if (e.defaultPrevented || e.repeat || !e.currentTarget.contains(e.target as Node)) return;
     const el = e.target as HTMLElement;
     const ok = shouldSubmitOnEnter(
       {
@@ -70,7 +78,12 @@ export function useFormShell(p: FormShellProps) {
     <FormFooter
       className="shrink-0"
       hintId={hintId}
-      primary={{ label: p.submitLabel ?? t("save"), onClick: () => void p.onSubmit() }}
+      primary={
+        p.actions ?? {
+          label: p.submitLabel ?? t("save"),
+          onClick: () => void p.onSubmit(),
+        }
+      }
       missing={p.missing}
       reason={p.reason}
       blocked={blocked}
