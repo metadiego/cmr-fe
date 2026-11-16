@@ -4721,7 +4721,8 @@
       "cargando": "Loading…",
       "enCentro": "At {centro}",
       "cambioResumen": "{cerrados} closed · {creados} new",
-      "nuevoTitulo": "New change"
+      "nuevoTitulo": "New change",
+      "sessionsAtLeastOne": "Sessions must be 1 or more."
     }
   },
   "perfiles": {
