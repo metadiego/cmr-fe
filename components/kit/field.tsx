@@ -6,7 +6,11 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { RequiredMark } from "./required-mark";
 
-/** Labelled form field: label (+ required mark), control, optional hint and error. */
+/**
+ * Labelled form field: label (+ required mark), control, optional hint and error.
+ * With `htmlFor`, the hint has id `${htmlFor}-hint` and the error `${htmlFor}-error`;
+ * the caller links them from the control: `aria-invalid={!!error}` and `aria-describedby`.
+ */
 export function Field({
   label,
   htmlFor,
@@ -24,16 +28,24 @@ export function Field({
   className?: string;
   children: ReactNode;
 }) {
+  const hintId = htmlFor ? `${htmlFor}-hint` : undefined;
+  const errorId = htmlFor ? `${htmlFor}-error` : undefined;
   return (
     <div className={cn("space-y-1.5", className)}>
       <Label htmlFor={htmlFor}>
-        {label}
-        {required && <RequiredMark />}
+        <span>
+          {label}
+          {required && <RequiredMark />}
+        </span>
       </Label>
       {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && (
+        <p id={hintId} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      )}
       {error && (
-        <p role="alert" className="text-xs text-destructive">
+        <p id={errorId} role="alert" className="text-xs text-destructive">
           {error}
         </p>
       )}
@@ -45,10 +57,7 @@ export function Field({
 export function FormError({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <p
-      role="alert"
-      className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive"
-    >
+    <p role="alert" className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
       {message}
     </p>
   );

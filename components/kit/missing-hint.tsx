@@ -1,5 +1,7 @@
 "use client";
 
+import { HugeiconsIcon } from "@hugeicons/react";
+import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { useTranslations } from "next-intl";
 
 import { footerState } from "@/lib/forms/missing";
@@ -20,10 +22,11 @@ export function MissingHint({
   const { hint } = footerState({ missing, reason, blocked });
   if (!hint) return null;
   return (
-    <p id={id} className="text-xs text-muted-foreground">
-      {hint.kind === "missing"
-        ? `${t("missingPrefix")} ${hint.items.join(", ")}`
-        : hint.text}
+    <p id={id} className="inline-flex items-start gap-1.5 text-xs text-muted-foreground">
+      <HugeiconsIcon icon={InformationCircleIcon} className="mt-px size-3.5 shrink-0" aria-hidden />
+      <span>
+        {hint.kind === "missing" ? `${t("missingPrefix")} ${hint.items.join(" · ")}` : hint.text}
+      </span>
     </p>
   );
 }

@@ -4,7 +4,10 @@ import { useCallback, useState } from "react";
 
 import { shouldReset } from "@/lib/forms/dialog-form";
 
-/** Form state that is re-initialised whenever the dialog opens or `key` (the record) changes. */
+/**
+ * Form state that is re-initialised whenever the dialog opens or `key` changes.
+ * `key` should identify the loaded record: data arriving later under the same key does not reset.
+ */
 export function useDialogForm<T>(
   initial: () => T,
   open: boolean,

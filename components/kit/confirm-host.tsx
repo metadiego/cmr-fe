@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -18,7 +18,10 @@ import { createConfirmQueue, type ConfirmOptions } from "@/lib/forms/confirm-que
 // One queue for the whole app, shared by useConfirm() and the mounted ConfirmHost.
 const queue = createConfirmQueue();
 
-/** `const confirm = useConfirm(); if (await confirm({ title })) …` */
+/**
+ * `const confirm = useConfirm(); if (await confirm({ title })) …`
+ * Resolves only while `ConfirmHost` is mounted (AppShell, root layout).
+ */
 export function useConfirm(): (o: ConfirmOptions) => Promise<boolean> {
   return queue.request;
 }
@@ -28,28 +31,33 @@ export function ConfirmHost() {
   const t = useTranslations("common");
   const current = useSyncExternalStore(queue.subscribe, queue.current, queue.current);
 
+  // Keep the last prompt so the text does not blank while the close animation runs.
+  const [last, setLast] = useState<ConfirmOptions | null>(null);
+  if (current && current !== last) setLast(current);
+  const shown = current ?? last;
+
   useEffect(() => () => queue.cancelAll(), []);
 
   return (
     <AlertDialog open={!!current} onOpenChange={(o) => !o && queue.settle(false)}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{current?.title}</AlertDialogTitle>
-          {current?.description && (
-            <AlertDialogDescription>{current.description}</AlertDialogDescription>
+          <AlertDialogTitle>{shown?.title}</AlertDialogTitle>
+          {shown?.description && (
+            <AlertDialogDescription>{shown.description}</AlertDialogDescription>
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{current?.cancelLabel ?? t("cancel")}</AlertDialogCancel>
+          <AlertDialogCancel>{shown?.cancelLabel ?? t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
-            variant={current?.destructive ? "destructive" : "default"}
+            variant={shown?.destructive ? "destructive" : "default"}
             onClick={(e) => {
               // Keep Radix from also firing onOpenChange(false), which would cancel the next prompt.
               e.preventDefault();
               queue.settle(true);
             }}
           >
-            {current?.confirmLabel ?? t("confirm")}
+            {shown?.confirmLabel ?? t("confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
