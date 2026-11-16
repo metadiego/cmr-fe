@@ -13,13 +13,13 @@ import {
   type GrupoFacturacion,
 } from "@/lib/api/grupos-facturacion";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { newBillingFieldMissing } from "@/lib/facturacion/billing-group-missing";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingRegion } from "@/components/kit/skeletons";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -28,23 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
 
 // Precio ilustrativo para el ejemplo en vivo del interruptor "¿multiplica?" — no es de ningún
 // producto real, solo pedagógico (ver FE-HANDOFF-MULTIPLICADOR-GRUPOS-FACTURACION).
@@ -98,7 +84,7 @@ export function ComoSeCobra({
   const deFabrica = columnas.filter((c) => esFabrica(c.role) && c.active);
   const extra = columnas.filter((c) => !esFabrica(c.role) && c.active);
 
-  const [toDelete, setToDelete] = React.useState<ColumnaFacturacion | null>(null);
+  const confirm = useConfirm();
   const [creating, setCreating] = React.useState(false);
   const [copyFrom, setCopyFrom] = React.useState("");
   const [copying, setCopying] = React.useState(false);
@@ -126,10 +112,14 @@ export function ComoSeCobra({
     }
   }
 
-  async function confirmarQuitar() {
-    if (!toDelete) return;
-    const col = toDelete;
-    setToDelete(null);
+  async function quitar(col: ColumnaFacturacion) {
+    const ok = await confirm({
+      title: t("removeFieldTitle"),
+      description: t("removeFieldBody", { nombre: label(col.labelKey, col.slug) }),
+      confirmLabel: t("removeField"),
+      cancelLabel: t("cancel"),
+    });
+    if (!ok) return;
     try {
       await actualizarColumnaFacturacion(col.id, { active: false });
       toast.success(t("fieldRemoved"));
@@ -224,7 +214,7 @@ export function ComoSeCobra({
             label={label}
             onToggle={toggleMultiplica}
             onRename={renombrar}
-            onRemove={() => setToDelete(c)}
+            onRemove={() => void quitar(c)}
           />
         ))}
       </div>
@@ -247,23 +237,6 @@ export function ComoSeCobra({
         </div>
         <p className="mt-2 text-xs text-muted-foreground">{t("fabricaHelp")}</p>
       </div>
-
-      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("removeFieldTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("removeFieldBody", {
-                nombre: toDelete ? label(toDelete.labelKey, toDelete.slug) : "",
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarQuitar}>{t("removeField")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {creating && (
         <NuevoCampoDialog
@@ -397,81 +370,76 @@ function NuevoCampoDialog({
   onCreated: () => void;
 }) {
   const t = useTranslations("gruposFacturacion");
+  // Mounted only while open (the parent renders it conditionally), so plain state starts clean every time.
   const [nombre, setNombre] = React.useState("");
   const [tipo, setTipo] = React.useState<(typeof TIPOS_EXTRA)[number]["value"]>("numero");
   const [multiplica, setMultiplica] = React.useState(true);
-  const [saving, setSaving] = React.useState(false);
+  const missing = newBillingFieldMissing({ name: nombre }).map(() => t("fieldNameLabel"));
 
-  async function crear() {
-    if (!nombre.trim()) return;
-    setSaving(true);
-    try {
-      await crearColumnaFacturacion({
+  const { submitting, submit } = useSubmit(
+    () =>
+      crearColumnaFacturacion({
         groupKey: grupoClave,
         slug: uniqueClave(nombre, existentes),
         labelKey: nombre.trim(),
         type: tipo,
         role: multiplica ? "multiplicador" : "informativo",
         sortOrder: orden,
-      });
-      toast.success(t("fieldAdded"));
-      onCreated();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  }
+      }),
+    {
+      successMessage: t("fieldAdded"),
+      onSuccess: () => onCreated(),
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
+  );
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("addFieldTitle")}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label>{t("fieldNameLabel")}</Label>
-            <Input
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder={t("fieldNamePlaceholder")}
-              autoFocus
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>{t("fieldTypeLabel")}</Label>
-            <div className="flex gap-2">
-              {TIPOS_EXTRA.map((op) => (
-                <button
-                  key={op.value}
-                  type="button"
-                  onClick={() => setTipo(op.value)}
-                  className={cn(
-                    "flex-1 rounded-md border px-3 py-2 text-sm transition-colors",
-                    tipo === op.value ? "border-primary bg-primary/10" : "border-border hover:bg-accent/40",
-                  )}
-                >
-                  <span className="mr-1.5">{op.emoji}</span>
-                  {t(`fieldType_${op.value}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <label className="flex items-center gap-3 text-sm">
-            <Switch checked={multiplica} onCheckedChange={(v) => setMultiplica(v === true)} />
-            <span>🔢 {t("multiplicaQuestion")}</span>
-          </label>
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="md"
+      title={t("addFieldTitle")}
+      onSubmit={() => submit()}
+      submitLabel={t("create")}
+      cancelLabel={t("cancel")}
+      submitting={submitting}
+      missing={missing}
+    >
+      <Field label={t("fieldNameLabel")} htmlFor="new-billing-field-name" required>
+        <Input
+          id="new-billing-field-name"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          placeholder={t("fieldNamePlaceholder")}
+          autoFocus
+        />
+      </Field>
+      <Field label={t("fieldTypeLabel")}>
+        <div className="flex gap-2">
+          {TIPOS_EXTRA.map((op) => (
+            <button
+              key={op.value}
+              type="button"
+              onClick={() => setTipo(op.value)}
+              aria-pressed={tipo === op.value}
+              className={cn(
+                "flex-1 rounded-md border px-3 py-2 text-sm transition-colors",
+                tipo === op.value ? "border-primary bg-primary/10" : "border-border hover:bg-accent/40",
+              )}
+            >
+              <span className="mr-1.5">{op.emoji}</span>
+              {t(`fieldType_${op.value}`)}
+            </button>
+          ))}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            {t("cancel")}
-          </Button>
-          <Button onClick={crear} disabled={saving || !nombre.trim()}>
-            {t("create")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </Field>
+      <label className="flex items-center gap-3 text-sm">
+        <Switch checked={multiplica} onCheckedChange={(v) => setMultiplica(v === true)} />
+        <span>🔢 {t("multiplicaQuestion")}</span>
+      </label>
+    </FormDialog>
   );
 }
