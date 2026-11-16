@@ -1163,7 +1163,6 @@
       "recordDuenoInactivo": "inactive",
       "camposFaltantes": "Required fields missing: {campos}",
       "emailInvalido": "Enter a valid email, e.g. name@domain.com",
-      "requiredLegend": "Required fields",
       "medico": "Doctor",
       "sinMedico": "No doctor",
       "otroCentro": "other center",
@@ -1239,6 +1238,11 @@
     "errorBody": "This screen hit an error. The rest of the system keeps working. You can retry.",
     "save": "Save",
     "saving": "Saving…",
+    "form": {
+      "missingPrefix": "To continue, fill in:",
+      "required": "required",
+      "requiredLegend": "Required fields"
+    },
     "cancel": "Cancel",
     "confirm": "Confirm",
     "delete": "Delete",
