@@ -35,7 +35,7 @@ export function FormSheet(p: FormShellProps & { size?: FormSheetSize }) {
           <SheetTitle>{p.title}</SheetTitle>
           {p.description && <SheetDescription>{p.description}</SheetDescription>}
         </SheetHeader>
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6" onKeyDown={onKeyDown}>
+        <div className="-my-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-1" onKeyDown={onKeyDown}>
           {p.children}
         </div>
         <div className="shrink-0 border-t p-6">{footer}</div>

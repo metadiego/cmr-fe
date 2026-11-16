@@ -11,19 +11,15 @@ import { useCan } from "@/hooks/use-can";
 import { ChangeLogSheet } from "@/components/change-log/change-log-sheet";
 import { cancelPatientDay, reopenPatientDay, reopenSession } from "@/lib/api/frontdesk-day";
 import { ApiError } from "@/lib/api/types";
-import { toastError } from "@/lib/api/errors";
 import { todayISO } from "@/lib/agenda/calendar";
 import { canReopen, duplicatesReopen, REOPEN_ERROR_KEYS, skippedReasons } from "@/lib/frontdesk/reopen";
+import { sessionReasonMissing } from "@/lib/frontdesk/session-reason-missing";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,9 +34,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Menú "···" de acciones de la fila (extraído de fila-sesion.tsx): historial, formatos, acciones
-// data-driven, cancelar y reparar (admin). El BE es la autoridad de qué transiciones aplican; esto
-// solo las pinta y confirma lo que pide confirmación.
+// Row "···" actions menu (extracted from fila-sesion.tsx): history, report formats, data-driven
+// actions, cancel and repair (admin). The BE decides which transitions apply; this only lists them
+// and confirms the ones that ask for it.
 export function RowMenu({
   disabled,
   cancelada,
@@ -76,7 +72,6 @@ export function RowMenu({
   onReparar: (payload: { reason: string; status?: string }) => void;
 }) {
   const t = useTranslations("frontdesk");
-  const tc = useTranslations("common");
   const tRoot = useTranslations();
   const { can } = useCan();
   // Which cancel the dialog confirms: this session, or every open session of the patient's day.
@@ -84,7 +79,6 @@ export function RowMenu({
   const [repararOpen, setRepararOpen] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
   const [estadoNuevo, setEstadoNuevo] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
   const [changesOpen, setChangesOpen] = React.useState(false); // «Historial de cambios» of this session
 
   // Reopen is offered only on a cancelled session of TODAY; the BE re-checks it (409 otherwise).
@@ -96,19 +90,21 @@ export function RowMenu({
     const key = REOPEN_ERROR_KEYS[code];
     return key && tRoot.has(key) ? tRoot(key) : code;
   };
-  async function act(fn: () => Promise<string | null>) {
-    setBusy(true);
-    try {
-      const msg = await fn();
+  const confirm = useConfirm();
+  // One guard for cancel / reopen: the cancel dialog stays open (and un-closable) while it runs.
+  const { submitting: busy, submit: act } = useSubmit((fn: () => Promise<string | null>) => fn(), {
+    onSuccess: (msg) => {
       if (msg) toast.success(msg);
+      setCancelOpen(false);
       onDone();
-    } catch (err) {
-      if (err instanceof ApiError && REOPEN_ERROR_KEYS[err.code]) toast.error(say(err.code));
-      else toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    onError: (err) => {
+      if (!(err instanceof ApiError && REOPEN_ERROR_KEYS[err.code])) return false;
+      toast.error(say(err.code));
+      return true;
+    },
+  });
+  const missing = sessionReasonMissing({ reason: motivo }).map(() => t("motivo"));
   const cancel = (mode: "one" | "all", reason: string) =>
     act(async () => {
       if (mode === "one") {
@@ -151,7 +147,7 @@ export function RowMenu({
             </DropdownMenuItem>
           ))}
           {/* Acciones data-driven desde el estado actual (p. ej. Reactivar una cancelada → segunda
-              oportunidad). Confirmación con toast cuando la transición del BE la exige. */}
+              oportunidad). Blocking confirm when the BE transition asks for it. */}
           {reopenable && (
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); reopenOne(); }}>
               {t("reopen")}
@@ -165,15 +161,10 @@ export function RowMenu({
           {acciones.map((a) => (
             <DropdownMenuItem
               key={a.clave}
-              onSelect={(e) => {
+              onSelect={async (e) => {
                 e.preventDefault();
-                if (a.confirmar) {
-                  toast(t("confirmarAccion", { accion: a.label }), {
-                    action: { label: a.label, onClick: () => onAccion?.(a.clave) },
-                  });
-                } else {
+                if (!a.confirmar || (await confirm({ title: t("confirmarAccion", { accion: a.label }), confirmLabel: a.label })))
                   onAccion?.(a.clave);
-                }
               }}
             >
               {a.label}
@@ -219,52 +210,52 @@ export function RowMenu({
         onUndone={onDone}
       />
 
-      <Dialog open={!!cancelOpen} onOpenChange={(v) => !v && setCancelOpen(false)}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>{cancelOpen === "all" ? t("cancelAllTitle") : t("cancelarTitle")}</DialogTitle>
-            {cancelOpen === "all" && <DialogDescription>{t("cancelAllHint")}</DialogDescription>}
-          </DialogHeader>
-          <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivo")} autoFocus />
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setCancelOpen(false)}>{tc("cancel")}</Button>
-            <Button
-              variant="destructive"
-              disabled={!motivo.trim()}
-              onClick={() => { const mode = cancelOpen || "one"; setCancelOpen(false); void cancel(mode, motivo.trim()); }}
-            >
-              {cancelOpen === "all" ? t("cancelAll") : t("cancelar")}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={!!cancelOpen}
+        onOpenChange={(v) => !v && setCancelOpen(false)}
+        size="sm"
+        title={cancelOpen === "all" ? t("cancelAllTitle") : t("cancelarTitle")}
+        description={cancelOpen === "all" ? t("cancelAllHint") : undefined}
+        onSubmit={() => cancel(cancelOpen || "one", motivo.trim())}
+        actions={[
+          {
+            label: cancelOpen === "all" ? t("cancelAll") : t("cancelar"),
+            variant: "destructive",
+            onClick: () => cancel(cancelOpen || "one", motivo.trim()),
+          },
+        ]}
+        submitting={busy}
+        missing={missing}
+      >
+        <Field label={t("motivo")} htmlFor="row-cancel-reason" required>
+          <Input id="row-cancel-reason" value={motivo} onChange={(e) => setMotivo(e.target.value)} autoFocus />
+        </Field>
+      </FormDialog>
 
-      <Dialog open={repararOpen} onOpenChange={setRepararOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader><DialogTitle>{t("repararTitle")}</DialogTitle></DialogHeader>
-          <div className="space-y-2">
-            <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivo")} autoFocus />
-            <Select value={estadoNuevo} onValueChange={setEstadoNuevo}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("estadoNuevo")} /></SelectTrigger>
-              <SelectContent>
-                {estados.map((e) => <SelectItem key={e.clave} value={e.clave}>{e.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setRepararOpen(false)}>{tc("cancel")}</Button>
-            <Button
-              disabled={!motivo.trim()}
-              onClick={() => {
-                setRepararOpen(false);
-                onReparar({ reason: motivo.trim(), ...(estadoNuevo ? { status: estadoNuevo } : {}) });
-              }}
-            >
-              {t("reparar")}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={repararOpen}
+        onOpenChange={setRepararOpen}
+        size="sm"
+        title={t("repararTitle")}
+        onSubmit={() => {
+          setRepararOpen(false);
+          onReparar({ reason: motivo.trim(), ...(estadoNuevo ? { status: estadoNuevo } : {}) });
+        }}
+        submitLabel={t("reparar")}
+        missing={missing}
+      >
+        <Field label={t("motivo")} htmlFor="row-repair-reason" required>
+          <Input id="row-repair-reason" value={motivo} onChange={(e) => setMotivo(e.target.value)} autoFocus />
+        </Field>
+        <Field label={t("estadoNuevo")} htmlFor="row-repair-status">
+          <Select value={estadoNuevo} onValueChange={setEstadoNuevo}>
+            <SelectTrigger id="row-repair-status" className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
+            <SelectContent>
+              {estados.map((e) => <SelectItem key={e.clave} value={e.clave}>{e.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Field>
+      </FormDialog>
     </>
   );
 }

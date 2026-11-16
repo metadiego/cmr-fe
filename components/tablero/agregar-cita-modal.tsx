@@ -19,12 +19,16 @@ import { toastError } from "@/lib/api/errors";
 import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { addDaysToDay, canReschedule, pickNextAppointment } from "@/lib/agenda/next-appointment";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
+import { addAppointmentMissing } from "@/lib/board/add-appointment-missing";
 import { useMe } from "@/hooks/use-me";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { PacienteSelect } from "@/components/citas/paciente-select";
 import { ReturnDatePicker } from "@/components/citas/return-date-picker";
 import { patientDoctorOption, type PatientDoctor } from "@/lib/medicos/patient-doctor-option";
 import { Badge } from "@/components/ui/badge";
+import { Field } from "@/components/kit/field";
+import { useFormShell } from "@/components/kit/form-shell";
+import { useSubmit } from "@/components/kit/use-submit";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +44,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
@@ -88,7 +91,6 @@ export function AgregarCitaModal({
   const [paciente, setPaciente] = React.useState<Paciente | null>(null);
   const [medicoId, setMedicoId] = React.useState<string>(NO_MEDICO);
   const [notas, setNotas] = React.useState<string>("");
-  const [busy, setBusy] = React.useState(false);
   // Faltantes del EHR que devolvió el 400: abren el modal de datos. null = sin gate.
   const [ehrGate, setEhrGate] = React.useState<EhrReadinessField[] | null>(null);
 
@@ -166,14 +168,16 @@ export function AgregarCitaModal({
     const nueva = tipos.find((x) => x.slug !== "seguimiento") ?? tipos[0];
     return paciente?.medicalRecordNumber ? (seguimiento ?? nueva ?? null) : (nueva ?? seguimiento ?? null);
   }, [paciente, tipos]);
-  // El walk-in NO exige médico: desde Atención el médico se asigna al MARCAR PRESENTE, no al agendar
-  // (pedirlo antes es pedir un dato que recepción aún no tiene — mismo caso que la enfermera en frontdesk).
-  // La regla real del BE (en-atencion-el-medico-se-sabe-despues) NO aplica al canal atencion, así que aquí
-  // nunca hace falta; sin médico el BE estampa el «Sin Medico» del centro (legacyCode 000). El asterisco y el
-  // botón bloqueado eran artefactos del FE. Si algún tipo lo exigiera de verdad, el BE responde 400 claro y
-  // toastError lo muestra — no lo adivinamos aquí. Handoff walk-in-sin-medico-habilitar-el-boton.
-  const medicoRequerido = false;
-  const canSubmit = !!paciente && !!tipoAuto && !busy && (!moving || !!motivoMover.trim());
+  // The walk-in does NOT require a doctor: from Atención the doctor is set when MARKING PRESENT, not when
+  // booking (asking earlier asks for data reception does not have yet). The BE rule
+  // (en-atencion-el-medico-se-sabe-despues) does not apply to the atencion channel; with no doctor the BE stamps
+  // the center's «Sin Medico» (legacyCode 000). If a type ever truly required one, the BE answers a clear 400
+  // and the error toast shows it. Handoff walk-in-sin-medico-habilitar-el-boton.
+  const missing = addAppointmentMissing({ hasPatient: !!paciente, moving, reason: motivoMover }).map((f) =>
+    f === "patient" ? t("patient") : t("reasonRequired"),
+  );
+  // No appointment type loaded yet (or the catalogue failed): the type is automatic, so it is not a field.
+  const noType = !tipoAuto;
 
   // The patient's doctor may not serve at this center (`medicos` comes filtered to the active
   // center, see getOpciones above) — the POST is still correct, but the <Select> can't show a
@@ -185,10 +189,11 @@ export function AgregarCitaModal({
     [paciente, medicos, centroId],
   );
 
-  async function onGuardar() {
-    if (!paciente || !tipoAuto) return;
-    setBusy(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
+      // Unreachable while the button is disabled; never report a save that did not happen.
+      if (!paciente) throw new Error(`${tRoot("common.form.missingPrefix")} ${t("patient")}`);
+      if (!tipoAuto) throw new Error(t("noAppointmentType"));
       if (moving && citaViva) {
         const { advertencias } = await reagendarCitaConAvisos(
           citaViva.id,
@@ -202,7 +207,7 @@ export function AgregarCitaModal({
             patientId: paciente.id,
             appointmentTypeId: tipoAuto.id,
             date: fecha,
-            status: "confirmada", // entra al tablero de atención de ese día
+            status: "confirmada", // lands on that day's atención board
             ...(fecha !== hoy && hora ? { time: hora } : {}),
             ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
             ...(notas.trim() ? { notes: notas.trim() } : {}),
@@ -211,29 +216,49 @@ export function AgregarCitaModal({
         );
         mostrarAvisos(advertencias, tRoot);
       }
-      onSaved?.();
-      onClose();
-    } catch (err) {
-      // Candado fail-closed del BE: paciente nuevo sin los datos del EHR → abrir el MISMO modal de datos que
-      // en Presente (campo `faltantes`, no `faltan`). Al completar se reintenta el alta; al cerrarlo, el padre
-      // deja la pantalla filtrada en el paciente.
-      if (err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS") {
-        const faltantes = (err.data?.faltantes as EhrReadinessField[] | undefined) ?? [];
-        if (faltantes.length) {
-          setEhrGate(faltantes);
-          return;
+    },
+    {
+      onSuccess: () => {
+        onSaved?.();
+        onClose();
+      },
+      // The BE's fail-closed lock: a new patient without the EHR data → open the SAME data dialog as on
+      // Present (field `faltantes`, not `faltan`). Completing it retries the booking; closing it leaves the
+      // screen filtered on the patient.
+      onError: (err) => {
+        if (err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS") {
+          const faltantes = (err.data?.faltantes as EhrReadinessField[] | undefined) ?? [];
+          if (faltantes.length) {
+            setEhrGate(faltantes);
+            return true;
+          }
         }
-      }
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+      },
+    },
+  );
+
+  const shell = useFormShell({
+    open: true,
+    onOpenChange: (o) => !o && onClose(),
+    title: t("title"),
+    children: null,
+    onSubmit: () => submit(),
+    submitLabel: moving ? t("moveTo", { date: fmtHoy(fecha, format) }) : fecha === hoy ? t("save") : t("saveScheduled"),
+    cancelLabel: t("cancel"),
+    submitting,
+    missing,
+    reason: noType ? t("noAppointmentType") : null,
+    blocked: noType,
+  });
 
   return (
     <>
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+    <Dialog open onOpenChange={shell.onOpenChange}>
+      <DialogContent
+        className="gap-0 overflow-hidden p-0 sm:max-w-lg"
+        showCloseButton={!submitting}
+        {...shell.contentGuards}
+      >
         <div className="relative bg-gradient-to-br from-primary/12 via-primary/5 to-transparent px-6 pt-6 pb-5">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">
             {fecha === hoy ? t("eyebrow") : t("eyebrowScheduled")}
@@ -261,14 +286,14 @@ export function AgregarCitaModal({
           </DialogDescription>
         </div>
 
-        <div className="space-y-4 px-6 py-5">
-          <Field label={t("patient")}>
+        <div className="space-y-4 px-6 py-5" onKeyDown={shell.onKeyDown}>
+          <Field label={t("patient")} htmlFor="add-appt-patient" required>
             {lockedPatient ? (
               <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm font-medium">
                 {paciente ? nombrePaciente(paciente) : lockedPatient.nombre}
               </div>
             ) : (
-              <PacienteSelect value={paciente} onChange={onPickPaciente} />
+              <PacienteSelect id="add-appt-patient" value={paciente} onChange={onPickPaciente} />
             )}
           </Field>
 
@@ -300,9 +325,9 @@ export function AgregarCitaModal({
           )}
 
           {/* Médico del paciente (precargado). La HORA no se pide en el walk-in de hoy. */}
-          <Field label={t("doctor") + (medicoRequerido ? " *" : "")}>
+          <Field label={t("doctor")} htmlFor="add-appt-doctor">
             <Select value={medicoId} onValueChange={setMedicoId}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id="add-appt-doctor" className="w-full">
                 <SelectValue placeholder={t("noDoctor")} />
               </SelectTrigger>
               <SelectContent>
@@ -336,8 +361,8 @@ export function AgregarCitaModal({
           />
 
           {moving ? (
-            <Field label={t("reasonRequired")}>
-              <Input value={motivoMover} onChange={(e) => setMotivoMover(e.target.value)} placeholder={t("reasonRequiredPh")} />
+            <Field label={t("reasonRequired")} htmlFor="add-appt-reason" required>
+              <Input id="add-appt-reason" value={motivoMover} onChange={(e) => setMotivoMover(e.target.value)} placeholder={t("reasonRequiredPh")} />
             </Field>
           ) : (
             <Field label={t("notes")}>
@@ -346,14 +371,7 @@ export function AgregarCitaModal({
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t bg-muted/30 px-6 py-4">
-          <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>
-            {t("cancel")}
-          </Button>
-          <Button type="button" onClick={onGuardar} disabled={!canSubmit}>
-            {moving ? t("moveTo", { date: fmtHoy(fecha, format) }) : fecha === hoy ? t("save") : t("saveScheduled")}
-          </Button>
-        </div>
+        <div className="border-t bg-muted/30 px-6 py-4">{shell.footer}</div>
       </DialogContent>
     </Dialog>
     {ehrGate && paciente && (
@@ -368,21 +386,12 @@ export function AgregarCitaModal({
           onClose();
         }}
         onCompleted={() => {
-          // Datos completos → reintentar el alta, que ahora sí pasa el candado del BE.
+          // Data complete → retry the booking, which now passes the BE lock.
           setEhrGate(null);
-          void onGuardar();
+          void submit();
         }}
       />
     )}
     </>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
-      {children}
-    </label>
   );
 }

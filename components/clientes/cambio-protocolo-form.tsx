@@ -14,8 +14,12 @@ import {
 } from "@/lib/api/frontdesk";
 import { getCatalogoFacturacion, type Producto } from "@/lib/api/facturas";
 import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
+import { isUsableLine, protocolChangeInvalid, protocolChangeMissing } from "@/lib/pacientes/protocol-change-missing";
 import { useResource } from "@/hooks/use-resource";
-import { toastError } from "@/lib/api/errors";
+import { Field } from "@/components/kit/field";
+import { FormFooter } from "@/components/kit/form-footer";
+import { RequiredLegend, RequiredMark } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,7 +66,6 @@ export function CambioProtocoloForm({
   const [medicoId, setMedicoId] = React.useState<string>("");
   const [motivo, setMotivo] = React.useState<string>("");
   const [reintegros, setReintegros] = React.useState<Record<string, string>>({});
-  const [busy, setBusy] = React.useState(false);
 
   // Al cambiar de paciente, limpiar la selección/borrador.
   const [prevPid, setPrevPid] = React.useState(pacienteId);
@@ -83,7 +86,7 @@ export function CambioProtocoloForm({
   }
 
   const nuevosValidos: CambioProtocaloNuevo[] = lineas
-    .filter((l) => l.productoId && Number(l.sesiones) >= 1)
+    .filter(isUsableLine)
     .map((l) => ({
       productId: l.productoId,
       totalSessions: Math.max(1, Math.floor(Number(l.sesiones) || 0)),
@@ -92,12 +95,14 @@ export function CambioProtocoloForm({
       ...(l.dosis.trim() ? { dose: Number(l.dosis) } : {}),
     }));
 
-  const puedeAplicar = origenSel.size > 0 && nuevosValidos.length > 0 && motivo.trim().length > 0 && !busy;
+  const missingLabel = { origin: t("paso1"), product: t("producto"), sessions: t("sesiones"), reason: t("motivo") };
+  const missing = protocolChangeMissing({ originCount: origenSel.size, lines: lineas, reason: motivo }).map((k) => missingLabel[k]);
+  const invalid = protocolChangeInvalid(lineas);
 
-  async function aplicar() {
-    if (!puedeAplicar || !pacienteId) return;
-    setBusy(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
+      // Unreachable from the screen (the container always passes the patient); never "succeed" without saving.
+      if (!pacienteId) throw new Error(t("paciente"));
       const reint = Object.entries(reintegros)
         .map(([paqueteId, v]) => ({ paqueteId, n: Math.floor(Number(v) || 0) }))
         .filter((r) => r.n > 0)
@@ -106,7 +111,7 @@ export function CambioProtocoloForm({
           return p ? { productId: p.productId, unidadesSelladas: r.n } : null;
         })
         .filter(Boolean) as { productId: string; unidadesSelladas: number }[];
-      const res = await aplicarCambioProtocolo(
+      return aplicarCambioProtocolo(
         pacienteId,
         {
           paqueteOrigenIds: [...origenSel],
@@ -117,26 +122,26 @@ export function CambioProtocoloForm({
         },
         centro,
       );
-      toast.success(t("aplicado"));
-      (res.avisos ?? []).forEach((a) => toast.warning(a.labelKey && tRoot.has(a.labelKey) ? tRoot(a.labelKey) : (a.message ?? "")));
-      setOrigenSel(new Set());
-      setLineas([nuevaLinea()]);
-      setMotivo("");
-      setReintegros({});
-      pendRes.refresh(); // silent: the list updates in place, no skeleton after applying
-      onApplied?.();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    {
+      successMessage: t("aplicado"),
+      onSuccess: (res) => {
+        (res.avisos ?? []).forEach((a) => toast.warning(a.labelKey && tRoot.has(a.labelKey) ? tRoot(a.labelKey) : (a.message ?? "")));
+        setOrigenSel(new Set());
+        setLineas([nuevaLinea()]);
+        setMotivo("");
+        setReintegros({});
+        pendRes.refresh(); // silent: the list updates in place, no skeleton after applying
+        onApplied?.();
+      },
+    },
+  );
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* Paso 1: qué se reemplaza */}
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold">{t("paso1")}</h2>
+        <h2 className="text-sm font-semibold">{t("paso1")}<RequiredMark /></h2>
         {pendRes.state.kind === "loading" && (
           <LoadingRegion>
             <ul className="space-y-2">
@@ -194,12 +199,13 @@ export function CambioProtocoloForm({
         <div className="space-y-2">
           {lineas.map((l) => (
             <div key={l.key} className="rounded-md bg-card p-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{t("producto")}<RequiredMark /></span>
               <div className="flex items-center gap-2">
                 {catRes.state.kind === "loading" ? (
                   <ControlSkeleton className="w-auto flex-1" />
                 ) : (
                   <Select value={l.productoId} onValueChange={(v) => setLinea(l.key, { productoId: v })}>
-                    <SelectTrigger className="h-9 flex-1"><SelectValue placeholder={t("producto")} /></SelectTrigger>
+                    <SelectTrigger className="h-9 flex-1" aria-label={t("producto")} aria-required><SelectValue placeholder={t("producto")} /></SelectTrigger>
                     <SelectContent>
                       {catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                     </SelectContent>
@@ -237,19 +243,23 @@ export function CambioProtocoloForm({
             </Select>
           )}
         </div>
-        <div className="space-y-1">
-          <Label>{t("motivo")} <span className="text-destructive">*</span></Label>
+        <Field label={t("motivo")} required>
           <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivoPlaceholder")} />
-        </div>
+        </Field>
 
         <p className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
           <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
           {t("aviso")}
         </p>
 
-        <div className="flex justify-end">
-          <Button onClick={aplicar} disabled={!puedeAplicar}>{busy ? tc("saving") : t("aplicar")}</Button>
-        </div>
+        <FormFooter
+          primary={{ label: t("aplicar"), onClick: () => submit() }}
+          missing={missing}
+          reason={invalid ? t(invalid) : null}
+          blocked={!!invalid}
+          submitting={submitting}
+          extra={<RequiredLegend className="text-xs text-muted-foreground sm:mr-auto" />}
+        />
       </section>
     </div>
   );
@@ -258,7 +268,7 @@ export function CambioProtocoloForm({
 function Campo({ label, value, onChange, req }: { label: string; value: string; onChange: (v: string) => void; req?: boolean }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}{req && <span className="text-destructive"> *</span>}</span>
+      <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}{req && <RequiredMark />}</span>
       <Input value={value} onChange={(e) => onChange(e.target.value)} inputMode="numeric" className="h-8 text-right tabular-nums" placeholder="—" />
     </label>
   );

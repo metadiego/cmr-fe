@@ -56,7 +56,9 @@ const DEBT = {
   // 10-nov-2026: 618 → 567 — the detail panel moved to components/auditoria/audit-detail-sheet.tsx
   // (merge of the Claude connector "via" branch with main's entity filter).
   "components/auditoria/auditoria-log.tsx": 567,
-  "components/clientes/paciente-form-sheet.tsx": 550,
+  // 16-nov-2026: 550 → 480 — moved onto the standard FormSheet shell (kit Field, useSubmit, useDialogForm);
+  // the required/blocked checks live in lib/pacientes/patient-form-missing.ts.
+  "components/clientes/paciente-form-sheet.tsx": 480,
   // 20-oct-2026: first entry for this file — same EHR-gate wiring as above, in both CentroSheet and
   // CentroSheetV2 (the classic and beta day views share this file). Admitted debt, not a silent bump.
   "components/agenda/dia-view.tsx": 605,

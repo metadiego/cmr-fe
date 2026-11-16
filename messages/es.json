@@ -1086,7 +1086,10 @@
       "reason": "Motivo",
       "reasonPlaceholder": "Por qué se fusionan estas dos fichas",
       "merge": "Fusionar",
-      "mergedOk": "Fichas fusionadas"
+      "mergedOk": "Fichas fusionadas",
+      "otherRecord": "La otra ficha",
+      "simulationFailed": "No se pudo calcular la fusión. Vuelve a elegir la ficha.",
+      "blockedReason": "La fusión está bloqueada: revisa los avisos de arriba."
     },
     "confirmDeactivateTitle": "¿Desactivar paciente?",
     "confirmDeactivateBody": "{name} dejará de aparecer en la lista. Su historial se conserva y puedes reactivarlo después.",
@@ -1166,7 +1169,8 @@
       "medico": "Médico",
       "sinMedico": "Sin médico",
       "otroCentro": "otro centro",
-      "idTypeFirst": "Elige primero el tipo de ID"
+      "idTypeFirst": "Elige primero el tipo de ID",
+      "checkingRecord": "Comprobando el número de récord…"
     },
     "acciones": "Acciones",
     "tabs": {
@@ -2008,7 +2012,8 @@
     "stepPresent": "Presente",
     "stepConsult": "En consulta",
     "stepAttended": "Atendido",
-    "now": "ahora"
+    "now": "ahora",
+    "noPatient": "Esta fila no tiene paciente; no se puede agendar la cita."
   },
   "settingsModulos": {
     "title": "Módulos del modal",
@@ -2191,6 +2196,8 @@
     "corregirSesiones": "Sesiones totales",
     "corregirGuardar": "Guardar corrección",
     "corregirMenorConsumido": "No puede ser menor a lo ya entregado ({n}).",
+    "fixAvailabilityMultiplierPositive": "Cada valor debe ser mayor que 0.",
+    "fixAvailabilityNoPackageId": "Este paquete no tiene identificador; recarga la página.",
     "corregirOk": "Disponibilidad actualizada",
     "corregirError": "No se pudo actualizar la disponibilidad",
     "fijarSinPaquete": "Fijar sesiones",
@@ -2199,7 +2206,7 @@
     "fijarSinPaqueteCampoSesiones": "Sesiones totales",
     "fijarSinPaqueteCampoProducto": "Producto (el servicio usa un grupo de facturación)",
     "fijarSinPaqueteElegirProducto": "Elegir producto…",
-    "fijarSinPaqueteProductoRequerido": "Elige a qué producto del grupo anclar el paquete nuevo.",
+    "fixSessionsNegative": "Debe ser 0 o más.",
     "fijarSinPaqueteGuardar": "Fijar sesiones",
     "fijarSinPaqueteOk": "Sesiones fijadas",
     "acciones": "Acciones",
@@ -2376,6 +2383,7 @@
       "sesiones": "Sesiones a transferir",
       "sesionesAyuda": "Vacío = todas ({n}). O escribe cuántas para una transferencia parcial.",
       "sesionesInvalida": "Debe ser entre 1 y {n}.",
+      "nothingPending": "Este paquete no tiene sesiones pendientes para transferir.",
       "modo": "Modo",
       "virtual": "Virtual",
       "virtualAyuda": "Solo el tratamiento; el otro centro usa su propio inventario.",
@@ -3486,7 +3494,8 @@
     "cancel": "Cancelar",
     "save": "Agregar al tablero",
     "saveScheduled": "Agendar cita",
-    "retired": "De baja"
+    "retired": "De baja",
+    "noAppointmentType": "No hay tipos de cita cargados; no se puede agendar."
   },
   "precios": {
     "title": "Precios",
@@ -4712,7 +4721,8 @@
       "cargando": "Cargando…",
       "enCentro": "En {centro}",
       "cambioResumen": "{cerrados} cerrado(s) · {creados} nuevo(s)",
-      "nuevoTitulo": "Nuevo cambio"
+      "nuevoTitulo": "Nuevo cambio",
+      "sessionsAtLeastOne": "Las sesiones deben ser 1 o más."
     }
   },
   "perfiles": {
@@ -5934,6 +5944,7 @@
     "searchVisit": "Buscar por nombre, récord o servicio",
     "visitsError": "No se pudieron cargar las visitas de ese día",
     "noVisits": "No hay visitas ese día que coincidan",
+    "visit": "La visita",
     "samePatient": "Mismo paciente",
     "kind": {
       "scale": "Báscula",

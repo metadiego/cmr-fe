@@ -20,20 +20,25 @@ import { listAlmacenes, type Almacen, type Producto } from "@/lib/api/inventario
 import { listProductosDeGrupo } from "@/lib/api/inventario-grupos";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
-import { toastError } from "@/lib/api/errors";
 import { legendMultiplicadores } from "@/lib/frontdesk/multiplicadores";
+import {
+  transferTreatmentInvalid,
+  transferTreatmentMissing,
+  type TransferTreatmentField,
+} from "@/lib/frontdesk/transfer-treatment-missing";
+import {
+  fixSessionsWithoutPackageInvalid,
+  fixSessionsWithoutPackageMissing,
+  type FixSessionsWithoutPackageField,
+} from "@/lib/frontdesk/fix-sessions-without-package-missing";
 import { CorregirDisponibilidadDialog } from "@/components/frontdesk/corregir-disponibilidad-dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,26 +74,23 @@ export function TransferirTratamientoDialog({
   const pendientes = Math.max(0, totales - entregadas);
   const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
-  const destinos = centros.filter((c) => c.id !== centro); // no transferir al mismo centro
+  const destinos = centros.filter((c) => c.id !== centro); // never transfer to the same center
 
-  const [destino, setDestino] = React.useState<string>("");
-  const [sesiones, setSesiones] = React.useState<string>("");
-  const [modo, setModo] = React.useState<"virtual" | "fisica">("virtual");
-  const [almOrigen, setAlmOrigen] = React.useState<string>("");
-  const [almDestino, setAlmDestino] = React.useState<string>("");
-  const [motivo, setMotivo] = React.useState<string>("");
-  const [guardando, setGuardando] = React.useState(false);
+  const [form, setForm] = useDialogForm(
+    () => ({
+      destino: "",
+      sesiones: String(pendientes || ""),
+      modo: "virtual" as "virtual" | "fisica",
+      almOrigen: "",
+      almDestino: "",
+      motivo: "",
+    }),
+    paquete != null,
+    paquete?.id ?? null,
+  );
+  const { destino, sesiones, modo, almOrigen, almDestino, motivo } = form;
 
-  // Reset al abrir/cambiar de paquete (sin efecto).
-  const pid = paquete?.id ?? null;
-  const [prevPid, setPrevPid] = React.useState<string | null>(null);
-  if (pid !== prevPid) {
-    setPrevPid(pid);
-    setDestino(""); setSesiones(String(pendientes || "")); setModo("virtual");
-    setAlmOrigen(""); setAlmDestino(""); setMotivo("");
-  }
-
-  // Almacenes por centro (solo si modo física).
+  // Warehouses per center (physical mode only).
   const almOrigenRes = useResource<Almacen[]>(
     () => (modo === "fisica" && centro ? listAlmacenes(centro) : Promise.resolve([])),
     [modo, centro],
@@ -100,124 +102,141 @@ export function TransferirTratamientoDialog({
   const almacenesOrigen = almOrigenRes.state.kind === "ok" ? almOrigenRes.state.data : [];
   const almacenesDestino = almDestinoRes.state.kind === "ok" ? almDestinoRes.state.data : [];
 
-  const nSes = Number(sesiones);
-  const sesInvalida = sesiones !== "" && (!Number.isFinite(nSes) || nSes <= 0 || nSes > pendientes);
-  const faltaAlmacen = modo === "fisica" && (!almOrigen || !almDestino);
-  const puede = !!paquete?.id && !!destino && !sesInvalida && !faltaAlmacen && pendientes > 0;
+  const state = { destination: destino, mode: modo, sourceWarehouse: almOrigen, destinationWarehouse: almDestino, sessions: sesiones, pending: pendientes };
+  const label: Record<TransferTreatmentField, string> = {
+    destination: t("transferir.destino"),
+    sourceWarehouse: t("transferir.almacenOrigen"),
+    destinationWarehouse: t("transferir.almacenDestino"),
+  };
+  const missing = transferTreatmentMissing(state).map((f) => label[f]);
+  const problem = transferTreatmentInvalid(state);
+  const reason =
+    problem === "nothingPending"
+      ? t("transferir.nothingPending")
+      : problem === "sessionsOutOfRange"
+        ? t("transferir.sesionesInvalida", { n: pendientes })
+        : null;
 
-  async function guardar() {
-    if (!puede || !paquete?.id) return;
-    setGuardando(true);
-    try {
+  const nSes = Number(sesiones);
+  const { submitting, submit } = useSubmit(
+    async () => {
+      if (!paquete?.id) return false; // the cell only opens this dialog for a package with an id
       await transferirTratamiento(
         paquete.id,
         {
           destinationClinicId: destino,
-          ...(sesiones !== "" && nSes < pendientes ? { sessions: nSes } : {}), // omitido = todas
+          ...(sesiones !== "" && nSes < pendientes ? { sessions: nSes } : {}), // omitted = all
           mode: modo,
           ...(modo === "fisica" ? { sourceWarehouseId: almOrigen, destinationWarehouseId: almDestino } : {}),
           ...(motivo.trim() ? { reason: motivo.trim() } : {}),
         },
         centro,
       );
-      toast.success(t("transferir.ok"));
-      onClose();
-      onDone();
-    } catch (e) {
-      toastError(e, t);
-    } finally {
-      setGuardando(false);
-    }
-  }
+      return true;
+    },
+    {
+      onSuccess: (done) => {
+        if (!done) return;
+        toast.success(t("transferir.ok"));
+        onClose();
+        onDone();
+      },
+    },
+  );
 
   return (
-    <Dialog open={paquete != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("transferir.titulo")}</DialogTitle>
-          <DialogDescription>{t("transferir.desc")}</DialogDescription>
-        </DialogHeader>
-        {paquete && (
-          <div className="space-y-3">
-            <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-              <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
-              <span className="ml-2 text-muted-foreground">{t("transferir.pendientes", { n: pendientes })}</span>
-            </div>
-
-            <div className="space-y-1">
-              <Label>{t("transferir.destino")}</Label>
-              <Select value={destino} onValueChange={setDestino}>
-                <SelectTrigger><SelectValue placeholder={t("transferir.elegirCentro")} /></SelectTrigger>
-                <SelectContent>
-                  {destinos.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1">
-              <Label>{t("transferir.sesiones")}</Label>
-              <Input type="number" min={1} max={pendientes} value={sesiones} onChange={(e) => setSesiones(e.target.value)} />
-              <p className="text-[11px] text-muted-foreground">{t("transferir.sesionesAyuda", { n: pendientes })}</p>
-              {sesInvalida && <p className="text-xs text-destructive">{t("transferir.sesionesInvalida", { n: pendientes })}</p>}
-            </div>
-
-            <div className="space-y-1">
-              <Label>{t("transferir.modo")}</Label>
-              <div className="flex gap-2">
-                {(["virtual", "fisica"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setModo(m)}
-                    className={"flex-1 rounded-md border px-3 py-2 text-left text-sm " + (modo === m ? "border-primary bg-primary/10" : "hover:bg-muted")}
-                  >
-                    <span className="block font-medium">{t(`transferir.${m}`)}</span>
-                    <span className="block text-[11px] text-muted-foreground">{t(`transferir.${m}Ayuda`)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {modo === "fisica" && (
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label>{t("transferir.almacenOrigen")}</Label>
-                  <Select value={almOrigen} onValueChange={setAlmOrigen}>
-                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{almacenesOrigen.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label>{t("transferir.almacenDestino")}</Label>
-                  <Select value={almDestino} onValueChange={setAlmDestino} disabled={!destino}>
-                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{almacenesDestino.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-1">
-              <Label>{t("transferir.motivo")}</Label>
-              <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("transferir.motivoPlaceholder")} />
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={onClose} disabled={guardando}>{t("transferir.cancelar")}</Button>
-              <Button onClick={guardar} disabled={!puede || guardando}>{t("transferir.confirmar")}</Button>
-            </div>
+    <FormDialog
+      open={paquete != null}
+      onOpenChange={(o) => !o && onClose()}
+      size="md"
+      title={t("transferir.titulo")}
+      description={t("transferir.desc")}
+      onSubmit={() => submit()}
+      submitLabel={t("transferir.confirmar")}
+      cancelLabel={t("transferir.cancelar")}
+      submitting={submitting}
+      missing={missing}
+      reason={reason}
+      // Nothing pending, or sessions out of range, kept the button disabled before too.
+      blocked={problem != null}
+    >
+      {paquete && (
+        <>
+          <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+            <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
+            <span className="ml-2 text-muted-foreground">{t("transferir.pendientes", { n: pendientes })}</span>
           </div>
-        )}
-      </DialogContent>
-    </Dialog>
+
+          <Field label={label.destination} htmlFor="transfer-destination" required className="space-y-1">
+            <Select value={destino} onValueChange={(v) => setForm({ destino: v })}>
+              <SelectTrigger id="transfer-destination"><SelectValue placeholder={t("transferir.elegirCentro")} /></SelectTrigger>
+              <SelectContent>
+                {destinos.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field label={t("transferir.sesiones")} htmlFor="transfer-sessions" hint={t("transferir.sesionesAyuda", { n: pendientes })} className="space-y-1">
+            <Input
+              id="transfer-sessions"
+              type="number"
+              min={1}
+              max={pendientes}
+              value={sesiones}
+              aria-invalid={problem === "sessionsOutOfRange"}
+              aria-describedby="transfer-sessions-hint"
+              onChange={(e) => setForm({ sesiones: e.target.value })}
+            />
+          </Field>
+
+          <Field label={t("transferir.modo")} className="space-y-1">
+            <div className="flex gap-2">
+              {(["virtual", "fisica"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setForm({ modo: m })}
+                  className={"flex-1 rounded-md border px-3 py-2 text-left text-sm " + (modo === m ? "border-primary bg-primary/10" : "hover:bg-muted")}
+                >
+                  <span className="block font-medium">{t(`transferir.${m}`)}</span>
+                  <span className="block text-[11px] text-muted-foreground">{t(`transferir.${m}Ayuda`)}</span>
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          {modo === "fisica" && (
+            <div className="grid grid-cols-2 gap-2">
+              <Field label={label.sourceWarehouse} htmlFor="transfer-source-warehouse" required className="space-y-1">
+                <Select value={almOrigen} onValueChange={(v) => setForm({ almOrigen: v })}>
+                  <SelectTrigger id="transfer-source-warehouse"><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>{almacenesOrigen.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </Field>
+              <Field label={label.destinationWarehouse} htmlFor="transfer-destination-warehouse" required className="space-y-1">
+                <Select value={almDestino} onValueChange={(v) => setForm({ almDestino: v })} disabled={!destino}>
+                  <SelectTrigger id="transfer-destination-warehouse"><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>{almacenesDestino.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </Field>
+            </div>
+          )}
+
+          <Field label={t("transferir.motivo")} htmlFor="transfer-reason" className="space-y-1">
+            <Input id="transfer-reason" value={motivo} onChange={(e) => setForm({ motivo: e.target.value })} placeholder={t("transferir.motivoPlaceholder")} />
+          </Field>
+          {modo === "fisica" && <RequiredLegend className="text-xs text-muted-foreground" />}
+        </>
+      )}
+    </FormDialog>
   );
 }
 
-// ————— Fijar sesiones SIN paquete previo (PATCH .../session-count, opt-in por servicio) —————
-// Gap distinto del de "Corregir disponibilidad": ese diálogo corrige un paquete que YA EXISTE; este
-// cubre el paciente que no tiene NINGUNO — antes, sin ningún paquete, no había forma de tocar el
-// número de sesión (handoff columna-sesiones-sin-paquete-handoff-be.md). Solo aparece si el servicio
-// tiene `allowSessionFixWithoutPackage` prendido (configurable por servicio, pantalla de Servicios).
+// ————— Fix sessions WITHOUT a prior package (PATCH .../session-count, opt-in per service) —————
+// A different gap from "Fix availability": that dialog fixes a package that ALREADY EXISTS; this one
+// covers the patient who has NONE — before, with no package at all, there was no way to touch the
+// session number (handoff columna-sesiones-sin-paquete-handoff-be.md). Shown only when the service has
+// `allowSessionFixWithoutPackage` on (configurable per service, Services screen).
 function FijarSesionesSinPaqueteDialog({
   servicio,
   pacienteId,
@@ -232,22 +251,12 @@ function FijarSesionesSinPaqueteDialog({
   onDone: () => void;
 }) {
   const t = useTranslations("frontdesk");
-  // Servicio de GRUPO (varios productos, p. ej. Láser HILT+MLS) sin productId propio: el BE exige
-  // indicar a cuál anclar el paquete nuevo. Sin grupo o con productId propio, no hace falta.
+  // GROUP service (several products, e.g. HILT+MLS laser) without its own productId: the BE requires
+  // saying which one the new package anchors to. Without a group, or with its own productId, not needed.
   const esDeGrupo = !!servicio && !servicio.productId && !!servicio.billingGroupId;
 
-  const [sesiones, setSesiones] = React.useState("");
-  const [productoId, setProductoId] = React.useState("");
-  const [guardando, setGuardando] = React.useState(false);
-
-  // Reset al abrir/cambiar de servicio (sin efecto).
-  const sid = servicio?.id ?? null;
-  const [prevSid, setPrevSid] = React.useState<string | null>(null);
-  if (sid !== prevSid) {
-    setPrevSid(sid);
-    setSesiones("");
-    setProductoId("");
-  }
+  const [form, setForm] = useDialogForm(() => ({ sesiones: "", productoId: "" }), servicio != null, servicio?.id ?? null);
+  const { sesiones, productoId } = form;
 
   const productosRes = useResource<Producto[]>(
     () => (esDeGrupo && servicio?.billingGroupId ? listProductosDeGrupo(servicio.billingGroupId, centro) : Promise.resolve([])),
@@ -255,66 +264,77 @@ function FijarSesionesSinPaqueteDialog({
   );
   const productos = productosRes.state.kind === "ok" ? productosRes.state.data : [];
 
-  const n = Number(sesiones);
-  const sesionesInvalidas = sesiones.trim() === "" || !Number.isFinite(n) || n < 0;
-  const faltaProducto = esDeGrupo && !productoId;
-  const puede = !!servicio?.id && !!pacienteId && !sesionesInvalidas && !faltaProducto;
+  const state = { sessions: sesiones, needsProduct: esDeGrupo, productId: productoId };
+  const label: Record<FixSessionsWithoutPackageField, string> = {
+    sessions: t("fijarSinPaqueteCampoSesiones"),
+    product: t("fijarSinPaqueteCampoProducto"),
+  };
+  const missing = fixSessionsWithoutPackageMissing(state).map((f) => label[f]);
+  const problem = fixSessionsWithoutPackageInvalid(state);
 
-  async function guardar() {
-    if (!puede || !servicio || !pacienteId) return;
-    setGuardando(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
+      if (!servicio || !pacienteId) return false; // the cell only renders this with both
       await fijarSesionesSinPaquete(
         pacienteId,
         servicio.id,
-        { sesionesTotales: n, ...(productoId ? { productoId } : {}) },
+        { sesionesTotales: Number(sesiones), ...(productoId ? { productoId } : {}) },
         centro,
       );
-      toast.success(t("fijarSinPaqueteOk"));
-      onClose();
-      onDone();
-    } catch (e) {
-      toastError(e, t);
-    } finally {
-      setGuardando(false);
-    }
-  }
+      return true;
+    },
+    {
+      onSuccess: (done) => {
+        if (!done) return;
+        toast.success(t("fijarSinPaqueteOk"));
+        onClose();
+        onDone();
+      },
+    },
+  );
 
   return (
-    <Dialog open={servicio != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("fijarSinPaqueteTitulo")}</DialogTitle>
-          <DialogDescription>{t("fijarSinPaqueteDesc")}</DialogDescription>
-        </DialogHeader>
-        {servicio && (
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <Label>{t("fijarSinPaqueteCampoSesiones")}</Label>
-              <Input type="number" min={0} value={sesiones} onChange={(e) => setSesiones(e.target.value)} />
-            </div>
+    <FormDialog
+      open={servicio != null}
+      onOpenChange={(o) => !o && onClose()}
+      size="md"
+      title={t("fijarSinPaqueteTitulo")}
+      description={t("fijarSinPaqueteDesc")}
+      onSubmit={() => submit()}
+      submitLabel={t("fijarSinPaqueteGuardar")}
+      cancelLabel={t("transferir.cancelar")}
+      submitting={submitting}
+      missing={missing}
+      reason={problem ? t("fixSessionsNegative") : null}
+      // A negative total kept the button disabled before too.
+      blocked={problem != null}
+    >
+      {servicio && (
+        <>
+          <Field label={label.sessions} htmlFor="fix-sessions-total" required className="space-y-1">
+            <Input
+              id="fix-sessions-total"
+              type="number"
+              min={0}
+              value={sesiones}
+              aria-invalid={problem != null}
+              onChange={(e) => setForm({ sesiones: e.target.value })}
+            />
+          </Field>
 
-            {esDeGrupo && (
-              <div className="space-y-1">
-                <Label>{t("fijarSinPaqueteCampoProducto")}</Label>
-                <Select value={productoId} onValueChange={setProductoId}>
-                  <SelectTrigger><SelectValue placeholder={t("fijarSinPaqueteElegirProducto")} /></SelectTrigger>
-                  <SelectContent>
-                    {productos.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                {faltaProducto && <p className="text-xs text-destructive">{t("fijarSinPaqueteProductoRequerido")}</p>}
-              </div>
-            )}
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={onClose} disabled={guardando}>{t("transferir.cancelar")}</Button>
-              <Button onClick={guardar} disabled={!puede || guardando}>{t("fijarSinPaqueteGuardar")}</Button>
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          {esDeGrupo && (
+            <Field label={label.product} htmlFor="fix-sessions-product" required className="space-y-1">
+              <Select value={productoId} onValueChange={(v) => setForm({ productoId: v })}>
+                <SelectTrigger id="fix-sessions-product"><SelectValue placeholder={t("fijarSinPaqueteElegirProducto")} /></SelectTrigger>
+                <SelectContent>
+                  {productos.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
+        </>
+      )}
+    </FormDialog>
   );
 }
 

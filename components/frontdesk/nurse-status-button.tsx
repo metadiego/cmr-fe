@@ -13,7 +13,7 @@ import {
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
 import { listPersonalPorCapacidad } from "@/lib/api/personal";
-import { toastError } from "@/lib/api/errors";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -53,7 +53,6 @@ export function NurseStatusButton({
   const [roster, setRoster] = React.useState<{ id: string; nombre: string }[]>([]);
   const [actuales, setActuales] = React.useState<NurseStatusActual[]>([]);
   const [sel, setSel] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
   const [gen, setGen] = React.useState(0);
   // Estatus con `durationOptions` (BE PR #596): se elige el tipo primero, y mientras no se escoja
   // duración (o "Sin límite") no se aplica nada todavía. Se limpia al cambiar de enfermera o cerrar
@@ -84,20 +83,16 @@ export function NurseStatusButton({
   const tipoLabel = (x: NurseStatusTipo) => (tRoot.has(x.labelKey) ? tRoot(x.labelKey) : x.name);
   const nombreDe = (a: NurseStatusActual) => a.personalNombre ?? roster.find((r) => r.id === a.staffId)?.nombre ?? a.staffId.slice(0, 8);
 
-  async function aplicar(personalId: string, statusTipoId: string | null, durationMinutes?: number) {
-    if (!personalId) return;
-    setBusy(true);
-    try {
+  // Every button in the panel acts at once (no form submit); one guard keeps them from double-firing.
+  const { submitting: busy, submit: aplicar } = useSubmit(
+    async (personalId: string, statusTipoId: string | null, durationMinutes?: number) => {
+      if (!personalId) return;
       await setNurseStatus({ staffId: personalId, statusTypeId: statusTipoId ?? undefined, durationMinutes }, centro);
       setGen((g) => g + 1);
       setPendienteDuracion(null);
       onChanged?.();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+  );
 
   return (
     <Sheet open={open} onOpenChange={(v) => { setOpen(v); setPendienteDuracion(null); }}>
