@@ -14,7 +14,7 @@ import {
   type NurseStatusTipo,
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
-import { toastError } from "@/lib/api/errors";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -29,13 +29,11 @@ const horaDe = (iso: string) => new Date(iso).toLocaleTimeString("es-PR", { hour
 // «Descanso» (BE #498): a break hides someone from Libres until it expires.
 export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fecha: string }) {
   const t = useTranslations("frontdesk");
-  const tRoot = useTranslations();
   const [open, setOpen] = React.useState(false);
   const [queue, setQueue] = React.useState<FrontdeskQueue | null>(null);
   const [tipos, setTipos] = React.useState<NurseStatusTipo[]>([]);
   const [actuales, setActuales] = React.useState<NurseStatusActual[]>([]);
   const [sel, setSel] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
   const [gen, setGen] = React.useState(0);
 
   React.useEffect(() => {
@@ -61,31 +59,21 @@ export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fec
   const enDescanso = breakTipo ? actuales.filter((a) => a.statusTypeId === breakTipo.id) : [];
   const nombreDe = (id: string) => activosHoy.get(id) ?? id.slice(0, 8);
 
-  async function ponerDescanso(minutos: number) {
-    if (!sel || !breakTipo) return;
-    setBusy(true);
-    try {
-      await setNurseStatus({ staffId: sel, statusTypeId: breakTipo.id, durationMinutes: minutos }, centro);
-      setSel("");
+  // Put on / take off a break: both act at once (no form submit) and share one guard.
+  const { submitting: busy, submit: setBreak } = useSubmit(
+    async (staffId: string, minutos: number | null) => {
+      if (minutos == null) {
+        await setNurseStatus({ staffId, statusTypeId: null }, centro);
+      } else {
+        if (!staffId || !breakTipo) return;
+        await setNurseStatus({ staffId, statusTypeId: breakTipo.id, durationMinutes: minutos }, centro);
+        setSel("");
+      }
       setGen((g) => g + 1);
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function quitarDescanso(staffId: string) {
-    setBusy(true);
-    try {
-      await setNurseStatus({ staffId, statusTypeId: null }, centro);
-      setGen((g) => g + 1);
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+  );
+  const ponerDescanso = (minutos: number) => setBreak(sel, minutos);
+  const quitarDescanso = (staffId: string) => setBreak(staffId, null);
 
   const descansoIds = new Set(enDescanso.map((a) => a.staffId));
   const libresDisponibles = libres.filter((p) => !descansoIds.has(p.id));

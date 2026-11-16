@@ -1086,7 +1086,10 @@
       "reason": "Reason",
       "reasonPlaceholder": "Why these two records are being merged",
       "merge": "Merge",
-      "mergedOk": "Records merged"
+      "mergedOk": "Records merged",
+      "otherRecord": "The other record",
+      "simulationFailed": "The merge could not be worked out. Pick the record again.",
+      "blockedReason": "The merge is blocked: see the notices above."
     },
     "confirmDeactivateTitle": "Deactivate patient?",
     "confirmDeactivateBody": "{name} will no longer appear in the list. Their history is kept and you can reactivate them later.",
@@ -1166,7 +1169,8 @@
       "medico": "Doctor",
       "sinMedico": "No doctor",
       "otroCentro": "other center",
-      "idTypeFirst": "Pick the ID type first"
+      "idTypeFirst": "Pick the ID type first",
+      "checkingRecord": "Checking the record number…"
     },
     "acciones": "Actions",
     "tabs": {
@@ -2008,7 +2012,8 @@
     "stepPresent": "Present",
     "stepConsult": "In consult",
     "stepAttended": "Attended",
-    "now": "now"
+    "now": "now",
+    "noPatient": "This row has no patient; the appointment can't be booked."
   },
   "settingsModulos": {
     "title": "Modal modules",
@@ -2191,6 +2196,8 @@
     "corregirSesiones": "Total sessions",
     "corregirGuardar": "Save correction",
     "corregirMenorConsumido": "Cannot be less than what is already delivered ({n}).",
+    "fixAvailabilityMultiplierPositive": "Each value must be greater than 0.",
+    "fixAvailabilityNoPackageId": "This package has no id; reload the page.",
     "corregirOk": "Availability updated",
     "corregirError": "Could not update availability",
     "fijarSinPaquete": "Fix sessions",
@@ -2199,7 +2206,7 @@
     "fijarSinPaqueteCampoSesiones": "Total sessions",
     "fijarSinPaqueteCampoProducto": "Product (the service uses a billing group)",
     "fijarSinPaqueteElegirProducto": "Choose product…",
-    "fijarSinPaqueteProductoRequerido": "Choose which product in the group to anchor the new package to.",
+    "fixSessionsNegative": "Must be 0 or more.",
     "fijarSinPaqueteGuardar": "Fix sessions",
     "fijarSinPaqueteOk": "Sessions fixed",
     "acciones": "Actions",
@@ -2376,6 +2383,7 @@
       "sesiones": "Sessions to transfer",
       "sesionesAyuda": "Empty = all ({n}). Or type how many for a partial transfer.",
       "sesionesInvalida": "Must be between 1 and {n}.",
+      "nothingPending": "This package has no pending sessions to transfer.",
       "modo": "Mode",
       "virtual": "Virtual",
       "virtualAyuda": "Only the treatment; the other center uses its own inventory.",
@@ -3486,7 +3494,8 @@
     "cancel": "Cancel",
     "save": "Add to board",
     "saveScheduled": "Book appointment",
-    "retired": "Retired"
+    "retired": "Retired",
+    "noAppointmentType": "No appointment types are loaded; the appointment can't be booked."
   },
   "precios": {
     "title": "Prices",
@@ -4712,7 +4721,8 @@
       "cargando": "Loading…",
       "enCentro": "At {centro}",
       "cambioResumen": "{cerrados} closed · {creados} new",
-      "nuevoTitulo": "New change"
+      "nuevoTitulo": "New change",
+      "sessionsAtLeastOne": "Sessions must be 1 or more."
     }
   },
   "perfiles": {
@@ -5934,6 +5944,7 @@
     "searchVisit": "Search by name, record or service",
     "visitsError": "That day's visits could not be loaded",
     "noVisits": "No visits that day match",
+    "visit": "The visit",
     "samePatient": "Same patient",
     "kind": {
       "scale": "Scale",

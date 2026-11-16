@@ -10,7 +10,8 @@ import { MissingHint } from "./missing-hint";
 
 export type FooterAction = {
   label: string;
-  onClick: () => void;
+  /** Wrap `submit`, never pass it directly: it is called with no arguments. */
+  onClick: () => void | Promise<void>;
   variant?: React.ComponentProps<typeof Button>["variant"];
   /** When any action sets `busy`, only those show the submitting label. */
   busy?: boolean;
@@ -72,7 +73,7 @@ export function FormFooter({
             key={a.label}
             type="button"
             variant={a.variant}
-            onClick={a.onClick}
+            onClick={() => a.onClick()}
             disabled={disabled}
             aria-describedby={hint ? id : undefined}
           >
