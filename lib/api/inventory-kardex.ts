@@ -49,17 +49,35 @@ export type KardexSummary = {
   closing: number;
 };
 
-export function getKardexDiario(p: { productId: string; from: string; to: string }, tenant?: string | null) {
-  const qs = new URLSearchParams({ productoId: p.productId, desde: p.from, hasta: p.to });
-  return apiFetch<KardexDaily>(`/inventory/reports/daily-kardex?${qs}`, {}, tenant ?? undefined);
+// Query params stay in Spanish (productoId, desde, hasta, fecha): that is the BE controller today, not a
+// choice made here (CLAUDE.md rule 6 spirit). centerIds goes along so the BE resolves inventario.read for
+// THAT center, not only the active one.
+function query(params: Record<string, string>, centerId?: string | null): string {
+  const qs = new URLSearchParams(params);
+  if (centerId) qs.set("centerIds", centerId);
+  return qs.toString();
 }
 
-export function getKardexDia(p: { productId: string; date: string }, tenant?: string | null) {
-  const qs = new URLSearchParams({ productoId: p.productId, fecha: p.date });
-  return apiFetch<KardexDayMovement[]>(`/inventory/reports/daily-kardex/day?${qs}`, {}, tenant ?? undefined);
+export function getDailyKardex(p: { productId: string; from: string; to: string }, centerId?: string | null) {
+  return apiFetch<KardexDaily>(
+    `/inventory/reports/daily-kardex?${query({ productoId: p.productId, desde: p.from, hasta: p.to }, centerId)}`,
+    {},
+    centerId ?? undefined,
+  );
 }
 
-export function getKardexResumen(p: { productId: string; from: string; to: string }, tenant?: string | null) {
-  const qs = new URLSearchParams({ productoId: p.productId, desde: p.from, hasta: p.to });
-  return apiFetch<KardexSummary>(`/inventory/reports/kardex-summary?${qs}`, {}, tenant ?? undefined);
+export function getKardexDay(p: { productId: string; date: string }, centerId?: string | null) {
+  return apiFetch<KardexDayMovement[]>(
+    `/inventory/reports/daily-kardex/day?${query({ productoId: p.productId, fecha: p.date }, centerId)}`,
+    {},
+    centerId ?? undefined,
+  );
+}
+
+export function getKardexSummary(p: { productId: string; from: string; to: string }, centerId?: string | null) {
+  return apiFetch<KardexSummary>(
+    `/inventory/reports/kardex-summary?${query({ productoId: p.productId, desde: p.from, hasta: p.to }, centerId)}`,
+    {},
+    centerId ?? undefined,
+  );
 }

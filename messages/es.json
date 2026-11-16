@@ -6210,41 +6210,48 @@
     "clinicKeyTooBroad": "Una API key de un centro no puede llevar acceso total ni permisos de gestión de accesos.",
     "beyondCreator": "Una API key no puede tener permisos que su creador no tiene."
   },
-  "inventarioKardex": {
-    "titulo": "Kardex diario",
-    "producto": "Producto",
-    "elegirProducto": "Elige un producto",
-    "desde": "Desde",
-    "hasta": "Hasta",
-    "tabDiario": "Por día",
-    "tabResumen": "Resumen gerencial",
-    "verDia": "Ver día",
-    "detalleTitulo": "Movimientos del {fecha}",
+  "inventoryKardex": {
+    "title": "Kardex diario",
+    "subtitle": "Entradas, aplicadas y ajustes de un producto, día por día, en viales cerrados.",
+    "print": "Imprimir",
+    "center": "Centro",
+    "product": "Producto",
+    "pickProduct": "Elige un producto",
+    "from": "Desde",
+    "to": "Hasta",
+    "badRange": "La fecha «Desde» debe ser anterior o igual a «Hasta».",
+    "loading": "Cargando…",
+    "tabDaily": "Por día",
+    "tabSummary": "Resumen gerencial",
+    "viewDay": "Ver día",
+    "periodTotal": "Total del período",
+    "noMovements": "Ese día no tiene movimientos.",
+    "dayTitle": "Detalle del {date}",
     "col": {
-      "fecha": "Fecha",
-      "inicio": "Inicio",
-      "entradas": "Entradas",
-      "aplicadas": "Aplicadas",
-      "proporcion": "Apl. en proporción",
-      "ajustes": "Ajustes",
-      "total": "Total",
-      "acciones": "Acciones"
+      "date": "Fecha",
+      "opening": "Inicio",
+      "inbound": "Entradas",
+      "applied": "Aplicadas",
+      "proportion": "Apl. en proporción",
+      "adjustments": "Ajustes",
+      "closing": "Total",
+      "actions": "Acciones"
     },
-    "res": {
-      "inicial": "Inventario inicial al {fecha}",
-      "entrada": "Entrada",
-      "ajuste": "Ajuste",
-      "aplicadas": "Aplicadas al {fecha}",
-      "final": "Inventario final al {fecha}"
+    "summary": {
+      "opening": "Inventario inicial al {date}",
+      "inbound": "Entrada",
+      "adjustment": "Ajuste",
+      "applied": "Aplicadas hasta el {date}",
+      "closing": "Inventario final al {date}"
     },
-    "det": {
-      "paciente": "Paciente",
+    "day": {
+      "patient": "Paciente",
       "record": "Récord",
-      "motivo": "Motivo",
-      "cantidad": "Cantidad",
-      "sesion": "Sesión",
-      "nota": "Nota",
-      "contenido": "(contenido)"
+      "reason": "Motivo",
+      "quantity": "Cantidad",
+      "session": "Sesión",
+      "notes": "Nota",
+      "content": "(contenido)"
     }
   }
 }
