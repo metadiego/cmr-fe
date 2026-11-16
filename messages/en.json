@@ -1086,7 +1086,10 @@
       "reason": "Reason",
       "reasonPlaceholder": "Why these two records are being merged",
       "merge": "Merge",
-      "mergedOk": "Records merged"
+      "mergedOk": "Records merged",
+      "otherRecord": "The other record",
+      "simulationFailed": "The merge could not be worked out. Pick the record again.",
+      "blockedReason": "The merge is blocked: see the notices above."
     },
     "confirmDeactivateTitle": "Deactivate patient?",
     "confirmDeactivateBody": "{name} will no longer appear in the list. Their history is kept and you can reactivate them later.",

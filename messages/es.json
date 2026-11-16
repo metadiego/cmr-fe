@@ -1086,7 +1086,10 @@
       "reason": "Motivo",
       "reasonPlaceholder": "Por qué se fusionan estas dos fichas",
       "merge": "Fusionar",
-      "mergedOk": "Fichas fusionadas"
+      "mergedOk": "Fichas fusionadas",
+      "otherRecord": "La otra ficha",
+      "simulationFailed": "No se pudo calcular la fusión. Vuelve a elegir la ficha.",
+      "blockedReason": "La fusión está bloqueada: revisa los avisos de arriba."
     },
     "confirmDeactivateTitle": "¿Desactivar paciente?",
     "confirmDeactivateBody": "{name} dejará de aparecer en la lista. Su historial se conserva y puedes reactivarlo después.",
