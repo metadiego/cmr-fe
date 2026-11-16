@@ -4472,11 +4472,12 @@
       "delete": "Eliminar",
       "deleteConfirmTitle": "Eliminar este adjunto",
       "deleteConfirmDesc": "Se quita de la lista del cuadre; no se puede deshacer desde aquí.",
-      "deleteReasonLabel": "Motivo (obligatorio)",
+      "deleteReasonLabel": "Motivo",
       "deleteReasonPlaceholder": "Por qué se elimina…",
       "deleteCancel": "Cancelar",
       "deleteConfirm": "Eliminar adjunto",
-      "deleted": "Adjunto eliminado"
+      "deleted": "Adjunto eliminado",
+      "deleteReasonTooShort": "El motivo necesita al menos 3 caracteres."
     },
     "attachment": {
       "notFound": "Ese adjunto ya no existe en este cuadre.",

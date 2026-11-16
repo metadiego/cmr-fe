@@ -4472,11 +4472,12 @@
       "delete": "Delete",
       "deleteConfirmTitle": "Delete this attachment",
       "deleteConfirmDesc": "It's removed from the cash sheet's list; this can't be undone from here.",
-      "deleteReasonLabel": "Reason (required)",
+      "deleteReasonLabel": "Reason",
       "deleteReasonPlaceholder": "Why it's being deleted…",
       "deleteCancel": "Cancel",
       "deleteConfirm": "Delete attachment",
-      "deleted": "Attachment deleted"
+      "deleted": "Attachment deleted",
+      "deleteReasonTooShort": "The reason needs at least 3 characters."
     },
     "attachment": {
       "notFound": "That attachment no longer exists on this cash sheet.",
