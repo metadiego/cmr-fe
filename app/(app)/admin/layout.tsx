@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 
 import { useMe, isAdmin } from "@/hooks/use-me";
 import { StaffPanel } from "@/app/(app)/configuration/staff/page";
-import { UsersList } from "@/components/admin/users-list";
 import { CentersList } from "@/components/admin/centers-list";
 import { PendingProfiles } from "@/components/admin/pending-profiles";
 import { ThemeSettings } from "@/components/admin/theme-settings";
@@ -19,14 +18,15 @@ import { ADMIN_TABS } from "@/lib/nav/tab-routes";
 
 // ADMINISTRATION tabs (users/roles/permissions/menu…): only an admin sees them. Staff is seen with the
 // staff permission (the menu already gates the entry), so a manager reaches their record the same way.
-const TABS_ADMIN = new Set<string>(["users", "roles", "permissions", "role-editor", "pending", "centers", "theme", "menu"]);
+const TABS_ADMIN = new Set<string>(["roles", "permissions", "role-editor", "pending", "centers", "theme", "menu"]);
 
 // "Staff and access": one page instead of Administration + Staff behind two doors (handoff
 // personal-y-accesos-una-sola-pagina). Staff comes FIRST (the person exists before their access) and
 // each tab is its own path (/admin/users, /admin/role-editor — lib/nav/tab-routes.ts). Not admin-only
 // any more: a manager sees Staff; the other tabs (users/roles/permissions/…) appear only for an admin.
 // The staff record is also at /configuration/staff. This is the layout of every tab route, so switching
-// tabs keeps it mounted.
+// tabs keeps it mounted. Users is not a tab of its own any more: every login has a staff record, so
+// an admin manages a login from the person's record in Staff (/admin/users → /admin).
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations("admin");
   const me = useMe();
@@ -50,7 +50,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="staff">{t("tabs.personal")}</TabsTrigger>
-          {admin && <TabsTrigger value="users">{t("tabs.users")}</TabsTrigger>}
           {admin && <TabsTrigger value="roles">{t("tabs.roles")}</TabsTrigger>}
           {admin && <TabsTrigger value="permissions">{t("tabs.permisos")}</TabsTrigger>}
           {admin && <TabsTrigger value="role-editor">{t("tabs.editorRol")}</TabsTrigger>}
@@ -66,7 +65,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {admin && (
           <>
-            <TabsContent value="users" className="mt-4"><UsersList /></TabsContent>
             <TabsContent value="roles" className="mt-4"><RbacSettings /></TabsContent>
             <TabsContent value="permissions" className="mt-4"><PermisosCatalogo /></TabsContent>
             <TabsContent value="role-editor" className="mt-4"><EditorRolUnificado /></TabsContent>

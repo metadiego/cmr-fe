@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/input";
 // one clinic on screen (`showClinics`), each row carries the clinics the person serves in as badges
 // (`servesInCenters`, else the home clinic `clinicName`).
 export function StaffList({
-  people, selectedId, onSelect, q, onQChange, loading, loaded, showClinics,
+  people, selectedId, onSelect, q, onQChange, loading, loaded, showClinics, isSuspended,
 }: {
+  /** True for a person whose login is suspended (known to an admin only). */
+  isSuspended?: (p: PersonalEnAlcance) => boolean;
   people: PersonalEnAlcance[];
   selectedId: string;
   onSelect: (id: string) => void;
@@ -27,6 +29,8 @@ export function StaffList({
   showClinics: boolean;
 }) {
   const t = useTranslations("personalFicha");
+  const tRoot = useTranslations();
+  const cargoLabel = (slug: string) => (tRoot.has(`personal.cargo.${slug}`) ? tRoot(`personal.cargo.${slug}`) : slug);
   return (
     <>
       <div className="relative">
@@ -53,7 +57,7 @@ export function StaffList({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{staffFullName(p)}</span>
                   <span className={cn("block truncate text-xs", on ? "text-primary-foreground/70" : "text-muted-foreground")}>
-                    {p.jobTitle || t("sinCargo")}{p.profileId ? "" : ` · ${t("sinCuenta")}`}
+                    {p.jobTitle ? cargoLabel(p.jobTitle) : t("sinCargo")}{p.profileId ? (isSuspended?.(p) ? ` · ${t("suspendida")}` : "") : ` · ${t("sinCuenta")}`}
                   </span>
                   {showClinics && <ClinicBadges person={p} selected={on} />}
                 </span>

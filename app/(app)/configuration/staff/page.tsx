@@ -1,18 +1,25 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { UserAccountIcon } from "@hugeicons/core-free-icons";
+import { UserAccountIcon, UserAdd01Icon } from "@hugeicons/core-free-icons";
 
 import { listPersonalAll, getCargos, type Personal, type PersonalEnAlcance, type CargoCatalogo } from "@/lib/api/personal";
-import { FichaEditor } from "@/components/personal/ficha-editor";
+import { FichaEditor, StaffActiveButton } from "@/components/personal/ficha-editor";
+import { SaveGroup } from "@/components/personal/save-group";
+import { normalizeResponsibilities, responsibilityOptions, showsConsultaPreferences } from "@/lib/personal/responsibilities";
 import { NuevoPersonalDialog } from "@/components/personal/nuevo-personal-dialog";
 import { StaffList } from "@/components/personal/staff-list";
 import { CentrosDePersona, FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
 import { DarAccesoDialog } from "@/components/personal/give-access-dialog";
 import { getRoles, type Rol } from "@/lib/api/rbac";
+import { getProfiles, type Perfil } from "@/lib/api/profiles";
+import { InviteDialog } from "@/components/admin/invite-dialog";
+import { UserAccessPanel } from "@/components/admin/user-access-panel";
+import { ACCESS_FILTERS, accessOf, countByAccess, filterByAccess, type AccessFilter } from "@/lib/personal/staff-access";
+import { useMe, isAdmin } from "@/hooks/use-me";
+import { cn } from "@/lib/utils";
 import { getEhrRoles, listEhrStaffLinks, type EhrRole, type EhrStaffLink } from "@/lib/api/ehr-integration";
 import { getCentrosDondePuedo } from "@/lib/api/centers";
 import { staffFullName as nombreDe } from "@/lib/personal/staff-name";
@@ -38,10 +45,22 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 // como dentro de la pestaña «Personal» de «Personal y accesos» (handoff personal-y-accesos-una-sola-pagina).
 export function StaffPanel() {
   const t = useTranslations("personalFicha");
+  const tAdmin = useTranslations("admin");
   const filter = useClinicFilter("personal.read");
   const create = useCreateClinic("personal.create", filter.choice);
   const [verInactivos, setVerInactivos] = React.useState(false);
   const [nuevoOpen, setNuevoOpen] = React.useState(false);
+  // Staff and Users are one list: every login has a staff record. An admin also loads the logins
+  // (managing access needs full access in the BE) to show their status and manage them on the record.
+  const me = useMe();
+  const admin = me.kind === "ok" && isAdmin(me.me);
+  const [inviteOpen, setInviteOpen] = React.useState(false);
+  const [access, setAccess] = React.useState<AccessFilter>("all");
+  const profilesRes = useResource<Perfil[]>(() => (admin ? getProfiles() : Promise.resolve([])), [admin]);
+  const profilesById = React.useMemo(
+    () => new Map((profilesRes.state.kind === "ok" ? profilesRes.state.data : []).map((p) => [p.id, p])),
+    [profilesRes.state],
+  );
   const listRes = useResource<PersonalEnAlcance[]>(
     () => listPersonalAll({ onlyInactive: verInactivos }, filter.choice),
     [filter.choiceKey, verInactivos],
@@ -77,18 +96,23 @@ export function StaffPanel() {
   const gridRef = React.useRef<HTMLDivElement>(null);
   const fillHeight = useFillViewportHeight(gridRef);
 
-  // Capacidades: derivadas de los valores REALES del personal (no hay catálogo aparte en el handoff).
-  const capacidadOpciones = React.useMemo(
-    () => [...new Set(personal.flatMap((p) => p.capabilities ?? []))].sort(),
-    [personal],
-  );
+  // Responsibilities offered: every tag in use by real staff (there is no separate catalogue).
+  const capacidadOpciones = React.useMemo(() => responsibilityOptions(personal), [personal]);
 
-  const filtrados = personal
+  const accessCounts = countByAccess(personal, profilesById);
+  const filtrados = filterByAccess(personal, access, profilesById)
     .filter((p) => {
       const n = q.trim().toLowerCase();
       return !n || nombreDe(p).toLowerCase().includes(n) || (p.jobTitle ?? "").toLowerCase().includes(n);
     })
     .sort((a, b) => nombreDe(a).localeCompare(nombreDe(b)));
+  // "Assign now" after an invite opens the new login's staff record once the list has it.
+  const [openProfileId, setOpenProfileId] = React.useState<string | null>(null);
+  const invited = openProfileId ? personal.find((p) => p.profileId === openProfileId) : undefined;
+  if (invited) {
+    setOpenProfileId(null);
+    setSelId(invited.id);
+  }
   const sel = personal.find((p) => p.id === selId) ?? null;
   // The selected person's home clinic: the record, its EHR roles and every write run there.
   const selClinic = sel?.clinicId ?? undefined;
@@ -108,13 +132,39 @@ export function StaffPanel() {
         {/* Lista */}
         <aside className="flex min-h-0 flex-col gap-3 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            {create.canCreate && <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>}
+            <div className="flex items-center gap-2">
+              {create.canCreate && <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>}
+              {admin && (
+                <Button size="sm" variant="outline" onClick={() => setInviteOpen(true)}>
+                  <HugeiconsIcon icon={UserAdd01Icon} data-icon="inline-start" />
+                  {tAdmin("users.invite")}
+                </Button>
+              )}
+            </div>
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <input type="checkbox" checked={verInactivos} onChange={(e) => { setVerInactivos(e.target.checked); setSelId(""); }} className="size-3.5" />
               {t("verInactivos")}
             </label>
           </div>
+          <div role="group" aria-label={t("accessFilter")} className="flex flex-wrap items-center gap-0.5 rounded-lg bg-muted p-0.5">
+            {ACCESS_FILTERS.filter((f) => f === "all" || f !== "suspended" || accessCounts.suspended > 0).map((f) => (
+              <button
+                key={f}
+                type="button"
+                aria-pressed={access === f}
+                onClick={() => { setAccess(f); setSelId(""); }}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
+                  access === f && "bg-background text-foreground shadow-sm",
+                )}
+              >
+                {t(`access.${f}`)}
+                <span className="tabular-nums text-muted-foreground">{accessCounts[f]}</span>
+              </button>
+            ))}
+          </div>
           <StaffList
+            isSuspended={(p) => accessOf(p, profilesById) === "suspended"}
             people={filtrados}
             selectedId={selId}
             onSelect={setSelId}
@@ -138,10 +188,12 @@ export function StaffPanel() {
               roles={roles}
               ehrRoles={ehrRoles}
               ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
+              profile={admin && sel.profileId ? profilesById.get(sel.profileId) : undefined}
+              onProfileChanged={() => profilesRes.refresh()}
               ehrCenterIds={ehrCenterIds}
               centro={selClinic}
               centroNombre={filter.showColumn ? (sel.clinicName ?? filter.nameOf(selClinic)) : ""}
-              onChanged={() => listRes.reload()}
+              onChanged={() => listRes.refresh()}
               onEhrChanged={() => ehrLinksRes.reload()}
             />
           ) : (
@@ -151,6 +203,15 @@ export function StaffPanel() {
           )}
         </section>
       </div>
+
+      {admin && (
+        <InviteDialog
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+          onInvited={() => { listRes.refresh(); profilesRes.refresh(); }}
+          onRequestAssign={(p) => { setAccess("all"); setOpenProfileId(p.id); }}
+        />
+      )}
 
       {nuevoOpen && (
         <NuevoPersonalDialog
@@ -178,8 +239,11 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, ehrCenterIds, centro, centroNombre, onChanged, onEhrChanged,
+  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
 }: {
+  /** The person's login, when the viewer is an admin (only an admin manages access). */
+  profile: Perfil | undefined;
+  onProfileChanged: () => void;
   persona: Personal;
   cargoCatalogo: CargoCatalogo[];
   capacidadOpciones: string[];
@@ -201,7 +265,7 @@ function FichaPersonal({
   // Hub de USUARIO en la MISMA pantalla (sin ir «más adentro»): la ficha, y —solo para quien hace
   // consultas, es decir tiene la capacidad «medico»— su agenda, pacientes y producción. La disponibilidad
   // (horarios, días libres, permisos, vacaciones) es para TODO usuario por igual. Ver hub-de-usuario-medicos.
-  const esMedico = (persona.capabilities ?? []).includes("medico");
+  const esMedico = normalizeResponsibilities(persona.capabilities).includes("medico");
   const puedeAgenda = esMedico && can("citas.read");
   const puedePacientes = esMedico && can("pacientes.read");
   const puedeProduccion = esMedico && can("citas.read");
@@ -230,40 +294,40 @@ function FichaPersonal({
           {puedeProduccion && <TabsTrigger value="produccion">{tRoot("medicoHub.tabs.production")}</TabsTrigger>}
         </TabsList>
 
-        <TabsContent value="ficha" className="space-y-6 pt-2">
-          {/* Ficha completa: identidad + cargo + capacidades + color + baja/reactivar (handoff personal-crud-completo). */}
-          <FichaEditor persona={persona} cargoCatalogo={cargoCatalogo} capacidadOpciones={capacidadOpciones} centro={centro} onChanged={onChanged} />
+        <TabsContent value="ficha" className="pt-2">
+          {/* One "Save" for every section below (save-group.tsx); deactivate is its own action. */}
+          <SaveGroup onSaved={onChanged} footerStart={<StaffActiveButton persona={persona} centro={centro} onChanged={onChanged} />}>
+            <div className="space-y-6">
+              <FichaEditor persona={persona} cargoCatalogo={cargoCatalogo} capacidadOpciones={capacidadOpciones} centro={centro} />
 
-          {/* Centros de servicio: donde la persona sale en los desplegables. El BE devuelve TODOS los centros
-              con un `activo` por cada uno (ya resuelto, sin replicar reglas). Marca/desmarca y guarda. */}
-          <CentrosDePersona persona={persona} centro={centro} />
+              {/* Service centers: where the person appears in the dropdowns. */}
+              <CentrosDePersona persona={persona} centro={centro} />
 
-          {/* Aterrizar en Consulta al entrar a Frontdesk (handoff aterrizar-en-consulta-handoff-fe):
-              BE PR #386 EN REVISIÓN, sin desplegar a esta fecha — el interruptor guarda su propio PUT,
-              separado de cargo/capacidades, para que un 400 de "campo desconocido" de hoy no toque nada
-              más. Mientras el BE no despliegue, esto no hace nada observable (el campo no existe). */}
-          <FrontdeskConsultaPreferencia persona={persona} centro={centro} />
+              {/* Front-desk preferences, only for front-desk staff (or whoever already has one set). */}
+              {showsConsultaPreferences(persona) && <FrontdeskConsultaPreferencia persona={persona} centro={centro} />}
 
-          {/* Acceso al sistema */}
-          <div className="border-t pt-4">
-            <Label className="mb-2 block">{t("acceso")}</Label>
-            {persona.profileId ? (
-              <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
-                <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
-                <span>{persona.email || t("conCuenta")}{persona.profileId ? ` · ${t("aprobado")}` : ""}</span>
-                <Link href="/admin" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
+              {/* System access */}
+              <div className="border-t pt-4">
+                <Label className="mb-2 block">{t("acceso")}</Label>
+                {profile ? (
+                  <UserAccessPanel profile={profile} onChanged={onProfileChanged} />
+                ) : persona.profileId ? (
+                  <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
+                    <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
+                    <span>{persona.email || t("conCuenta")}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
+                    <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
-                <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
-              </div>
-            )}
-          </div>
 
-          {/* Vincular con el EHR: en TODA ficha, sin excepción (decisión del dueño, 01-oct-2026) —
-              cualquier cargo puede necesitar la cuenta, no se gatea por capacidad/rol. */}
-          <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centerIds={ehrCenterIds} centro={centro} onChanged={onEhrChanged} />
+              {/* EHR account: on every record (owner, 01-oct-2026): any job title may need it. */}
+              <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centerIds={ehrCenterIds} centro={centro} onChanged={onEhrChanged} />
+            </div>
+          </SaveGroup>
         </TabsContent>
 
         <TabsContent value="disponibilidad" className="pt-2">
@@ -280,7 +344,7 @@ function FichaPersonal({
           roles={roles}
           centro={centro}
           onClose={() => setDarAcceso(false)}
-          onDone={() => { setDarAcceso(false); onChanged(); }}
+          onDone={() => { setDarAcceso(false); onChanged(); onProfileChanged(); }}
         />
       )}
     </div>

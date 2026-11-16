@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   getPersonalCentros, updatePersonalCentros, updateFrontdeskStartsOnConsultation,
@@ -10,29 +9,32 @@ import {
   type Personal, type CentroDePersonal, type PersonalConPreferenciaFrontdesk,
 } from "@/lib/api/personal";
 import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
-import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board";
+import { useSaveSection } from "@/components/personal/save-group";
 
 // Sections of a staff record (app/(app)/configuration/staff/page.tsx). `centro` is the PERSON's home
 // clinic (`persona.clinicId`), never a screen clinic: every read and write here runs in that clinic.
 
 export function CentrosDePersona({ persona, centro }: { persona: Personal; centro?: string }) {
   const t = useTranslations("personalFicha");
-  const tRoot = useTranslations();
   const res = useResource<CentroDePersonal[]>(() => getPersonalCentros(persona.id, centro), [persona.id, centro]);
   const base = res.state.kind === "ok" ? res.state.data : [];
-  // Selección local (activos) sobre lo que trae el BE; guardar manda la lista de encendidos.
+  // Local selection over what the BE returned; saving sends the list of centers switched on.
   const [activos, setActivos] = React.useState<Set<string> | null>(null);
   const marcados = activos ?? new Set(base.filter((c) => c.active).map((c) => c.id));
-  const [busy, setBusy] = React.useState(false);
   const original = new Set(base.filter((c) => c.active).map((c) => c.id));
-  const sucio = base.length > 0 && (marcados.size !== original.size || [...marcados].some((id) => !original.has(id)));
+  const dirty = base.length > 0 && (marcados.size !== original.size || [...marcados].some((id) => !original.has(id)));
+
+  useSaveSection("centers", dirty, async () => {
+    await updatePersonalCentros(persona.id, [...marcados], centro);
+    setActivos(null);
+    res.refresh();
+  });
 
   function toggle(id: string) {
     setActivos(() => {
@@ -40,20 +42,6 @@ export function CentrosDePersona({ persona, centro }: { persona: Personal; centr
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-  }
-  async function guardar() {
-    if (busy || !sucio) return;
-    setBusy(true);
-    try {
-      await updatePersonalCentros(persona.id, [...marcados], centro);
-      toast.success(t("centrosGuardados"));
-      setActivos(null);
-      res.reload();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
   }
 
   return (
@@ -69,6 +57,7 @@ export function CentrosDePersona({ persona, centro }: { persona: Personal; centr
             <button
               key={c.id}
               type="button"
+              aria-pressed={on}
               onClick={() => toggle(c.id)}
               className={cn(
                 "rounded-full border px-3 py-1 text-sm font-medium transition-colors",
@@ -80,97 +69,51 @@ export function CentrosDePersona({ persona, centro }: { persona: Personal; centr
           );
         })}
       </div>
-      {sucio && (
-        <div className="mt-3 flex justify-end">
-          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCentros")}</Button>
-        </div>
-      )}
     </div>
   );
 }
 
+// Front-desk preferences: land on Consulta when opening Frontdesk, and which status tab Consulta opens
+// with. Each is its own PUT (a failure in one never touches the rest of the record); both save with the
+// record's single "Save". The tab options come from the Consulta board's statuses (data, not code).
 export function FrontdeskConsultaPreferencia({ persona, centro }: { persona: Personal; centro?: string }) {
   const t = useTranslations("personalFicha");
   const tRoot = useTranslations();
-  // Lee su propio valor ya traído en la lista (ningún GET nuevo): hoy el campo no existe en prod
-  // (PR #386 sin desplegar), así que esto da `undefined` → el switch nace apagado, sin romper nada.
-  const actual = (persona as PersonalConPreferenciaFrontdesk).frontdeskStartsOnConsultation ?? false;
-  const [valor, setValor] = React.useState(actual);
-  const [busy, setBusy] = React.useState(false);
-  const sucio = valor !== actual;
-
-  async function guardar() {
-    if (busy || !sucio) return;
-    setBusy(true);
-    try {
-      await updateFrontdeskStartsOnConsultation(persona.id, valor, centro);
-      toast.success(t("frontdeskConsultaGuardado"));
-    } catch (e) {
-      toastError(e, tRoot);
-      setValor(actual);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="border-t pt-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-0.5">
-          <Label>{t("frontdeskConsultaLabel")}</Label>
-          <p className="text-xs text-muted-foreground">{t("frontdeskConsultaAyuda")}</p>
-        </div>
-        <Switch checked={valor} disabled={busy} onCheckedChange={setValor} />
-      </div>
-      {sucio && (
-        <div className="mt-3 flex justify-end">
-          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
-        </div>
-      )}
-      <ConsultaInitialTab persona={persona} centro={centro} />
-    </div>
-  );
-}
-
-// Con qué pestaña de ESTADO abre el tablero de Consulta — preferencia de la persona (handoff
-// traer-al-dia-y-la-pestana-inicial). Opciones data-driven desde los estados del tablero de Atención: hoy
-// "Como está configurado" (null) + cada estado; si mañana se añade uno, aparece solo, es dato no código.
-function ConsultaInitialTab({ persona, centro }: { persona: Personal; centro?: string }) {
-  const t = useTranslations("personalFicha");
-  const tRoot = useTranslations();
-  const AS_IS = "__as_is__"; // null no es value válido de <Select>: se mapea a null al guardar
-  const actual = (persona as PersonalConPreferenciaFrontdesk).consultationBoardInitialTab ?? null;
-  const [valor, setValor] = React.useState<string>(actual ?? AS_IS);
-  const [busy, setBusy] = React.useState(false);
-  const sucio = (valor === AS_IS ? null : valor) !== actual;
+  const AS_IS = "__as_is__"; // null is not a valid <Select> value: mapped to null when saving
+  const prefs = persona as PersonalConPreferenciaFrontdesk;
+  const startsActual = prefs.frontdeskStartsOnConsultation ?? false;
+  const tabActual = prefs.consultationBoardInitialTab ?? null;
+  const [starts, setStarts] = React.useState(startsActual);
+  const [tab, setTab] = React.useState<string>(tabActual ?? AS_IS);
+  const tabValue = tab === AS_IS ? null : tab;
   const defRes = useResource<TableroDefinicion>(
     () => (centro ? getDefinicion(CONSULTATION_BOARD, centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
     [centro],
   );
   const estados = defRes.state.kind === "ok" ? defRes.state.data.statuses : [];
 
-  async function guardar() {
-    if (busy || !sucio) return;
-    setBusy(true);
-    try {
-      await updateConsultationBoardInitialTab(persona.id, valor === AS_IS ? null : valor, centro);
-      toast.success(t("consultaInicialGuardado"));
-    } catch (e) {
-      toastError(e, tRoot);
-      setValor(actual ?? AS_IS);
-    } finally {
-      setBusy(false);
-    }
-  }
+  useSaveSection("frontdesk-start", starts !== startsActual, async () => {
+    await updateFrontdeskStartsOnConsultation(persona.id, starts, centro);
+  });
+  useSaveSection("consulta-tab", tabValue !== tabActual, async () => {
+    await updateConsultationBoardInitialTab(persona.id, tabValue, centro);
+  });
 
   return (
-    <div className="mt-4 flex items-start justify-between gap-4">
-      <div className="space-y-0.5">
-        <Label>{t("consultaInicialLabel")}</Label>
-        <p className="text-xs text-muted-foreground">{t("consultaInicialAyuda")}</p>
+    <div className="space-y-4 border-t pt-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-0.5">
+          <Label>{t("frontdeskConsultaLabel")}</Label>
+          <p className="text-xs text-muted-foreground">{t("frontdeskConsultaAyuda")}</p>
+        </div>
+        <Switch checked={starts} onCheckedChange={setStarts} />
       </div>
-      <div className="flex items-center gap-2">
-        <Select value={valor} disabled={busy} onValueChange={setValor}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-0.5">
+          <Label>{t("consultaInicialLabel")}</Label>
+          <p className="text-xs text-muted-foreground">{t("consultaInicialAyuda")}</p>
+        </div>
+        <Select value={tab} onValueChange={setTab}>
           <SelectTrigger size="sm" className="w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value={AS_IS}>{t("consultaInicialAsIs")}</SelectItem>
@@ -179,9 +122,6 @@ function ConsultaInitialTab({ persona, centro }: { persona: Personal; centro?: s
             ))}
           </SelectContent>
         </Select>
-        {sucio && (
-          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
-        )}
       </div>
     </div>
   );

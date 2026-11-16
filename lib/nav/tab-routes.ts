@@ -46,8 +46,9 @@ export const APPOINTMENTS_TABS = {
 
 export const ADMIN_TABS = {
   pattern: "/admin",
-  tabs: ["staff", "users", "roles", "permissions", "role-editor", "pending", "centers", "theme", "menu"],
-  legacy: { personal: "staff", permisos: "permissions", editorRol: "role-editor" },
+  tabs: ["staff", "roles", "permissions", "role-editor", "pending", "centers", "theme", "menu"],
+  // "users" merged into "staff" (14-nov-2026): every login has a staff record.
+  legacy: { personal: "staff", permisos: "permissions", editorRol: "role-editor", users: "staff" },
 } as const satisfies TabRoute;
 
 export const TAB_ROUTES: readonly TabRoute[] = [
