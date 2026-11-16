@@ -2,21 +2,19 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import { listPersonal, type Personal } from "@/lib/api/personal";
-import { toastError } from "@/lib/api/errors";
+import { boardActionMissing } from "@/lib/board/board-action-missing";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { TimePicker } from "@/components/ui/time-picker";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
@@ -24,13 +22,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Field, FormDialog } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 import {
   Select,
   SelectContent,
@@ -65,8 +60,20 @@ export function TableroAcciones({
   const { can } = useCan();
 
   const [pending, setPending] = React.useState<Transicion | null>(null);
-  const [values, setValues] = React.useState<Record<string, string>>({});
-  const [busy, setBusy] = React.useState(false);
+  // Re-initialised whenever the dialog opens or another transition is picked.
+  const [values, setValues] = useDialogForm<Record<string, string>>(() => ({}), !!pending, pending?.slug);
+
+  const { submitting, submit } = useSubmit(
+    (tr: Transicion, payload: Record<string, string>) =>
+      ejecutarAccion({ boardSlug: tablero, entityId: entidadId, action: tr.slug, payload }, centroId),
+    {
+      successMessage: tc("saved"),
+      onSuccess: () => {
+        setPending(null);
+        onDone();
+      },
+    },
+  );
 
   const isTerminal = estados.find((e) => e.slug === estado)?.isTerminal ?? false;
   const available = transiciones
@@ -77,38 +84,24 @@ export function TableroAcciones({
 
   if (available.length === 0) return null;
 
-  async function run(tr: Transicion, payload: Record<string, string>) {
-    setBusy(true);
-    try {
-      await ejecutarAccion({ boardSlug: tablero, entityId: entidadId, action: tr.slug, payload }, centroId);
-      toast.success(tc("saved"));
-      setPending(null);
-      setValues({});
-      onDone();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
-
   function pick(tr: Transicion) {
     if (tr.formFields.length === 0 && !tr.requiresConfirmation) {
-      void run(tr, {});
+      void submit(tr, {});
     } else {
-      setValues({});
       setPending(tr);
     }
   }
 
-  const canSubmit =
-    !!pending && !busy && pending.formFields.every((f) => (values[f] ?? "").trim() !== "");
+  const fieldLabel = (field: string) => (KNOWN_FIELDS.includes(field) ? t(`field.${field}`) : field);
+  const fields = pending?.formFields ?? [];
+  const missing = boardActionMissing(fields, values).map(fieldLabel);
+  const run = () => (pending ? submit(pending, values) : undefined);
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" disabled={busy} aria-label={t("actions")}>
+          <Button variant="ghost" size="icon" disabled={submitting} aria-label={t("actions")}>
             <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -121,40 +114,37 @@ export function TableroAcciones({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{pending ? tRoot(pending.labelKey) : ""}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {pending?.formFields.map((field) => (
-              <Field
-                key={field}
-                field={field}
-                value={values[field] ?? ""}
-                onChange={(v) => setValues((s) => ({ ...s, [field]: v }))}
-              />
-            ))}
-            {pending && pending.formFields.length === 0 && pending.requiresConfirmation && (
-              <p className="text-sm text-muted-foreground">{t("confirmAction")}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPending(null)} disabled={busy}>
-              {tc("cancel")}
-            </Button>
-            <Button onClick={() => pending && run(pending, values)} disabled={!canSubmit}>
-              {busy ? tc("saving") : tc("save")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={!!pending}
+        onOpenChange={(o) => !o && setPending(null)}
+        title={pending ? tRoot(pending.labelKey) : ""}
+        size="md"
+        onSubmit={run}
+        submitting={submitting}
+        missing={missing}
+      >
+        {fields.length >= 3 && <RequiredLegend />}
+        {fields.map((field) => (
+          <Field key={field} label={fieldLabel(field)} required>
+            <FieldInput
+              field={field}
+              value={values[field] ?? ""}
+              onChange={(v) => setValues({ [field]: v })}
+            />
+          </Field>
+        ))}
+        {pending && fields.length === 0 && pending.requiresConfirmation && (
+          <p className="text-sm text-muted-foreground">{t("confirmAction")}</p>
+        )}
+      </FormDialog>
     </>
   );
 }
 
+const KNOWN_FIELDS = ["motivo", "fecha", "hora", "enfermeraId"];
+
 // Renders the right input per required field clave (best-effort mapping).
-function Field({
+function FieldInput({
   field,
   value,
   onChange,
@@ -163,10 +153,6 @@ function Field({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const t = useTranslations("tableroBoard");
-  const KNOWN = ["motivo", "fecha", "hora", "enfermeraId"];
-  const label = KNOWN.includes(field) ? t(`field.${field}`) : field;
-
   // enfermeraId → select of nurses.
   const isEnfermera = field === "enfermeraId";
   const enfRes = useResource<Personal[]>(
@@ -175,29 +161,24 @@ function Field({
   );
   const enfermeras = enfRes.state.kind === "ok" ? enfRes.state.data : [];
 
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {field === "motivo" ? (
-        <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={2} />
-      ) : field === "fecha" ? (
-        <DatePicker value={value} onChange={onChange} />
-      ) : field === "hora" ? (
-        <TimePicker value={value} onChange={onChange} />
-      ) : isEnfermera ? (
-        <Select value={value || undefined} onValueChange={onChange}>
-          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {enfermeras.map((m) => (
-              <SelectItem key={m.id} value={m.id}>
-                {[m.name, m.lastName].filter(Boolean).join(" ")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-        <Input value={value} onChange={(e) => onChange(e.target.value)} />
-      )}
-    </div>
+  return field === "motivo" ? (
+    <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={2} />
+  ) : field === "fecha" ? (
+    <DatePicker value={value} onChange={onChange} />
+  ) : field === "hora" ? (
+    <TimePicker value={value} onChange={onChange} />
+  ) : isEnfermera ? (
+    <Select value={value || undefined} onValueChange={onChange}>
+      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+      <SelectContent>
+        {enfermeras.map((m) => (
+          <SelectItem key={m.id} value={m.id}>
+            {[m.name, m.lastName].filter(Boolean).join(" ")}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  ) : (
+    <Input value={value} onChange={(e) => onChange(e.target.value)} />
   );
 }
