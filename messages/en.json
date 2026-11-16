@@ -2008,7 +2008,8 @@
     "stepPresent": "Present",
     "stepConsult": "In consult",
     "stepAttended": "Attended",
-    "now": "now"
+    "now": "now",
+    "noPatient": "This row has no patient; the appointment can't be booked."
   },
   "settingsModulos": {
     "title": "Modal modules",
@@ -3489,7 +3490,8 @@
     "cancel": "Cancel",
     "save": "Add to board",
     "saveScheduled": "Book appointment",
-    "retired": "Retired"
+    "retired": "Retired",
+    "noAppointmentType": "No appointment types are loaded; the appointment can't be booked."
   },
   "precios": {
     "title": "Prices",

@@ -2008,7 +2008,8 @@
     "stepPresent": "Presente",
     "stepConsult": "En consulta",
     "stepAttended": "Atendido",
-    "now": "ahora"
+    "now": "ahora",
+    "noPatient": "Esta fila no tiene paciente; no se puede agendar la cita."
   },
   "settingsModulos": {
     "title": "Módulos del modal",
@@ -3489,7 +3490,8 @@
     "cancel": "Cancelar",
     "save": "Agregar al tablero",
     "saveScheduled": "Agendar cita",
-    "retired": "De baja"
+    "retired": "De baja",
+    "noAppointmentType": "No hay tipos de cita cargados; no se puede agendar."
   },
   "precios": {
     "title": "Precios",
