@@ -2192,6 +2192,7 @@
     "corregirGuardar": "Guardar corrección",
     "corregirMenorConsumido": "No puede ser menor a lo ya entregado ({n}).",
     "fixAvailabilityMultiplierPositive": "Cada valor debe ser mayor que 0.",
+    "fixAvailabilityNoPackageId": "Este paquete no tiene identificador; recarga la página.",
     "corregirOk": "Disponibilidad actualizada",
     "corregirError": "No se pudo actualizar la disponibilidad",
     "fijarSinPaquete": "Fijar sesiones",

@@ -46,8 +46,9 @@ export function CorregirDisponibilidadDialog({
     f === "totalSessions" ? t("corregirSesiones") : multLabel(f.slice("mult.".length)),
   );
   const problem = fixAvailabilityInvalid(state);
-  const reason =
-    problem === "belowDelivered"
+  const reason = !paquete?.id
+    ? t("fixAvailabilityNoPackageId")
+    : problem === "belowDelivered"
       ? t("corregirMenorConsumido", { n: entregadas })
       : problem === "multiplierNotPositive"
         ? t("fixAvailabilityMultiplierPositive")

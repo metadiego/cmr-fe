@@ -2192,6 +2192,7 @@
     "corregirGuardar": "Save correction",
     "corregirMenorConsumido": "Cannot be less than what is already delivered ({n}).",
     "fixAvailabilityMultiplierPositive": "Each value must be greater than 0.",
+    "fixAvailabilityNoPackageId": "This package has no id; reload the page.",
     "corregirOk": "Availability updated",
     "corregirError": "Could not update availability",
     "fijarSinPaquete": "Fix sessions",
