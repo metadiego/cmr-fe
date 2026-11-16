@@ -44,10 +44,10 @@ area each, that move every dialog onto the kit and delete its hand-built copies.
 | 1 | `feat/forms-kit` | Kit: `lib/forms/*`, `components/kit/*`, `ConfirmHost`, i18n | new + `form-dialog.tsx`, `app-shell.tsx`, messages |
 | 2 | `feat/forms-desk-patients` | Patient desk (incl. the front desk dialogs it shares), board (tablero) & patients | 30 |
 | 3 | `feat/forms-billing-cash` | Billing & cash | 22 |
-| 4 | `feat/forms-admin-config` | Users, access, staff & configuration (+ retire `FormDialog.canSubmit`) | 33 |
+| 4 | `feat/forms-admin-config` | Users, access, staff & configuration (+ retire `FormDialog.canSubmit`) | 32 |
 | 5 | `feat/forms-rest` | Inventory, services, audit, formats, auth | 20 |
 | 6 | `chore/forms-lock-in` | Lint rules + CLAUDE.md section so it stays this way | 2 |
-| 7 | `feat/forms-agenda` | Agenda & appointments, incl. the therapy scheduler — **deferred, "later"** (owner, 16-nov) | 9 |
+| 7 | `feat/forms-agenda` | Agenda & appointments, incl. the therapy scheduler — **deferred, "later"** (owner, 16-nov) | 7 |
 
 Order set by the owner on 16-nov. PRs 2–5 and 7 depend only on PR 1. Each branches from the latest
 `main`.
@@ -75,7 +75,7 @@ The sweeps and lint exceptions treat these two files like the deferred agenda fi
 - PR 5's final sweep skips them.
 - PR 6's lint rule needs no exception for them, because neither calls `window.confirm`; re-check with `grep` before PR 6.
 
-## Dead code found by the trace (16-nov) — not migrated, owner to decide
+## Dead code found by the trace (16-nov) — deleted in PR 1 (owner OK, 16-nov)
 
 Imported by nothing, checked by file name and component name in `app/`, `components/` and `lib/`:
 - `components/admin/assign-center-dialog.tsx` (`AssignCenterDialog`)
@@ -83,7 +83,7 @@ Imported by nothing, checked by file name and component name in `app/`, `compone
 - `components/citas/cita-form-sheet.tsx` (`CitaFormSheet`)
 - `components/frontdesk/programar-citas-modal.tsx` (`ProgramarCitasModal`)
 
-They are left out of every PR. If the owner approves, they are deleted in PR 1. Note: the
+They are deleted in PR 1, in their own commit. Note: the
 earlier trace followed only `@/` imports; this one also follows relative imports. That is why
 `nueva-cita-modal` turned out to be in use.
 
@@ -336,7 +336,7 @@ Task R on each file in `components/frontdesk/`:
 
 ## PR 4 — Users, access, staff & configuration (`feat/forms-admin-config`)
 - `components/admin/`:
-  - `access-dialog`, `assign-center-dialog`, `cambiar-email-dialog`, `centers-list`, `codigo-acceso-dialog`
+  - `access-dialog`, `cambiar-email-dialog`, `centers-list`, `codigo-acceso-dialog`
   - `datos-fiscales-dialog`, `invite-dialog`, `menu-admin`, `override-settings`, `pending-profiles`
   - `permisos-catalogo` (`window.confirm`), `permisos-dialog`, `profile-centros-dialog` (`window.confirm`), `profile-edit-dialog`, `rbac-settings` (`window.confirm`)
 - `components/personal/`: `ehr-link-section`, `give-access-dialog`, `nuevo-personal-dialog`
@@ -396,10 +396,8 @@ Then Task R on:
   - `FormFooter` with `primary` = [«Agendar y seguir», «Agendar y cerrar»] and `extra` = «Programar una serie del tren» (keeps its own `disabled`);
   - a slot that doesn't fit stays bookable, with its warning as today.
 - `components/agenda/cita-modal.tsx`
-- `components/agenda/sesion-modal.tsx`
 - `components/agenda/planificar-dia-modal.tsx`
 - `components/agenda/recurring-booking-modal.tsx` (has `window.confirm`)
 - `components/agenda/train-series-modal.tsx`
 - `components/citas/cita-actions.tsx` (cancel and reschedule dialogs)
-- `components/citas/cita-form-sheet.tsx`
 - `components/calendario/evento-modal.tsx` (has `window.confirm`)
