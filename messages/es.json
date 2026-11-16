@@ -4423,7 +4423,9 @@
       "acknowledgeHint": "La hoja cambió después de esta firma. Confirma que las cifras corregidas son las buenas; queda el motivo, quién y cuándo.",
       "acknowledgeReason": "Motivo (obligatorio): qué se corrigió y por qué",
       "acknowledged": "Corrección acusada",
-      "acknowledgedNote": "Cifras corregidas · confirmado por {name} · {when}"
+      "acknowledgedNote": "Cifras corregidas · confirmado por {name} · {when}",
+      "acknowledgeReasonLabel": "Motivo",
+      "reasonTooShort": "El motivo necesita al menos 3 caracteres."
     },
     "attachments": {
       "title": "Settlements escaneado",

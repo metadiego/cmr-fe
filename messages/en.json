@@ -4423,7 +4423,9 @@
       "acknowledgeHint": "The sheet changed after this signature. Confirm the corrected figures are right; the reason, who and when are kept.",
       "acknowledgeReason": "Reason (required): what was corrected and why",
       "acknowledged": "Correction acknowledged",
-      "acknowledgedNote": "Figures corrected · confirmed by {name} · {when}"
+      "acknowledgedNote": "Figures corrected · confirmed by {name} · {when}",
+      "acknowledgeReasonLabel": "Reason",
+      "reasonTooShort": "The reason needs at least 3 characters."
     },
     "attachments": {
       "title": "Scanned settlements",

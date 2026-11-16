@@ -11,6 +11,7 @@ import { getCentroPreferences } from "@/lib/api/preferences";
 import { ApiError } from "@/lib/api/types";
 import { apiErrorMessage, toastError } from "@/lib/api/errors";
 import { money } from "@/lib/caja/totales";
+import { acknowledgeInvalid, acknowledgeMissing } from "@/lib/caja/acknowledge-missing";
 import {
   alreadySignedBy,
   readSignOffStatement,
@@ -25,7 +26,9 @@ import {
 } from "@/lib/caja/sign-off";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 
 // «Firmar y aceptar» a cash sheet (BE #486, handoff docs/specs/cash-sign-off-handoff.md). Signing is a
 // STAMP — name, date and time, and the figures accepted — and never needs the sheet closed (the owner
@@ -210,8 +213,15 @@ export function CashSignOffPanel({
   const t = useTranslations("caja.signOff");
   const [asking, setAsking] = React.useState<SignOffRole | null>(null);
   const [ackBlock, setAckBlock] = React.useState<SignatureBlock | null>(null);
-  const [ackReason, setAckReason] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
+  const [{ reason: ackReason }, setAck] = useDialogForm(() => ({ reason: "" }), !!ackBlock, ackBlock?.key);
+  const ackMissing = acknowledgeMissing({ reason: ackReason }).map(() => t("acknowledgeReasonLabel"));
+  const ackProblem = acknowledgeInvalid({ reason: ackReason });
+
+  // sign/acknowledge toast their own errors and resolve false: the dialog then stays open.
+  const signing = useSubmit((role: SignOffRole) => signOff.sign(role), { onSuccess: (ok) => ok && setAsking(null) });
+  const acknowledging = useSubmit((b: SignatureBlock, reason: string) => signOff.acknowledge(b, reason), {
+    onSuccess: (ok) => ok && setAckBlock(null),
+  });
 
   // A role someone ELSE already signed has no button (the BE would answer 409); one I signed = «sign again».
   const live = (role: SignOffRole) =>
@@ -228,14 +238,6 @@ export function CashSignOffPanel({
       </Button>
     );
   };
-
-  async function accept() {
-    if (!asking) return;
-    setBusy(true);
-    const ok = await signOff.sign(asking);
-    setBusy(false);
-    if (ok) setAsking(null);
-  }
 
   const figureRows: Array<[string, number]> = [
     [t("dayTotal"), now.dayTotal],
@@ -282,7 +284,7 @@ export function CashSignOffPanel({
               )}
               {w.note && <div className="mt-1 text-xs text-muted-foreground">{w.note}</div>}
               {b.changed && canSignSupervisor && (
-                <Button size="sm" variant="outline" className="mt-2 h-7 text-xs" onClick={() => { setAckReason(""); setAckBlock(b); }}>
+                <Button size="sm" variant="outline" className="mt-2 h-7 text-xs" onClick={() => setAckBlock(b)}>
                   {t("acknowledge")}
                 </Button>
               )}
@@ -291,58 +293,56 @@ export function CashSignOffPanel({
         })}
       </div>
 
-      <Dialog open={!!ackBlock} onOpenChange={(v) => !v && !busy && setAckBlock(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("acknowledge")}</DialogTitle>
-            <DialogDescription>{t("acknowledgeHint")}</DialogDescription>
-          </DialogHeader>
-          <Textarea value={ackReason} onChange={(e) => setAckReason(e.target.value)} rows={3} maxLength={500} placeholder={t("acknowledgeReason")} />
-          <DialogFooter>
-            <Button variant="ghost" disabled={busy} onClick={() => setAckBlock(null)}>{t("cancel")}</Button>
-            <Button
-              disabled={busy || ackReason.trim().length < 3}
-              onClick={async () => {
-                if (!ackBlock) return;
-                setBusy(true);
-                const ok = await signOff.acknowledge(ackBlock, ackReason.trim());
-                setBusy(false);
-                if (ok) setAckBlock(null);
-              }}
-            >
-              {t("acknowledge")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={!!ackBlock}
+        onOpenChange={(v) => !v && setAckBlock(null)}
+        title={t("acknowledge")}
+        description={t("acknowledgeHint")}
+        onSubmit={() => (ackBlock ? acknowledging.submit(ackBlock, ackReason.trim()) : undefined)}
+        submitLabel={t("acknowledge")}
+        cancelLabel={t("cancel")}
+        submitting={acknowledging.submitting}
+        missing={ackMissing}
+        reason={ackProblem ? t(ackProblem) : null}
+        blocked={ackProblem != null}
+      >
+        {/* A textarea: Enter adds a line and never submits, so acknowledging needs the button. */}
+        <Field label={t("acknowledgeReasonLabel")} htmlFor="ack-reason" required>
+          <Textarea
+            id="ack-reason"
+            value={ackReason}
+            onChange={(e) => setAck({ reason: e.target.value })}
+            rows={3}
+            maxLength={500}
+            placeholder={t("acknowledgeReason")}
+          />
+        </Field>
+      </FormDialog>
 
-      <Dialog open={!!asking} onOpenChange={(v) => !v && !busy && setAsking(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{asking === "supervisor" ? t("signSupervisor") : t("dialogTitle")}</DialogTitle>
-            <DialogDescription>{t("dialogHint")}</DialogDescription>
-          </DialogHeader>
-          <p className="rounded-md bg-muted px-3 py-2 text-sm">{signOff.statement}</p>
-          <table className="w-full text-sm">
-            <tbody>
-              {figureRows.map(([k, v]) => (
-                <tr key={k} className="border-b last:border-0">
-                  <td className="py-1.5 text-muted-foreground">{k}</td>
-                  <td className="py-1.5 text-right font-mono tabular-nums">{money(v)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <DialogFooter>
-            <Button variant="ghost" disabled={busy} onClick={() => setAsking(null)}>
-              {t("cancel")}
-            </Button>
-            <Button disabled={busy} onClick={accept}>
-              {busy ? t("signing") : t("accept")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Nothing to fill in: the statement and figures are what is accepted. No text input, so no Enter-to-sign. */}
+      <FormDialog
+        open={!!asking}
+        onOpenChange={(v) => !v && setAsking(null)}
+        title={asking === "supervisor" ? t("signSupervisor") : t("dialogTitle")}
+        description={t("dialogHint")}
+        onSubmit={() => (asking ? signing.submit(asking) : undefined)}
+        submitLabel={t("accept")}
+        submittingLabel={t("signing")}
+        cancelLabel={t("cancel")}
+        submitting={signing.submitting}
+      >
+        <p className="rounded-md bg-muted px-3 py-2 text-sm">{signOff.statement}</p>
+        <table className="w-full text-sm">
+          <tbody>
+            {figureRows.map(([k, v]) => (
+              <tr key={k} className="border-b last:border-0">
+                <td className="py-1.5 text-muted-foreground">{k}</td>
+                <td className="py-1.5 text-right font-mono tabular-nums">{money(v)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </FormDialog>
     </section>
   );
 }
