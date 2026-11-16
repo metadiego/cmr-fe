@@ -5944,6 +5944,7 @@
     "searchVisit": "Buscar por nombre, récord o servicio",
     "visitsError": "No se pudieron cargar las visitas de ese día",
     "noVisits": "No hay visitas ese día que coincidan",
+    "visit": "La visita",
     "samePatient": "Mismo paciente",
     "kind": {
       "scale": "Báscula",

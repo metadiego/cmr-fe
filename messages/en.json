@@ -5944,6 +5944,7 @@
     "searchVisit": "Search by name, record or service",
     "visitsError": "That day's visits could not be loaded",
     "noVisits": "No visits that day match",
+    "visit": "The visit",
     "samePatient": "Same patient",
     "kind": {
       "scale": "Scale",
