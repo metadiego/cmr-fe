@@ -42,20 +42,19 @@ area each, that move every dialog onto the kit and delete its hand-built copies.
 | PR | Branch | Scope | Files |
 |---|---|---|---|
 | 1 | `feat/forms-kit` | Kit: `lib/forms/*`, `components/kit/*`, `ConfirmHost`, i18n | new + `form-dialog.tsx`, `app-shell.tsx`, messages |
-| 2 | `feat/forms-frontdesk` | Frontdesk | 13 |
-| 3 | `feat/forms-board-patients` | Board (tablero), patient desk & patients | 18 |
-| 4 | `feat/forms-billing-cash` | Billing & cash | 22 |
-| 5 | `feat/forms-admin-config` | Users, access, staff & configuration (+ retire `FormDialog.canSubmit`) | 33 |
-| 6 | `feat/forms-rest` | Inventory, services, audit, formats, auth | 20 |
-| 7 | `chore/forms-lock-in` | Lint rules + CLAUDE.md section so it stays this way | 2 |
-| 8 | `feat/forms-agenda` | Agenda & appointments, incl. the therapy scheduler — **deferred, "later"** (owner, 16-nov) | 9 |
+| 2 | `feat/forms-frontdesk-patients` | Frontdesk, board (tablero), patient desk & patients | 31 |
+| 3 | `feat/forms-billing-cash` | Billing & cash | 22 |
+| 4 | `feat/forms-admin-config` | Users, access, staff & configuration (+ retire `FormDialog.canSubmit`) | 33 |
+| 5 | `feat/forms-rest` | Inventory, services, audit, formats, auth | 20 |
+| 6 | `chore/forms-lock-in` | Lint rules + CLAUDE.md section so it stays this way | 2 |
+| 7 | `feat/forms-agenda` | Agenda & appointments, incl. the therapy scheduler — **deferred, "later"** (owner, 16-nov) | 9 |
 
-Order set by the owner on 16-nov. PRs 2–6 and 8 depend only on PR 1. Each branches from the latest
+Order set by the owner on 16-nov. PRs 2–5 and 7 depend only on PR 1. Each branches from the latest
 `main`.
 
 **Because the agenda PR is deferred,** two things carry temporary exceptions until it lands:
-- **PR 6's final sweep** ignores `components/agenda/*`, `components/citas/*` and `components/calendario/*`. Those files keep their local `Field` copies and two `window.confirm`s for now.
-- **PR 7's lint rule** lists `components/agenda/recurring-booking-modal.tsx` and `components/calendario/evento-modal.tsx` as named exceptions. PR 8 deletes those exceptions in the same commit that removes their `window.confirm`.
+- **PR 5's final sweep** ignores `components/agenda/*`, `components/citas/*` and `components/calendario/*`. Those files keep their local `Field` copies and two `window.confirm`s for now.
+- **PR 6's lint rule** lists `components/agenda/recurring-booking-modal.tsx` and `components/calendario/evento-modal.tsx` as named exceptions. PR 7 deletes those exceptions in the same commit that removes their `window.confirm`.
 
 ---
 
@@ -204,7 +203,7 @@ type FormSize = "sm" | "md" | "lg" | "xl" | "2xl";            // sm:max-w-sm | m
 FormDialog(p: { open; onOpenChange; title; description?; size?: FormSize /* default "md" */; children;
   onSubmit: () => void | Promise<void>; submitLabel?; submittingLabel?; cancelLabel?; submitting?: boolean;
   missing?: readonly string[]; reason?: string | null; blocked?: boolean; extra?: ReactNode;
-  /** @deprecated use missing/blocked; removed in PR 5 */ canSubmit?: boolean })
+  /** @deprecated use missing/blocked; removed in PR 4 */ canSubmit?: boolean })
 FormSheet(same props as FormDialog, side "right", size widths sm:max-w-md | lg | xl | 2xl | 3xl)
 useSubmit<T>(fn: () => Promise<T>, o?: { successMessage?: string; onSuccess?: (v: T) => void }): { submitting: boolean; submit: () => Promise<void> }
 useDialogForm<T>(initial: () => T, open: boolean, key?: unknown): [T, (patch: Partial<T> | ((s: T) => T)) => void]
@@ -230,7 +229,7 @@ Behaviour pinned by the spec:
 
 ---
 
-## The migration recipe (Task R) — applied to every file in PRs 2–6 and 8
+## The migration recipe (Task R) — applied to every file in PRs 2–5 and 7
 
 Each file in a PR's list is one task: **Task R on `<file>`**. Steps:
 
@@ -275,7 +274,11 @@ Each PR ends with:
 
 ---
 
-## PR 2 — Frontdesk (`feat/forms-frontdesk`)
+## PR 2 — Frontdesk, board, patient desk & patients (`feat/forms-frontdesk-patients`)
+
+One PR (owner, 16-nov). Commit per area in this order — frontdesk, board, patient desk, patients — so the review can go area by area.
+
+### Frontdesk
 Task R on each file in `components/frontdesk/`:
 - `compras-modal`, `confirm-deshacer-dialog`, `corregir-disponibilidad-dialog`, `dosis-aviso-dialog`
 - `formatos-modal`, `frontdesk-board` (`DEBT` 816), `historial-modal`, `nurse-status-button`
@@ -283,7 +286,7 @@ Task R on each file in `components/frontdesk/`:
 
 Also check `fila-sesion.tsx` (`DEBT` 723) for dialogs it renders inline.
 
-## PR 3 — Board, patient desk & patients (`feat/forms-board-patients`)
+### Board, patient desk & patients
 - `components/tablero/`: `acciones-modal`, `agregar-cita-modal`, `celda-toggle-icon`, `ehr-readiness-modal`, `historial-dialog`, `nueva-cita-modal`, `tablero-acciones`
 - `components/patient-desk/`: `patient-desk`, `therapy-queue-strip`
 
@@ -291,7 +294,7 @@ Also check `fila-sesion.tsx` (`DEBT` 723) for dialogs it renders inline.
 - `app/(app)/patients/[id]/layout.tsx`
 - `components/body-measurements/link-visit-dialog.tsx`
 
-## PR 4 — Billing & cash (`feat/forms-billing-cash`)
+## PR 3 — Billing & cash (`feat/forms-billing-cash`)
 - `components/facturacion/`:
   - `add-kit-component`, `como-se-cobra`, `devoluciones-list-view`, `factura-row-actions`
   - `grupos-admin`, `invoice-add-item` (local `Lbl`), `invoice-change-patient`, `invoice-header-dialog`
@@ -302,7 +305,7 @@ Also check `fila-sesion.tsx` (`DEBT` 723) for dialogs it renders inline.
 
 - `components/caja/`: `cash-sign-off`, `cuadre-attachment-delete-button`, `cuadre-scan-button`, `past-day-confirm-host`, `resumen-pagos`
 
-## PR 5 — Users, access, staff & configuration (`feat/forms-admin-config`)
+## PR 4 — Users, access, staff & configuration (`feat/forms-admin-config`)
 - `components/admin/`:
   - `access-dialog`, `assign-center-dialog`, `cambiar-email-dialog`, `centers-list`, `codigo-acceso-dialog`
   - `datos-fiscales-dialog`, `invite-dialog`, `menu-admin`, `override-settings`, `pending-profiles`
@@ -320,7 +323,7 @@ Also check `fila-sesion.tsx` (`DEBT` 723) for dialogs it renders inline.
 
 Last task: `grep -rn "canSubmit" components app` must show no `FormDialog` user. Then remove the deprecated `canSubmit` prop from `form-dialog.tsx`. Commit `refactor(forms): drop FormDialog.canSubmit`.
 
-## PR 6 — Inventory and the rest (`feat/forms-rest`)
+## PR 5 — Inventory and the rest (`feat/forms-rest`)
 - `components/inventario/`:
   - `ajuste-modal`, `amp-editor-sheet`, `insumos-editor-sheet`, `live-stock-history-sheet`, `pp-form-sheet`
   - `presentaciones-proveedor-admin`, `productos-admin` (`DEBT` 1048), `proveedores-admin`, `retire-scale-button`
@@ -335,11 +338,11 @@ Final sweep before opening the PR. Each grep must return nothing outside `compon
 - `grep -rnE "^function (Field|FieldRow|Lbl)\b" components app`
 - `grep -rnE "window\.confirm|[^.a-zA-Z]confirm\(" components app` (excluding `useConfirm` callers)
 
-## PR 7 — Lock it in (`chore/forms-lock-in`)
+## PR 6 — Lock it in (`chore/forms-lock-in`)
 
 **Files:** Modify `eslint.config.mjs`, `CLAUDE.md`
 
-- [ ] **Step 1:** In `eslint.config.mjs` add `no-restricted-globals` for `confirm`, and `no-restricted-properties` for `window.confirm`, with the message "Use useConfirm() from components/kit/confirm-host". `npm run lint` → green, which proves PRs 2–6 removed them all. Add a per-file override for `components/agenda/recurring-booking-modal.tsx` and `components/calendario/evento-modal.tsx`, with a comment saying the agenda PR (PR 8) removes it.
+- [ ] **Step 1:** In `eslint.config.mjs` add `no-restricted-globals` for `confirm`, and `no-restricted-properties` for `window.confirm`, with the message "Use useConfirm() from components/kit/confirm-host". `npm run lint` → green, which proves PRs 2–5 removed them all. Add a per-file override for `components/agenda/recurring-booking-modal.tsx` and `components/calendario/evento-modal.tsx`, with a comment saying the agenda PR (PR 7) removes it.
 - [ ] **Step 2:** Add a "Forms and dialogs" section to `CLAUDE.md` (rule 7: the file and the repo cannot diverge). It says:
   - new dialogs use `FormDialog`/`FormSheet`/`FormFooter`/`Field`;
   - `missing` drives `disabled`;
@@ -348,9 +351,9 @@ Final sweep before opening the PR. Each grep must return nothing outside `compon
   - pure logic lives in `lib/forms/`.
 - [ ] **Step 3:** `npm run lint && npm run build` → green. Commit `chore(forms): lint rule and CLAUDE.md section for the form shell`.
 
-## PR 8 — Agenda & appointments (`feat/forms-agenda`) — deferred
+## PR 7 — Agenda & appointments (`feat/forms-agenda`) — deferred
 
-Runs after PR 7, whenever the owner schedules it. Also delete the two lint exceptions PR 7 added, in the same commit that removes their `window.confirm`.
+Runs after PR 6, whenever the owner schedules it. Also delete the two lint exceptions PR 6 added, in the same commit that removes their `window.confirm`.
 
 First task, before Task R: **split `components/agenda/therapy-day-scheduler.tsx`** (598 lines, not in `DEBT`):
 - move the left column (patient hero, bought chips, therapy cards) to `components/agenda/therapy-day-cards.tsx`;
