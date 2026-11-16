@@ -17,13 +17,15 @@ import {
   type CashScanSource,
 } from "@/lib/api/cash-scan";
 import { listScanners, type PrintHubScanner } from "@/lib/api/print-hub";
-import { toastError } from "@/lib/api/errors";
+import { scanMissing } from "@/lib/caja/scan-missing";
 import { useCan } from "@/hooks/use-can";
 import { CuadreScanCrop } from "@/components/caja/cuadre-scan-crop";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Label } from "@/components/ui/label";
+import { Field } from "@/components/kit/field";
+import { FormFooter } from "@/components/kit/form-footer";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
@@ -44,7 +46,6 @@ const DEFAULT_OPTIONS: Options = { source: "adf", duplex: false, colorMode: "Gra
 // preview o final, distinguido por `job.kind`.
 export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { reconciliationId: string; centroId?: string | null; onScanned: () => void }) {
   const t = useTranslations("caja.attachments");
-  const tRoot = useTranslations();
   const { can } = useCan();
   const [scanners, setScanners] = React.useState<PrintHubScanner[] | null>(null);
   const [open, setOpen] = React.useState(false);
@@ -54,7 +55,6 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
   const [options, setOptions] = React.useState<Options>(DEFAULT_OPTIONS);
   const [cropEnabled, setCropEnabled] = React.useState(false);
   const [advanced, setAdvanced] = React.useState(false);
-  const [starting, setStarting] = React.useState(false);
   const [job, setJob] = React.useState<CashScanJob | null>(null);
   const [expired, setExpired] = React.useState(false);
   const [pendingRegion, setPendingRegion] = React.useState<CashScanRegion | null>(null);
@@ -116,29 +116,19 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
     // eslint-disable-next-line react-hooks/exhaustive-deps -- solo dispara al llegar a "done", no en cada render de onScanned
   }, [job?.status === "done", job?.kind]);
 
-  if (!allowed || !scanners || scanners.length === 0) return null;
-
-  async function runPreview() {
-    if (!scannerId) return;
-    setStarting(true);
-    try {
-      const started = await previewCashScan(reconciliationId, { scannerId, source: options.source, colorMode: options.colorMode }, centroId);
-      if (centroId) window.localStorage.setItem(LAST_SCANNER_KEY(centroId), scannerId);
-      startedAtRef.current = Date.now();
-      setExpired(false);
-      setJob(started);
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setStarting(false);
-    }
+  // Starting a job (preview or final) is the "submit"; the job then runs on the hub and is polled.
+  function started(job: CashScanJob) {
+    if (centroId) window.localStorage.setItem(LAST_SCANNER_KEY(centroId), scannerId);
+    startedAtRef.current = Date.now();
+    setExpired(false);
+    setJob(job);
   }
-
-  async function runFinal(region: CashScanRegion | null) {
-    if (!scannerId) return;
-    setStarting(true);
-    setPendingRegion(region);
-    try {
+  const preview = useSubmit(() => previewCashScan(reconciliationId, { scannerId, source: options.source, colorMode: options.colorMode }, centroId), {
+    onSuccess: started,
+  });
+  const final = useSubmit(
+    (region: CashScanRegion | null) => {
+      setPendingRegion(region);
       const body: CashScanRequest = {
         scannerId,
         source: options.source,
@@ -147,17 +137,15 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
         resolution: options.resolution,
         region: region ?? undefined,
       };
-      const started = await startCashScan(reconciliationId, body, centroId);
-      if (centroId) window.localStorage.setItem(LAST_SCANNER_KEY(centroId), scannerId);
-      startedAtRef.current = Date.now();
-      setExpired(false);
-      setJob(started);
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setStarting(false);
-    }
-  }
+      return startCashScan(reconciliationId, body, centroId);
+    },
+    { onSuccess: started },
+  );
+  const starting = preview.submitting || final.submitting;
+  const runPreview = () => preview.submit();
+  const runFinal = (region: CashScanRegion | null) => final.submit(region);
+
+  if (!allowed || !scanners || scanners.length === 0) return null;
 
   function launch() {
     if (cropEnabled) void runPreview();
@@ -173,6 +161,7 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
     expired ? t("scanExpired") : job?.status === "scanning" ? t("scanning") : job?.status === "pending" ? t("scanWaiting") : job?.status === "failed" ? (job.lastError ?? t("scanFailed")) : null;
   const canRetry = expired || job?.status === "failed";
   const busy = !!job && !expired && (job.status === "pending" || job.status === "scanning");
+  const missing = scanMissing({ scannerId }).map(() => t("scanScanner"));
 
   return (
     <>
@@ -181,8 +170,8 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
         {t("scan")}
       </Button>
 
-      <Dialog open={open} onOpenChange={(v) => !busy && setOpen(v)}>
-        <DialogContent className={showCrop ? "sm:max-w-xl" : undefined}>
+      <Dialog open={open} onOpenChange={(v) => !busy && !starting && setOpen(v)}>
+        <DialogContent className={showCrop ? "sm:max-w-xl" : undefined} showCloseButton={!starting && !busy}>
           <DialogHeader>
             <DialogTitle>{t("scanDialogTitle")}</DialogTitle>
           </DialogHeader>
@@ -199,15 +188,14 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
             <>
               <div className="space-y-4">
                 {scanners.length > 1 && (
-                  <div className="space-y-1.5">
-                    <Label>{t("scanScanner")}</Label>
+                  <Field label={t("scanScanner")} htmlFor="scan-scanner" required>
                     <Select value={scannerId} onValueChange={setScannerId} disabled={busy}>
-                      <SelectTrigger size="sm" className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectTrigger id="scan-scanner" size="sm" className="w-full"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {scanners.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
-                  </div>
+                  </Field>
                 )}
 
                 <label className="flex items-center gap-2 text-sm">
@@ -220,56 +208,61 @@ export function CuadreScanButton({ reconciliationId, centroId, onScanned }: { re
                     <Button type="button" variant="ghost" size="sm" className="h-7 px-0">{t("scanOptions")}</Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-3 pt-2">
-                    <div className="space-y-1.5">
-                      <Label>{t("scanSource")}</Label>
+                    <Field label={t("scanSource")} htmlFor="scan-source">
                       <Select value={options.source} onValueChange={(v) => setOptions((o) => ({ ...o, source: v as CashScanSource }))} disabled={busy}>
-                        <SelectTrigger size="sm" className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectTrigger id="scan-source" size="sm" className="w-full"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="adf">{t("scanSourceAdf")}</SelectItem>
                           <SelectItem value="platen">{t("scanSourcePlaten")}</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
+                    </Field>
                     {options.source === "adf" && (
                       <label className="flex items-center gap-2 text-sm">
                         <Switch checked={options.duplex} onCheckedChange={(v) => setOptions((o) => ({ ...o, duplex: v }))} disabled={busy} />
                         {t("scanDuplex")}
                       </label>
                     )}
-                    <div className="space-y-1.5">
-                      <Label>{t("scanColorMode")}</Label>
+                    <Field label={t("scanColorMode")} htmlFor="scan-color">
                       <Select value={options.colorMode} onValueChange={(v) => setOptions((o) => ({ ...o, colorMode: v as CashScanColorMode }))} disabled={busy}>
-                        <SelectTrigger size="sm" className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectTrigger id="scan-color" size="sm" className="w-full"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="BlackAndWhite1">{t("scanColorBw")}</SelectItem>
                           <SelectItem value="Grayscale8">{t("scanColorGray")}</SelectItem>
                           <SelectItem value="RGB24">{t("scanColorRgb")}</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>{t("scanResolution")}</Label>
+                    </Field>
+                    <Field label={t("scanResolution")} htmlFor="scan-resolution">
                       <Select value={String(options.resolution)} onValueChange={(v) => setOptions((o) => ({ ...o, resolution: Number(v) as Options["resolution"] }))} disabled={busy}>
-                        <SelectTrigger size="sm" className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectTrigger id="scan-resolution" size="sm" className="w-full"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {[150, 200, 300, 400, 600].map((r) => <SelectItem key={r} value={String(r)}>{r} dpi</SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </div>
+                    </Field>
                   </CollapsibleContent>
                 </Collapsible>
 
-                {statusLabel && (
+                {/* While the job runs the footer says so; failures stay here, next to «Retry». */}
+                {statusLabel && !busy && (
                   <p className={canRetry ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>{statusLabel}</p>
                 )}
               </div>
 
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={busy}>{t("scanCancel")}</Button>
-                <Button type="button" onClick={canRetry ? retry : launch} disabled={starting || busy || !scannerId}>
-                  {busy ? statusLabel : canRetry ? t("scanRetry") : cropEnabled ? t("cropPreviewStart") : t("scanStart")}
-                </Button>
-              </DialogFooter>
+              {/* Two screens (options, then crop with its own buttons): the footer is used directly. No text
+                  input, so no Enter-to-scan. */}
+              <FormFooter
+                primary={{ label: canRetry ? t("scanRetry") : cropEnabled ? t("cropPreviewStart") : t("scanStart"), onClick: () => (canRetry ? retry() : launch()) }}
+                missing={missing}
+                reason={busy ? statusLabel : null}
+                blocked={busy}
+                submitting={starting}
+                submittingLabel={t("scanWaiting")}
+                // As before, the dialog cannot be closed while the hub works on the job.
+                onCancel={busy ? undefined : () => setOpen(false)}
+                cancelLabel={t("scanCancel")}
+              />
             </>
           )}
         </DialogContent>
