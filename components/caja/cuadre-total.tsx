@@ -42,6 +42,7 @@ import { getDayAttachments } from "@/lib/caja/day-attachments";
 import { CashEmailPanel } from "@/components/caja/cash-email-panel";
 import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-off";
 import { figuresOfReport, SIGN_AS_SUPERVISOR } from "@/lib/caja/sign-off";
+import { resolveCashierSiblings } from "@/lib/caja/cash-signoff-siblings";
 import type { CajaDivision } from "@/lib/api/caja";
 import { ComprobacionCuadreTotal } from "@/components/caja/comprobacion-cuadre-total";
 import { CashCountModeQuickButton } from "@/components/configuracion/cash-count-mode-admin";
@@ -259,10 +260,17 @@ function Editor({
     canSignCashier: false,
     canSignSupervisor: puedeFirmarGerente,
     centerId: centroId,
-    siblings: async () =>
-      (await listarCuadres({ fecha }))
-        .filter((c) => c.userId && (c.division === "consulta" || c.division === "general"))
-        .map((c) => ({ id: c.id, userId: c.userId!, division: c.division, name: porCajero.find((x) => x.usuarioId === c.userId)?.nombre ?? null })),
+    // BE #605, handoff firmas-consolidado-desde-ventas: los bloques son quien COBRÓ hoy
+    // (`porCajero`, ya es el día completo, ambas divisiones) — no quien abrió una hoja.
+    siblings: async () => {
+      const cuadresDia = (await listarCuadres({ fecha })).filter((c) => c.division === "consulta" || c.division === "general");
+      return resolveCashierSiblings({
+        porCajero,
+        cuadres: cuadresDia,
+        centerId: centroId,
+        nameFor: (uid) => porCajero.find((x) => x.usuarioId === uid)?.nombre ?? null,
+      });
+    },
     siblingNow: async (sib) => figuresOfReport(await getReporteDia(fecha, sib.division as CajaDivision, sib.userId)),
     onSigned: onReload,
   });

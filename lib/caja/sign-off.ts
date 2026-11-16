@@ -102,12 +102,72 @@ export function readSignOffStatement(config: unknown): string | null {
   return typeof s === "string" && s.trim() ? s.trim() : null;
 }
 
-/** A cashier sheet a consolidated / day-total sheet sums. */
+/** A cashier sheet a consolidated / day-total sheet sums. `id` is absent when she has no sheet
+ * yet (she collected today but never opened one) — signing creates it via "Firmar la mía". */
 export interface SiblingSheet {
-  id: string;
+  id?: string;
   userId: string;
   name: string | null;
   division?: string | null;
+}
+
+/** Who actually collected today (`reporte.porCajero`, BE keeps these keys in Spanish). */
+export interface PorCajeroEntry {
+  usuarioId: string | null;
+  nombre: string | null;
+}
+
+/** The fields of a `cuadre` (reconciliation sheet) rule 4 needs — same on `CuadreCaja`. */
+export interface CuadreSheetInfo {
+  id: string;
+  userId: string | null;
+  countedCash: number;
+  declaredPettyCash: number;
+  pettyCashApplies: boolean;
+  division?: string | null;
+}
+
+/**
+ * Rules 1-3 (handoff docs/specs/firmas-consolidado-desde-ventas-handoff-be.md, BE #605): the
+ * consolidated / day-total signature blocks are the cashiers who actually COLLECTED today
+ * (`porCajero`), in that order — not whoever happened to open a sheet. Each is matched to her own
+ * sheet if she has one already (so her real signature/count shows); with none yet, the block
+ * stays unsigned and sheet-less (signing creates the sheet). Sheet owners who did NOT collect are
+ * returned separately as `leftoverSheets` — rule 4 needs to know whether each already has a live
+ * signature, which can only be learned by fetching it, so the caller (who can do that fetch)
+ * decides which of those to still include.
+ */
+export function cashierSiblingsFromReport(args: {
+  porCajero: PorCajeroEntry[];
+  cuadres: CuadreSheetInfo[];
+  /** Fallback division for a cashier with NO sheet yet (unused once she has one — her own sheet's
+   * division wins, needed to re-read HER report correctly once she does sign). */
+  division?: string | null;
+  nameFor?: (userId: string) => string | null;
+}): { siblings: SiblingSheet[]; leftoverSheets: CuadreSheetInfo[] } {
+  const byUser = new Map<string, CuadreSheetInfo>();
+  for (const c of args.cuadres) if (c.userId) byUser.set(c.userId, c);
+  const incluidos = new Set<string>();
+  const siblings: SiblingSheet[] = [];
+  for (const p of args.porCajero) {
+    if (!p.usuarioId || incluidos.has(p.usuarioId)) continue;
+    incluidos.add(p.usuarioId);
+    const sheet = byUser.get(p.usuarioId);
+    siblings.push({
+      id: sheet?.id,
+      userId: p.usuarioId,
+      division: sheet?.division ?? args.division,
+      name: args.nameFor?.(p.usuarioId) ?? p.nombre ?? null,
+    });
+  }
+  const leftoverSheets = args.cuadres.filter((c) => c.userId && !incluidos.has(c.userId));
+  return { siblings, leftoverSheets };
+}
+
+/** Rule 4b: a real count beyond petty cash — the only part of rule 4 decidable without fetching
+ * signatures (the other part, "already signed", needs a live signature check by the caller). */
+export function hasRealCashCount(c: CuadreSheetInfo): boolean {
+  return r2(c.countedCash) - (c.pettyCashApplies ? r2(c.declaredPettyCash) : 0) !== 0;
 }
 
 /** One signature block: its label under the line; over it, who accepted and when (blank if unsigned). */
@@ -164,7 +224,7 @@ export function signatureBlocks(args: {
   if (isCashierSheet) return [block("cashier", "cashier", null, liveSignature(own, "cashier"), now), supervisor];
   const cashiers = siblings.map((sib) => {
     const s = liveSignature(sib.signatures, "cashier");
-    return block(`cashier:${sib.id}`, "cashier", s?.signerName ?? sib.name ?? "—", s, sib.now);
+    return block(`cashier:${sib.id ?? sib.userId}`, "cashier", s?.signerName ?? sib.name ?? "—", s, sib.now);
   });
   return [...(cashiers.length ? cashiers : [block("cashier", "cashier", null, null, null)]), supervisor];
 }

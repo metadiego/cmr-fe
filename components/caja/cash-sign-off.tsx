@@ -80,7 +80,9 @@ export function useCashSignOff(o: CashSignOffOptions) {
       const sibs = cur.siblings ? await cur.siblings() : [];
       const siblings = await Promise.all(
         sibs.map(async (sib) => {
-          const signatures = await getCashSignatures(sib.id, centerId).catch(() => [] as CashSignature[]);
+          // Sin hoja propia todavía (cobró hoy pero nunca la abrió, regla 3 del handoff): no hay
+          // firmas que pedir — "Sin firmar" directo, sin la llamada.
+          const signatures = sib.id ? await getCashSignatures(sib.id, centerId).catch(() => [] as CashSignature[]) : [];
           // Only a signed sheet needs its own figures (to tell whether it moved after signing).
           const signed = signatures.some((s) => s.role === "cashier" && !s.voidedAt);
           const now = signed && cur.siblingNow ? await cur.siblingNow(sib).catch(() => null) : null;

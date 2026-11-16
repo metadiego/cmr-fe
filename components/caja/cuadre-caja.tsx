@@ -39,6 +39,7 @@ import { ConsolidatedCountBar } from "@/components/caja/consolidated-count-bar";
 import { CashEmailPanel } from "@/components/caja/cash-email-panel";
 import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-off";
 import { figuresOfReport, SIGN_AS_SUPERVISOR } from "@/lib/caja/sign-off";
+import { resolveCashierSiblings } from "@/lib/caja/cash-signoff-siblings";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
@@ -366,7 +367,11 @@ function Editor({
     canSignCashier,
     canSignSupervisor,
     centerId: centro,
-    siblings: esConsolidado ? async () => cuadres.filter((c) => c.userId).map((c) => ({ id: c.id, userId: c.userId!, division, name: cajeros.find((x) => x.userId === c.userId)?.name ?? porCajero.find((x) => x.usuarioId === c.userId)?.nombre ?? null })) : undefined,
+    // BE #605, handoff firmas-consolidado-desde-ventas: los bloques son quien COBRÓ hoy
+    // (`porCajero`), no quien abrió una hoja — Waldemar cobró sin hoja propia y antes no salía.
+    siblings: esConsolidado
+      ? () => resolveCashierSiblings({ porCajero, cuadres, division, centerId: centro, nameFor: (uid) => cajeros.find((x) => x.userId === uid)?.name ?? null })
+      : undefined,
     siblingNow: async (sib) => figuresOfReport(await getReporteDia(fecha, division, sib.userId)),
     onSigned: onReload,
   });

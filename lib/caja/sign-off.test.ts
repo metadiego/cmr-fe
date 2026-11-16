@@ -4,14 +4,17 @@ import assert from "node:assert/strict";
 import {
   signatureState,
   alreadySignedBy,
+  cashierSiblingsFromReport,
   figuresChanged,
   figuresOfReport,
+  hasRealCashCount,
   liveSignature,
   readSignOffStatement,
   signatureBlocks,
   signatureChangeFigures,
   signaturesPrintHtml,
   type CashSignature,
+  type CuadreSheetInfo,
   type SignedFigures,
 } from "./sign-off.ts";
 
@@ -128,6 +131,49 @@ test("signaturesPrintHtml: stamp over the line, label under it, escaped, red not
   assert.match(html, /Cajero — &lt;Ana&gt;/);
   assert.match(html, /firma-sello">&nbsp;<\/div><div class="firma">Gerente/);
   assert.equal(signaturesPrintHtml([]), "");
+});
+
+const sheet = (over: Partial<CuadreSheetInfo>): CuadreSheetInfo => ({
+  id: "x", userId: "u1", countedCash: 0, declaredPettyCash: 0, pettyCashApplies: true, division: "general", ...over,
+});
+
+test("hasRealCashCount: beyond the petty cash fund, or no fund applies at all", () => {
+  assert.equal(hasRealCashCount(sheet({ countedCash: 50, declaredPettyCash: 50 })), false);
+  assert.equal(hasRealCashCount(sheet({ countedCash: 62.34, declaredPettyCash: 50 })), true);
+  assert.equal(hasRealCashCount(sheet({ countedCash: 50, declaredPettyCash: 50, pettyCashApplies: false })), true);
+  assert.equal(hasRealCashCount(sheet({ countedCash: 0, declaredPettyCash: 0 })), false);
+});
+
+test("cashierSiblingsFromReport: the owner bug (Bayamón 16-nov) — Waldemar sold with no sheet, Christian has only a petty-cash sheet", () => {
+  // Christian opened the general sheet (50/50 fund only, no real sales there) — the BUG had him
+  // show up as "Cajero" on the consolidated sheet while Waldemar, who actually collected
+  // $12,340.46, was invisible because he never opened a sheet of his own.
+  const cuadres: CuadreSheetInfo[] = [sheet({ id: "christian-general", userId: "christian", countedCash: 50, declaredPettyCash: 50, division: "general" })];
+  const porCajero = [{ usuarioId: "waldemar", nombre: "Waldemar Ortiz" }];
+  const { siblings, leftoverSheets } = cashierSiblingsFromReport({ porCajero, cuadres, division: "general" });
+  assert.deepEqual(siblings, [{ id: undefined, userId: "waldemar", division: "general", name: "Waldemar Ortiz" }]);
+  assert.deepEqual(leftoverSheets, cuadres);
+});
+
+test("cashierSiblingsFromReport: a cashier who sold AND already has her sheet gets that sheet's id/division", () => {
+  const cuadres: CuadreSheetInfo[] = [sheet({ id: "w1", userId: "waldemar", division: "general" })];
+  const { siblings } = cashierSiblingsFromReport({
+    porCajero: [{ usuarioId: "waldemar", nombre: null }],
+    cuadres,
+    nameFor: (uid) => (uid === "waldemar" ? "Waldemar Ortiz" : null),
+  });
+  assert.deepEqual(siblings, [{ id: "w1", userId: "waldemar", division: "general", name: "Waldemar Ortiz" }]);
+});
+
+test("cashierSiblingsFromReport: rule 4 leftovers — a sheet whose owner never sold stays out of `siblings`, caller decides", () => {
+  const cuadres: CuadreSheetInfo[] = [
+    sheet({ id: "a", userId: "sold", countedCash: 100 }),
+    sheet({ id: "b", userId: "petty-only", countedCash: 50, declaredPettyCash: 50 }),
+  ];
+  const { siblings, leftoverSheets } = cashierSiblingsFromReport({ porCajero: [{ usuarioId: "sold", nombre: "Sold" }], cuadres });
+  assert.deepEqual(siblings.map((s) => s.userId), ["sold"]);
+  assert.deepEqual(leftoverSheets.map((c) => c.userId), ["petty-only"]);
+  assert.equal(hasRealCashCount(leftoverSheets[0]), false); // caller must check for a live signature instead
 });
 
 test("signatureState: moved and not acknowledged = red; acknowledged on today's figures = quiet; moved again = red (BE #565)", () => {
