@@ -1163,7 +1163,6 @@
       "recordDuenoInactivo": "inactivo",
       "camposFaltantes": "Faltan campos obligatorios: {campos}",
       "emailInvalido": "Escribe un correo válido, p. ej. nombre@dominio.com",
-      "requiredLegend": "Campos obligatorios",
       "medico": "Médico",
       "sinMedico": "Sin médico",
       "otroCentro": "otro centro",
@@ -1239,6 +1238,11 @@
     "errorBody": "Ocurrió un error en esta pantalla. El resto del sistema sigue funcionando. Puedes reintentar.",
     "save": "Guardar",
     "saving": "Guardando…",
+    "form": {
+      "missingPrefix": "Para continuar, completa:",
+      "required": "obligatorio",
+      "requiredLegend": "Campos obligatorios"
+    },
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "delete": "Eliminar",

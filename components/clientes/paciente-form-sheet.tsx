@@ -1,5 +1,6 @@
 "use client";
 
+import { RequiredLegend } from "@/components/kit/required-mark";
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -467,9 +468,7 @@ export function PacienteFormSheet({
           </div>
 
           <SheetFooter className="flex-row items-center gap-2 border-t px-6 py-4">
-            <span className="mr-auto text-xs text-muted-foreground">
-              <span className="text-destructive">*</span> {t("requiredLegend")}
-            </span>
+            <RequiredLegend className="mr-auto text-xs text-muted-foreground" />
             <Button
               type="button"
               variant="outline"

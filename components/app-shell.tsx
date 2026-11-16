@@ -1,5 +1,6 @@
 "use client";
 
+import { ConfirmHost } from "@/components/kit/confirm-host";
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -66,6 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MenuProvider>
         <ShellChrome>{children}</ShellChrome>
         <ConfirmActionHost />
+        <ConfirmHost />
         <PastDayConfirmHost />
       </MenuProvider>
     </MeProvider>

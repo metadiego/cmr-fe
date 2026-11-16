@@ -1,98 +1,58 @@
 "use client";
 
-import * as React from "react";
-import { useTranslations } from "next-intl";
-
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { useFormShell, type FormShellProps } from "./form-shell";
 
-// A labelled form field wrapper (extracted from the original invite-dialog.tsx).
-export function Field({
-  label,
-  htmlFor,
-  hint,
-  children,
-}: {
-  label: string;
-  htmlFor?: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
+// Existing imports of `Field` from this module keep working.
+export { Field } from "./field";
+
+export type FormSize = "sm" | "md" | "lg" | "xl" | "2xl";
+
+const WIDTH: Record<FormSize, string> = {
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-2xl",
+  "2xl": "sm:max-w-5xl",
+};
+
+/**
+ * Submit-form dialog: header, scrolling body, always-visible footer with the
+ * missing-fields hint. `missing` drives `disabled`; `reason` only explains.
+ *
+ *   <FormDialog open={open} onOpenChange={setOpen} title={t("title")}
+ *     missing={missing} submitting={submitting} onSubmit={submit}>
+ *     <Field label={...} required><Input .../></Field>
+ *   </FormDialog>
+ */
+export function FormDialog(p: FormShellProps & { size?: FormSize }) {
+  const { onOpenChange, contentGuards, onKeyDown, footer, submitting } = useFormShell(p);
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={htmlFor}>{label}</Label>
-      {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
-  );
-}
-
-// A submit-form dialog: title/description header, arbitrary fields as children,
-// and a Cancel/Submit footer with a busy state. Mirrors the proven pattern in
-// invite-dialog.tsx — onSubmit is awaited, the submit button shows `submitting`,
-// and the parent controls open state (resetting its own form on close).
-//
-//   <FormDialog open={open} onOpenChange={setOpen} title={t("title")}
-//     submitting={busy} canSubmit={valid} onSubmit={save}>
-//     <Field label={...}><Input .../></Field>
-//   </FormDialog>
-export function FormDialog({
-  open,
-  onOpenChange,
-  title,
-  description,
-  children,
-  onSubmit,
-  submitting = false,
-  canSubmit = true,
-  submitLabel,
-  submittingLabel,
-  cancelLabel,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-  onSubmit: () => void | Promise<void>;
-  submitting?: boolean;
-  canSubmit?: boolean;
-  submitLabel?: string;
-  submittingLabel?: string;
-  cancelLabel?: string;
-}) {
-  const t = useTranslations("common");
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+    <Dialog open={p.open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={cn("flex max-h-[90dvh] flex-col", WIDTH[p.size ?? "md"])}
+        showCloseButton={!submitting}
+        {...contentGuards}
+      >
+        <DialogHeader className="shrink-0">
+          <DialogTitle>{p.title}</DialogTitle>
+          {p.description && <DialogDescription>{p.description}</DialogDescription>}
         </DialogHeader>
-
-        <div className="space-y-4">{children}</div>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={submitting}
-          >
-            {cancelLabel ?? t("cancel")}
-          </Button>
-          <Button onClick={() => onSubmit()} disabled={submitting || !canSubmit}>
-            {submitting ? (submittingLabel ?? t("saving")) : (submitLabel ?? t("save"))}
-          </Button>
-        </DialogFooter>
+        {/* Padding + negative margin keep focus rings from being clipped by overflow-y-auto. */}
+        <div
+          className="-mx-1 -my-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-1 py-1"
+          onKeyDown={onKeyDown}
+        >
+          {p.children}
+        </div>
+        {footer}
       </DialogContent>
     </Dialog>
   );
