@@ -3941,7 +3941,8 @@
       "total": "Total",
       "medio": "Referral",
       "usuario": "User",
-      "acciones": "Actions"
+      "acciones": "Actions",
+      "metodoPago": "Payment"
     },
     "grupo": {
       "producto": "Product"
