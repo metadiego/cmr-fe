@@ -66,12 +66,14 @@ export function LinkVisitDialog({
     [list, reading, q],
   );
 
-  const missing = missingFields([[t("visit"), !!picked]]);
+  // A pick hidden by the search does not count: Enter in the search box must never link an off-screen visit.
+  const visiblePick = picked && shown.some((c) => c.id === picked) ? picked : null;
+  const missing = missingFields([[t("visit"), !!visiblePick]]);
   const { submitting, submit } = useSubmit(
     async () => {
       // The dialog only opens with a reading and the button needs a pick: never "succeed" without linking.
-      if (!reading || !picked) throw new Error(t("visit"));
-      await linkMeasurement(reading.kind, reading.id, picked, reading.clinicId);
+      if (!reading || !visiblePick) throw new Error(t("visit"));
+      await linkMeasurement(reading.kind, reading.id, visiblePick, reading.clinicId);
     },
     { successMessage: t("linked"), onSuccess: onLinked },
   );

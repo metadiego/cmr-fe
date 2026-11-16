@@ -199,12 +199,13 @@ export function CambioProtocoloForm({
         <div className="space-y-2">
           {lineas.map((l) => (
             <div key={l.key} className="rounded-md bg-card p-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{t("producto")}<RequiredMark /></span>
               <div className="flex items-center gap-2">
                 {catRes.state.kind === "loading" ? (
                   <ControlSkeleton className="w-auto flex-1" />
                 ) : (
                   <Select value={l.productoId} onValueChange={(v) => setLinea(l.key, { productoId: v })}>
-                    <SelectTrigger className="h-9 flex-1"><SelectValue placeholder={t("producto")} /></SelectTrigger>
+                    <SelectTrigger className="h-9 flex-1" aria-label={t("producto")} aria-required><SelectValue placeholder={t("producto")} /></SelectTrigger>
                     <SelectContent>
                       {catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                     </SelectContent>
