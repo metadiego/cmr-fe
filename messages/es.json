@@ -1504,7 +1504,8 @@
     "changeLog": "Historial de cambios",
     "confirmationPolicies": "Confirmaciones",
     "calendarAbsenceReview": "Ausencias por revisar",
-    "paymentMethods": "Formas de pago"
+    "paymentMethods": "Formas de pago",
+    "inventory_daily_kardex": "Kardex diario"
   },
   "admin": {
     "title": "Administración",
@@ -6208,5 +6209,42 @@
   "apiKeys": {
     "clinicKeyTooBroad": "Una API key de un centro no puede llevar acceso total ni permisos de gestión de accesos.",
     "beyondCreator": "Una API key no puede tener permisos que su creador no tiene."
+  },
+  "inventarioKardex": {
+    "titulo": "Kardex diario",
+    "producto": "Producto",
+    "elegirProducto": "Elige un producto",
+    "desde": "Desde",
+    "hasta": "Hasta",
+    "tabDiario": "Por día",
+    "tabResumen": "Resumen gerencial",
+    "verDia": "Ver día",
+    "detalleTitulo": "Movimientos del {fecha}",
+    "col": {
+      "fecha": "Fecha",
+      "inicio": "Inicio",
+      "entradas": "Entradas",
+      "aplicadas": "Aplicadas",
+      "proporcion": "Apl. en proporción",
+      "ajustes": "Ajustes",
+      "total": "Total",
+      "acciones": "Acciones"
+    },
+    "res": {
+      "inicial": "Inventario inicial al {fecha}",
+      "entrada": "Entrada",
+      "ajuste": "Ajuste",
+      "aplicadas": "Aplicadas al {fecha}",
+      "final": "Inventario final al {fecha}"
+    },
+    "det": {
+      "paciente": "Paciente",
+      "record": "Récord",
+      "motivo": "Motivo",
+      "cantidad": "Cantidad",
+      "sesion": "Sesión",
+      "nota": "Nota",
+      "contenido": "(contenido)"
+    }
   }
 }

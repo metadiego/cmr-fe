@@ -1504,7 +1504,8 @@
     "changeLog": "Change history",
     "confirmationPolicies": "Confirmations",
     "calendarAbsenceReview": "Absences to review",
-    "paymentMethods": "Payment methods"
+    "paymentMethods": "Payment methods",
+    "inventory_daily_kardex": "Daily kardex"
   },
   "admin": {
     "title": "Administration",
@@ -6208,5 +6209,42 @@
   "apiKeys": {
     "clinicKeyTooBroad": "A center API key cannot carry full access or access-management permissions.",
     "beyondCreator": "An API key cannot have permissions its creator does not have."
+  },
+  "inventarioKardex": {
+    "titulo": "Daily kardex",
+    "producto": "Product",
+    "elegirProducto": "Choose a product",
+    "desde": "From",
+    "hasta": "To",
+    "tabDiario": "By day",
+    "tabResumen": "Management summary",
+    "verDia": "View day",
+    "detalleTitulo": "Movements of {fecha}",
+    "col": {
+      "fecha": "Date",
+      "inicio": "Opening",
+      "entradas": "Inbound",
+      "aplicadas": "Applied",
+      "proporcion": "Applied (proportion)",
+      "ajustes": "Adjustments",
+      "total": "Total",
+      "acciones": "Actions"
+    },
+    "res": {
+      "inicial": "Opening stock at {fecha}",
+      "entrada": "Inbound",
+      "ajuste": "Adjustment",
+      "aplicadas": "Applied to {fecha}",
+      "final": "Closing stock at {fecha}"
+    },
+    "det": {
+      "paciente": "Patient",
+      "record": "Record",
+      "motivo": "Reason",
+      "cantidad": "Quantity",
+      "sesion": "Session",
+      "nota": "Note",
+      "contenido": "(content)"
+    }
   }
 }

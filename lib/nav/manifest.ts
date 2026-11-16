@@ -112,6 +112,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "paquetes-venta", route: "/inventory/sales-packages", group: "inventory", order: 11 },
   // Live stock from the inventory scales (handoff stock-live-balanzas, 27-oct-2026). Seeded by the BE.
   { clave: "inventory-live-stock", route: "/inventory/live-stock", group: "inventory", order: 12 },
+  { clave: "inventory-daily-kardex", route: "/inventory/kardex", group: "inventory", order: 13 }, // BE daily kardex (16-nov-2026)
   // Movido de Facturación/Reportes a Inventario (owner, 09-oct-2026): es cuánto insumo se consumió,
   // dato de inventario, no de facturación. También se quita el botón de Facturación (ver
   // facturas-list-view.tsx) que apuntaba acá.
