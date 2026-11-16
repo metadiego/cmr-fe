@@ -146,6 +146,7 @@ export default function DailyKardexPage() {
                 </TableHeader>
                 <TableBody>
                   {daily.days.map((d) => {
+                    // Dimmed, not disabled: adjustments can net to zero (+133 / −133 on 1-nov) and still be there.
                     const quiet = !d.inbound && !d.applied && !d.adjustments;
                     return (
                       <TableRow key={d.date} className={quiet ? "text-muted-foreground" : undefined}>
@@ -161,7 +162,7 @@ export default function DailyKardexPage() {
                         <TableCell className="text-right tabular-nums">{d.adjustments ? num(d.adjustments) : ""}</TableCell>
                         <TableCell className="text-right font-medium tabular-nums text-foreground">{num(d.closing)}</TableCell>
                         <TableCell className="no-print py-1 text-right">
-                          <Button size="sm" variant="ghost" disabled={quiet} onClick={() => setDay(d.date)}>
+                          <Button size="sm" variant="ghost" onClick={() => setDay(d.date)}>
                             {t("viewDay")}
                           </Button>
                         </TableCell>
