@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { regenerarDisponibilidad, type RegenerarDisponibilidad } from "@/lib/api/facturas";
-import { toastError } from "@/lib/api/errors";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 // Confirmación + resultado EN PALABRAS de "Regenerar disponibilidad". Fase 1: explica qué hace y pide
 // confirmar (acción deliberada y peligrosa). Fase 2: traduce la respuesta del BE a lenguaje humano
 // (añadidas / nada faltaba / sugerencias de config), nunca JSON. Idempotente → repetir es inofensivo.
+// Confirm-only (no fields): it keeps its own two-phase layout instead of the form shell; useSubmit runs the
+// call once at a time and toasts the error, and the dialog cannot be closed while it runs.
 export function RegenerarDisponibilidadDialog({
   open,
   onOpenChange,
@@ -27,37 +29,29 @@ export function RegenerarDisponibilidadDialog({
 }) {
   const t = useTranslations("facturacion");
   const tc = useTranslations("common");
-  const tRoot = useTranslations();
-  const [busy, setBusy] = React.useState(false);
   const [res, setRes] = React.useState<RegenerarDisponibilidad | null>(null);
+  const { submitting: busy, submit: run } = useSubmit(async () => {
+    const r = await regenerarDisponibilidad(facturaId, centro);
+    setRes(r);
+    await onDone?.();
+  });
 
   function handleOpenChange(next: boolean) {
-    if (!next) { setRes(null); setBusy(false); }
+    if (!next && busy) return;
+    if (!next) setRes(null);
     onOpenChange(next);
-  }
-  async function run() {
-    setBusy(true);
-    try {
-      const r = await regenerarDisponibilidad(facturaId, centro);
-      setRes(r);
-      await onDone?.();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" showCloseButton={!busy}>
         <DialogHeader><DialogTitle>{t("regen.titulo")}</DialogTitle></DialogHeader>
         {res === null ? (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">{t("regen.explica")}</p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => handleOpenChange(false)}>{tc("cancel")}</Button>
-              <Button onClick={run} disabled={busy}>{busy ? t("regen.ejecutando") : t("regen.confirmar")}</Button>
+              <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={busy}>{tc("cancel")}</Button>
+              <Button onClick={() => run()} disabled={busy}>{busy ? t("regen.ejecutando") : t("regen.confirmar")}</Button>
             </div>
           </div>
         ) : (
