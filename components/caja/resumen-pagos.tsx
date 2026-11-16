@@ -8,17 +8,7 @@ import type { CajaDivision, ReporteDia } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
 
 // Panel derecho "Resumen de pagos" (UI 2026, sticky): tarjetas / otros medios / resumen general
 // (modelo CMA: inicio, efectivo de ventas, electrónicas, total tarjetas, total del día, fact.
@@ -73,6 +63,12 @@ export function ResumenPagos({
   const tp = useTranslations("caja.payments");
   const tRoot = useTranslations();
   const [emailOpen, setEmailOpen] = React.useState(false);
+  const confirm = useConfirm();
+
+  async function askProcesar() {
+    const ok = await confirm({ title: t("closeConfirmTitle"), description: t("closeConfirmBody"), confirmLabel: t("closeConfirmOk") });
+    if (ok) onProcesar();
+  }
 
   // Estado del cuadre (etiqueta legacy): 0 = cuadra, < 0 = falta, > 0 = sobra. `sinContar` manda
   // sobre todo lo demás: nadie ha guardado un conteo real, nunca se pinta "cuadra" aunque la cifra
@@ -207,23 +203,9 @@ export function ResumenPagos({
           </p>
         )}
         {canProcesar && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button className="w-full" disabled={procesando}>
-                {t("processClose")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("closeConfirmTitle")}</AlertDialogTitle>
-                <AlertDialogDescription>{t("closeConfirmBody")}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{tRoot("common.cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={onProcesar}>{t("closeConfirmOk")}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button className="w-full" disabled={procesando} onClick={() => void askProcesar()}>
+            {t("processClose")}
+          </Button>
         )}
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={onExport}>
