@@ -6252,6 +6252,22 @@
       "session": "Sesión",
       "notes": "Nota",
       "content": "(contenido)"
+    },
+    "reason": {
+      "apertura": "Apertura",
+      "apertura_vial": "Apertura de vial",
+      "aplicacion": "Aplicación",
+      "compra": "Compra",
+      "consumo_interno": "Consumo interno",
+      "conteo_fisico": "Conteo físico",
+      "correccion": "Corrección",
+      "dano_rotura": "Daño / rotura",
+      "devolucion": "Devolución",
+      "merma": "Merma",
+      "perdida": "Pérdida",
+      "transferencia": "Transferencia",
+      "vencimiento": "Vencimiento",
+      "venta": "Venta"
     }
   }
 }

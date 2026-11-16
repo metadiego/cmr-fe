@@ -6252,6 +6252,22 @@
       "session": "Session",
       "notes": "Note",
       "content": "(content)"
+    },
+    "reason": {
+      "apertura": "Opening",
+      "apertura_vial": "Vial opened",
+      "aplicacion": "Application",
+      "compra": "Purchase",
+      "consumo_interno": "Internal use",
+      "conteo_fisico": "Physical count",
+      "correccion": "Correction",
+      "dano_rotura": "Damage / breakage",
+      "devolucion": "Return",
+      "merma": "Shrinkage",
+      "perdida": "Loss",
+      "transferencia": "Transfer",
+      "vencimiento": "Expiry",
+      "venta": "Sale"
     }
   }
 }

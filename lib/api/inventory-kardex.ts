@@ -42,6 +42,8 @@ export type KardexSummary = {
     quantity: number;
     documentType: string | null;
     documentId: string | null;
+    /** Purchase-order / transfer number when the BE has one (follow-up of #608); else look in notes. */
+    documentNumber?: string | null;
     notes: string | null;
   }>;
   applied: number;
