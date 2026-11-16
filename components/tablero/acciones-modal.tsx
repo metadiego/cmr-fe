@@ -8,9 +8,9 @@ import { toast } from "sonner";
 
 import type { CitaFila } from "@/lib/api/agenda-dia";
 import { facturarCita } from "@/lib/api/facturas";
-import { toastError } from "@/lib/api/errors";
 import { saveCallOrigin } from "@/lib/scheduling/call-origin";
 import { useCan } from "@/hooks/use-can";
+import { useSubmit } from "@/components/kit/use-submit";
 import {
   Dialog,
   DialogContent,
@@ -77,7 +77,6 @@ export function AccionesModal({
   const searchParams = useSearchParams();
   const { can } = useCan();
   const [open, setOpen] = React.useState(false);
-  const [busy, setBusy] = React.useState(false);
 
   // "facturar" is billing, not just a soft-disabled kind: hide it outright for anyone without
   // factura.create (e.g. call-center operators — cc_operator carries no factura.* permission at
@@ -85,12 +84,10 @@ export function AccionesModal({
   // guard yet (flagged to BE); this is defense at the one layer FE controls.
   const visibleActions = actions.filter((a) => a.kind !== "facturar" || can("factura.create"));
 
-  // "Facturar Consulta": crea/obtiene el borrador de la cita (idempotente) y abre
-  // la pantalla de facturación. POST /facturas/cita/:citaId (data-driven kind).
-  async function facturar() {
-    setBusy(true);
-    try {
-      const f = await facturarCita(String(fila.id), centroId);
+  // "Bill consultation": creates/fetches the appointment's draft invoice (idempotent) and opens the
+  // billing screen. POST /facturas/cita/:citaId (data-driven kind).
+  const { submitting: busy, submit: facturar } = useSubmit(() => facturarCita(String(fila.id), centroId), {
+    onSuccess: (f) => {
       setOpen(false);
       const qsActual = searchParams.toString();
       const volver = volverHref ?? pathname + (qsActual ? `?${qsActual}` : "");
@@ -99,12 +96,8 @@ export function AccionesModal({
       qp.set("volver", volver);
       const q = `?${qp.toString()}`;
       router.push(`/billing/invoices/${(f as { id: string }).id}${q}`);
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+  });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -150,7 +143,7 @@ export function AccionesModal({
             }
             if (a.kind === "facturar") {
               return (
-                <button key={a.key} type="button" onClick={facturar} disabled={busy} className={cls}>
+                <button key={a.key} type="button" onClick={() => facturar()} disabled={busy} className={cls}>
                   {iconFor(a.icon)}
                   {tRoot(a.labelKey)}
                 </button>
