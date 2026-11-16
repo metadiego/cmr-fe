@@ -66,7 +66,7 @@ this plan. Deprecated in this plan only: the app menu does not change.
 
 Not touched, because only `/boards/frontdesk` reaches them (traced from every `page.tsx`/`layout.tsx`, 16-nov):
 - `components/frontdesk/frontdesk-board.tsx`
-- `components/frontdesk/programar-citas-modal.tsx`
+- `components/frontdesk/programar-citas-modal.tsx` (in fact imported by nothing — see Dead code)
 
 All other `components/frontdesk/*` dialogs are also reached from the patient desk, the generic
 board or the patient file, so they are migrated in PR 2.
@@ -74,6 +74,18 @@ board or the patient file, so they are migrated in PR 2.
 The sweeps and lint exceptions treat these two files like the deferred agenda files:
 - PR 5's final sweep skips them.
 - PR 6's lint rule needs no exception for them, because neither calls `window.confirm`; re-check with `grep` before PR 6.
+
+## Dead code found by the trace (16-nov) — not migrated, owner to decide
+
+Imported by nothing, checked by file name and component name in `app/`, `components/` and `lib/`:
+- `components/admin/assign-center-dialog.tsx` (`AssignCenterDialog`)
+- `components/agenda/sesion-modal.tsx` (`SesionModal`)
+- `components/citas/cita-form-sheet.tsx` (`CitaFormSheet`)
+- `components/frontdesk/programar-citas-modal.tsx` (`ProgramarCitasModal`)
+
+They are left out of every PR. If the owner approves, they are deleted in PR 1. Note: the
+earlier trace followed only `@/` imports; this one also follows relative imports. That is why
+`nueva-cita-modal` turned out to be in use.
 
 ## PR 1 — The kit
 
@@ -304,8 +316,7 @@ Task R on each file in `components/frontdesk/`:
 - `panel-notificar-modal`, `row-menu`, `sesiones-cell`, `technician-status-button`
 
 ### Board, patient desk & patients
-- `components/tablero/`: `acciones-modal`, `agregar-cita-modal`, `celda-toggle-icon`, `ehr-readiness-modal`, `historial-dialog`, `tablero-acciones`
-- `components/tablero/nueva-cita-modal.tsx` (451 lines) is imported by nothing: delete it rather than migrate, if the owner agrees (asked 16-nov); otherwise skip it
+- `components/tablero/`: `acciones-modal`, `agregar-cita-modal`, `celda-toggle-icon`, `ehr-readiness-modal`, `historial-dialog`, `nueva-cita-modal` (the `nueva_cita_prescripcion` post-action, opened via `post-accion.tsx` from the generic board), `tablero-acciones`
 - `components/patient-desk/`: `patient-desk`, `therapy-queue-strip`
 
 - `components/clientes/`: `acciones-paciente-sheet`, `ficha-facturacion`, `ficha-tabs`, `old-record-suggestion-banner`, `paciente-form-sheet` (`DEBT` 550), `patient-merge-dialog`, `cambio-protocolo-form`
