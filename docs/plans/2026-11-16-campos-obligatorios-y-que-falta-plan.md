@@ -305,6 +305,8 @@ Each PR ends with:
 
 ## PR 2 — Patient desk, board & patients (`feat/forms-desk-patients`)
 
+**First task, before any Task R (carried over from PR 1's final review):** in `components/kit/form-footer.tsx` render `onClick={() => a.onClick()}` so the click event never reaches a `useSubmit` function with optional arguments; type `FooterAction.onClick` as `() => void | Promise<void>` with a JSDoc line "wrap `submit`, never pass it directly"; give `FormSheet`'s body the same `py-1 -my-1` focus-ring room as `FormDialog`; treat `actions={[]}` like no `actions`. Commit `fix(forms): footer actions never receive the click event`.
+
 One PR (owner, 16-nov). Commit per area in this order — shared desk dialogs, board, patient desk, patients — so the review can go area by area.
 
 ### Shared desk dialogs (live in `components/frontdesk/`, used by the patient desk)
