@@ -50,3 +50,6 @@ test("Enter on role button, link or menuitem does not submit", () => {
 test("Enter with keyCode 229 (Safari IME) does not submit", () => {
   assert.equal(shouldSubmitOnEnter({ ...base, keyCode: 229 }, false), false);
 });
+test("Enter on role option does not submit", () => {
+  assert.equal(shouldSubmitOnEnter({ ...base, targetRole: "option" }, false), false);
+});

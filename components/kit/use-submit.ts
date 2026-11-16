@@ -24,7 +24,11 @@ export function useSubmit<T>(
       if (r.status === "error") toastError(r.error, tRoot);
       else if (r.status === "ok") {
         if (o?.successMessage) toast.success(o.successMessage);
-        o?.onSuccess?.(r.value);
+        try {
+          o?.onSuccess?.(r.value);
+        } catch (err) {
+          toastError(err, tRoot);
+        }
       }
     } finally {
       setSubmitting(false);

@@ -46,6 +46,8 @@ export function useFormShell(p: FormShellProps) {
     onInteractOutside: (e: Event) => submitting && e.preventDefault(),
   };
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // Portalled content (Select options, popovers, nested dialogs) bubbles through React but is not in the body.
+    if (e.defaultPrevented || !e.currentTarget.contains(e.target as Node)) return;
     const el = e.target as HTMLElement;
     const ok = shouldSubmitOnEnter(
       {
