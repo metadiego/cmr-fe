@@ -36,3 +36,17 @@ test("Enter on a BUTTON does not submit (the button handles its own click)", () 
 test("another key does not submit", () => {
   assert.equal(shouldSubmitOnEnter({ ...base, key: "a" }, false), false);
 });
+test("Enter on a SELECT does not submit", () => {
+  assert.equal(shouldSubmitOnEnter({ ...base, targetTag: "SELECT" }, false), false);
+});
+test("Enter on a link (A) does not submit", () => {
+  assert.equal(shouldSubmitOnEnter({ ...base, targetTag: "A" }, false), false);
+});
+test("Enter on role button, link or menuitem does not submit", () => {
+  for (const targetRole of ["button", "link", "menuitem"]) {
+    assert.equal(shouldSubmitOnEnter({ ...base, targetRole }, false), false, targetRole);
+  }
+});
+test("Enter with keyCode 229 (Safari IME) does not submit", () => {
+  assert.equal(shouldSubmitOnEnter({ ...base, keyCode: 229 }, false), false);
+});
