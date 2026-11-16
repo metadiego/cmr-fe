@@ -306,8 +306,8 @@ function PagoEditRow({
   // Tope solo para pagos (los reembolsos tienen su propia regla): al editar, el importe ACTUAL se libera.
   const esReembolso = pago.type === "reembolso";
   const tope = topePago(total, abonado, n(pago.amount));
-  // Empty → listed in the hint; filled but invalid → its own message. Over the cap is the red line
-  // under the row (it was already there), so it is not repeated in the hint.
+  // Empty → listed in the hint; filled but invalid → its own message (over the cap included). The hint
+  // lists what is missing first, so the red cap line shows only while the hint is not carrying it.
   const issue = paymentAmountIssue(monto, esReembolso ? null : tope);
   const excede = issue === "exceedsCap";
   const missing = paymentRowMissing({ methodId: formaId, amount: monto }).map((f) => t(f === "method" ? "method" : "amount"));
@@ -321,7 +321,7 @@ function PagoEditRow({
   );
   const rowState = {
     missing,
-    reason: issue === "notPositive" ? t("amountNotPositive") : !cambio ? t("noChanges") : null,
+    reason: issue === "notPositive" ? t("amountNotPositive") : excede ? t("exceedsTotal", { max: money(tope) }) : !cambio ? t("noChanges") : null,
     blocked: issue !== null || !cambio,
     submitting: busy || submitting,
   };
@@ -348,7 +348,7 @@ function PagoEditRow({
           <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
         </Button>
       </div>
-      {excede && <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>}
+      {excede && hint?.kind !== "reason" && <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>}
       <MissingHint id={hintId} {...rowState} />
     </li>
   );
@@ -388,14 +388,15 @@ function PagoAddRow({
     const h = setTimeout(() => last4Ref.current?.focus(), 60);
     return () => clearTimeout(h);
   }, [esTarjeta]);
-  // Empty → listed in the hint; filled but invalid → its own message (over the cap: the red line below).
+  // Empty → listed in the hint; filled but invalid → its own message (over the cap included; the red
+  // line below shows it only while the hint lists something missing instead).
   const issue = paymentAmountIssue(monto, tope);
   const excede = issue === "exceedsCap";
   // The method is taken as a parameter because picking it from the select applies the payment in the same
   // event, before `formaId` has updated (setState is async).
   const rowStateFor = (methodId: string) => ({
     missing: paymentRowMissing({ methodId, amount: monto }).map((f) => t(f === "method" ? "method" : "amount")),
-    reason: issue === "notPositive" ? t("amountNotPositive") : null,
+    reason: issue === "notPositive" ? t("amountNotPositive") : excede ? t("exceedsTotal", { max: money(tope) }) : null,
     blocked: issue !== null,
     submitting: busy || submitting,
   });
@@ -452,9 +453,10 @@ function PagoAddRow({
         </Button>
       </div>
       {/* Split: para cobrar en varias formas se agrega un pago por cada forma; cada uno se topa al saldo restante. */}
-      {excede
-        ? <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>
-        : <p className="text-[11px] text-muted-foreground">{t("splitHint", { max: money(tope) })}</p>}
+      {/* Over the cap: said once — by the hint when it carries the reason, else by the red line. */}
+      {!excede
+        ? <p className="text-[11px] text-muted-foreground">{t("splitHint", { max: money(tope) })}</p>
+        : hint?.kind !== "reason" && <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>}
       <MissingHint id={hintId} {...rowState} />
     </div>
   );

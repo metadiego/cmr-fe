@@ -319,14 +319,15 @@ export function CashSignOffPanel({
         </Field>
       </FormDialog>
 
-      {/* Nothing to fill in: the statement and figures are what is accepted. No text input, so no Enter-to-sign. */}
+      {/* Nothing to fill in: the statement and figures are what is accepted. Signing is button-only:
+          Enter is a no-op (a focused scroll container on small screens must never sign). */}
       <FormDialog
         open={!!asking}
         onOpenChange={(v) => !v && setAsking(null)}
         title={asking === "supervisor" ? t("signSupervisor") : t("dialogTitle")}
         description={t("dialogHint")}
-        onSubmit={() => (asking ? signing.submit(asking) : undefined)}
-        submitLabel={t("accept")}
+        onSubmit={() => {}}
+        actions={[{ label: t("accept"), onClick: () => (asking ? signing.submit(asking) : undefined) }]}
         submittingLabel={t("signing")}
         cancelLabel={t("cancel")}
         submitting={signing.submitting}

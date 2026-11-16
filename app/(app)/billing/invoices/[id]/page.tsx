@@ -131,11 +131,11 @@ export default function FacturacionPage() {
   const [reciboOpen, setReciboOpen] = React.useState(false);
   const centro = urlCentro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined; // the INVOICE's clinic
 
-  const refetch = React.useCallback(() => {
-    return getFactura(id, centro)
-      .then(setFactura)
-      .catch((err) => toastError(err, tRoot));
-  }, [id, centro, tRoot]);
+  // Must keep catching its own errors: if it threw, `run` would report a saved payment as failed and the open row would invite a second charge.
+  const refetch = React.useCallback(
+    () => getFactura(id, centro).then(setFactura).catch((err) => toastError(err, tRoot)),
+    [id, centro, tRoot],
+  );
 
   React.useEffect(() => {
     let active = true;
@@ -972,7 +972,7 @@ function OpcionalesDialog({
   const extra = opcionales.filter(eff).reduce((s, o) => s + (o.incrementalPrice ?? 0), 0);
   // No required fields (including nothing is a valid choice). Saving before the list loads would send an
   // empty selection, so it stays blocked until then, as before — now saying why.
-  const reason = res.state.kind === "loading" ? tc("loading") : res.state.kind === "fail" ? res.state.message : null;
+  const reason = res.state.kind === "loading" ? tc("loading") : res.state.kind === "fail" ? res.state.message || tc("error") : null;
   const { submitting, submit } = useSubmit(
     () => setItemOpcionales(facturaId, itemId, opcionales.filter(eff).map((o) => o.componentId), centro),
     { onSuccess: () => onSaved() },

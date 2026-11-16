@@ -159,6 +159,10 @@ function EmailDialog({ facturaId, centroId, onClose }: { facturaId: string; cent
           value={email}
           onValueChange={setEmail}
           placeholder={t("emailPatientDefault")}
+          // Sending is irreversible: Enter only completes the address, never sends to a half-typed one.
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
         />
       </Field>
       <Field label={t("emailBody")} htmlFor={`invoice-email-body-${facturaId}`}>

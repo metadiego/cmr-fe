@@ -132,7 +132,7 @@ function CatalogoCombobox({
   );
 }
 
-export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productId: string; description: string; quantity: number; unitPrice?: number; taxable?: boolean; meta?: Record<string, number | string> }) => void }) {
+export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productId: string; description: string; quantity: number; unitPrice?: number; taxable?: boolean; meta?: Record<string, number | string> }) => Promise<boolean> }) {
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
   const [prodId, setProdId] = React.useState("");
@@ -200,6 +200,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
   const onFlowKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
+    if (e.repeat) return; // a held Enter must not add the same line twice
     const cont = e.currentTarget.closest("[data-addline]");
     const inputs = cont ? Array.from(cont.querySelectorAll<HTMLInputElement>("[data-flow]")) : [];
     const next = inputs[inputs.indexOf(e.currentTarget) + 1];
@@ -208,7 +209,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
       next.select();
     } else if (!addDisabled) {
       // Same rule as the button: nothing missing, the price resolved, the page not busy.
-      add();
+      void add();
     }
   };
 
@@ -277,7 +278,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
     setCant(dt != null ? String(dt) : "");
   }
 
-  function add() {
+  async function add() {
     if (!prod) return; // narrowing only: `missing` lists the product while it does not resolve
     // Solo mandamos `gravado` cuando lo SABEMOS (el producto lo trae) o el cajero lo tocó; si un producto
     // de búsqueda no trae el dato, se OMITE y el BE aplica el default del producto (no forzar «exento»).
@@ -297,7 +298,8 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
       if (esSelectCaptura(c)) { meta[c.slug] = raw; return; } // valor de opción (string)
       if (!Number.isNaN(Number(raw))) meta[c.slug] = Number(raw);
     });
-    onAdd({
+    // Cleared only when the line was added: on failure what was typed stays, to retry without retyping.
+    const added = await onAdd({
       productId: prod.id,
       description: prod.name,
       quantity: Math.max(1, Math.floor(Number(packageMode ? paquetes : cant) || 1)),
@@ -307,6 +309,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
       ...(gravadoKnown ? { taxable: g } : {}),
       ...(Object.keys(meta).length ? { meta } : {}),
     });
+    if (!added) return;
     setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({}); setPaquetes("1");
   }
 
@@ -408,7 +411,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
         className="col-span-2 h-9 md:col-span-1"
         disabled={addDisabled}
         aria-describedby={hint ? hintId : undefined}
-        onClick={add}
+        onClick={() => void add()}
       >
         {t("add")}
       </Button>
