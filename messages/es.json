@@ -1166,7 +1166,8 @@
       "medico": "Médico",
       "sinMedico": "Sin médico",
       "otroCentro": "otro centro",
-      "idTypeFirst": "Elige primero el tipo de ID"
+      "idTypeFirst": "Elige primero el tipo de ID",
+      "checkingRecord": "Comprobando el número de récord…"
     },
     "acciones": "Acciones",
     "tabs": {
