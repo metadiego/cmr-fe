@@ -268,8 +268,8 @@ export default function DailyKardexPage() {
                 <TableBody>
                   {movements.map((m) => (
                     <TableRow key={m.id}>
-                      <TableCell>{m.patient || "—"}</TableCell>
-                      <TableCell className="tabular-nums">{m.record || "—"}</TableCell>
+                      <TableCell>{m.patient?.name || "—"}</TableCell>
+                      <TableCell className="tabular-nums">{m.medicalRecordNumber ?? m.patient?.medicalRecordNumber ?? "—"}</TableCell>
                       <TableCell>{reasonText(m.reason)}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         {num(m.signedQuantity, 0)}
