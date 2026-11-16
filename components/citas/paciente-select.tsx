@@ -11,9 +11,11 @@ import { Input } from "@/components/ui/input";
 // Async patient picker: type to search (server-side `q`), click a result to
 // select. Once selected, shows the patient with a "change" affordance.
 export function PacienteSelect({
+  id,
   value,
   onChange,
 }: {
+  id?: string;
   value: Paciente | null;
   onChange: (p: Paciente | null) => void;
 }) {
@@ -66,6 +68,7 @@ export function PacienteSelect({
   return (
     <div className="relative">
       <Input
+        id={id}
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);

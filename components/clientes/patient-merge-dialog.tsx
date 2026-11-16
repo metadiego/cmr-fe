@@ -92,8 +92,10 @@ function PatientMergeDialog({
   // Mismo patrón: el reinicio (plan=null, busy=true/false) se ajusta en el render al cambiar el par;
   // el effect solo dispara el fetch real y escribe el resultado desde sus callbacks async.
   const [seenPairKey, setSeenPairKey] = React.useState<string | null>(null);
+  const [acceptPast, setAcceptPast] = React.useState(false);
   if (pairKey !== seenPairKey) {
     setSeenPairKey(pairKey);
+    setAcceptPast(false); // a past-impact acknowledgement belongs to one pair and direction
     setPlan(null);
     setSimBusy(!!pairKey);
   }
@@ -115,7 +117,6 @@ function PatientMergeDialog({
   }, [pairKey, centerId]);
 
   const [reason, setReason] = React.useState("");
-  const [acceptPast, setAcceptPast] = React.useState(false);
 
   const blocked = (plan?.blocking.length ?? 0) > 0;
   const needsPastAccept = !!plan?.pastReports.changesPastPatientCounts;
@@ -257,7 +258,15 @@ function PatientMergeDialog({
 
               {!blocked && (
                 <Field label={t("reason")} required>
-                  <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t("reasonPlaceholder")} />
+                  {/* Enter must not submit: the merge is irreversible, so it only runs from the explicit button. */}
+                  <Input
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") e.preventDefault();
+                    }}
+                    placeholder={t("reasonPlaceholder")}
+                  />
                 </Field>
               )}
             </>

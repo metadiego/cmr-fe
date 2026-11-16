@@ -56,7 +56,7 @@ export function CorregirDisponibilidadDialog({
 
   const { submitting, submit } = useSubmit(
     async () => {
-      if (!paquete?.id) return;
+      if (!paquete?.id) throw new Error(t("fixAvailabilityNoPackageId"));
       if (tieneMult) {
         const multiplicadores = Object.fromEntries(Object.entries(form.valoresMult).map(([k, v]) => [k, Number(v)]));
         await ajustarDisponibilidad(paquete.id, { multiplicadores }, centro);

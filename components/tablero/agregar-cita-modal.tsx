@@ -287,13 +287,13 @@ export function AgregarCitaModal({
         </div>
 
         <div className="space-y-4 px-6 py-5" onKeyDown={shell.onKeyDown}>
-          <Field label={t("patient")} required>
+          <Field label={t("patient")} htmlFor="add-appt-patient" required>
             {lockedPatient ? (
               <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm font-medium">
                 {paciente ? nombrePaciente(paciente) : lockedPatient.nombre}
               </div>
             ) : (
-              <PacienteSelect value={paciente} onChange={onPickPaciente} />
+              <PacienteSelect id="add-appt-patient" value={paciente} onChange={onPickPaciente} />
             )}
           </Field>
 
@@ -325,9 +325,9 @@ export function AgregarCitaModal({
           )}
 
           {/* Médico del paciente (precargado). La HORA no se pide en el walk-in de hoy. */}
-          <Field label={t("doctor")}>
+          <Field label={t("doctor")} htmlFor="add-appt-doctor">
             <Select value={medicoId} onValueChange={setMedicoId}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id="add-appt-doctor" className="w-full">
                 <SelectValue placeholder={t("noDoctor")} />
               </SelectTrigger>
               <SelectContent>
@@ -361,8 +361,8 @@ export function AgregarCitaModal({
           />
 
           {moving ? (
-            <Field label={t("reasonRequired")} required>
-              <Input value={motivoMover} onChange={(e) => setMotivoMover(e.target.value)} placeholder={t("reasonRequiredPh")} />
+            <Field label={t("reasonRequired")} htmlFor="add-appt-reason" required>
+              <Input id="add-appt-reason" value={motivoMover} onChange={(e) => setMotivoMover(e.target.value)} placeholder={t("reasonRequiredPh")} />
             </Field>
           ) : (
             <Field label={t("notes")}>
