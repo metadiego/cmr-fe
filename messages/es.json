@@ -2191,6 +2191,7 @@
     "corregirSesiones": "Sesiones totales",
     "corregirGuardar": "Guardar corrección",
     "corregirMenorConsumido": "No puede ser menor a lo ya entregado ({n}).",
+    "fixAvailabilityMultiplierPositive": "Cada valor debe ser mayor que 0.",
     "corregirOk": "Disponibilidad actualizada",
     "corregirError": "No se pudo actualizar la disponibilidad",
     "fijarSinPaquete": "Fijar sesiones",

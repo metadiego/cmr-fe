@@ -1,129 +1,128 @@
 "use client";
 
-import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import { ajustarDisponibilidad, paqueteTotales, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
-import { toastError } from "@/lib/api/errors";
-import { Button } from "@/components/ui/button";
+import { fixAvailabilityInvalid, fixAvailabilityMissing } from "@/lib/frontdesk/fix-availability-missing";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 
-// Modal "Corregir disponibilidad" (GAP C) — PATCH …/paquetes/:id/ajuste. Corrige sesiones cuando
-// facturación se equivocó; actualiza el saldo (no reescribe la factura). RBAC: quien lo abre ya pasó el
-// gate `frontdesk.disponibilidad.editar`. Extraído de frontdesk-board.tsx (techo de tamaño).
+// "Fix availability" dialog (GAP C) — PATCH …/paquetes/:id/ajuste. Fixes sessions when billing got them
+// wrong; updates the balance (does not rewrite the invoice). RBAC: whoever opens it already passed the
+// `frontdesk.disponibilidad.editar` gate. Extracted from frontdesk-board.tsx (size ceiling).
 export function CorregirDisponibilidadDialog({
   paquete,
   centro,
   onClose,
   onDone,
 }: {
-  paquete: PaqueteDisponibilidad | null; // null = cerrado (diálogo controlado por el padre)
+  paquete: PaqueteDisponibilidad | null; // null = closed (dialog controlled by the parent)
   centro?: string;
   onClose: () => void;
   onDone: () => void;
 }) {
   const t = useTranslations("frontdesk");
   const { entregadas, totales } = paquete ? paqueteTotales(paquete) : { entregadas: 0, totales: 0 };
-  // El paquete trae su desglose multiplicador (áreas×días) → el doctor decide la combinación
-  // (2×12 vs 1×24), no un total suelto: mandar `multiplicadores`, no `totalSessions` — si se
-  // manda solo el total, áreas y días quedan desalineados (handoff areas-y-dias-en-el-kit).
+  // The package carries its multiplier breakdown (areas×days) → the doctor picks the combination
+  // (2×12 vs 1×24), not a bare total: send `multiplicadores`, not `totalSessions` — sending only the
+  // total leaves areas and days out of step (handoff areas-y-dias-en-el-kit).
   const tieneMult = !!(paquete?.multiplicadores && Object.keys(paquete.multiplicadores).length > 0);
-  const [valor, setValor] = React.useState<string>("");
-  const [valoresMult, setValoresMult] = React.useState<Record<string, string>>({});
-  const [guardando, setGuardando] = React.useState(false);
-  // Reinicia el input al abrir/cambiar de paquete (patrón "ajustar estado en render", sin efecto).
-  const pid = paquete?.id ?? null;
-  const [prevPid, setPrevPid] = React.useState<string | null>(null);
-  if (pid !== prevPid) {
-    setPrevPid(pid);
-    setValor(paquete ? String(totales) : "");
-    setValoresMult(
-      paquete?.multiplicadores
+  const [form, setForm] = useDialogForm(
+    () => ({
+      valor: paquete ? String(totales) : "",
+      valoresMult: paquete?.multiplicadores
         ? Object.fromEntries(Object.entries(paquete.multiplicadores).map(([k, v]) => [k, String(v)]))
-        : {},
-    );
-  }
-  const n = Number(valor);
-  const invalido = !tieneMult && (!Number.isFinite(n) || n < entregadas);
-  const multInvalido = tieneMult && Object.values(valoresMult).some((v) => !Number.isFinite(Number(v)) || Number(v) <= 0);
-  async function guardar() {
-    if (!paquete?.id) return;
-    if ((tieneMult && multInvalido) || (!tieneMult && invalido)) return;
-    setGuardando(true);
-    try {
+        : ({} as Record<string, string>),
+    }),
+    paquete != null,
+    paquete?.id ?? null,
+  );
+  const state = { multipliers: tieneMult ? form.valoresMult : null, total: form.valor, delivered: entregadas };
+  const multLabel = (k: string) => (t.has(`mult.${k}`) ? t(`mult.${k}`) : k);
+  const missing = fixAvailabilityMissing(state).map((f) =>
+    f === "totalSessions" ? t("corregirSesiones") : multLabel(f.slice("mult.".length)),
+  );
+  const problem = fixAvailabilityInvalid(state);
+  const reason =
+    problem === "belowDelivered"
+      ? t("corregirMenorConsumido", { n: entregadas })
+      : problem === "multiplierNotPositive"
+        ? t("fixAvailabilityMultiplierPositive")
+        : null;
+
+  const { submitting, submit } = useSubmit(
+    async () => {
+      if (!paquete?.id) return;
       if (tieneMult) {
-        const multiplicadores = Object.fromEntries(Object.entries(valoresMult).map(([k, v]) => [k, Number(v)]));
+        const multiplicadores = Object.fromEntries(Object.entries(form.valoresMult).map(([k, v]) => [k, Number(v)]));
         await ajustarDisponibilidad(paquete.id, { multiplicadores }, centro);
       } else {
-        await ajustarDisponibilidad(paquete.id, { totalSessions: n }, centro);
+        await ajustarDisponibilidad(paquete.id, { totalSessions: Number(form.valor) }, centro);
       }
-      toast.success(t("corregirOk"));
-      onClose();
-      onDone();
-    } catch (e) {
-      toastError(e, t);
-    } finally {
-      setGuardando(false);
-    }
-  }
+    },
+    {
+      successMessage: t("corregirOk"),
+      onSuccess: () => {
+        onClose();
+        onDone();
+      },
+    },
+  );
+
+  const multKeys = Object.keys(form.valoresMult);
   return (
-    <Dialog open={paquete != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{t("corregirTitulo")}</DialogTitle>
-          <DialogDescription>{t("corregirDesc")}</DialogDescription>
-        </DialogHeader>
-        {paquete && (
-          <div className="space-y-3">
-            <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-              <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
-            </div>
-            {tieneMult ? (
-              <div className="flex flex-wrap gap-3">
-                {Object.keys(valoresMult).map((k) => (
-                  <div key={k} className="space-y-1">
-                    <Label htmlFor={`corregir-mult-${k}`}>{t.has(`mult.${k}`) ? t(`mult.${k}`) : k}</Label>
-                    <Input
-                      id={`corregir-mult-${k}`}
-                      type="number"
-                      min={1}
-                      value={valoresMult[k]}
-                      onChange={(e) => setValoresMult((p) => ({ ...p, [k]: e.target.value }))}
-                      className="w-24"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <Label htmlFor="corregir-sesiones">{t("corregirSesiones")}</Label>
-                <Input
-                  id="corregir-sesiones"
-                  type="number"
-                  min={entregadas}
-                  value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                />
-                {invalido && <p className="text-xs text-destructive">{t("corregirMenorConsumido", { n: entregadas })}</p>}
-              </div>
-            )}
-            <div className="flex justify-end">
-              <Button onClick={guardar} disabled={(tieneMult ? multInvalido : invalido) || guardando || !paquete.id}>
-                {t("corregirGuardar")}
-              </Button>
-            </div>
+    <FormDialog
+      open={paquete != null}
+      onOpenChange={(o) => !o && onClose()}
+      size="sm"
+      title={t("corregirTitulo")}
+      description={t("corregirDesc")}
+      onSubmit={() => submit()}
+      submitLabel={t("corregirGuardar")}
+      submitting={submitting}
+      missing={missing}
+      reason={reason}
+      // Filled but unacceptable values, or a package without id, kept the button disabled before too.
+      blocked={problem != null || !paquete?.id}
+    >
+      {paquete && (
+        <>
+          <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+            <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
           </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          {tieneMult ? (
+            <div className="flex flex-wrap gap-3">
+              {multKeys.map((k) => (
+                <Field key={k} label={multLabel(k)} htmlFor={`corregir-mult-${k}`} required className="space-y-1">
+                  <Input
+                    id={`corregir-mult-${k}`}
+                    type="number"
+                    min={1}
+                    value={form.valoresMult[k]}
+                    onChange={(e) => setForm((s) => ({ ...s, valoresMult: { ...s.valoresMult, [k]: e.target.value } }))}
+                    className="w-24"
+                  />
+                </Field>
+              ))}
+              {multKeys.length >= 3 && <RequiredLegend className="basis-full text-xs text-muted-foreground" />}
+            </div>
+          ) : (
+            <Field label={t("corregirSesiones")} htmlFor="corregir-sesiones" required className="space-y-1">
+              <Input
+                id="corregir-sesiones"
+                type="number"
+                min={entregadas}
+                value={form.valor}
+                aria-invalid={problem === "belowDelivered"}
+                onChange={(e) => setForm({ valor: e.target.value })}
+              />
+            </Field>
+          )}
+        </>
+      )}
+    </FormDialog>
   );
 }
