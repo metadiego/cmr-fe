@@ -199,6 +199,9 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   function cell(clave: string, value: unknown) {
     if (clave === "fac_estado") return <EstadoBadge estado={String(value ?? "")} />;
     if (clave === "fac_total") return <span className="font-medium tabular-nums">{money(value)}</span>;
+    // Payment methods of the invoice's active payments (BE binding pago.metodos): discreet on purpose.
+    if (clave === "fac_metodo_pago")
+      return <span className="text-xs text-muted-foreground">{value == null || value === "" ? "—" : String(value)}</span>;
     if (clave === "fac_fecha") return <span className="tabular-nums">{formatFechaSolo(value) || "—"}</span>;
     if (clave === "fac_numero")
       return <span className="font-mono tabular-nums">{value != null && value !== "" ? String(value) : t("draft")}</span>;

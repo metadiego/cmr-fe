@@ -3941,7 +3941,8 @@
       "total": "Total",
       "medio": "Referido",
       "usuario": "Usuario",
-      "acciones": "Acciones"
+      "acciones": "Acciones",
+      "metodoPago": "Pago"
     },
     "grupo": {
       "producto": "Producto"
