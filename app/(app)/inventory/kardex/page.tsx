@@ -70,6 +70,8 @@ export default function DailyKardexPage() {
     const date = parseDayUTC(d);
     return date ? format.dateTime(date, "dayShort") : d;
   };
+  // reason = movement_reasons.slug; a new reason is a DB row, so an unknown slug shows as-is.
+  const reasonText = (r: string | null | undefined) => (!r ? "—" : t.has(`reason.${r}`) ? t(`reason.${r}`) : r);
   const totals = daily?.days.reduce(
     (a, d) => ({ inbound: a.inbound + d.inbound, applied: a.applied + d.applied, adjustments: a.adjustments + d.adjustments }),
     { inbound: 0, applied: 0, adjustments: 0 },
@@ -196,7 +198,7 @@ export default function DailyKardexPage() {
                       <TableCell className="text-right font-semibold tabular-nums">{num(summary.opening)}</TableCell>
                     </TableRow>
                     {summary.lines.map((l, i) => {
-                      const doc = readableDocument(l.documentId);
+                      const doc = l.documentNumber ?? readableDocument(l.documentId);
                       return (
                         <TableRow key={`${l.date}-${i}`}>
                           <TableCell>
@@ -205,7 +207,7 @@ export default function DailyKardexPage() {
                               {" · "}
                               {dayText(l.date)}
                               {doc && <span className="ml-1 font-mono text-xs">#{doc}</span>}
-                              {l.reason && <span className="text-muted-foreground"> · {l.reason}</span>}
+                              {l.reason && <span className="text-muted-foreground"> · {reasonText(l.reason)}</span>}
                             </div>
                             {l.notes && <div className="text-xs text-muted-foreground">{l.notes}</div>}
                           </TableCell>
@@ -268,7 +270,7 @@ export default function DailyKardexPage() {
                     <TableRow key={m.id}>
                       <TableCell>{m.patient || "—"}</TableCell>
                       <TableCell className="tabular-nums">{m.record || "—"}</TableCell>
-                      <TableCell>{m.reason ?? "—"}</TableCell>
+                      <TableCell>{reasonText(m.reason)}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         {num(m.signedQuantity, 0)}
                         {m.openVial && <span className="ml-1 text-xs text-muted-foreground">{t("day.content")}</span>}
