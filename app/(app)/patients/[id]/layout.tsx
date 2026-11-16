@@ -15,32 +15,21 @@ import {
   Alert01Icon,
 } from "@hugeicons/core-free-icons";
 
-import { toast } from "sonner";
-
 import {
   getPaciente,
   updatePaciente,
   deletePaciente,
   type Paciente,
 } from "@/lib/api/pacientes";
-import { toastError } from "@/lib/api/errors";
 import { readCallOrigin, clearCallOrigin } from "@/lib/scheduling/call-origin";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Can } from "@/components/kit/can";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
 import { useCan } from "@/hooks/use-can";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
@@ -164,35 +153,27 @@ function PacienteDetail({
   };
   const tab = allowed[requestedTab] ? requestedTab : "summary";
   const age = ageFrom(p.dateOfBirth);
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
-  const [busy, setBusy] = React.useState(false);
   const centroId = p.clinicId ?? undefined;
+  const confirm = useConfirm();
+
+  const deactivation = useSubmit(() => deletePaciente(p.id, centroId), {
+    successMessage: t("deactivated"),
+    onSuccess: onDeleted,
+  });
+  const reactivation = useSubmit(() => updatePaciente(p.id, { active: true }, centroId), {
+    successMessage: t("reactivated"),
+    onSuccess: onChanged,
+  });
+  const busy = deactivation.submitting || reactivation.submitting;
 
   async function deactivate() {
-    setBusy(true);
-    try {
-      await deletePaciente(p.id, centroId);
-      toast.success(t("deactivated"));
-      onDeleted();
-    } catch (err) {
-      toastError(err);
-    } finally {
-      setBusy(false);
-      setConfirmOpen(false);
-    }
-  }
-
-  async function reactivate() {
-    setBusy(true);
-    try {
-      await updatePaciente(p.id, { active: true }, centroId);
-      toast.success(t("reactivated"));
-      onChanged();
-    } catch (err) {
-      toastError(err);
-    } finally {
-      setBusy(false);
-    }
+    const ok = await confirm({
+      title: t("confirmDeactivateTitle"),
+      description: t("confirmDeactivateBody", { name: fullName(p) }),
+      confirmLabel: t("deactivate"),
+      cancelLabel: t("cancel"),
+    });
+    if (ok) await deactivation.submit();
   }
 
   return (
@@ -235,7 +216,7 @@ function PacienteDetail({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={reactivate}
+                      onClick={() => reactivation.submit()}
                       disabled={busy}
                     >
                       {t("reactivate")}
@@ -261,7 +242,7 @@ function PacienteDetail({
                       variant="outline"
                       size="sm"
                       className="text-destructive hover:text-destructive"
-                      onClick={() => setConfirmOpen(true)}
+                      onClick={() => deactivate()}
                       disabled={busy}
                     >
                       {t("deactivate")}
@@ -273,29 +254,6 @@ function PacienteDetail({
           />
         </div>
       </div>
-
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirmDeactivateTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("confirmDeactivateBody", { name: fullName(p) })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                deactivate();
-              }}
-              disabled={busy}
-            >
-              {t("deactivate")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <OldRecordSuggestionBanner
         patientId={p.id}
