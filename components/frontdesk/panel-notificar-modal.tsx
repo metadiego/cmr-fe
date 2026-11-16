@@ -1,17 +1,16 @@
 "use client";
 
-import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import { notificarPanel } from "@/lib/api/paneles";
-import { toastError } from "@/lib/api/errors";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Modal de la CAMPANA (columna fd_notificar). Manda el aviso al panel (data-driven: panel/sección vienen
-// del render de la columna) y, opcional, asigna la enfermera sin avisar (reusa el select fd_enfermera).
+// Bell modal (fd_notificar column). Sends the notice to the panel (data-driven: panel/section come from
+// the column render) and, optionally, assigns the nurse without notifying (reuses the fd_enfermera select).
+// No fields to fill: one action button, so it keeps its own layout and only uses useSubmit.
 export function PanelNotificarModal({
   open,
   onOpenChange,
@@ -41,34 +40,26 @@ export function PanelNotificarModal({
   centro?: string;
 }) {
   const t = useTranslations("frontdesk");
-  const [enviando, setEnviando] = React.useState(false);
-
-  async function notificar() {
-    setEnviando(true);
-    try {
-      await notificarPanel(
+  const { submitting: enviando, submit: notificar } = useSubmit(
+    () =>
+      notificarPanel(
         panelClave,
         citaId ? { seccion, appointmentId: citaId } : { seccion, sessionId: sesionId },
         centro,
-      );
-      toast.success(t("notificado"));
-      onOpenChange(false);
-    } catch (e) {
-      toastError(e, t);
-    } finally {
-      setEnviando(false);
-    }
-  }
+      ),
+    { successMessage: t("notificado"), onSuccess: () => onOpenChange(false) },
+  );
 
+  // No closing while the notice is being sent (Esc, outside click, X).
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => (o || !enviando) && onOpenChange(o)}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>{servicioNombre}</DialogTitle>
           <DialogDescription>{pacienteNombre}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <Button size="lg" className="h-14 w-full text-base" onClick={notificar} disabled={enviando}>
+          <Button size="lg" className="h-14 w-full text-base" onClick={() => notificar()} disabled={enviando}>
             {enviando ? t("notificando") : t("notificarAlPanel")}
           </Button>
           {enfermeras.length > 0 && onAsignarEnfermera && (
