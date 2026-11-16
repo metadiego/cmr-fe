@@ -1504,7 +1504,8 @@
     "changeLog": "Historial de cambios",
     "confirmationPolicies": "Confirmaciones",
     "calendarAbsenceReview": "Ausencias por revisar",
-    "paymentMethods": "Formas de pago"
+    "paymentMethods": "Formas de pago",
+    "inventory_daily_kardex": "Kardex diario"
   },
   "admin": {
     "title": "Administración",
@@ -6208,5 +6209,49 @@
   "apiKeys": {
     "clinicKeyTooBroad": "Una API key de un centro no puede llevar acceso total ni permisos de gestión de accesos.",
     "beyondCreator": "Una API key no puede tener permisos que su creador no tiene."
+  },
+  "inventoryKardex": {
+    "title": "Kardex diario",
+    "subtitle": "Entradas, aplicadas y ajustes de un producto, día por día, en viales cerrados.",
+    "print": "Imprimir",
+    "center": "Centro",
+    "product": "Producto",
+    "pickProduct": "Elige un producto",
+    "from": "Desde",
+    "to": "Hasta",
+    "badRange": "La fecha «Desde» debe ser anterior o igual a «Hasta».",
+    "loading": "Cargando…",
+    "tabDaily": "Por día",
+    "tabSummary": "Resumen gerencial",
+    "viewDay": "Ver día",
+    "periodTotal": "Total del período",
+    "noMovements": "Ese día no tiene movimientos.",
+    "dayTitle": "Detalle del {date}",
+    "col": {
+      "date": "Fecha",
+      "opening": "Inicio",
+      "inbound": "Entradas",
+      "applied": "Aplicadas",
+      "proportion": "Apl. en proporción",
+      "adjustments": "Ajustes",
+      "closing": "Total",
+      "actions": "Acciones"
+    },
+    "summary": {
+      "opening": "Inventario inicial al {date}",
+      "inbound": "Entrada",
+      "adjustment": "Ajuste",
+      "applied": "Aplicadas hasta el {date}",
+      "closing": "Inventario final al {date}"
+    },
+    "day": {
+      "patient": "Paciente",
+      "record": "Récord",
+      "reason": "Motivo",
+      "quantity": "Cantidad",
+      "session": "Sesión",
+      "notes": "Nota",
+      "content": "(contenido)"
+    }
   }
 }

@@ -1504,7 +1504,8 @@
     "changeLog": "Change history",
     "confirmationPolicies": "Confirmations",
     "calendarAbsenceReview": "Absences to review",
-    "paymentMethods": "Payment methods"
+    "paymentMethods": "Payment methods",
+    "inventory_daily_kardex": "Daily kardex"
   },
   "admin": {
     "title": "Administration",
@@ -6208,5 +6209,49 @@
   "apiKeys": {
     "clinicKeyTooBroad": "A center API key cannot carry full access or access-management permissions.",
     "beyondCreator": "An API key cannot have permissions its creator does not have."
+  },
+  "inventoryKardex": {
+    "title": "Daily kardex",
+    "subtitle": "A product's inbound, applied and adjustments, day by day, in sealed vials.",
+    "print": "Print",
+    "center": "Center",
+    "product": "Product",
+    "pickProduct": "Pick a product",
+    "from": "From",
+    "to": "To",
+    "badRange": "«From» must be on or before «To».",
+    "loading": "Loading…",
+    "tabDaily": "By day",
+    "tabSummary": "Management summary",
+    "viewDay": "View day",
+    "periodTotal": "Period total",
+    "noMovements": "No movements that day.",
+    "dayTitle": "Detail for {date}",
+    "col": {
+      "date": "Date",
+      "opening": "Opening",
+      "inbound": "Inbound",
+      "applied": "Applied",
+      "proportion": "Applied (proportion)",
+      "adjustments": "Adjustments",
+      "closing": "Total",
+      "actions": "Actions"
+    },
+    "summary": {
+      "opening": "Opening inventory on {date}",
+      "inbound": "Inbound",
+      "adjustment": "Adjustment",
+      "applied": "Applied through {date}",
+      "closing": "Closing inventory on {date}"
+    },
+    "day": {
+      "patient": "Patient",
+      "record": "Record",
+      "reason": "Reason",
+      "quantity": "Quantity",
+      "session": "Session",
+      "notes": "Note",
+      "content": "(content)"
+    }
   }
 }
