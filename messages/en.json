@@ -3350,7 +3350,9 @@
       "addComponentConfirm": "Add component",
       "componentAdded": "Component added to the kit",
       "reason": "Reason",
-      "reasonPlaceholder": "Why it is added (required)"
+      "reasonPlaceholder": "Why it is added (required)",
+      "component": "Component",
+      "reasonTooShort": "The reason needs at least 3 characters."
     },
     "imprimirNoEmitida": "The invoice was not issued when printing.",
     "corregirImpuesto": {
@@ -3467,7 +3469,9 @@
       "multiplicador_invalido": "{field}: must be a whole number of 1 or more.",
       "meta_solo_borrador": "Areas and days can only be changed on a draft invoice."
     },
-    "multipliersEditHint": "Fix areas or days here: saved when you leave the field."
+    "multipliersEditHint": "Fix areas or days here: saved when you leave the field.",
+    "lineProduct": "Product/service",
+    "priceLoading": "Looking up the price…"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -5559,10 +5563,11 @@
     "changeSelection": "Change",
     "searchPlaceholder": "Search patient: name, record or ID…",
     "searchHint": "Type at least 2 letters to search.",
-    "reasonLabel": "Reason (required)",
+    "reasonLabel": "Reason",
     "reasonPlaceholder": "E.g.: patient 16034 was billed by mistake instead of 680",
     "confirm": "Change patient",
-    "done": "Invoice patient updated."
+    "done": "Invoice patient updated.",
+    "patient": "New patient"
   },
   "invoice": {
     "notFound": "The invoice does not exist.",

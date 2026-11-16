@@ -3350,7 +3350,9 @@
       "addComponentConfirm": "Agregar componente",
       "componentAdded": "Componente agregado al kit",
       "reason": "Motivo",
-      "reasonPlaceholder": "Por qué se agrega (obligatorio)"
+      "reasonPlaceholder": "Por qué se agrega (obligatorio)",
+      "component": "Componente",
+      "reasonTooShort": "El motivo necesita al menos 3 caracteres."
     },
     "imprimirNoEmitida": "La factura no se emitió al imprimir.",
     "corregirImpuesto": {
@@ -3467,7 +3469,9 @@
       "multiplicador_invalido": "{field}: debe ser un número entero de 1 o más.",
       "meta_solo_borrador": "Las áreas y los días solo se corrigen en una factura en borrador."
     },
-    "multipliersEditHint": "Corrige áreas o días aquí: se guarda al salir del campo."
+    "multipliersEditHint": "Corrige áreas o días aquí: se guarda al salir del campo.",
+    "lineProduct": "Producto/servicio",
+    "priceLoading": "Buscando el precio…"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -5559,10 +5563,11 @@
     "changeSelection": "Cambiar",
     "searchPlaceholder": "Buscar paciente: nombre, record o ID…",
     "searchHint": "Escribe al menos 2 letras para buscar.",
-    "reasonLabel": "Motivo (obligatorio)",
+    "reasonLabel": "Motivo",
     "reasonPlaceholder": "Ej.: se facturó por error al paciente 16034 en vez del 680",
     "confirm": "Cambiar paciente",
-    "done": "Paciente de la factura actualizado."
+    "done": "Paciente de la factura actualizado.",
+    "patient": "Paciente nuevo"
   },
   "invoice": {
     "notFound": "La factura no existe.",
