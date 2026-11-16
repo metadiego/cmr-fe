@@ -25,8 +25,10 @@ export type KardexDayMovement = {
   documentType: string | null;
   documentId: string | null;
   notes: string | null;
-  patient: string | null;
-  record: string | null;
+  /** Shape read from prod 16-nov (vitamin C, Caguas): an object, not a name. */
+  patient: { id: string; medicalRecordNumber: string | null; name: string | null } | null;
+  patientId?: string | null;
+  medicalRecordNumber: string | null;
   sessionNumber: number | null;
   sessionsTotal: number | null;
 };
