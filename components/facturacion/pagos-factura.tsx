@@ -37,6 +37,8 @@ import { Edit02Icon, Delete02Icon, Tick02Icon, Cancel01Icon, Add01Icon } from "@
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
+// Thrown by a row when the page's `run` reports failure: `run` already toasted it, so useSubmit must not toast again.
+const RUN_FAILED = new Error("run failed");
 
 // Bloque de PAGOS de una factura emitida. Todo a la vista, sin modos ocultos:
 //   - cada fila (pago o reembolso) muestra su ✎ Editar y 🗑 Anular SIEMPRE visibles (gate RBAC
@@ -61,7 +63,7 @@ export function PagosFactura({
   id: string;
   centro?: string;
   busy: boolean;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
   saldo: number;
   montoAbonado: number;
   esBorrador?: boolean;
@@ -291,7 +293,7 @@ function PagoEditRow({
   id: string;
   centro?: string;
   busy: boolean;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
   total: number;
   abonado: number;
   onDone: () => void;
@@ -310,12 +312,12 @@ function PagoEditRow({
   const excede = issue === "exceedsCap";
   const missing = paymentRowMissing({ methodId: formaId, amount: monto }).map((f) => t(f === "method" ? "method" : "amount"));
   const { submitting, submit } = useSubmit(
-    // `run` toasts the API error itself and never throws; the row closes after it either way, as before.
-    () => {
+    // `run` toasts the API error itself and returns false: then the row stays open with what was typed.
+    async () => {
       if (!pago.id) throw new Error("payment without id");
-      return run(() => repararPago(id, pago.id!, { paymentMethodId: formaId, amount: n(monto), reason: t("motivoCorreccion") }, centro));
+      if (!(await run(() => repararPago(id, pago.id!, { paymentMethodId: formaId, amount: n(monto), reason: t("motivoCorreccion") }, centro)))) throw RUN_FAILED;
     },
-    { onSuccess: onDone },
+    { onSuccess: onDone, onError: (err) => err === RUN_FAILED },
   );
   const rowState = {
     missing,
@@ -366,7 +368,7 @@ function PagoAddRow({
   id: string;
   centro?: string;
   busy: boolean;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
   tope: number; // máximo abonable = saldo pendiente; sugerimos ese importe y no dejamos pasarse.
   onDone: () => void;
 }) {
@@ -399,13 +401,14 @@ function PagoAddRow({
   });
 
   // Registers with the CURRENT amount. useSubmit's guard (plus the page's `busy`) stops a double charge
-  // from a double click, a held Enter or click + Enter. `run` toasts the API error and never throws.
+  // from a double click, a held Enter or click + Enter. `run` toasts the API error and returns false:
+  // then the row stays open (nothing was charged), with the amount still in it.
   const { submitting, submit } = useSubmit(
-    (fid: string) => {
+    async (fid: string) => {
       const notas = last4.length === 4 ? `•••• ${last4}` : undefined;
-      return run(() => registrarPago(id, { paymentMethodId: fid, amount: n(monto), ...(notas ? { notes: notas } : {}) } as never, centro));
+      if (!(await run(() => registrarPago(id, { paymentMethodId: fid, amount: n(monto), ...(notas ? { notes: notas } : {}) } as never, centro)))) throw RUN_FAILED;
     },
-    { onSuccess: onDone },
+    { onSuccess: onDone, onError: (err) => err === RUN_FAILED },
   );
   const rowState = rowStateFor(formaId);
   const { disabled, hint } = footerState(rowState);
