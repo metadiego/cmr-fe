@@ -35,6 +35,7 @@ export function useFormShell(p: FormShellProps) {
   const t = useTranslations("common");
   const hintId = `${useId()}-hint`;
   const submitting = !!p.submitting;
+  const actions = p.actions && p.actions.length > 0 ? p.actions : undefined;
   const blocked = !!p.blocked || p.canSubmit === false;
   const { disabled } = footerState({
     missing: p.missing,
@@ -79,7 +80,7 @@ export function useFormShell(p: FormShellProps) {
       className="shrink-0"
       hintId={hintId}
       primary={
-        p.actions ?? {
+        actions ?? {
           label: p.submitLabel ?? t("save"),
           onClick: () => void p.onSubmit(),
         }
