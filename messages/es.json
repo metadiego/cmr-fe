@@ -2576,7 +2576,9 @@
     "settled": "Saldado",
     "overpaid": "Sobre-abonado",
     "viaRefundTitle": "Ese reembolso pertenece a una devolución",
-    "viaRefundLink": "Ir a la devolución"
+    "viaRefundLink": "Ir a la devolución",
+    "amountNotPositive": "El monto debe ser mayor que 0.",
+    "noChanges": "Sin cambios."
   },
   "formasPago": {
     "efectivo": "Efectivo",

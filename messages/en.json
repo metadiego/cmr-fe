@@ -2576,7 +2576,9 @@
     "settled": "Paid in full",
     "overpaid": "Overpaid",
     "viaRefundTitle": "That reimbursement belongs to a return",
-    "viaRefundLink": "Go to the return"
+    "viaRefundLink": "Go to the return",
+    "amountNotPositive": "The amount must be greater than 0.",
+    "noChanges": "No changes."
   },
   "formasPago": {
     "efectivo": "Cash",
