@@ -14,12 +14,15 @@ import { Input } from "@/components/ui/input";
 // Autocontenido: no depende de cmdk/popover. Resiliente vía listProductos (fallback
 // client-side si el BE no soporta soloFisicos/q).
 export function ProductoPicker({
+  id,
   value,
   onChange,
   soloFisicos = true,
   placeholder,
   className,
 }: {
+  /** Put on the trigger, so a `<label htmlFor>` / kit Field can point at the picker. */
+  id?: string;
   value: string;
   onChange: (id: string, producto: Producto | null) => void;
   soloFisicos?: boolean;
@@ -80,6 +83,7 @@ export function ProductoPicker({
   return (
     <div ref={rootRef} className={cn("relative", className)}>
       <button
+        id={id}
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -110,6 +114,10 @@ export function ProductoPicker({
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              // Enter while searching must not submit the dialog/form the picker sits in.
+              onKeyDown={(e) => {
+                if (e.key === "Enter") e.preventDefault();
+              }}
               placeholder={t("search")}
               className="h-7 border-0 p-0 shadow-none focus-visible:ring-0"
             />

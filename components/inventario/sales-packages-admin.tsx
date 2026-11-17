@@ -26,7 +26,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 
 // USD with an explicit locale: digits only, identical in es and en (CLAUDE.md rule 3b).
 const money = (v: number | null | undefined) =>
@@ -186,74 +189,65 @@ function SalesPackageDialog({
   onSaved: () => void;
 }) {
   const t = useTranslations("salesPackages");
-  const tRoot = useTranslations();
+  // Mounted per record (keyed by the parent), so useState starts clean for every open.
   const [name, setName] = React.useState(pkg?.name ?? "");
   const [productId, setProductId] = React.useState(pkg?.productId ?? "");
   const [sessions, setSessions] = React.useState(pkg ? String(pkg.sessions) : "");
   const [price, setPrice] = React.useState(pkg ? String(pkg.packagePrice) : "");
   const [sortOrder, setSortOrder] = React.useState(pkg ? String(pkg.sortOrder) : "");
-  const [busy, setBusy] = React.useState(false);
 
-  async function save() {
-    setBusy(true);
-    const body = {
-      name: name.trim(),
-      productId,
-      sessions: Number(sessions),
-      packagePrice: Number(price),
-      ...(sortOrder.trim() ? { sortOrder: Number(sortOrder) } : {}),
-    };
-    try {
+  const missing = missingFields([
+    [t("col.name"), name.trim().length > 0],
+    [t("col.product"), !!productId],
+    [t("col.sessions"), sessions.trim().length > 0],
+    [t("col.package"), price.trim().length > 0],
+  ]);
+
+  // The BE sends every failure at once (labelKey + failures[]); useSubmit's toastError lists them.
+  const { submitting, submit } = useSubmit(
+    async () => {
+      const body = {
+        name: name.trim(),
+        productId,
+        sessions: Number(sessions),
+        packagePrice: Number(price),
+        ...(sortOrder.trim() ? { sortOrder: Number(sortOrder) } : {}),
+      };
       if (pkg) await updateSalesPackage(pkg.id, body, centroId);
       else await createSalesPackage({ ...body, ...(centroIdCrear ? { centerId: centroIdCrear } : {}) }, centroId);
-      toast.success(t("saved"));
-      onSaved();
-    } catch (err) {
-      // The BE sends every failure at once (labelKey + failures[]); toastError lists them.
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    { successMessage: t("saved"), onSuccess: onSaved },
+  );
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{pkg ? t("editTitle") : t("newTitle")}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1.5 sm:col-span-2">
-            <span className="text-xs font-medium text-muted-foreground">{t("col.name")}</span>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("namePh")} />
-          </label>
-          <label className="flex flex-col gap-1.5 sm:col-span-2">
-            <span className="text-xs font-medium text-muted-foreground">{t("col.product")}</span>
-            <ProductoPicker value={productId} onChange={(id) => setProductId(id)} soloFisicos={false} placeholder={pkg?.productName ?? t("productPh")} />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("col.sessions")}</span>
-            <Input type="number" min={1} value={sessions} onChange={(e) => setSessions(e.target.value)} />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("col.package")}</span>
-            <Input type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("sortOrder")}</span>
-            <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} />
-          </label>
-          <p className="self-end text-xs text-muted-foreground sm:col-span-2">{t("regularHint")}</p>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={busy}>
-            {tRoot("common.cancel")}
-          </Button>
-          <Button onClick={save} disabled={busy || !name.trim() || !productId || !sessions || !price}>
-            {tRoot("common.save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="lg"
+      title={pkg ? t("editTitle") : t("newTitle")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+    >
+      <RequiredLegend />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label={t("col.name")} htmlFor="sales-package-name" required className="sm:col-span-2">
+          <Input id="sales-package-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("namePh")} />
+        </Field>
+        <Field label={t("col.product")} htmlFor="sales-package-product" required className="sm:col-span-2">
+          <ProductoPicker id="sales-package-product" value={productId} onChange={(id) => setProductId(id)} soloFisicos={false} placeholder={pkg?.productName ?? t("productPh")} />
+        </Field>
+        <Field label={t("col.sessions")} htmlFor="sales-package-sessions" required>
+          <Input id="sales-package-sessions" type="number" min={1} value={sessions} onChange={(e) => setSessions(e.target.value)} />
+        </Field>
+        <Field label={t("col.package")} htmlFor="sales-package-price" required>
+          <Input id="sales-package-price" type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
+        </Field>
+        <Field label={t("sortOrder")} htmlFor="sales-package-sort">
+          <Input id="sales-package-sort" type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} />
+        </Field>
+        <p className="self-end text-xs text-muted-foreground sm:col-span-2">{t("regularHint")}</p>
+      </div>
+    </FormDialog>
   );
 }

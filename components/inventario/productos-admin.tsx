@@ -66,14 +66,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { FormSheet } from "@/components/kit/form-sheet";
+import { Field } from "@/components/kit/field";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 import { AmpEditorSheet } from "@/components/inventario/amp-editor-sheet";
 import { InsumosEditorSheet } from "@/components/inventario/insumos-editor-sheet";
 import { VialYPresentaciones } from "@/components/inventario/vial-y-presentaciones";
@@ -541,12 +538,9 @@ function ProductoForm({
   const tc = useTranslations("common");
   const isEdit = !!producto;
 
-  const [form, setForm] = React.useState<FormState>(EMPTY);
-  const [submitting, setSubmitting] = React.useState(false);
-  const [prevId, setPrevId] = React.useState<string | undefined>(undefined);
-  if (open && producto?.id !== prevId) {
-    setPrevId(producto?.id);
-    setForm(
+  // Re-initialised when the sheet opens or another product is loaded.
+  const [form, update] = useDialogForm<FormState>(
+    () =>
       producto
         ? {
             sku: producto.sku ?? "",
@@ -575,11 +569,12 @@ function ProductoForm({
             grupoFacturacionId: producto.billingGroupId ?? "",
           }
         : EMPTY,
-    );
-  }
+    open,
+    producto?.id,
+  );
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
-    setForm((prev) => ({ ...prev, [k]: v }));
+    update({ [k]: v } as Partial<FormState>);
   }
 
   // Grupo de facturación: asignar a uno existente, "Sin grupo (insumo)" (null), o crear uno nuevo AL VUELO
@@ -604,6 +599,11 @@ function ProductoForm({
   const [ngDivision, setNgDivision] = React.useState("");
   const [creandoGrupo, setCreandoGrupo] = React.useState(false);
 
+  // Inline mini-forms (new group, new vial presentation): Enter in their inputs must not save the product.
+  const noEnter = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") e.preventDefault();
+  };
+
   async function crearGrupoInline() {
     if (!ngClave.trim()) return;
     setCreandoGrupo(true);
@@ -626,15 +626,14 @@ function ProductoForm({
     }
   }
 
-  const canSubmit =
-    form.nombre.trim().length > 0 &&
-    (isEdit || form.sku.trim().length > 0) &&
-    !submitting;
+  // SKU is only typed on create (the input is read-only when editing).
+  const missing = missingFields([
+    [t("field.nombre"), form.nombre.trim().length > 0],
+    [t("field.sku"), isEdit || form.sku.trim().length > 0],
+  ]);
 
-  async function onSubmit() {
-    if (!canSubmit) return;
-    setSubmitting(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
       const id = (s: string) => (s && s !== NONE ? s : undefined);
       const num = (s: string) => {
@@ -685,320 +684,317 @@ function ProductoForm({
       // El grupo de facturación ya viaja en el propio producto (grupoFacturacionId, arriba): uuid o null
       // explícito. Ya no hace falta reasignar la membresía del grupo tras guardar.
       void savedId;
-      toast.success(isEdit ? t("updated") : t("created"));
-      onOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
+    },
+    {
+      successMessage: isEdit ? t("updated") : t("created"),
+      onSuccess: () => {
+        onOpenChange(false);
+        onSaved();
+      },
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
+  );
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col overflow-y-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>{isEdit ? t("editTitle") : t("newTitle")}</SheetTitle>
-          <SheetDescription>{t("description")}</SheetDescription>
-        </SheetHeader>
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      size="sm"
+      title={isEdit ? t("editTitle") : t("newTitle")}
+      description={t("description")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+    >
+      <Field label={t("field.nombre")} htmlFor="prod-name" required>
+        <Input id="prod-name" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
+      </Field>
 
-        <div className="grid gap-4 px-4">
-          <Field label={t("field.nombre")}>
-            <Input value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
-          </Field>
-
-          {/* Grupo de facturación: elegir uno existente o CREAR uno nuevo al vuelo (no salir del form). */}
-          <Field label={t("field.grupoFacturacion")}>
-            <div className="space-y-2">
+      {/* Grupo de facturación: elegir uno existente o CREAR uno nuevo al vuelo (no salir del form). */}
+      <Field label={t("field.grupoFacturacion")} htmlFor="prod-group">
+        <div className="space-y-2">
+          <Select
+            value={form.grupoFacturacionId || NONE}
+            onValueChange={(v) => set("grupoFacturacionId", v === NONE ? "" : v)}
+          >
+            <SelectTrigger id="prod-group" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {/* "Sin grupo (insumo)" = null explícito: el producto se consume, no abre columna. */}
+              <SelectItem value={NONE}>{t("field.grupoNinguno")}</SelectItem>
+              {grupos.map((g) => (
+                <SelectItem key={g.id} value={g.id}>
+                  {grupoLabel(g.labelKey, g.slug)} ·{" "}
+                  {grupoLabel(`fac.division.${g.division}`, g.division)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {/* Qué implica la elección (sin esto se elige a ciegas). Con grupo, se nombra su división. */}
+          <p className="text-xs text-muted-foreground">
+            {form.grupoFacturacionId
+              ? t("field.grupoFacturacionHelpCon", {
+                  division: grupoLabel(
+                    `fac.division.${grupos.find((g) => g.id === form.grupoFacturacionId)?.division ?? ""}`,
+                    grupos.find((g) => g.id === form.grupoFacturacionId)?.division ?? "",
+                  ),
+                })
+              : t("field.grupoFacturacionHelpSin")}
+          </p>
+          {nuevoGrupo ? (
+            <div className="space-y-2 rounded-md bg-card p-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+              <Input
+                placeholder={t("grupoClave")}
+                value={ngClave}
+                onChange={(e) => setNgClave(e.target.value)}
+                onKeyDown={noEnter}
+                className="h-8"
+              />
+              <Input
+                placeholder={ngClave ? `fac.grupo.${ngClave}` : "labelKey"}
+                value={ngLabel}
+                onChange={(e) => setNgLabel(e.target.value)}
+                onKeyDown={noEnter}
+                className="h-8"
+              />
               <Select
-                value={form.grupoFacturacionId || NONE}
-                onValueChange={(v) => set("grupoFacturacionId", v === NONE ? "" : v)}
+                value={ngDivision || divisiones[0]?.slug || "general"}
+                onValueChange={setNgDivision}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* "Sin grupo (insumo)" = null explícito: el producto se consume, no abre columna. */}
-                  <SelectItem value={NONE}>{t("field.grupoNinguno")}</SelectItem>
-                  {grupos.map((g) => (
-                    <SelectItem key={g.id} value={g.id}>
-                      {grupoLabel(g.labelKey, g.slug)} ·{" "}
-                      {grupoLabel(`fac.division.${g.division}`, g.division)}
+                  {divisiones.map((d) => (
+                    <SelectItem key={d.slug} value={d.slug}>
+                      {grupoLabel(d.labelKey, d.slug)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {/* Qué implica la elección (sin esto se elige a ciegas). Con grupo, se nombra su división. */}
-              <p className="text-xs text-muted-foreground">
-                {form.grupoFacturacionId
-                  ? t("field.grupoFacturacionHelpCon", {
-                      division: grupoLabel(
-                        `fac.division.${grupos.find((g) => g.id === form.grupoFacturacionId)?.division ?? ""}`,
-                        grupos.find((g) => g.id === form.grupoFacturacionId)?.division ?? "",
-                      ),
-                    })
-                  : t("field.grupoFacturacionHelpSin")}
-              </p>
-              {nuevoGrupo ? (
-                <div className="space-y-2 rounded-md bg-card p-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-                  <Input
-                    placeholder={t("grupoClave")}
-                    value={ngClave}
-                    onChange={(e) => setNgClave(e.target.value)}
-                    className="h-8"
-                  />
-                  <Input
-                    placeholder={ngClave ? `fac.grupo.${ngClave}` : "labelKey"}
-                    value={ngLabel}
-                    onChange={(e) => setNgLabel(e.target.value)}
-                    className="h-8"
-                  />
-                  <Select
-                    value={ngDivision || divisiones[0]?.slug || "general"}
-                    onValueChange={setNgDivision}
-                  >
-                    <SelectTrigger className="h-8">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {divisiones.map((d) => (
-                        <SelectItem key={d.slug} value={d.slug}>
-                          {grupoLabel(d.labelKey, d.slug)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={crearGrupoInline}
-                      disabled={creandoGrupo || !ngClave.trim()}
-                    >
-                      {t("grupoCrear")}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setNuevoGrupo(false)}>
-                      {tc("cancel")}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
+              <div className="flex gap-2">
                 <Button
-                  type="button"
                   size="sm"
-                  variant="outline"
-                  onClick={() => setNuevoGrupo(true)}
+                  onClick={crearGrupoInline}
+                  disabled={creandoGrupo || !ngClave.trim()}
                 >
-                  {t("grupoNuevo")}
+                  {t("grupoCrear")}
                 </Button>
-              )}
+                <Button size="sm" variant="ghost" onClick={() => setNuevoGrupo(false)}>
+                  {tc("cancel")}
+                </Button>
+              </div>
             </div>
-          </Field>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.sku")}>
-              <Input
-                value={form.sku}
-                onChange={(e) => set("sku", e.target.value)}
-                disabled={isEdit}
-              />
-            </Field>
-            <Field label={t("field.nombreCorto")}>
-              <Input
-                value={form.nombreCorto}
-                onChange={(e) => set("nombreCorto", e.target.value)}
-              />
-            </Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.nombreTecnico")}>
-              <Input
-                value={form.nombreTecnico}
-                onChange={(e) => set("nombreTecnico", e.target.value)}
-                placeholder={t("field.nombreTecnicoPh")}
-              />
-            </Field>
-            <Field label={t("field.costoReferencia")}>
-              <Input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                step="0.01"
-                value={form.costoReferencia}
-                onChange={(e) => set("costoReferencia", e.target.value)}
-                placeholder={t("field.opcional")}
-              />
-            </Field>
-          </div>
-
-          {/* Contenido del envase (opcional): cuánto trae el frasco/caja + su unidad + unidades por envase.
-              Simple y opcional; con esto la receta calcula cuántas aplicaciones rinde un vial (contenido ÷ dosis). */}
-          <div className="rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-            <div className="mb-2 flex items-baseline justify-between gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("field.envaseTitle")}</span>
-              <span className="text-[11px] text-muted-foreground">{t("field.opcional")}</span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <Field label={t("field.contenido")}>
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="any"
-                  value={form.contenido}
-                  onChange={(e) => set("contenido", e.target.value)}
-                  placeholder="10"
-                />
-              </Field>
-              <Field label={t("field.unidadContenido")}>
-                <Select
-                  value={form.unidadContenidoId || NONE}
-                  onValueChange={(v) => set("unidadContenidoId", v === NONE ? "" : v)}
-                >
-                  <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>{t("field.none")}</SelectItem>
-                    {unidadesContenido.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label={t("field.unidadesPorEnvase")}>
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  step="1"
-                  value={form.unidadesPorEnvase}
-                  onChange={(e) => set("unidadesPorEnvase", e.target.value)}
-                  placeholder="1"
-                />
-              </Field>
-            </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">{t("field.envaseHelp")}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.tipo")}>
-              <Select
-                value={form.tipo}
-                onValueChange={(v) => set("tipo", v as FormState["tipo"])}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS.map((x) => (
-                    <SelectItem key={x} value={x}>
-                      {t(`tipo.${x}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label={t("field.modoDescarga")}>
-              <Select
-                value={form.modoDescarga}
-                onValueChange={(v) => set("modoDescarga", v as FormState["modoDescarga"])}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {MODOS.map((x) => (
-                    <SelectItem key={x} value={x}>
-                      {t(`modo.${x}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.categoria")}>
-              <CatalogSelect
-                value={form.categoriaId}
-                onChange={(v) => set("categoriaId", v)}
-                options={categorias}
-                placeholder={t("field.none")}
-              />
-            </Field>
-            <Field label={t("field.marca")}>
-              <CatalogSelect
-                value={form.marcaId}
-                onChange={(v) => set("marcaId", v)}
-                options={marcas}
-                placeholder={t("field.none")}
-              />
-            </Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.fabricante")}>
-              <CatalogSelect
-                value={form.fabricanteId}
-                onChange={(v) => set("fabricanteId", v)}
-                options={fabricantes}
-                placeholder={t("field.none")}
-              />
-            </Field>
-            <Field label={t("field.barcode")}>
-              <Input value={form.barcode} onChange={(e) => set("barcode", e.target.value)} />
-            </Field>
-          </div>
-          <Toggle label={t("field.esInventariable")} checked={form.esInventariable} onChange={(v) => set("esInventariable", v)} />
-          <Toggle label={t("field.gravado")} checked={form.gravado} onChange={(v) => set("gravado", v)} />
-          {/* ¿Se vende suelto? = facturableGeneral. Si NO, avisar que su precio no se usa (en el legado
-              había que inventarle un precio para que apareciera en la factura; aquí no hace falta). */}
-          <div className="space-y-1">
-            <Toggle label={t("field.facturableGeneral")} checked={form.facturableGeneral} onChange={(v) => set("facturableGeneral", v)} />
-            {!form.facturableGeneral && (
-              <p className="px-1 text-xs text-muted-foreground">{t("field.facturableGeneralNo")}</p>
-            )}
-          </div>
-          <Toggle label={t("field.aplicaPrecioBaseDevolucion")} checked={form.aplicaPrecioBaseDevolucion} onChange={(v) => set("aplicaPrecioBaseDevolucion", v)} />
-          {form.tipo === "compuesto" && (
-            <Toggle label={t("imprimeComponentes")} checked={form.imprimeComponentes} onChange={(v) => set("imprimeComponentes", v)} />
-          )}
-          {isEdit && (
-            <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />
-          )}
-
-          {/* El árbol "¿qué se descuenta?" — solo para kits ya guardados (necesita id). Es lo que caza el
-              duplicado que dejó existencias en negativo. */}
-          {isEdit && producto && form.tipo === "compuesto" && (
-            <div className="pt-1">
-              <DescargaSimuladaPanel productoId={producto.id} />
-            </div>
-          )}
-
-          {/* Viales abiertos (remanente) + presentaciones del vial (cambiar = elegir la activa). Solo con
-              producto existente. Handoff HANDOFF-viales-presentaciones-y-remanente. */}
-          {isEdit && producto && (
-            <div className="pt-1">
-              <VialYPresentaciones productoId={producto.id} />
-            </div>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setNuevoGrupo(true)}
+            >
+              {t("grupoNuevo")}
+            </Button>
           )}
         </div>
+      </Field>
 
-        <SheetFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={!canSubmit}>
-            {submitting ? tc("saving") : tc("save")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.sku")} htmlFor="prod-sku" required={!isEdit}>
+          <Input
+            id="prod-sku"
+            value={form.sku}
+            onChange={(e) => set("sku", e.target.value)}
+            disabled={isEdit}
+          />
+        </Field>
+        <Field label={t("field.nombreCorto")} htmlFor="prod-short-name">
+          <Input
+            id="prod-short-name"
+            value={form.nombreCorto}
+            onChange={(e) => set("nombreCorto", e.target.value)}
+          />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.nombreTecnico")} htmlFor="prod-technical-name">
+          <Input
+            id="prod-technical-name"
+            value={form.nombreTecnico}
+            onChange={(e) => set("nombreTecnico", e.target.value)}
+            placeholder={t("field.nombreTecnicoPh")}
+          />
+        </Field>
+        <Field label={t("field.costoReferencia")} htmlFor="prod-cost">
+          <Input
+            id="prod-cost"
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step="0.01"
+            value={form.costoReferencia}
+            onChange={(e) => set("costoReferencia", e.target.value)}
+            placeholder={t("field.opcional")}
+          />
+        </Field>
+      </div>
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-    </label>
+      {/* Contenido del envase (opcional): cuánto trae el frasco/caja + su unidad + unidades por envase.
+          Simple y opcional; con esto la receta calcula cuántas aplicaciones rinde un vial (contenido ÷ dosis). */}
+      <div className="rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+        <div className="mb-2 flex items-baseline justify-between gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("field.envaseTitle")}</span>
+          <span className="text-[11px] text-muted-foreground">{t("field.opcional")}</span>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Field label={t("field.contenido")} htmlFor="prod-content">
+            <Input
+              id="prod-content"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="any"
+              value={form.contenido}
+              onChange={(e) => set("contenido", e.target.value)}
+              placeholder="10"
+            />
+          </Field>
+          <Field label={t("field.unidadContenido")} htmlFor="prod-content-unit">
+            <Select
+              value={form.unidadContenidoId || NONE}
+              onValueChange={(v) => set("unidadContenidoId", v === NONE ? "" : v)}
+            >
+              <SelectTrigger id="prod-content-unit" className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>{t("field.none")}</SelectItem>
+                {unidadesContenido.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label={t("field.unidadesPorEnvase")} htmlFor="prod-units-per-container">
+            <Input
+              id="prod-units-per-container"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step="1"
+              value={form.unidadesPorEnvase}
+              onChange={(e) => set("unidadesPorEnvase", e.target.value)}
+              placeholder="1"
+            />
+          </Field>
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">{t("field.envaseHelp")}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.tipo")} htmlFor="prod-type">
+          <Select
+            value={form.tipo}
+            onValueChange={(v) => set("tipo", v as FormState["tipo"])}
+          >
+            <SelectTrigger id="prod-type" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TIPOS.map((x) => (
+                <SelectItem key={x} value={x}>
+                  {t(`tipo.${x}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label={t("field.modoDescarga")} htmlFor="prod-deduction">
+          <Select
+            value={form.modoDescarga}
+            onValueChange={(v) => set("modoDescarga", v as FormState["modoDescarga"])}
+          >
+            <SelectTrigger id="prod-deduction" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MODOS.map((x) => (
+                <SelectItem key={x} value={x}>
+                  {t(`modo.${x}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.categoria")} htmlFor="prod-category">
+          <CatalogSelect
+            id="prod-category"
+            value={form.categoriaId}
+            onChange={(v) => set("categoriaId", v)}
+            options={categorias}
+            placeholder={t("field.none")}
+          />
+        </Field>
+        <Field label={t("field.marca")} htmlFor="prod-brand">
+          <CatalogSelect
+            id="prod-brand"
+            value={form.marcaId}
+            onChange={(v) => set("marcaId", v)}
+            options={marcas}
+            placeholder={t("field.none")}
+          />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.fabricante")} htmlFor="prod-manufacturer">
+          <CatalogSelect
+            id="prod-manufacturer"
+            value={form.fabricanteId}
+            onChange={(v) => set("fabricanteId", v)}
+            options={fabricantes}
+            placeholder={t("field.none")}
+          />
+        </Field>
+        <Field label={t("field.barcode")} htmlFor="prod-barcode">
+          <Input id="prod-barcode" value={form.barcode} onChange={(e) => set("barcode", e.target.value)} />
+        </Field>
+      </div>
+      <Toggle label={t("field.esInventariable")} checked={form.esInventariable} onChange={(v) => set("esInventariable", v)} />
+      <Toggle label={t("field.gravado")} checked={form.gravado} onChange={(v) => set("gravado", v)} />
+      {/* ¿Se vende suelto? = facturableGeneral. Si NO, avisar que su precio no se usa (en el legado
+          había que inventarle un precio para que apareciera en la factura; aquí no hace falta). */}
+      <div className="space-y-1">
+        <Toggle label={t("field.facturableGeneral")} checked={form.facturableGeneral} onChange={(v) => set("facturableGeneral", v)} />
+        {!form.facturableGeneral && (
+          <p className="px-1 text-xs text-muted-foreground">{t("field.facturableGeneralNo")}</p>
+        )}
+      </div>
+      <Toggle label={t("field.aplicaPrecioBaseDevolucion")} checked={form.aplicaPrecioBaseDevolucion} onChange={(v) => set("aplicaPrecioBaseDevolucion", v)} />
+      {form.tipo === "compuesto" && (
+        <Toggle label={t("imprimeComponentes")} checked={form.imprimeComponentes} onChange={(v) => set("imprimeComponentes", v)} />
+      )}
+      {isEdit && (
+        <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />
+      )}
+
+      {/* El árbol "¿qué se descuenta?" — solo para kits ya guardados (necesita id). Es lo que caza el
+          duplicado que dejó existencias en negativo. */}
+      {isEdit && producto && form.tipo === "compuesto" && (
+        <div className="pt-1">
+          <DescargaSimuladaPanel productoId={producto.id} />
+        </div>
+      )}
+
+      {/* Viales abiertos (remanente) + presentaciones del vial (cambiar = elegir la activa). Solo con
+          producto existente. Handoff HANDOFF-viales-presentaciones-y-remanente. */}
+      {isEdit && producto && (
+        <div className="pt-1" onKeyDown={noEnter}>
+          <VialYPresentaciones productoId={producto.id} />
+        </div>
+      )}
+    </FormSheet>
   );
 }
 
@@ -1020,11 +1016,13 @@ function Toggle({
 }
 
 function CatalogSelect({
+  id,
   value,
   onChange,
   options,
   placeholder,
 }: {
+  id?: string;
   value: string;
   onChange: (v: string) => void;
   options: Clasificacion[];
@@ -1032,7 +1030,7 @@ function CatalogSelect({
 }) {
   return (
     <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
-      <SelectTrigger className="w-full">
+      <SelectTrigger id={id} className="w-full">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

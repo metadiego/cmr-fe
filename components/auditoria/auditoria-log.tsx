@@ -29,16 +29,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Tooltip } from "@/components/ui/tooltip";
 import { DataTable, type Column } from "@/components/kit/data-table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
 import {
   Select,
   SelectContent,
@@ -513,11 +504,21 @@ function Tile({
 // los umbrales. yaEnCurso no es error. Exige admin sin X-Tenant-ID (lo pone la API con tenant null).
 function PurgaButton() {
   const t = useTranslations("auditoria");
-  const [open, setOpen] = React.useState(false);
+  const confirm = useConfirm();
   const [purgando, setPurgando] = React.useState(false);
+  const asking = React.useRef(false); // a double click must not queue a second prompt
 
   async function purgar() {
-    setOpen(false);
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("purga.titulo"),
+      description: t("purga.cuerpo"),
+      confirmLabel: t("purga.confirmar"),
+      cancelLabel: t("purga.cancelar"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setPurgando(true);
     let errores = 0;
     let mutaciones = 0;
@@ -546,22 +547,8 @@ function PurgaButton() {
   }
 
   return (
-    <>
-      <Button size="sm" variant="outline" onClick={() => setOpen(true)} disabled={purgando}>
-        {purgando ? t("purga.corriendo") : t("purga.boton")}
-      </Button>
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("purga.titulo")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("purga.cuerpo")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("purga.cancelar")}</AlertDialogCancel>
-            <AlertDialogAction onClick={purgar}>{t("purga.confirmar")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <Button size="sm" variant="outline" onClick={purgar} disabled={purgando}>
+      {purgando ? t("purga.corriendo") : t("purga.boton")}
+    </Button>
   );
 }

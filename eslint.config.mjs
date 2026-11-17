@@ -48,18 +48,24 @@ const DEBT = {
   // 16-nov-2026: lowered from 1460 to 1317 — its dialogs moved onto the standard form shell
   // (FormDialog/useSubmit/useConfirm); the rest of the gap was already slack.
   "app/(app)/billing/invoices/[id]/page.tsx": 1317,
-  "components/inventario/productos-admin.tsx": 1048,
+  // 17-nov-2026: 1048 → 1046 — the product sheet moved onto the standard FormSheet shell (kit Field,
+  // useDialogForm, useSubmit); the local Field and canSubmit went.
+  "components/inventario/productos-admin.tsx": 1046,
   // 17-nov-2026: 700 → 681 — the delete AlertDialog became a useConfirm prompt (standard form kit);
   // the stray blank line after </aside> went, and the delete confirm gained `destructive: true` (net 0).
   "components/configuracion/menu-editor.tsx": 681,
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)
   // se extrajeron a components/servicios/servicio-form-fields.tsx para hacerle lugar al toggle de
   // allowSessionFixWithoutPackage sin tocar el ceiling. Ver HANDOFF-sesiones-sin-paquete-listo.md.
-  "components/servicios/servicios-admin.tsx": 661,
+  // 17-nov-2026: 661 → 614 — the service sheet moved onto the standard FormSheet shell (kit Field,
+  // useDialogForm, useSubmit, useConfirm for "apply to all centers"); local canSubmit and the
+  // hand-built confirm went.
+  "components/servicios/servicios-admin.tsx": 614,
   // 10-nov-2026: 642 → 618 — Campo/CopiableCampo moved to components/auditoria/audit-fields.tsx.
   // 10-nov-2026: 618 → 567 — the detail panel moved to components/auditoria/audit-detail-sheet.tsx
   // (merge of the Claude connector "via" branch with main's entity filter).
-  "components/auditoria/auditoria-log.tsx": 567,
+  // 17-nov-2026: 567 → 554 — the purge AlertDialog became a useConfirm prompt (standard form kit).
+  "components/auditoria/auditoria-log.tsx": 554,
   // 16-nov-2026: 550 → 480 — moved onto the standard FormSheet shell (kit Field, useSubmit, useDialogForm);
   // the required/blocked checks live in lib/pacientes/patient-form-missing.ts.
   "components/clientes/paciente-form-sheet.tsx": 480,

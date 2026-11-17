@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { toast } from "sonner";
 
 import { createPrinter, deletePrinter, updatePrinter, type CenterPrinter } from "@/lib/api/print-hub";
@@ -61,6 +62,7 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
   const t = useTranslations("aparienciaCorporativa");
   const tReceipt = useTranslations("receipt");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const [form, setForm] = React.useState<Form>(() => fromPrinter(printer));
   const [discovery, setDiscovery] = React.useState<Discovery>({ kind: "idle" });
   const [busy, setBusy] = React.useState<"save" | "test" | "delete" | null>(null);
@@ -117,7 +119,8 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
 
   async function remove() {
     if (!printer) return onDeleted();
-    if (!window.confirm(t("printerRemoveConfirm", { name: printer.name }))) return;
+    const ok = await confirm({ title: t("printerRemoveConfirm", { name: printer.name }), destructive: true });
+    if (!ok) return;
     setBusy("delete");
     try {
       await deletePrinter(centerId, printer.id);

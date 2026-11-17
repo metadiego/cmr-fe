@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { toast } from "sonner";
 
 import { actualizarFormaPago, crearFormaPago, desactivarFormaPago, getFormasPago, type FormaPago } from "@/lib/api/facturas";
@@ -22,6 +23,7 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 export function PaymentMethodsAdmin() {
   const t = useTranslations("paymentMethods");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const me = useMe();
   const admin = me.kind === "ok" && isAdmin(me.me);
   const { state, reload } = useResource<FormaPago[]>(() => getFormasPago(), []);
@@ -57,7 +59,8 @@ export function PaymentMethodsAdmin() {
     }
   }
   async function desactivar(f: FormaPago) {
-    if (!window.confirm(t("deactivateConfirm", { name: f.name }))) return;
+    const ok = await confirm({ title: t("deactivateConfirm", { name: f.name }), destructive: true });
+    if (!ok) return;
     setBusy(f.id);
     try {
       await desactivarFormaPago(f.id);

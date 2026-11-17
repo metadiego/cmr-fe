@@ -3662,7 +3662,8 @@
     "multiAplicado": "Aplicado en {n} centro(s)",
     "multiSinCambios": "Sin cambios (todos los centros ya estaban iguales)",
     "cargaParcial": "No se pudieron cargar los servicios de: {centros}. La vista puede estar incompleta.",
-    "ordenArrastrar": "Arrastra para reordenar las pestañas"
+    "ordenArrastrar": "Arrastra para reordenar las pestañas",
+    "sortOrderInvalid": "El orden debe ser un número."
   },
   "transferencias": {
     "title": "Transferencias",
@@ -3691,6 +3692,7 @@
     "confirmAprobarBody": "Se registrará lo recibido y el remanente se procesará como: {politica}.",
     "rechazarTitle": "Rechazar transferencia",
     "rechazarBody": "Todo el stock vuelve al origen. Indica el motivo.",
+    "lineQuantityInvalid": "Pon una cantidad mayor que cero en el producto elegido.",
     "motivoPlaceholder": "Motivo del rechazo…",
     "estado": {
       "pendiente": "Pendiente",
@@ -4927,7 +4929,9 @@
     "vialesCerrados": "Viales cerrados de {presentacion}",
     "vialesAbiertos": "Abiertos ({unidad})",
     "vialesSinVista": "El contenido de algún vial está en otra medida: el total se calcula al guardar.",
-    "vialesAjustado": "Contado {contado}, el sistema tenía {sistema}: quedó ajustado."
+    "vialesAjustado": "Contado {contado}, el sistema tenía {sistema}: quedó ajustado.",
+    "vialCount": "Lo que contaste",
+    "quantityInvalid": "La cantidad tiene que ser mayor que cero."
   },
   "inventarioViales": {
     "titulo": "Viales",

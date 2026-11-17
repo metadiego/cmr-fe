@@ -7,31 +7,33 @@ import { toast } from "sonner";
 import { retireScaleDevice } from "@/lib/api/scale-live-stock";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
 
 // «Retirar balanza»: deletes every stock event of that scale in the center, after a confirmation that
 // names the deviceId (handoff stock-live-balanzas.md). Book stock is never touched.
+// The shared confirm prompt focuses Cancel, so a habitual Enter never retires the scale.
 export function RetireScaleButton({ deviceId, centroId, onDone }: { deviceId: string; centroId?: string; onDone: () => void }) {
   const t = useTranslations("liveStock");
   const tRoot = useTranslations();
-  const [open, setOpen] = React.useState(false);
+  const confirm = useConfirm();
   const [busy, setBusy] = React.useState(false);
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
 
   async function retire() {
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("retireTitle", { deviceId }),
+      description: t("retireBody", { deviceId }),
+      confirmLabel: t("retire"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setBusy(true);
     try {
       const res = await retireScaleDevice(deviceId, centroId);
       toast.success(t("retired", { deviceId: res.deviceId, n: res.deleted }));
-      setOpen(false);
       onDone();
     } catch (err) {
       toastError(err, tRoot);
@@ -41,31 +43,14 @@ export function RetireScaleButton({ deviceId, centroId, onDone }: { deviceId: st
   }
 
   return (
-    <>
-      <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => setOpen(true)}>
-        {t("retire")}
-      </Button>
-      <AlertDialog open={open} onOpenChange={(o) => !busy && setOpen(o)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("retireTitle", { deviceId })}</AlertDialogTitle>
-            <AlertDialogDescription>{t("retireBody", { deviceId })}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tRoot("common.cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={busy}
-              variant="destructive"
-              onClick={(e) => {
-                e.preventDefault();
-                retire();
-              }}
-            >
-              {t("retire")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-7 text-xs text-destructive"
+      disabled={busy}
+      onClick={() => void retire()}
+    >
+      {t("retire")}
+    </Button>
   );
 }

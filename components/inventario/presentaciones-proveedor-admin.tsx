@@ -20,16 +20,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { PPFormSheet } from "@/components/inventario/pp-form-sheet";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
@@ -61,8 +52,8 @@ export function PresentacionesProveedorAdmin() {
 
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<PresentacionProveedor | null>(null);
-  const [deleting, setDeleting] = React.useState<PresentacionProveedor | null>(null);
-  const [busy, setBusy] = React.useState(false);
+  const [busyId, setBusyId] = React.useState<string | null>(null);
+  const confirm = useConfirm();
 
   function openNew() {
     setEditing(null);
@@ -73,18 +64,27 @@ export function PresentacionesProveedorAdmin() {
     setSheetOpen(true);
   }
 
-  async function confirmDelete() {
-    if (!deleting) return;
-    setBusy(true);
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
+  async function onDeactivate(p: PresentacionProveedor) {
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("deactivateTitle"),
+      description: t("deactivateBody", { name: p.name }),
+      confirmLabel: t("deactivate"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
+    setBusyId(p.id);
     try {
-      await deletePresentacionProveedor(deleting.id);
+      await deletePresentacionProveedor(p.id);
       toast.success(t("deleted"));
-      setDeleting(null);
       ppRes.reload();
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {
-      setBusy(false);
+      setBusyId(null);
     }
   }
 
@@ -182,7 +182,8 @@ export function PresentacionesProveedorAdmin() {
                             variant="ghost"
                             size="sm"
                             className="text-destructive hover:text-destructive"
-                            onClick={() => setDeleting(p)}
+                            disabled={busyId === p.id}
+                            onClick={() => onDeactivate(p)}
                           >
                             {t("deactivate")}
                           </Button>
@@ -209,23 +210,6 @@ export function PresentacionesProveedorAdmin() {
           onSaved={ppRes.reload}
         />
       )}
-
-      <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("deactivateTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("deactivateBody", { name: deleting?.name ?? "" })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tc("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={busy}>
-              {t("deactivate")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </PageContainer>
   );
 }

@@ -20,7 +20,13 @@ import {
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { payloadBulkDirty } from "@/lib/servicios/bulk-diff";
-import { ColorField, Field, Toggle, GrupoSelect, StartStepField, PrimaryPackageRuleSelect, MultiConfirmDialog } from "@/components/servicios/servicio-form-fields";
+import { ColorField, Toggle, GrupoSelect, StartStepField, PrimaryPackageRuleSelect } from "@/components/servicios/servicio-form-fields";
+import { FormSheet } from "@/components/kit/form-sheet";
+import { Field } from "@/components/kit/field";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useMe, isAdmin } from "@/hooks/use-me";
@@ -36,14 +42,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip } from "@/components/ui/tooltip";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
@@ -377,6 +375,7 @@ function DiffChip({
 
 type FormState = {
   clave: string;
+  claveTouched: boolean; // the key was typed by hand (otherwise it follows the name)
   nombre: string;
   color: string;
   orden: string;
@@ -392,6 +391,7 @@ type FormState = {
 };
 const EMPTY: FormState = {
   clave: "",
+  claveTouched: false,
   nombre: "",
   color: "#3b82f6",
   orden: "",
@@ -405,6 +405,26 @@ const EMPTY: FormState = {
   activo: true,
   startStep: "",
 };
+
+function toForm(servicio: Servicio | null): FormState {
+  if (!servicio) return EMPTY;
+  return {
+    clave: servicio.slug,
+    claveTouched: true,
+    nombre: servicio.name,
+    color: servicio.color ?? "#3b82f6",
+    orden: servicio.sortOrder != null ? String(servicio.sortOrder) : "",
+    grupoFacturacionId: servicio.billingGroupId ?? "",
+    productoId: servicio.productId ?? "",
+    requiereTecnico: servicio.requiresTechnician,
+    requiereEnfermera: servicio.requiresNurse,
+    badge: servicio.badge,
+    allowSessionFixWithoutPackage: servicio.allowSessionFixWithoutPackage,
+    primaryPackageRule: servicio.primaryPackageRule ?? "row",
+    activo: servicio.active,
+    startStep: servicio.startStepMinutes != null ? String(servicio.startStepMinutes) : "",
+  };
+}
 
 function ServicioForm({
   open,
@@ -425,52 +445,25 @@ function ServicioForm({
 }) {
   const t = useTranslations("servicios");
   const tc = useTranslations("common");
+  const confirm = useConfirm();
   const servicio = fila?.rep ?? null;
   const isEdit = !!servicio;
   const editandoTodos = isEdit && esTodos; // editar la clave en todos los centros
 
-  const [form, setForm] = React.useState<FormState>(EMPTY);
-  const [inicial, setInicial] = React.useState<FormState>(EMPTY);
-  const [claveTouched, setClaveTouched] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
-  const [prevId, setPrevId] = React.useState<string | undefined>(undefined);
-  const [prevOpen, setPrevOpen] = React.useState(false);
-  // Re-sync en CADA apertura (no solo al cambiar de id): una edición cancelada
-  // no puede reaparecer y colarse a todos los centros con "Aplicar a todos".
-  if (open && (!prevOpen || servicio?.id !== prevId)) {
-    setPrevId(servicio?.id);
-    setClaveTouched(!!servicio);
-    const inicialForm: FormState = servicio
-      ? {
-          clave: servicio.slug,
-          nombre: servicio.name,
-          color: servicio.color ?? "#3b82f6",
-          orden: servicio.sortOrder != null ? String(servicio.sortOrder) : "",
-          grupoFacturacionId: servicio.billingGroupId ?? "",
-          productoId: servicio.productId ?? "",
-          requiereTecnico: servicio.requiresTechnician,
-          requiereEnfermera: servicio.requiresNurse,
-          badge: servicio.badge,
-          allowSessionFixWithoutPackage: servicio.allowSessionFixWithoutPackage,
-          primaryPackageRule: servicio.primaryPackageRule ?? "row",
-          activo: servicio.active,
-          startStep: servicio.startStepMinutes != null ? String(servicio.startStepMinutes) : "",
-        }
-      : EMPTY;
-    setForm(inicialForm);
-    setInicial(inicialForm);
-  }
-  if (open !== prevOpen) setPrevOpen(open);
-
+  // Reset on EVERY open (not only on another id): a cancelled edit must not come back and slip into
+  // every center through "Apply to all". `inicial` is the baseline for the dirty-only bulk payload.
+  const inicial = toForm(servicio);
+  const [form, update] = useDialogForm<FormState>(() => toForm(servicio), open, servicio?.id);
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
-    setForm((p) => ({ ...p, [k]: v }));
+    update({ [k]: v } as Partial<FormState>);
   }
 
-  const claveEff = isEdit || claveTouched ? form.clave : slugify(form.nombre);
+  const claveEff = isEdit || form.claveTouched ? form.clave : slugify(form.nombre);
   const ordenValido = !form.orden.trim() || Number.isFinite(Number(form.orden));
-  const canSubmit =
-    form.nombre.trim().length > 0 && claveEff.trim().length > 0 && ordenValido && !submitting;
+  const missing = missingFields([
+    [t("field.nombre"), form.nombre.trim().length > 0],
+    [t("field.clave"), claveEff.trim().length > 0],
+  ]);
 
   // Payload común (sin activo ni clave) para editar la fila (un centro o multicentro).
   function payloadComun() {
@@ -489,164 +482,133 @@ function ServicioForm({
     };
   }
 
-  async function guardarUnCentro() {
-    if (!servicio) return;
-    setSubmitting(true);
-    try {
-      await updateServicio(servicio.id, { ...payloadComun(), active: form.activo }, centro);
-      toast.success(t("updated"));
-      onOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function guardarAlta() {
-    setSubmitting(true);
-    try {
-      const payload = { slug: claveEff.trim(), ...payloadComun() } as CreateServicioPayload;
-      const destinos = centros.length ? centros : [{ id: centro, name: "" } as Centro];
-      const resultados = await Promise.allSettled(destinos.map((c) => createServicio(payload, c.id)));
-      const fallos = resultados.map((r, i) => (r.status === "rejected" ? destinos[i].name : null)).filter(Boolean);
-      if (fallos.length === destinos.length) {
-        throw (resultados.find((r) => r.status === "rejected") as PromiseRejectedResult).reason;
+  // Three saves, one guard: multi-center (PUT por-clave, the CORRECT endpoint — it does not iterate
+  // updateServicio; only the fields the user CHANGED travel, see lib/servicios/bulk-diff.ts), one
+  // center, or create in every center.
+  const { submitting, submit } = useSubmit(
+    async () => {
+      if (editandoTodos && servicio) {
+        const payload = payloadBulkDirty(inicial, form);
+        const res = await updateServicioPorClave(servicio.slug, payload as UpdateServicioPorClavePayload, centro || undefined);
+        const conCambios = res.actualizados.filter((a) => Object.keys(a.cambios).length > 0).length;
+        toast.success(conCambios > 0 ? t("multiAplicado", { n: conCambios }) : t("multiSinCambios"));
+      } else if (servicio) {
+        await updateServicio(servicio.id, { ...payloadComun(), active: form.activo }, centro);
+        toast.success(t("updated"));
+      } else {
+        const payload = { slug: claveEff.trim(), ...payloadComun() } as CreateServicioPayload;
+        const destinos = centros.length ? centros : [{ id: centro, name: "" } as Centro];
+        const resultados = await Promise.allSettled(destinos.map((c) => createServicio(payload, c.id)));
+        const fallos = resultados.map((r, i) => (r.status === "rejected" ? destinos[i].name : null)).filter(Boolean);
+        if (fallos.length === destinos.length) {
+          throw (resultados.find((r) => r.status === "rejected") as PromiseRejectedResult).reason;
+        }
+        if (fallos.length > 0) toast.warning(t("createdParcial", { centros: fallos.join(", ") }));
+        else toast.success(t("createdTodos", { n: destinos.length }));
       }
-      if (fallos.length > 0) toast.warning(t("createdParcial", { centros: fallos.join(", ") }));
-      else toast.success(t("createdTodos", { n: destinos.length }));
-      onOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  // Multicentro: usa el endpoint CORRECTO por-clave (no itera updateServicio). Confirmación previa
-  // con los centros afectados; luego toast con el resumen del diff que devuelve el BE.
-  // SOLO viajan los campos que el usuario CAMBIÓ (dirty vs `inicial`): cambiar el color no arrastra
-  // nombre/orden/grupo del centro representativo a los demás. Ver lib/servicios/bulk-diff.ts.
-  async function guardarTodos() {
-    if (!servicio) return;
-    const payload = payloadBulkDirty(inicial, form);
-    if (Object.keys(payload).length === 0) {
-      toast.success(t("multiSinCambios"));
-      setConfirmOpen(false);
-      onOpenChange(false);
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const res = await updateServicioPorClave(
-        servicio.slug,
-        payload as UpdateServicioPorClavePayload,
-        centro || undefined,
-      );
-      const conCambios = res.actualizados.filter((a) => Object.keys(a.cambios).length > 0).length;
-      toast.success(conCambios > 0 ? t("multiAplicado", { n: conCambios }) : t("multiSinCambios"));
-      setConfirmOpen(false);
-      onOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  function onSubmit() {
-    if (!canSubmit) return;
-    if (editandoTodos) { setConfirmOpen(true); return; } // confirmar antes de tocar todos los centros
-    if (isEdit) return void guardarUnCentro();
-    return void guardarAlta();
-  }
+    },
+    {
+      onSuccess: () => {
+        onOpenChange(false);
+        onSaved();
+      },
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
+  );
 
   // El alcance REAL del bulk: los centros donde la clave EXISTE (fila.entradas),
   // no todos mis centros — el BE actualiza solo filas con esa clave.
   const afectados = editandoTodos && fila?.entradas?.length ? fila.entradas.map((e) => e.centro) : centros;
   const nombresCentros = afectados.map((c) => c.name).filter(Boolean).join(", ");
 
+  // Multi-center: nothing changed → say so and close (nothing to send); otherwise confirm which
+  // centers it touches before saving. `asking` stops a second Enter/click from queueing a second prompt.
+  const asking = React.useRef(false);
+  async function onSubmit() {
+    if (editandoTodos) {
+      if (asking.current) return;
+      if (Object.keys(payloadBulkDirty(inicial, form)).length === 0) {
+        toast.success(t("multiSinCambios"));
+        onOpenChange(false);
+        return;
+      }
+      asking.current = true;
+      const ok = await confirm({
+        title: t("multiConfirmTitle"),
+        description: t("multiConfirmBody", { n: afectados.length, centros: nombresCentros }),
+        confirmLabel: t("multiConfirmOk"),
+      }).finally(() => (asking.current = false));
+      if (!ok) return;
+    }
+    await submit();
+  }
+
   return (
-    <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="flex w-full flex-col overflow-y-auto sm:max-w-md">
-          <SheetHeader>
-            <SheetTitle>{isEdit ? (editandoTodos ? t("editTitleTodos") : t("editTitle")) : t("newTitle")}</SheetTitle>
-            <SheetDescription>{editandoTodos ? t("formHelpTodos") : isEdit ? t("formHelp") : t("formHelpAlta")}</SheetDescription>
-          </SheetHeader>
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      size="sm"
+      title={isEdit ? (editandoTodos ? t("editTitleTodos") : t("editTitle")) : t("newTitle")}
+      description={editandoTodos ? t("formHelpTodos") : isEdit ? t("formHelp") : t("formHelpAlta")}
+      onSubmit={onSubmit}
+      submitLabel={editandoTodos ? t("aplicarTodos") : tc("save")}
+      submitting={submitting}
+      missing={missing}
+      blocked={!ordenValido}
+      reason={ordenValido ? null : t("sortOrderInvalid")}
+    >
+      <Field label={t("field.nombre")} htmlFor="service-name" required>
+        <Input id="service-name" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.clave")} htmlFor="service-key" required={!isEdit}>
+          <Input
+            id="service-key"
+            value={claveEff}
+            onChange={(e) => update({ claveTouched: true, clave: e.target.value })}
+            disabled={isEdit}
+            className="font-mono"
+          />
+        </Field>
+        <Field label={t("field.orden")} htmlFor="service-order">
+          <Input id="service-order" inputMode="numeric" value={form.orden} onChange={(e) => set("orden", e.target.value)} placeholder="0" />
+        </Field>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <ColorField id="service-color" label={t("field.color")} value={form.color} onChange={(v) => set("color", v)} />
+        <StartStepField id="service-start-step" value={form.startStep} onChange={(v) => set("startStep", v)} />
+      </div>
 
-          <div className="grid gap-4 px-4">
-            <Field label={t("field.nombre")}>
-              <Input value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
-            </Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label={t("field.clave")}>
-                <Input
-                  value={claveEff}
-                  onChange={(e) => { setClaveTouched(true); set("clave", e.target.value); }}
-                  disabled={isEdit}
-                  className="font-mono"
-                />
-              </Field>
-              <Field label={t("field.orden")}>
-                <Input inputMode="numeric" value={form.orden} onChange={(e) => set("orden", e.target.value)} placeholder="0" />
-              </Field>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <ColorField label={t("field.color")} value={form.color} onChange={(v) => set("color", v)} />
-              <StartStepField value={form.startStep} onChange={(v) => set("startStep", v)} />
-            </div>
+      <Field label={t("field.grupo")} htmlFor="service-group" hint={t("field.grupoHint")}>
+        <GrupoSelect id="service-group" value={form.grupoFacturacionId} onChange={(id) => set("grupoFacturacionId", id)} />
+      </Field>
 
-            <Field label={t("field.grupo")} hint={t("field.grupoHint")}>
-              <GrupoSelect value={form.grupoFacturacionId} onChange={(id) => set("grupoFacturacionId", id)} />
-            </Field>
+      <Field label={t("field.producto")} htmlFor="service-product" hint={t("field.productoHint")}>
+        <ProductoPicker id="service-product" value={form.productoId} onChange={(id) => set("productoId", id)} placeholder={t("field.productoNone")} />
+      </Field>
 
-            <Field label={t("field.producto")} hint={t("field.productoHint")}>
-              <ProductoPicker value={form.productoId} onChange={(id) => set("productoId", id)} placeholder={t("field.productoNone")} />
-            </Field>
-
-            <Toggle label={t("field.requiereTecnico")} checked={form.requiereTecnico} onChange={(v) => set("requiereTecnico", v)} />
-            <Toggle label={t("field.requiereEnfermera")} checked={form.requiereEnfermera} onChange={(v) => set("requiereEnfermera", v)} />
-            <Toggle label={t("field.badge")} checked={form.badge} onChange={(v) => set("badge", v)} />
-            {/* Igual que Activo: es por centro (cada fila Láser Bayamón/Caguas es su propio servicio),
-                no se edita en "aplicar a todos los centros". Handoff HANDOFF-sesiones-sin-paquete-listo.md. */}
-            {!editandoTodos && (
-              <Toggle
-                label={t("field.allowSessionFixWithoutPackage")}
-                hint={t("field.allowSessionFixWithoutPackageHint")}
-                checked={form.allowSessionFixWithoutPackage}
-                onChange={(v) => set("allowSessionFixWithoutPackage", v)}
-              />
-            )}
-            {/* Igual que allowSessionFixWithoutPackage: es por centro, no entra en "aplicar a todos". */}
-            {!editandoTodos && (
-              <PrimaryPackageRuleSelect value={form.primaryPackageRule} onChange={(v) => set("primaryPackageRule", v)} />
-            )}
-            {/* Activo NO se edita en multicentro (es por centro); sí en un-centro. */}
-            {isEdit && !editandoTodos && <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />}
-          </div>
-
-          <SheetFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>{tc("cancel")}</Button>
-            <Button onClick={onSubmit} disabled={!canSubmit}>{submitting ? tc("saving") : editandoTodos ? t("aplicarTodos") : tc("save")}</Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <MultiConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title={t("multiConfirmTitle")}
-        body={t("multiConfirmBody", { n: afectados.length, centros: nombresCentros })}
-        confirmLabel={t("multiConfirmOk")}
-        cancelLabel={tc("cancel")}
-        submitting={submitting}
-        onConfirm={guardarTodos}
-      />
-    </>
+      <Toggle label={t("field.requiereTecnico")} checked={form.requiereTecnico} onChange={(v) => set("requiereTecnico", v)} />
+      <Toggle label={t("field.requiereEnfermera")} checked={form.requiereEnfermera} onChange={(v) => set("requiereEnfermera", v)} />
+      <Toggle label={t("field.badge")} checked={form.badge} onChange={(v) => set("badge", v)} />
+      {/* Igual que Activo: es por centro (cada fila Láser Bayamón/Caguas es su propio servicio),
+          no se edita en "aplicar a todos los centros". Handoff HANDOFF-sesiones-sin-paquete-listo.md. */}
+      {!editandoTodos && (
+        <Toggle
+          label={t("field.allowSessionFixWithoutPackage")}
+          hint={t("field.allowSessionFixWithoutPackageHint")}
+          checked={form.allowSessionFixWithoutPackage}
+          onChange={(v) => set("allowSessionFixWithoutPackage", v)}
+        />
+      )}
+      {/* Igual que allowSessionFixWithoutPackage: es por centro, no entra en "aplicar a todos". */}
+      {!editandoTodos && (
+        <PrimaryPackageRuleSelect id="service-primary-rule" value={form.primaryPackageRule} onChange={(v) => set("primaryPackageRule", v)} />
+      )}
+      {/* Activo NO se edita en multicentro (es por centro); sí en un-centro. */}
+      {isEdit && !editandoTodos && <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />}
+    </FormSheet>
   );
 }
-

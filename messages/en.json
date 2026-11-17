@@ -3662,7 +3662,8 @@
     "multiAplicado": "Applied to {n} center(s)",
     "multiSinCambios": "No changes (all centers were already the same)",
     "cargaParcial": "Could not load services from: {centros}. The view may be incomplete.",
-    "ordenArrastrar": "Drag to reorder the tabs"
+    "ordenArrastrar": "Drag to reorder the tabs",
+    "sortOrderInvalid": "The order must be a number."
   },
   "transferencias": {
     "title": "Transfers",
@@ -3691,6 +3692,7 @@
     "confirmAprobarBody": "Received amounts will be recorded and the remainder handled as: {politica}.",
     "rechazarTitle": "Reject transfer",
     "rechazarBody": "All stock returns to origin. State the reason.",
+    "lineQuantityInvalid": "Enter a quantity greater than zero for the chosen product.",
     "motivoPlaceholder": "Rejection reason…",
     "estado": {
       "pendiente": "Pending",
@@ -4927,7 +4929,9 @@
     "vialesCerrados": "Closed vials of {presentacion}",
     "vialesAbiertos": "Open ({unidad})",
     "vialesSinVista": "Some vial content is in another measure: the total is worked out on saving.",
-    "vialesAjustado": "Counted {contado}, the system had {sistema}: adjusted."
+    "vialesAjustado": "Counted {contado}, the system had {sistema}: adjusted.",
+    "vialCount": "What you counted",
+    "quantityInvalid": "The quantity must be greater than zero."
   },
   "inventarioViales": {
     "titulo": "Vials",

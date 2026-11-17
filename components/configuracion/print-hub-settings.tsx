@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon } from "@hugeicons/core-free-icons";
@@ -46,6 +47,7 @@ const probe = (url: string): Promise<Link> => {
 export function PrintHubSettings({ centerId, centerName }: Props) {
   const t = useTranslations("aparienciaCorporativa");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const { can } = useCan();
   const canRead = can("print-hub.read") || can("*");
   const canEdit = can("print-hub.update") || can("*");
@@ -138,7 +140,8 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
   }
 
   async function remove() {
-    if (!window.confirm(t("hubRemoveConfirm", { center: centerName }))) return;
+    const ok = await confirm({ title: t("hubRemoveConfirm", { center: centerName }), destructive: true });
+    if (!ok) return;
     setBusy("delete");
     try {
       await deletePrintHub(centerId);

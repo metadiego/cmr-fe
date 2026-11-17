@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { toast } from "sonner";
 
 import {
@@ -53,6 +54,7 @@ type Estado<T> =
 
 export default function AparienciaCorporativaPage() {
   const t = useTranslations("aparienciaCorporativa");
+  const confirm = useConfirm();
   const { can } = useCan();
   const puedeSistema = can("preferences.update") || can("*");
   // Los overrides los crea y quita quien puede escribir preferencias corporativas (el BE los reserva a
@@ -180,7 +182,8 @@ export default function AparienciaCorporativaPage() {
   async function quitarOverride(o: Override) {
     // Un DELETE que le cambia la pantalla a todo el mundo al instante y no se puede deshacer: se
     // pregunta, igual que antes de borrar un rol o revocar un centro.
-    if (!window.confirm(t("overrideRemoveConfirm", { nombre: o.name || o.id }))) return;
+    const ok = await confirm({ title: t("overrideRemoveConfirm", { nombre: o.name || o.id }), destructive: true });
+    if (!ok) return;
     const id = o.id;
     try {
       await deleteOverride(id);
