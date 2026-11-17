@@ -262,11 +262,8 @@ export function AjusteModal({
       blocked={check.problem !== null}
       reason={check.problem ? problemText[check.problem] : null}
     >
-      {sinAlmacen ? (
-        <p className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
-          {t("sinAlmacen")}
-        </p>
-      ) : (
+      {/* With no warehouse the footer reason already says why; the body stays empty. */}
+      {sinAlmacen ? null : (
         <>
           {/* What is happening, in one line: from how much to how much. */}
           <div className="flex items-baseline gap-3 rounded-lg border bg-muted/30 px-3 py-2 text-sm">
@@ -301,7 +298,8 @@ export function AjusteModal({
           </div>
 
           {porViales ? (
-            <Field label={t("vialCount")} required>
+            // The label points at the first vial input (each row also has its own label).
+            <Field label={t("vialCount")} htmlFor={`cv-${viales[0].id}`} required>
               <ConteoViales
                 presentaciones={viales}
                 cerrados={cerrados}

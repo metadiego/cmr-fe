@@ -17,14 +17,18 @@ export function RetireScaleButton({ deviceId, centroId, onDone }: { deviceId: st
   const tRoot = useTranslations();
   const confirm = useConfirm();
   const [busy, setBusy] = React.useState(false);
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
 
   async function retire() {
+    if (asking.current) return;
+    asking.current = true;
     const ok = await confirm({
       title: t("retireTitle", { deviceId }),
       description: t("retireBody", { deviceId }),
       confirmLabel: t("retire"),
       destructive: true,
-    });
+    }).finally(() => (asking.current = false));
     if (!ok) return;
     setBusy(true);
     try {

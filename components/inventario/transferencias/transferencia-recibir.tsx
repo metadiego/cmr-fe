@@ -105,6 +105,10 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   const [motivo, setMotivo] = React.useState("");
   // Set once a receive/reject succeeded: the page is navigating away, so nothing may be sent twice.
   const [done, setDone] = React.useState(false);
+  // Same flag as a ref, readable after an await (the state value in that closure is stale).
+  const doneRef = React.useRef(false);
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
 
   const esDestino = !!transfer && receivable.includes(transfer.destinationClinicId);
   const puedeRecibir =
@@ -123,6 +127,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   const hayErrores = items.some((it) => lineError(it) !== null);
 
   const leave = (msg: string) => {
+    doneRef.current = true;
     setDone(true);
     toast.success(msg);
     router.push("/inventory/transfers");
@@ -135,7 +140,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   const aprobar = useSubmit(
     async () => {
       // Backstop only: the button is disabled while a line is invalid.
-      if (!transfer || hayErrores) throw new Error(tc("error"));
+      if (!transfer || hayErrores) throw new Error(tc("errorTitle"));
       await recibirTransferencia(id, {
         items: items.map((it) => ({ itemId: it.id, receivedQuantity: Number(recibido[it.id]) })),
         politicaRemanente: politica,
@@ -147,7 +152,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   const rechazar = useSubmit(
     async () => {
       // Backstop only: the button is disabled until the reason is filled.
-      if (!transfer || !motivo.trim()) throw new Error(tc("error"));
+      if (!transfer || !motivo.trim()) throw new Error(tc("errorTitle"));
       await rechazarTransferencia(id, { reason: motivo.trim() });
     },
     {
@@ -164,12 +169,15 @@ export function TransferenciaRecibir({ id }: { id: string }) {
 
   // Receiving moves stock between clinics: it always goes through the confirm (which focuses Cancel).
   async function onAprobar() {
+    if (asking.current || doneRef.current) return;
+    asking.current = true;
     const ok = await confirm({
       title: t("confirmAprobarTitle"),
       description: t("confirmAprobarBody", { politica: politica === "merma" ? t("pol.merma") : t("pol.devolver") }),
       confirmLabel: t("aprobar"),
-    });
-    if (ok) await aprobar.submit();
+    }).finally(() => (asking.current = false));
+    if (!ok || doneRef.current) return;
+    await aprobar.submit();
   }
 
   if (state.kind === "loading") {

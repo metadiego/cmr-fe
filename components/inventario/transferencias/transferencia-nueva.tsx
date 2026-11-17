@@ -113,6 +113,11 @@ export function TransferenciaNueva() {
     [t("lineas"), !sinLineas || cantidadInvalida],
   ]);
   const blocked = sinLineas && cantidadInvalida;
+  // A chosen product with a blank / non-positive quantity is left out of the payload when another line
+  // is valid: say so (text only; `reason` never disables, `blocked` stays as above).
+  const lineaDescartada =
+    !sinLineas && lineas.some((l) => l.productoId && !(Number(l.cantidad) > 0));
+  const avisoCantidad = cantidadInvalida || lineaDescartada;
 
   function setLinea(key: string, patch: Partial<Linea>) {
     setLineas((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
@@ -249,7 +254,7 @@ export function TransferenciaNueva() {
           submitting={submitting || done}
           missing={missing}
           blocked={blocked}
-          reason={blocked ? t("lineQuantityInvalid") : null}
+          reason={avisoCantidad ? t("lineQuantityInvalid") : null}
         />
       </div>
     </PageContainer>

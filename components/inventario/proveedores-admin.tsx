@@ -48,13 +48,17 @@ export function ProveedoresAdmin() {
     setFormOpen(true);
   }
 
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function onDeactivate(p: Proveedor) {
+    if (asking.current) return;
+    asking.current = true;
     const ok = await confirm({
       title: t("deactivateTitle"),
       description: t("deactivateBody", { name: p.name }),
       confirmLabel: t("deactivate"),
       destructive: true,
-    });
+    }).finally(() => (asking.current = false));
     if (!ok) return;
     setBusyId(p.id);
     try {
