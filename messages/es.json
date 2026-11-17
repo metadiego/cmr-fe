@@ -297,6 +297,7 @@
     "fSlug": "Clave",
     "fKind": "Tipo",
     "fCapacity": "Capacidad (pacientes a la vez)",
+    "capacityInvalid": "La capacidad debe ser mayor que 0.",
     "fConcurrency": "Concurrencia",
     "fMaxMin": "Máximo de minutos por paciente",
     "fMaxMinPlaceholder": "sin tope",

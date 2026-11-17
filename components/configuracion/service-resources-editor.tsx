@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   listResources,
@@ -12,12 +11,12 @@ import {
   type ServiceResourceLine,
 } from "@/lib/api/resources";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // «Qué consume un servicio»: por cada servicio, qué recursos ocupa y cuánto. Es lo que hace que la agenda
@@ -32,7 +31,6 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
 
   const [serviceId, setServiceId] = React.useState<string>("");
   const [lines, setLines] = React.useState<ServiceResourceLine[]>([]);
-  const [busy, setBusy] = React.useState(false);
   // Líneas del servicio elegido (useResource, no effect manual → sin setState síncrono en effect).
   const linesRes = useResource<ServiceResourceLine[]>(
     () => (serviceId ? getServiceResources(serviceId, centroId) : Promise.resolve([])),
@@ -67,18 +65,10 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
   function remove(i: number) {
     setLines((ls) => ls.filter((_, idx) => idx !== i));
   }
-  async function guardar() {
-    if (busy || !serviceId) return;
-    setBusy(true);
-    try {
-      await setServiceResources(serviceId, lines, centroId);
-      toast.success(t("saved"));
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+  // The save button is only shown once a service is picked (see the render below).
+  const { submitting, submit } = useSubmit(() => setServiceResources(serviceId, lines, centroId), {
+    successMessage: t("saved"),
+  });
 
   return (
     <section className="space-y-4">
@@ -190,7 +180,7 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
           {puedeEscribir && (
             <div className="flex items-center justify-between">
               <Button variant="outline" size="sm" onClick={addLine} disabled={recursos.length === 0}>{t("addLine")}</Button>
-              <Button size="sm" onClick={guardar} disabled={busy}>{busy ? tRoot("common.saving") : tRoot("common.save")}</Button>
+              <Button size="sm" onClick={() => submit()} disabled={submitting}>{submitting ? tRoot("common.saving") : tRoot("common.save")}</Button>
             </div>
           )}
         </div>
