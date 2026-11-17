@@ -9,6 +9,7 @@ import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { todayPR } from "@/lib/format/fecha";
 import { ehrReadinessInvalid, ehrReadinessMissing, ehrReadinessOrder } from "@/lib/board/ehr-readiness-missing";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Field, FormDialog } from "@/components/kit/form-dialog";
 import { RequiredLegend } from "@/components/kit/required-mark";
 import { useSubmit } from "@/components/kit/use-submit";
@@ -103,12 +104,20 @@ export function EhrReadinessModal({
                   <SelectItem value="desconocido">{t("sexoDesconocido")}</SelectItem>
                 </SelectContent>
               </Select>
+            ) : f === "fechaNacimiento" ? (
+              <DatePicker
+                id={id}
+                value={form[f] ?? ""}
+                onChange={(v) => set(f, v)}
+                max={todayPR()}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? `${id}-error` : undefined}
+              />
             ) : (
               <Input
                 id={id}
-                type={f === "fechaNacimiento" ? "date" : "text"}
+                type="text"
                 value={form[f] ?? ""}
-                max={f === "fechaNacimiento" ? todayPR() : undefined}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? `${id}-error` : undefined}
                 onChange={(e) => set(f, e.target.value)}

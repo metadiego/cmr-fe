@@ -5610,7 +5610,12 @@
     "clear": "Clear",
     "hour": "Hour",
     "minute": "Min",
-    "period": "AM/PM"
+    "period": "AM/PM",
+    "typedFormat": "Type the date as MM/DD/YYYY (e.g. 03/15/1958).",
+    "typedInvalid": "That's not a real date.",
+    "typedFuture": "The date can't be in the future.",
+    "typedAge": "Check the year — the age doesn't look right.",
+    "typedRange": "That date is outside the allowed range."
   },
   "patientDesk": {
     "title": "Patient Center",

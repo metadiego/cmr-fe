@@ -5610,7 +5610,12 @@
     "clear": "Borrar",
     "hour": "Hora",
     "minute": "Min",
-    "period": "AM/PM"
+    "period": "AM/PM",
+    "typedFormat": "Escribe la fecha como MM/DD/AAAA (p. ej. 03/15/1958).",
+    "typedInvalid": "Esa no es una fecha real.",
+    "typedFuture": "La fecha no puede ser futura.",
+    "typedAge": "Verifica el año — la edad no parece correcta.",
+    "typedRange": "Esa fecha está fuera del rango permitido."
   },
   "patientDesk": {
     "title": "Centro de Pacientes",

@@ -1,7 +1,7 @@
 // Lock del bug off-by-one: una fecha solo-día NUNCA debe retroceder por zona horaria. Correr: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatFechaSolo, parseDayUTC } from "./fecha.ts";
+import { formatFechaSolo, parseDayUTC, parseFechaEscrita } from "./fecha.ts";
 
 test("fecha solo-día se formatea MM/DD/YYYY sin corrimiento", () => {
   assert.equal(formatFechaSolo("2026-07-21"), "07/21/2026");
@@ -60,4 +60,40 @@ test("parseDayUTC returns null for empty/invalid input", () => {
   assert.equal(parseDayUTC(""), null);
   assert.equal(parseDayUTC(null), null);
   assert.equal(parseDayUTC("no-a-date"), null);
+});
+
+// --- parseFechaEscrita: MM/DD/YYYY typed by hand, never DD/MM -----------------------
+
+test("parseFechaEscrita: con barra, con guion, y sin separador dan la misma fecha", () => {
+  assert.deepEqual(parseFechaEscrita("03/15/1958"), { ok: true, iso: "1958-03-15" });
+  assert.deepEqual(parseFechaEscrita("3/15/1958"), { ok: true, iso: "1958-03-15" });
+  assert.deepEqual(parseFechaEscrita("03-15-1958"), { ok: true, iso: "1958-03-15" });
+  assert.deepEqual(parseFechaEscrita("03151958"), { ok: true, iso: "1958-03-15" });
+  assert.deepEqual(parseFechaEscrita("  03/15/1958  "), { ok: true, iso: "1958-03-15" });
+});
+
+test("parseFechaEscrita: formato que no casa ninguna forma", () => {
+  assert.deepEqual(parseFechaEscrita("1958-03-15"), { ok: false, razon: "formato" });
+  assert.deepEqual(parseFechaEscrita("marzo 15 1958"), { ok: false, razon: "formato" });
+  assert.deepEqual(parseFechaEscrita(""), { ok: false, razon: "formato" });
+});
+
+test("parseFechaEscrita: mes/día fuera de rango, o un día que no existe (30 de febrero)", () => {
+  assert.deepEqual(parseFechaEscrita("13/01/1958"), { ok: false, razon: "invalida" });
+  assert.deepEqual(parseFechaEscrita("02/30/1958"), { ok: false, razon: "invalida" });
+  assert.deepEqual(parseFechaEscrita("00/15/1958"), { ok: false, razon: "invalida" });
+});
+
+test("parseFechaEscrita: el 29 de febrero solo en años bisiestos", () => {
+  assert.deepEqual(parseFechaEscrita("02/29/2000"), { ok: true, iso: "2000-02-29" });
+  assert.deepEqual(parseFechaEscrita("02/29/1900"), { ok: false, razon: "invalida" });
+});
+
+test("parseFechaEscrita: nunca una fecha futura", () => {
+  assert.deepEqual(parseFechaEscrita("01/01/2099"), { ok: false, razon: "futura" });
+});
+
+test("parseFechaEscrita: edad fuera de rango (>120) rechazada, el resto pasa", () => {
+  assert.deepEqual(parseFechaEscrita("01/01/1850"), { ok: false, razon: "edad" });
+  assert.equal(parseFechaEscrita("01/01/1958").ok, true);
 });
