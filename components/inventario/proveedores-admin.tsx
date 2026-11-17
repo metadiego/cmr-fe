@@ -20,24 +20,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 export function ProveedoresAdmin() {
@@ -49,8 +36,8 @@ export function ProveedoresAdmin() {
 
   const [formOpen, setFormOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Proveedor | null>(null);
-  const [deleting, setDeleting] = React.useState<Proveedor | null>(null);
-  const [busy, setBusy] = React.useState(false);
+  const [busyId, setBusyId] = React.useState<string | null>(null);
+  const confirm = useConfirm();
 
   function openNew() {
     setEditing(null);
@@ -61,18 +48,23 @@ export function ProveedoresAdmin() {
     setFormOpen(true);
   }
 
-  async function confirmDelete() {
-    if (!deleting) return;
-    setBusy(true);
+  async function onDeactivate(p: Proveedor) {
+    const ok = await confirm({
+      title: t("deactivateTitle"),
+      description: t("deactivateBody", { name: p.name }),
+      confirmLabel: t("deactivate"),
+      destructive: true,
+    });
+    if (!ok) return;
+    setBusyId(p.id);
     try {
-      await deleteProveedor(deleting.id);
+      await deleteProveedor(p.id);
       toast.success(t("deleted"));
-      setDeleting(null);
       reload();
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {
-      setBusy(false);
+      setBusyId(null);
     }
   }
 
@@ -135,7 +127,8 @@ export function ProveedoresAdmin() {
                         variant="ghost"
                         size="sm"
                         className="text-destructive hover:text-destructive"
-                        onClick={() => setDeleting(p)}
+                        disabled={busyId === p.id}
+                        onClick={() => onDeactivate(p)}
                       >
                         {t("deactivate")}
                       </Button>
@@ -154,23 +147,6 @@ export function ProveedoresAdmin() {
         onOpenChange={setFormOpen}
         onSaved={reload}
       />
-
-      <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("deactivateTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("deactivateBody", { name: deleting?.name ?? "" })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tc("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={busy}>
-              {t("deactivate")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </PageContainer>
   );
 }
@@ -202,17 +178,11 @@ function ProveedorForm({
   onSaved: () => void;
 }) {
   const t = useTranslations("inventario.prov");
-  const tc = useTranslations("common");
   const isEdit = !!proveedor;
 
-  const [form, setForm] = React.useState<FormState>(EMPTY);
-  const [submitting, setSubmitting] = React.useState(false);
-
-  const [prevId, setPrevId] = React.useState<string | undefined>(undefined);
-  const targetId = proveedor?.id;
-  if (open && targetId !== prevId) {
-    setPrevId(targetId);
-    setForm(
+  // Re-initialised when the dialog opens or another supplier is loaded.
+  const [form, update] = useDialogForm<FormState>(
+    () =>
       proveedor
         ? {
             name: proveedor.name ?? "",
@@ -222,17 +192,18 @@ function ProveedorForm({
             active: proveedor.active ?? true,
           }
         : EMPTY,
-    );
-  }
+    open,
+    proveedor?.id,
+  );
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
-    setForm((prev) => ({ ...prev, [k]: v }));
+    update({ [k]: v } as Partial<FormState>);
   }
 
-  async function onSubmit() {
-    if (!form.name.trim()) return;
-    setSubmitting(true);
-    try {
+  const missing = missingFields([[t("field.nombre"), form.name.trim().length > 0]]);
+
+  const { submitting, submit } = useSubmit(
+    async () => {
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
       const base = {
         name: form.name.trim(),
@@ -245,74 +216,67 @@ function ProveedorForm({
       } else {
         await createProveedor(base);
       }
-      toast.success(isEdit ? t("updated") : t("created"));
-      onOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? t("editTitle") : t("newTitle")}</DialogTitle>
-          <DialogDescription>{t("formDescription")}</DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3">
-          <FormRow label={t("field.nombre")}>
-            <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
-          </FormRow>
-          <FormRow label={t("field.telefono")}>
-            <Input
-              type="tel"
-              value={form.phone}
-              onChange={(e) => set("phone", e.target.value)}
-            />
-          </FormRow>
-          <FormRow label={t("field.email")}>
-            <Input
-              type="email"
-              value={form.email}
-              onChange={(e) => set("email", e.target.value)}
-            />
-          </FormRow>
-          <FormRow label={t("field.direccion")}>
-            <Input
-              value={form.address}
-              onChange={(e) => set("address", e.target.value)}
-            />
-          </FormRow>
-          {isEdit && (
-            <div className="flex items-center justify-between rounded-lg border px-3 py-2">
-              <Label>{t("field.activo")}</Label>
-              <Switch checked={form.active} onCheckedChange={(v) => set("active", v)} />
-            </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={submitting || !form.name.trim()}>
-            {submitting ? tc("saving") : tc("save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    },
+    {
+      successMessage: isEdit ? t("updated") : t("created"),
+      onSuccess: () => {
+        onOpenChange(false);
+        onSaved();
+      },
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
   );
-}
 
-function FormRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-    </label>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      title={isEdit ? t("editTitle") : t("newTitle")}
+      description={t("formDescription")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+    >
+      <Field label={t("field.nombre")} htmlFor="supplier-name" required>
+        <Input id="supplier-name" value={form.name} onChange={(e) => set("name", e.target.value)} />
+      </Field>
+      <Field label={t("field.telefono")} htmlFor="supplier-phone">
+        <Input
+          id="supplier-phone"
+          type="tel"
+          value={form.phone}
+          onChange={(e) => set("phone", e.target.value)}
+        />
+      </Field>
+      <Field label={t("field.email")} htmlFor="supplier-email">
+        <Input
+          id="supplier-email"
+          type="email"
+          value={form.email}
+          onChange={(e) => set("email", e.target.value)}
+        />
+      </Field>
+      <Field label={t("field.direccion")} htmlFor="supplier-address">
+        <Input
+          id="supplier-address"
+          value={form.address}
+          onChange={(e) => set("address", e.target.value)}
+        />
+      </Field>
+      {isEdit && (
+        <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+          <Label htmlFor="supplier-active">{t("field.activo")}</Label>
+          <Switch
+            id="supplier-active"
+            checked={form.active}
+            onCheckedChange={(v) => set("active", v)}
+          />
+        </div>
+      )}
+    </FormDialog>
   );
 }
