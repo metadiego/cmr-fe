@@ -14,6 +14,9 @@ import { ApiError } from "@/lib/api/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 import {
   TableBody,
   TableCell,
@@ -22,14 +25,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTable } from "@/components/ui/data-table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 type State =
   | { kind: "loading" }
@@ -50,7 +45,6 @@ export function PendingProfiles() {
   const [busyId, setBusyId] = React.useState<string | null>(null);
   // Reject dialog state.
   const [reject, setReject] = React.useState<{ profile: Perfil; motivo: string } | null>(null);
-  const [rejecting, setRejecting] = React.useState(false);
 
   // Refetch the pending list. Called on mount and after a mutation. Does not
   // set "loading" synchronously (initial state is already loading); handlers
@@ -90,20 +84,25 @@ export function PendingProfiles() {
     }
   }
 
-  async function onConfirmReject() {
-    if (!reject || !reject.motivo.trim()) return;
-    setRejecting(true);
-    try {
+  const rejectMissing = missingFields([[t("rejectReason"), !!reject?.motivo.trim()]]);
+  const { submitting: rejecting, submit: confirmReject } = useSubmit(
+    async () => {
+      if (!reject) throw new Error("no profile"); // unreachable: the dialog is open only with a profile
       await rejectProfile(reject.profile.id, reject.motivo.trim());
-      toast.success(t("rejected", { email: reject.profile.email }));
-      setReject(null);
-      load();
-    } catch (err) {
-      toast.error(errMessage(err));
-    } finally {
-      setRejecting(false);
-    }
-  }
+      return reject.profile.email;
+    },
+    {
+      onSuccess: (email) => {
+        toast.success(t("rejected", { email }));
+        setReject(null);
+        load();
+      },
+      onError: (err) => {
+        toast.error(errMessage(err));
+        return true;
+      },
+    },
+  );
 
   if (state.kind === "loading") {
     return <p className="text-sm text-muted-foreground">{t("loading")}</p>;
@@ -164,18 +163,24 @@ export function PendingProfiles() {
         </TableBody>
       </DataTable>
 
-      <Dialog
+      <FormDialog
         open={reject !== null}
         onOpenChange={(open) => !open && setReject(null)}
+        size="md"
+        title={t("rejectTitle")}
+        description={t("rejectDescription", { email: reject?.profile.email ?? "" })}
+        // Rejecting is outward and final: only the button fires it (Enter in the textarea is a newline).
+        onSubmit={() => {}}
+        actions={[
+          { label: t("confirmReject"), variant: "destructive", onClick: () => confirmReject() },
+        ]}
+        cancelLabel={t("cancel")}
+        submitting={rejecting}
+        missing={rejectMissing}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("rejectTitle")}</DialogTitle>
-            <DialogDescription>
-              {t("rejectDescription", { email: reject?.profile.email ?? "" })}
-            </DialogDescription>
-          </DialogHeader>
+        <Field label={t("rejectReason")} htmlFor="reject-profile-reason" required>
           <Textarea
+            id="reject-profile-reason"
             value={reject?.motivo ?? ""}
             onChange={(e) =>
               setReject((r) => (r ? { ...r, motivo: e.target.value } : r))
@@ -183,20 +188,8 @@ export function PendingProfiles() {
             placeholder={t("motivoPlaceholder")}
             rows={3}
           />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReject(null)}>
-              {t("cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={onConfirmReject}
-              disabled={rejecting || !reject?.motivo.trim()}
-            >
-              {t("confirmReject")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </Field>
+      </FormDialog>
     </>
   );
 }

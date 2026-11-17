@@ -297,6 +297,7 @@
     "fSlug": "Clave",
     "fKind": "Tipo",
     "fCapacity": "Capacidad (pacientes a la vez)",
+    "capacityInvalid": "La capacidad debe ser mayor que 0.",
     "fConcurrency": "Concurrencia",
     "fMaxMin": "Máximo de minutos por paciente",
     "fMaxMinPlaceholder": "sin tope",
@@ -1708,6 +1709,7 @@
     "rejectTitle": "Rechazar perfil",
     "rejectDescription": "Indica el motivo del rechazo de {email}.",
     "motivoPlaceholder": "Motivo del rechazo",
+    "rejectReason": "Motivo del rechazo",
     "confirmReject": "Rechazar",
     "cancel": "Cancelar",
     "users": {
@@ -1745,7 +1747,8 @@
         "cancelar": "Cancelar",
         "guardar": "Cambiar email",
         "guardando": "Cambiando…",
-        "ok": "Email de acceso actualizado"
+        "ok": "Email de acceso actualizado",
+        "unchanged": "Es el mismo email que ya tiene"
       },
       "adminBadge": "Administrador",
       "allCenters": "Todos los centros",
@@ -3935,7 +3938,8 @@
       "clinico": "Clínico",
       "agenda": "Agenda",
       "otras": "Otras"
-    }
+    },
+    "noClinicToCreate": "No tienes un centro donde crear plantillas."
   },
   "fac": {
     "col": {

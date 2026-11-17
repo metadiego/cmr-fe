@@ -16,13 +16,14 @@ import { useCan } from "@/hooks/use-can";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
+import { missingFields } from "@/lib/forms/missing";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
 
-// Catálogo de permisos: tabla con buscador por módulo + alta/edición/borrado. La clave `modulo.accion`
-// se enseña partida en vivo al escribirla (para que la convención se entienda sin explicarla). La clave
-// NO se edita (está en el código y en cada concesión). Handoff permisos-y-roles-pantalla.
+// Permission catalogue: table with a module search + create/edit/delete. The `module.action` key is
+// shown split live while typing (so the convention is learnt without explaining it). The key is NOT
+// editable (it lives in the code and in every grant). Handoff permisos-y-roles-pantalla.
 function partes(clave: string): { modulo: string; accion: string } {
   const c = clave.trim().toLowerCase().replace(/\s+/g, "");
   const i = c.indexOf(".");
@@ -40,6 +41,7 @@ export function PermisosCatalogo() {
   const [nuevo, setNuevo] = React.useState(false);
   const [editar, setEditar] = React.useState<Permiso | null>(null);
   const [busyId, setBusyId] = React.useState<string | null>(null);
+  const confirm = useConfirm();
 
   const filtrados = permisos
     .filter((p) => {
@@ -49,14 +51,15 @@ export function PermisosCatalogo() {
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
   async function borrar(p: Permiso) {
-    if (!window.confirm(t("borrarConfirm", { clave: p.slug }))) return;
+    const ok = await confirm({ title: t("borrarConfirm", { clave: p.slug }), confirmLabel: tc("delete"), destructive: true });
+    if (!ok) return;
     setBusyId(p.id);
     try {
       await eliminarPermiso(p.id);
       toast.success(t("borrado"));
       res.reload();
     } catch (e) {
-      // El BE dice a cuántos afecta y qué hacer → mostrarlo tal cual.
+      // The BE says how many it affects and what to do → show it as is.
       toastError(e, tRoot);
     } finally {
       setBusyId(null);
@@ -109,112 +112,93 @@ export function PermisosCatalogo() {
         </div>
       )}
 
-      {nuevo && <PermisoNuevoDialog onClose={() => setNuevo(false)} onSaved={() => { setNuevo(false); res.reload(); }} tRoot={tRoot} tc={tc} t={t} />}
-      {editar && <PermisoEditarDialog permiso={editar} onClose={() => setEditar(null)} onSaved={() => { setEditar(null); res.reload(); }} tRoot={tRoot} tc={tc} t={t} />}
+      {nuevo && <PermisoNuevoDialog onClose={() => setNuevo(false)} onSaved={() => { setNuevo(false); res.reload(); }} tc={tc} t={t} />}
+      {editar && <PermisoEditarDialog permiso={editar} onClose={() => setEditar(null)} onSaved={() => { setEditar(null); res.reload(); }} tc={tc} t={t} />}
     </div>
   );
 }
 
-function PermisoNuevoDialog({ onClose, onSaved, tRoot, tc, t }: {
+function PermisoNuevoDialog({ onClose, onSaved, tc, t }: {
   onClose: () => void; onSaved: () => void;
-  tRoot: ReturnType<typeof useTranslations>; tc: ReturnType<typeof useTranslations>; t: ReturnType<typeof useTranslations>;
+  tc: ReturnType<typeof useTranslations>; t: ReturnType<typeof useTranslations>;
 }) {
+  // Mounted only while open (the parent renders it conditionally), so plain state resets itself.
   const [clave, setClave] = React.useState("");
   const [descripcion, setDescripcion] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
   const { modulo, accion } = partes(clave);
   const valido = /^[a-z0-9_]+(\.[a-z0-9_]+)+$/.test(clave.trim().toLowerCase().replace(/\s+/g, ""));
+  const missing = missingFields([[t("field.clave"), !!clave.trim()]]);
+  // Filled but malformed: explained in the footer, not counted as missing.
+  const invalid = !!clave.trim() && !valido;
 
-  async function guardar() {
-    if (!valido || busy) return;
-    setBusy(true);
-    try {
-      await crearPermiso({ slug: clave.trim(), ...(descripcion.trim() ? { description: descripcion.trim() } : {}) });
-      toast.success(t("creado"));
-      onSaved();
-    } catch (e) {
-      toastError(e, tRoot); // 409 ya existe / 400 formato → mensaje del BE
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    // 409 already exists / 400 format → the BE message (via the default error toast).
+    () => crearPermiso({ slug: clave.trim(), ...(descripcion.trim() ? { description: descripcion.trim() } : {}) }),
+    { successMessage: t("creado"), onSuccess: () => onSaved() },
+  );
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("nuevoTitulo")}</DialogTitle>
-          <DialogDescription>{t("nuevoDesc")}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 text-sm">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("field.clave")}</span>
-            <Input value={clave} onChange={(e) => setClave(e.target.value)} placeholder="factura.pago.anular" autoFocus />
-          </label>
-          {/* Preview EN VIVO de cómo se parte la clave — enseña la convención sin explicarla. */}
-          {clave.trim() && (
-            <div className={valido ? "rounded-md border bg-muted/40 px-3 py-2 text-xs" : "rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"}>
-              {valido ? (
-                <span><span className="font-medium">{t("field.modulo")}:</span> <code className="font-mono">{modulo}</code> · <span className="font-medium">{t("field.accion")}:</span> <code className="font-mono">{accion}</code></span>
-              ) : t("formatoInvalido")}
-            </div>
-          )}
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("field.descripcion")}</span>
-            <Input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
-          </label>
-          <div className="flex justify-end gap-2 pt-1">
-            <Button variant="outline" size="sm" onClick={onClose} disabled={busy}>{tc("cancel")}</Button>
-            <Button size="sm" onClick={guardar} disabled={!valido || busy}>{busy ? tc("loading") : tc("save")}</Button>
-          </div>
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="md"
+      title={t("nuevoTitulo")}
+      description={t("nuevoDesc")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      submittingLabel={tc("loading")}
+      submitLabel={tc("save")}
+      cancelLabel={tc("cancel")}
+      missing={missing}
+      blocked={invalid}
+      reason={invalid ? t("formatoInvalido") : null}
+    >
+      <Field label={t("field.clave")} htmlFor="permission-new-key" required>
+        <Input id="permission-new-key" value={clave} onChange={(e) => setClave(e.target.value)} placeholder="factura.pago.anular" autoFocus />
+      </Field>
+      {/* LIVE preview of how the key splits — teaches the convention without explaining it. */}
+      {clave.trim() && valido && (
+        <div className="rounded-md border bg-muted/40 px-3 py-2 text-xs">
+          <span><span className="font-medium">{t("field.modulo")}:</span> <code className="font-mono">{modulo}</code> · <span className="font-medium">{t("field.accion")}:</span> <code className="font-mono">{accion}</code></span>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+      <Field label={t("field.descripcion")} htmlFor="permission-new-description">
+        <Input id="permission-new-description" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+      </Field>
+    </FormDialog>
   );
 }
 
-function PermisoEditarDialog({ permiso, onClose, onSaved, tRoot, tc, t }: {
+function PermisoEditarDialog({ permiso, onClose, onSaved, tc, t }: {
   permiso: Permiso; onClose: () => void; onSaved: () => void;
-  tRoot: ReturnType<typeof useTranslations>; tc: ReturnType<typeof useTranslations>; t: ReturnType<typeof useTranslations>;
+  tc: ReturnType<typeof useTranslations>; t: ReturnType<typeof useTranslations>;
 }) {
+  // Mounted only while open, per permission (the parent renders it conditionally).
   const [descripcion, setDescripcion] = React.useState(permiso.description ?? "");
-  const [busy, setBusy] = React.useState(false);
-  async function guardar() {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await actualizarPermiso(permiso.id, descripcion.trim());
-      toast.success(t("guardado"));
-      onSaved();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    () => actualizarPermiso(permiso.id, descripcion.trim()),
+    { successMessage: t("guardado"), onSuccess: () => onSaved() },
+  );
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("editarTitulo")}</DialogTitle>
-          <DialogDescription>{t("editarDesc")}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 text-sm">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("field.clave")}</span>
-            {/* La clave es SOLO LECTURA: renombrarla dejaría colgando el código y las concesiones. */}
-            <Input value={permiso.slug} disabled readOnly className="font-mono" />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("field.descripcion")}</span>
-            <Input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} autoFocus />
-          </label>
-          <div className="flex justify-end gap-2 pt-1">
-            <Button variant="outline" size="sm" onClick={onClose} disabled={busy}>{tc("cancel")}</Button>
-            <Button size="sm" onClick={guardar} disabled={busy}>{busy ? tc("loading") : tc("save")}</Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="md"
+      title={t("editarTitulo")}
+      description={t("editarDesc")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      submittingLabel={tc("loading")}
+      submitLabel={tc("save")}
+      cancelLabel={tc("cancel")}
+    >
+      <Field label={t("field.clave")} htmlFor="permission-edit-key">
+        {/* The key is READ-ONLY: renaming it would leave the code and the grants dangling. */}
+        <Input id="permission-edit-key" value={permiso.slug} disabled readOnly className="font-mono" />
+      </Field>
+      <Field label={t("field.descripcion")} htmlFor="permission-edit-description">
+        <Input id="permission-edit-description" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} autoFocus />
+      </Field>
+    </FormDialog>
   );
 }

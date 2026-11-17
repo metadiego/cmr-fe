@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   actualizarColumna,
@@ -13,9 +12,10 @@ import {
 } from "@/lib/api/tablero";
 import { listProductos, type Producto } from "@/lib/api/inventario";
 import { listGruposFacturacion } from "@/lib/api/grupos-facturacion";
-import { toastError } from "@/lib/api/errors";
+import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -95,7 +95,7 @@ export function ColumnConfigDialog({
   // una columna entera de la tabla. `asignadoDe` dice de qué columna sale el nombre.
   const [mostrarAsignado, setMostrarAsignado] = React.useState(!!r.mostrarAsignado);
   const [asignadoDe, setAsignadoDe] = React.useState((r.asignadoDe as string) ?? "");
-  const [busy, setBusy] = React.useState(false);
+  const missing = missingFields([[t("colBinding"), !!binding.trim()]]);
 
   // Preserva las claves NO gestionadas por este diálogo (group, postAccion, color,
   // background, ancho…): parte del render existente y solo setea/limpia las del tipo.
@@ -123,9 +123,8 @@ export function ColumnConfigDialog({
     return Object.keys(base).length ? base : null;
   }
 
-  async function submit() {
-    setBusy(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
       const payload = {
         type: tipo,
         binding: binding.trim(),
@@ -148,29 +147,31 @@ export function ColumnConfigDialog({
         else delete compRender.grupoFacturacionId;
       }
       await setComposicionRender(tablero, col.id, compRender);
-      toast.success(t("saved"));
-      onSaved();
-      onClose();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    {
+      successMessage: t("saved"),
+      onSuccess: () => {
+        onSaved();
+        onClose();
+      },
+    },
+  );
 
   return (
     <FormDialog
       open
       onOpenChange={(o) => !o && onClose()}
       title={`${t("configure")}: ${tRoot(col.labelKey)}`}
-      onSubmit={submit}
-      submitting={busy}
-      canSubmit={!busy && !!binding.trim()}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
     >
       {/* Nombre propio del negocio para esta columna EN ESTE servicio (re-etiquetar sin desplegar). El
           marcador es el nombre actual traducido; vacío = volver al de siempre. */}
-      <Field label={t("cfgLabel")} hint={t("cfgLabelHelp")}>
+      <Field label={t("cfgLabel")} htmlFor="column-config-label" hint={t("cfgLabelHelp")}>
         <Input
+          id="column-config-label"
+          aria-describedby="column-config-label-hint"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder={tRoot(col.labelKey)}
@@ -186,8 +187,14 @@ export function ColumnConfigDialog({
             </SelectContent>
           </Select>
         </Field>
-        <Field label={t("colBinding")} hint={t("colBindingHint")}>
-          <Input value={binding} onChange={(e) => setBinding(e.target.value)} placeholder="cita.motivo" />
+        <Field label={t("colBinding")} htmlFor="column-config-binding" hint={t("colBindingHint")} required>
+          <Input
+            id="column-config-binding"
+            aria-describedby="column-config-binding-hint"
+            value={binding}
+            onChange={(e) => setBinding(e.target.value)}
+            placeholder="cita.motivo"
+          />
         </Field>
       </div>
 
@@ -350,7 +357,13 @@ function ProductosGrupoConfig({
       <div className="space-y-1.5">
         <span className="text-xs font-medium text-muted-foreground">{t("cfgEscogeProductos")}</span>
         <div className="relative">
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("cfgBuscarProducto")} />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            // Enter while searching a product must not save the whole column config.
+            onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+            placeholder={t("cfgBuscarProducto")}
+          />
           {resultados.length > 0 && (
             <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border bg-background shadow-md">
               {resultados.map((p) => (

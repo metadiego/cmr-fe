@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Label } from "@/components/ui/label";
 import {
   TableBody,
   TableCell,
@@ -26,14 +25,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTable } from "@/components/ui/data-table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
 import {
   Select,
   SelectContent,
@@ -194,105 +188,85 @@ function CreateOverrideDialog({
 }) {
   const t = useTranslations("admin.override");
   const tc = useTranslations("admin");
-  const [nombre, setNombre] = React.useState("");
-  const [scope, setScope] = React.useState<string>(GLOBAL);
-  const [desde, setDesde] = React.useState("");
-  const [hasta, setHasta] = React.useState("");
-  const [config, setConfig] = React.useState<ThemeConfig>({});
-  const [submitting, setSubmitting] = React.useState(false);
+  // Every field is optional (an empty theme is a valid override); reset on every open.
+  const [form, update] = useDialogForm(
+    () => ({ nombre: "", scope: GLOBAL as string, desde: "", hasta: "", config: {} as ThemeConfig }),
+    open,
+  );
 
-  function handleOpenChange(next: boolean) {
-    if (!next) {
-      setNombre("");
-      setScope(GLOBAL);
-      setDesde("");
-      setHasta("");
-      setConfig({});
-    }
-    onOpenChange(next);
-  }
-
-  async function onSubmit() {
-    setSubmitting(true);
-    try {
-      await createOverride({
-        config,
-        name: nombre.trim() || undefined,
-        centerId: scope === GLOBAL ? undefined : scope,
-        validFrom: desde || undefined,
-        validUntil: hasta || undefined,
-      });
-      toast.success(t("created"));
-      handleOpenChange(false);
-      onCreated();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    () =>
+      createOverride({
+        config: form.config,
+        name: form.nombre.trim() || undefined,
+        centerId: form.scope === GLOBAL ? undefined : form.scope,
+        validFrom: form.desde || undefined,
+        validUntil: form.hasta || undefined,
+      }),
+    {
+      successMessage: t("created"),
+      onSuccess: () => {
+        onOpenChange(false);
+        onCreated();
+      },
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
+  );
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("createTitle")}</DialogTitle>
-          <DialogDescription>{t("createHelp")}</DialogDescription>
-        </DialogHeader>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      title={t("createTitle")}
+      description={t("createHelp")}
+      // The scope defaults to global (every center): Enter never creates it, only the button.
+      onSubmit={() => {}}
+      actions={[{ label: t("createSubmit"), onClick: () => submit() }]}
+      submitting={submitting}
+      submittingLabel={t("creating")}
+      cancelLabel={tc("cancel")}
+    >
+      <Field label={t("name")} htmlFor="override-name">
+        <Input
+          id="override-name"
+          value={form.nombre}
+          onChange={(e) => update({ nombre: e.target.value })}
+          placeholder={t("namePlaceholder")}
+        />
+      </Field>
 
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label>{t("name")}</Label>
-            <Input
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder={t("namePlaceholder")}
-            />
-          </div>
+      <Field label={t("scope")} htmlFor="override-scope">
+        <Select value={form.scope} onValueChange={(v) => update({ scope: v })}>
+          <SelectTrigger id="override-scope" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={GLOBAL}>{t("global")}</SelectItem>
+            {centers.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name} ({c.code})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
 
-          <div className="space-y-1.5">
-            <Label>{t("scope")}</Label>
-            <Select value={scope} onValueChange={setScope}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={GLOBAL}>{t("global")}</SelectItem>
-                {centers.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name} ({c.code})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("from")}>
+          <DatePicker value={form.desde} onChange={(v) => update({ desde: v })} clearable />
+        </Field>
+        <Field label={t("to")}>
+          <DatePicker value={form.hasta} onChange={(v) => update({ hasta: v })} clearable />
+        </Field>
+      </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>{t("from")}</Label>
-              <DatePicker value={desde} onChange={setDesde} clearable />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t("to")}</Label>
-              <DatePicker value={hasta} onChange={setHasta} clearable />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label>{t("theme")}</Label>
-            <ThemeEditor value={config} onChange={setConfig} />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={submitting}>
-            {submitting ? t("creating") : t("createSubmit")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <Field label={t("theme")}>
+        <ThemeEditor value={form.config} onChange={(c) => update({ config: c })} />
+      </Field>
+    </FormDialog>
   );
 }

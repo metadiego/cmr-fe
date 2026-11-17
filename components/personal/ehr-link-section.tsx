@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   provisionEhrStaff,
@@ -13,12 +12,13 @@ import {
 } from "@/lib/api/ehr-integration";
 import type { Personal } from "@/lib/api/personal";
 import { suggestEhrRoleId } from "@/lib/personal/ehr-role-suggestion";
-import { toastError } from "@/lib/api/errors";
+import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
 
 // «Vincular con el EHR»: crear/editar la cuenta del EHR externo para esta persona, con un clic.
 // Handoff docs/specs/vincular-personal-con-el-ehr-handoff-fe.md. El botón va en TODA ficha de
@@ -113,67 +113,65 @@ function EhrLinkDialog({
       ? freshRes.state.data.find((l) => l.staffId === persona.id)
       : linkSnapshot;
   const [roleId, setRoleId] = React.useState(() => suggestEhrRoleId(persona.jobTitle, roles) ?? "");
-  const [busy, setBusy] = React.useState(false);
   const esNuevo = !link;
   const nombre = [persona.name, persona.lastName].filter(Boolean).join(" ").trim() || persona.name;
 
-  // Vincular (crear) necesita un correo real — el EHR invita a ESE correo; editar un rol ya
-  // vinculado no lo vuelve a pedir, así que no aplica. Sin esto, "Confirmar" solo se gateaba por
-  // `roleId` y un correo vacío mandaba un aviso sin sentido ("se enviará un correo a —") y lo
-  // dejaba enviar de todas formas. Encontrado por revisión adversarial (2026-10-01).
+  // Linking (create) needs a real email: the EHR invites THAT address. Editing the role of an existing
+  // link does not ask for it again, so it does not apply there. Without this, "Confirm" was gated only by
+  // `roleId`, and an empty email sent a meaningless notice ("an email will be sent to —") and let it go
+  // through anyway. Found by adversarial review (2026-10-01).
   const faltaCorreo = esNuevo && !persona.email;
+  const loading = freshRes.state.kind === "loading";
 
-  async function confirmar() {
-    if (busy || !roleId || faltaCorreo || freshRes.state.kind === "loading") return;
-    setBusy(true);
-    try {
+  const missing = missingFields([[t("ehrRol"), !!roleId]]);
+  const reason = faltaCorreo ? t("ehrFaltaCorreo") : loading ? tRoot("common.loading") : null;
+
+  const { submitting, submit } = useSubmit(
+    async () => {
       if (esNuevo) {
         await provisionEhrStaff(persona.id, roleId, centro);
       } else {
         await updateEhrStaffLink(persona.id, { ehrRoleId: roleId }, centro);
       }
-      toast.success(t(esNuevo ? "ehrVinculado" : "ehrActualizado"));
-      onDone();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    { successMessage: t(esNuevo ? "ehrVinculado" : "ehrActualizado"), onSuccess: onDone },
+  );
 
   return (
-    // Ignora el cierre (Escape/clic en el fondo) mientras hay una llamada en vuelo — no solo el botón
-    // Cancelar: cerrar a mitad de un POST .../provision y volver a abrir reinicia `busy` a false,
-    // permitiendo un segundo clic en Confirmar mientras el primero sigue en curso → dos invitaciones
-    // reales al mismo correo. Encontrado por revisión adversarial antes de mergear (2026-10-01).
-    <Dialog open onOpenChange={(o) => !o && !busy && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t(esNuevo ? "ehrVincularTitulo" : "ehrEditarTitulo", { nombre })}</DialogTitle>
-          <DialogDescription>
-            {esNuevo
-              ? faltaCorreo
-                ? t("ehrFaltaCorreo")
-                : t("ehrCorreoAviso", { email: persona.email ?? "" })
-              : t("ehrEditarDesc")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-2">
-          <Label>{t("ehrRol")}</Label>
-          <Select value={roleId || undefined} onValueChange={setRoleId}>
-            <SelectTrigger className="w-full"><SelectValue placeholder={t("ehrRolPlaceholder")} /></SelectTrigger>
-            <SelectContent>
-              {roles.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={busy}>{tRoot("common.cancel")}</Button>
-          <Button onClick={confirmar} disabled={busy || !roleId || faltaCorreo || freshRes.state.kind === "loading"}>
-            {busy ? t("ehrGuardando") : t(esNuevo ? "ehrVincular" : "ehrGuardar")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    // The shell ignores closing (Escape / backdrop click) while a call is in flight, not only the Cancel
+    // button: closing mid POST .../provision and reopening would allow a second Confirm while the first is
+    // still running → two real invitations to the same email. Found by adversarial review (2026-10-01).
+    // Linking sends an invitation email (outward): Enter never fires it, only the button does.
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="md"
+      title={t(esNuevo ? "ehrVincularTitulo" : "ehrEditarTitulo", { nombre })}
+      description={
+        esNuevo
+          ? faltaCorreo
+            ? t("ehrFaltaCorreo")
+            : t("ehrCorreoAviso", { email: persona.email ?? "" })
+          : t("ehrEditarDesc")
+      }
+      missing={missing}
+      blocked={faltaCorreo || loading}
+      reason={reason}
+      submitting={submitting}
+      submittingLabel={t("ehrGuardando")}
+      onSubmit={() => {}}
+      actions={[{ label: t(esNuevo ? "ehrVincular" : "ehrGuardar"), onClick: () => submit() }]}
+    >
+      <Field label={t("ehrRol")} htmlFor="ehr-link-role" required>
+        <Select value={roleId || undefined} onValueChange={setRoleId}>
+          <SelectTrigger id="ehr-link-role" className="w-full">
+            <SelectValue placeholder={t("ehrRolPlaceholder")} />
+          </SelectTrigger>
+          <SelectContent>
+            {roles.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </Field>
+    </FormDialog>
   );
 }

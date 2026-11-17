@@ -297,6 +297,7 @@
     "fSlug": "Key",
     "fKind": "Kind",
     "fCapacity": "Capacity (patients at once)",
+    "capacityInvalid": "Capacity must be greater than 0.",
     "fConcurrency": "Concurrency",
     "fMaxMin": "Max minutes per patient",
     "fMaxMinPlaceholder": "no cap",
@@ -1708,6 +1709,7 @@
     "rejectTitle": "Reject profile",
     "rejectDescription": "Provide the reason for rejecting {email}.",
     "motivoPlaceholder": "Rejection reason",
+    "rejectReason": "Rejection reason",
     "confirmReject": "Reject",
     "cancel": "Cancel",
     "users": {
@@ -1745,7 +1747,8 @@
         "cancelar": "Cancel",
         "guardar": "Change email",
         "guardando": "Changing…",
-        "ok": "Access email updated"
+        "ok": "Access email updated",
+        "unchanged": "Same as the current email"
       },
       "adminBadge": "Administrator",
       "allCenters": "All centers",
@@ -3935,7 +3938,8 @@
       "clinico": "Clinical",
       "agenda": "Schedule",
       "otras": "Other"
-    }
+    },
+    "noClinicToCreate": "You have no center to create templates in."
   },
   "fac": {
     "col": {
