@@ -1708,6 +1708,7 @@
     "rejectTitle": "Rechazar perfil",
     "rejectDescription": "Indica el motivo del rechazo de {email}.",
     "motivoPlaceholder": "Motivo del rechazo",
+    "rejectReason": "Motivo del rechazo",
     "confirmReject": "Rechazar",
     "cancel": "Cancelar",
     "users": {
