@@ -40,14 +40,12 @@ import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-pi
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
 import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip"
 import { PatientDeskSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
-import { ServiceFilterDropdown } from "@/components/patient-desk/service-filter-dropdown"
+import { ServiceFilterDropdown, consultSubtypeLabel } from "@/components/patient-desk/service-filter-dropdown"
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail"
-import { LiveBadge } from "@/components/live-badge"
 import { EnTerapiaSinAsistirBanner } from "@/components/frontdesk/en-terapia-sin-asistir-banner"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   Dialog,
@@ -59,6 +57,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
@@ -185,19 +184,19 @@ export function PatientDesk() {
   // `presentAt` ya es el de la CONSULTA (asConsultationView lo pisa con consultationPresentAt), no el
   // de un servicio. Data-driven del catálogo de subtipos del tablero (consultSubtypes), nunca
   // "nueva"/"seguimiento" a mano, para que cubra cualquier subtipo que el centro configure.
+  // Same numbers in every tab (the toolbar does not change when switching): the whole day's
+  // consultations, not the tab's filtered list.
   const consultSubtypeCounts = React.useMemo(() => {
     const counts = new Map<string, number>()
     for (const s of consultSubtypes) counts.set(s.slug, 0)
-    if (kind === "consultation") {
-      for (const p of patients) {
-        if (!p.presentAt) continue
-        for (const slug of p.consultationSubtypes) {
-          if (counts.has(slug)) counts.set(slug, (counts.get(slug) ?? 0) + 1)
-        }
+    for (const p of filterByKind(day.patients, "consultation").map(asConsultationView)) {
+      if (!p.presentAt) continue
+      for (const slug of p.consultationSubtypes) {
+        if (counts.has(slug)) counts.set(slug, (counts.get(slug) ?? 0) + 1)
       }
     }
     return counts
-  }, [kind, patients, consultSubtypes])
+  }, [day.patients, consultSubtypes])
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId)
     ? selectedId
@@ -251,72 +250,52 @@ export function PatientDesk() {
         <EnTerapiaSinAsistirBanner centro={gate.centro} />
       )}
 
+      {/* ONE row, the same in every tab (owner, 17-nov-2026): what the list shows on the left (tab,
+          sub-filter, date, search), who is free right now and «Citar» on the right. Facts about the
+          list («En sala») and «En vivo» (a dot) head the list itself. */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-40 flex-1 sm:max-w-md">
-          <HugeiconsIcon
-            icon={Search01Icon}
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className="pr-8 pl-9"
-            aria-label={t("searchPlaceholder")}
-          />
-          {/* Antes no había forma de limpiar sin borrar a mano — un récord buscado dejaba el panel
-              "congelado" en ese paciente sin que se notara por qué (handoff
-              quejas-de-mostrador-2026-10-20 §5). El SSE de usePatientDay no depende de `query` (filtra
-              client-side sobre data.patients ya cargada), así que sigue vivo con la búsqueda puesta. */}
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              aria-label={t("clearSearch")}
-              title={t("clearSearch")}
-              className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
-            </button>
-          )}
-        </div>
-        <DatePicker
-          className="w-40"
-          value={date}
-          onChange={setDate}
-          aria-label={t("date")}
-        />
         <div
           className="inline-flex rounded-md border p-0.5"
           role="group"
           aria-label={t("kindLabel")}
         >
-          {(["all", "services", "consultation"] as const).map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => pickKind(k)}
-              aria-pressed={kind === k}
-              className={cn(
-                "rounded px-3 py-1 text-xs font-medium",
-                kind === k
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              {t(`kind.${k}`)}
-            </button>
-          ))}
+          {(["all", "services", "consultation"] as const).map((k) => {
+            const active = kind === k
+            // The active Servicios/Consulta tab carries its own sub-filter: clicking it opens the menu
+            // (owner, 17-nov-2026: no separate ▾ button floating next to the tabs).
+            const hasMenu = active && k !== "all"
+            const tab = (
+              <button
+                key={k}
+                type="button"
+                onClick={hasMenu ? undefined : () => pickKind(k)}
+                aria-pressed={active}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded px-3 py-1 text-xs font-medium",
+                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {t(`kind.${k}`)}
+                {hasMenu && <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />}
+              </button>
+            )
+            return hasMenu ? (
+              <ServiceFilterDropdown
+                key={k}
+                kind={kind}
+                serviceFilter={serviceFilter}
+                consultSubtypeFilter={consultSubtypeFilter}
+                servicesToday={servicesToday}
+                consultSubtypes={consultSubtypes}
+                onPickService={pickServiceFilter}
+                onPickConsultSubtype={setConsultSubtypeFilter}
+                trigger={tab}
+              />
+            ) : (
+              tab
+            )
+          })}
         </div>
-        <ServiceFilterDropdown
-          kind={kind}
-          serviceFilter={serviceFilter}
-          consultSubtypeFilter={consultSubtypeFilter}
-          servicesToday={servicesToday}
-          consultSubtypes={consultSubtypes}
-          onPickService={pickServiceFilter}
-          onPickConsultSubtype={setConsultSubtypeFilter}
-        />
         {/* El filtro activo se ve, no solo se infiere del ícono relleno — antes alguien dejaba
             "Seguimiento" puesto y no se daba cuenta de que algunos pacientes no aparecían (handoff
             quejas-de-mostrador-2026-10-20 §3). */}
@@ -344,43 +323,46 @@ export function PatientDesk() {
             {t("filteringBy", {
               name: (() => {
                 const s = consultSubtypes.find((x) => x.slug === consultSubtypeFilter)
-                return s ? (tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug) : consultSubtypeFilter
+                return s ? consultSubtypeLabel(s, t, tRoot) : consultSubtypeFilter
               })(),
             })}
             <HugeiconsIcon icon={Cancel01Icon} className="size-3" />
           </button>
         )}
-        {loadingDay ? (
-          <Skeleton aria-hidden className="h-3 w-20" />
-        ) : (
-          <span className="text-xs text-muted-foreground">
-            {t("patientsCount", { n: patients.length })}
-          </span>
-        )}
-        {!loadingDay && kind === "consultation" && consultSubtypes.length > 0 && (
-          <span className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              {t("enSala")}
-            </span>
-            {consultSubtypes.map((s) => (
-              <span
-                key={s.slug}
-                className="inline-flex items-center gap-1 rounded-full bg-primary/10 py-0.5 pl-2.5 pr-2 text-primary"
-              >
-                <span className="text-xs font-medium">{tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug}</span>
-                <span className="text-sm font-bold tabular-nums">{consultSubtypeCounts.get(s.slug) ?? 0}</span>
-              </span>
-            ))}
-            {/* La suma, para no obligar al usuario a sumarlas de cabeza (dueño, 06-nov-2026). */}
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary py-0.5 pl-2.5 pr-2 text-primary-foreground">
-              <span className="text-xs font-medium">{t("enSalaTotal")}</span>
-              <span className="text-sm font-bold tabular-nums">
-                {[...consultSubtypeCounts.values()].reduce((sum, n) => sum + n, 0)}
-              </span>
-            </span>
-          </span>
-        )}
-        {data.live && <LiveBadge label={t("live")} />}
+        <DatePicker
+          className="w-40"
+          value={date}
+          onChange={setDate}
+          aria-label={t("date")}
+        />
+        <div className="relative min-w-48 flex-1 sm:max-w-md">
+          <HugeiconsIcon
+            icon={Search01Icon}
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="pr-8 pl-9"
+            aria-label={t("searchPlaceholder")}
+          />
+          {/* Antes no había forma de limpiar sin borrar a mano — un récord buscado dejaba el panel
+              "congelado" en ese paciente sin que se notara por qué (handoff
+              quejas-de-mostrador-2026-10-20 §5). El SSE de usePatientDay no depende de `query` (filtra
+              client-side sobre data.patients ya cargada), así que sigue vivo con la búsqueda puesta. */}
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label={t("clearSearch")}
+              title={t("clearSearch")}
+              className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+            </button>
+          )}
+        </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <LiveLocationWidget
             centroId={gate.centro}
@@ -394,66 +376,47 @@ export function PatientDesk() {
             onChanged={data.refresh}
           />
           <TechnicianStatusButton centro={gate.centro} fecha={date} />
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/scheduling/appointments/services">
-              {t("serviceAppointments")}
-            </Link>
-          </Button>
-          {/* «Citar» follows the toggle: Servicios books therapies (the filtered service preselected),
-              Consulta adds a consultation to today's board, Todos asks which. */}
-          {can("citas.create") &&
-            (kind === "all" ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm">
-                    <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
-                    {t("book")}
-                    <HugeiconsIcon
-                      icon={ArrowDown01Icon}
-                      className="size-3.5"
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+          {/* «Citar» is the same menu in every tab, so the toolbar does not change; in Servicios a
+              filtered service is preselected. The service appointments list lives here too. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm">
+                <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
+                {t("book")}
+                <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {can("citas.create") && (
+                <>
                   <DropdownMenuItem
-                    onSelect={() => setSchedule({ open: true, pacienteId: "" })}
+                    onSelect={() =>
+                      setSchedule({
+                        open: true,
+                        pacienteId: "",
+                        servicioId: kind === "services" ? (serviceFilter ?? undefined) : undefined,
+                      })
+                    }
                   >
                     {t("bookService")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => setAddingConsultation({ open: true })}
-                  >
+                  <DropdownMenuItem onSelect={() => setAddingConsultation({ open: true })}>
                     {t("bookConsultation")}
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button
-                size="sm"
-                onClick={() =>
-                  kind === "consultation"
-                    ? setAddingConsultation({ open: true })
-                    : setSchedule({
-                        open: true,
-                        pacienteId: "",
-                        servicioId: serviceFilter ?? undefined,
-                      })
-                }
-              >
-                <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
-                {t(
-                  kind === "consultation" ? "bookConsultation" : "bookService"
-                )}
-              </Button>
-            ))}
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem asChild>
+                <Link href="/scheduling/appointments/services">{t("serviceAppointments")}</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* No margins here: PageContainer's gap spaces the rows, and a strip that renders nothing
           (no queue today) adds no gap, so no empty band is left behind. */}
-      {kind !== "consultation" && (
-        <TherapyQueueStrip centerId={gate.centro} date={date} />
-      )}
+      <TherapyQueueStrip centerId={gate.centro} date={date} />
 
       {gate.cargando ? (
         <PatientDeskSkeleton />
@@ -475,6 +438,28 @@ export function PatientDesk() {
         </p>
       ) : (
         <PatientListView
+          live={data.live}
+          headerEnd={
+            // Consultation patients in the room: meaningful in Todos and Consulta, not in Servicios.
+            kind !== "services" && consultSubtypes.length > 0 && (
+              <span className="inline-flex flex-wrap items-center gap-x-3">
+                <span>{t("enSala")}:</span>
+                {consultSubtypes.map((s) => (
+                  <span key={s.slug} className="whitespace-nowrap">
+                    {consultSubtypeLabel(s, t, tRoot)}{" "}
+                    <span className="font-semibold text-foreground tabular-nums">{consultSubtypeCounts.get(s.slug) ?? 0}</span>
+                  </span>
+                ))}
+                {/* La suma, para no obligar al usuario a sumarlas de cabeza (dueño, 06-nov-2026). */}
+                <span className="whitespace-nowrap">
+                  {t("enSalaTotal")}{" "}
+                  <span className="font-semibold text-foreground tabular-nums">
+                    {[...consultSubtypeCounts.values()].reduce((sum, n) => sum + n, 0)}
+                  </span>
+                </span>
+              </span>
+            )
+          }
           patients={patients}
           data={data}
           kind={kind}

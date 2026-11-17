@@ -7,14 +7,11 @@ import { toast } from "sonner"
 import {
   getRoles,
   getPermisos,
-  getRoleMenu,
-  setRoleMenu,
   createRole,
   updateRole,
   deleteRole,
   type Rol,
   type Permiso,
-  type ProfileMenuItem,
 } from "@/lib/api/rbac"
 import { apiErrorMessage } from "@/lib/api/errors"
 import { PermisosDialog } from "@/components/admin/permisos-dialog"
@@ -50,7 +47,6 @@ export function RbacSettings() {
   const [permisos, setPermisos] = React.useState<Permiso[]>([])
   const [createOpen, setCreateOpen] = React.useState(false)
   const [permisosFor, setPermisosFor] = React.useState<Rol | null>(null)
-  const [menuFor, setMenuFor] = React.useState<Rol | null>(null)
   const [editFor, setEditFor] = React.useState<Rol | null>(null)
   const [busyId, setBusyId] = React.useState<string | null>(null)
   // List view (the usual one) vs grid (all roles at once, ticking on the card).
@@ -171,13 +167,6 @@ export function RbacSettings() {
                   >
                     {t("permisos")}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setMenuFor(r)}
-                  >
-                    {t("menuRol")}
-                  </Button>
                   {/* Edit (name/description only, NEVER the key) also for System roles: the BE accepts
                       the name PUT on System (verified). Only Delete is barred for System. */}
                   <Button
@@ -221,154 +210,7 @@ export function RbacSettings() {
         onOpenChange={(open) => !open && setEditFor(null)}
         onSaved={load}
       />
-      <RoleMenuDialog
-        key={menuFor?.id ?? "menu-none"}
-        role={menuFor}
-        onOpenChange={(open) => !open && setMenuFor(null)}
-      />
     </section>
-  )
-}
-
-/**
- * Role↔menu link (D2): which menu options the role sees, with checkboxes.
- * Items without a permission are visible to everyone (fixed tick); ticking/unticking
- * translates to the role's permissions without touching its non-menu permissions.
- */
-function RoleMenuDialog({
-  role,
-  onOpenChange,
-}: {
-  role: Rol | null
-  onOpenChange: (open: boolean) => void
-}) {
-  const t = useTranslations("admin.rbac")
-  const tc = useTranslations("admin")
-  const tRoot = useTranslations()
-  const open = role !== null
-  const [form, update] = useDialogForm(
-    () => ({
-      items: null as ProfileMenuItem[] | null,
-      selected: new Set<string>(),
-      loadError: null as string | null,
-    }),
-    open,
-    role?.id,
-  )
-
-  React.useEffect(() => {
-    if (!role) return
-    let active = true
-    getRoleMenu(role.id)
-      .then((list) => {
-        if (!active) return
-        update({
-          items: list,
-          selected: new Set(
-            list.filter((i) => i.allowed && i.requiresPermiso).map((i) => i.slug)
-          ),
-          loadError: null,
-        })
-      })
-      .catch((err) => {
-        if (active) update({ loadError: apiErrorMessage(err) })
-      })
-    return () => {
-      active = false
-    }
-  }, [role, update])
-
-  function labelDe(i: ProfileMenuItem) {
-    const anyI = i as unknown as { customLabel?: string | null }
-    if (anyI.customLabel) return anyI.customLabel
-    return tRoot.has(i.labelKey) ? tRoot(i.labelKey) : i.slug
-  }
-
-  const { submitting, submit } = useSubmit(
-    async () => {
-      if (!role) throw new Error("no role") // unreachable: the dialog is open only with a role
-      await setRoleMenu(role.id, [...form.selected])
-    },
-    {
-      successMessage: t("menuRolSaved"),
-      onSuccess: () => onOpenChange(false),
-      onError: (err) => {
-        toast.error(apiErrorMessage(err))
-        return true
-      },
-    },
-  )
-
-  const loaded = form.items !== null
-
-  return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      size="lg"
-      title={t("menuRolTitle", { role: role?.name ?? "" })}
-      description={t("menuRolHelp")}
-      // Saving may remove menu permissions from the role: Enter never fires it, only the button.
-      onSubmit={() => {}}
-      actions={[{ label: t("save"), onClick: () => submit() }]}
-      submitting={submitting}
-      submittingLabel={t("saving")}
-      cancelLabel={tc("cancel")}
-      // Saving was already disabled until the menu loads; now it says why.
-      blocked={!loaded}
-      reason={loaded ? null : (form.loadError ?? t("loading"))}
-    >
-      {!loaded && !form.loadError && (
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
-      )}
-      <div className="space-y-1">
-        {form.items?.map((i) => {
-          const anyI = i as unknown as {
-            type?: string
-            parentSlug?: string | null
-          }
-          if (anyI.type === "separador") return null
-          const esGrupo = anyI.type === "grupo"
-          const indent = anyI.parentSlug && !esGrupo ? "pl-6" : ""
-          if (esGrupo) {
-            return (
-              <p
-                key={i.slug}
-                className="pt-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
-              >
-                {labelDe(i)}
-              </p>
-            )
-          }
-          const participa = !!i.requiresPermiso
-          return (
-            <label
-              key={i.slug}
-              className={`flex items-center gap-2 text-sm ${indent}`}
-            >
-              <Checkbox
-                checked={participa ? form.selected.has(i.slug) : true}
-                disabled={!participa}
-                onCheckedChange={(v) =>
-                  update((s) => {
-                    const next = new Set(s.selected)
-                    if (v === true) next.add(i.slug)
-                    else next.delete(i.slug)
-                    return { ...s, selected: next }
-                  })
-                }
-              />
-              <span className="min-w-0 truncate">{labelDe(i)}</span>
-              {!participa && (
-                <Badge variant="outline" className="ml-auto">
-                  {t("menuRolSinPermiso")}
-                </Badge>
-              )}
-            </label>
-          )
-        })}
-      </div>
-    </FormDialog>
   )
 }
 

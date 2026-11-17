@@ -9,17 +9,8 @@ import { Input } from "@/components/ui/input";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { useSubmit } from "@/components/kit/use-submit";
 import { useDialogForm } from "@/components/kit/use-dialog-form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
-type AccessMode = "operativo" | "gerencial";
-
-/** Admin edit of a profile (D5): first name, last name and access mode. */
+/** Admin edit of a profile (D5): first name and last name (the backend ignores access mode since cmr-be #557). */
 // Seeded from the profile and re-seeded on open / another profile (the caller also keys by profile id).
 export function ProfileEditDialog({
   profile,
@@ -38,7 +29,6 @@ export function ProfileEditDialog({
     () => ({
       nombre: profile?.name ?? "",
       apellido: profile?.lastName ?? "",
-      accessMode: (profile?.accessMode === "gerencial" ? "gerencial" : "operativo") as AccessMode,
     }),
     open,
     profile?.id,
@@ -52,7 +42,6 @@ export function ProfileEditDialog({
       await updateProfile(profile.id, {
         name: form.nombre.trim(),
         lastName: form.apellido.trim() || null,
-        accessMode: form.accessMode,
       });
     },
     {
@@ -90,24 +79,6 @@ export function ProfileEditDialog({
           value={form.apellido}
           onChange={(e) => update({ apellido: e.target.value })}
         />
-      </Field>
-      <Field label={t("accessMode")} htmlFor="profile-edit-access-mode" hint={t("accessModeHelp")}>
-        <Select
-          value={form.accessMode}
-          onValueChange={(v) => update({ accessMode: v as AccessMode })}
-        >
-          <SelectTrigger
-            id="profile-edit-access-mode"
-            className="w-full"
-            aria-describedby="profile-edit-access-mode-hint"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="operativo">{t("operativo")}</SelectItem>
-            <SelectItem value="gerencial">{t("gerencial")}</SelectItem>
-          </SelectContent>
-        </Select>
       </Field>
     </FormDialog>
   );

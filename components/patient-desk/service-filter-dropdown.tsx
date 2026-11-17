@@ -1,12 +1,11 @@
 "use client"
 
+import type * as React from "react"
+
 import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons"
 
 import { cn } from "@/lib/utils"
 import type { PatientKind } from "@/lib/frontdesk/patient-day"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +26,15 @@ export type ServiceOfTheDay = {
 
 export type ConsultSubtype = { id: string; slug: string; labelKey: string }
 
+type Translate = { (key: string): string; has: (key: string) => boolean }
+
+/** A consultation subtype's name on the patient desk: the short one ("Nuevo", owner 17-nov-2026)
+ *  when there is one, else the board's full label. `t` is the patientDesk namespace. */
+export function consultSubtypeLabel(s: { slug: string; labelKey: string }, t: Translate, tRoot: Translate): string {
+  if (t.has(`subtypeShort.${s.slug}`)) return t(`subtypeShort.${s.slug}`)
+  return tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug
+}
+
 // Sub-filtro DENTRO de la pestaña activa: un servicio ("Servicios") o un subtipo ("Consulta").
 // Extraído de patient-desk.tsx (que estaba en su techo de líneas) — pedido original del dueño de
 // filtrar por servicio; el N=presente/N=asistidos clicable es del 06-nov-2026 (handoff
@@ -41,6 +49,7 @@ export function ServiceFilterDropdown({
   consultSubtypes,
   onPickService,
   onPickConsultSubtype,
+  trigger,
 }: {
   kind: PatientKind
   serviceFilter: string | null
@@ -49,6 +58,8 @@ export function ServiceFilterDropdown({
   consultSubtypes: ConsultSubtype[]
   onPickService: (serviceId: string | null, pendingOnly?: boolean) => void
   onPickConsultSubtype: (subtype: string | null) => void
+  /** What opens the menu: the active tab itself («Servicios ▾» / «Consulta ▾»), owner 17-nov-2026. */
+  trigger: React.ReactElement
 }) {
   const t = useTranslations("patientDesk")
   const tRoot = useTranslations()
@@ -56,22 +67,7 @@ export function ServiceFilterDropdown({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant={
-            (kind === "services" && serviceFilter) ||
-            (kind === "consultation" && consultSubtypeFilter)
-              ? "default"
-              : "outline"
-          }
-          size="icon"
-          className="size-7"
-          aria-label={kind === "services" ? t("filterByService") : t("filterByType")}
-        >
-          <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         {kind === "services" ? (
           <DropdownMenuRadioGroup
@@ -136,7 +132,7 @@ export function ServiceFilterDropdown({
             <DropdownMenuRadioItem value={SUB_FILTER_ALL}>{t("allTypes")}</DropdownMenuRadioItem>
             {consultSubtypes.map((s) => (
               <DropdownMenuRadioItem key={s.id} value={s.slug}>
-                {tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug}
+                {consultSubtypeLabel(s, t, tRoot)}
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>

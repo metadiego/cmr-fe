@@ -11,12 +11,17 @@ import {
   type ScheduleRequest,
 } from "@/components/patient-desk/patient-detail"
 import { cn } from "@/lib/utils"
+import { Tooltip } from "@/components/ui/tooltip"
 import { usePatientsPriorityFlags } from "@/hooks/use-patients-priority-flags"
 import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height"
 import { PriorityFlagPill } from "@/components/clientes/priority-flags-badges"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 
 interface Props {
+  /** The list updates itself (the day's stream is connected): a small dot before the count. */
+  live?: boolean
+  /** Right side of the list header (e.g. the consultations in the room). */
+  headerEnd?: React.ReactNode
   patients: PatientDay[]
   data: PatientDayData
   kind: PatientKind
@@ -33,6 +38,8 @@ interface Props {
 // Master/detail: the day's patients on the left, the selected one's services on the right.
 // The list scrolls on its own so the detail stays in view on a wide screen.
 export function PatientListView({
+  live,
+  headerEnd,
   patients,
   data,
   kind,
@@ -62,10 +69,24 @@ export function PatientListView({
       style={fillHeight ? { height: fillHeight } : undefined}
       className="grid gap-4 lg:grid-cols-[minmax(280px,360px)_1fr]"
     >
-      <ul
-        className="max-h-[70vh] space-y-1.5 overflow-y-auto rounded-lg bg-card p-2 ring-1 ring-foreground/10 lg:max-h-none"
-        aria-label={t("patients")}
-      >
+      {/* The count heads the list it counts: it follows the tab, filters and search, so it is "patients
+          in this list", not the day's bookings (owner, 17-nov-2026). */}
+      <div className="flex max-h-[70vh] min-h-0 flex-col rounded-lg bg-card ring-1 ring-foreground/10 lg:max-h-none">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b px-3 py-2 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-2">
+            {live && (
+              <Tooltip content={t("live")}>
+                <span className="relative flex size-2" role="status" aria-label={t("live")}>
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-60" />
+                  <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
+                </span>
+              </Tooltip>
+            )}
+            {t("patientsCount", { n: patients.length })}
+          </span>
+          {headerEnd}
+        </div>
+        <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-2" aria-label={t("patients")}>
         {patients.map((p) => (
           <li key={p.patientId}>
             <button
@@ -122,7 +143,8 @@ export function PatientListView({
             </button>
           </li>
         ))}
-      </ul>
+        </ul>
+      </div>
       <div className="min-w-0 overflow-y-auto rounded-lg bg-card p-4 ring-1 ring-foreground/10">
         {selected ? (
           <PatientDetail

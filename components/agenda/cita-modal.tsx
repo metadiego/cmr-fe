@@ -87,9 +87,9 @@ export function CitaModal({
   // "callcenter" fijo para CUALQUIER invocador de este modal compartido — incluida la ficha del
   // paciente (acciones-paciente-sheet.tsx), que no es call-center y le atribuía la cartera a quien
   // sea que creara la cita ahí. Cada pantalla declara la suya; sin declarar, no viaja nada y el BE
-  // cae a su propio default ('atencion'). Handoff bug-canal-callcenter-no-se-manda-handoff-fe.md
+  // cae a su propio default ('frontdesk'). Handoff bug-canal-callcenter-no-se-manda-handoff-fe.md
   // (su diagnóstico original estaba al revés: el dato SÍ viajaba, pero desde donde no debía).
-  canal?: "atencion" | "callcenter";
+  canal?: "frontdesk" | "callcenter";
   onOpenChange: (open: boolean) => void;
   // Gets the appointment just saved (create/edit) so the caller can show it at once.
   onSaved: (cita?: Cita) => void;

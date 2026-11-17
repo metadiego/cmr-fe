@@ -14,7 +14,7 @@ import {
 } from "@/lib/api/frontdesk";
 import { listPersonalPorCapacidad } from "@/lib/api/personal";
 import { useSubmit } from "@/components/kit/use-submit";
-import { Button } from "@/components/ui/button";
+import { StatusCountButton } from "@/components/frontdesk/status-count-button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip } from "@/components/ui/tooltip";
 
@@ -98,14 +98,7 @@ export function NurseStatusButton({
     <Sheet open={open} onOpenChange={(v) => { setOpen(v); setPendienteDuracion(null); }}>
       <Tooltip content={t("nurseTitle")}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="relative" aria-label={t("nurseTitle")}>
-            <HugeiconsIcon icon={StethoscopeIcon} className="size-4" />
-            {count > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-4 text-white">
-                {count}
-              </span>
-            )}
-          </Button>
+          <StatusCountButton icon={StethoscopeIcon} count={count} label={t("nurseTitle")} />
         </SheetTrigger>
       </Tooltip>
       <SheetContent side="right" className="w-96 p-4">

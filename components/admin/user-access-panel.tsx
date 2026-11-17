@@ -116,7 +116,7 @@ export function UserAccessPanel({ profile, onChanged }: { profile: Perfil; onCha
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setEditOpen(true)}>{t("users.editar")}</DropdownMenuItem>
-              {profile.status === "aprobado" && !profile.isMaster && (
+              {profile.status === "aprobado" && !profile.isAdmin && (
                 <DropdownMenuItem variant="destructive" disabled={busy} onClick={toggleSuspension}>
                   {t("users.suspender")}
                 </DropdownMenuItem>
@@ -133,7 +133,7 @@ export function UserAccessPanel({ profile, onChanged }: { profile: Perfil; onCha
                 </DropdownMenuItem>
               )}
               {/* Signs the person out everywhere, so the dialog asks for confirmation. */}
-              {can("profiles.email") && !profile.isMaster && (
+              {can("profiles.email") && !profile.isAdmin && (
                 <DropdownMenuItem onClick={() => setEmailOpen(true)}>{t("users.cambiarEmail")}</DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -144,7 +144,7 @@ export function UserAccessPanel({ profile, onChanged }: { profile: Perfil; onCha
       <dl className="grid gap-2 sm:grid-cols-[8rem_1fr]">
         <dt className="text-xs text-muted-foreground">{t("columns.roles")}</dt>
         <dd className="flex flex-wrap gap-1">
-          {profile.isMaster ? (
+          {profile.isAdmin ? (
             <Badge className="gap-1">
               <HugeiconsIcon icon={Shield01Icon} data-icon="inline-start" />
               {t("users.adminBadge")}
@@ -168,7 +168,7 @@ export function UserAccessPanel({ profile, onChanged }: { profile: Perfil; onCha
             ))
           ) : (
             <span className="text-xs text-muted-foreground">
-              {profile.isMaster ? t("users.allCenters") : t("users.sinCentro")}
+              {profile.isAdmin ? t("users.allCenters") : t("users.sinCentro")}
             </span>
           )}
         </dd>

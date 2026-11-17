@@ -38,6 +38,8 @@ export function CuadreAttachments({
   const format = useFormatter();
   const { can } = useCan();
   const canDelete = can("cash_attachment.delete");
+  // Attaching a file is a write (cmr-be #557): the upload endpoints need cash.write.
+  const canAttach = can("cash.write");
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [items, setItems] = React.useState<CashReconciliationAttachmentListed[] | null>(null);
   const [failed, setFailed] = React.useState(false);
@@ -87,10 +89,12 @@ export function CuadreAttachments({
         <p className="text-sm font-semibold">{t("title")}</p>
         <div className="flex items-center gap-2">
           <CuadreScanButton reconciliationId={reconciliationId} centroId={centroId} onScanned={() => setGen((g) => g + 1)} />
-          <Button type="button" size="sm" variant="outline" disabled={uploading} onClick={() => inputRef.current?.click()}>
-            <HugeiconsIcon icon={Attachment01Icon} className="size-4" />
-            {uploading ? t("uploading") : t("add")}
-          </Button>
+          {canAttach && (
+            <Button type="button" size="sm" variant="outline" disabled={uploading} onClick={() => inputRef.current?.click()}>
+              <HugeiconsIcon icon={Attachment01Icon} className="size-4" />
+              {uploading ? t("uploading") : t("add")}
+            </Button>
+          )}
         </div>
         <input
           ref={inputRef}
@@ -159,6 +163,8 @@ export function CuadreAttachmentsOverview({
   onPick: (userId: string) => void;
 }) {
   const t = useTranslations("caja.attachments");
+  const { can } = useCan();
+  const canAttach = can("cash.write");
   const [counts, setCounts] = React.useState<Record<string, number>>({});
 
   const rows = React.useMemo(
@@ -197,10 +203,12 @@ export function CuadreAttachmentsOverview({
               <span className="flex shrink-0 items-center gap-2">
                 {n > 0 && <span className="text-xs text-muted-foreground">{t("count", { n })}</span>}
                 <CuadreScanButton reconciliationId={r.id} centroId={centroId} onScanned={() => setCounts((c) => ({ ...c, [r.userId]: (c[r.userId] ?? 0) + 1 }))} />
-                <Button type="button" size="sm" variant="outline" onClick={() => onPick(r.userId)}>
-                  <HugeiconsIcon icon={Attachment01Icon} className="size-4" />
-                  {t("add")}
-                </Button>
+                {canAttach && (
+                  <Button type="button" size="sm" variant="outline" onClick={() => onPick(r.userId)}>
+                    <HugeiconsIcon icon={Attachment01Icon} className="size-4" />
+                    {t("add")}
+                  </Button>
+                )}
               </span>
             </li>
           );
