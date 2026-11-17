@@ -10,7 +10,7 @@ import { cell } from "@/lib/formatos/mls-sheet";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/frontdesk/signature-pad";
 import { LogoFormato, imprimirFormato, PieFormato } from "@/components/frontdesk/formato-parts";
-import { BORDER, LineInput, PatientLine, SHEET, TD, TH, type LaserSheetHeader } from "@/components/frontdesk/laser-sheet-parts";
+import { BORDER, LineInput, PatientLine, SesionPorAreas, SHEET, TD, TH, type LaserSheetHeader } from "@/components/frontdesk/laser-sheet-parts";
 
 // The HILT laser sheet, drawn like the legacy «HILT Form» (.personal/formatos-legacy/HILT Form.pdf).
 // Sheet 1: logo left and «HILT» centred, the patient line, the regions that fit (lib/formatos/hilt-sheet),
@@ -123,7 +123,7 @@ export function HiltSheet({ centro, header, onVolver }: { centro?: string; heade
             {field(th("horaEntrada"), <LineInput value={horaIn} onChange={setHoraIn} label={th("horaEntrada")} />)}
             {field(th("proxima"), header.proximaCita)}
             {field(th("horaSalida"), <LineInput value={horaOut} onChange={setHoraOut} label={th("horaSalida")} />)}
-            {field(th("nTerapias"), header.sesion)}
+            {field(th("nTerapias"), <SesionPorAreas sesion={header.sesion} areas={header.areas} />)}
             {field(th("firma"), <SignaturePad height={26} bare />)}
           </div>
 

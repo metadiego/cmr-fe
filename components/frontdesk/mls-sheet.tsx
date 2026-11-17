@@ -9,7 +9,7 @@ import { cell, sameHeight } from "@/lib/formatos/mls-sheet";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/frontdesk/signature-pad";
 import { LogoFormato, imprimirFormato, PieFormato } from "@/components/frontdesk/formato-parts";
-import { BORDER, LineInput, PatientLine, SHEET, TD, TH, type LaserSheetHeader } from "@/components/frontdesk/laser-sheet-parts";
+import { BORDER, LineInput, PatientLine, SesionPorAreas, SHEET, TD, TH, type LaserSheetHeader } from "@/components/frontdesk/laser-sheet-parts";
 
 // The MLS laser sheet, drawn like the legacy «MLS Form» (.personal/formatos-legacy/MLS Form.pdf): logo
 // left and «MLS» centred; Paciente / Fecha / Record on one line; the two pathology tables side by side
@@ -96,7 +96,7 @@ export function MlsSheet({ centro, header, onVolver }: { centro?: string; header
             {field(tm("horaEntrada"), typed(horaIn, setHoraIn, tm("horaEntrada")))}
             {field(tm("proxima"), header.proximaCita)}
             {field(tm("horaSalida"), typed(horaOut, setHoraOut, tm("horaSalida")))}
-            {field(tm("nTerapias"), header.sesion)}
+            {field(tm("nTerapias"), <SesionPorAreas sesion={header.sesion} areas={header.areas} />)}
             {field(tm("ctd"), typed(ctd, setCtd, tm("ctd")))}
           </div>
 

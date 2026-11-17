@@ -2,12 +2,35 @@
 
 import * as React from "react";
 
-import { legacyDay } from "@/lib/formatos/mls-sheet";
+import { areasCount, legacyDay } from "@/lib/formatos/mls-sheet";
 
 // Pieces the legacy laser sheets (MLS, HILT) share. Inline styles only: each sheet is cloned into its own
 // print window (formato-parts imprimirFormato), where the app's CSS does not exist.
 
-export type LaserSheetHeader = { paciente: string; record: string; sesion: string; tecnico: string; proximaCita: string; fecha: string };
+export type LaserSheetHeader = {
+  paciente: string;
+  record: string;
+  sesion: string;
+  tecnico: string;
+  proximaCita: string;
+  fecha: string;
+  // Cuántas ÁREAS trata esta visita (owner, 17-nov-2026): «Número de Terapias» se repite una vez por
+  // área («1/12  1/12» con 2). 1, 0 o sin dato (null) → la sesión sola, como siempre.
+  areas?: number | null;
+};
+
+/** «Número de Terapias» repetido una vez por área — envuelve (flex-wrap) en vez de achicar la letra. */
+export function SesionPorAreas({ sesion, areas }: { sesion: string; areas?: number | null }) {
+  const n = areasCount(areas);
+  if (n <= 1) return <>{sesion}</>;
+  return (
+    <span style={{ display: "inline-flex", flexWrap: "wrap", gap: "2px 10px" }}>
+      {Array.from({ length: n }, (_, i) => (
+        <span key={i}>{sesion}</span>
+      ))}
+    </span>
+  );
+}
 
 export const BORDER = "1px solid #000";
 export const TH: React.CSSProperties = { border: BORDER, background: "#f0f0f0", padding: "3px 4px", textAlign: "center", verticalAlign: "middle", fontWeight: 700, fontSize: 10 };

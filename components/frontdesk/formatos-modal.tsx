@@ -209,6 +209,7 @@ export function FormatosModal({
               tecnico: enviarTecnico ? (tecnicoNombre ?? "") : "",
               proximaCita: proximaCita ?? "",
               fecha: fecha ?? "",
+              areas: areas ? Number(areas) : null,
             }}
             onVolver={() => setGenerado(false)}
           />
@@ -223,6 +224,7 @@ export function FormatosModal({
               tecnico: enviarTecnico ? (tecnicoNombre ?? "") : "",
               proximaCita: proximaCita ?? "",
               fecha: fecha ?? "",
+              areas: areas ? Number(areas) : null,
             }}
             onVolver={() => setGenerado(false)}
           />
