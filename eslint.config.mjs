@@ -64,7 +64,8 @@ const DEBT = {
   // 10-nov-2026: 642 → 618 — Campo/CopiableCampo moved to components/auditoria/audit-fields.tsx.
   // 10-nov-2026: 618 → 567 — the detail panel moved to components/auditoria/audit-detail-sheet.tsx
   // (merge of the Claude connector "via" branch with main's entity filter).
-  "components/auditoria/auditoria-log.tsx": 567,
+  // 17-nov-2026: 567 → 554 — the purge AlertDialog became a useConfirm prompt (standard form kit).
+  "components/auditoria/auditoria-log.tsx": 554,
   // 16-nov-2026: 550 → 480 — moved onto the standard FormSheet shell (kit Field, useSubmit, useDialogForm);
   // the required/blocked checks live in lib/pacientes/patient-form-missing.ts.
   "components/clientes/paciente-form-sheet.tsx": 480,
