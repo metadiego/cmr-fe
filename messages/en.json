@@ -3187,6 +3187,8 @@
   "receipt": {
     "print": "Print receipt",
     "previewTitle": "Receipt preview",
+    "preview": "Preview",
+    "previewDescription": "How the printed receipt will look.",
     "loadFailed": "Couldn't load the receipt",
     "preparing": "Preparing receipt…",
     "void": "VOID",

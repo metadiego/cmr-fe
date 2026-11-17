@@ -60,7 +60,8 @@ import { buildReceiptText } from "@/lib/print/receipt-labels";
 import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
 import { loadLogoRaster } from "@/lib/print/load-logo";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
-import { EDITOR_GRID, INVOICE_PAGE_FILL, CardSection, ReceiptPreviewCard } from "@/components/facturacion/receipt-preview-card";
+import { EDITOR_GRID, INVOICE_PAGE_FILL, CardSection } from "@/components/facturacion/receipt-preview-card";
+import { ReceiptPreviewSheet } from "@/components/facturacion/receipt-preview-sheet";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, MoreHorizontalIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
@@ -325,6 +326,7 @@ export default function FacturacionPage() {
             {factura.patientId && (
               <PatientTodaySummaryButton pacienteId={String(factura.patientId)} facturaActualId={id} centro={centro ?? (factura as { clinicId?: string }).clinicId ?? undefined} />
             )}
+            <ReceiptPreviewSheet><ReciboTermico recibo={recibo} /></ReceiptPreviewSheet>
             <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
               <HugeiconsIcon icon={PrinterIcon} className="size-4" />
               {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
@@ -424,12 +426,6 @@ export default function FacturacionPage() {
       <Editor
         key={String(factura.updatedAt ?? factura.id)}
         factura={factura} id={id} centro={centro} catalogo={catalogo} formas={formas} busy={busy} run={run}
-        receipt={
-          // Thermal receipt preview (print CSS isolates it when printing).
-          <ReceiptPreviewCard>
-            <ReciboTermico recibo={recibo} />
-          </ReceiptPreviewCard>
-        }
       />
 
       <InvoiceReopenings invoiceId={id} centerId={centro} invoice={factura} />
@@ -446,7 +442,6 @@ function Editor({
   formas,
   busy,
   run,
-  receipt,
 }: {
   factura: FacturaConItems;
   id: string;
@@ -455,7 +450,6 @@ function Editor({
   formas: FormaPago[];
   busy: boolean;
   run: (fn: () => Promise<unknown>) => Promise<boolean>;
-  receipt: React.ReactNode;
 }) {
   const t = useTranslations("facturacion");
   const { can } = useCan();
@@ -818,8 +812,6 @@ function Editor({
           <CardSection><PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} pastCashDay={factura.pastCashDay} /></CardSection>
         )}
       </Card>
-
-      {receipt}
 
       {opcItemId && (
         <OpcionalesDialog

@@ -3187,6 +3187,8 @@
   "receipt": {
     "print": "Imprimir recibo",
     "previewTitle": "Vista previa del recibo",
+    "preview": "Vista previa",
+    "previewDescription": "Así se verá el recibo impreso.",
     "loadFailed": "No se pudo cargar el recibo",
     "preparing": "Preparando recibo…",
     "void": "ANULADA",

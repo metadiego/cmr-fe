@@ -108,7 +108,7 @@ function CatalogoCombobox({
       />
       {open && (
         <div
-          className={"absolute z-50 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md " + (placement.up ? "bottom-full mb-1" : "top-full mt-1")}
+          className={"absolute left-0 z-50 w-max min-w-full max-w-[min(40rem,85vw)] overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md " + (placement.up ? "bottom-full mb-1" : "top-full mt-1")}
           style={{ maxHeight: placement.maxHeight }}
         >
           {buscando && <ProductOptionsSkeleton />}
@@ -120,10 +120,11 @@ function CatalogoCombobox({
               key={p.id}
               type="button"
               onClick={() => { onPick(p); setOpen(false); setQuery(""); setDebounced(""); }}
-              className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+              title={p.sku ? `${p.sku} — ${p.name}` : p.name}
+              className="grid w-full grid-cols-[minmax(5rem,9rem)_1fr] items-baseline gap-3 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
             >
-              {p.sku && <span className="shrink-0 font-mono text-xs text-muted-foreground">{p.sku}</span>}
-              <span className="min-w-0">{p.name}</span>
+              <span className="truncate font-mono text-xs text-muted-foreground">{p.sku}</span>
+              <span className="min-w-0 truncate">{p.name}</span>
             </button>
           ))}
         </div>
