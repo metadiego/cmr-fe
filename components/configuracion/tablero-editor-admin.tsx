@@ -27,6 +27,7 @@ import {
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import { getAllMenu, createMenuItem, type MenuItem } from "@/lib/api/menu";
 import { toastError } from "@/lib/api/errors";
+import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { MetaCrud, type Draft } from "@/components/configuracion/meta-crud";
@@ -135,14 +136,14 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
             ]}
             initialDraft={{ color: "#6b7280", orden: 0, esInicial: false, esTerminal: false, visibleEnAtencion: false }}
             toDraft={(r) => ({ id: r.id, clave: r.slug, labelKey: r.labelKey, color: r.color, orden: r.sortOrder, esInicial: r.isInitial, esTerminal: r.isTerminal, visibleEnAtencion: r.visibleInCareBoard })}
-            canSubmit={(d) => !!s(d, "clave").trim() && !!s(d, "labelKey").trim()}
+            missing={(d) => missingFields([[t("clave"), !!s(d, "clave").trim()], [t("label"), !!s(d, "labelKey").trim()]])}
             create={(d) => crearEstado({ boardSlug: clave, slug: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), color: s(d, "color") || undefined, sortOrder: num(d, "orden"), isInitial: !!d.esInicial, isTerminal: !!d.esTerminal, visibleInCareBoard: !!d.visibleEnAtencion })}
             update={(id, d) => actualizarEstado(id, { labelKey: s(d, "labelKey").trim(), color: s(d, "color") || undefined, sortOrder: num(d, "orden"), isInitial: !!d.esInicial, isTerminal: !!d.esTerminal, visibleInCareBoard: !!d.visibleEnAtencion })}
             remove={(id) => borrarEstado(id)}
             fields={(d, patch) => (
               <>
-                <Field label={t("clave")}><Input value={s(d, "clave")} onChange={(e) => patch({ clave: e.target.value })} placeholder="pendiente" /></Field>
-                <Field label={t("label")}><Input value={s(d, "labelKey")} onChange={(e) => patch({ labelKey: e.target.value })} placeholder="op.estado.pendiente" /></Field>
+                <Field label={t("clave")} htmlFor="status-key" required><Input id="status-key" value={s(d, "clave")} onChange={(e) => patch({ clave: e.target.value })} placeholder="pendiente" /></Field>
+                <Field label={t("label")} htmlFor="status-label" required><Input id="status-label" value={s(d, "labelKey")} onChange={(e) => patch({ labelKey: e.target.value })} placeholder="op.estado.pendiente" /></Field>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label={t("estColor")}><Input type="color" value={s(d, "color") || "#6b7280"} onChange={(e) => patch({ color: e.target.value })} /></Field>
                   <Field label="#"><Input type="number" value={s(d, "orden")} onChange={(e) => patch({ orden: e.target.value })} /></Field>
@@ -171,14 +172,14 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
             ]}
             initialDraft={{ desdeEstados: [], requiere: "", confirmar: false, orden: 0 }}
             toDraft={(r) => ({ id: (r as unknown as { id: string }).id, clave: r.slug, labelKey: r.labelKey, desdeEstados: r.fromStatuses || [], aEstado: r.toStatus ?? "", requiere: (r.formFields || []).join(", "), confirmar: r.requiresConfirmation, orden: r.sortOrder })}
-            canSubmit={(d) => !!s(d, "clave").trim() && !!s(d, "labelKey").trim() && !!s(d, "aEstado")}
+            missing={(d) => missingFields([[t("clave"), !!s(d, "clave").trim()], [t("label"), !!s(d, "labelKey").trim()], [t("trA"), !!s(d, "aEstado")]])}
             create={(d) => crearTransicion({ boardSlug: clave, slug: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), fromStatuses: (d.desdeEstados as string[]) || [], toStatus: s(d, "aEstado"), formFields: reqArr(d), requiresConfirmation: !!d.confirmar, sortOrder: num(d, "orden") })}
             update={(id, d) => actualizarTransicion(id, { labelKey: s(d, "labelKey").trim(), fromStatuses: (d.desdeEstados as string[]) || [], toStatus: s(d, "aEstado"), formFields: reqArr(d), requiresConfirmation: !!d.confirmar, sortOrder: num(d, "orden") })}
             remove={(id) => borrarTransicion(id)}
             fields={(d, patch) => (
               <>
-                <Field label={t("clave")}><Input value={s(d, "clave")} onChange={(e) => patch({ clave: e.target.value })} placeholder="empezar" /></Field>
-                <Field label={t("label")}><Input value={s(d, "labelKey")} onChange={(e) => patch({ labelKey: e.target.value })} placeholder="op.accion.empezar" /></Field>
+                <Field label={t("clave")} htmlFor="transition-key" required><Input id="transition-key" value={s(d, "clave")} onChange={(e) => patch({ clave: e.target.value })} placeholder="empezar" /></Field>
+                <Field label={t("label")} htmlFor="transition-label" required><Input id="transition-label" value={s(d, "labelKey")} onChange={(e) => patch({ labelKey: e.target.value })} placeholder="op.accion.empezar" /></Field>
                 <Field label={t("trDesde")} hint={t("trDesdeHint")}>
                   <div className="flex flex-wrap gap-2">
                     {estados.map((es) => {
@@ -193,8 +194,8 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
                     {estados.length === 0 && <span className="text-xs text-muted-foreground">{t("trNoEstados")}</span>}
                   </div>
                 </Field>
-                <Field label={t("trA")}>
-                  <select className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" value={s(d, "aEstado")} onChange={(e) => patch({ aEstado: e.target.value })}>
+                <Field label={t("trA")} htmlFor="transition-to" required>
+                  <select id="transition-to" className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" value={s(d, "aEstado")} onChange={(e) => patch({ aEstado: e.target.value })}>
                     <option value="">—</option>
                     {estados.map((es) => <option key={es.slug} value={es.slug}>{tRoot(es.labelKey)}</option>)}
                   </select>
@@ -220,14 +221,14 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
             ]}
             initialDraft={{ orden: 0 }}
             toDraft={(r) => ({ id: (r as unknown as { id: string }).id, clave: r.slug, labelKey: r.labelKey, orden: r.sortOrder })}
-            canSubmit={(d) => !!s(d, "clave").trim() && !!s(d, "labelKey").trim()}
+            missing={(d) => missingFields([[t("clave"), !!s(d, "clave").trim()], [t("label"), !!s(d, "labelKey").trim()]])}
             create={(d) => crearSubTipo({ boardSlug: clave, slug: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), sortOrder: num(d, "orden") })}
             update={(id, d) => actualizarSubTipo(id, { labelKey: s(d, "labelKey").trim(), sortOrder: num(d, "orden") })}
             remove={(id) => borrarSubTipo(id)}
             fields={(d, patch) => (
               <>
-                <Field label={t("clave")}><Input value={s(d, "clave")} onChange={(e) => patch({ clave: e.target.value })} /></Field>
-                <Field label={t("label")}><Input value={s(d, "labelKey")} onChange={(e) => patch({ labelKey: e.target.value })} /></Field>
+                <Field label={t("clave")} htmlFor="subtype-key" required><Input id="subtype-key" value={s(d, "clave")} onChange={(e) => patch({ clave: e.target.value })} /></Field>
+                <Field label={t("label")} htmlFor="subtype-label" required><Input id="subtype-label" value={s(d, "labelKey")} onChange={(e) => patch({ labelKey: e.target.value })} /></Field>
                 <Field label="#"><Input type="number" value={s(d, "orden")} onChange={(e) => patch({ orden: e.target.value })} /></Field>
               </>
             )}
