@@ -207,6 +207,37 @@ commit**. In the backend, `CLAUDE.md` ended up forbidding a command that was alr
 describing a CI that had not existed for months: an obsolete instruction is worse than none, because
 it gets obeyed blindly.
 
+### 8. Forms and dialogs use the kit (only the `confirm()` ban is linted)
+A Bayamón receptionist could not book because «Agendar» stayed grey and nothing said the hour was
+missing. Every dialog and sheet was then moved onto one shell (spec
+`docs/specs/2026-11-16-campos-obligatorios-y-que-falta-design.md`). New ones are built the same way:
+
+- **The shell:** `FormDialog` / `FormSheet` (sizes `sm`–`2xl`), or `FormFooter` alone when the layout
+  is unusual. Fields are the kit `Field` (`label`, `required`, `error`, `hint`, `htmlFor` + a
+  matching `id` on the control). **No local `Field` / `Lbl` copies.** Three or more required
+  fields get a `RequiredLegend`.
+- **`missing` drives `disabled`:** list what is empty with `missingFields([[label, ok], …])`, in
+  on-screen order, and pass it as `missing`. There is no `canSubmit`; never restate the same
+  conditions in a second variable.
+- **Filled but invalid is never "missing":** it is a `reason` (text only, it never disables).
+  `blocked` is for a non-field cause that already blocks, and **always comes with a true
+  `reason`**: never a grey button with nothing written above it, and never «Cargando…» when
+  nothing is loading.
+- **The hooks:** `useSubmit` (busy, double-submit guard, error toast), `useDialogForm(initial,
+  open, record?.id)` (clean form on every open and on another record), `useConfirm()` for any
+  yes/no. The browser's `confirm()` is a **lint error**; the only exception is
+  `components/calendario/evento-modal.tsx`, until the agenda PR removes it.
+- **A submit never "succeeds" without saving** (no bare `return` in an async submit: throw, or put
+  the condition in `missing`/`blocked`), and **a failed save never closes the dialog or loses what
+  was typed**.
+- **Enter submits** when the button is enabled — except for irreversible or outward actions
+  (voids, deletes, sending an email or invite, signing a cash day, changing access, moving stock).
+  Those use `onSubmit={() => {}}` plus `actions=[…]`, so only the button fires them. Inputs
+  embedded inside a form (a row you add, a search box) must not save the parent on Enter: call
+  `e.preventDefault()` on Enter in that input (the shell skips events that are already prevented).
+- **Pure logic lives in `lib/`:** the kit's in `lib/forms/`; for money, cash, desks, board, patients
+  and stock, each form's checks go in `lib/<area>/<form>-missing.ts` with a test (rule 5).
+
 ## Things worth knowing about the code
 
 - **`lib/env.ts` throws on import** if `NEXT_PUBLIC_SUPABASE_URL` or
