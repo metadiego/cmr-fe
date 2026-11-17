@@ -624,6 +624,8 @@
       "cfgOptionsSource": "Fuente de opciones",
       "cfgWriteBinding": "Escribe en (FK)",
       "cfgWriteBindingHint": "Campo que se guarda al elegir, ej. cita.medicoId.",
+      "cfgCapacidades": "Capacidades",
+      "cfgCapacidadesHelp": "Quién puede llenar este select: la unión del personal con cualquiera de estas capacidades. Sin ninguna marcada, la lista sale vacía, a propósito.",
       "cfgTransition": "Transición",
       "cfgEstampa": "Sella hora en",
       "cfgEstampaHint": "Campo de la hora sellada, ej. llegadaEn.",
@@ -778,6 +780,9 @@
       "prox_cita": "Próx-cita",
       "pago": "Pago",
       "testimonio": "Testimonio"
+    },
+    "source": {
+      "personal": "Personal por capacidades"
     }
   },
   "agenda": {
