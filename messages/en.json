@@ -2576,7 +2576,9 @@
     "settled": "Paid in full",
     "overpaid": "Overpaid",
     "viaRefundTitle": "That reimbursement belongs to a return",
-    "viaRefundLink": "Go to the return"
+    "viaRefundLink": "Go to the return",
+    "amountNotPositive": "The amount must be greater than 0.",
+    "noChanges": "No changes."
   },
   "formasPago": {
     "efectivo": "Cash",
@@ -3350,7 +3352,9 @@
       "addComponentConfirm": "Add component",
       "componentAdded": "Component added to the kit",
       "reason": "Reason",
-      "reasonPlaceholder": "Why it is added (required)"
+      "reasonPlaceholder": "Why it is added (required)",
+      "component": "Component",
+      "reasonTooShort": "The reason needs at least 3 characters."
     },
     "imprimirNoEmitida": "The invoice was not issued when printing.",
     "corregirImpuesto": {
@@ -3467,7 +3471,9 @@
       "multiplicador_invalido": "{field}: must be a whole number of 1 or more.",
       "meta_solo_borrador": "Areas and days can only be changed on a draft invoice."
     },
-    "multipliersEditHint": "Fix areas or days here: saved when you leave the field."
+    "multipliersEditHint": "Fix areas or days here: saved when you leave the field.",
+    "lineProduct": "Product/service",
+    "priceLoading": "Looking up the price…"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -4415,9 +4421,11 @@
       "signMine": "Sign my sheet",
       "acknowledge": "Acknowledge correction",
       "acknowledgeHint": "The sheet changed after this signature. Confirm the corrected figures are right; the reason, who and when are kept.",
-      "acknowledgeReason": "Reason (required): what was corrected and why",
+      "acknowledgeReason": "Reason: what was corrected and why",
       "acknowledged": "Correction acknowledged",
-      "acknowledgedNote": "Figures corrected · confirmed by {name} · {when}"
+      "acknowledgedNote": "Figures corrected · confirmed by {name} · {when}",
+      "acknowledgeReasonLabel": "Reason",
+      "reasonTooShort": "The reason needs at least 3 characters."
     },
     "attachments": {
       "title": "Scanned settlements",
@@ -4464,11 +4472,12 @@
       "delete": "Delete",
       "deleteConfirmTitle": "Delete this attachment",
       "deleteConfirmDesc": "It's removed from the cash sheet's list; this can't be undone from here.",
-      "deleteReasonLabel": "Reason (required)",
+      "deleteReasonLabel": "Reason",
       "deleteReasonPlaceholder": "Why it's being deleted…",
       "deleteCancel": "Cancel",
       "deleteConfirm": "Delete attachment",
-      "deleted": "Attachment deleted"
+      "deleted": "Attachment deleted",
+      "deleteReasonTooShort": "The reason needs at least 3 characters."
     },
     "attachment": {
       "notFound": "That attachment no longer exists on this cash sheet.",
@@ -5524,7 +5533,7 @@
     "hint": "Back to draft with its same number, to correct it",
     "title": "Reopen the invoice",
     "description": "It goes back to draft with its same number. Stock is returned and payments are kept; correct it and issue it again.",
-    "reasonLabel": "Reason (required)",
+    "reasonLabel": "Reason",
     "reasonPlaceholder": "E.g. exonerated by mistake, the patient pays 10 dollars",
     "confirm": "Reopen",
     "done": "Invoice reopened: correct it and issue it again.",
@@ -5559,10 +5568,11 @@
     "changeSelection": "Change",
     "searchPlaceholder": "Search patient: name, record or ID…",
     "searchHint": "Type at least 2 letters to search.",
-    "reasonLabel": "Reason (required)",
+    "reasonLabel": "Reason",
     "reasonPlaceholder": "E.g.: patient 16034 was billed by mistake instead of 680",
     "confirm": "Change patient",
-    "done": "Invoice patient updated."
+    "done": "Invoice patient updated.",
+    "patient": "New patient"
   },
   "invoice": {
     "notFound": "The invoice does not exist.",

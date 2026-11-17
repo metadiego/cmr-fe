@@ -16,7 +16,9 @@ import {
 import { ApiError } from "@/lib/api/types";
 import { useCan } from "@/hooks/use-can";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
-import { topePago, pagoExcede } from "@/lib/facturacion/tope-pago";
+import { topePago } from "@/lib/facturacion/tope-pago";
+import { paymentAmountIssue, paymentRowMissing } from "@/lib/facturacion/payment-row-missing";
+import { footerState } from "@/lib/forms/missing";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,20 +29,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { MissingHint } from "@/components/kit/missing-hint";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Edit02Icon, Delete02Icon, Tick02Icon, Cancel01Icon, Add01Icon } from "@hugeicons/core-free-icons";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
+// Thrown by a row when the page's `run` reports failure: `run` already toasted it, so useSubmit must not toast again.
+const RUN_FAILED = new Error("run failed");
 
 // Bloque de PAGOS de una factura emitida. Todo a la vista, sin modos ocultos:
 //   - cada fila (pago o reembolso) muestra su ✎ Editar y 🗑 Anular SIEMPRE visibles (gate RBAC
@@ -65,7 +63,7 @@ export function PagosFactura({
   id: string;
   centro?: string;
   busy: boolean;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
   saldo: number;
   montoAbonado: number;
   esBorrador?: boolean;
@@ -219,7 +217,7 @@ function PagoViewRow({
 }) {
   const t = useTranslations("pagosFactura");
   const tRoot = useTranslations();
-  const [confirmAnular, setConfirmAnular] = React.useState(false);
+  const confirm = useConfirm();
   const esReembolso = pago.type === "reembolso";
   const fecha = formatFechaSolo(pago.date);
   // El pago sólo trae `formaPagoNombre` (español); resolvemos la `clave` por `paymentMethodId` para traducir.
@@ -258,26 +256,21 @@ function PagoViewRow({
               disabled={busy || bloqueado}
               title={titulo}
               aria-label={t("void")}
-              onClick={() => setConfirmAnular(true)}
+              onClick={async () => {
+                const ok = await confirm({
+                  title: t("voidTitle"),
+                  description: t("voidBody"),
+                  confirmLabel: t("void"),
+                  destructive: true,
+                });
+                if (ok) onAnular();
+              }}
             >
               <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
             </Button>
           </span>
         );
       })()}
-
-      <AlertDialog open={confirmAnular} onOpenChange={(o) => !o && setConfirmAnular(false)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("voidTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("voidBody")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tRoot("common.cancel")}</AlertDialogCancel>
-            <Button variant="destructive" disabled={busy} onClick={() => { setConfirmAnular(false); onAnular(); }}>{t("void")}</Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </li>
   );
 }
@@ -300,7 +293,7 @@ function PagoEditRow({
   id: string;
   centro?: string;
   busy: boolean;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
   total: number;
   abonado: number;
   onDone: () => void;
@@ -313,13 +306,27 @@ function PagoEditRow({
   // Tope solo para pagos (los reembolsos tienen su propia regla): al editar, el importe ACTUAL se libera.
   const esReembolso = pago.type === "reembolso";
   const tope = topePago(total, abonado, n(pago.amount));
-  const excede = !esReembolso && pagoExcede(n(monto), tope);
-  const valido = !!formaId && n(monto) > 0 && !excede;
-
-  function guardar() {
-    if (!pago.id || !cambio || !valido || busy) return;
-    run(() => repararPago(id, pago.id!, { paymentMethodId: formaId, amount: n(monto), reason: t("motivoCorreccion") }, centro)).then(onDone);
-  }
+  // Empty → listed in the hint; filled but invalid → its own message (over the cap included). The hint
+  // lists what is missing first, so the red cap line shows only while the hint is not carrying it.
+  const issue = paymentAmountIssue(monto, esReembolso ? null : tope);
+  const excede = issue === "exceedsCap";
+  const missing = paymentRowMissing({ methodId: formaId, amount: monto }).map((f) => t(f === "method" ? "method" : "amount"));
+  const { submitting, submit } = useSubmit(
+    // `run` toasts the API error itself and returns false: then the row stays open with what was typed.
+    async () => {
+      if (!pago.id) throw new Error("payment without id");
+      if (!(await run(() => repararPago(id, pago.id!, { paymentMethodId: formaId, amount: n(monto), reason: t("motivoCorreccion") }, centro)))) throw RUN_FAILED;
+    },
+    { onSuccess: onDone, onError: (err) => err === RUN_FAILED },
+  );
+  const rowState = {
+    missing,
+    reason: issue === "notPositive" ? t("amountNotPositive") : excede ? t("exceedsTotal", { max: money(tope) }) : !cambio ? t("noChanges") : null,
+    blocked: issue !== null || !cambio,
+    submitting: busy || submitting,
+  };
+  const { disabled, hint } = footerState(rowState);
+  const hintId = React.useId() + "-hint";
 
   return (
     <li className="space-y-1.5 rounded-lg border px-2.5 py-2">
@@ -334,14 +341,15 @@ function PagoEditRow({
       </div>
       <div className="flex items-center gap-1.5">
         <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" onFocus={(e) => e.currentTarget.select()} className={"h-8 flex-1 text-right tabular-nums" + (excede ? " ring-1 ring-destructive" : "")} aria-invalid={excede} aria-label={t("amount")} />
-        <Button type="button" size="icon" className="size-8" disabled={!cambio || !valido || busy} aria-label={t("save")} onClick={guardar}>
+        <Button type="button" size="icon" className="size-8" disabled={disabled} aria-label={t("save")} aria-describedby={hint ? hintId : undefined} onClick={() => submit()}>
           <HugeiconsIcon icon={Tick02Icon} className="size-4" />
         </Button>
         <Button type="button" variant="ghost" size="icon" className="size-8" disabled={busy} aria-label={t("cancel")} onClick={onDone}>
           <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
         </Button>
       </div>
-      {excede && <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>}
+      {excede && hint?.kind !== "reason" && <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>}
+      <MissingHint id={hintId} {...rowState} />
     </li>
   );
 }
@@ -360,7 +368,7 @@ function PagoAddRow({
   id: string;
   centro?: string;
   busy: boolean;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
   tope: number; // máximo abonable = saldo pendiente; sugerimos ese importe y no dejamos pasarse.
   onDone: () => void;
 }) {
@@ -380,24 +388,42 @@ function PagoAddRow({
     const h = setTimeout(() => last4Ref.current?.focus(), 60);
     return () => clearTimeout(h);
   }, [esTarjeta]);
-  const excede = pagoExcede(n(monto), tope);
-  const valido = !!formaId && n(monto) > 0 && !excede && !busy;
+  // Empty → listed in the hint; filled but invalid → its own message (over the cap included; the red
+  // line below shows it only while the hint lists something missing instead).
+  const issue = paymentAmountIssue(monto, tope);
+  const excede = issue === "exceedsCap";
+  // The method is taken as a parameter because picking it from the select applies the payment in the same
+  // event, before `formaId` has updated (setState is async).
+  const rowStateFor = (methodId: string) => ({
+    missing: paymentRowMissing({ methodId, amount: monto }).map((f) => t(f === "method" ? "method" : "amount")),
+    reason: issue === "notPositive" ? t("amountNotPositive") : excede ? t("exceedsTotal", { max: money(tope) }) : null,
+    blocked: issue !== null,
+    submitting: busy || submitting,
+  });
 
-  // Registra con el monto ACTUAL. Acepta la forma por parámetro porque al autoaplicar desde el select el
-  // estado `formaId` aún no se actualizó (setState es asíncrono). Guardado por `busy` → sin doble cobro.
-  function registrar(fid: string = formaId) {
-    if (!fid || n(monto) <= 0 || pagoExcede(n(monto), tope) || busy) return;
-    const notas = last4.length === 4 ? `•••• ${last4}` : undefined;
-    run(() => registrarPago(id, { paymentMethodId: fid, amount: n(monto), ...(notas ? { notes: notas } : {}) } as never, centro)).then(onDone);
-  }
-  // Menos clics (pedido del mostrador): al elegir el tipo de pago se aplica YA, con el monto puesto (el saldo).
-  // La TARJETA no se autoaplica: deja anotar los últimos 4 antes de registrar. Para dividir, edita el monto a
-  // la parte antes de elegir el tipo; se aplica esa parte y el resto queda para otro pago. Pantalla de dinero:
-  // reversible (anular) y topado al saldo; el `busy` evita el doble registro.
+  // Registers with the CURRENT amount. useSubmit's guard (plus the page's `busy`) stops a double charge
+  // from a double click, a held Enter or click + Enter. `run` toasts the API error and returns false:
+  // then the row stays open (nothing was charged), with the amount still in it.
+  const { submitting, submit } = useSubmit(
+    async (fid: string) => {
+      const notas = last4.length === 4 ? `•••• ${last4}` : undefined;
+      if (!(await run(() => registrarPago(id, { paymentMethodId: fid, amount: n(monto), ...(notas ? { notes: notas } : {}) } as never, centro)))) throw RUN_FAILED;
+    },
+    { onSuccess: onDone, onError: (err) => err === RUN_FAILED },
+  );
+  const rowState = rowStateFor(formaId);
+  const { disabled, hint } = footerState(rowState);
+  const hintId = React.useId() + "-hint";
+
+  // Fewer clicks (front-desk request): picking the method applies the payment AT ONCE, with the amount in
+  // the field (the balance). A CARD is not auto-applied, so the last 4 can be noted first. To split, edit
+  // the amount to the part before picking; that part is applied and the rest stays for another payment.
+  // Money screen: reversible (void), capped at the balance. Nothing is applied while something is
+  // missing or invalid — the hint under the row says what.
   function onPickForma(v: string) {
     setFormaId(v);
     const f = formas.find((x) => x.id === v);
-    if (f && f.isCash !== false) registrar(v); // no-tarjeta → aplica al instante
+    if (f && f.isCash !== false && !footerState(rowStateFor(v)).disabled) void submit(v); // not a card → applies at once
   }
 
   return (
@@ -410,7 +436,7 @@ function PagoAddRow({
         </SelectContent>
       </Select>
       {esTarjeta && (
-        <Input ref={last4Ref} value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); registrar(); } }} placeholder={t("cardLast4")} className="h-8 w-full tabular-nums" inputMode="numeric" aria-label={t("cardLast4")} />
+        <Input ref={last4Ref} value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); if (!disabled) void submit(formaId); } }} placeholder={t("cardLast4")} className="h-8 w-full tabular-nums" inputMode="numeric" aria-label={t("cardLast4")} />
       )}
       <div className="flex items-center gap-1.5">
         {/* Monto enfocado y SELECCIONADO al abrir: para dividir, se teclea el parcial de una sin borrar. */}
@@ -418,7 +444,7 @@ function PagoAddRow({
         {/* Sin botón «Registrar»: al elegir el tipo se aplica solo. La TARJETA conserva un visto para confirmar
             tras anotar los últimos 4 (que no se autoaplica). Handoff: pedido del mostrador (menos clics). */}
         {esTarjeta && (
-          <Button type="button" size="icon" className="size-8" disabled={!valido} aria-label={t("register")} onClick={() => registrar()}>
+          <Button type="button" size="icon" className="size-8" disabled={disabled} aria-label={t("register")} aria-describedby={hint ? hintId : undefined} onClick={() => void submit(formaId)}>
             <HugeiconsIcon icon={Tick02Icon} className="size-4" />
           </Button>
         )}
@@ -427,9 +453,11 @@ function PagoAddRow({
         </Button>
       </div>
       {/* Split: para cobrar en varias formas se agrega un pago por cada forma; cada uno se topa al saldo restante. */}
-      {excede
-        ? <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>
-        : <p className="text-[11px] text-muted-foreground">{t("splitHint", { max: money(tope) })}</p>}
+      {/* Over the cap: said once — by the hint when it carries the reason, else by the red line. */}
+      {!excede
+        ? <p className="text-[11px] text-muted-foreground">{t("splitHint", { max: money(tope) })}</p>
+        : hint?.kind !== "reason" && <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>}
+      <MissingHint id={hintId} {...rowState} />
     </div>
   );
 }

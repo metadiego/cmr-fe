@@ -17,7 +17,7 @@ interface Props {
   centro?: string;
   disabled: boolean;
   label: string;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
 }
 
 // Local calendar day, YYYY-MM-DD: the latest date an invoice may be issued on (backwards only).

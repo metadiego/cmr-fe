@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, ArrowLeft01Icon, Cancel01Icon, InvoiceIcon } from "@hugeicons/core-free-icons";
 
@@ -14,7 +13,7 @@ import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { invoiceDetailHref } from "@/lib/facturacion/invoice-clinics";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
-import { toastError } from "@/lib/api/errors";
+import { voidReasonMissing } from "@/lib/facturacion/void-reason-missing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -23,15 +22,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ReturnSummarySkeleton } from "@/components/facturacion/invoice-return-skeleton";
 import { RefundEditorBody } from "@/components/facturacion/refund-editor-body";
 import { RefundHistory } from "@/components/facturacion/refund-history";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 
 // «Ver devolución» — un EDITOR EN SU SITIO (BE PR #580, handoff
 // .personal/handoff-editar-devolucion-completa.md), no solo una pantalla de lectura: el dueño, sobre
@@ -66,24 +59,15 @@ export default function DevolucionDetallePage() {
   }
 
   const [anular, setAnular] = React.useState(false);
-  const [motivo, setMotivo] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-
-  async function confirmarAnular() {
-    if (!motivo.trim() || busy) return;
-    setBusy(true);
-    try {
-      await anularDevolucion(id, devId, motivo.trim(), centro);
-      toast.success(t("anuladaOk"));
+  const [{ motivo }, setForm] = useDialogForm(() => ({ motivo: "" }), anular);
+  const missing = voidReasonMissing({ reason: motivo }).map(() => t("anularReason"));
+  const { submitting, submit } = useSubmit(() => anularDevolucion(id, devId, motivo.trim(), centro), {
+    successMessage: t("anuladaOk"),
+    onSuccess: () => {
       setAnular(false);
-      setMotivo("");
       refresh();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+  });
 
   const refund = state.kind === "ok" ? state.data : null;
   const backHref = `/billing/invoices/${id}${centro ? `?centro=${centro}` : ""}`;
@@ -175,19 +159,31 @@ export default function DevolucionDetallePage() {
         </>
       )}
 
-      <AlertDialog open={anular} onOpenChange={(o) => !o && setAnular(false)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("anularTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("anularBody")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("anularReason")} autoFocus />
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tRoot("common.cancel")}</AlertDialogCancel>
-            <Button variant="destructive" disabled={!motivo.trim() || busy} onClick={confirmarAnular}>{t("anular")}</Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <FormDialog
+        open={anular}
+        onOpenChange={setAnular}
+        size="md"
+        title={t("anularTitle")}
+        description={t("anularBody")}
+        onSubmit={() => submit()}
+        actions={[{ label: t("anular"), variant: "destructive", onClick: () => submit() }]}
+        submitting={submitting}
+        missing={missing}
+      >
+        <Field label={t("anularReason")} htmlFor="void-refund-reason" required>
+          <Input
+            id="void-refund-reason"
+            value={motivo}
+            onChange={(e) => setForm({ motivo: e.target.value })}
+            // Voiding is irreversible: a habitual Enter after typing the reason must not fire it.
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.preventDefault();
+            }}
+            placeholder={t("anularReason")}
+            autoFocus
+          />
+        </Field>
+      </FormDialog>
     </PageContainer>
   );
 }
