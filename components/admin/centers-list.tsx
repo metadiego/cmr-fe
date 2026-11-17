@@ -9,7 +9,6 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { useCan } from "@/hooks/use-can";
 import { DatosFiscalesDialog } from "@/components/admin/datos-fiscales-dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,14 +19,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTable } from "@/components/ui/data-table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { missingFields } from "@/lib/forms/missing";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
 
 type State =
   | { kind: "loading" }
@@ -145,78 +140,66 @@ function CreateCenterDialog({
   onCreated?: () => void;
 }) {
   const t = useTranslations("admin");
-  const [nombre, setNombre] = React.useState("");
-  const [codigo, setCodigo] = React.useState("");
-  const [direccion, setDireccion] = React.useState("");
-  const [submitting, setSubmitting] = React.useState(false);
+  const [form, update] = useDialogForm(
+    () => ({ nombre: "", codigo: "", direccion: "" }),
+    open,
+  );
+  const missing = missingFields([
+    [t("centers.name"), !!form.nombre.trim()],
+    [t("centers.code"), !!form.codigo.trim()],
+  ]);
 
-  // Reset on close (handler, not effect) so the next open is fresh.
-  function handleOpenChange(next: boolean) {
-    if (!next) {
-      setNombre("");
-      setCodigo("");
-      setDireccion("");
-    }
-    onOpenChange(next);
-  }
-
-  async function onSubmit() {
-    if (!nombre.trim() || !codigo.trim()) return;
-    setSubmitting(true);
-    try {
-      const c = await createCenter({
-        name: nombre.trim(),
-        code: codigo.trim(),
-        address: direccion.trim() || undefined,
-      });
-      toast.success(t("centers.success", { name: c.name }));
-      onOpenChange(false);
-      onCreated?.();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    () =>
+      createCenter({
+        name: form.nombre.trim(),
+        code: form.codigo.trim(),
+        address: form.direccion.trim() || undefined,
+      }),
+    {
+      onSuccess: (c) => {
+        toast.success(t("centers.success", { name: c.name }));
+        onOpenChange(false);
+        onCreated?.();
+      },
+    },
+  );
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("centers.createTitle")}</DialogTitle>
-          <DialogDescription>{t("centers.createDescription")}</DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label>{t("centers.name")}</Label>
-            <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>{t("centers.code")}</Label>
-            <Input value={codigo} onChange={(e) => setCodigo(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>{t("centers.address")}</Label>
-            <Input
-              value={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            {t("cancel")}
-          </Button>
-          <Button
-            onClick={onSubmit}
-            disabled={submitting || !nombre.trim() || !codigo.trim()}
-          >
-            {submitting ? t("centers.submitting") : t("centers.submit")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      title={t("centers.createTitle")}
+      description={t("centers.createDescription")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+      submitLabel={t("centers.submit")}
+      submittingLabel={t("centers.submitting")}
+      cancelLabel={t("cancel")}
+    >
+      <Field label={t("centers.name")} htmlFor="create-center-name" required>
+        <Input
+          id="create-center-name"
+          value={form.nombre}
+          onChange={(e) => update({ nombre: e.target.value })}
+        />
+      </Field>
+      <Field label={t("centers.code")} htmlFor="create-center-code" required>
+        <Input
+          id="create-center-code"
+          value={form.codigo}
+          onChange={(e) => update({ codigo: e.target.value })}
+        />
+      </Field>
+      <Field label={t("centers.address")} htmlFor="create-center-address">
+        <Input
+          id="create-center-address"
+          value={form.direccion}
+          onChange={(e) => update({ direccion: e.target.value })}
+        />
+      </Field>
+    </FormDialog>
   );
 }
