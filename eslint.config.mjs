@@ -48,7 +48,9 @@ const DEBT = {
   // 16-nov-2026: lowered from 1460 to 1317 — its dialogs moved onto the standard form shell
   // (FormDialog/useSubmit/useConfirm); the rest of the gap was already slack.
   "app/(app)/billing/invoices/[id]/page.tsx": 1317,
-  "components/inventario/productos-admin.tsx": 1048,
+  // 17-nov-2026: 1048 → 1046 — the product sheet moved onto the standard FormSheet shell (kit Field,
+  // useDialogForm, useSubmit); the local Field and canSubmit went.
+  "components/inventario/productos-admin.tsx": 1046,
   // 17-nov-2026: 700 → 681 — the delete AlertDialog became a useConfirm prompt (standard form kit);
   // the stray blank line after </aside> went, and the delete confirm gained `destructive: true` (net 0).
   "components/configuracion/menu-editor.tsx": 681,
