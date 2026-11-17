@@ -152,3 +152,7 @@ sitio donde ponerlos).
 4. Pantalla «Menú del rol»: ocultarla o avisar de que ya no cambia lo que la gente ve.
 5. `isMaster`/`accessMode` → `isAdmin` en `users-list.tsx`, `theme-settings.tsx`, `app-shell.tsx`; quitar el
    selector de «modo de acceso» de invitar/editar perfil (el BE lo ignora).
+
+**Hecho el 16-nov-2026** (rama `feat/access-control-post-release`): los cinco puntos. En «Menú del rol» se
+eligió quitar (no avisar): el diálogo y el interruptor «visible» del editor de rol guardaban una lista que el
+BE ya no lee (el menú sale de los permisos). `schema.d.ts` regenerado contra producción.
