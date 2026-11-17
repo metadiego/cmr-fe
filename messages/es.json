@@ -1745,7 +1745,8 @@
         "cancelar": "Cancelar",
         "guardar": "Cambiar email",
         "guardando": "Cambiando…",
-        "ok": "Email de acceso actualizado"
+        "ok": "Email de acceso actualizado",
+        "unchanged": "Es el mismo email que ya tiene"
       },
       "adminBadge": "Administrador",
       "allCenters": "Todos los centros",

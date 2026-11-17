@@ -1745,7 +1745,8 @@
         "cancelar": "Cancel",
         "guardar": "Change email",
         "guardando": "Changing…",
-        "ok": "Access email updated"
+        "ok": "Access email updated",
+        "unchanged": "Same as the current email"
       },
       "adminBadge": "Administrator",
       "allCenters": "All centers",
