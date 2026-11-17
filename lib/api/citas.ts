@@ -171,6 +171,40 @@ export async function countByDay(params: {
   return apiFetch<ConteoPorDia[]>(path, {}, tenant);
 }
 
+// An appointment left "en_consulta" from a previous day, never attended or closed — same rule as
+// the frontdesk sessions "en terapia" banner (lib/api/frontdesk-eventos.ts), for appointments
+// instead of service sessions. BE #616. `actorId`/`actorName` are the last "consulta" transition's
+// staff member, already resolved by the BE; `actorId` is null on rows that predate actor recording.
+export interface CitaEnConsultaSinCerrar {
+  appointmentId: string;
+  clinicId: string;
+  date: string;
+  time: string;
+  patientId: string;
+  patientName: string;
+  medicalRecordNumber: string | null;
+  actorId: string | null;
+  actorName: string | null;
+  at: string;
+}
+
+// `days`: 1–90, default 30. PREVIOUS days only (today excluded), PR timezone — same window the
+// sessions banner uses via `inDaysPR(-30)`..`inDaysPR(-1)`.
+export async function listCitasEnConsultaSinCerrar(params: {
+  days?: number;
+  centroId?: string;
+  centerIds?: string[];
+}): Promise<CitaEnConsultaSinCerrar[]> {
+  const { centroId, centerIds, days } = params;
+  const sp = readQuery(days ? { days } : {});
+  const [path, tenant] = await scopedRead(
+    `/appointments/at-consultation-without-close?${sp.toString()}`,
+    centroId,
+    centerIds,
+  );
+  return apiFetch<CitaEnConsultaSinCerrar[]>(path, {}, tenant);
+}
+
 // Found by id in every center the person can read; the row carries `clinicId`/`clinicName`.
 export function getCita(id: string): Promise<Cita> {
   return apiFetch<Cita>(`/appointments/${id}`);
