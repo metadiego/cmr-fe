@@ -599,9 +599,9 @@ function ProductoForm({
   const [ngDivision, setNgDivision] = React.useState("");
   const [creandoGrupo, setCreandoGrupo] = React.useState(false);
 
-  // The inline new-group inputs are a separate mini-form: Enter there must not save the product.
+  // Inline mini-forms (new group, new vial presentation): Enter in their inputs must not save the product.
   const noEnter = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") e.preventDefault();
+    if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") e.preventDefault();
   };
 
   async function crearGrupoInline() {
@@ -990,7 +990,7 @@ function ProductoForm({
       {/* Viales abiertos (remanente) + presentaciones del vial (cambiar = elegir la activa). Solo con
           producto existente. Handoff HANDOFF-viales-presentaciones-y-remanente. */}
       {isEdit && producto && (
-        <div className="pt-1">
+        <div className="pt-1" onKeyDown={noEnter}>
           <VialYPresentaciones productoId={producto.id} />
         </div>
       )}
