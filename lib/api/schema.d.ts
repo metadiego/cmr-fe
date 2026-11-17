@@ -1315,7 +1315,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/diarias`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[0]_v1"];
         put?: never;
@@ -1338,7 +1338,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/daily`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[1]_v1"];
         put?: never;
@@ -1361,7 +1361,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/diarias`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[2]_v1"];
         put?: never;
@@ -1384,7 +1384,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/daily`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[3]_v1"];
         put?: never;
@@ -1404,7 +1404,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[4]_v2"];
         put?: never;
@@ -1424,7 +1424,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[5]_v2"];
         put?: never;
@@ -1444,7 +1444,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[6]_v2"];
         put?: never;
@@ -1464,7 +1464,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[7]_v2"];
         put?: never;
@@ -1483,7 +1483,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/servicios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1504,7 +1504,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/services`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1525,7 +1525,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/servicios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1546,7 +1546,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
+         * Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/services`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -1566,7 +1566,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[4]_v2"];
         put?: never;
         post?: never;
@@ -1583,7 +1583,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[5]_v2"];
         put?: never;
         post?: never;
@@ -1600,7 +1600,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[6]_v2"];
         put?: never;
         post?: never;
@@ -1617,7 +1617,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, dosis de la Vit C) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. Por fila: visitas (participaciones), pacientes distintos, terapias aplicadas (`therapies`: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita) y sus porcentajes; `vitals` = signos vitales tomados por enfermera en las citas. De todos los centros donde se tiene estadisticas.read (centerIds acota). */
         get: operations["EstadisticasController_porServicio[7]_v2"];
         put?: never;
         post?: never;
@@ -4745,7 +4745,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * One invoice, in any center where the caller reads invoices (a record cannot mix centers).
+         * One invoice (any center the caller reads), + pastCashDay and each payment pastDayLocked.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -4771,7 +4771,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * One invoice, in any center where the caller reads invoices (a record cannot mix centers).
+         * One invoice (any center the caller reads), + pastCashDay and each payment pastDayLocked.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -4796,7 +4796,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** One invoice, in any center where the caller reads invoices (a record cannot mix centers). */
+        /** One invoice (any center the caller reads), + pastCashDay and each payment pastDayLocked. */
         get: operations["FacturacionController_get[2]_v2"];
         put?: never;
         post?: never;
@@ -4814,7 +4814,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** One invoice, in any center where the caller reads invoices (a record cannot mix centers). */
+        /** One invoice (any center the caller reads), + pastCashDay and each payment pastDayLocked. */
         get: operations["FacturacionController_get[3]_v2"];
         put?: never;
         post?: never;
@@ -11789,6 +11789,814 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/devoluciones/{devolucionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detalle de una devolución: cabecera, líneas devueltas, TODOS sus reembolsos (también los anulados) y el hueco entre lo devuelto y lo reembolsado. / A refund in full: lines, every reimbursement and the reimbursement gap.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/devoluciones/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["RefundRepairController_detail[0]_v1"];
+        /**
+         * Edita la devolución ENTERA en su sitio (mismo id y número): líneas (sesiones/unidades y monto; se pueden añadir, cambiar y quitar), fecha, motivo, notas, quién atendió, forma de la cabecera y, si vienen, los reembolsos. Repone y aplica paquetes, contadores e inventario en UNA transacción. Las reglas AVISAN (meta.warnings) y cada centro puede hacer que una bloquee (preferencias refundEdit.rules → 400 REFUND_EDIT_BLOCKED). Límites duros: nunca más que el total de la factura (REFUND_EXCEEDS_INVOICE_TOTAL) ni negativos (REFUND_NEGATIVE). Pide confirmación (428, X-Confirm-Action: refund.edit). / Edits the whole refund in place.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/devoluciones/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["RefundRepairController_edit[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/devoluciones/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["RefundRepairController_update[0]_v1"];
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/refunds/{devolucionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detalle de una devolución: cabecera, líneas devueltas, TODOS sus reembolsos (también los anulados) y el hueco entre lo devuelto y lo reembolsado. / A refund in full: lines, every reimbursement and the reimbursement gap.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/refunds/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["RefundRepairController_detail[1]_v1"];
+        /**
+         * Edita la devolución ENTERA en su sitio (mismo id y número): líneas (sesiones/unidades y monto; se pueden añadir, cambiar y quitar), fecha, motivo, notas, quién atendió, forma de la cabecera y, si vienen, los reembolsos. Repone y aplica paquetes, contadores e inventario en UNA transacción. Las reglas AVISAN (meta.warnings) y cada centro puede hacer que una bloquee (preferencias refundEdit.rules → 400 REFUND_EDIT_BLOCKED). Límites duros: nunca más que el total de la factura (REFUND_EXCEEDS_INVOICE_TOTAL) ni negativos (REFUND_NEGATIVE). Pide confirmación (428, X-Confirm-Action: refund.edit). / Edits the whole refund in place.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/refunds/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["RefundRepairController_edit[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/refunds/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["RefundRepairController_update[1]_v1"];
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/devoluciones/{devolucionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detalle de una devolución: cabecera, líneas devueltas, TODOS sus reembolsos (también los anulados) y el hueco entre lo devuelto y lo reembolsado. / A refund in full: lines, every reimbursement and the reimbursement gap.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/devoluciones/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["RefundRepairController_detail[2]_v1"];
+        /**
+         * Edita la devolución ENTERA en su sitio (mismo id y número): líneas (sesiones/unidades y monto; se pueden añadir, cambiar y quitar), fecha, motivo, notas, quién atendió, forma de la cabecera y, si vienen, los reembolsos. Repone y aplica paquetes, contadores e inventario en UNA transacción. Las reglas AVISAN (meta.warnings) y cada centro puede hacer que una bloquee (preferencias refundEdit.rules → 400 REFUND_EDIT_BLOCKED). Límites duros: nunca más que el total de la factura (REFUND_EXCEEDS_INVOICE_TOTAL) ni negativos (REFUND_NEGATIVE). Pide confirmación (428, X-Confirm-Action: refund.edit). / Edits the whole refund in place.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/devoluciones/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["RefundRepairController_edit[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/devoluciones/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["RefundRepairController_update[2]_v1"];
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/refunds/{devolucionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detalle de una devolución: cabecera, líneas devueltas, TODOS sus reembolsos (también los anulados) y el hueco entre lo devuelto y lo reembolsado. / A refund in full: lines, every reimbursement and the reimbursement gap.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/refunds/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["RefundRepairController_detail[3]_v1"];
+        /**
+         * Edita la devolución ENTERA en su sitio (mismo id y número): líneas (sesiones/unidades y monto; se pueden añadir, cambiar y quitar), fecha, motivo, notas, quién atendió, forma de la cabecera y, si vienen, los reembolsos. Repone y aplica paquetes, contadores e inventario en UNA transacción. Las reglas AVISAN (meta.warnings) y cada centro puede hacer que una bloquee (preferencias refundEdit.rules → 400 REFUND_EDIT_BLOCKED). Límites duros: nunca más que el total de la factura (REFUND_EXCEEDS_INVOICE_TOTAL) ni negativos (REFUND_NEGATIVE). Pide confirmación (428, X-Confirm-Action: refund.edit). / Edits the whole refund in place.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/refunds/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["RefundRepairController_edit[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/refunds/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["RefundRepairController_update[3]_v1"];
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/devoluciones/{devolucionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle de una devolución: cabecera, líneas devueltas, TODOS sus reembolsos (también los anulados) y el hueco entre lo devuelto y lo reembolsado. / A refund in full: lines, every reimbursement and the reimbursement gap. */
+        get: operations["RefundRepairController_detail[4]_v2"];
+        /** Edita la devolución ENTERA en su sitio (mismo id y número): líneas (sesiones/unidades y monto; se pueden añadir, cambiar y quitar), fecha, motivo, notas, quién atendió, forma de la cabecera y, si vienen, los reembolsos. Repone y aplica paquetes, contadores e inventario en UNA transacción. Las reglas AVISAN (meta.warnings) y cada centro puede hacer que una bloquee (preferencias refundEdit.rules → 400 REFUND_EDIT_BLOCKED). Límites duros: nunca más que el total de la factura (REFUND_EXCEEDS_INVOICE_TOTAL) ni negativos (REFUND_NEGATIVE). Pide confirmación (428, X-Confirm-Action: refund.edit). / Edits the whole refund in place. */
+        put: operations["RefundRepairController_edit[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes. */
+        patch: operations["RefundRepairController_update[4]_v2"];
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/refunds/{devolucionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle de una devolución: cabecera, líneas devueltas, TODOS sus reembolsos (también los anulados) y el hueco entre lo devuelto y lo reembolsado. / A refund in full: lines, every reimbursement and the reimbursement gap. */
+        get: operations["RefundRepairController_detail[5]_v2"];
+        /** Edita la devolución ENTERA en su sitio (mismo id y número): líneas (sesiones/unidades y monto; se pueden añadir, cambiar y quitar), fecha, motivo, notas, quién atendió, forma de la cabecera y, si vienen, los reembolsos. Repone y aplica paquetes, contadores e inventario en UNA transacción. Las reglas AVISAN (meta.warnings) y cada centro puede hacer que una bloquee (preferencias refundEdit.rules → 400 REFUND_EDIT_BLOCKED). Límites duros: nunca más que el total de la factura (REFUND_EXCEEDS_INVOICE_TOTAL) ni negativos (REFUND_NEGATIVE). Pide confirmación (428, X-Confirm-Action: refund.edit). / Edits the whole refund in place. */
+        put: operations["RefundRepairController_edit[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes. */
+        patch: operations["RefundRepairController_update[5]_v2"];
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/devoluciones/{devolucionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle de una devolución: cabecera, líneas devueltas, TODOS sus reembolsos (también los anulados) y el hueco entre lo devuelto y lo reembolsado. / A refund in full: lines, every reimbursement and the reimbursement gap. */
+        get: operations["RefundRepairController_detail[6]_v2"];
+        /** Edita la devolución ENTERA en su sitio (mismo id y número): líneas (sesiones/unidades y monto; se pueden añadir, cambiar y quitar), fecha, motivo, notas, quién atendió, forma de la cabecera y, si vienen, los reembolsos. Repone y aplica paquetes, contadores e inventario en UNA transacción. Las reglas AVISAN (meta.warnings) y cada centro puede hacer que una bloquee (preferencias refundEdit.rules → 400 REFUND_EDIT_BLOCKED). Límites duros: nunca más que el total de la factura (REFUND_EXCEEDS_INVOICE_TOTAL) ni negativos (REFUND_NEGATIVE). Pide confirmación (428, X-Confirm-Action: refund.edit). / Edits the whole refund in place. */
+        put: operations["RefundRepairController_edit[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes. */
+        patch: operations["RefundRepairController_update[6]_v2"];
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/refunds/{devolucionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Detalle de una devolución: cabecera, líneas devueltas, TODOS sus reembolsos (también los anulados) y el hueco entre lo devuelto y lo reembolsado. / A refund in full: lines, every reimbursement and the reimbursement gap. */
+        get: operations["RefundRepairController_detail[7]_v2"];
+        /** Edita la devolución ENTERA en su sitio (mismo id y número): líneas (sesiones/unidades y monto; se pueden añadir, cambiar y quitar), fecha, motivo, notas, quién atendió, forma de la cabecera y, si vienen, los reembolsos. Repone y aplica paquetes, contadores e inventario en UNA transacción. Las reglas AVISAN (meta.warnings) y cada centro puede hacer que una bloquee (preferencias refundEdit.rules → 400 REFUND_EDIT_BLOCKED). Límites duros: nunca más que el total de la factura (REFUND_EXCEEDS_INVOICE_TOTAL) ni negativos (REFUND_NEGATIVE). Pide confirmación (428, X-Confirm-Action: refund.edit). / Edits the whole refund in place. */
+        put: operations["RefundRepairController_edit[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes. */
+        patch: operations["RefundRepairController_update[7]_v2"];
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/devoluciones/{devolucionId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula la edición con el MISMO cuerpo que PUT: devuelve qué cambiaría (líneas, paquetes, contadores, inventario, montos, estado de la factura, hueco de reembolso) y los avisos, sin escribir nada. / Dry run of the refund edit.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/devoluciones/{devolucionId}/simular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["RefundRepairController_simulate[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/refunds/{devolucionId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula la edición con el MISMO cuerpo que PUT: devuelve qué cambiaría (líneas, paquetes, contadores, inventario, montos, estado de la factura, hueco de reembolso) y los avisos, sin escribir nada. / Dry run of the refund edit.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/refunds/{devolucionId}/simulate`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["RefundRepairController_simulate[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/devoluciones/{devolucionId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula la edición con el MISMO cuerpo que PUT: devuelve qué cambiaría (líneas, paquetes, contadores, inventario, montos, estado de la factura, hueco de reembolso) y los avisos, sin escribir nada. / Dry run of the refund edit.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/devoluciones/{devolucionId}/simular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["RefundRepairController_simulate[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/refunds/{devolucionId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula la edición con el MISMO cuerpo que PUT: devuelve qué cambiaría (líneas, paquetes, contadores, inventario, montos, estado de la factura, hueco de reembolso) y los avisos, sin escribir nada. / Dry run of the refund edit.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/refunds/{devolucionId}/simulate`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["RefundRepairController_simulate[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/devoluciones/{devolucionId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula la edición con el MISMO cuerpo que PUT: devuelve qué cambiaría (líneas, paquetes, contadores, inventario, montos, estado de la factura, hueco de reembolso) y los avisos, sin escribir nada. / Dry run of the refund edit. */
+        post: operations["RefundRepairController_simulate[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/refunds/{devolucionId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula la edición con el MISMO cuerpo que PUT: devuelve qué cambiaría (líneas, paquetes, contadores, inventario, montos, estado de la factura, hueco de reembolso) y los avisos, sin escribir nada. / Dry run of the refund edit. */
+        post: operations["RefundRepairController_simulate[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/devoluciones/{devolucionId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula la edición con el MISMO cuerpo que PUT: devuelve qué cambiaría (líneas, paquetes, contadores, inventario, montos, estado de la factura, hueco de reembolso) y los avisos, sin escribir nada. / Dry run of the refund edit. */
+        post: operations["RefundRepairController_simulate[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/refunds/{devolucionId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula la edición con el MISMO cuerpo que PUT: devuelve qué cambiaría (líneas, paquetes, contadores, inventario, montos, estado de la factura, hueco de reembolso) y los avisos, sin escribir nada. / Dry run of the refund edit. */
+        post: operations["RefundRepairController_simulate[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/devoluciones/{devolucionId}/historial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de la devolución y sus líneas (registro de cambios): quién, cuándo, antes y después. / Change history of a refund.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/devoluciones/{devolucionId}/historial`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["RefundRepairController_history[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/refunds/{devolucionId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de la devolución y sus líneas (registro de cambios): quién, cuándo, antes y después. / Change history of a refund.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/refunds/{devolucionId}/history`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["RefundRepairController_history[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/devoluciones/{devolucionId}/historial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de la devolución y sus líneas (registro de cambios): quién, cuándo, antes y después. / Change history of a refund.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/devoluciones/{devolucionId}/historial`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["RefundRepairController_history[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/refunds/{devolucionId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de la devolución y sus líneas (registro de cambios): quién, cuándo, antes y después. / Change history of a refund.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/refunds/{devolucionId}/history`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["RefundRepairController_history[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/devoluciones/{devolucionId}/historial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de la devolución y sus líneas (registro de cambios): quién, cuándo, antes y después. / Change history of a refund. */
+        get: operations["RefundRepairController_history[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/refunds/{devolucionId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de la devolución y sus líneas (registro de cambios): quién, cuándo, antes y después. / Change history of a refund. */
+        get: operations["RefundRepairController_history[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/devoluciones/{devolucionId}/historial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de la devolución y sus líneas (registro de cambios): quién, cuándo, antes y después. / Change history of a refund. */
+        get: operations["RefundRepairController_history[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/refunds/{devolucionId}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de la devolución y sus líneas (registro de cambios): quién, cuándo, antes y después. / Change history of a refund. */
+        get: operations["RefundRepairController_history[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/devoluciones/{devolucionId}/reembolsos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Reemplaza por dónde salió el dinero de una devolución ACTIVA (se puede repartir en varias formas). Anula los reembolsos activos y crea los nuevos con la fecha de la devolución. La suma debe ser el monto devuelto al centavo (400 REFUND_REIMBURSEMENT_SUM_MISMATCH); devolución no activa → 400 REFUND_NOT_ACTIVE. Pide confirmación (428, X-Confirm-Action: refund.reimbursements.replace). / Replaces a refund reimbursements.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/devoluciones/{devolucionId}/reembolsos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["RefundRepairController_replaceReimbursements[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/refunds/{devolucionId}/reimbursements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Reemplaza por dónde salió el dinero de una devolución ACTIVA (se puede repartir en varias formas). Anula los reembolsos activos y crea los nuevos con la fecha de la devolución. La suma debe ser el monto devuelto al centavo (400 REFUND_REIMBURSEMENT_SUM_MISMATCH); devolución no activa → 400 REFUND_NOT_ACTIVE. Pide confirmación (428, X-Confirm-Action: refund.reimbursements.replace). / Replaces a refund reimbursements.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/refunds/{devolucionId}/reimbursements`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["RefundRepairController_replaceReimbursements[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/devoluciones/{devolucionId}/reembolsos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Reemplaza por dónde salió el dinero de una devolución ACTIVA (se puede repartir en varias formas). Anula los reembolsos activos y crea los nuevos con la fecha de la devolución. La suma debe ser el monto devuelto al centavo (400 REFUND_REIMBURSEMENT_SUM_MISMATCH); devolución no activa → 400 REFUND_NOT_ACTIVE. Pide confirmación (428, X-Confirm-Action: refund.reimbursements.replace). / Replaces a refund reimbursements.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/devoluciones/{devolucionId}/reembolsos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["RefundRepairController_replaceReimbursements[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/refunds/{devolucionId}/reimbursements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Reemplaza por dónde salió el dinero de una devolución ACTIVA (se puede repartir en varias formas). Anula los reembolsos activos y crea los nuevos con la fecha de la devolución. La suma debe ser el monto devuelto al centavo (400 REFUND_REIMBURSEMENT_SUM_MISMATCH); devolución no activa → 400 REFUND_NOT_ACTIVE. Pide confirmación (428, X-Confirm-Action: refund.reimbursements.replace). / Replaces a refund reimbursements.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/refunds/{devolucionId}/reimbursements`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["RefundRepairController_replaceReimbursements[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/devoluciones/{devolucionId}/reembolsos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Reemplaza por dónde salió el dinero de una devolución ACTIVA (se puede repartir en varias formas). Anula los reembolsos activos y crea los nuevos con la fecha de la devolución. La suma debe ser el monto devuelto al centavo (400 REFUND_REIMBURSEMENT_SUM_MISMATCH); devolución no activa → 400 REFUND_NOT_ACTIVE. Pide confirmación (428, X-Confirm-Action: refund.reimbursements.replace). / Replaces a refund reimbursements. */
+        put: operations["RefundRepairController_replaceReimbursements[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/refunds/{devolucionId}/reimbursements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Reemplaza por dónde salió el dinero de una devolución ACTIVA (se puede repartir en varias formas). Anula los reembolsos activos y crea los nuevos con la fecha de la devolución. La suma debe ser el monto devuelto al centavo (400 REFUND_REIMBURSEMENT_SUM_MISMATCH); devolución no activa → 400 REFUND_NOT_ACTIVE. Pide confirmación (428, X-Confirm-Action: refund.reimbursements.replace). / Replaces a refund reimbursements. */
+        put: operations["RefundRepairController_replaceReimbursements[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/devoluciones/{devolucionId}/reembolsos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Reemplaza por dónde salió el dinero de una devolución ACTIVA (se puede repartir en varias formas). Anula los reembolsos activos y crea los nuevos con la fecha de la devolución. La suma debe ser el monto devuelto al centavo (400 REFUND_REIMBURSEMENT_SUM_MISMATCH); devolución no activa → 400 REFUND_NOT_ACTIVE. Pide confirmación (428, X-Confirm-Action: refund.reimbursements.replace). / Replaces a refund reimbursements. */
+        put: operations["RefundRepairController_replaceReimbursements[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/refunds/{devolucionId}/reimbursements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Reemplaza por dónde salió el dinero de una devolución ACTIVA (se puede repartir en varias formas). Anula los reembolsos activos y crea los nuevos con la fecha de la devolución. La suma debe ser el monto devuelto al centavo (400 REFUND_REIMBURSEMENT_SUM_MISMATCH); devolución no activa → 400 REFUND_NOT_ACTIVE. Pide confirmación (428, X-Confirm-Action: refund.reimbursements.replace). / Replaces a refund reimbursements. */
+        put: operations["RefundRepairController_replaceReimbursements[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/items/{itemId}/agregar-componente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Añade un componente OPCIONAL a la línea de kit de una factura EMITIDA sin cambiar el monto: sale en «Incluye:», crea solo su disponibilidad y descarga solo lo suyo. Pide confirmación (428, X-Confirm-Action: invoice.kit.add_component) y un motivo. / Adds an optional component to an issued kit line at the same amount.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/items/{itemId}/agregar-componente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["IssuedKitComponentController_add[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/items/{itemId}/add-component": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Añade un componente OPCIONAL a la línea de kit de una factura EMITIDA sin cambiar el monto: sale en «Incluye:», crea solo su disponibilidad y descarga solo lo suyo. Pide confirmación (428, X-Confirm-Action: invoice.kit.add_component) y un motivo. / Adds an optional component to an issued kit line at the same amount.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/items/{itemId}/add-component`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["IssuedKitComponentController_add[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/items/{itemId}/agregar-componente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Añade un componente OPCIONAL a la línea de kit de una factura EMITIDA sin cambiar el monto: sale en «Incluye:», crea solo su disponibilidad y descarga solo lo suyo. Pide confirmación (428, X-Confirm-Action: invoice.kit.add_component) y un motivo. / Adds an optional component to an issued kit line at the same amount.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/items/{itemId}/agregar-componente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["IssuedKitComponentController_add[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/items/{itemId}/add-component": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Añade un componente OPCIONAL a la línea de kit de una factura EMITIDA sin cambiar el monto: sale en «Incluye:», crea solo su disponibilidad y descarga solo lo suyo. Pide confirmación (428, X-Confirm-Action: invoice.kit.add_component) y un motivo. / Adds an optional component to an issued kit line at the same amount.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/items/{itemId}/add-component`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["IssuedKitComponentController_add[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/items/{itemId}/agregar-componente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Añade un componente OPCIONAL a la línea de kit de una factura EMITIDA sin cambiar el monto: sale en «Incluye:», crea solo su disponibilidad y descarga solo lo suyo. Pide confirmación (428, X-Confirm-Action: invoice.kit.add_component) y un motivo. / Adds an optional component to an issued kit line at the same amount. */
+        post: operations["IssuedKitComponentController_add[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/items/{itemId}/add-component": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Añade un componente OPCIONAL a la línea de kit de una factura EMITIDA sin cambiar el monto: sale en «Incluye:», crea solo su disponibilidad y descarga solo lo suyo. Pide confirmación (428, X-Confirm-Action: invoice.kit.add_component) y un motivo. / Adds an optional component to an issued kit line at the same amount. */
+        post: operations["IssuedKitComponentController_add[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/items/{itemId}/agregar-componente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Añade un componente OPCIONAL a la línea de kit de una factura EMITIDA sin cambiar el monto: sale en «Incluye:», crea solo su disponibilidad y descarga solo lo suyo. Pide confirmación (428, X-Confirm-Action: invoice.kit.add_component) y un motivo. / Adds an optional component to an issued kit line at the same amount. */
+        post: operations["IssuedKitComponentController_add[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/items/{itemId}/add-component": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Añade un componente OPCIONAL a la línea de kit de una factura EMITIDA sin cambiar el monto: sale en «Incluye:», crea solo su disponibilidad y descarga solo lo suyo. Pide confirmación (428, X-Confirm-Action: invoice.kit.add_component) y un motivo. / Adds an optional component to an issued kit line at the same amount. */
+        post: operations["IssuedKitComponentController_add[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturacion/devoluciones": {
         parameters: {
             query?: never;
@@ -16898,6 +17706,310 @@ export interface paths {
         post?: never;
         /** Quita una bandera de prioridad del paciente (la condición ya no aplica). */
         delete: operations["PacientesController_removePatientPriorityFlag[7]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/{id}/fusionar-en/{targetId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula la fusión: cuántas filas se moverían por tabla, choques y si cambiarían conteos de personas de periodos pasados. No escribe nada. / Dry run of a patient merge.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/{id}/fusionar-en/{targetId}/simular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PatientMergeController_simulate[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/{id}/merge-into/{targetId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula la fusión: cuántas filas se moverían por tabla, choques y si cambiarían conteos de personas de periodos pasados. No escribe nada. / Dry run of a patient merge.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/{id}/merge-into/{targetId}/simulate`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PatientMergeController_simulate[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/{id}/fusionar-en/{targetId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula la fusión: cuántas filas se moverían por tabla, choques y si cambiarían conteos de personas de periodos pasados. No escribe nada. / Dry run of a patient merge.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/{id}/fusionar-en/{targetId}/simular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PatientMergeController_simulate[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/{id}/merge-into/{targetId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula la fusión: cuántas filas se moverían por tabla, choques y si cambiarían conteos de personas de periodos pasados. No escribe nada. / Dry run of a patient merge.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/{id}/merge-into/{targetId}/simulate`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PatientMergeController_simulate[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/{id}/fusionar-en/{targetId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula la fusión: cuántas filas se moverían por tabla, choques y si cambiarían conteos de personas de periodos pasados. No escribe nada. / Dry run of a patient merge. */
+        post: operations["PatientMergeController_simulate[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/{id}/merge-into/{targetId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula la fusión: cuántas filas se moverían por tabla, choques y si cambiarían conteos de personas de periodos pasados. No escribe nada. / Dry run of a patient merge. */
+        post: operations["PatientMergeController_simulate[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/{id}/fusionar-en/{targetId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula la fusión: cuántas filas se moverían por tabla, choques y si cambiarían conteos de personas de periodos pasados. No escribe nada. / Dry run of a patient merge. */
+        post: operations["PatientMergeController_simulate[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/{id}/merge-into/{targetId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula la fusión: cuántas filas se moverían por tabla, choques y si cambiarían conteos de personas de periodos pasados. No escribe nada. / Dry run of a patient merge. */
+        post: operations["PatientMergeController_simulate[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/{id}/fusionar-en/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fusiona la ficha duplicada en la real, en UNA transacción: solo cambia a qué paciente apunta cada fila (sin tocar montos, fechas, estados ni números) y desactiva la duplicada. Pide confirmación (patient.merge). / Merge a duplicate patient into the real one.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/{id}/fusionar-en/{targetId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PatientMergeController_merge[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/{id}/merge-into/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fusiona la ficha duplicada en la real, en UNA transacción: solo cambia a qué paciente apunta cada fila (sin tocar montos, fechas, estados ni números) y desactiva la duplicada. Pide confirmación (patient.merge). / Merge a duplicate patient into the real one.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/{id}/merge-into/{targetId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PatientMergeController_merge[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/{id}/fusionar-en/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fusiona la ficha duplicada en la real, en UNA transacción: solo cambia a qué paciente apunta cada fila (sin tocar montos, fechas, estados ni números) y desactiva la duplicada. Pide confirmación (patient.merge). / Merge a duplicate patient into the real one.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/{id}/fusionar-en/{targetId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PatientMergeController_merge[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/{id}/merge-into/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fusiona la ficha duplicada en la real, en UNA transacción: solo cambia a qué paciente apunta cada fila (sin tocar montos, fechas, estados ni números) y desactiva la duplicada. Pide confirmación (patient.merge). / Merge a duplicate patient into the real one.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/{id}/merge-into/{targetId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PatientMergeController_merge[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/{id}/fusionar-en/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fusiona la ficha duplicada en la real, en UNA transacción: solo cambia a qué paciente apunta cada fila (sin tocar montos, fechas, estados ni números) y desactiva la duplicada. Pide confirmación (patient.merge). / Merge a duplicate patient into the real one. */
+        post: operations["PatientMergeController_merge[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/{id}/merge-into/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fusiona la ficha duplicada en la real, en UNA transacción: solo cambia a qué paciente apunta cada fila (sin tocar montos, fechas, estados ni números) y desactiva la duplicada. Pide confirmación (patient.merge). / Merge a duplicate patient into the real one. */
+        post: operations["PatientMergeController_merge[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/{id}/fusionar-en/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fusiona la ficha duplicada en la real, en UNA transacción: solo cambia a qué paciente apunta cada fila (sin tocar montos, fechas, estados ni números) y desactiva la duplicada. Pide confirmación (patient.merge). / Merge a duplicate patient into the real one. */
+        post: operations["PatientMergeController_merge[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/{id}/merge-into/{targetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fusiona la ficha duplicada en la real, en UNA transacción: solo cambia a qué paciente apunta cada fila (sin tocar montos, fechas, estados ni números) y desactiva la duplicada. Pide confirmación (patient.merge). / Merge a duplicate patient into the real one. */
+        post: operations["PatientMergeController_merge[7]_v2"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -23117,6 +24229,378 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/impresion-hubs/{centerId}/escaneres": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Escáneres eSCL del centro. / eSCL scanners of the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/escaneres`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Readable with print-hub.read (configures them) OR caja.scan (scans with them) IN that center.
+         */
+        get: operations["ScannersController_list[0]_v1"];
+        put?: never;
+        /**
+         * Alta de un escáner. / Adds a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/escaneres`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScannersController_create[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/scanners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Escáneres eSCL del centro. / eSCL scanners of the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/scanners`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Readable with print-hub.read (configures them) OR caja.scan (scans with them) IN that center.
+         */
+        get: operations["ScannersController_list[1]_v1"];
+        put?: never;
+        /**
+         * Alta de un escáner. / Adds a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/scanners`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScannersController_create[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/escaneres": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Escáneres eSCL del centro. / eSCL scanners of the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/escaneres`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Readable with print-hub.read (configures them) OR caja.scan (scans with them) IN that center.
+         */
+        get: operations["ScannersController_list[2]_v1"];
+        put?: never;
+        /**
+         * Alta de un escáner. / Adds a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/escaneres`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScannersController_create[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/scanners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Escáneres eSCL del centro. / eSCL scanners of the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/scanners`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Readable with print-hub.read (configures them) OR caja.scan (scans with them) IN that center.
+         */
+        get: operations["ScannersController_list[3]_v1"];
+        put?: never;
+        /**
+         * Alta de un escáner. / Adds a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/scanners`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScannersController_create[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/escaneres": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Escáneres eSCL del centro. / eSCL scanners of the center.
+         * @description Readable with print-hub.read (configures them) OR caja.scan (scans with them) IN that center.
+         */
+        get: operations["ScannersController_list[4]_v2"];
+        put?: never;
+        /** Alta de un escáner. / Adds a scanner. */
+        post: operations["ScannersController_create[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/scanners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Escáneres eSCL del centro. / eSCL scanners of the center.
+         * @description Readable with print-hub.read (configures them) OR caja.scan (scans with them) IN that center.
+         */
+        get: operations["ScannersController_list[5]_v2"];
+        put?: never;
+        /** Alta de un escáner. / Adds a scanner. */
+        post: operations["ScannersController_create[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/escaneres": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Escáneres eSCL del centro. / eSCL scanners of the center.
+         * @description Readable with print-hub.read (configures them) OR caja.scan (scans with them) IN that center.
+         */
+        get: operations["ScannersController_list[6]_v2"];
+        put?: never;
+        /** Alta de un escáner. / Adds a scanner. */
+        post: operations["ScannersController_create[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/scanners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Escáneres eSCL del centro. / eSCL scanners of the center.
+         * @description Readable with print-hub.read (configures them) OR caja.scan (scans with them) IN that center.
+         */
+        get: operations["ScannersController_list[7]_v2"];
+        put?: never;
+        /** Alta de un escáner. / Adds a scanner. */
+        post: operations["ScannersController_create[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/escaneres/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita un escáner. / Edits a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/escaneres/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["ScannersController_update[0]_v1"];
+        post?: never;
+        /**
+         * Baja de un escáner. / Removes a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/escaneres/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["ScannersController_remove[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/scanners/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita un escáner. / Edits a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/scanners/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["ScannersController_update[1]_v1"];
+        post?: never;
+        /**
+         * Baja de un escáner. / Removes a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/scanners/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["ScannersController_remove[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/escaneres/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita un escáner. / Edits a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/escaneres/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["ScannersController_update[2]_v1"];
+        post?: never;
+        /**
+         * Baja de un escáner. / Removes a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/escaneres/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["ScannersController_remove[2]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/scanners/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita un escáner. / Edits a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/scanners/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["ScannersController_update[3]_v1"];
+        post?: never;
+        /**
+         * Baja de un escáner. / Removes a scanner.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/scanners/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["ScannersController_remove[3]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/escaneres/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita un escáner. / Edits a scanner. */
+        put: operations["ScannersController_update[4]_v2"];
+        post?: never;
+        /** Baja de un escáner. / Removes a scanner. */
+        delete: operations["ScannersController_remove[4]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/scanners/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita un escáner. / Edits a scanner. */
+        put: operations["ScannersController_update[5]_v2"];
+        post?: never;
+        /** Baja de un escáner. / Removes a scanner. */
+        delete: operations["ScannersController_remove[5]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/escaneres/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita un escáner. / Edits a scanner. */
+        put: operations["ScannersController_update[6]_v2"];
+        post?: never;
+        /** Baja de un escáner. / Removes a scanner. */
+        delete: operations["ScannersController_remove[6]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/scanners/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita un escáner. / Edits a scanner. */
+        put: operations["ScannersController_update[7]_v2"];
+        post?: never;
+        /** Baja de un escáner. / Removes a scanner. */
+        delete: operations["ScannersController_remove[7]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/permisos": {
         parameters: {
             query?: never;
@@ -23507,7 +24991,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Asigna un rol al perfil (opcionalmente acotado a un centro). Los roles reservados (admin/super_admin) solo los concede el master de forma global.
+         * Asigna un rol al perfil (opcionalmente acotado a un centro). El rol de acceso total (admin) solo se concede de forma global, solo lo concede un administrador en persona (no una API key) y pide confirmación (428 → repetir con X-Confirm-Action: rbac.admin.grant).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/profiles/{id}/roles`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -23527,7 +25011,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Asigna un rol al perfil (opcionalmente acotado a un centro). Los roles reservados (admin/super_admin) solo los concede el master de forma global. */
+        /** Asigna un rol al perfil (opcionalmente acotado a un centro). El rol de acceso total (admin) solo se concede de forma global, solo lo concede un administrador en persona (no una API key) y pide confirmación (428 → repetir con X-Confirm-Action: rbac.admin.grant). */
         post: operations["RbacController_assignRole_v2"];
         delete?: never;
         options?: never;
@@ -30285,6 +31769,462 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["OperacionesController_conteo[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/kardex-diario": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Daily kardex of one product, in sealed units (docs/specs/kardex-diario-de-inventario.md).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/kardex-diario`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexDiario[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/daily-kardex": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Daily kardex of one product, in sealed units (docs/specs/kardex-diario-de-inventario.md).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/daily-kardex`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexDiario[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/kardex-diario": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Daily kardex of one product, in sealed units (docs/specs/kardex-diario-de-inventario.md).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/kardex-diario`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexDiario[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/daily-kardex": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Daily kardex of one product, in sealed units (docs/specs/kardex-diario-de-inventario.md).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/daily-kardex`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexDiario[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/kardex-diario": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily kardex of one product, in sealed units (docs/specs/kardex-diario-de-inventario.md). */
+        get: operations["ReportesController_kardexDiario[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/daily-kardex": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily kardex of one product, in sealed units (docs/specs/kardex-diario-de-inventario.md). */
+        get: operations["ReportesController_kardexDiario[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/kardex-diario": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily kardex of one product, in sealed units (docs/specs/kardex-diario-de-inventario.md). */
+        get: operations["ReportesController_kardexDiario[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/daily-kardex": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily kardex of one product, in sealed units (docs/specs/kardex-diario-de-inventario.md). */
+        get: operations["ReportesController_kardexDiario[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/kardex-diario/dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every movement of one day of the daily kardex (patient, record, session n/m).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/kardex-diario/dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexDia[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/daily-kardex/day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every movement of one day of the daily kardex (patient, record, session n/m).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/daily-kardex/day`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexDia[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/kardex-diario/dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every movement of one day of the daily kardex (patient, record, session n/m).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/kardex-diario/dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexDia[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/daily-kardex/day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every movement of one day of the daily kardex (patient, record, session n/m).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/daily-kardex/day`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexDia[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/kardex-diario/dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every movement of one day of the daily kardex (patient, record, session n/m). */
+        get: operations["ReportesController_kardexDia[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/daily-kardex/day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every movement of one day of the daily kardex (patient, record, session n/m). */
+        get: operations["ReportesController_kardexDia[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/kardex-diario/dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every movement of one day of the daily kardex (patient, record, session n/m). */
+        get: operations["ReportesController_kardexDia[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/daily-kardex/day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every movement of one day of the daily kardex (patient, record, session n/m). */
+        get: operations["ReportesController_kardexDia[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/kardex-resumen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Period summary: opening, each inbound and adjustment, applied, closing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/kardex-resumen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexResumen[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/kardex-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Period summary: opening, each inbound and adjustment, applied, closing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/kardex-summary`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexResumen[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/kardex-resumen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Period summary: opening, each inbound and adjustment, applied, closing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/kardex-resumen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexResumen[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/kardex-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Period summary: opening, each inbound and adjustment, applied, closing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/kardex-summary`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexResumen[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/kardex-resumen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Period summary: opening, each inbound and adjustment, applied, closing. */
+        get: operations["ReportesController_kardexResumen[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/kardex-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Period summary: opening, each inbound and adjustment, applied, closing. */
+        get: operations["ReportesController_kardexResumen[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/kardex-resumen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Period summary: opening, each inbound and adjustment, applied, closing. */
+        get: operations["ReportesController_kardexResumen[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/kardex-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Period summary: opening, each inbound and adjustment, applied, closing. */
+        get: operations["ReportesController_kardexResumen[7]_v2"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -42677,6 +44617,310 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pacientes/disponibilidad-legado/paquetes-acompanantes/plan-reparacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read-only repair plan of the active center: per package of a simultaneous service (laser MLS + HILT), delivered before → after (visit days of the service on or after its purchase date, capped at what it can give). Never lowers anything.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/paquetes-acompanantes/plan-reparacion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_companionRepairPlan[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/companion-packages/repair-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read-only repair plan of the active center: per package of a simultaneous service (laser MLS + HILT), delivered before → after (visit days of the service on or after its purchase date, capped at what it can give). Never lowers anything.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/companion-packages/repair-plan`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_companionRepairPlan[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/paquetes-acompanantes/plan-reparacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read-only repair plan of the active center: per package of a simultaneous service (laser MLS + HILT), delivered before → after (visit days of the service on or after its purchase date, capped at what it can give). Never lowers anything.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/paquetes-acompanantes/plan-reparacion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_companionRepairPlan[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/companion-packages/repair-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read-only repair plan of the active center: per package of a simultaneous service (laser MLS + HILT), delivered before → after (visit days of the service on or after its purchase date, capped at what it can give). Never lowers anything.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/companion-packages/repair-plan`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_companionRepairPlan[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/paquetes-acompanantes/plan-reparacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read-only repair plan of the active center: per package of a simultaneous service (laser MLS + HILT), delivered before → after (visit days of the service on or after its purchase date, capped at what it can give). Never lowers anything. */
+        get: operations["DisponibilidadLegadoController_companionRepairPlan[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/companion-packages/repair-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read-only repair plan of the active center: per package of a simultaneous service (laser MLS + HILT), delivered before → after (visit days of the service on or after its purchase date, capped at what it can give). Never lowers anything. */
+        get: operations["DisponibilidadLegadoController_companionRepairPlan[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/paquetes-acompanantes/plan-reparacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read-only repair plan of the active center: per package of a simultaneous service (laser MLS + HILT), delivered before → after (visit days of the service on or after its purchase date, capped at what it can give). Never lowers anything. */
+        get: operations["DisponibilidadLegadoController_companionRepairPlan[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/companion-packages/repair-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read-only repair plan of the active center: per package of a simultaneous service (laser MLS + HILT), delivered before → after (visit days of the service on or after its purchase date, capped at what it can give). Never lowers anything. */
+        get: operations["DisponibilidadLegadoController_companionRepairPlan[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/paquetes-acompanantes/reparar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Applies the REVIEWED rows of the repair plan that the server still computes the same (the rest come back as skipped), through the package delivery path. Asks for confirmation (428 legacy.companion_packages.repair).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/paquetes-acompanantes/reparar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_applyCompanionRepair[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/companion-packages/repair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Applies the REVIEWED rows of the repair plan that the server still computes the same (the rest come back as skipped), through the package delivery path. Asks for confirmation (428 legacy.companion_packages.repair).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/companion-packages/repair`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_applyCompanionRepair[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/paquetes-acompanantes/reparar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Applies the REVIEWED rows of the repair plan that the server still computes the same (the rest come back as skipped), through the package delivery path. Asks for confirmation (428 legacy.companion_packages.repair).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/paquetes-acompanantes/reparar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_applyCompanionRepair[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/companion-packages/repair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Applies the REVIEWED rows of the repair plan that the server still computes the same (the rest come back as skipped), through the package delivery path. Asks for confirmation (428 legacy.companion_packages.repair).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/companion-packages/repair`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_applyCompanionRepair[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/paquetes-acompanantes/reparar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Applies the REVIEWED rows of the repair plan that the server still computes the same (the rest come back as skipped), through the package delivery path. Asks for confirmation (428 legacy.companion_packages.repair). */
+        post: operations["DisponibilidadLegadoController_applyCompanionRepair[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/companion-packages/repair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Applies the REVIEWED rows of the repair plan that the server still computes the same (the rest come back as skipped), through the package delivery path. Asks for confirmation (428 legacy.companion_packages.repair). */
+        post: operations["DisponibilidadLegadoController_applyCompanionRepair[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/paquetes-acompanantes/reparar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Applies the REVIEWED rows of the repair plan that the server still computes the same (the rest come back as skipped), through the package delivery path. Asks for confirmation (428 legacy.companion_packages.repair). */
+        post: operations["DisponibilidadLegadoController_applyCompanionRepair[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/companion-packages/repair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Applies the REVIEWED rows of the repair plan that the server still computes the same (the rest come back as skipped), through the package delivery path. Asks for confirmation (428 legacy.companion_packages.repair). */
+        post: operations["DisponibilidadLegadoController_applyCompanionRepair[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pacientes/disponibilidad-legado/{record}/diagnostico": {
         parameters: {
             query?: never;
@@ -43279,6 +45523,462 @@ export interface paths {
         put?: never;
         /** Aplica lo confirmado del diagnóstico: crea la disponibilidad DIRECTAMENTE (sin factura), idempotente por paciente+producto. */
         post: operations["DisponibilidadLegadoController_aplicar[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Legacy purchases of the center (read-only): per patient, what each legacy invoice in the window promises and whether the legacy visits or a loaded package already account for it.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/compras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_comprasDelCentro[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Legacy purchases of the center (read-only): per patient, what each legacy invoice in the window promises and whether the legacy visits or a loaded package already account for it.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/purchases`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_comprasDelCentro[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Legacy purchases of the center (read-only): per patient, what each legacy invoice in the window promises and whether the legacy visits or a loaded package already account for it.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/compras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_comprasDelCentro[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Legacy purchases of the center (read-only): per patient, what each legacy invoice in the window promises and whether the legacy visits or a loaded package already account for it.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/purchases`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_comprasDelCentro[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Legacy purchases of the center (read-only): per patient, what each legacy invoice in the window promises and whether the legacy visits or a loaded package already account for it. */
+        get: operations["DisponibilidadLegadoController_comprasDelCentro[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Legacy purchases of the center (read-only): per patient, what each legacy invoice in the window promises and whether the legacy visits or a loaded package already account for it. */
+        get: operations["DisponibilidadLegadoController_comprasDelCentro[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Legacy purchases of the center (read-only): per patient, what each legacy invoice in the window promises and whether the legacy visits or a loaded package already account for it. */
+        get: operations["DisponibilidadLegadoController_comprasDelCentro[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Legacy purchases of the center (read-only): per patient, what each legacy invoice in the window promises and whether the legacy visits or a loaded package already account for it. */
+        get: operations["DisponibilidadLegadoController_comprasDelCentro[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/{record}/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Legacy purchases of ONE patient (read-only): what is ready to load, what the legacy visits already account for, and why.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/{record}/compras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_comprasDelPaciente[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/{record}/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Legacy purchases of ONE patient (read-only): what is ready to load, what the legacy visits already account for, and why.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/{record}/purchases`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_comprasDelPaciente[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/{record}/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Legacy purchases of ONE patient (read-only): what is ready to load, what the legacy visits already account for, and why.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/{record}/compras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_comprasDelPaciente[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/{record}/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Legacy purchases of ONE patient (read-only): what is ready to load, what the legacy visits already account for, and why.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/{record}/purchases`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DisponibilidadLegadoController_comprasDelPaciente[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/{record}/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Legacy purchases of ONE patient (read-only): what is ready to load, what the legacy visits already account for, and why. */
+        get: operations["DisponibilidadLegadoController_comprasDelPaciente[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/{record}/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Legacy purchases of ONE patient (read-only): what is ready to load, what the legacy visits already account for, and why. */
+        get: operations["DisponibilidadLegadoController_comprasDelPaciente[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/{record}/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Legacy purchases of ONE patient (read-only): what is ready to load, what the legacy visits already account for, and why. */
+        get: operations["DisponibilidadLegadoController_comprasDelPaciente[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/{record}/purchases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Legacy purchases of ONE patient (read-only): what is ready to load, what the legacy visits already account for, and why. */
+        get: operations["DisponibilidadLegadoController_comprasDelPaciente[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/{record}/compras/aplicar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Loads the legacy purchases no legacy visit accounts for: packages with no invoice behind (legacy origin), idempotent per patient + invoice + product. Recomputed on the server.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/{record}/compras/aplicar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_aplicarCompras[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/disponibilidad-legado/{record}/purchases/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Loads the legacy purchases no legacy visit accounts for: packages with no invoice behind (legacy origin), idempotent per patient + invoice + product. Recomputed on the server.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/disponibilidad-legado/{record}/purchases/apply`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_aplicarCompras[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/{record}/compras/aplicar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Loads the legacy purchases no legacy visit accounts for: packages with no invoice behind (legacy origin), idempotent per patient + invoice + product. Recomputed on the server.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/{record}/compras/aplicar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_aplicarCompras[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/legacy-availability/{record}/purchases/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Loads the legacy purchases no legacy visit accounts for: packages with no invoice behind (legacy origin), idempotent per patient + invoice + product. Recomputed on the server.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/legacy-availability/{record}/purchases/apply`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["DisponibilidadLegadoController_aplicarCompras[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/{record}/compras/aplicar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Loads the legacy purchases no legacy visit accounts for: packages with no invoice behind (legacy origin), idempotent per patient + invoice + product. Recomputed on the server. */
+        post: operations["DisponibilidadLegadoController_aplicarCompras[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/disponibilidad-legado/{record}/purchases/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Loads the legacy purchases no legacy visit accounts for: packages with no invoice behind (legacy origin), idempotent per patient + invoice + product. Recomputed on the server. */
+        post: operations["DisponibilidadLegadoController_aplicarCompras[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/{record}/compras/aplicar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Loads the legacy purchases no legacy visit accounts for: packages with no invoice behind (legacy origin), idempotent per patient + invoice + product. Recomputed on the server. */
+        post: operations["DisponibilidadLegadoController_aplicarCompras[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/legacy-availability/{record}/purchases/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Loads the legacy purchases no legacy visit accounts for: packages with no invoice behind (legacy origin), idempotent per patient + invoice + product. Recomputed on the server. */
+        post: operations["DisponibilidadLegadoController_aplicarCompras[7]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -50577,6 +53277,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/sesiones/{id}/hoja": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Session number of the visit in each package it consumes (primary first, by the service primaryPackageRule) and the areas to pre-fill (typed on the visit → package multipliers → last earlier visit; null if unknown). Read-only, in the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/hoja`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["SessionSheetController_sheet[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sessions/{id}/sheet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Session number of the visit in each package it consumes (primary first, by the service primaryPackageRule) and the areas to pre-fill (typed on the visit → package multipliers → last earlier visit; null if unknown). Read-only, in the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/sheet`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["SessionSheetController_sheet[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sesiones/{id}/hoja": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Session number of the visit in each package it consumes (primary first, by the service primaryPackageRule) and the areas to pre-fill (typed on the visit → package multipliers → last earlier visit; null if unknown). Read-only, in the session center. */
+        get: operations["SessionSheetController_sheet[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sessions/{id}/sheet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Session number of the visit in each package it consumes (primary first, by the service primaryPackageRule) and the areas to pre-fill (typed on the visit → package multipliers → last earlier visit; null if unknown). Read-only, in the session center. */
+        get: operations["SessionSheetController_sheet[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/frontdesk/sesiones/agendar-tren": {
         parameters: {
             query?: never;
@@ -55917,6 +58693,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/caja/cuadres/{id}/firmas/{signatureId}/acusar-cambio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Acknowledge changed figures on a live signature (manager, with a reason)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/firmas/{signatureId}/acusar-cambio`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_acusarCambio[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/reconciliations/{id}/signatures/{signatureId}/acknowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Acknowledge changed figures on a live signature (manager, with a reason)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/signatures/{signatureId}/acknowledge`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_acusarCambio[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadres/{id}/firmas/{signatureId}/acusar-cambio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Acknowledge changed figures on a live signature (manager, with a reason)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/firmas/{signatureId}/acusar-cambio`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_acusarCambio[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/reconciliations/{id}/signatures/{signatureId}/acknowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Acknowledge changed figures on a live signature (manager, with a reason)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/signatures/{signatureId}/acknowledge`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CajaController_acusarCambio[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadres/{id}/firmas/{signatureId}/acusar-cambio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge changed figures on a live signature (manager, with a reason) */
+        post: operations["CajaController_acusarCambio[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/reconciliations/{id}/signatures/{signatureId}/acknowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge changed figures on a live signature (manager, with a reason) */
+        post: operations["CajaController_acusarCambio[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadres/{id}/firmas/{signatureId}/acusar-cambio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge changed figures on a live signature (manager, with a reason) */
+        post: operations["CajaController_acusarCambio[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/reconciliations/{id}/signatures/{signatureId}/acknowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge changed figures on a live signature (manager, with a reason) */
+        post: operations["CajaController_acusarCambio[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/caja/cuadres/{id}/firmas": {
         parameters: {
             query?: never;
@@ -56392,6 +59320,158 @@ export interface paths {
         /** Step 2: register the uploaded file as an attachment of the sheet (uploadedBy = who uploads) */
         post: operations["CajaController_registerAttachment[7]_v2"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadres/{id}/adjuntos/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove an attachment of a cash sheet (supervisor, reason required, audited). 428 until X-Confirm-Action: cash.attachment.delete
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/adjuntos/{attachmentId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CajaController_removeAttachment[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/reconciliations/{id}/attachments/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove an attachment of a cash sheet (supervisor, reason required, audited). 428 until X-Confirm-Action: cash.attachment.delete
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/attachments/{attachmentId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CajaController_removeAttachment[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadres/{id}/adjuntos/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove an attachment of a cash sheet (supervisor, reason required, audited). 428 until X-Confirm-Action: cash.attachment.delete
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/adjuntos/{attachmentId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CajaController_removeAttachment[2]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/reconciliations/{id}/attachments/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove an attachment of a cash sheet (supervisor, reason required, audited). 428 until X-Confirm-Action: cash.attachment.delete
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/attachments/{attachmentId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CajaController_removeAttachment[3]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadres/{id}/adjuntos/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove an attachment of a cash sheet (supervisor, reason required, audited). 428 until X-Confirm-Action: cash.attachment.delete */
+        delete: operations["CajaController_removeAttachment[4]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/reconciliations/{id}/attachments/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove an attachment of a cash sheet (supervisor, reason required, audited). 428 until X-Confirm-Action: cash.attachment.delete */
+        delete: operations["CajaController_removeAttachment[5]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadres/{id}/adjuntos/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove an attachment of a cash sheet (supervisor, reason required, audited). 428 until X-Confirm-Action: cash.attachment.delete */
+        delete: operations["CajaController_removeAttachment[6]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/reconciliations/{id}/attachments/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove an attachment of a cash sheet (supervisor, reason required, audited). 428 until X-Confirm-Action: cash.attachment.delete */
+        delete: operations["CajaController_removeAttachment[7]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -57335,6 +60415,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Closes the day sheet with the figures of the center's count mode. A missing count never blocks
+         *     the close: the answer carries `countMode` (mode, complete, warnings) it closed with.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadre-total/{id}/cerrar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -57355,6 +60437,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Closes the day sheet with the figures of the center's count mode. A missing count never blocks
+         *     the close: the answer carries `countMode` (mode, complete, warnings) it closed with.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/total-reconciliation/{id}/close`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -57375,6 +60459,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Closes the day sheet with the figures of the center's count mode. A missing count never blocks
+         *     the close: the answer carries `countMode` (mode, complete, warnings) it closed with.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadre-total/{id}/cerrar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -57395,6 +60481,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Closes the day sheet with the figures of the center's count mode. A missing count never blocks
+         *     the close: the answer carries `countMode` (mode, complete, warnings) it closed with.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/total-reconciliation/{id}/close`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -57414,6 +60502,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Closes the day sheet with the figures of the center's count mode. A missing count never blocks
+         *     the close: the answer carries `countMode` (mode, complete, warnings) it closed with.
+         */
         post: operations["CajaController_cerrarTotal[4]_v2"];
         delete?: never;
         options?: never;
@@ -57430,6 +60522,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Closes the day sheet with the figures of the center's count mode. A missing count never blocks
+         *     the close: the answer carries `countMode` (mode, complete, warnings) it closed with.
+         */
         post: operations["CajaController_cerrarTotal[5]_v2"];
         delete?: never;
         options?: never;
@@ -57446,6 +60542,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Closes the day sheet with the figures of the center's count mode. A missing count never blocks
+         *     the close: the answer carries `countMode` (mode, complete, warnings) it closed with.
+         */
         post: operations["CajaController_cerrarTotal[6]_v2"];
         delete?: never;
         options?: never;
@@ -57462,7 +60562,1339 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Closes the day sheet with the figures of the center's count mode. A missing count never blocks
+         *     the close: the answer carries `countMode` (mode, complete, warnings) it closed with.
+         */
         post: operations["CajaController_cerrarTotal[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/modo-de-conteo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * How each readable center counts the day's cash: flexible (default), split (two counts) or single (one count).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/modo-de-conteo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashCountModeController_list[0]_v1"];
+        /**
+         * Set ONE center's count mode (centerIds[0] or the session's; caja.count_mode checked there).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/modo-de-conteo`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges caja.countMode into the center preferences (the rest of the layer is kept) and returns the previous value, to revert. A missing count only warns; nothing is blocked.
+         */
+        put: operations["CashCountModeController_set[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/count-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * How each readable center counts the day's cash: flexible (default), split (two counts) or single (one count).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/count-mode`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashCountModeController_list[1]_v1"];
+        /**
+         * Set ONE center's count mode (centerIds[0] or the session's; caja.count_mode checked there).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/count-mode`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges caja.countMode into the center preferences (the rest of the layer is kept) and returns the previous value, to revert. A missing count only warns; nothing is blocked.
+         */
+        put: operations["CashCountModeController_set[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/modo-de-conteo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * How each readable center counts the day's cash: flexible (default), split (two counts) or single (one count).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/modo-de-conteo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashCountModeController_list[2]_v1"];
+        /**
+         * Set ONE center's count mode (centerIds[0] or the session's; caja.count_mode checked there).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/modo-de-conteo`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges caja.countMode into the center preferences (the rest of the layer is kept) and returns the previous value, to revert. A missing count only warns; nothing is blocked.
+         */
+        put: operations["CashCountModeController_set[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/count-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * How each readable center counts the day's cash: flexible (default), split (two counts) or single (one count).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/count-mode`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashCountModeController_list[3]_v1"];
+        /**
+         * Set ONE center's count mode (centerIds[0] or the session's; caja.count_mode checked there).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/count-mode`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges caja.countMode into the center preferences (the rest of the layer is kept) and returns the previous value, to revert. A missing count only warns; nothing is blocked.
+         */
+        put: operations["CashCountModeController_set[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/modo-de-conteo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How each readable center counts the day's cash: flexible (default), split (two counts) or single (one count). */
+        get: operations["CashCountModeController_list[4]_v2"];
+        /**
+         * Set ONE center's count mode (centerIds[0] or the session's; caja.count_mode checked there).
+         * @description Merges caja.countMode into the center preferences (the rest of the layer is kept) and returns the previous value, to revert. A missing count only warns; nothing is blocked.
+         */
+        put: operations["CashCountModeController_set[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/count-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How each readable center counts the day's cash: flexible (default), split (two counts) or single (one count). */
+        get: operations["CashCountModeController_list[5]_v2"];
+        /**
+         * Set ONE center's count mode (centerIds[0] or the session's; caja.count_mode checked there).
+         * @description Merges caja.countMode into the center preferences (the rest of the layer is kept) and returns the previous value, to revert. A missing count only warns; nothing is blocked.
+         */
+        put: operations["CashCountModeController_set[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/modo-de-conteo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How each readable center counts the day's cash: flexible (default), split (two counts) or single (one count). */
+        get: operations["CashCountModeController_list[6]_v2"];
+        /**
+         * Set ONE center's count mode (centerIds[0] or the session's; caja.count_mode checked there).
+         * @description Merges caja.countMode into the center preferences (the rest of the layer is kept) and returns the previous value, to revert. A missing count only warns; nothing is blocked.
+         */
+        put: operations["CashCountModeController_set[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/count-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How each readable center counts the day's cash: flexible (default), split (two counts) or single (one count). */
+        get: operations["CashCountModeController_list[7]_v2"];
+        /**
+         * Set ONE center's count mode (centerIds[0] or the session's; caja.count_mode checked there).
+         * @description Merges caja.countMode into the center preferences (the rest of the layer is kept) and returns the previous value, to revert. A missing count only warns; nothing is blocked.
+         */
+        put: operations["CashCountModeController_set[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cierre": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Whether each readable center offers «Procesar cierre» (closeEnabled, default true).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cierre`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashCountModeController_closeSetting[0]_v1"];
+        /**
+         * Switch «Procesar cierre» for ONE center (centerIds[0] or the session's; caja.count_mode checked there).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cierre`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges caja.closeEnabled into the center preferences and returns the previous value, to revert. With false both close endpoints answer 409 CASH_CLOSE_DISABLED; closed sheets and reopening are unchanged.
+         */
+        put: operations["CashCountModeController_setCloseSetting[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/close-setting": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Whether each readable center offers «Procesar cierre» (closeEnabled, default true).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/close-setting`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashCountModeController_closeSetting[1]_v1"];
+        /**
+         * Switch «Procesar cierre» for ONE center (centerIds[0] or the session's; caja.count_mode checked there).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/close-setting`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges caja.closeEnabled into the center preferences and returns the previous value, to revert. With false both close endpoints answer 409 CASH_CLOSE_DISABLED; closed sheets and reopening are unchanged.
+         */
+        put: operations["CashCountModeController_setCloseSetting[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cierre": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Whether each readable center offers «Procesar cierre» (closeEnabled, default true).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cierre`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashCountModeController_closeSetting[2]_v1"];
+        /**
+         * Switch «Procesar cierre» for ONE center (centerIds[0] or the session's; caja.count_mode checked there).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cierre`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges caja.closeEnabled into the center preferences and returns the previous value, to revert. With false both close endpoints answer 409 CASH_CLOSE_DISABLED; closed sheets and reopening are unchanged.
+         */
+        put: operations["CashCountModeController_setCloseSetting[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/close-setting": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Whether each readable center offers «Procesar cierre» (closeEnabled, default true).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/close-setting`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashCountModeController_closeSetting[3]_v1"];
+        /**
+         * Switch «Procesar cierre» for ONE center (centerIds[0] or the session's; caja.count_mode checked there).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/close-setting`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merges caja.closeEnabled into the center preferences and returns the previous value, to revert. With false both close endpoints answer 409 CASH_CLOSE_DISABLED; closed sheets and reopening are unchanged.
+         */
+        put: operations["CashCountModeController_setCloseSetting[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cierre": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether each readable center offers «Procesar cierre» (closeEnabled, default true). */
+        get: operations["CashCountModeController_closeSetting[4]_v2"];
+        /**
+         * Switch «Procesar cierre» for ONE center (centerIds[0] or the session's; caja.count_mode checked there).
+         * @description Merges caja.closeEnabled into the center preferences and returns the previous value, to revert. With false both close endpoints answer 409 CASH_CLOSE_DISABLED; closed sheets and reopening are unchanged.
+         */
+        put: operations["CashCountModeController_setCloseSetting[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/close-setting": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether each readable center offers «Procesar cierre» (closeEnabled, default true). */
+        get: operations["CashCountModeController_closeSetting[5]_v2"];
+        /**
+         * Switch «Procesar cierre» for ONE center (centerIds[0] or the session's; caja.count_mode checked there).
+         * @description Merges caja.closeEnabled into the center preferences and returns the previous value, to revert. With false both close endpoints answer 409 CASH_CLOSE_DISABLED; closed sheets and reopening are unchanged.
+         */
+        put: operations["CashCountModeController_setCloseSetting[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cierre": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether each readable center offers «Procesar cierre» (closeEnabled, default true). */
+        get: operations["CashCountModeController_closeSetting[6]_v2"];
+        /**
+         * Switch «Procesar cierre» for ONE center (centerIds[0] or the session's; caja.count_mode checked there).
+         * @description Merges caja.closeEnabled into the center preferences and returns the previous value, to revert. With false both close endpoints answer 409 CASH_CLOSE_DISABLED; closed sheets and reopening are unchanged.
+         */
+        put: operations["CashCountModeController_setCloseSetting[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/close-setting": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether each readable center offers «Procesar cierre» (closeEnabled, default true). */
+        get: operations["CashCountModeController_closeSetting[7]_v2"];
+        /**
+         * Switch «Procesar cierre» for ONE center (centerIds[0] or the session's; caja.count_mode checked there).
+         * @description Merges caja.closeEnabled into the center preferences and returns the previous value, to revert. With false both close endpoints answer 409 CASH_CLOSE_DISABLED; closed sheets and reopening are unchanged.
+         */
+        put: operations["CashCountModeController_setCloseSetting[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/dia-pasado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Si el cuadre de ese día (pasado y ya cuadrado) está cerrado para quien pregunta. No cambia nada. / Whether that past day's cash sheet is closed to the caller. Changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/dia-pasado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashPastDayController_check[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/past-day-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Si el cuadre de ese día (pasado y ya cuadrado) está cerrado para quien pregunta. No cambia nada. / Whether that past day's cash sheet is closed to the caller. Changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/past-day-check`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashPastDayController_check[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/dia-pasado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Si el cuadre de ese día (pasado y ya cuadrado) está cerrado para quien pregunta. No cambia nada. / Whether that past day's cash sheet is closed to the caller. Changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/dia-pasado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashPastDayController_check[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/past-day-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Si el cuadre de ese día (pasado y ya cuadrado) está cerrado para quien pregunta. No cambia nada. / Whether that past day's cash sheet is closed to the caller. Changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/past-day-check`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashPastDayController_check[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/dia-pasado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Si el cuadre de ese día (pasado y ya cuadrado) está cerrado para quien pregunta. No cambia nada. / Whether that past day's cash sheet is closed to the caller. Changes nothing. */
+        get: operations["CashPastDayController_check[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/past-day-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Si el cuadre de ese día (pasado y ya cuadrado) está cerrado para quien pregunta. No cambia nada. / Whether that past day's cash sheet is closed to the caller. Changes nothing. */
+        get: operations["CashPastDayController_check[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/dia-pasado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Si el cuadre de ese día (pasado y ya cuadrado) está cerrado para quien pregunta. No cambia nada. / Whether that past day's cash sheet is closed to the caller. Changes nothing. */
+        get: operations["CashPastDayController_check[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/past-day-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Si el cuadre de ese día (pasado y ya cuadrado) está cerrado para quien pregunta. No cambia nada. / Whether that past day's cash sheet is closed to the caller. Changes nothing. */
+        get: operations["CashPastDayController_check[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadres/{id}/escaneos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Los escaneos del cuadre y su estado (pending, scanning, done, failed). / The scans of this reconciliation.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/escaneos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashScanController_list[0]_v1"];
+        put?: never;
+        /**
+         * Encola un escaneo hacia este cuadre: el hub del centro escanea y el PDF queda como adjunto. / Queues a scan into this reconciliation.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/escaneos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CashScanController_request[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/reconciliations/{id}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Los escaneos del cuadre y su estado (pending, scanning, done, failed). / The scans of this reconciliation.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/scans`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashScanController_list[1]_v1"];
+        put?: never;
+        /**
+         * Encola un escaneo hacia este cuadre: el hub del centro escanea y el PDF queda como adjunto. / Queues a scan into this reconciliation.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/scans`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CashScanController_request[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadres/{id}/escaneos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Los escaneos del cuadre y su estado (pending, scanning, done, failed). / The scans of this reconciliation.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/escaneos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashScanController_list[2]_v1"];
+        put?: never;
+        /**
+         * Encola un escaneo hacia este cuadre: el hub del centro escanea y el PDF queda como adjunto. / Queues a scan into this reconciliation.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/escaneos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CashScanController_request[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/reconciliations/{id}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Los escaneos del cuadre y su estado (pending, scanning, done, failed). / The scans of this reconciliation.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/scans`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CashScanController_list[3]_v1"];
+        put?: never;
+        /**
+         * Encola un escaneo hacia este cuadre: el hub del centro escanea y el PDF queda como adjunto. / Queues a scan into this reconciliation.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/scans`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CashScanController_request[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadres/{id}/escaneos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Los escaneos del cuadre y su estado (pending, scanning, done, failed). / The scans of this reconciliation. */
+        get: operations["CashScanController_list[4]_v2"];
+        put?: never;
+        /** Encola un escaneo hacia este cuadre: el hub del centro escanea y el PDF queda como adjunto. / Queues a scan into this reconciliation. */
+        post: operations["CashScanController_request[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/reconciliations/{id}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Los escaneos del cuadre y su estado (pending, scanning, done, failed). / The scans of this reconciliation. */
+        get: operations["CashScanController_list[5]_v2"];
+        put?: never;
+        /** Encola un escaneo hacia este cuadre: el hub del centro escanea y el PDF queda como adjunto. / Queues a scan into this reconciliation. */
+        post: operations["CashScanController_request[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadres/{id}/escaneos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Los escaneos del cuadre y su estado (pending, scanning, done, failed). / The scans of this reconciliation. */
+        get: operations["CashScanController_list[6]_v2"];
+        put?: never;
+        /** Encola un escaneo hacia este cuadre: el hub del centro escanea y el PDF queda como adjunto. / Queues a scan into this reconciliation. */
+        post: operations["CashScanController_request[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/reconciliations/{id}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Los escaneos del cuadre y su estado (pending, scanning, done, failed). / The scans of this reconciliation. */
+        get: operations["CashScanController_list[7]_v2"];
+        put?: never;
+        /** Encola un escaneo hacia este cuadre: el hub del centro escanea y el PDF queda como adjunto. / Queues a scan into this reconciliation. */
+        post: operations["CashScanController_request[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/cuadres/{id}/escaneos/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vista previa rápida del cristal para elegir el área; NO se adjunta. La imagen sale en GET .../escaneos como previewUrl (10 min). / Quick preview to pick the area on; never an attachment.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/escaneos/previa`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CashScanController_preview[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/caja/reconciliations/{id}/scans/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vista previa rápida del cristal para elegir el área; NO se adjunta. La imagen sale en GET .../escaneos como previewUrl (10 min). / Quick preview to pick the area on; never an attachment.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/scans/preview`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CashScanController_preview[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/cuadres/{id}/escaneos/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vista previa rápida del cristal para elegir el área; NO se adjunta. La imagen sale en GET .../escaneos como previewUrl (10 min). / Quick preview to pick the area on; never an attachment.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/escaneos/previa`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CashScanController_preview[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cash/reconciliations/{id}/scans/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vista previa rápida del cristal para elegir el área; NO se adjunta. La imagen sale en GET .../escaneos como previewUrl (10 min). / Quick preview to pick the area on; never an attachment.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/scans/preview`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CashScanController_preview[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/cuadres/{id}/escaneos/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vista previa rápida del cristal para elegir el área; NO se adjunta. La imagen sale en GET .../escaneos como previewUrl (10 min). / Quick preview to pick the area on; never an attachment. */
+        post: operations["CashScanController_preview[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/caja/reconciliations/{id}/scans/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vista previa rápida del cristal para elegir el área; NO se adjunta. La imagen sale en GET .../escaneos como previewUrl (10 min). / Quick preview to pick the area on; never an attachment. */
+        post: operations["CashScanController_preview[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/cuadres/{id}/escaneos/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vista previa rápida del cristal para elegir el área; NO se adjunta. La imagen sale en GET .../escaneos como previewUrl (10 min). / Quick preview to pick the area on; never an attachment. */
+        post: operations["CashScanController_preview[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/cash/reconciliations/{id}/scans/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vista previa rápida del cristal para elegir el área; NO se adjunta. La imagen sale en GET .../escaneos como previewUrl (10 min). / Quick preview to pick the area on; never an attachment. */
+        post: operations["CashScanController_preview[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trabajos-escaneo/siguiente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub toma el siguiente escaneo de su centro (204 si no hay). / The hub takes the next scan of its center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/trabajos-escaneo/siguiente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ScanJobsController_next[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trabajos-escaneo/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub toma el siguiente escaneo de su centro (204 si no hay). / The hub takes the next scan of its center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/trabajos-escaneo/next`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ScanJobsController_next[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scan-jobs/siguiente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub toma el siguiente escaneo de su centro (204 si no hay). / The hub takes the next scan of its center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/scan-jobs/siguiente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ScanJobsController_next[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scan-jobs/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub toma el siguiente escaneo de su centro (204 si no hay). / The hub takes the next scan of its center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/scan-jobs/next`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ScanJobsController_next[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/trabajos-escaneo/siguiente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub toma el siguiente escaneo de su centro (204 si no hay). / The hub takes the next scan of its center. */
+        get: operations["ScanJobsController_next[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/trabajos-escaneo/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub toma el siguiente escaneo de su centro (204 si no hay). / The hub takes the next scan of its center. */
+        get: operations["ScanJobsController_next[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/scan-jobs/siguiente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub toma el siguiente escaneo de su centro (204 si no hay). / The hub takes the next scan of its center. */
+        get: operations["ScanJobsController_next[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/scan-jobs/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub toma el siguiente escaneo de su centro (204 si no hay). / The hub takes the next scan of its center. */
+        get: operations["ScanJobsController_next[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trabajos-escaneo/{id}/url-subida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * URL firmada donde el hub sube el PDF de ese escaneo (bucket privado). / Signed URL to PUT the PDF of that scan.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/trabajos-escaneo/{id}/url-subida`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScanJobsController_uploadUrl[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trabajos-escaneo/{id}/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * URL firmada donde el hub sube el PDF de ese escaneo (bucket privado). / Signed URL to PUT the PDF of that scan.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/trabajos-escaneo/{id}/upload-url`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScanJobsController_uploadUrl[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scan-jobs/{id}/url-subida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * URL firmada donde el hub sube el PDF de ese escaneo (bucket privado). / Signed URL to PUT the PDF of that scan.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/scan-jobs/{id}/url-subida`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScanJobsController_uploadUrl[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scan-jobs/{id}/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * URL firmada donde el hub sube el PDF de ese escaneo (bucket privado). / Signed URL to PUT the PDF of that scan.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/scan-jobs/{id}/upload-url`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScanJobsController_uploadUrl[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/trabajos-escaneo/{id}/url-subida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** URL firmada donde el hub sube el PDF de ese escaneo (bucket privado). / Signed URL to PUT the PDF of that scan. */
+        post: operations["ScanJobsController_uploadUrl[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/trabajos-escaneo/{id}/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** URL firmada donde el hub sube el PDF de ese escaneo (bucket privado). / Signed URL to PUT the PDF of that scan. */
+        post: operations["ScanJobsController_uploadUrl[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/scan-jobs/{id}/url-subida": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** URL firmada donde el hub sube el PDF de ese escaneo (bucket privado). / Signed URL to PUT the PDF of that scan. */
+        post: operations["ScanJobsController_uploadUrl[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/scan-jobs/{id}/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** URL firmada donde el hub sube el PDF de ese escaneo (bucket privado). / Signed URL to PUT the PDF of that scan. */
+        post: operations["ScanJobsController_uploadUrl[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trabajos-escaneo/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * El hub dice cómo fue: ok registra el adjunto del cuadre; un error reintenta hasta 3 veces. / The hub reports the outcome.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/trabajos-escaneo/{id}/resultado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScanJobsController_result[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trabajos-escaneo/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * El hub dice cómo fue: ok registra el adjunto del cuadre; un error reintenta hasta 3 veces. / The hub reports the outcome.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/trabajos-escaneo/{id}/result`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScanJobsController_result[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scan-jobs/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * El hub dice cómo fue: ok registra el adjunto del cuadre; un error reintenta hasta 3 veces. / The hub reports the outcome.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/scan-jobs/{id}/resultado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScanJobsController_result[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scan-jobs/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * El hub dice cómo fue: ok registra el adjunto del cuadre; un error reintenta hasta 3 veces. / The hub reports the outcome.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/scan-jobs/{id}/result`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ScanJobsController_result[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/trabajos-escaneo/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** El hub dice cómo fue: ok registra el adjunto del cuadre; un error reintenta hasta 3 veces. / The hub reports the outcome. */
+        post: operations["ScanJobsController_result[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/trabajos-escaneo/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** El hub dice cómo fue: ok registra el adjunto del cuadre; un error reintenta hasta 3 veces. / The hub reports the outcome. */
+        post: operations["ScanJobsController_result[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/scan-jobs/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** El hub dice cómo fue: ok registra el adjunto del cuadre; un error reintenta hasta 3 veces. / The hub reports the outcome. */
+        post: operations["ScanJobsController_result[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/scan-jobs/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** El hub dice cómo fue: ok registra el adjunto del cuadre; un error reintenta hasta 3 veces. / The hub reports the outcome. */
+        post: operations["ScanJobsController_result[7]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -59294,7 +63726,7 @@ export interface components {
              *     vecina de otra como un RENAME (casi tiró `staff.active`), y esta convive con la que sustituye.
              * @enum {string}
              */
-            context: "general" | "consulta";
+            context: "consulta" | "general";
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -59394,6 +63826,14 @@ export interface components {
              * @description IMPUESTO de la línea. Editable para poder CORREGIR una factura ya emitida que quedó con el impuesto equivocado (la 000625 se emitió con "Estatal" suelto y le faltaban los $8.22 del Municipal). Si se manda un COMPONENTE, el servidor guarda su padre: una línea lleva el impuesto, nunca una de sus partes.
              */
             taxId?: string;
+            /**
+             * @description Areas / days (and any other multiplier of the line's billing group), same keys as when the line was added, e.g. { "areas": 4, "dias": 12 }. DRAFT only. Merged over the line's meta: the multipliers, effective quantity, total, tax and sessions are recomputed on the SAME line. A multiplier must be a whole number ≥ 1 (400 facturacion.error.multiplicador_invalido); on an issued invoice it is a 400 facturacion.error.meta_solo_borrador.
+             * @example {
+             *       "areas": 4,
+             *       "dias": 12
+             *     }
+             */
+            meta?: Record<string, never>;
             description?: string;
             quantity?: number;
             sessions?: number;
@@ -59609,8 +64049,8 @@ export interface components {
             notes: string | null;
             reference: string | null;
             /** Format: date-time */
-            anuladoEn: string | null;
-            anuladoPor: string | null;
+            cancelledAt: string | null;
+            cancelledBy: string | null;
             anuladoPorRef?: Record<string, never>;
             cancellationReason: string | null;
             replacesId: string | null;
@@ -59931,6 +64371,109 @@ export interface components {
             snapshot: {
                 [key: string]: unknown;
             };
+        };
+        UpdateRefundDto: {
+            /** @description Motivo de la devolución. */
+            reason?: string;
+            /** @description Notas libres de la devolución (null las borra). */
+            notes?: string | null;
+        };
+        RefundEditLineDto: {
+            /**
+             * Format: uuid
+             * @description Línea de la factura de origen.
+             */
+            invoiceItemId: string;
+            /**
+             * Format: uuid
+             * @description Componente del kit, si se devuelve por componente.
+             */
+            invoiceItemComponentId?: string | null;
+            /** @description Sesiones (línea de paquete) o unidades a devolver. 0 = sacar la línea de la devolución. */
+            quantity: number;
+            /** @description Monto devuelto de la línea, con impuesto. Sin él: se conserva si la cantidad no cambió; si cambió, el proporcional. */
+            amount?: number | null;
+        };
+        ReimbursementLineDto: {
+            /**
+             * Format: uuid
+             * @description Forma de pago por la que salió el dinero.
+             */
+            paymentMethodId: string;
+            /** @description Monto que salió por esa forma (> 0). */
+            amount: number;
+        };
+        EditRefundDto: {
+            /** @description TODAS las líneas que debe tener la devolución. Una línea que estaba y no viene (o viene con 0) sale. */
+            lines: components["schemas"]["RefundEditLineDto"][];
+            /** @description Fecha de la devolución (YYYY-MM-DD). */
+            date?: string;
+            /** @description Motivo de la devolución. */
+            reason?: string;
+            notes?: string | null;
+            /**
+             * Format: uuid
+             * @description Quién atendió la devolución (personal).
+             */
+            userId?: string | null;
+            /**
+             * Format: uuid
+             * @description Forma de reembolso de la cabecera.
+             */
+            refundMethodId?: string | null;
+            /** @description Por dónde salió el dinero, si se corrige a la vez. Sin él, los reembolsos se quedan y la respuesta trae el hueco. */
+            reimbursements?: components["schemas"]["ReimbursementLineDto"][];
+            /** @description Por qué se edita (queda en los reembolsos que se reemplazan). */
+            changeReason?: string;
+        };
+        ChangeLogEntryEntity: {
+            clinicRef?: Record<string, never>;
+            entityType: string;
+            entityId: string;
+            action: string;
+            /** @enum {string} */
+            actorKind: "user" | "api-key" | "system";
+            actorStaffId: string | null;
+            actorStaffRef?: Record<string, never>;
+            actorProfileId: string | null;
+            actorProfileRef?: Record<string, never>;
+            actorRef: string | null;
+            actorName: string;
+            patientId: string | null;
+            patientRef?: Record<string, never>;
+            businessDate: string | null;
+            before: Record<string, never> | null;
+            after: Record<string, never> | null;
+            changedFields: string[];
+            reason: string | null;
+            requestId: string | null;
+            undoesEntryId: string | null;
+            /** Format: date-time */
+            undoneAt: string | null;
+            undoneByName: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ReplaceRefundReimbursementsDto: {
+            reimbursements: components["schemas"]["ReimbursementLineDto"][];
+            /** @description Por qué se corrige (queda en los reembolsos anulados). */
+            reason: string;
+        };
+        AddIssuedKitComponentDto: {
+            /**
+             * Format: uuid
+             * @description Id del componente OPCIONAL del kit (GET /invoices/:id/items/:itemId/optional-items → componenteId). / The kit's optional component id.
+             */
+            componentId: string;
+            /**
+             * @description Por qué se añade a una factura ya emitida y cobrada (queda en el registro de cambios). / Why (kept in the change log).
+             * @example Infiltración omitida al facturar; ya cobrada
+             */
+            reason: string;
         };
         SecuenciaDevolucionEntity: {
             clinicRef?: Record<string, never>;
@@ -60598,6 +65141,12 @@ export interface components {
             flagTypeId: string;
             note?: string;
         };
+        MergePatientDto: {
+            /** @description Por qué se fusionan (queda en el registro de cambios). / Why both records are the same person. */
+            reason: string;
+            /** @description true = se acepta que cambien los conteos de PERSONAS de periodos pasados (pacientes distintos, nuevo vs seguimiento) que la simulación avisa. El dinero no cambia nunca. / Accept the past patient-count changes the simulation reports; money never changes. */
+            acceptPastReportImpact?: boolean;
+        };
         StaffPhoneExtensionDto: {
             /**
              * @description La central tal como la reporta su agente en calls.pbx (ucm-bayamon, 3cx). / The PBX as its agent reports it (v2: `pbx`).
@@ -61083,8 +65632,12 @@ export interface components {
             lastName: string | null;
             /** @enum {string} */
             status: "pendiente" | "aprobado" | "rechazado" | "suspendido";
-            /** @enum {string} */
-            accessMode: "operativo" | "gerencial";
+            /**
+             * @description Computed since night 6: 'admin' when the profile holds the role granting '*', else 'operativo'.
+             * @enum {string}
+             */
+            accessMode: "operativo" | "admin";
+            /** @description Computed since night 6: whether the profile holds the role granting '*' (= isAdmin). */
             isMaster: boolean;
             avatarUrl: string | null;
             /** Format: date-time */
@@ -61129,8 +65682,12 @@ export interface components {
             lastName: string | null;
             /** @enum {string} */
             status: "pendiente" | "aprobado" | "rechazado" | "suspendido";
-            /** @enum {string} */
-            accessMode: "operativo" | "gerencial";
+            /**
+             * @description Computed since night 6: 'admin' when the profile holds the role granting '*', else 'operativo'.
+             * @enum {string}
+             */
+            accessMode: "operativo" | "admin";
+            /** @description Computed since night 6: whether the profile holds the role granting '*' (= isAdmin). */
             isMaster: boolean;
             avatarUrl: string | null;
             /** Format: date-time */
@@ -61582,6 +66139,51 @@ export interface components {
              * @description Impresora del centro. / Printer of the center.
              */
             printerId: string;
+        };
+        CenterScannerEntity: {
+            clinicRef?: Record<string, never>;
+            name: string;
+            esclUrl: string;
+            documentFormat: string;
+            /** @enum {string} */
+            defaultSource: "platen" | "adf";
+            active: boolean;
+            sortOrder: number;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ScannerDto: {
+            /** @example Xerox Administración */
+            name: string;
+            /**
+             * @description Base URL of the scanner's eSCL service on the branch LAN.
+             * @example https://192.130.80.164/eSCL
+             */
+            esclUrl: string;
+            /** @default application/pdf-a */
+            documentFormat?: string;
+            /**
+             * @description Where a scan reads the paper when the request does not say: 'platen' = the flatbed glass, 'adf' = the feeder. The screen preselects it.
+             * @default platen
+             * @enum {string}
+             */
+            defaultSource?: "adf" | "platen";
+            /** @default true */
+            active?: boolean;
+            sortOrder?: number;
+        };
+        UpdateScannerDto: {
+            name?: string;
+            esclUrl?: string;
+            documentFormat?: string;
+            /** @enum {string} */
+            defaultSource?: "adf" | "platen";
+            active?: boolean;
+            sortOrder?: number;
         };
         PermisoEntity: {
             slug: string;
@@ -62382,6 +66984,8 @@ export interface components {
             slug: string;
             name: string;
             active: boolean;
+            /** @enum {string|null} */
+            kardexColumn: "entradas" | "aplicadas" | "ajustes" | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -62395,6 +66999,11 @@ export interface components {
         UpdateMotivoMovimientoDto: {
             name?: string;
             active?: boolean;
+            /**
+             * @description Daily-kardex column this reason counts in ('entradas' | 'aplicadas' | 'ajustes'); null = ajustes.
+             * @enum {string|null}
+             */
+            kardexColumn?: "entradas" | "aplicadas" | "ajustes" | null;
         };
         CreateMovimientoInventarioDto: {
             /** Format: uuid */
@@ -63154,7 +67763,7 @@ export interface components {
              */
             status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
             /** @enum {string} */
-            channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             reason?: string;
             notes?: string;
             /** Format: uuid */
@@ -63177,7 +67786,7 @@ export interface components {
             status: "presente" | "cancelada" | "programada" | "confirmada" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
             isFirstVisit: boolean;
             /** @enum {string} */
-            channel: "atencion" | "callcenter" | "webhook" | "ia";
+            channel: "frontdesk" | "callcenter" | "webhook" | "ia";
             reason: string | null;
             notes: string | null;
             rescheduledFromId: string | null;
@@ -63273,10 +67882,10 @@ export interface components {
              */
             appointmentTypeId?: string;
             /**
-             * @description Canal por el que llegó; por defecto, atención.
+             * @description Channel it came through; defaults to frontdesk (atencion is accepted as an alias).
              * @enum {string}
              */
-            channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             /**
              * @description Por qué se registra tarde. Queda en los cuatro eventos del historial.
              * @example no se registró el día de la visita; detectado el 31
@@ -63862,6 +68471,20 @@ export interface components {
             /** @description 0 QUITA la línea: así se deshace lo tecleado de más sin dejar un renglón a cero. */
             quantity: number;
         };
+        ReviewedCompanionRepairRowDto: {
+            /**
+             * Format: uuid
+             * @description Package to raise.
+             */
+            packageId: string;
+            /** @description Delivered sessions the reviewed plan showed BEFORE. */
+            before: number;
+            /** @description Delivered sessions the reviewed plan showed AFTER. */
+            after: number;
+        };
+        ApplyCompanionRepairDto: {
+            packages: components["schemas"]["ReviewedCompanionRepairRowDto"][];
+        };
         LegacyVisitDto: {
             /**
              * @description Legacy item code (mconsultass.coditems)
@@ -63904,6 +68527,24 @@ export interface components {
              */
             patientId?: string;
             items: components["schemas"]["AplicarLegadoItemDto"][];
+        };
+        ApplyLegacyPurchasesDto: {
+            /**
+             * @description First day the center lived in the new system (YYYY-MM-DD). Purchases before it count; legacy visits after it do not.
+             * @example 2026-11-04
+             */
+            cutover: string;
+            /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+            lookbackDays?: number;
+            /**
+             * Format: uuid
+             * @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO).
+             */
+            patientId?: string;
+            /** @description Load only these purchase references (from the diagnosis). Without it, every `to_load` purchase. */
+            references?: string[];
+            /** @description Also load the `review` purchases (bought after a package the visits still keep open). */
+            includeReview?: boolean;
         };
         PaisEntity: {
             name: string;
@@ -64225,6 +68866,7 @@ export interface components {
             requiresTechnician: boolean;
             requiresNurse: boolean;
             packageConsumption: string;
+            primaryPackageRule: string;
             badge: boolean;
             formActions: Record<string, never> | null;
             active: boolean;
@@ -64238,6 +68880,7 @@ export interface components {
             /** @enum {string|null} */
             sheetSection: "LASER" | "IV" | null;
             startStepMinutes: number | null;
+            statisticsUnitKey: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -64246,6 +68889,12 @@ export interface components {
             updatedAt: string;
         };
         CreateServicioDto: {
+            /**
+             * @description Which package numbers a visit that consumes several at once: 'row' (the anchored one) or
+             *     'most_delivered' (laser MLS + HILT). See docs/specs/laser-sesion-del-dia-y-areas.md.
+             * @enum {string}
+             */
+            primaryPackageRule?: "row" | "most_delivered";
             slug: string;
             name: string;
             color?: string;
@@ -64281,6 +68930,17 @@ export interface components {
             sheetSection?: "LASER" | "IV" | null;
             /** @description Minutes between the start times this service offers and accepts (60 = on the hour only, like the call-center sheet for Laser and the IV line). Null = every slot of the day. Does not change how long the session takes. */
             startStepMinutes?: number | null;
+            /**
+             * @description Key of the session data that holds the units this service applies, for the statistics (`therapies` of /estadisticas/diarias and /estadisticas/servicios). 'cantidad' = the vials/doses captured by the board (Vit C, Intravenoso). Null = default rule: applied areas, else quantity, else 1 per visit.
+             * @example cantidad
+             */
+            statisticsUnitKey?: string | null;
+            /**
+             * @description Which package numbers a visit that consumes several at once: 'row' (the anchored one) or
+             *     'most_delivered' (laser MLS + HILT). See docs/specs/laser-sesion-del-dia-y-areas.md.
+             * @enum {string}
+             */
+            primaryPackageRule?: "row" | "most_delivered";
             name?: string;
             color?: string | null;
             icon?: string | null;
@@ -64321,6 +68981,17 @@ export interface components {
             sheetSection?: "LASER" | "IV" | null;
             /** @description Minutes between the start times this service offers and accepts (60 = on the hour only, like the call-center sheet for Laser and the IV line). Null = every slot of the day. Does not change how long the session takes. */
             startStepMinutes?: number | null;
+            /**
+             * @description Key of the session data that holds the units this service applies, for the statistics (`therapies` of /estadisticas/diarias and /estadisticas/servicios). 'cantidad' = the vials/doses captured by the board (Vit C, Intravenoso). Null = default rule: applied areas, else quantity, else 1 per visit.
+             * @example cantidad
+             */
+            statisticsUnitKey?: string | null;
+            /**
+             * @description Which package numbers a visit that consumes several at once: 'row' (the anchored one) or
+             *     'most_delivered' (laser MLS + HILT). See docs/specs/laser-sesion-del-dia-y-areas.md.
+             * @enum {string}
+             */
+            primaryPackageRule?: "row" | "most_delivered";
             name?: string;
             color?: string;
             icon?: string;
@@ -64377,6 +69048,8 @@ export interface components {
             date: string;
             statusTypeId: string | null;
             statusTipoIdRef?: Record<string, never>;
+            serviceId: string | null;
+            serviceIdRef?: Record<string, never>;
             /** Format: date-time */
             expiresAt: string | null;
             actorId: string | null;
@@ -65165,6 +69838,10 @@ export interface components {
             to: string[];
             messageId: string | null;
             notificationId: string;
+            /** @description Scanned attachments of the reconciliation sent along, each as its own file. The day total carries those of every reconciliation of its day and center. */
+            attachmentsIncluded: number;
+            /** @description Attachments that could not go (unreadable or over the 15 MB email budget); the body says so. */
+            attachmentsSkipped: number;
         };
         SignReconciliationDto: {
             /**
@@ -65191,6 +69868,17 @@ export interface components {
             /** Format: date-time */
             voidedAt: string | null;
             voidReason: string | null;
+            /** @description Figures a manager acknowledged as a correction (dayTotal, salesCash, countedCash, difference). */
+            acknowledgedFigures: Record<string, never> | null;
+            /** Format: date-time */
+            acknowledgedAt: string | null;
+            acknowledgedBy: string | null;
+            acknowledgedByName: string | null;
+            acknowledgeReason: string | null;
+        };
+        AcknowledgeSignatureDto: {
+            /** @description Why the changed figures are accepted (mandatory), e.g. «Corrección de 3 pagos Exonerada registrados por error». */
+            reason: string;
         };
         AttachmentUploadUrlRequestDto: {
             /**
@@ -65261,6 +69949,13 @@ export interface components {
             /** @description Name of who uploaded it; null when unknown (never the id). */
             uploadedByName: string | null;
         };
+        DeleteAttachmentDto: {
+            /**
+             * @description Why the file is removed (min 3 chars). Recorded in the change log with the attachment as it was.
+             * @example Escaneo de prueba
+             */
+            reason: string;
+        };
         AbrirCuadreDto: {
             /**
              * @description División del cuadre: consulta | general. Obligatoria para no mezclar ambas facturaciones.
@@ -65286,7 +69981,7 @@ export interface components {
             userId: string | null;
             usuarioIdRef?: Record<string, never>;
             /** @enum {string|null} */
-            division: "general" | "consulta" | "todas" | null;
+            division: "consulta" | "general" | "todas" | null;
             date: string;
             currencyId: string | null;
             monedaIdRef?: Record<string, never>;
@@ -65299,6 +69994,8 @@ export interface components {
             difference: number;
             totalsByMethod: Record<string, never> | null;
             notes: string | null;
+            /** @enum {string|null} */
+            countMode: "split" | "flexible" | "single" | null;
             /** Format: date-time */
             closedAt: string | null;
             id: string;
@@ -65334,11 +70031,152 @@ export interface components {
             /** @description Day (YYYY-MM-DD). Default: today in the center. */
             date?: string;
         };
-        TotalReconciliationDayDto: {
+        OpenTotalReconciliationDto: {
             /** @description Day (YYYY-MM-DD). Default: today in the center. */
             date?: string;
             /** @description The center of the sheet (one id; the day sheet is per center). Needs caja.read there. Default: the session center. */
             centerIds?: string[];
+            /** @description The day sheet's own starting fund. Used only by a 'single' count-mode center when no cashier declared a fund. */
+            declaredPettyCash?: number;
+            /** @description Whether that fund is subtracted from the counted cash. Omitted on create = true; omitted on resume = unchanged. */
+            pettyCashApplies?: boolean;
+        };
+        CashCountModeDto: {
+            clinicId: string;
+            clinicName: string;
+            /**
+             * @description flexible = today (the day's single count wins if there is one, else the sum of the divisions); split = two counts, consulta and general, always summed; single = one count of the whole drawer, the cashiers' counts not required.
+             * @enum {string}
+             */
+            mode: "flexible" | "split" | "single";
+            /** @description The choices, so the switch never hardcodes them. */
+            modes: ("flexible" | "split" | "single")[];
+        };
+        SetCashCountModeDto: {
+            /**
+             * @description flexible = today (the day's single count wins if there is one, else the sum of the divisions); split = two counts, consulta and general, always summed; single = one count of the whole drawer, the cashiers' counts not required.
+             * @enum {string}
+             */
+            mode: "flexible" | "split" | "single";
+        };
+        CashCountModeChangeDto: {
+            clinicId: string;
+            /** @enum {string} */
+            previous: "flexible" | "split" | "single";
+            /** @enum {string} */
+            current: "flexible" | "split" | "single";
+        };
+        CashCloseSettingDto: {
+            clinicId: string;
+            clinicName: string;
+            /** @description Whether the center offers «Procesar cierre». Default true. With false, POST /cash/reconciliations/:id/close and POST /cash/total-reconciliation/:id/close answer 409 CASH_CLOSE_DISABLED (labelKey caja.error.closeDisabled); sheets already closed and «Reabrir» are unchanged. */
+            closeEnabled: boolean;
+        };
+        SetCashCloseSettingDto: {
+            /** @description Whether the center offers «Procesar cierre». Default true. With false, POST /cash/reconciliations/:id/close and POST /cash/total-reconciliation/:id/close answer 409 CASH_CLOSE_DISABLED (labelKey caja.error.closeDisabled); sheets already closed and «Reabrir» are unchanged. */
+            closeEnabled: boolean;
+        };
+        CashCloseSettingChangeDto: {
+            clinicId: string;
+            previous: boolean;
+            current: boolean;
+        };
+        ScanRegionDto: {
+            /** @description 1/300 inch from the left. */
+            x: number;
+            /** @description 1/300 inch from the top. */
+            y: number;
+            width: number;
+            height: number;
+        };
+        RequestCashScanDto: {
+            /**
+             * Format: uuid
+             * @description Escáner del centro del cuadre. / Scanner of the sheet center.
+             */
+            scannerId: string;
+            /**
+             * @description Omitted = the scanner's defaultSource (center_scanners.default_source).
+             * @enum {string}
+             */
+            source?: "adf" | "platen";
+            /**
+             * @description Both sides of each sheet (feeder only).
+             * @default false
+             */
+            duplex?: boolean;
+            /**
+             * @default Grayscale8
+             * @enum {string}
+             */
+            colorMode?: "BlackAndWhite1" | "Grayscale8" | "RGB24";
+            /**
+             * @default 300
+             * @enum {number}
+             */
+            resolution?: 150 | 200 | 300 | 400 | 600;
+            /** @description Area to keep (picked on a preview), 1/300 inch; omitted = the whole page. */
+            region?: components["schemas"]["ScanRegionDto"];
+        };
+        CashScanJobEntity: {
+            clinicRef?: Record<string, never>;
+            reconciliationId: string;
+            reconciliationRef?: Record<string, never>;
+            scannerId: string;
+            scannerRef?: Record<string, never>;
+            requestedBy: string | null;
+            requestedByRef?: Record<string, never>;
+            /** @enum {string} */
+            source: "platen" | "adf";
+            duplex: boolean;
+            /** @enum {string} */
+            colorMode: "BlackAndWhite1" | "Grayscale8" | "RGB24";
+            resolution: number;
+            /** @enum {string} */
+            kind: "preview" | "final";
+            region: Record<string, never> | null;
+            /** @enum {string} */
+            status: "done" | "pending" | "failed" | "scanning";
+            attempts: number;
+            lastError: string | null;
+            /** Format: date-time */
+            claimedAt: string | null;
+            /** Format: date-time */
+            finishedAt: string | null;
+            storagePath: string | null;
+            attachmentId: string | null;
+            attachmentRef?: Record<string, never>;
+            /** Format: date-time */
+            expiresAt: string;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PreviewCashScanDto: {
+            /**
+             * Format: uuid
+             * @description Escáner del centro del cuadre. / Scanner of the sheet center.
+             */
+            scannerId: string;
+            /**
+             * @description Omitted = the scanner's defaultSource (center_scanners.default_source).
+             * @enum {string}
+             */
+            source?: "adf" | "platen";
+            /**
+             * @default Grayscale8
+             * @enum {string}
+             */
+            colorMode?: "BlackAndWhite1" | "Grayscale8" | "RGB24";
+        };
+        ScanJobResultDto: {
+            /** @description true = the PDF was uploaded to the signed URL. / true = scanned and uploaded. */
+            ok: boolean;
+            /** @description What failed (feeder empty, scanner busy, unreachable…). */
+            error?: string;
         };
         RequestUploadUrlDto: {
             /** @enum {string} */
@@ -65885,6 +70723,11 @@ export interface components {
             createdBy: string;
             /** Format: date-time */
             createdAt: string;
+            /**
+             * Format: date-time
+             * @description Last time the key authenticated a request (5-minute resolution); null = not since tracking began.
+             */
+            lastUsedAt?: string | null;
         };
         ApiKeyResponseDto: {
             id: string;
@@ -65901,6 +70744,11 @@ export interface components {
             createdBy: string;
             /** Format: date-time */
             createdAt: string;
+            /**
+             * Format: date-time
+             * @description Last time the key authenticated a request (5-minute resolution); null = not since tracking began.
+             */
+            lastUsedAt?: string | null;
         };
     };
     responses: never;
@@ -82334,6 +87182,1462 @@ export interface operations {
             };
         };
     };
+    "RefundRepairController_detail[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `huecoReembolso` (v2 `reimbursementGap`) distinto de 0 = falta registrar por dónde salió el dinero: se repara con PUT …/reembolsos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_edit[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_update[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_detail[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `huecoReembolso` (v2 `reimbursementGap`) distinto de 0 = falta registrar por dónde salió el dinero: se repara con PUT …/reembolsos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_edit[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_update[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_detail[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `huecoReembolso` (v2 `reimbursementGap`) distinto de 0 = falta registrar por dónde salió el dinero: se repara con PUT …/reembolsos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_edit[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_update[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_detail[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `huecoReembolso` (v2 `reimbursementGap`) distinto de 0 = falta registrar por dónde salió el dinero: se repara con PUT …/reembolsos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_edit[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_update[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_detail[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `huecoReembolso` (v2 `reimbursementGap`) distinto de 0 = falta registrar por dónde salió el dinero: se repara con PUT …/reembolsos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_edit[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_update[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_detail[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `huecoReembolso` (v2 `reimbursementGap`) distinto de 0 = falta registrar por dónde salió el dinero: se repara con PUT …/reembolsos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_edit[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_update[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_detail[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `huecoReembolso` (v2 `reimbursementGap`) distinto de 0 = falta registrar por dónde salió el dinero: se repara con PUT …/reembolsos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_edit[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_update[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_detail[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `huecoReembolso` (v2 `reimbursementGap`) distinto de 0 = falta registrar por dónde salió el dinero: se repara con PUT …/reembolsos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_edit[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_update[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRefundDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_simulate[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_simulate[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_simulate[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_simulate[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_simulate[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_simulate[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_simulate[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_simulate[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRefundDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_history[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeLogEntryEntity"][];
+                };
+            };
+        };
+    };
+    "RefundRepairController_history[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeLogEntryEntity"][];
+                };
+            };
+        };
+    };
+    "RefundRepairController_history[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeLogEntryEntity"][];
+                };
+            };
+        };
+    };
+    "RefundRepairController_history[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeLogEntryEntity"][];
+                };
+            };
+        };
+    };
+    "RefundRepairController_history[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeLogEntryEntity"][];
+                };
+            };
+        };
+    };
+    "RefundRepairController_history[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeLogEntryEntity"][];
+                };
+            };
+        };
+    };
+    "RefundRepairController_history[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeLogEntryEntity"][];
+                };
+            };
+        };
+    };
+    "RefundRepairController_history[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeLogEntryEntity"][];
+                };
+            };
+        };
+    };
+    "RefundRepairController_replaceReimbursements[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRefundReimbursementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_replaceReimbursements[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRefundReimbursementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_replaceReimbursements[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRefundReimbursementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_replaceReimbursements[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRefundReimbursementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_replaceReimbursements[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRefundReimbursementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_replaceReimbursements[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRefundReimbursementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_replaceReimbursements[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRefundReimbursementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "RefundRepairController_replaceReimbursements[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                refundId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceRefundReimbursementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "IssuedKitComponentController_add[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddIssuedKitComponentDto"];
+            };
+        };
+        responses: {
+            /** @description `{ invoice, added }`: la factura (misma forma que GET /invoices/:id) y los paquetes creados `[{ sku, sesiones }]`. 400 INVOICE_NOT_ISSUED, 404 KIT_COMPONENT_NOT_OPTIONAL, 409 KIT_COMPONENT_ALREADY_INCLUDED, 428 ACTION_REQUIRES_CONFIRMATION. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "IssuedKitComponentController_add[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddIssuedKitComponentDto"];
+            };
+        };
+        responses: {
+            /** @description `{ invoice, added }`: la factura (misma forma que GET /invoices/:id) y los paquetes creados `[{ sku, sesiones }]`. 400 INVOICE_NOT_ISSUED, 404 KIT_COMPONENT_NOT_OPTIONAL, 409 KIT_COMPONENT_ALREADY_INCLUDED, 428 ACTION_REQUIRES_CONFIRMATION. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "IssuedKitComponentController_add[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddIssuedKitComponentDto"];
+            };
+        };
+        responses: {
+            /** @description `{ invoice, added }`: la factura (misma forma que GET /invoices/:id) y los paquetes creados `[{ sku, sesiones }]`. 400 INVOICE_NOT_ISSUED, 404 KIT_COMPONENT_NOT_OPTIONAL, 409 KIT_COMPONENT_ALREADY_INCLUDED, 428 ACTION_REQUIRES_CONFIRMATION. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "IssuedKitComponentController_add[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddIssuedKitComponentDto"];
+            };
+        };
+        responses: {
+            /** @description `{ invoice, added }`: la factura (misma forma que GET /invoices/:id) y los paquetes creados `[{ sku, sesiones }]`. 400 INVOICE_NOT_ISSUED, 404 KIT_COMPONENT_NOT_OPTIONAL, 409 KIT_COMPONENT_ALREADY_INCLUDED, 428 ACTION_REQUIRES_CONFIRMATION. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "IssuedKitComponentController_add[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddIssuedKitComponentDto"];
+            };
+        };
+        responses: {
+            /** @description `{ invoice, added }`: la factura (misma forma que GET /invoices/:id) y los paquetes creados `[{ sku, sesiones }]`. 400 INVOICE_NOT_ISSUED, 404 KIT_COMPONENT_NOT_OPTIONAL, 409 KIT_COMPONENT_ALREADY_INCLUDED, 428 ACTION_REQUIRES_CONFIRMATION. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "IssuedKitComponentController_add[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddIssuedKitComponentDto"];
+            };
+        };
+        responses: {
+            /** @description `{ invoice, added }`: la factura (misma forma que GET /invoices/:id) y los paquetes creados `[{ sku, sesiones }]`. 400 INVOICE_NOT_ISSUED, 404 KIT_COMPONENT_NOT_OPTIONAL, 409 KIT_COMPONENT_ALREADY_INCLUDED, 428 ACTION_REQUIRES_CONFIRMATION. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "IssuedKitComponentController_add[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddIssuedKitComponentDto"];
+            };
+        };
+        responses: {
+            /** @description `{ invoice, added }`: la factura (misma forma que GET /invoices/:id) y los paquetes creados `[{ sku, sesiones }]`. 400 INVOICE_NOT_ISSUED, 404 KIT_COMPONENT_NOT_OPTIONAL, 409 KIT_COMPONENT_ALREADY_INCLUDED, 428 ACTION_REQUIRES_CONFIRMATION. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "IssuedKitComponentController_add[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddIssuedKitComponentDto"];
+            };
+        };
+        responses: {
+            /** @description `{ invoice, added }`: la factura (misma forma que GET /invoices/:id) y los paquetes creados `[{ sku, sesiones }]`. 400 INVOICE_NOT_ISSUED, 404 KIT_COMPONENT_NOT_OPTIONAL, 409 KIT_COMPONENT_ALREADY_INCLUDED, 428 ACTION_REQUIRES_CONFIRMATION. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "DevolucionesController_list[0]_v1": {
         parameters: {
             query: {
@@ -90219,6 +96523,382 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "PatientMergeController_simulate[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El plan: moves, collisions, blocking, pastReports. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PatientMergeController_simulate[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El plan: moves, collisions, blocking, pastReports. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PatientMergeController_simulate[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El plan: moves, collisions, blocking, pastReports. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PatientMergeController_simulate[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El plan: moves, collisions, blocking, pastReports. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PatientMergeController_simulate[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El plan: moves, collisions, blocking, pastReports. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PatientMergeController_simulate[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El plan: moves, collisions, blocking, pastReports. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PatientMergeController_simulate[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El plan: moves, collisions, blocking, pastReports. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PatientMergeController_simulate[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description El plan: moves, collisions, blocking, pastReports. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PatientMergeController_merge[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergePatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PatientMergeController_merge[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergePatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PatientMergeController_merge[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergePatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PatientMergeController_merge[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergePatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PatientMergeController_merge[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergePatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PatientMergeController_merge[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergePatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PatientMergeController_merge[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergePatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PatientMergeController_merge[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                targetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergePatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -99752,6 +106432,742 @@ export interface operations {
             };
         };
     };
+    "ScannersController_list[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"][];
+                };
+            };
+        };
+    };
+    "ScannersController_create[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScannerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_list[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"][];
+                };
+            };
+        };
+    };
+    "ScannersController_create[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScannerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_list[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"][];
+                };
+            };
+        };
+    };
+    "ScannersController_create[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScannerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_list[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"][];
+                };
+            };
+        };
+    };
+    "ScannersController_create[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScannerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_list[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"][];
+                };
+            };
+        };
+    };
+    "ScannersController_create[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScannerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_list[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"][];
+                };
+            };
+        };
+    };
+    "ScannersController_create[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScannerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_list[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"][];
+                };
+            };
+        };
+    };
+    "ScannersController_create[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScannerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_list[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"][];
+                };
+            };
+        };
+    };
+    "ScannersController_create[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScannerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_update[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateScannerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_remove[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScannersController_update[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateScannerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_remove[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScannersController_update[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateScannerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_remove[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScannersController_update[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateScannerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_remove[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScannersController_update[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateScannerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_remove[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScannersController_update[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateScannerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_remove[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScannersController_update[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateScannerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_remove[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScannersController_update[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateScannerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterScannerEntity"];
+                };
+            };
+        };
+    };
+    "ScannersController_remove[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "RbacController_permisos[0]_v1": {
         parameters: {
             query?: never;
@@ -100655,7 +108071,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -100678,7 +108096,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -100701,7 +108121,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -100724,7 +108146,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -110798,6 +118222,542 @@ export interface operations {
             };
         };
     };
+    "ReportesController_kardexDiario[0]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexDiario[1]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexDiario[2]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexDiario[3]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexDiario[4]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexDiario[5]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexDiario[6]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexDiario[7]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexDia[0]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                date: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_kardexDia[1]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                date: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_kardexDia[2]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                date: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_kardexDia[3]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                date: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_kardexDia[4]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                date: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_kardexDia[5]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                date: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_kardexDia[6]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                date: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_kardexDia[7]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                date: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_kardexResumen[0]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexResumen[1]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexResumen[2]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexResumen[3]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexResumen[4]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexResumen[5]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexResumen[6]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexResumen[7]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "ReportesController_rotacion[0]_v1": {
         parameters: {
             query?: {
@@ -118107,8 +126067,8 @@ export interface operations {
                 patientId?: string;
                 /** @description Filtra por estado (programada, confirmada, …) */
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                /** @description Filtra por canal (callcenter, atencion, …) */
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                /** @description Filter by channel (frontdesk, callcenter, webhook, ia; atencion = frontdesk) */
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
                 /**
                  * @description true = incluir también las `reprogramada`, que por defecto NO salen: son el rastro de que la
                  *     cita se movió, no citas aparte. Es lo que alimenta el modal de «historial de reagendamientos».
@@ -118190,8 +126150,8 @@ export interface operations {
                 patientId?: string;
                 /** @description Filtra por estado (programada, confirmada, …) */
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                /** @description Filtra por canal (callcenter, atencion, …) */
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                /** @description Filter by channel (frontdesk, callcenter, webhook, ia; atencion = frontdesk) */
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
                 /**
                  * @description true = incluir también las `reprogramada`, que por defecto NO salen: son el rastro de que la
                  *     cita se movió, no citas aparte. Es lo que alimenta el modal de «historial de reagendamientos».
@@ -118273,8 +126233,8 @@ export interface operations {
                 patientId?: string;
                 /** @description Filtra por estado (programada, confirmada, …) */
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                /** @description Filtra por canal (callcenter, atencion, …) */
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                /** @description Filter by channel (frontdesk, callcenter, webhook, ia; atencion = frontdesk) */
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
                 /**
                  * @description true = incluir también las `reprogramada`, que por defecto NO salen: son el rastro de que la
                  *     cita se movió, no citas aparte. Es lo que alimenta el modal de «historial de reagendamientos».
@@ -118356,8 +126316,8 @@ export interface operations {
                 patientId?: string;
                 /** @description Filtra por estado (programada, confirmada, …) */
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                /** @description Filtra por canal (callcenter, atencion, …) */
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                /** @description Filter by channel (frontdesk, callcenter, webhook, ia; atencion = frontdesk) */
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
                 /**
                  * @description true = incluir también las `reprogramada`, que por defecto NO salen: son el rastro de que la
                  *     cita se movió, no citas aparte. Es lo que alimenta el modal de «historial de reagendamientos».
@@ -119287,7 +127247,7 @@ export interface operations {
                 to: string;
                 doctorId?: string;
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
             path?: never;
@@ -119314,7 +127274,7 @@ export interface operations {
                 to: string;
                 doctorId?: string;
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
             path?: never;
@@ -119341,7 +127301,7 @@ export interface operations {
                 to: string;
                 doctorId?: string;
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
             path?: never;
@@ -119368,7 +127328,7 @@ export interface operations {
                 to: string;
                 doctorId?: string;
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
             path?: never;
@@ -119395,7 +127355,7 @@ export interface operations {
                 to: string;
                 doctorId?: string;
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
             path?: never;
@@ -119422,7 +127382,7 @@ export interface operations {
                 to: string;
                 doctorId?: string;
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
             path?: never;
@@ -119449,7 +127409,7 @@ export interface operations {
                 to: string;
                 doctorId?: string;
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
             path?: never;
@@ -119476,7 +127436,7 @@ export interface operations {
                 to: string;
                 doctorId?: string;
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
-                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
             path?: never;
@@ -128897,6 +136857,326 @@ export interface operations {
             };
         };
     };
+    "DisponibilidadLegadoController_companionRepairPlan[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_companionRepairPlan[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_companionRepairPlan[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_companionRepairPlan[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_companionRepairPlan[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_companionRepairPlan[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_companionRepairPlan[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_companionRepairPlan[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_applyCompanionRepair[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyCompanionRepairDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DisponibilidadLegadoController_applyCompanionRepair[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyCompanionRepairDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DisponibilidadLegadoController_applyCompanionRepair[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyCompanionRepairDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DisponibilidadLegadoController_applyCompanionRepair[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyCompanionRepairDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DisponibilidadLegadoController_applyCompanionRepair[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyCompanionRepairDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DisponibilidadLegadoController_applyCompanionRepair[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyCompanionRepairDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DisponibilidadLegadoController_applyCompanionRepair[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyCompanionRepairDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DisponibilidadLegadoController_applyCompanionRepair[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyCompanionRepairDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "DisponibilidadLegadoController_diagnostico[0]_v1": {
         parameters: {
             query?: {
@@ -129780,6 +138060,662 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["AplicarLegadoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelCentro[0]_v1": {
+        parameters: {
+            query: {
+                /** @description First day the center lived in the new system (YYYY-MM-DD). Caguas 2026-11-04. */
+                cutover: string;
+                /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+                lookbackDays?: string;
+                /** @description Patients per page (default 100, max 500). `skipped` says how many are left after this page: it never truncates silently. */
+                limit?: string;
+                /** @description Patients to skip. */
+                offset?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelCentro[1]_v1": {
+        parameters: {
+            query: {
+                /** @description First day the center lived in the new system (YYYY-MM-DD). Caguas 2026-11-04. */
+                cutover: string;
+                /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+                lookbackDays?: string;
+                /** @description Patients per page (default 100, max 500). `skipped` says how many are left after this page: it never truncates silently. */
+                limit?: string;
+                /** @description Patients to skip. */
+                offset?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelCentro[2]_v1": {
+        parameters: {
+            query: {
+                /** @description First day the center lived in the new system (YYYY-MM-DD). Caguas 2026-11-04. */
+                cutover: string;
+                /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+                lookbackDays?: string;
+                /** @description Patients per page (default 100, max 500). `skipped` says how many are left after this page: it never truncates silently. */
+                limit?: string;
+                /** @description Patients to skip. */
+                offset?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelCentro[3]_v1": {
+        parameters: {
+            query: {
+                /** @description First day the center lived in the new system (YYYY-MM-DD). Caguas 2026-11-04. */
+                cutover: string;
+                /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+                lookbackDays?: string;
+                /** @description Patients per page (default 100, max 500). `skipped` says how many are left after this page: it never truncates silently. */
+                limit?: string;
+                /** @description Patients to skip. */
+                offset?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelCentro[4]_v2": {
+        parameters: {
+            query: {
+                /** @description First day the center lived in the new system (YYYY-MM-DD). Caguas 2026-11-04. */
+                cutover: string;
+                /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+                lookbackDays?: string;
+                /** @description Patients per page (default 100, max 500). `skipped` says how many are left after this page: it never truncates silently. */
+                limit?: string;
+                /** @description Patients to skip. */
+                offset?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelCentro[5]_v2": {
+        parameters: {
+            query: {
+                /** @description First day the center lived in the new system (YYYY-MM-DD). Caguas 2026-11-04. */
+                cutover: string;
+                /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+                lookbackDays?: string;
+                /** @description Patients per page (default 100, max 500). `skipped` says how many are left after this page: it never truncates silently. */
+                limit?: string;
+                /** @description Patients to skip. */
+                offset?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelCentro[6]_v2": {
+        parameters: {
+            query: {
+                /** @description First day the center lived in the new system (YYYY-MM-DD). Caguas 2026-11-04. */
+                cutover: string;
+                /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+                lookbackDays?: string;
+                /** @description Patients per page (default 100, max 500). `skipped` says how many are left after this page: it never truncates silently. */
+                limit?: string;
+                /** @description Patients to skip. */
+                offset?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelCentro[7]_v2": {
+        parameters: {
+            query: {
+                /** @description First day the center lived in the new system (YYYY-MM-DD). Caguas 2026-11-04. */
+                cutover: string;
+                /** @description Days before the cutover whose purchases are read (default 60, max 365). */
+                lookbackDays?: string;
+                /** @description Patients per page (default 100, max 500). `skipped` says how many are left after this page: it never truncates silently. */
+                limit?: string;
+                /** @description Patients to skip. */
+                offset?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelPaciente[0]_v1": {
+        parameters: {
+            query: {
+                /** @description YYYY-MM-DD. */
+                cutover: string;
+                lookbackDays?: string;
+                /** @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO with the candidates). */
+                patientId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelPaciente[1]_v1": {
+        parameters: {
+            query: {
+                /** @description YYYY-MM-DD. */
+                cutover: string;
+                lookbackDays?: string;
+                /** @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO with the candidates). */
+                patientId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelPaciente[2]_v1": {
+        parameters: {
+            query: {
+                /** @description YYYY-MM-DD. */
+                cutover: string;
+                lookbackDays?: string;
+                /** @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO with the candidates). */
+                patientId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelPaciente[3]_v1": {
+        parameters: {
+            query: {
+                /** @description YYYY-MM-DD. */
+                cutover: string;
+                lookbackDays?: string;
+                /** @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO with the candidates). */
+                patientId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelPaciente[4]_v2": {
+        parameters: {
+            query: {
+                /** @description YYYY-MM-DD. */
+                cutover: string;
+                lookbackDays?: string;
+                /** @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO with the candidates). */
+                patientId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelPaciente[5]_v2": {
+        parameters: {
+            query: {
+                /** @description YYYY-MM-DD. */
+                cutover: string;
+                lookbackDays?: string;
+                /** @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO with the candidates). */
+                patientId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelPaciente[6]_v2": {
+        parameters: {
+            query: {
+                /** @description YYYY-MM-DD. */
+                cutover: string;
+                lookbackDays?: string;
+                /** @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO with the candidates). */
+                patientId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_comprasDelPaciente[7]_v2": {
+        parameters: {
+            query: {
+                /** @description YYYY-MM-DD. */
+                cutover: string;
+                lookbackDays?: string;
+                /** @description Chosen patient when the record belongs to several people (else 409 RECORD_AMBIGUO with the candidates). */
+                patientId?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_aplicarCompras[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyLegacyPurchasesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_aplicarCompras[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyLegacyPurchasesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_aplicarCompras[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyLegacyPurchasesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_aplicarCompras[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyLegacyPurchasesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_aplicarCompras[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyLegacyPurchasesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_aplicarCompras[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyLegacyPurchasesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_aplicarCompras[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyLegacyPurchasesDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DisponibilidadLegadoController_aplicarCompras[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Patient record number, in the active center. */
+                medicalRecordNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyLegacyPurchasesDto"];
             };
         };
         responses: {
@@ -140701,6 +149637,86 @@ export interface operations {
             };
         };
     };
+    "SessionSheetController_sheet[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description { sessionId, serviceId, display, packages: [{ packageId, productId, productName, sku, number, total, xy, primary }], areas, areasSource } */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionSheetController_sheet[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description { sessionId, serviceId, display, packages: [{ packageId, productId, productName, sku, number, total, xy, primary }], areas, areasSource } */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionSheetController_sheet[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description { sessionId, serviceId, display, packages: [{ packageId, productId, productName, sku, number, total, xy, primary }], areas, areasSource } */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionSheetController_sheet[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description { sessionId, serviceId, display, packages: [{ packageId, productId, productName, sku, number, total, xy, primary }], areas, areasSource } */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "TrainBookingController_bookTrain[0]_v1": {
         parameters: {
             query?: never;
@@ -149165,6 +158181,238 @@ export interface operations {
             };
         };
     };
+    "CajaController_acusarCambio[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeSignatureDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_acusarCambio[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeSignatureDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_acusarCambio[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeSignatureDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_acusarCambio[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeSignatureDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_acusarCambio[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeSignatureDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_acusarCambio[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeSignatureDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_acusarCambio[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeSignatureDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
+    "CajaController_acusarCambio[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                signatureId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeSignatureDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconciliationSignatureDto"];
+                };
+            };
+        };
+    };
     "CajaController_firmas[0]_v1": {
         parameters: {
             query?: {
@@ -149997,6 +159245,222 @@ export interface operations {
             };
         };
     };
+    "CajaController_removeAttachment[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                attachmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_removeAttachment[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                attachmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_removeAttachment[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                attachmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_removeAttachment[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                attachmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_removeAttachment[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                attachmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_removeAttachment[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                attachmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_removeAttachment[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                attachmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CajaController_removeAttachment[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                attachmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAttachmentDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "CajaController_contar[0]_v1": {
         parameters: {
             query?: never;
@@ -150804,7 +160268,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+                "application/json": components["schemas"]["OpenTotalReconciliationDto"];
             };
         };
         responses: {
@@ -150849,7 +160313,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+                "application/json": components["schemas"]["OpenTotalReconciliationDto"];
             };
         };
         responses: {
@@ -150894,7 +160358,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+                "application/json": components["schemas"]["OpenTotalReconciliationDto"];
             };
         };
         responses: {
@@ -150939,7 +160403,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+                "application/json": components["schemas"]["OpenTotalReconciliationDto"];
             };
         };
         responses: {
@@ -150984,7 +160448,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+                "application/json": components["schemas"]["OpenTotalReconciliationDto"];
             };
         };
         responses: {
@@ -151029,7 +160493,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+                "application/json": components["schemas"]["OpenTotalReconciliationDto"];
             };
         };
         responses: {
@@ -151074,7 +160538,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+                "application/json": components["schemas"]["OpenTotalReconciliationDto"];
             };
         };
         responses: {
@@ -151119,7 +160583,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TotalReconciliationDayDto"];
+                "application/json": components["schemas"]["OpenTotalReconciliationDto"];
             };
         };
         responses: {
@@ -151498,6 +160962,2086 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "CashCountModeController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_set[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCountModeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_set[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCountModeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_list[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_set[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCountModeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_list[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_set[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCountModeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_list[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_set[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCountModeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_list[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_set[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCountModeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_list[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_set[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCountModeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_list[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_set[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCountModeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCountModeChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_closeSetting[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_setCloseSetting[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCloseSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_closeSetting[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_setCloseSetting[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCloseSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_closeSetting[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_setCloseSetting[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCloseSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_closeSetting[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_setCloseSetting[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCloseSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_closeSetting[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_setCloseSetting[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCloseSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_closeSetting[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_setCloseSetting[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCloseSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_closeSetting[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_setCloseSetting[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCloseSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingChangeDto"];
+                };
+            };
+        };
+    };
+    "CashCountModeController_closeSetting[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingDto"][];
+                };
+            };
+        };
+    };
+    "CashCountModeController_setCloseSetting[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCashCloseSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCloseSettingChangeDto"];
+                };
+            };
+        };
+    };
+    "CashPastDayController_check[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{ day, reconciled, locked, canModify }`: reconciled = pasado con cuadre; locked = sin caja.past_day.modify (las acciones se deshabilitan); canModify = con el permiso (se avisa antes). Centro: `centerIds[0]`, obligatorio (caja.read allí). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CashPastDayController_check[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{ day, reconciled, locked, canModify }`: reconciled = pasado con cuadre; locked = sin caja.past_day.modify (las acciones se deshabilitan); canModify = con el permiso (se avisa antes). Centro: `centerIds[0]`, obligatorio (caja.read allí). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CashPastDayController_check[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{ day, reconciled, locked, canModify }`: reconciled = pasado con cuadre; locked = sin caja.past_day.modify (las acciones se deshabilitan); canModify = con el permiso (se avisa antes). Centro: `centerIds[0]`, obligatorio (caja.read allí). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CashPastDayController_check[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{ day, reconciled, locked, canModify }`: reconciled = pasado con cuadre; locked = sin caja.past_day.modify (las acciones se deshabilitan); canModify = con el permiso (se avisa antes). Centro: `centerIds[0]`, obligatorio (caja.read allí). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CashPastDayController_check[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{ day, reconciled, locked, canModify }`: reconciled = pasado con cuadre; locked = sin caja.past_day.modify (las acciones se deshabilitan); canModify = con el permiso (se avisa antes). Centro: `centerIds[0]`, obligatorio (caja.read allí). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CashPastDayController_check[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{ day, reconciled, locked, canModify }`: reconciled = pasado con cuadre; locked = sin caja.past_day.modify (las acciones se deshabilitan); canModify = con el permiso (se avisa antes). Centro: `centerIds[0]`, obligatorio (caja.read allí). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CashPastDayController_check[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{ day, reconciled, locked, canModify }`: reconciled = pasado con cuadre; locked = sin caja.past_day.modify (las acciones se deshabilitan); canModify = con el permiso (se avisa antes). Centro: `centerIds[0]`, obligatorio (caja.read allí). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CashPastDayController_check[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                date?: string;
+                division?: "consulta" | "general";
+                userId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description `{ day, reconciled, locked, canModify }`: reconciled = pasado con cuadre; locked = sin caja.past_day.modify (las acciones se deshabilitan); canModify = con el permiso (se avisa antes). Centro: `centerIds[0]`, obligatorio (caja.read allí). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CashScanController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CashScanController_request[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CashScanController_request[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_list[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CashScanController_request[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_list[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CashScanController_request[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_list[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CashScanController_request[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_list[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CashScanController_request[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_list[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CashScanController_request[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_list[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CashScanController_request[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_preview[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_preview[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_preview[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_preview[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_preview[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_preview[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_preview[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "CashScanController_preview[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCashScanDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashScanJobEntity"];
+                };
+            };
+        };
+    };
+    "ScanJobsController_next[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing to scan. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_next[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing to scan. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_next[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing to scan. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_next[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing to scan. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_next[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing to scan. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_next[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing to scan. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_next[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing to scan. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_next[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Nothing to scan. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_uploadUrl[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_uploadUrl[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_uploadUrl[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_uploadUrl[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_uploadUrl[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_uploadUrl[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_uploadUrl[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_uploadUrl[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_result[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_result[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_result[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_result[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_result[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_result[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_result[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ScanJobsController_result[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
