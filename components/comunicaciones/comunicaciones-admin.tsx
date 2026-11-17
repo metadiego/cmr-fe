@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
 import { useDialogForm } from "@/components/kit/use-dialog-form";
 import { useSubmit } from "@/components/kit/use-submit";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -392,10 +393,13 @@ function PlantillaForm({
       description={t("nuevaPlantillaHelp")}
       missing={missing}
       blocked={clinicsLoading}
-      reason={clinicsLoading ? tRoot("common.loading") : null}
+      // Blocked because the clinic list is still loading, or because it failed or came back empty.
+      reason={clinicsLoading ? (create.loading ? tRoot("common.loading") : t("noClinicToCreate")) : null}
       submitting={submitting}
       onSubmit={() => submit()}
     >
+      {/* Three required fields only when the clinic picker shows (Clave, Cuerpo, Centro). */}
+      {clinicPicker && <RequiredLegend />}
       <Field label={t("col.clave")} htmlFor="template-key" required>
         <Input
           id="template-key"

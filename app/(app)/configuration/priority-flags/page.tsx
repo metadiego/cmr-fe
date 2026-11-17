@@ -148,7 +148,8 @@ function FlagFormSheet({
   const [color, setColor] = React.useState(flag?.color ?? PRIORITY_FLAG_COLOR_KEYS[0]);
 
   const missing = missingFields([
-    [t("slug"), !!slug.trim()],
+    // The slug is fixed once created (the edit payload never sends it): only required on create.
+    [t("slug"), !!flag || !!slug.trim()],
     [t("labelKey"), !!labelKey.trim()],
   ]);
 

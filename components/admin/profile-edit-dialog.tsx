@@ -33,6 +33,7 @@ export function ProfileEditDialog({
   onSaved?: () => void;
 }) {
   const t = useTranslations("admin.editarPerfil");
+  const tCommon = useTranslations("common");
   const [form, update] = useDialogForm(
     () => ({
       nombre: profile?.name ?? "",
@@ -72,7 +73,9 @@ export function ProfileEditDialog({
       description={t("help")}
       missing={missing}
       submitting={submitting}
-      onSubmit={() => submit()}
+      // Saving may change the access mode (what the person sees): Enter never fires it, only the button.
+      onSubmit={() => {}}
+      actions={[{ label: tCommon("save"), onClick: () => submit() }]}
     >
       <Field label={t("nombre")} htmlFor="profile-edit-first-name" required>
         <Input

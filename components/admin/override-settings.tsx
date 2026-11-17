@@ -223,9 +223,10 @@ function CreateOverrideDialog({
       size="md"
       title={t("createTitle")}
       description={t("createHelp")}
-      onSubmit={() => submit()}
+      // The scope defaults to global (every center): Enter never creates it, only the button.
+      onSubmit={() => {}}
+      actions={[{ label: t("createSubmit"), onClick: () => submit() }]}
       submitting={submitting}
-      submitLabel={t("createSubmit")}
       submittingLabel={t("creating")}
       cancelLabel={tc("cancel")}
     >

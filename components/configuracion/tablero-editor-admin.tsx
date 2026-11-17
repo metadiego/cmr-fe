@@ -35,6 +35,7 @@ import { ColumnasTab } from "@/components/configuracion/columnas-tab";
 import { ServicioColumnasEditor } from "@/components/configuracion/servicio-columnas-editor";
 import { ServiciosAdmin } from "@/components/servicios/servicios-admin";
 import { Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,6 +179,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
             remove={(id) => borrarTransicion(id)}
             fields={(d, patch) => (
               <>
+                <RequiredLegend />
                 <Field label={t("clave")} htmlFor="transition-key" required><Input id="transition-key" value={s(d, "clave")} onChange={(e) => patch({ clave: e.target.value })} placeholder="empezar" /></Field>
                 <Field label={t("label")} htmlFor="transition-label" required><Input id="transition-label" value={s(d, "labelKey")} onChange={(e) => patch({ labelKey: e.target.value })} placeholder="op.accion.empezar" /></Field>
                 <Field label={t("trDesde")} hint={t("trDesdeHint")}>

@@ -148,11 +148,6 @@ export function InviteDialog({
     [t("name"), !!nombre.trim()],
   ]);
 
-  // Sending an invite is outward (it emails the person): Enter in a text field never fires it.
-  const noEnter = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") e.preventDefault();
-  };
-
   const { submitting, submit } = useSubmit(async () => {
     const linked = sinCuenta.find((p) => p.id === personalId);
     const plan = planInvite(centroId, centros.map((c) => c.id), rolClave, linked?.clinicId);
@@ -289,10 +284,12 @@ export function InviteDialog({
       size="md"
       title={t("title")}
       description={t("description")}
-      onSubmit={() => submit()}
+      // Sending an invite is outward (it emails the person): Enter in any field never fires it,
+      // only the button. EmailInput still completes the domain on Enter.
+      onSubmit={() => {}}
+      actions={[{ label: t("submit"), onClick: () => submit() }]}
       submitting={submitting}
       missing={missing}
-      submitLabel={t("submit")}
       submittingLabel={t("submitting")}
       cancelLabel={tc("cancel")}
     >
@@ -336,7 +333,6 @@ export function InviteDialog({
           value={email}
           onValueChange={(v) => update({ email: v })}
           placeholder="you@email.com"
-          onKeyDown={noEnter}
         />
       </Field>
       <Field label={t("name")} htmlFor="invite-name" required>
@@ -344,7 +340,6 @@ export function InviteDialog({
           id="invite-name"
           value={nombre}
           onChange={(e) => update({ nombre: e.target.value })}
-          onKeyDown={noEnter}
         />
       </Field>
       <Field label={t("lastName")} htmlFor="invite-last-name">
@@ -352,7 +347,6 @@ export function InviteDialog({
           id="invite-last-name"
           value={apellido}
           onChange={(e) => update({ apellido: e.target.value })}
-          onKeyDown={noEnter}
         />
       </Field>
       {suggested && (
@@ -432,8 +426,7 @@ export function InviteDialog({
               onChange={(e) => update({ origenQuery: e.target.value, origenOpen: true })}
               onFocus={() => update({ origenOpen: true })}
               onBlur={() => setTimeout(() => update({ origenOpen: false }), 150)}
-              onKeyDown={noEnter}
-              placeholder={t("clone.placeholder")}
+                  placeholder={t("clone.placeholder")}
             />
             {origenOpen && (
               <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">

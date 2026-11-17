@@ -357,6 +357,7 @@ export function MenuEditor() {
       description: t("deleteBody", { name: label(it) }),
       confirmLabel: t("delete"),
       cancelLabel: t("cancel"),
+      destructive: true,
     });
     if (!ok) return;
     try {
@@ -675,7 +676,6 @@ export function MenuEditor() {
           )}
         </div>
       </aside>
-
     </div>
   );
 }

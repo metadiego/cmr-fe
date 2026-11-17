@@ -71,7 +71,8 @@ export function MetaCrud<T extends { id: string }>({
     async () => {
       // The dialog is only mounted while `editing` is set.
       if (editing === "new") await create(draft);
-      else await update((editing as T).id, draft);
+      else if (editing) await update(editing.id, draft);
+      else throw new Error("MetaCrud: submit with no row being edited");
     },
     {
       successMessage: tc("saved"),

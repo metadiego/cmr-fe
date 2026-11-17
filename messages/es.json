@@ -3938,7 +3938,8 @@
       "clinico": "Clínico",
       "agenda": "Agenda",
       "otras": "Otras"
-    }
+    },
+    "noClinicToCreate": "No tienes un centro donde crear plantillas."
   },
   "fac": {
     "col": {

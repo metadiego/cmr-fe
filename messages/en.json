@@ -3938,7 +3938,8 @@
       "clinico": "Clinical",
       "agenda": "Schedule",
       "otras": "Other"
-    }
+    },
+    "noClinicToCreate": "You have no center to create templates in."
   },
   "fac": {
     "col": {

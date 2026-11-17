@@ -172,10 +172,11 @@ function CreateCenterDialog({
       size="md"
       title={t("centers.createTitle")}
       description={t("centers.createDescription")}
-      onSubmit={() => submit()}
+      // A center cannot be deleted or renamed from here once created: Enter never fires it, only the button.
+      onSubmit={() => {}}
+      actions={[{ label: t("centers.submit"), onClick: () => submit() }]}
       submitting={submitting}
       missing={missing}
-      submitLabel={t("centers.submit")}
       submittingLabel={t("centers.submitting")}
       cancelLabel={t("cancel")}
     >
