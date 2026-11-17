@@ -425,9 +425,11 @@ function EditRoleDialog({
       size="md"
       title={t("editTitle")}
       description={role?.slug}
-      onSubmit={() => submit()}
+      // Saving may untick "all centers" and take multi-center access from everyone holding the role:
+      // Enter never fires it, only the button.
+      onSubmit={() => {}}
+      actions={[{ label: t("save"), onClick: () => submit() }]}
       submitting={submitting}
-      submitLabel={t("save")}
       submittingLabel={t("saving")}
       cancelLabel={tc("cancel")}
       missing={missing}
