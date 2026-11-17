@@ -57,6 +57,7 @@ export function AmpEditorSheet({
   onSaved: () => void;
 }) {
   const t = useTranslations("inventario.amp");
+  const tc = useTranslations("common");
   const isEdit = !!amp;
 
   // Re-initialised when the sheet opens or the edited AMP changes.
@@ -93,7 +94,8 @@ export function AmpEditorSheet({
     advanced,
   } = form;
 
-  const activos = proveedores.filter((p) => p.active);
+  // Active suppliers, plus the AMP's own one if it was deactivated: the current pick must stay visible.
+  const opciones = proveedores.filter((p) => p.active || p.id === proveedorId);
   const unidadNombre = (id: string) => unidades.find((u) => u.id === id)?.name ?? "";
 
   // Autogenera el nombre "{producto} — {cantidad} {unidad}" mientras no se edite a mano.
@@ -164,9 +166,9 @@ export function AmpEditorSheet({
             <SelectValue placeholder={t("field.selectProveedor")} />
           </SelectTrigger>
           <SelectContent>
-            {activos.map((p) => (
+            {opciones.map((p) => (
               <SelectItem key={p.id} value={p.id}>
-                {p.name}
+                {p.active ? p.name : `${p.name} (${tc("inactive")})`}
               </SelectItem>
             ))}
           </SelectContent>
