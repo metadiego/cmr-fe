@@ -19,20 +19,16 @@ import {
   PRIORITY_FLAG_COLOR_KEYS,
 } from "@/lib/pacientes/priority-flags";
 import { toastError } from "@/lib/api/errors";
+import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { ConfigGuard } from "@/components/configuracion/config-guard";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet";
+import { FormSheet } from "@/components/kit/form-sheet";
+import { Field } from "@/components/kit/field";
+import { useSubmit } from "@/components/kit/use-submit";
 import {
   Select,
   SelectContent,
@@ -146,80 +142,77 @@ function FlagFormSheet({
   onSaved: () => void;
 }) {
   const t = useTranslations("configuracion.prioridadFlags");
-  const tRoot = useTranslations();
   const [slug, setSlug] = React.useState(flag?.slug ?? "");
   const [labelKey, setLabelKey] = React.useState(flag?.labelKey ?? "");
   const [icon, setIcon] = React.useState(flag?.icon ?? PRIORITY_FLAG_ICON_KEYS[0]);
   const [color, setColor] = React.useState(flag?.color ?? PRIORITY_FLAG_COLOR_KEYS[0]);
-  const [busy, setBusy] = React.useState(false);
 
-  async function save() {
-    setBusy(true);
-    try {
+  const missing = missingFields([
+    [t("slug"), !!slug.trim()],
+    [t("labelKey"), !!labelKey.trim()],
+  ]);
+
+  const { submitting, submit } = useSubmit(
+    async () => {
       if (flag) {
         await updatePriorityFlagType(flag.id, { labelKey, icon, color });
-        toast.success(t("updated"));
       } else {
         await createPriorityFlagType({ slug: slug.trim(), labelKey: labelKey.trim(), icon, color });
-        toast.success(t("created"));
       }
-      onSaved();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    { successMessage: flag ? t("updated") : t("created"), onSuccess: onSaved },
+  );
 
   return (
-    <Sheet open onOpenChange={(v) => !v && onClose()}>
-      <SheetContent className="space-y-4 overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{flag ? t("edit") : t("new")}</SheetTitle>
-        </SheetHeader>
+    <FormSheet
+      open
+      onOpenChange={(v) => !v && onClose()}
+      size="sm"
+      title={flag ? t("edit") : t("new")}
+      missing={missing}
+      submitting={submitting}
+      onSubmit={() => submit()}
+    >
+      <Field label={t("slug")} htmlFor="pf-slug" hint={t("slugHint")} required={!flag}>
+        <Input
+          id="pf-slug"
+          aria-describedby="pf-slug-hint"
+          value={slug}
+          disabled={!!flag}
+          onChange={(e) => setSlug(e.target.value)}
+        />
+      </Field>
 
-        <div className="space-y-1.5 px-4">
-          <Label htmlFor="pf-slug">{t("slug")}</Label>
-          <Input id="pf-slug" value={slug} disabled={!!flag} onChange={(e) => setSlug(e.target.value)} />
-          <p className="text-xs text-muted-foreground">{t("slugHint")}</p>
-        </div>
+      <Field label={t("labelKey")} htmlFor="pf-labelkey" hint={t("labelKeyHint")} required>
+        <Input
+          id="pf-labelkey"
+          aria-describedby="pf-labelkey-hint"
+          value={labelKey}
+          onChange={(e) => setLabelKey(e.target.value)}
+        />
+      </Field>
 
-        <div className="space-y-1.5 px-4">
-          <Label htmlFor="pf-labelkey">{t("labelKey")}</Label>
-          <Input id="pf-labelkey" value={labelKey} onChange={(e) => setLabelKey(e.target.value)} />
-          <p className="text-xs text-muted-foreground">{t("labelKeyHint")}</p>
-        </div>
+      <Field label={t("icon")} htmlFor="pf-icon">
+        <Select value={icon} onValueChange={setIcon}>
+          <SelectTrigger id="pf-icon"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {PRIORITY_FLAG_ICON_KEYS.map((k) => (
+              <SelectItem key={k} value={k}>{k}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
 
-        <div className="space-y-1.5 px-4">
-          <Label>{t("icon")}</Label>
-          <Select value={icon} onValueChange={setIcon}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {PRIORITY_FLAG_ICON_KEYS.map((k) => (
-                <SelectItem key={k} value={k}>{k}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5 px-4">
-          <Label>{t("color")}</Label>
-          <Select value={color} onValueChange={setColor}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {PRIORITY_FLAG_COLOR_KEYS.map((k) => (
-                <SelectItem key={k} value={k}>{t(`colorName.${k}`)}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <SheetFooter>
-          <Button onClick={save} disabled={busy || !slug.trim() || !labelKey.trim()}>
-            {tRoot("common.save")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+      <Field label={t("color")} htmlFor="pf-color">
+        <Select value={color} onValueChange={setColor}>
+          <SelectTrigger id="pf-color"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {PRIORITY_FLAG_COLOR_KEYS.map((k) => (
+              <SelectItem key={k} value={k}>{t(`colorName.${k}`)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+    </FormSheet>
   );
 }
