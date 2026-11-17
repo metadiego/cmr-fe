@@ -109,6 +109,7 @@ export function EhrReadinessModal({
                 id={id}
                 value={form[f] ?? ""}
                 onChange={(v) => set(f, v)}
+                birthDate
                 max={todayPR()}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? `${id}-error` : undefined}

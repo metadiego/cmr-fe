@@ -63,13 +63,16 @@ function diasEnMes(anio: number, mes: number): number {
   return mes === 2 && esBisiesto(anio) ? 29 : DIAS_POR_MES[mes - 1];
 }
 
-export type FechaEscritaError = "formato" | "invalida" | "futura" | "edad";
+export type FechaEscritaError = "formato" | "invalida";
 export type FechaEscritaResultado = { ok: true; iso: string } | { ok: false; razon: FechaEscritaError };
 
 // Fecha TECLEADA a mano: MM/DD/AAAA, MM-DD-AAAA, o MMDDAAAA sin separadores (negocio USA/PR,
-// NUNCA DD/MM). Valida que sea una fecha de calendario real (no 30 de febrero), que no sea futura,
-// y una edad sensata (0-120) antes de devolver el "YYYY-MM-DD" que espera el BE. Puro aritmético,
-// sin pasar por `new Date(str)` — mismo cuidado de zona que el resto del archivo.
+// NUNCA DD/MM). Valida SOLO que sea una fecha de calendario real (no 30 de febrero) antes de
+// devolver el "YYYY-MM-DD" que espera el BE — puro aritmético, sin pasar por `new Date(str)` —
+// mismo cuidado de zona que el resto del archivo. Universal: una cita o un vencimiento futuro es
+// una fecha VÁLIDA aquí. `validarFechaNacimiento` abajo es la capa aparte para cuando el campo es
+// específicamente una fecha de nacimiento (nunca futura, edad sensata) — bug real, owner
+// 17-nov-2026: aplicar esas dos reglas al DatePicker genérico rompía "reservar cita".
 export function parseFechaEscrita(texto: string): FechaEscritaResultado {
   const limpio = texto.trim();
   const partes = limpio.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/) ?? limpio.match(/^(\d{2})(\d{2})(\d{4})$/);
@@ -79,12 +82,21 @@ export function parseFechaEscrita(texto: string): FechaEscritaResultado {
   const anio = Number(partes[3]);
   if (mes < 1 || mes > 12 || dia < 1 || dia > diasEnMes(anio, mes)) return { ok: false, razon: "invalida" };
   const iso = `${String(anio).padStart(4, "0")}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
-  const hoy = todayPR();
-  if (iso > hoy) return { ok: false, razon: "futura" };
-  const [hy, hm, hd] = hoy.split("-").map(Number);
-  const edad = hy - anio - (hm < mes || (hm === mes && hd < dia) ? 1 : 0);
-  if (edad > 120) return { ok: false, razon: "edad" };
   return { ok: true, iso };
+}
+
+export type FechaNacimientoError = "futura" | "edad";
+
+// Reglas que SOLO valen para una fecha de NACIMIENTO: nunca futura, edad sensata (0-120). Se
+// aplican aparte de `parseFechaEscrita` (que no sabe nada de esto) — el DatePicker solo las llama
+// cuando el campo lleva `birthDate`.
+export function validarFechaNacimiento(iso: string): FechaNacimientoError | null {
+  const hoy = todayPR();
+  if (iso > hoy) return "futura";
+  const [hy, hm, hd] = hoy.split("-").map(Number);
+  const [anio, mes, dia] = iso.split("-").map(Number);
+  const edad = hy - anio - (hm < mes || (hm === mes && hd < dia) ? 1 : 0);
+  return edad > 120 ? "edad" : null;
 }
 
 // Current wall-clock time in the clinic's timezone, "HH:mm" (24h) — for gating "don't offer a time

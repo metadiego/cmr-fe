@@ -1,7 +1,7 @@
 // Lock del bug off-by-one: una fecha solo-día NUNCA debe retroceder por zona horaria. Correr: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatFechaSolo, parseDayUTC, parseFechaEscrita } from "./fecha.ts";
+import { formatFechaSolo, parseDayUTC, parseFechaEscrita, validarFechaNacimiento } from "./fecha.ts";
 
 test("fecha solo-día se formatea MM/DD/YYYY sin corrimiento", () => {
   assert.equal(formatFechaSolo("2026-07-21"), "07/21/2026");
@@ -89,11 +89,24 @@ test("parseFechaEscrita: el 29 de febrero solo en años bisiestos", () => {
   assert.deepEqual(parseFechaEscrita("02/29/1900"), { ok: false, razon: "invalida" });
 });
 
-test("parseFechaEscrita: nunca una fecha futura", () => {
-  assert.deepEqual(parseFechaEscrita("01/01/2099"), { ok: false, razon: "futura" });
+test("parseFechaEscrita: una fecha FUTURA es válida aquí — una cita o un vencimiento lo es (owner 17-nov-2026)", () => {
+  assert.deepEqual(parseFechaEscrita("01/01/2099"), { ok: true, iso: "2099-01-01" });
 });
 
-test("parseFechaEscrita: edad fuera de rango (>120) rechazada, el resto pasa", () => {
-  assert.deepEqual(parseFechaEscrita("01/01/1850"), { ok: false, razon: "edad" });
-  assert.equal(parseFechaEscrita("01/01/1958").ok, true);
+test("parseFechaEscrita: una edad centenaria es válida aquí — esa regla no es universal", () => {
+  assert.deepEqual(parseFechaEscrita("01/01/1850"), { ok: true, iso: "1850-01-01" });
+});
+
+// --- validarFechaNacimiento: SOLO para el campo fecha de nacimiento ------------------
+
+test("validarFechaNacimiento: futura rechazada", () => {
+  assert.equal(validarFechaNacimiento("2099-01-01"), "futura");
+});
+
+test("validarFechaNacimiento: edad > 120 rechazada", () => {
+  assert.equal(validarFechaNacimiento("1850-01-01"), "edad");
+});
+
+test("validarFechaNacimiento: una fecha de nacimiento razonable no tiene problema", () => {
+  assert.equal(validarFechaNacimiento("1958-03-15"), null);
 });

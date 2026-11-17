@@ -325,7 +325,7 @@ export function PacienteFormSheet({
             </Field>
             <Field label={t("fechaNacimiento")} required={req("fechaNacimiento")} error={fechaNacimientoValida ? null : t("fechaNacimientoFutura")}>
               <DatePicker
-                value={form.fechaNacimiento}
+                value={form.fechaNacimiento} birthDate
                 max={todayPR()} onChange={(v) => set("fechaNacimiento", v)}
                 clearable={!req("fechaNacimiento")}
                 aria-invalid={errFields.has("fechaNacimiento") || !fechaNacimientoValida || undefined} />

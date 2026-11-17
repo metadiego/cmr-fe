@@ -7,7 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { Calendar03Icon } from "@hugeicons/core-free-icons"
 
 import { cn } from "@/lib/utils"
-import { formatFechaSolo, parseFechaEscrita, todayPR, type FechaEscritaError } from "@/lib/format/fecha"
+import { formatFechaSolo, parseFechaEscrita, todayPR, validarFechaNacimiento, type FechaEscritaError, type FechaNacimientoError } from "@/lib/format/fecha"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
@@ -21,8 +21,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 // Owner request (17-nov-2026): staff type dates fast (03/15/1958) and a click-only calendar was too
 // slow for them — now the field is a plain text input (MM/DD/YYYY, with or without slashes, or the
 // 8 bare digits) with the calendar as a secondary picker behind the icon button, never the only way
-// in. Invalid/future/implausible-age input shows its OWN inline error right here and never calls
-// `onChange` — the caller's `value` only ever moves to a date that actually parsed.
+// in. Invalid input shows its OWN inline error right here and never calls `onChange` — the caller's
+// `value` only ever moves to a date that actually parsed.
+//
+// "Not future" / "sane age" are NOT universal — a booking, an expiry, a return date is routinely
+// future (real regression caught same day: applying them to every DatePicker broke "book a next
+// appointment"). Pass `birthDate` to opt into those two extra checks; every other caller only gets
+// the universal one (a real calendar date).
 
 const DAY_LOCALES = { es, en: enUS } as const
 
@@ -49,6 +54,9 @@ type DatePickerProps = {
   readOnly?: boolean
   /** Adds a "Clear" action, for optional dates and filters. */
   clearable?: boolean
+  /** Opts into the two birth-date-only rules on typed input: never future, age 0-120. Every other
+   * DatePicker (bookings, returns, expiries…) only gets the universal "real calendar date" check. */
+  birthDate?: boolean
   placeholder?: string
   id?: string
   className?: string
@@ -66,6 +74,7 @@ function DatePicker({
   disabled,
   readOnly,
   clearable,
+  birthDate,
   placeholder,
   id,
   className,
@@ -96,7 +105,7 @@ function DatePicker({
   const [texto, setTexto] = React.useState(mostrado)
   const [visto, setVisto] = React.useState(mostrado)
   const [focused, setFocused] = React.useState(false)
-  const [error, setError] = React.useState<FechaEscritaError | "rango" | null>(null)
+  const [error, setError] = React.useState<FechaEscritaError | FechaNacimientoError | "rango" | null>(null)
   if (mostrado !== visto && !focused && !error) {
     setVisto(mostrado)
     setTexto(mostrado)
@@ -121,6 +130,13 @@ function DatePicker({
       setError(r.razon)
       return
     }
+    if (birthDate) {
+      const problema = validarFechaNacimiento(r.iso)
+      if (problema) {
+        setError(problema)
+        return
+      }
+    }
     if ((min && r.iso < min) || (max && r.iso > max)) {
       setError("rango")
       return
@@ -129,7 +145,7 @@ function DatePicker({
     onChange(r.iso)
   }
 
-  const mensajeError = (e: FechaEscritaError | "rango"): string =>
+  const mensajeError = (e: FechaEscritaError | FechaNacimientoError | "rango"): string =>
     e === "formato" ? t("typedFormat") : e === "invalida" ? t("typedInvalid") : e === "futura" ? t("typedFuture") : e === "edad" ? t("typedAge") : t("typedRange")
 
   return (
