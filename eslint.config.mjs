@@ -49,7 +49,8 @@ const DEBT = {
   // (FormDialog/useSubmit/useConfirm); the rest of the gap was already slack.
   "app/(app)/billing/invoices/[id]/page.tsx": 1317,
   "components/inventario/productos-admin.tsx": 1048,
-  "components/configuracion/menu-editor.tsx": 700,
+  // 17-nov-2026: 700 → 681 — the delete AlertDialog became a useConfirm prompt (standard form kit).
+  "components/configuracion/menu-editor.tsx": 681,
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)
   // se extrajeron a components/servicios/servicio-form-fields.tsx para hacerle lugar al toggle de
   // allowSessionFixWithoutPackage sin tocar el ceiling. Ver HANDOFF-sesiones-sin-paquete-listo.md.
