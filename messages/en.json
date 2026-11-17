@@ -5655,6 +5655,7 @@
     "queue": {
       "pillLabel": "{waiting} waiting · {inTherapy} in therapy",
       "panelTitle": "{service} queue",
+      "openViewer": "View {service}'s general viewer",
       "panelDescription": "Arrival order, who is in therapy now, and who is free to take them.",
       "empty": "No one waiting or in therapy right now.",
       "sectionWaiting": "Waiting",

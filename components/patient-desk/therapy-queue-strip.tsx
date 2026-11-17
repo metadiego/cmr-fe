@@ -17,6 +17,9 @@ import { onShiftState } from "@/lib/frontdesk/technicians-today"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 import { toastError } from "@/lib/api/errors"
 import { cn } from "@/lib/utils"
+import { getServicios, type Servicio } from "@/lib/api/servicios"
+import { useResource } from "@/hooks/use-resource"
+import { ServiceBoardViewer } from "@/components/frontdesk/service-board-viewer"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -55,6 +58,16 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
   const tRoot = useTranslations()
   const { queue, refresh } = useTherapyQueue(centerId, date)
   const [openServiceId, setOpenServiceId] = React.useState<string | null>(null)
+  // Clic sobre el NOMBRE de la terapia (pedido del dueño, 17-nov-2026, inspirado en el legado): abre
+  // el visor general (ServiceBoardViewer), aparte del clic sobre el resto de la pastilla (que sigue
+  // abriendo la cola de siempre). Necesita el Servicio completo (slug), que la cola no trae.
+  const serviciosRes = useResource<Servicio[]>(
+    () => (centerId ? getServicios(centerId) : Promise.resolve([])),
+    [centerId],
+  )
+  const servicios = serviciosRes.state.kind === "ok" ? serviciosRes.state.data : []
+  const [viewerServiceId, setViewerServiceId] = React.useState<string | null>(null)
+  const viewerServicio = servicios.find((s) => s.id === viewerServiceId) ?? null
   // sessionId → técnico elegido en el desplegable (vacío: usar el sugerido del BE).
   const [picked, setPicked] = React.useState<Record<string, string>>({})
   const [busy, setBusy] = React.useState<string | null>(null)
@@ -95,11 +108,21 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
     <>
       <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
         {visible.map((svc) => (
-          <button
+          // `role="button"` en un `div` (no un `<button>` anidado) a propósito: el NOMBRE lleva su
+          // PROPIO click target (abre el visor general) aparte del resto de la pastilla (abre la cola
+          // de siempre) — un botón real no admite otro botón adentro.
+          <div
             key={svc.serviceId}
-            type="button"
+            role="button"
+            tabIndex={0}
             onClick={() => setOpenServiceId(svc.serviceId)}
-            className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition hover:bg-muted/60"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                setOpenServiceId(svc.serviceId)
+              }
+            }}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition hover:bg-muted/60"
             style={{ borderColor: svc.color ?? undefined }}
           >
             <span
@@ -108,14 +131,23 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
                 backgroundColor: svc.color ?? "var(--muted-foreground)",
               }}
             />
-            <span className="max-w-[120px] truncate">{svc.name}</span>
+            <span
+              className="max-w-[120px] truncate underline decoration-dotted underline-offset-2"
+              title={t("openViewer", { service: svc.name })}
+              onClick={(e) => {
+                e.stopPropagation()
+                setViewerServiceId(svc.serviceId)
+              }}
+            >
+              {svc.name}
+            </span>
             <span className="text-muted-foreground">
               {t("pillLabel", {
                 waiting: svc.waiting.length,
                 inTherapy: svc.inTherapy.length,
               })}
             </span>
-          </button>
+          </div>
         ))}
       </div>
       <Sheet open={!!active} onOpenChange={(o) => !o && setOpenServiceId(null)}>
@@ -331,6 +363,15 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
           ) : null}
         </SheetContent>
       </Sheet>
+      {viewerServicio && (
+        <ServiceBoardViewer
+          servicio={viewerServicio}
+          centro={centerId}
+          fecha={date}
+          open={!!viewerServicio}
+          onOpenChange={(o) => !o && setViewerServiceId(null)}
+        />
+      )}
     </>
   )
 }

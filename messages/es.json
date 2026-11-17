@@ -5655,6 +5655,7 @@
     "queue": {
       "pillLabel": "{waiting} en sala · {inTherapy} en terapia",
       "panelTitle": "Cola de {service}",
+      "openViewer": "Ver el visor general de {service}",
       "panelDescription": "Orden de llegada, quién está en terapia ahora y quién está libre para tomarla.",
       "empty": "Nadie esperando ni en terapia ahora.",
       "sectionWaiting": "Esperando",
