@@ -30,16 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const num = (v: number | string | null | undefined) => Number(v ?? 0) || 0;
@@ -106,10 +100,11 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     setRecibido(init);
   }
 
-  const [busy, setBusy] = React.useState(false);
-  const [confirmAprobar, setConfirmAprobar] = React.useState(false);
+  const confirm = useConfirm();
   const [rechazando, setRechazando] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
+  // Set once a receive/reject succeeded: the page is navigating away, so nothing may be sent twice.
+  const [done, setDone] = React.useState(false);
 
   const esDestino = !!transfer && receivable.includes(transfer.destinationClinicId);
   const puedeRecibir =
@@ -127,35 +122,54 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   };
   const hayErrores = items.some((it) => lineError(it) !== null);
 
-  async function aprobar() {
-    if (!transfer || hayErrores || busy) return;
-    setBusy(true);
-    try {
+  const leave = (msg: string) => {
+    setDone(true);
+    toast.success(msg);
+    router.push("/inventory/transfers");
+  };
+  const onError = (err: unknown) => {
+    toast.error(apiErrorMessage(err));
+    return true;
+  };
+
+  const aprobar = useSubmit(
+    async () => {
+      // Backstop only: the button is disabled while a line is invalid.
+      if (!transfer || hayErrores) throw new Error(tc("error"));
       await recibirTransferencia(id, {
         items: items.map((it) => ({ itemId: it.id, receivedQuantity: Number(recibido[it.id]) })),
         politicaRemanente: politica,
       });
-      toast.success(t("recibidaOk"));
-      setConfirmAprobar(false);
-      router.push("/inventory/transfers");
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-      setBusy(false);
-    }
-  }
+    },
+    { onSuccess: () => leave(t("recibidaOk")), onError },
+  );
 
-  async function rechazar() {
-    if (!transfer || !motivo.trim() || busy) return;
-    setBusy(true);
-    try {
+  const rechazar = useSubmit(
+    async () => {
+      // Backstop only: the button is disabled until the reason is filled.
+      if (!transfer || !motivo.trim()) throw new Error(tc("error"));
       await rechazarTransferencia(id, { reason: motivo.trim() });
-      toast.success(t("rechazadaOk"));
-      setRechazando(false);
-      router.push("/inventory/transfers");
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-      setBusy(false);
-    }
+    },
+    {
+      onSuccess: () => {
+        setRechazando(false);
+        leave(t("rechazadaOk"));
+      },
+      onError,
+    },
+  );
+  const motivoMissing = missingFields([[t("field.motivo"), motivo.trim().length > 0]]);
+
+  const busy = aprobar.submitting || rechazar.submitting || done;
+
+  // Receiving moves stock between clinics: it always goes through the confirm (which focuses Cancel).
+  async function onAprobar() {
+    const ok = await confirm({
+      title: t("confirmAprobarTitle"),
+      description: t("confirmAprobarBody", { politica: politica === "merma" ? t("pol.merma") : t("pol.devolver") }),
+      confirmLabel: t("aprobar"),
+    });
+    if (ok) await aprobar.submit();
   }
 
   if (state.kind === "loading") {
@@ -246,7 +260,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
             <Button variant="outline" disabled={busy} onClick={() => setRechazando(true)}>
               {t("rechazar")}
             </Button>
-            <Button disabled={busy || hayErrores} onClick={() => setConfirmAprobar(true)}>
+            <Button disabled={busy || hayErrores} onClick={() => void onAprobar()}>
               {t("aprobar")}
             </Button>
           </div>
@@ -257,36 +271,28 @@ export function TransferenciaRecibir({ id }: { id: string }) {
         )
       )}
 
-      {/* Confirmar aprobación */}
-      <AlertDialog open={confirmAprobar} onOpenChange={(o) => !busy && setConfirmAprobar(o)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirmAprobarTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("confirmAprobarBody", { politica: politica === "merma" ? t("pol.merma") : t("pol.devolver") })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tc("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={aprobar} disabled={busy}>{t("aprobar")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Rechazar (motivo) */}
-      <AlertDialog open={rechazando} onOpenChange={(o) => !busy && setRechazando(o)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("rechazarTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("rechazarBody")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivoPlaceholder")} rows={3} />
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tc("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={rechazar} disabled={busy || !motivo.trim()}>{t("rechazar")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Reject (reason). Enter never sends it: only the button does (an outward, irreversible action). */}
+      <FormDialog
+        open={rechazando}
+        onOpenChange={setRechazando}
+        size="md"
+        title={t("rechazarTitle")}
+        description={t("rechazarBody")}
+        onSubmit={() => {}}
+        actions={[{ label: t("rechazar"), onClick: () => rechazar.submit() }]}
+        submitting={rechazar.submitting}
+        missing={motivoMissing}
+      >
+        <Field label={t("field.motivo")} htmlFor="transfer-reject-reason" required>
+          <Textarea
+            id="transfer-reject-reason"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            placeholder={t("motivoPlaceholder")}
+            rows={3}
+          />
+        </Field>
+      </FormDialog>
     </PageContainer>
   );
 }
