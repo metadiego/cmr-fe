@@ -13,7 +13,7 @@ import {
 import { getCenters, type Centro } from "@/lib/api/centers";
 import type { ThemeConfig } from "@/lib/theme/config";
 import { apiErrorMessage } from "@/lib/api/errors";
-import { useMe } from "@/hooks/use-me";
+import { isAdmin, useMe } from "@/hooks/use-me";
 import { OverrideSettings } from "@/components/admin/override-settings";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -31,7 +31,7 @@ import { ThemeEditor } from "@/components/theme/theme-editor";
 export function ThemeSettings() {
   const t = useTranslations("admin.theme");
   const me = useMe();
-  const isMaster = me.kind === "ok" && me.me.isMaster;
+  const admin = me.kind === "ok" && isAdmin(me.me);
   const [centers, setCenters] = React.useState<Centro[]>([]);
   const [centroId, setCentroId] = React.useState<string>("");
 
@@ -90,7 +90,7 @@ export function ThemeSettings() {
         )}
       </section>
 
-      {isMaster && <OverrideSettings />}
+      {admin && <OverrideSettings />}
     </div>
   );
 }

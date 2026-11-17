@@ -128,7 +128,6 @@ export function PendingProfiles() {
           <TableRow>
             <TableHead>{t("columns.email")}</TableHead>
             <TableHead>{t("columns.name")}</TableHead>
-            <TableHead>{t("columns.accessMode")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
             <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
@@ -138,7 +137,6 @@ export function PendingProfiles() {
             <TableRow key={p.id}>
               <TableCell className="font-medium">{p.email}</TableCell>
               <TableCell>{[p.name, p.lastName].filter(Boolean).join(" ")}</TableCell>
-              <TableCell>{p.accessMode}</TableCell>
               <TableCell>
                 <Badge variant="secondary">{p.status}</Badge>
               </TableCell>

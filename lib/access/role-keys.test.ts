@@ -27,17 +27,17 @@ test("hasRole matches old and new keys on either side", () => {
   assert.equal(hasRole(undefined, "admin"), false);
 });
 
-test("isAdmin: isAdmin wins when the API sends it (after #557)", () => {
-  assert.equal(isAdmin({ isAdmin: true, isMaster: false, roles: [] }), true);
-  assert.equal(isAdmin({ isAdmin: false, isMaster: false, roles: ["admin"] }), false, "a center-scoped admin role is not full access");
+test("isAdmin: only the isAdmin flag the API sends counts (cmr-be #557 is live)", () => {
+  assert.equal(isAdmin({ isAdmin: true }), true);
+  assert.equal(isAdmin({ isAdmin: false }), false, "a center-scoped admin role is not full access");
+  assert.equal(isAdmin(null), false);
 });
 
-test("isAdmin: before #557, master, admin access mode or the admin role", () => {
-  assert.equal(isAdmin({ isMaster: true, roles: [] }), true);
-  assert.equal(isAdmin({ isMaster: false, accessMode: "admin", roles: [] }), true);
-  assert.equal(isAdmin({ isMaster: false, accessMode: "operativo", roles: ["admin"] }), true);
-  assert.equal(isAdmin({ isMaster: false, accessMode: "gerencial", roles: ["gerente"] }), false);
-  assert.equal(isAdmin(null), false);
+test("isAdmin: the pre-#557 signals (master, admin access mode, admin role) no longer count alone", () => {
+  assert.equal(isAdmin({ isMaster: true } as { isAdmin?: boolean }), false);
+  assert.equal(isAdmin({ accessMode: "admin" } as { isAdmin?: boolean }), false);
+  assert.equal(isAdmin({ roles: ["admin"] } as { isAdmin?: boolean }), false);
+  assert.equal(isAdmin({}), false, "no flag, no full access");
 });
 
 test("the admin role is fixed and '*' is never offered", () => {

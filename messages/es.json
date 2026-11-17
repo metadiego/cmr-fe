@@ -1035,7 +1035,7 @@
       "time": "Hora",
       "channel": "Canal",
       "channels": {
-        "atencion": "Atención",
+        "frontdesk": "Recepción",
         "callcenter": "Call center",
         "webhook": "Webhook",
         "ia": "IA"
@@ -1533,16 +1533,14 @@
     },
     "editorRol": {
       "title": "Editor de Rol unificado (beta)",
-      "help": "Elige un rol y ajusta qué ve y qué puede hacer, todo en una pantalla. No reemplaza Roles/Permisos/Menú todavía.",
+      "help": "Elige un rol y ajusta qué puede hacer. El menú de cada persona sale de sus permisos.",
       "selectRole": "Elige un rol",
       "loading": "Cargando…",
       "empty": "Elige un rol para empezar.",
       "retry": "Reintentar",
       "save": "Guardar",
       "saving": "Guardando…",
-      "saved": "Editor de rol guardado.",
-      "savedMenuOnly": "Se guardó el menú, pero fallaron los permisos: {error}",
-      "savedPermisosOnly": "Se guardaron los permisos, pero falló el menú: {error}"
+      "saved": "Editor de rol guardado."
     },
     "rbac": {
       "title": "Roles y permisos",
@@ -1577,11 +1575,6 @@
       "edit": "Editar",
       "editTitle": "Editar rol",
       "updated": "Rol actualizado.",
-      "menuRol": "Menú",
-      "menuRolTitle": "Menú del rol {role}",
-      "menuRolHelp": "Marca las opciones del menú que verá este rol. Se traduce a permisos; los permisos que no son de menú no se tocan.",
-      "menuRolSaved": "Menú del rol actualizado",
-      "menuRolSinPermiso": "visible para todos",
       "confirmDelete": "¿Eliminar el rol {role}? Los usuarios que lo tengan lo perderán.",
       "todosLosCentros": "Opera en todos los centros",
       "todosLosCentrosAyuda": "Quien reciba este rol lo hereda; el rol se asigna global (no a un centro).",
@@ -1694,7 +1687,6 @@
     "columns": {
       "email": "Email",
       "name": "Nombre",
-      "accessMode": "Modo de acceso",
       "status": "Estado",
       "actions": "Acciones",
       "roles": "Rol(es)",
@@ -1877,13 +1869,9 @@
     },
     "editarPerfil": {
       "title": "Editar {email}",
-      "help": "Datos básicos y modo de acceso del usuario.",
+      "help": "Datos básicos del usuario.",
       "nombre": "Nombre",
       "apellido": "Apellido",
-      "accessMode": "Modo de acceso",
-      "operativo": "Operativo (un centro a la vez)",
-      "gerencial": "Gerencial (ve todos sus centros, solo lectura)",
-      "accessModeHelp": "Gerencial ve varios centros a la vez pero no puede escribir.",
       "guardado": "Perfil actualizado"
     },
     "permisos": {

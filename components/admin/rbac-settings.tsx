@@ -7,14 +7,11 @@ import { toast } from "sonner"
 import {
   getRoles,
   getPermisos,
-  getRoleMenu,
-  setRoleMenu,
   createRole,
   updateRole,
   deleteRole,
   type Rol,
   type Permiso,
-  type ProfileMenuItem,
 } from "@/lib/api/rbac"
 import { apiErrorMessage } from "@/lib/api/errors"
 import { PermisosDialog } from "@/components/admin/permisos-dialog"
@@ -54,7 +51,6 @@ export function RbacSettings() {
   const [permisos, setPermisos] = React.useState<Permiso[]>([])
   const [createOpen, setCreateOpen] = React.useState(false)
   const [permisosFor, setPermisosFor] = React.useState<Rol | null>(null)
-  const [menuFor, setMenuFor] = React.useState<Rol | null>(null)
   const [editFor, setEditFor] = React.useState<Rol | null>(null)
   const [busyId, setBusyId] = React.useState<string | null>(null)
   // Vista lista (la de siempre) vs rejilla (todos los roles a la vez, marcando en la tarjeta).
@@ -169,13 +165,6 @@ export function RbacSettings() {
                   >
                     {t("permisos")}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setMenuFor(r)}
-                  >
-                    {t("menuRol")}
-                  </Button>
                   {/* Editar (solo nombre/descripción, NUNCA la clave) también para roles Sistema: el BE
                       acepta el PUT de nombre en Sistema (verificado). Solo Eliminar queda vedado a Sistema. */}
                   <Button
@@ -219,146 +208,7 @@ export function RbacSettings() {
         onOpenChange={(open) => !open && setEditFor(null)}
         onSaved={load}
       />
-      <RoleMenuDialog
-        key={menuFor?.id ?? "menu-none"}
-        role={menuFor}
-        onOpenChange={(open) => !open && setMenuFor(null)}
-      />
     </section>
-  )
-}
-
-/**
- * Vínculo rol↔menú (D2): qué opciones del menú ve el rol, con checkboxes.
- * Ítems sin permiso son visibles para todos (check fijo); marcar/desmarcar
- * traduce a permisos del rol sin tocar sus permisos no ligados a menú.
- */
-function RoleMenuDialog({
-  role,
-  onOpenChange,
-}: {
-  role: Rol | null
-  onOpenChange: (open: boolean) => void
-}) {
-  const t = useTranslations("admin.rbac")
-  const tc = useTranslations("admin")
-  const tRoot = useTranslations()
-  const [items, setItems] = React.useState<ProfileMenuItem[] | null>(null)
-  const [selected, setSelected] = React.useState<Set<string>>(new Set())
-  const [submitting, setSubmitting] = React.useState(false)
-
-  React.useEffect(() => {
-    if (!role) return
-    let active = true
-    getRoleMenu(role.id)
-      .then((list) => {
-        if (!active) return
-        setItems(list)
-        setSelected(
-          new Set(
-            list
-              .filter((i) => i.allowed && i.requiresPermiso)
-              .map((i) => i.slug)
-          )
-        )
-      })
-      .catch((err) => active && toast.error(apiErrorMessage(err)))
-    return () => {
-      active = false
-    }
-  }, [role])
-
-  function labelDe(i: ProfileMenuItem) {
-    const anyI = i as unknown as { customLabel?: string | null }
-    if (anyI.customLabel) return anyI.customLabel
-    return tRoot.has(i.labelKey) ? tRoot(i.labelKey) : i.slug
-  }
-
-  async function onSubmit() {
-    if (!role) return
-    setSubmitting(true)
-    try {
-      await setRoleMenu(role.id, [...selected])
-      toast.success(t("menuRolSaved"))
-      onOpenChange(false)
-    } catch (err) {
-      toast.error(apiErrorMessage(err))
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <Dialog open={role !== null} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>
-            {t("menuRolTitle", { role: role?.name ?? "" })}
-          </DialogTitle>
-          <DialogDescription>{t("menuRolHelp")}</DialogDescription>
-        </DialogHeader>
-
-        {!items && (
-          <p className="text-sm text-muted-foreground">{t("loading")}</p>
-        )}
-        <div className="space-y-1">
-          {items?.map((i) => {
-            const anyI = i as unknown as {
-              type?: string
-              parentSlug?: string | null
-            }
-            if (anyI.type === "separador") return null
-            const esGrupo = anyI.type === "grupo"
-            const indent = anyI.parentSlug && !esGrupo ? "pl-6" : ""
-            if (esGrupo) {
-              return (
-                <p
-                  key={i.slug}
-                  className="pt-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
-                >
-                  {labelDe(i)}
-                </p>
-              )
-            }
-            const participa = !!i.requiresPermiso
-            return (
-              <label
-                key={i.slug}
-                className={`flex items-center gap-2 text-sm ${indent}`}
-              >
-                <Checkbox
-                  checked={participa ? selected.has(i.slug) : true}
-                  disabled={!participa}
-                  onCheckedChange={(v) =>
-                    setSelected((prev) => {
-                      const next = new Set(prev)
-                      if (v === true) next.add(i.slug)
-                      else next.delete(i.slug)
-                      return next
-                    })
-                  }
-                />
-                <span className="min-w-0 truncate">{labelDe(i)}</span>
-                {!participa && (
-                  <Badge variant="outline" className="ml-auto">
-                    {t("menuRolSinPermiso")}
-                  </Badge>
-                )}
-              </label>
-            )
-          })}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={submitting || !items}>
-            {submitting ? t("saving") : t("save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   )
 }
 

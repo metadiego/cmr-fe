@@ -42,20 +42,11 @@ export function isAssignablePermission(slug: string): boolean {
   return slug !== FULL_ACCESS_PERMISSION;
 }
 
-interface MeLike {
-  isAdmin?: boolean;
-  isMaster?: boolean;
-  accessMode?: string;
-  roles?: readonly string[] | null;
-}
-
 /**
- * Full access (admin). After cmr-be #557, `/auth/me` returns `isAdmin`, the only signal (and
- * `isMaster` mirrors it). Before it, an admin is a master, an "admin" access mode, or a holder of
- * the admin role. Cosmetic only: the backend decides.
+ * Full access (admin). Since cmr-be #557, `/auth/me` and `/profiles` return `isAdmin`, the only
+ * signal (`isMaster` and `accessMode` are derived from it and kept only for old clients).
+ * Cosmetic only: the backend decides.
  */
-export function isAdmin(me: MeLike | null | undefined): boolean {
-  if (!me) return false;
-  if (typeof me.isAdmin === "boolean") return me.isAdmin;
-  return me.isMaster === true || me.accessMode === "admin" || hasRole(me.roles, ADMIN_ROLE);
+export function isAdmin(me: { isAdmin?: boolean } | null | undefined): boolean {
+  return me?.isAdmin === true;
 }

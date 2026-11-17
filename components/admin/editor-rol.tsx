@@ -9,7 +9,6 @@ import {
   getPermisos,
   getRoleMenu,
   getRolePermisos,
-  setRoleMenu,
   setRolePermisos,
   type Rol,
   type Permiso,
@@ -18,7 +17,6 @@ import {
 import { apiErrorMessage } from "@/lib/api/errors"
 import { isAdminRole } from "@/lib/access/role-keys"
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
@@ -56,7 +54,6 @@ export function EditorRolUnificado() {
   // roleId del último menú/permisos cargados — deriva "cargando" (roleId !== tree.forRole) sin un
   // setState sincrónico extra al inicio del efecto (react-hooks/set-state-in-effect).
   const [tree, setTree] = React.useState<{ forRole: string; nodes: MenuNode[] } | null>(null)
-  const [visibles, setVisibles] = React.useState<Set<string>>(new Set())
   // Precargado con TODOS los permisos actuales del rol (no solo los de esta pantalla):
   // setRolePermisos reemplaza el set completo, así que lo no tocado aquí debe seguir viajando.
   const [permisosRol, setPermisosRol] = React.useState<Set<string>>(new Set())
@@ -88,14 +85,9 @@ export function EditorRolUnificado() {
       .then(([menu, permisosDelRol]) => {
         if (!active) return
         setLoadError(null)
+        // The menu tree only lays out the permissions: since cmr-be #557 what a person sees in the menu
+        // follows from their permissions, so there is no separate "visible" switch to save.
         setTree({ forRole: id, nodes: buildTree(menu) })
-        setVisibles(
-          new Set(
-            menu
-              .filter((i) => i.type !== "grupo" && i.type !== "separador" && i.allowed)
-              .map((i) => i.slug)
-          )
-        )
         setPermisosRol(new Set(permisosDelRol))
       })
       .catch((err) => {
@@ -118,15 +110,6 @@ export function EditorRolUnificado() {
     return tRoot.has(n.labelKey) ? tRoot(n.labelKey) : n.slug
   }
 
-  function toggleVisible(clave: string, on: boolean) {
-    setVisibles((prev) => {
-      const next = new Set(prev)
-      if (on) next.add(clave)
-      else next.delete(clave)
-      return next
-    })
-  }
-
   function toggleVerbo(clave: string, on: boolean) {
     setPermisosRol((prev) => {
       const next = new Set(prev)
@@ -139,24 +122,13 @@ export function EditorRolUnificado() {
   async function onSubmit() {
     if (!roleId) return
     setSubmitting(true)
-    // allSettled, no Promise.all: son 2 PUT de reemplazo completo independientes — si UNO falla,
-    // el otro pudo haber quedado guardado. El aviso debe decir cuál, no un error genérico que deje
-    // sin saber qué de verdad se guardó.
-    const [menuResult, permisosResult] = await Promise.allSettled([
-      setRoleMenu(roleId, [...visibles]),
-      setRolePermisos(roleId, [...permisosRol]),
-    ])
-    setSubmitting(false)
-    if (menuResult.status === "fulfilled" && permisosResult.status === "fulfilled") {
+    try {
+      await setRolePermisos(roleId, [...permisosRol])
       toast.success(t("saved"))
-    } else if (menuResult.status === "fulfilled" && permisosResult.status === "rejected") {
-      toast.error(t("savedMenuOnly", { error: apiErrorMessage(permisosResult.reason) }))
-    } else if (permisosResult.status === "fulfilled" && menuResult.status === "rejected") {
-      toast.error(t("savedPermisosOnly", { error: apiErrorMessage(menuResult.reason) }))
-    } else if (menuResult.status === "rejected") {
-      toast.error(apiErrorMessage(menuResult.reason))
-    } else if (permisosResult.status === "rejected") {
-      toast.error(apiErrorMessage(permisosResult.reason))
+    } catch (err) {
+      toast.error(apiErrorMessage(err))
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -183,11 +155,6 @@ export function EditorRolUnificado() {
           className="flex flex-wrap items-center gap-3 border-b py-2"
           style={{ marginLeft: (depth - 1) * 16 }}
         >
-          <Switch
-            checked={visibles.has(n.slug)}
-            onCheckedChange={(v) => toggleVisible(n.slug, v)}
-            aria-label={labelDe(n)}
-          />
           <span className="min-w-40 text-sm">{labelDe(n)}</span>
           {verbos.length > 0 && (
             <div className="flex flex-wrap gap-3">

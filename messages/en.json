@@ -1035,7 +1035,7 @@
       "time": "Time",
       "channel": "Channel",
       "channels": {
-        "atencion": "Front desk",
+        "frontdesk": "Front desk",
         "callcenter": "Call center",
         "webhook": "Webhook",
         "ia": "AI"
@@ -1533,16 +1533,14 @@
     },
     "editorRol": {
       "title": "Unified role editor (beta)",
-      "help": "Pick a role and adjust what it sees and what it can do, in one screen. Doesn't replace Roles/Permissions/Menu yet.",
+      "help": "Pick a role and adjust what it can do. Each person's menu follows from their permissions.",
       "selectRole": "Pick a role",
       "loading": "Loading…",
       "empty": "Pick a role to get started.",
       "retry": "Retry",
       "save": "Save",
       "saving": "Saving…",
-      "saved": "Role editor saved.",
-      "savedMenuOnly": "Menu saved, but permissions failed: {error}",
-      "savedPermisosOnly": "Permissions saved, but menu failed: {error}"
+      "saved": "Role editor saved."
     },
     "rbac": {
       "title": "Roles & permissions",
@@ -1577,11 +1575,6 @@
       "edit": "Edit",
       "editTitle": "Edit role",
       "updated": "Role updated.",
-      "menuRol": "Menu",
-      "menuRolTitle": "Menu for role {role}",
-      "menuRolHelp": "Check the menu options this role sees. Translated to permissions; non-menu permissions are untouched.",
-      "menuRolSaved": "Role menu updated",
-      "menuRolSinPermiso": "visible to everyone",
       "confirmDelete": "Delete role {role}? Users holding it will lose it.",
       "todosLosCentros": "Operates in all centers",
       "todosLosCentrosAyuda": "Whoever gets this role inherits it; the role is assigned globally (not to a center).",
@@ -1694,7 +1687,6 @@
     "columns": {
       "email": "Email",
       "name": "Name",
-      "accessMode": "Access mode",
       "status": "Status",
       "actions": "Actions",
       "roles": "Role(s)",
@@ -1877,13 +1869,9 @@
     },
     "editarPerfil": {
       "title": "Edit {email}",
-      "help": "Basic data and access mode.",
+      "help": "Basic details of the user.",
       "nombre": "First name",
       "apellido": "Last name",
-      "accessMode": "Access mode",
-      "operativo": "Operational (one center at a time)",
-      "gerencial": "Managerial (sees all their centers, read-only)",
-      "accessModeHelp": "Managerial sees several centers at once but cannot write.",
       "guardado": "Profile updated"
     },
     "permisos": {
