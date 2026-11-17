@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { UserSquareIcon } from "@hugeicons/core-free-icons";
 
 import { getFrontdeskQueue, type FrontdeskQueue } from "@/lib/api/frontdesk-queue";
@@ -15,7 +14,7 @@ import {
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
 import { useSubmit } from "@/components/kit/use-submit";
-import { Button } from "@/components/ui/button";
+import { StatusCountButton } from "@/components/frontdesk/status-count-button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip } from "@/components/ui/tooltip";
 
@@ -82,14 +81,7 @@ export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fec
     <Sheet open={open} onOpenChange={setOpen}>
       <Tooltip content={t("tecnicosTitle")}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="relative" aria-label={t("tecnicosTitle")}>
-            <HugeiconsIcon icon={UserSquareIcon} className="size-4" />
-            {libresDisponibles.length > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-emerald-600 px-1 text-[10px] font-bold leading-4 text-white">
-                {libresDisponibles.length}
-              </span>
-            )}
-          </Button>
+          <StatusCountButton icon={UserSquareIcon} count={libresDisponibles.length} label={t("tecnicosTitle")} />
         </SheetTrigger>
       </Tooltip>
       <SheetContent side="right" className="w-96 p-4">

@@ -9,6 +9,7 @@ import type { CitaFila } from "@/lib/api/agenda-dia"
 import { freeDoctors } from "@/lib/frontdesk/doctors-free"
 import { listActiveDoctorAbsences } from "@/lib/api/disponibilidad"
 import { useResource } from "@/hooks/use-resource"
+import { StatusCountButton } from "@/components/frontdesk/status-count-button"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -48,21 +49,19 @@ export function MedicosLibresWidget({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          title={iconOnly ? t("titulo") : undefined}
-          aria-label={iconOnly ? t("titulo") : undefined}
-        >
-          <HugeiconsIcon icon={Doctor03Icon} className="size-4" />
-          {!iconOnly && t("titulo")}
-          {libres.length > 0 && (
-            <Badge variant="secondary" className="tabular-nums">
-              {libres.length}
-            </Badge>
-          )}
-        </Button>
+        {iconOnly ? (
+          <StatusCountButton icon={Doctor03Icon} count={libres.length} label={t("titulo")} />
+        ) : (
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <HugeiconsIcon icon={Doctor03Icon} className="size-4" />
+            {t("titulo")}
+            {libres.length > 0 && (
+              <Badge variant="secondary" className="tabular-nums">
+                {libres.length}
+              </Badge>
+            )}
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>{t("titulo")}</DropdownMenuLabel>

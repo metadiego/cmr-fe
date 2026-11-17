@@ -5614,7 +5614,7 @@
     "filterByType": "Filter by type",
     "allServices": "All services",
     "allTypes": "All types",
-    "filteringBy": "filtering: {name}",
+    "filteringBy": "{name}",
     "filteringByPending": "unattended: {name}",
     "serviceArrivedPendingHint": "See who's still unattended for this service",
     "clearSearch": "Clear search",
@@ -5661,7 +5661,11 @@
       "seeAll": "see all ({n} more)",
       "onlyFiltered": "only {service}"
     },
-    "serviceDone": "Done"
+    "serviceDone": "Done",
+    "subtypeShort": {
+      "nueva": "New",
+      "seguimiento": "Follow-up"
+    }
   },
   "salesPackages": {
     "title": "Sales packages",
