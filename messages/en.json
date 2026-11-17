@@ -4927,7 +4927,9 @@
     "vialesCerrados": "Closed vials of {presentacion}",
     "vialesAbiertos": "Open ({unidad})",
     "vialesSinVista": "Some vial content is in another measure: the total is worked out on saving.",
-    "vialesAjustado": "Counted {contado}, the system had {sistema}: adjusted."
+    "vialesAjustado": "Counted {contado}, the system had {sistema}: adjusted.",
+    "vialCount": "What you counted",
+    "quantityInvalid": "The quantity must be greater than zero."
   },
   "inventarioViales": {
     "titulo": "Vials",

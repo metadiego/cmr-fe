@@ -12,8 +12,12 @@ import {
   type MotivoMovimiento,
 } from "@/lib/api/inventario"
 import { contarExistencias } from "@/lib/api/inventory-count"
-import { apiErrorLabel } from "@/lib/api/errors"
 import { ajusteDesdeConteo, deltaDelConteo } from "@/lib/inventario/ajuste"
+import {
+  adjustmentCheck,
+  type AdjustmentField,
+  type AdjustmentProblem,
+} from "@/lib/inventario/adjustment-missing"
 import {
   conteoPayload,
   presentacionesContables,
@@ -25,14 +29,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { FormDialog, Field } from "@/components/kit/form-dialog"
+import { RequiredLegend } from "@/components/kit/required-mark"
+import { useSubmit } from "@/components/kit/use-submit"
 import {
   Select,
   SelectContent,
@@ -72,7 +71,6 @@ export function AjusteModal({
   onHecho: () => void
 }) {
   const t = useTranslations("inventarioAjuste")
-  const tRoot = useTranslations()
   const [motivos, setMotivos] = React.useState<MotivoMovimiento[]>([])
   const [modo, setModo] = React.useState<Modo>("movimiento")
   const [motivo, setMotivo] = React.useState("")
@@ -80,7 +78,6 @@ export function AjusteModal({
   const [signo, setSigno] = React.useState<"positivo" | "negativo">("negativo")
   const [contado, setContado] = React.useState("")
   const [notas, setNotas] = React.useState("")
-  const [guardando, setGuardando] = React.useState(false)
   // Count by vials: the product's presentations with content, and the id of the stock unit (to know
   // whether the vial content can be added up here). Without such presentations the count is as before.
   const [viales, setViales] = React.useState<PresentacionContable[]>([])
@@ -160,140 +157,151 @@ export function AjusteModal({
         : objetivo.stockActual
 
   const sinAlmacen = !objetivo.almacenId
-  const puedeGuardar = porViales
-    ? !guardando && !sinAlmacen && payloadViales !== null && notas.trim() !== ""
-    : !guardando &&
-      !sinAlmacen &&
-      notas.trim() !== "" &&
-      (modo === "conteo"
-        ? deltaConteo !== null
-        : motivo !== "" && Number.isFinite(nCantidad) && nCantidad > 0)
+  const check = adjustmentCheck({
+    mode: modo,
+    byVials: porViales,
+    hasWarehouse: !sinAlmacen,
+    quantity: cantidad,
+    reason: motivo,
+    counted: contado,
+    stock: objetivo.stockActual,
+    vialsCounted: payloadViales !== null,
+    notes: notas,
+  })
+  const fieldLabel: Record<AdjustmentField, string> = {
+    quantity: t("cantidad"),
+    reason: t("motivo"),
+    counted: t("contado"),
+    vialCount: t("vialCount"),
+    notes: t("notas"),
+  }
+  const problemText: Record<AdjustmentProblem, string> = {
+    noWarehouse: t("sinAlmacen"),
+    quantityInvalid: t("quantityInvalid"),
+    noDifference: t("sinDiferencia"),
+  }
+  const missing = check.missing.map((f) => fieldLabel[f])
 
-  async function guardar() {
-    if (!objetivo.almacenId) return
-    setGuardando(true)
+  // The button is disabled unless `adjustmentCheck` passes, so the throws below are only a backstop.
+  async function guardar(): Promise<string> {
+    if (!objetivo.almacenId) throw new Error(t("sinAlmacen"))
     if (porViales) {
-      if (!payloadViales) return setGuardando(false)
-      try {
-        const r = await contarExistencias(
-          { ...payloadViales, notes: notas.trim() },
-          centro
-        )
-        toast.success(
-          r.difference === 0
-            ? t("sinDiferencia")
-            : t("vialesAjustado", { contado: r.contado, sistema: r.sistema })
-        )
-        onHecho()
-        onClose()
-      } catch (e) {
-        toast.error(apiErrorLabel(e, tRoot))
-        setGuardando(false)
-      }
-      return
+      if (!payloadViales) throw new Error(t("vialCount"))
+      const r = await contarExistencias(
+        { ...payloadViales, notes: notas.trim() },
+        centro
+      )
+      return r.difference === 0
+        ? t("sinDiferencia")
+        : t("vialesAjustado", { contado: r.contado, sistema: r.sistema })
     }
-    try {
-      let payload: {
-        productId: string
-        warehouseId: string
-        quantity: number
-        sign: "positivo" | "negativo"
-        reason: string
-        notes: string
-      } | null
-      if (modo === "conteo") {
-        const c = ajusteDesdeConteo({
-          productoId: objetivo.productoId,
-          almacenId: objetivo.almacenId,
-          stockActual: objetivo.stockActual,
-          contado: nContado,
-          notas: notas.trim(),
-        })
-        payload = c
-          ? {
-              productId: c.productoId,
-              warehouseId: c.almacenId,
-              quantity: c.cantidad,
-              sign: c.signo,
-              reason: c.motivo,
-              notes: c.notas,
-            }
-          : null
-      } else {
-        payload = {
-          productId: objetivo.productoId,
-          warehouseId: objetivo.almacenId,
-          quantity: nCantidad,
-          sign: signo,
-          reason: motivo,
-          notes: notas.trim(),
-        }
+    let payload: {
+      productId: string
+      warehouseId: string
+      quantity: number
+      sign: "positivo" | "negativo"
+      reason: string
+      notes: string
+    } | null
+    if (modo === "conteo") {
+      const c = ajusteDesdeConteo({
+        productoId: objetivo.productoId,
+        almacenId: objetivo.almacenId,
+        stockActual: objetivo.stockActual,
+        contado: nContado,
+        notas: notas.trim(),
+      })
+      payload = c
+        ? {
+            productId: c.productoId,
+            warehouseId: c.almacenId,
+            quantity: c.cantidad,
+            sign: c.signo,
+            reason: c.motivo,
+            notes: c.notas,
+          }
+        : null
+    } else {
+      payload = {
+        productId: objetivo.productoId,
+        warehouseId: objetivo.almacenId,
+        quantity: nCantidad,
+        sign: signo,
+        reason: motivo,
+        notes: notas.trim(),
       }
-      if (!payload) {
-        // Contó lo mismo que dice el sistema: no hay nada que ajustar y no se manda un cero.
-        toast.info(t("sinDiferencia"))
-        setGuardando(false)
-        return
-      }
-      await ajustarExistencias(payload, centro)
-      toast.success(t("hecho"))
-      onHecho()
-      onClose()
-    } catch (e) {
-      toast.error(apiErrorLabel(e, tRoot))
-      setGuardando(false)
     }
+    // Counted the same as the system: nothing to adjust and a zero is never sent.
+    if (!payload) throw new Error(t("sinDiferencia"))
+    await ajustarExistencias(payload, centro)
+    return t("hecho")
   }
 
+  const { submitting, submit } = useSubmit(guardar, {
+    onSuccess: (msg) => {
+      toast.success(msg)
+      onHecho()
+      onClose()
+    },
+  })
+
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{t("titulo")}</DialogTitle>
-          <DialogDescription>
-            {objetivo.nombre}
-            {objetivo.almacenNombre ? ` · ${objetivo.almacenNombre}` : ""}
-          </DialogDescription>
-        </DialogHeader>
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="lg"
+      title={t("titulo")}
+      description={`${objetivo.nombre}${objetivo.almacenNombre ? ` · ${objetivo.almacenNombre}` : ""}`}
+      // A stock adjustment is irreversible: Enter in a field never fires it, only the button.
+      onSubmit={() => {}}
+      actions={[{ label: t("guardar"), onClick: () => submit() }]}
+      submitting={submitting}
+      submittingLabel={t("guardando")}
+      cancelLabel={t("cancelar")}
+      missing={missing}
+      blocked={check.problem !== null}
+      reason={check.problem ? problemText[check.problem] : null}
+    >
+      {sinAlmacen ? (
+        <p className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
+          {t("sinAlmacen")}
+        </p>
+      ) : (
+        <>
+          {/* What is happening, in one line: from how much to how much. */}
+          <div className="flex items-baseline gap-3 rounded-lg border bg-muted/30 px-3 py-2 text-sm">
+            <span className="text-muted-foreground">{t("stockActual")}</span>
+            <span className="font-mono font-semibold">
+              {objetivo.stockActual}
+            </span>
+            <span className="text-muted-foreground">→</span>
+            <span className="font-mono font-semibold text-primary">
+              {resultante}
+            </span>
+          </div>
 
-        {sinAlmacen ? (
-          <p className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
-            {t("sinAlmacen")}
-          </p>
-        ) : (
-          <div className="space-y-4">
-            {/* Qué está pasando, en una línea: de cuánto a cuánto. */}
-            <div className="flex items-baseline gap-3 rounded-lg border bg-muted/30 px-3 py-2 text-sm">
-              <span className="text-muted-foreground">{t("stockActual")}</span>
-              <span className="font-mono font-semibold">
-                {objetivo.stockActual}
-              </span>
-              <span className="text-muted-foreground">→</span>
-              <span className="font-mono font-semibold text-primary">
-                {resultante}
-              </span>
-            </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant={modo === "movimiento" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setModo("movimiento")}
+            >
+              {t("modoMovimiento")}
+            </Button>
+            <Button
+              type="button"
+              variant={modo === "conteo" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setModo("conteo")}
+            >
+              {t("modoConteo")}
+            </Button>
+            {modo === "movimiento" && <RequiredLegend className="ml-auto text-xs text-muted-foreground" />}
+          </div>
 
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={modo === "movimiento" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setModo("movimiento")}
-              >
-                {t("modoMovimiento")}
-              </Button>
-              <Button
-                type="button"
-                variant={modo === "conteo" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setModo("conteo")}
-              >
-                {t("modoConteo")}
-              </Button>
-            </div>
-
-            {porViales ? (
+          {porViales ? (
+            <Field label={t("vialCount")} required>
               <ConteoViales
                 presentaciones={viales}
                 cerrados={cerrados}
@@ -302,115 +310,107 @@ export function AjusteModal({
                 onCerrado={(id, v) => setCerrados((c) => ({ ...c, [id]: v }))}
                 onAbiertos={setAbiertos}
               />
-            ) : modo === "conteo" ? (
-              <div className="space-y-2">
-                <Label htmlFor="aj-contado">{t("contado")}</Label>
-                <Input
-                  id="aj-contado"
-                  type="number"
-                  step="any"
-                  min={0}
-                  inputMode="decimal"
-                  value={contado}
-                  onChange={(e) => {
-                    const v = e.target.value
-                    setContado(v.trim() !== "" && Number(v) < 0 ? "0" : v)
-                  }}
-                  placeholder={String(objetivo.stockActual)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {deltaConteo
-                    ? t("diferencia", {
-                        signo: deltaConteo.signo === "negativo" ? "−" : "+",
-                        n: deltaConteo.cantidad,
-                      })
-                    : t("contadoAyuda")}
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="flex gap-3">
-                  <div className="flex-1 space-y-2">
-                    <Label htmlFor="aj-cantidad">{t("cantidad")}</Label>
-                    <Input
-                      id="aj-cantidad"
-                      type="number"
-                      step="any"
-                      min="0"
-                      inputMode="decimal"
-                      value={cantidad}
-                      onChange={(e) => setCantidad(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("sentido")}</Label>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant={signo === "negativo" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSigno("negativo")}
-                      >
-                        {t("resta")}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={signo === "positivo" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSigno("positivo")}
-                      >
-                        {t("suma")}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="aj-motivo">{t("motivo")}</Label>
-                  <Select value={motivo} onValueChange={setMotivo}>
-                    <SelectTrigger id="aj-motivo">
-                      <SelectValue placeholder={t("motivoPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {motivosVisibles.map((m) => (
-                        <SelectItem key={m.slug} value={m.slug}>
-                          {m.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
-
-            {porViales && totalViales === null && payloadViales && (
-              <p className="text-xs text-muted-foreground">
-                {t("vialesSinVista")}
-              </p>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="aj-notas">{t("notas")}</Label>
-              <Textarea
-                id="aj-notas"
-                value={notas}
-                onChange={(e) => setNotas(e.target.value)}
-                placeholder={t("notasPlaceholder")}
-                rows={2}
+            </Field>
+          ) : modo === "conteo" ? (
+            <Field
+              label={t("contado")}
+              htmlFor="aj-contado"
+              required
+              hint={
+                deltaConteo
+                  ? t("diferencia", {
+                      signo: deltaConteo.signo === "negativo" ? "−" : "+",
+                      n: deltaConteo.cantidad,
+                    })
+                  : t("contadoAyuda")
+              }
+            >
+              <Input
+                id="aj-contado"
+                type="number"
+                step="any"
+                min={0}
+                inputMode="decimal"
+                value={contado}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setContado(v.trim() !== "" && Number(v) < 0 ? "0" : v)
+                }}
+                placeholder={String(objetivo.stockActual)}
+                aria-describedby="aj-contado-hint"
               />
-              <p className="text-xs text-muted-foreground">{t("notasAyuda")}</p>
-            </div>
-          </div>
-        )}
+            </Field>
+          ) : (
+            <>
+              <div className="flex gap-3">
+                <Field label={t("cantidad")} htmlFor="aj-cantidad" required className="flex-1">
+                  <Input
+                    id="aj-cantidad"
+                    type="number"
+                    step="any"
+                    min="0"
+                    inputMode="decimal"
+                    value={cantidad}
+                    onChange={(e) => setCantidad(e.target.value)}
+                  />
+                </Field>
+                <div className="space-y-1.5">
+                  <Label>{t("sentido")}</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant={signo === "negativo" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSigno("negativo")}
+                    >
+                      {t("resta")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={signo === "positivo" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSigno("positivo")}
+                    >
+                      {t("suma")}
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={guardando}>
-            {t("cancelar")}
-          </Button>
-          <Button onClick={guardar} disabled={!puedeGuardar}>
-            {guardando ? t("guardando") : t("guardar")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+              <Field label={t("motivo")} htmlFor="aj-motivo" required>
+                <Select value={motivo} onValueChange={setMotivo}>
+                  <SelectTrigger id="aj-motivo">
+                    <SelectValue placeholder={t("motivoPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {motivosVisibles.map((m) => (
+                      <SelectItem key={m.slug} value={m.slug}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </>
+          )}
+
+          {porViales && totalViales === null && payloadViales && (
+            <p className="text-xs text-muted-foreground">
+              {t("vialesSinVista")}
+            </p>
+          )}
+          <Field label={t("notas")} htmlFor="aj-notas" required hint={t("notasAyuda")}>
+            <Textarea
+              id="aj-notas"
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+              placeholder={t("notasPlaceholder")}
+              rows={2}
+              aria-describedby="aj-notas-hint"
+            />
+          </Field>
+        </>
+      )}
+    </FormDialog>
   )
 }

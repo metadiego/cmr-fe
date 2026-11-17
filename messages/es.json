@@ -4927,7 +4927,9 @@
     "vialesCerrados": "Viales cerrados de {presentacion}",
     "vialesAbiertos": "Abiertos ({unidad})",
     "vialesSinVista": "El contenido de algún vial está en otra medida: el total se calcula al guardar.",
-    "vialesAjustado": "Contado {contado}, el sistema tenía {sistema}: quedó ajustado."
+    "vialesAjustado": "Contado {contado}, el sistema tenía {sistema}: quedó ajustado.",
+    "vialCount": "Lo que contaste",
+    "quantityInvalid": "La cantidad tiene que ser mayor que cero."
   },
   "inventarioViales": {
     "titulo": "Viales",
