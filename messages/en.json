@@ -3691,6 +3691,7 @@
     "confirmAprobarBody": "Received amounts will be recorded and the remainder handled as: {politica}.",
     "rechazarTitle": "Reject transfer",
     "rechazarBody": "All stock returns to origin. State the reason.",
+    "lineQuantityInvalid": "Enter a quantity greater than zero for the chosen product.",
     "motivoPlaceholder": "Rejection reason…",
     "estado": {
       "pendiente": "Pending",

@@ -3691,6 +3691,7 @@
     "confirmAprobarBody": "Se registrará lo recibido y el remanente se procesará como: {politica}.",
     "rechazarTitle": "Rechazar transferencia",
     "rechazarBody": "Todo el stock vuelve al origen. Indica el motivo.",
+    "lineQuantityInvalid": "Pon una cantidad mayor que cero en el producto elegido.",
     "motivoPlaceholder": "Motivo del rechazo…",
     "estado": {
       "pendiente": "Pendiente",
