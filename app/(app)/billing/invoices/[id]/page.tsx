@@ -52,7 +52,6 @@ import { ChangeInvoicePatientButton } from "@/components/facturacion/invoice-cha
 import { IssueButton } from "@/components/facturacion/issue-button";
 import { AddItem } from "@/components/facturacion/invoice-add-item";
 import { LineMultipliersEditor } from "@/components/facturacion/line-multipliers-editor";
-import { Lbl } from "@/components/facturacion/field-label";
 import { AddSalesPackage, PackageEvidence, PackageSavingsRow } from "@/components/facturacion/sales-package-parts";
 import { sellSalesPackage } from "@/lib/api/sales-packages";
 import { isPackageLine } from "@/lib/factura/sales-package";
@@ -92,6 +91,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
+import { invoiceUserMissing } from "@/lib/facturacion/invoice-user-missing";
 import { ControlSkeleton } from "@/components/kit/skeletons";
 import { InvoiceDetailSkeleton, DialogRowsSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
 
@@ -128,11 +131,11 @@ export default function FacturacionPage() {
   const [reciboOpen, setReciboOpen] = React.useState(false);
   const centro = urlCentro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined; // the INVOICE's clinic
 
-  const refetch = React.useCallback(() => {
-    return getFactura(id, centro)
-      .then(setFactura)
-      .catch((err) => toastError(err, tRoot));
-  }, [id, centro, tRoot]);
+  // Must keep catching its own errors: if it threw, `run` would report a saved payment as failed and the open row would invite a second charge.
+  const refetch = React.useCallback(
+    () => getFactura(id, centro).then(setFactura).catch((err) => toastError(err, tRoot)),
+    [id, centro, tRoot],
+  );
 
   React.useEffect(() => {
     let active = true;
@@ -162,14 +165,18 @@ export default function FacturacionPage() {
     };
   }, [id, urlCentro, tRoot]);
 
+  // Runs an invoice change, refetches, and toasts the error itself. Resolves to whether `fn` succeeded,
+  // so a row or dialog that closes on success can stay open when the save failed.
   const run = React.useCallback(
-    async (fn: () => Promise<unknown>) => {
+    async (fn: () => Promise<unknown>): Promise<boolean> => {
       setBusy(true);
       try {
         await fn();
         await refetch();
+        return true;
       } catch (err) {
         toastError(err, tRoot);
+        return false;
       } finally {
         setBusy(false);
       }
@@ -177,8 +184,9 @@ export default function FacturacionPage() {
     [refetch, tRoot],
   );
 
+  const confirm = useConfirm();
   async function descartar() {
-    if (typeof window !== "undefined" && !window.confirm(t("descartarConfirm"))) return;
+    if (!(await confirm({ title: t("descartarConfirm"), confirmLabel: t("descartar"), destructive: true }))) return;
     setDescartando(true);
     try {
       await descartarFactura(id, centro);
@@ -445,7 +453,7 @@ function Editor({
   catalogo: Producto[];
   formas: FormaPago[];
   busy: boolean;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
   receipt: React.ReactNode;
 }) {
   const t = useTranslations("facturacion");
@@ -598,7 +606,7 @@ function Editor({
               </span>
             )}
           </CardTitle>
-          {esBorrador && esGeneral && <CardAction><AddSalesPackage centro={centro} disabled={busy} onPick={(pkg) => run(() => sellSalesPackage(id, pkg.id, centro))} /></CardAction>}
+          {esBorrador && esGeneral && <CardAction><AddSalesPackage centro={centro} disabled={busy} onPick={async (pkg) => { await run(() => sellSalesPackage(id, pkg.id, centro)); }} /></CardAction>}
         </CardHeader>
         <CardContent className="flex-1 space-y-4">
           {esBorrador && (
@@ -957,60 +965,53 @@ function OpcionalesDialog({
 }) {
   const t = useTranslations("facturacion");
   const tc = useTranslations("common");
-  const tRoot = useTranslations();
   const res = useResource<ItemOpcional[]>(() => getItemOpcionales(facturaId, itemId, centro), [facturaId, itemId, centro]);
   const opcionales = res.state.kind === "ok" ? res.state.data : [];
   const [ov, setOv] = React.useState<Record<string, boolean>>({});
-  const [saving, setSaving] = React.useState(false);
   const eff = (o: ItemOpcional) => ov[o.componentId] ?? o.incluido;
   const extra = opcionales.filter(eff).reduce((s, o) => s + (o.incrementalPrice ?? 0), 0);
-
-  async function guardar() {
-    setSaving(true);
-    try {
-      const incluidos = opcionales.filter(eff).map((o) => o.componentId);
-      await setItemOpcionales(facturaId, itemId, incluidos, centro);
-      onSaved();
-    } catch (err) {
-      toastError(err, tRoot);
-      setSaving(false);
-    }
-  }
+  // No required fields (including nothing is a valid choice). Saving before the list loads would send an
+  // empty selection, so it stays blocked until then, as before — now saying why.
+  const reason = res.state.kind === "loading" ? tc("loading") : res.state.kind === "fail" ? res.state.message || tc("error") : null;
+  const { submitting, submit } = useSubmit(
+    () => setItemOpcionales(facturaId, itemId, opcionales.filter(eff).map((o) => o.componentId), centro),
+    { onSuccess: () => onSaved() },
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("opcionalesTitle")}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-2">
-          {res.state.kind === "loading" && <DialogRowsSkeleton trailing="w-14" />}
-          {res.state.kind === "ok" && opcionales.length === 0 && (
-            <p className="py-6 text-center text-sm text-muted-foreground">{t("opcionalesEmpty")}</p>
-          )}
-          {opcionales.map((o) => (
-            <label key={o.componentId} className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm">
-              <span className="flex items-center gap-2">
-                <input type="checkbox" checked={eff(o)} onChange={() => setOv((m) => ({ ...m, [o.componentId]: !eff(o) }))} />
-                <span className="font-medium">{o.name}</span>
-                {o.quantity > 1 && <span className="text-xs text-muted-foreground">×{o.quantity}</span>}
-              </span>
-              <span className="tabular-nums text-muted-foreground">+{money(o.incrementalPrice)}</span>
-            </label>
-          ))}
-        </div>
-        {opcionales.length > 0 && (
-          <div className="flex items-center justify-between border-t pt-3 text-sm">
-            <span className="text-muted-foreground">{t("opcionalesExtra")}</span>
-            <span className="font-semibold tabular-nums">+{money(extra)}</span>
-          </div>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      title={t("opcionalesTitle")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      blocked={res.state.kind !== "ok"}
+      reason={reason}
+    >
+      <div className="space-y-2">
+        {res.state.kind === "loading" && <DialogRowsSkeleton trailing="w-14" />}
+        {res.state.kind === "ok" && opcionales.length === 0 && (
+          <p className="py-6 text-center text-sm text-muted-foreground">{t("opcionalesEmpty")}</p>
         )}
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tc("cancel")}</Button>
-          <Button size="sm" onClick={guardar} disabled={saving || res.state.kind !== "ok"}>{tc("save")}</Button>
+        {opcionales.map((o) => (
+          <label key={o.componentId} className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm">
+            <span className="flex items-center gap-2">
+              <input type="checkbox" checked={eff(o)} onChange={() => setOv((m) => ({ ...m, [o.componentId]: !eff(o) }))} />
+              <span className="font-medium">{o.name}</span>
+              {o.quantity > 1 && <span className="text-xs text-muted-foreground">×{o.quantity}</span>}
+            </span>
+            <span className="tabular-nums text-muted-foreground">+{money(o.incrementalPrice)}</span>
+          </label>
+        ))}
+      </div>
+      {opcionales.length > 0 && (
+        <div className="flex items-center justify-between border-t pt-3 text-sm">
+          <span className="text-muted-foreground">{t("opcionalesExtra")}</span>
+          <span className="font-semibold tabular-nums">+{money(extra)}</span>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </FormDialog>
   );
 }
 
@@ -1037,56 +1038,42 @@ function CorregirImpuestoDialog({
   onSaved: () => void;
 }) {
   const t = useTranslations("facturacion");
-  const tc = useTranslations("common");
-  const tRoot = useTranslations();
   const SIN = "__sin_impuesto__";
+  // Always has a value ("no tax" is a choice), so nothing can be missing.
   const [sel, setSel] = React.useState<string>(item.taxId ? String(item.taxId) : SIN);
-  const [saving, setSaving] = React.useState(false);
-
-  async function guardar() {
-    setSaving(true);
-    try {
-      await actualizarItem(facturaId, item.id, { taxId: sel === SIN ? null : sel } as never, centro);
-      onSaved();
-    } catch (err) {
-      toastError(err, tRoot);
-      setSaving(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    () => actualizarItem(facturaId, item.id, { taxId: sel === SIN ? null : sel } as never, centro),
+    { onSuccess: () => onSaved() },
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("corregirImpuesto.titulo", { nombre: item.description ?? "" })}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          <label className="flex flex-col gap-1.5">
-            <Lbl>{t("corregirImpuesto.impuesto")}</Lbl>
-            <Select value={sel} onValueChange={setSel}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {/* "Sin impuesto" (exento) + solo los APLICABLES (parentId null): nunca sus componentes. */}
-                <SelectItem value={SIN}>{t("corregirImpuesto.sinImpuesto")}</SelectItem>
-                {impuestos.map((im) => {
-                  // El nombre del catálogo a veces YA trae la tasa ("IVU PR (11.5%)"): no duplicarla.
-                  const base = im.name || im.slug;
-                  const label = im.rate != null && !/%/.test(base) ? `${base} (${im.rate}%)` : base;
-                  return <SelectItem key={im.id} value={im.id}>{label}</SelectItem>;
-                })}
-              </SelectContent>
-            </Select>
-          </label>
-          <Alert variant="warning" className="text-xs">
-            <AlertDescription>{t("corregirImpuesto.aviso")}</AlertDescription>
-          </Alert>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tc("cancel")}</Button>
-            <Button size="sm" onClick={guardar} disabled={saving}>{tc("save")}</Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      title={t("corregirImpuesto.titulo", { nombre: item.description ?? "" })}
+      onSubmit={() => submit()}
+      submitting={submitting}
+    >
+      <Field label={t("corregirImpuesto.impuesto")} htmlFor="line-tax">
+        <Select value={sel} onValueChange={setSel}>
+          <SelectTrigger id="line-tax"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {/* "Sin impuesto" (exento) + solo los APLICABLES (parentId null): nunca sus componentes. */}
+            <SelectItem value={SIN}>{t("corregirImpuesto.sinImpuesto")}</SelectItem>
+            {impuestos.map((im) => {
+              // El nombre del catálogo a veces YA trae la tasa ("IVU PR (11.5%)"): no duplicarla.
+              const base = im.name || im.slug;
+              const label = im.rate != null && !/%/.test(base) ? `${base} (${im.rate}%)` : base;
+              return <SelectItem key={im.id} value={im.id}>{label}</SelectItem>;
+            })}
+          </SelectContent>
+        </Select>
+      </Field>
+      <Alert variant="warning" className="text-xs">
+        <AlertDescription>{t("corregirImpuesto.aviso")}</AlertDescription>
+      </Alert>
+    </FormDialog>
   );
 }
 
@@ -1216,7 +1203,6 @@ function UsuarioDialog({
   onSaved: () => void;
 }) {
   const t = useTranslations("facturacion");
-  const tRoot = useTranslations();
   // getProfiles es de administración (403 a un cajero): pedirlo SOLO al abrir este diálogo (acción de
   // admin «corregir usuario»), no al montar la pantalla de caja. Handoff selector-de-linea-sin-buscador.
   const perfilesRes = useResource<Perfil[]>(() => (open ? getProfiles() : Promise.resolve([])), [open]);
@@ -1224,44 +1210,34 @@ function UsuarioDialog({
   const est = String(factura.status ?? "");
   const actual = ((est === "borrador" ? factura.createdBy?.profileId : factura.issuedBy?.profileId) ?? factura.emisor?.profileId ?? "") as string;
   const [sel, setSel] = React.useState<string>(actual);
-  const [saving, setSaving] = React.useState(false);
-
-  async function guardar() {
-    if (!sel) return;
-    setSaving(true);
-    try {
-      await editarCabeceraFactura(String(factura.id), { userId: sel } as EditarCabeceraPayload, centro);
-      onSaved();
-    } catch (err) {
-      toastError(err, tRoot);
-      setSaving(false);
-    }
-  }
+  const missing = invoiceUserMissing({ userId: sel }).map(() => t("usuarioResponsable"));
+  const { submitting, submit } = useSubmit(
+    () => editarCabeceraFactura(String(factura.id), { userId: sel } as EditarCabeceraPayload, centro),
+    { onSuccess: () => onSaved() },
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>{t("corregirUsuarioTitle")}</DialogTitle></DialogHeader>
-        <div className="space-y-3">
-          <label className="flex flex-col gap-1.5">
-            <Lbl>{t("usuarioResponsable")}</Lbl>
-            {perfilesRes.state.kind === "loading" ? <ControlSkeleton /> : (
-            <Select value={sel} onValueChange={setSel}>
-              <SelectTrigger><SelectValue placeholder={t("elegirUsuario")} /></SelectTrigger>
-              <SelectContent>
-                {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            )}
-          </label>
-          <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("corregirUsuarioAyuda")}</p>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tRoot("common.cancel")}</Button>
-            <Button size="sm" onClick={guardar} disabled={saving || !sel}>{tRoot("common.save")}</Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      title={t("corregirUsuarioTitle")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+    >
+      <Field label={t("usuarioResponsable")} htmlFor="invoice-user" required>
+        {perfilesRes.state.kind === "loading" ? <ControlSkeleton /> : (
+        <Select value={sel} onValueChange={setSel}>
+          <SelectTrigger id="invoice-user"><SelectValue placeholder={t("elegirUsuario")} /></SelectTrigger>
+          <SelectContent>
+            {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        )}
+      </Field>
+      <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("corregirUsuarioAyuda")}</p>
+    </FormDialog>
   );
 }
 

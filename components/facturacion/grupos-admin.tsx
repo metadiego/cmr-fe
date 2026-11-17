@@ -17,6 +17,7 @@ import {
 import type { Producto } from "@/lib/api/inventario";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { contarPorGrupo, particionarMembresia } from "@/lib/facturacion/grupos";
+import { newBillingGroupMissing } from "@/lib/facturacion/billing-group-missing";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { cn } from "@/lib/utils";
@@ -34,15 +35,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { FormSheet } from "@/components/kit/form-sheet";
+import { Field } from "@/components/kit/field";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Administración de GRUPOS DE FACTURACIÓN (crear/editar + membresía de productos). Layout
@@ -435,77 +431,75 @@ function NuevoGrupo({
   const t = useTranslations("gruposFacturacion");
   const tRoot = useTranslations();
   const [open, setOpen] = React.useState(false);
-  const [clave, setClave] = React.useState("");
-  const [labelKey, setLabelKey] = React.useState("");
-  const [division, setDivision] = React.useState(divisiones[0]?.slug ?? "general");
-  const [saving, setSaving] = React.useState(false);
+  const [form, setForm] = useDialogForm(
+    () => ({ clave: "", labelKey: "", division: divisiones[0]?.slug ?? "general" }),
+    open,
+  );
+  const { clave, labelKey, division } = form;
+  const missing = newBillingGroupMissing({ key: clave }).map(() => t("clave"));
 
-  async function crear() {
-    setSaving(true);
-    try {
-      const g = await crearGrupoFacturacion({
+  const { submitting, submit } = useSubmit(
+    () =>
+      crearGrupoFacturacion({
         slug: clave.trim(),
         labelKey: labelKey.trim() || `fac.grupo.${clave.trim()}`,
         division,
-      });
-      toast.success(t("created"));
-      setOpen(false);
-      setClave("");
-      setLabelKey("");
-      onCreated(g);
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  }
+      }),
+    {
+      successMessage: t("created"),
+      onSuccess: (g) => {
+        setOpen(false);
+        onCreated(g);
+      },
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
+  );
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button size="sm">{t("new")}</Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>{t("new")}</SheetTitle>
-          <SheetDescription>{t("newHelp")}</SheetDescription>
-        </SheetHeader>
-        <div className="space-y-4 px-4">
-          <div className="space-y-1">
-            <Label htmlFor="g-clave">{t("clave")}</Label>
-            <Input id="g-clave" value={clave} onChange={(e) => setClave(e.target.value)} />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="g-label">{t("labelKey")}</Label>
-            <Input
-              id="g-label"
-              value={labelKey}
-              onChange={(e) => setLabelKey(e.target.value)}
-              placeholder={clave ? `fac.grupo.${clave}` : "fac.grupo.…"}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label>{t("division")}</Label>
-            <Select value={division} onValueChange={setDivision}>
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {divisiones.map((d) => (
-                  <SelectItem key={d.slug} value={d.slug}>
-                    {tRoot.has(d.labelKey) ? tRoot(d.labelKey) : d.slug}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <SheetFooter>
-          <Button onClick={crear} disabled={saving || !clave.trim()}>
-            {t("create")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Button size="sm" onClick={() => setOpen(true)}>
+        {t("new")}
+      </Button>
+      <FormSheet
+        open={open}
+        onOpenChange={setOpen}
+        size="sm"
+        title={t("new")}
+        description={t("newHelp")}
+        onSubmit={() => submit()}
+        submitLabel={t("create")}
+        submitting={submitting}
+        missing={missing}
+      >
+        <Field label={t("clave")} htmlFor="g-clave" required>
+          <Input id="g-clave" value={clave} onChange={(e) => setForm({ clave: e.target.value })} />
+        </Field>
+        <Field label={t("labelKey")} htmlFor="g-label">
+          <Input
+            id="g-label"
+            value={labelKey}
+            onChange={(e) => setForm({ labelKey: e.target.value })}
+            placeholder={clave ? `fac.grupo.${clave}` : "fac.grupo.…"}
+          />
+        </Field>
+        <Field label={t("division")} htmlFor="g-division">
+          <Select value={division} onValueChange={(v) => setForm({ division: v })}>
+            <SelectTrigger id="g-division" className="h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {divisiones.map((d) => (
+                <SelectItem key={d.slug} value={d.slug}>
+                  {tRoot.has(d.labelKey) ? tRoot(d.labelKey) : d.slug}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </FormSheet>
+    </>
   );
 }

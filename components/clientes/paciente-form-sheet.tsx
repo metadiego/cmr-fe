@@ -47,7 +47,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { type Sexo, type FormState, EMPTY, fromPaciente, toPayload, camposDeError } from "./paciente-form-model";
+import { type Sexo, type FormState, ID_TYPES, EMPTY, fromPaciente, toPayload, camposDeError } from "./paciente-form-model";
+import { Section, Grid } from "./paciente-form-layout";
 
 // Slide-in create/edit form for a patient. `paciente` null → create mode.
 export function PacienteFormSheet({
@@ -300,6 +301,19 @@ export function PacienteFormSheet({
                 onChange={(e) => set("apellidos", e.target.value)}
               />
             </Field>
+            {/* Tipo ANTES del ID (regla del dueño 30-sep): un número sin su tipo no sirve. */}
+            <Field label={t("idType")} required={req("idType")}>
+              <Select value={form.idType || undefined} onValueChange={(v) => set("idType", v as FormState["idType"])}>
+                <SelectTrigger className="w-full" aria-invalid={errFields.has("idType") || undefined}>
+                  <SelectValue placeholder={t("idTypePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ID_TYPES.map((v) => (
+                    <SelectItem key={v} value={v}>{t(`idType_${v}`)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
             <Field label={t("docId")} required={req("docId")}>
               <Input
                 value={form.docId}
@@ -325,7 +339,7 @@ export function PacienteFormSheet({
             </Field>
             <Field label={t("fechaNacimiento")} required={req("fechaNacimiento")} error={fechaNacimientoValida ? null : t("fechaNacimientoFutura")}>
               <DatePicker
-                value={form.fechaNacimiento}
+                value={form.fechaNacimiento} birthDate
                 max={todayPR()} onChange={(v) => set("fechaNacimiento", v)}
                 clearable={!req("fechaNacimiento")}
                 aria-invalid={errFields.has("fechaNacimiento") || !fechaNacimientoValida || undefined} />
@@ -455,26 +469,3 @@ export function PacienteFormSheet({
   );
 }
 
-function Section({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon?: Parameters<typeof HugeiconsIcon>[0]["icon"];
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="space-y-3">
-      <h3 className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-        {icon ? <HugeiconsIcon icon={icon} strokeWidth={2} className="size-3.5" /> : null}
-        {title}
-      </h3>
-      {children}
-    </section>
-  );
-}
-
-function Grid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>;
-}

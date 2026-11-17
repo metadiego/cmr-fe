@@ -5,6 +5,12 @@ import { ApiError } from "@/lib/api/types";
 // Extraído de paciente-form-sheet.tsx para bajarlo del techo de tamaño (max-lines) y poder
 // marcar en el formulario los campos que el BE rechaza. Handoff alta-de-paciente-mostrar-el-error.
 
+// Tipo de documento del ID (mismas 4 opciones que pide el modal de datos del EHR en Presente —
+// constante ÚNICA, usada en los dos sitios. Handoff tipo-de-id-en-la-ficha-handoff-be.md: la ficha
+// no tenía este campo, así que `idType` nunca quedaba lleno tras el alta y el modal lo volvía a pedir.
+export const ID_TYPES = ["drivers_license", "passport", "green_card", "state_id"] as const;
+export type IdType = (typeof ID_TYPES)[number];
+
 export type Sexo = NonNullable<Paciente["sex"]>;
 // Runtime whitelist of the values the BE accepts on write. Legacy patients still hold codes like
 // "0"/"1" (the BE v2 backfill has NOT run yet); those are coerced to "" on load so a plain edit
@@ -21,6 +27,7 @@ export const SEXO_VALUES: readonly Sexo[] = [
 export type FormState = {
   nombres: string;
   apellidos: string;
+  idType: "" | IdType;
   docId: string;
   sexo: "" | Sexo;
   fechaNacimiento: string;
@@ -38,6 +45,7 @@ export type FormState = {
 export const EMPTY: FormState = {
   nombres: "",
   apellidos: "",
+  idType: "",
   docId: "",
   sexo: "",
   fechaNacimiento: "",
@@ -56,6 +64,7 @@ export function fromPaciente(p: Paciente): FormState {
   return {
     nombres: p.firstName ?? "",
     apellidos: p.lastName ?? "",
+    idType: ID_TYPES.includes(p.idType as IdType) ? (p.idType as IdType) : "",
     docId: p.documentId ?? "",
     sexo: SEXO_VALUES.includes(p.sex as Sexo) ? (p.sex as Sexo) : "",
     fechaNacimiento: p.dateOfBirth?.slice(0, 10) ?? "",
@@ -77,6 +86,7 @@ export function toPayload(f: FormState): CreatePacientePayload {
   return {
     firstName: f.nombres.trim(),
     lastName: t(f.apellidos),
+    idType: f.idType || undefined,
     documentId: t(f.docId),
     sex: f.sexo || undefined,
     dateOfBirth: t(f.fechaNacimiento),
@@ -102,6 +112,7 @@ const API_TO_FIELD: Record<string, keyof FormState> = {
   apellidos: "apellidos",
   documentid: "docId",
   docid: "docId",
+  idtype: "idType",
   sex: "sexo",
   sexo: "sexo",
   dateofbirth: "fechaNacimiento",

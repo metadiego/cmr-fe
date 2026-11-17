@@ -18,15 +18,19 @@ import { useResource } from "@/hooks/use-resource"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DatePicker } from "@/components/ui/date-picker"
-import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Field } from "@/components/kit/field"
+import { FormFooter } from "@/components/kit/form-footer"
+import { useConfirm } from "@/components/kit/confirm-host"
+import { useSubmit } from "@/components/kit/use-submit"
+import { useDialogForm } from "@/components/kit/use-dialog-form"
+import { missingFields } from "@/lib/forms/missing"
 import {
   Select,
   SelectContent,
@@ -38,9 +42,9 @@ import {
 const TIPOS = ["base", "temporal", "fijo"] as const
 
 /**
- * Centros de un usuario (D4): lista sus asignaciones (tipo + vigencia + estado),
- * agrega una nueva (temporal = cubrir en otro centro hasta una fecha; fijo/base =
- * cambio de centro) y revoca. Un centro a la vez lo garantiza el BE.
+ * A user's centers (D4): lists their assignments (type + validity + state),
+ * adds a new one (temporary = cover another center until a date; fixed/base =
+ * change of center) and revokes. One center at a time is enforced by the BE.
  */
 export function ProfileCentrosDialog({
   profile,
@@ -67,43 +71,42 @@ export function ProfileCentrosDialog({
   const nombreCentro = (id: string) =>
     centers.find((c) => c.id === id)?.name ?? id.slice(0, 8)
 
-  // Alta
-  const [centroId, setCentroId] = React.useState("")
-  const [tipo, setTipo] = React.useState<(typeof TIPOS)[number]>("base")
-  const [hasta, setHasta] = React.useState("")
-  const [submitting, setSubmitting] = React.useState(false)
+  // New assignment (the list above is a viewer; this card is the only form).
+  const [form, update] = useDialogForm(
+    () => ({ centroId: "", tipo: "base" as (typeof TIPOS)[number], hasta: "" }),
+    open,
+    perfilId,
+  )
+  const confirm = useConfirm()
 
-  function reset() {
-    setCentroId("")
-    setTipo("base")
-    setHasta("")
-  }
+  const missing = missingFields([[t("centro"), !!form.centroId]])
 
-  async function onAdd() {
-    if (!centroId || !profile) return
-    setSubmitting(true)
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
+      if (!profile) throw new Error("no profile") // unreachable: the dialog is open only with a profile
       await assignCenter(profile.id, {
-        centerId: centroId,
-        type: tipo,
-        validUntil: tipo === "temporal" && hasta ? hasta : undefined,
+        centerId: form.centroId,
+        type: form.tipo,
+        validUntil: form.tipo === "temporal" && form.hasta ? form.hasta : undefined,
       })
-      toast.success(t("asignado"))
-      reset()
-      refresh()
-    } catch (err) {
-      toastError(err, tRoot)
-    } finally {
-      setSubmitting(false)
-    }
-  }
+    },
+    {
+      successMessage: t("asignado"),
+      onSuccess: () => {
+        update({ centroId: "", tipo: "base", hasta: "" })
+        refresh()
+      },
+    },
+  )
 
   async function onRevoke(a: Asignacion) {
     if (!profile) return
-    if (
-      !window.confirm(t("confirmRevocar", { centro: nombreCentro(a.centerId) }))
-    )
-      return
+    const ok = await confirm({
+      title: t("confirmRevocar", { centro: nombreCentro(a.centerId) }),
+      confirmLabel: t("revocar"),
+      destructive: true,
+    })
+    if (!ok) return
     try {
       await revokeAsignacion(profile.id, a.id)
       toast.success(t("revocada"))
@@ -124,14 +127,9 @@ export function ProfileCentrosDialog({
     }
   }
 
-  function handleOpenChange(next: boolean) {
-    if (!next) reset()
-    onOpenChange(next)
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+    <Dialog open={open} onOpenChange={(o) => (o || !submitting) && onOpenChange(o)}>
+      <DialogContent className="sm:max-w-xl" showCloseButton={!submitting}>
         <DialogHeader>
           <DialogTitle>
             {t("title", { nombre: profile?.name ?? "" })}
@@ -139,7 +137,7 @@ export function ProfileCentrosDialog({
           <DialogDescription>{t("help")}</DialogDescription>
         </DialogHeader>
 
-        {/* Asignaciones actuales */}
+        {/* Current assignments */}
         <div className="space-y-2">
           {asigState.kind === "loading" && (
             <p className="text-sm text-muted-foreground">
@@ -199,13 +197,15 @@ export function ProfileCentrosDialog({
             ))}
         </div>
 
-        {/* Alta de asignación */}
+        {/* New assignment */}
         <div className="space-y-3 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label>{t("centro")}</Label>
-              <Select value={centroId || undefined} onValueChange={setCentroId}>
-                <SelectTrigger className="w-full">
+            <Field label={t("centro")} htmlFor="profile-centers-center" required>
+              <Select
+                value={form.centroId || undefined}
+                onValueChange={(v) => update({ centroId: v })}
+              >
+                <SelectTrigger id="profile-centers-center" className="w-full">
                   <SelectValue placeholder={t("centroPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -216,14 +216,13 @@ export function ProfileCentrosDialog({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t("tipoLabel")}</Label>
+            </Field>
+            <Field label={t("tipoLabel")} htmlFor="profile-centers-type">
               <Select
-                value={tipo}
-                onValueChange={(v) => setTipo(v as (typeof TIPOS)[number])}
+                value={form.tipo}
+                onValueChange={(v) => update({ tipo: v as (typeof TIPOS)[number] })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="profile-centers-type" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -234,23 +233,19 @@ export function ProfileCentrosDialog({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            {tipo === "temporal" && (
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label>{t("vigenteHasta")}</Label>
-                <DatePicker value={hasta} onChange={setHasta} clearable />
-              </div>
+            </Field>
+            {form.tipo === "temporal" && (
+              <Field label={t("vigenteHasta")} className="sm:col-span-2">
+                <DatePicker value={form.hasta} onChange={(v) => update({ hasta: v })} clearable />
+              </Field>
             )}
           </div>
-          <DialogFooter>
-            <Button
-              size="sm"
-              onClick={onAdd}
-              disabled={!centroId || submitting}
-            >
-              {t("agregar")}
-            </Button>
-          </DialogFooter>
+          {/* Inline add form inside the card: FormFooter directly, no cancel (the dialog has its own close). */}
+          <FormFooter
+            primary={{ label: t("agregar"), onClick: () => submit() }}
+            missing={missing}
+            submitting={submitting}
+          />
         </div>
       </DialogContent>
     </Dialog>

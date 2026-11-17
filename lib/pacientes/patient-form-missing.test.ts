@@ -6,6 +6,7 @@ import { PATIENT_FORM_FIELDS, patientFormBlock, patientFormMissing } from "./pat
 const full: Record<string, string> = {
   nombres: "Ana",
   apellidos: "Rivera",
+  idType: "drivers_license",
   docId: "123",
   sexo: "femenino",
   fechaNacimiento: "1980-05-01",

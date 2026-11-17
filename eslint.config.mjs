@@ -45,9 +45,13 @@ const DEBT = {
   // components/facturacion/receipt-preview-card.tsx (shared with the skeleton), the receipt print dialog
   // to components/facturacion/receipt-print-dialog.tsx; back link removed; the patient-today summary
   // became a header button.
-  "app/(app)/billing/invoices/[id]/page.tsx": 1460,
+  // 16-nov-2026: lowered from 1460 to 1317 — its dialogs moved onto the standard form shell
+  // (FormDialog/useSubmit/useConfirm); the rest of the gap was already slack.
+  "app/(app)/billing/invoices/[id]/page.tsx": 1317,
   "components/inventario/productos-admin.tsx": 1048,
-  "components/configuracion/menu-editor.tsx": 700,
+  // 17-nov-2026: 700 → 681 — the delete AlertDialog became a useConfirm prompt (standard form kit);
+  // the stray blank line after </aside> went, and the delete confirm gained `destructive: true` (net 0).
+  "components/configuracion/menu-editor.tsx": 681,
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)
   // se extrajeron a components/servicios/servicio-form-fields.tsx para hacerle lugar al toggle de
   // allowSessionFixWithoutPackage sin tocar el ceiling. Ver HANDOFF-sesiones-sin-paquete-listo.md.

@@ -5,10 +5,12 @@ import { useTranslations } from "next-intl";
 
 import { updatePaciente } from "@/lib/api/pacientes";
 import { type EhrReadinessField } from "@/lib/api/ehr-integration";
+import { ID_TYPES } from "@/components/clientes/paciente-form-model";
 import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { todayPR } from "@/lib/format/fecha";
 import { ehrReadinessInvalid, ehrReadinessMissing, ehrReadinessOrder } from "@/lib/board/ehr-readiness-missing";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Field, FormDialog } from "@/components/kit/form-dialog";
 import { RequiredLegend } from "@/components/kit/required-mark";
 import { useSubmit } from "@/components/kit/use-submit";
@@ -17,7 +19,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // BLOCKING dialog that asks for the data the EHR needs BEFORE marking Present. It paints ONLY the
 // `faltantes` the readiness check reports, with the same control as the patient form, saves them with the
 // usual PUT and only then lets the flow continue. Cancel = Present is not marked. Handoff be-ehr-integration-presente.
-const ID_TYPES = ["drivers_license", "passport", "green_card", "state_id"] as const;
 
 export function EhrReadinessModal({
   pacienteId,
@@ -103,12 +104,21 @@ export function EhrReadinessModal({
                   <SelectItem value="desconocido">{t("sexoDesconocido")}</SelectItem>
                 </SelectContent>
               </Select>
+            ) : f === "fechaNacimiento" ? (
+              <DatePicker
+                id={id}
+                value={form[f] ?? ""}
+                onChange={(v) => set(f, v)}
+                birthDate
+                max={todayPR()}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? `${id}-error` : undefined}
+              />
             ) : (
               <Input
                 id={id}
-                type={f === "fechaNacimiento" ? "date" : "text"}
+                type="text"
                 value={form[f] ?? ""}
-                max={f === "fechaNacimiento" ? todayPR() : undefined}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? `${id}-error` : undefined}
                 onChange={(e) => set(f, e.target.value)}

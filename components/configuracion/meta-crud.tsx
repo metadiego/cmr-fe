@@ -8,6 +8,7 @@ import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { FormDialog } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Button } from "@/components/ui/button";
 
 export type Draft = Record<string, unknown>;
@@ -25,7 +26,7 @@ export function MetaCrud<T extends { id: string }>({
   initialDraft,
   toDraft,
   fields,
-  canSubmit = () => true,
+  missing,
   create,
   update,
   remove,
@@ -40,7 +41,8 @@ export function MetaCrud<T extends { id: string }>({
   initialDraft: Draft;
   toDraft: (r: T) => Draft;
   fields: (draft: Draft, patch: (p: Draft) => void) => React.ReactNode;
-  canSubmit?: (draft: Draft) => boolean;
+  /** Labels of the required fields still empty in `draft`, in on-screen order (missingFields). */
+  missing?: (draft: Draft) => string[];
   create: (draft: Draft) => Promise<unknown>;
   update: (id: string, draft: Draft) => Promise<unknown>;
   remove?: (id: string) => Promise<unknown>;
@@ -54,7 +56,6 @@ export function MetaCrud<T extends { id: string }>({
 
   const [editing, setEditing] = React.useState<T | "new" | null>(null);
   const [draft, setDraft] = React.useState<Draft>(initialDraft);
-  const [busy, setBusy] = React.useState(false);
 
   function openNew() {
     setDraft(initialDraft);
@@ -66,20 +67,21 @@ export function MetaCrud<T extends { id: string }>({
   }
   const patch = (p: Draft) => setDraft((d) => ({ ...d, ...p }));
 
-  async function submit() {
-    setBusy(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
+      // The dialog is only mounted while `editing` is set.
       if (editing === "new") await create(draft);
       else if (editing) await update(editing.id, draft);
-      toast.success(tc("saved"));
-      setEditing(null);
-      reload();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+      else throw new Error("MetaCrud: submit with no row being edited");
+    },
+    {
+      successMessage: tc("saved"),
+      onSuccess: () => {
+        setEditing(null);
+        reload();
+      },
+    },
+  );
 
   async function del(row: T) {
     if (!remove) return;
@@ -133,9 +135,9 @@ export function MetaCrud<T extends { id: string }>({
           open
           onOpenChange={(o) => !o && setEditing(null)}
           title={title}
-          onSubmit={submit}
-          submitting={busy}
-          canSubmit={canSubmit(draft) && !busy}
+          onSubmit={() => submit()}
+          submitting={submitting}
+          missing={missing?.(draft)}
         >
           {fields(draft, patch)}
         </FormDialog>

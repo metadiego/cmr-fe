@@ -6,6 +6,7 @@
 export const PATIENT_FORM_FIELDS = [
   "nombres",
   "apellidos",
+  "idType",
   "docId",
   "sexo",
   "fechaNacimiento",

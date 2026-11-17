@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/scheduling-bridge";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { useResource } from "@/hooks/use-resource";
+import { missingFields } from "@/lib/forms/missing";
 import { MetaCrud } from "@/components/configuracion/meta-crud";
 import { Field } from "@/components/kit/form-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -93,7 +94,7 @@ export function DoctorMappingsTable({ centerIds, puedeEscribir }: { centerIds: s
       getRowKey={(r) => r.id}
       initialDraft={{ externalName: "", staffId: "" }}
       toDraft={(r) => ({ externalName: r.externalName, staffId: r.staffId })}
-      canSubmit={(d) => !!(d.externalName as string)?.trim() && !!d.staffId}
+      missing={(d) => missingFields([[t("externalName"), !!(d.externalName as string)?.trim()], [t("doctor"), !!d.staffId]])}
       create={(d) => createDoctorMapping({ externalName: (d.externalName as string).trim(), staffId: d.staffId as string })}
       update={(id, d) => updateDoctorMapping(id, { externalName: (d.externalName as string).trim(), staffId: d.staffId as string })}
       remove={puedeEscribir ? (id) => deleteDoctorMapping(id) : undefined}
@@ -104,12 +105,12 @@ export function DoctorMappingsTable({ centerIds, puedeEscribir }: { centerIds: s
       ]}
       fields={(draft, patch) => (
         <>
-          <Field label={t("externalName")}>
-            <Input value={(draft.externalName as string) ?? ""} onChange={(e) => patch({ externalName: e.target.value })} />
+          <Field label={t("externalName")} htmlFor="doctor-mapping-name" required>
+            <Input id="doctor-mapping-name" value={(draft.externalName as string) ?? ""} onChange={(e) => patch({ externalName: e.target.value })} />
           </Field>
-          <Field label={t("doctor")}>
+          <Field label={t("doctor")} htmlFor="doctor-mapping-staff" required>
             <Select value={(draft.staffId as string) ?? ""} onValueChange={(id) => patch({ staffId: id })}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("selectDoctor")} /></SelectTrigger>
+              <SelectTrigger id="doctor-mapping-staff" className="w-full"><SelectValue placeholder={t("selectDoctor")} /></SelectTrigger>
               <SelectContent>
                 {staff.map((p) => (
                   <SelectItem key={p.id} value={p.id}>{staffName(p)}</SelectItem>
@@ -135,7 +136,7 @@ export function AgentMappingsTable({ centerIds, puedeEscribir }: { centerIds: st
       getRowKey={(r) => r.id}
       initialDraft={{ externalCode: "", staffId: "" }}
       toDraft={(r) => ({ externalCode: r.externalCode, staffId: r.staffId })}
-      canSubmit={(d) => !!(d.externalCode as string)?.trim() && !!d.staffId}
+      missing={(d) => missingFields([[t("externalCode"), !!(d.externalCode as string)?.trim()], [t("agent"), !!d.staffId]])}
       create={(d) => createAgentMapping({ externalCode: (d.externalCode as string).trim().toUpperCase(), staffId: d.staffId as string })}
       update={(id, d) => updateAgentMapping(id, { externalCode: (d.externalCode as string).trim().toUpperCase(), staffId: d.staffId as string })}
       remove={puedeEscribir ? (id) => deleteAgentMapping(id) : undefined}
@@ -155,17 +156,18 @@ export function AgentMappingsTable({ centerIds, puedeEscribir }: { centerIds: st
       ]}
       fields={(draft, patch) => (
         <>
-          <Field label={t("externalCode")}>
+          <Field label={t("externalCode")} htmlFor="agent-mapping-code" required>
             <Input
+              id="agent-mapping-code"
               value={(draft.externalCode as string) ?? ""}
               onChange={(e) => patch({ externalCode: e.target.value })}
               className="font-mono uppercase"
               maxLength={2}
             />
           </Field>
-          <Field label={t("agent")}>
+          <Field label={t("agent")} htmlFor="agent-mapping-staff" required>
             <Select value={(draft.staffId as string) ?? ""} onValueChange={(id) => patch({ staffId: id })}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("selectAgent")} /></SelectTrigger>
+              <SelectTrigger id="agent-mapping-staff" className="w-full"><SelectValue placeholder={t("selectAgent")} /></SelectTrigger>
               <SelectContent>
                 {staff.map((p) => (
                   <SelectItem key={p.id} value={p.id}>{staffName(p)}</SelectItem>

@@ -297,6 +297,7 @@
     "fSlug": "Clave",
     "fKind": "Tipo",
     "fCapacity": "Capacidad (pacientes a la vez)",
+    "capacityInvalid": "La capacidad debe ser mayor que 0.",
     "fConcurrency": "Concurrencia",
     "fMaxMin": "Máximo de minutos por paciente",
     "fMaxMinPlaceholder": "sin tope",
@@ -1700,6 +1701,7 @@
     "rejectTitle": "Rechazar perfil",
     "rejectDescription": "Indica el motivo del rechazo de {email}.",
     "motivoPlaceholder": "Motivo del rechazo",
+    "rejectReason": "Motivo del rechazo",
     "confirmReject": "Rechazar",
     "cancel": "Cancelar",
     "users": {
@@ -1737,7 +1739,8 @@
         "cancelar": "Cancelar",
         "guardar": "Cambiar email",
         "guardando": "Cambiando…",
-        "ok": "Email de acceso actualizado"
+        "ok": "Email de acceso actualizado",
+        "unchanged": "Es el mismo email que ya tiene"
       },
       "adminBadge": "Administrador",
       "allCenters": "Todos los centros",
@@ -2564,7 +2567,9 @@
     "settled": "Saldado",
     "overpaid": "Sobre-abonado",
     "viaRefundTitle": "Ese reembolso pertenece a una devolución",
-    "viaRefundLink": "Ir a la devolución"
+    "viaRefundLink": "Ir a la devolución",
+    "amountNotPositive": "El monto debe ser mayor que 0.",
+    "noChanges": "Sin cambios."
   },
   "formasPago": {
     "efectivo": "Efectivo",
@@ -3338,7 +3343,9 @@
       "addComponentConfirm": "Agregar componente",
       "componentAdded": "Componente agregado al kit",
       "reason": "Motivo",
-      "reasonPlaceholder": "Por qué se agrega (obligatorio)"
+      "reasonPlaceholder": "Por qué se agrega (obligatorio)",
+      "component": "Componente",
+      "reasonTooShort": "El motivo necesita al menos 3 caracteres."
     },
     "imprimirNoEmitida": "La factura no se emitió al imprimir.",
     "corregirImpuesto": {
@@ -3455,7 +3462,9 @@
       "multiplicador_invalido": "{field}: debe ser un número entero de 1 o más.",
       "meta_solo_borrador": "Las áreas y los días solo se corrigen en una factura en borrador."
     },
-    "multipliersEditHint": "Corrige áreas o días aquí: se guarda al salir del campo."
+    "multipliersEditHint": "Corrige áreas o días aquí: se guarda al salir del campo.",
+    "lineProduct": "Producto/servicio",
+    "priceLoading": "Buscando el precio…"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -3917,7 +3926,8 @@
       "clinico": "Clínico",
       "agenda": "Agenda",
       "otras": "Otras"
-    }
+    },
+    "noClinicToCreate": "No tienes un centro donde crear plantillas."
   },
   "fac": {
     "col": {
@@ -4403,9 +4413,11 @@
       "signMine": "Firmar mi hoja",
       "acknowledge": "Acusar corrección",
       "acknowledgeHint": "La hoja cambió después de esta firma. Confirma que las cifras corregidas son las buenas; queda el motivo, quién y cuándo.",
-      "acknowledgeReason": "Motivo (obligatorio): qué se corrigió y por qué",
+      "acknowledgeReason": "Motivo: qué se corrigió y por qué",
       "acknowledged": "Corrección acusada",
-      "acknowledgedNote": "Cifras corregidas · confirmado por {name} · {when}"
+      "acknowledgedNote": "Cifras corregidas · confirmado por {name} · {when}",
+      "acknowledgeReasonLabel": "Motivo",
+      "reasonTooShort": "El motivo necesita al menos 3 caracteres."
     },
     "attachments": {
       "title": "Settlements escaneado",
@@ -4452,11 +4464,12 @@
       "delete": "Eliminar",
       "deleteConfirmTitle": "Eliminar este adjunto",
       "deleteConfirmDesc": "Se quita de la lista del cuadre; no se puede deshacer desde aquí.",
-      "deleteReasonLabel": "Motivo (obligatorio)",
+      "deleteReasonLabel": "Motivo",
       "deleteReasonPlaceholder": "Por qué se elimina…",
       "deleteCancel": "Cancelar",
       "deleteConfirm": "Eliminar adjunto",
-      "deleted": "Adjunto eliminado"
+      "deleted": "Adjunto eliminado",
+      "deleteReasonTooShort": "El motivo necesita al menos 3 caracteres."
     },
     "attachment": {
       "notFound": "Ese adjunto ya no existe en este cuadre.",
@@ -5512,7 +5525,7 @@
     "hint": "Vuelve a borrador con su mismo número para corregirla",
     "title": "Reabrir la factura",
     "description": "Vuelve a borrador con su mismo número. Se repone el inventario y se conservan los pagos; al terminar la corriges y la vuelves a emitir.",
-    "reasonLabel": "Motivo (obligatorio)",
+    "reasonLabel": "Motivo",
     "reasonPlaceholder": "Ej.: se exoneró por error y el paciente paga 10 dólares",
     "confirm": "Reabrir",
     "done": "Factura reabierta: corrígela y vuelve a emitirla.",
@@ -5547,10 +5560,11 @@
     "changeSelection": "Cambiar",
     "searchPlaceholder": "Buscar paciente: nombre, record o ID…",
     "searchHint": "Escribe al menos 2 letras para buscar.",
-    "reasonLabel": "Motivo (obligatorio)",
+    "reasonLabel": "Motivo",
     "reasonPlaceholder": "Ej.: se facturó por error al paciente 16034 en vez del 680",
     "confirm": "Cambiar paciente",
-    "done": "Paciente de la factura actualizado."
+    "done": "Paciente de la factura actualizado.",
+    "patient": "Paciente nuevo"
   },
   "invoice": {
     "notFound": "La factura no existe.",
@@ -5588,7 +5602,12 @@
     "clear": "Borrar",
     "hour": "Hora",
     "minute": "Min",
-    "period": "AM/PM"
+    "period": "AM/PM",
+    "typedFormat": "Escribe la fecha como MM/DD/AAAA (p. ej. 03/15/1958).",
+    "typedInvalid": "Esa no es una fecha real.",
+    "typedFuture": "La fecha no puede ser futura.",
+    "typedAge": "Verifica el año — la edad no parece correcta.",
+    "typedRange": "Esa fecha está fuera del rango permitido."
   },
   "patientDesk": {
     "title": "Centro de Pacientes",

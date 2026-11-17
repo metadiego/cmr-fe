@@ -9,14 +9,17 @@ import { UserSwitchIcon } from "@hugeicons/core-free-icons";
 import { getReopenCheck, changeInvoicePatient, type ReopenCheck } from "@/lib/api/invoice-reopen";
 import { buscarPaciente, type FacturaConItems, type PacienteBusqueda } from "@/lib/api/facturas";
 import { apiErrorLabel } from "@/lib/api/errors";
+import { changePatientMissing } from "@/lib/facturacion/change-patient-missing";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DialogRowsSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { FormError } from "@/components/kit/field";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 
 interface Props {
   invoiceId: string;
@@ -36,12 +39,12 @@ export function ChangeInvoicePatientButton({ invoiceId, centerId, currentPatient
   const tRoot = useTranslations();
   const [check, setCheck] = React.useState<ReopenCheck | null>(null);
   const [open, setOpen] = React.useState(false);
-  const [elegido, setElegido] = React.useState<PacienteBusqueda | null>(null);
-  const [q, setQ] = React.useState("");
-  const [debounced, setDebounced] = React.useState("");
-  const [reason, setReason] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  // Re-initialised every time the dialog opens (search, pick, reason and the last error).
+  const [form, setForm] = useDialogForm(
+    () => ({ elegido: null as PacienteBusqueda | null, q: "", debounced: "", reason: "", error: null as string | null }),
+    open,
+  );
+  const { elegido, q, debounced, reason, error } = form;
 
   React.useEffect(() => {
     let active = true;
@@ -54,9 +57,9 @@ export function ChangeInvoicePatientButton({ invoiceId, centerId, currentPatient
   }, [invoiceId, centerId]);
 
   React.useEffect(() => {
-    const h = setTimeout(() => setDebounced(q), 250);
+    const h = setTimeout(() => setForm({ debounced: q }), 250);
     return () => clearTimeout(h);
-  }, [q]);
+  }, [q, setForm]);
   const term = debounced.trim();
   const res = useResource<PacienteBusqueda[]>(
     () => (term.length >= 2 ? buscarPaciente(term, centerId) : Promise.resolve([])),
@@ -71,30 +74,29 @@ export function ChangeInvoicePatientButton({ invoiceId, centerId, currentPatient
   const blocked = !!check && !check.canReopen;
   const why = reasons.map((r) => tRoot(r.labelKey)).join(" · ");
 
-  function reset() {
-    setElegido(null);
-    setQ("");
-    setDebounced("");
-    setReason("");
-    setError(null);
-  }
+  const labels = { patient: t("patient"), reason: t("reasonLabel") } as const;
+  const missing = changePatientMissing({ patientId: elegido ? String(elegido.id) : null, reason }).map((f) => labels[f]);
 
-  async function confirmar() {
-    if (!elegido) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const r = await changeInvoicePatient(invoiceId, elegido.id, reason.trim(), centerId);
-      r.warnings.forEach((w) => toast.warning(w.labelKey ? tRoot(w.labelKey) : (w.message ?? w.code)));
-      toast.success(t("done"));
-      setOpen(false);
-      onChanged(r.invoice);
-    } catch (err) {
-      setError(apiErrorLabel(err, tRoot));
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    async () => {
+      if (!elegido) throw new Error(t("patient"));
+      setForm({ error: null });
+      return changeInvoicePatient(invoiceId, elegido.id, reason.trim(), centerId);
+    },
+    {
+      onSuccess: (r) => {
+        r.warnings.forEach((w) => toast.warning(w.labelKey ? tRoot(w.labelKey) : (w.message ?? w.code)));
+        toast.success(t("done"));
+        setOpen(false);
+        onChanged(r.invoice);
+      },
+      // The error stays inside the dialog, as before (no toast).
+      onError: (err) => {
+        setForm({ error: apiErrorLabel(err, tRoot) });
+        return true;
+      },
+    },
+  );
 
   return (
     <>
@@ -104,34 +106,37 @@ export function ChangeInvoicePatientButton({ invoiceId, centerId, currentPatient
         className="no-print"
         disabled={!check || blocked}
         title={blocked ? why : t("hint")}
-        onClick={() => {
-          reset();
-          setOpen(true);
-        }}
+        onClick={() => setOpen(true)}
       >
         <HugeiconsIcon icon={UserSwitchIcon} className="size-4" />
         {t("action")}
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
-          </DialogHeader>
-          {warnings.length > 0 && (
-            <Alert variant="warning">
-              <AlertDescription>
-                {warnings.map((w) => (
-                  <p key={w.labelKey}>{tRoot(w.labelKey)}</p>
-                ))}
-              </AlertDescription>
-            </Alert>
-          )}
-          {currentPatientName && (
-            <p className="text-sm text-muted-foreground">
-              {t("currentPatient")}: <span className="font-medium text-foreground">{currentPatientName}</span>
-            </p>
-          )}
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        size="lg"
+        title={t("title")}
+        description={t("description")}
+        onSubmit={() => submit()}
+        submitLabel={t("confirm")}
+        submitting={submitting}
+        missing={missing}
+      >
+        {warnings.length > 0 && (
+          <Alert variant="warning">
+            <AlertDescription>
+              {warnings.map((w) => (
+                <p key={w.labelKey}>{tRoot(w.labelKey)}</p>
+              ))}
+            </AlertDescription>
+          </Alert>
+        )}
+        {currentPatientName && (
+          <p className="text-sm text-muted-foreground">
+            {t("currentPatient")}: <span className="font-medium text-foreground">{currentPatientName}</span>
+          </p>
+        )}
+        <Field label={t("patient")} htmlFor={elegido ? undefined : "change-patient-search"} required>
           {elegido ? (
             <div className="flex items-center justify-between gap-3 rounded-lg border bg-accent/40 px-3 py-2 text-sm">
               <span className="min-w-0">
@@ -140,13 +145,13 @@ export function ChangeInvoicePatientButton({ invoiceId, centerId, currentPatient
                   {elegido.medicalRecordNumber ? `#${elegido.medicalRecordNumber}` : ""} {elegido.documentId ? `· ID ${elegido.documentId}` : ""}
                 </span>
               </span>
-              <Button variant="ghost" size="sm" onClick={() => setElegido(null)}>
+              <Button variant="ghost" size="sm" onClick={() => setForm({ elegido: null })}>
                 {t("changeSelection")}
               </Button>
             </div>
           ) : (
             <div className="space-y-2">
-              <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPlaceholder")} />
+              <Input id="change-patient-search" autoFocus value={q} onChange={(e) => setForm({ q: e.target.value })} placeholder={t("searchPlaceholder")} />
               <div className="max-h-60 space-y-1 overflow-y-auto">
                 {term.length < 2 && <p className="py-4 text-center text-sm text-muted-foreground">{t("searchHint")}</p>}
                 {loading && <DialogRowsSkeleton sub trailing={null} />}
@@ -160,7 +165,7 @@ export function ChangeInvoicePatientButton({ invoiceId, centerId, currentPatient
                       key={p.id}
                       type="button"
                       disabled={esActual}
-                      onClick={() => setElegido(p)}
+                      onClick={() => setForm({ elegido: p })}
                       className="flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm hover:bg-accent disabled:opacity-50"
                     >
                       <span className="min-w-0">
@@ -175,27 +180,18 @@ export function ChangeInvoicePatientButton({ invoiceId, centerId, currentPatient
               </div>
             </div>
           )}
-          <div className="space-y-1.5">
-            <Label htmlFor="change-patient-reason">{t("reasonLabel")}</Label>
-            <Textarea
-              id="change-patient-reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder={t("reasonPlaceholder")}
-              rows={3}
-            />
-          </div>
-          {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>
-              {tRoot("common.cancel")}
-            </Button>
-            <Button onClick={confirmar} disabled={busy || !elegido || !reason.trim()}>
-              {busy ? tRoot("common.loading") : t("confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </Field>
+        <Field label={t("reasonLabel")} htmlFor="change-patient-reason" required>
+          <Textarea
+            id="change-patient-reason"
+            value={reason}
+            onChange={(e) => setForm({ reason: e.target.value })}
+            placeholder={t("reasonPlaceholder")}
+            rows={3}
+          />
+        </Field>
+        <FormError message={error} />
+      </FormDialog>
     </>
   );
 }

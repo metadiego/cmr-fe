@@ -8,12 +8,15 @@ import { getProducto, listComponentes, listProductos, type ProductoComponente, t
 import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/facturacion-config";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
-import { toastError } from "@/lib/api/errors";
+import { customizeKitAddMissing } from "@/lib/facturacion/customize-kit-missing";
+import { footerState } from "@/lib/forms/missing";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { Lbl } from "@/components/facturacion/field-label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog } from "@/components/kit/form-dialog";
+import { MissingHint } from "@/components/kit/missing-hint";
+import { useSubmit } from "@/components/kit/use-submit";
 import { DialogRowsSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
 
 // Personalizar el KIT de una línea: quitar / cambiar cantidad / AGREGAR componentes, SOLO en esta factura
@@ -40,7 +43,6 @@ export function PersonalizarKitDialog({
 }) {
   const t = useTranslations("facturacion");
   const tc = useTranslations("common");
-  const tRoot = useTranslations();
   const { can } = useCan();
   const puedeAgregar = can("factura.kit_agregar");
 
@@ -98,7 +100,6 @@ export function PersonalizarKitDialog({
   const [nuevoId, setNuevoId] = React.useState("");
   const [nuevoNombre, setNuevoNombre] = React.useState("");
   const [nuevaCant, setNuevaCant] = React.useState("1");
-  const [saving, setSaving] = React.useState(false);
 
   // Columnas de FACTURACIÓN por componente (role "multiplicador" = áreas/días, igual que la línea
   // suelta de láser): un componente cuyo grupo las tiene muestra un input por columna, con la
@@ -162,9 +163,14 @@ export function PersonalizarKitDialog({
     ...added.map((r) => ({ ...r, cantidad: cantDe(r), multiplicadores: multiplicadoresDe(r) })),
   ].filter((r) => r.cantidad > 0);
 
+  // «Add component» sub-row: its button and hint come from the same state (the quantity is clamped ≥ 1).
+  const addRowState = { missing: customizeKitAddMissing({ productId: nuevoId }).map(() => t("kit.component")) };
+  const { disabled: addDisabled, hint: addHint } = footerState(addRowState);
+  const addHintId = React.useId() + "-hint";
+
   function agregar() {
     const c = nuevoCols.length > 0 ? nuevoMultCant : Math.max(1, Math.floor(Number(nuevaCant) || 0));
-    if (!nuevoId || c <= 0) return;
+    if (!nuevoId || c <= 0) return; // narrowing only: the button is disabled while the product is missing
     if (nuevoCols.length > 0) setMult((m) => ({ ...m, [nuevoId]: nuevoMultVals }));
     // Si ya está en base y estaba removido, reponerlo en vez de duplicar.
     if (base.some((b) => b.productoId === nuevoId)) {
@@ -179,10 +185,9 @@ export function PersonalizarKitDialog({
     setNuevoMult({});
   }
 
-  async function guardar() {
-    setSaving(true);
-    try {
-      await personalizarKit(
+  const { submitting, submit } = useSubmit(
+    () =>
+      personalizarKit(
         facturaId,
         item.id,
         finalRows.map((r) => ({
@@ -191,13 +196,9 @@ export function PersonalizarKitDialog({
           ...(r.multiplicadores ? { multipliers: r.multiplicadores } : {}),
         })),
         centro,
-      );
-      onSaved();
-    } catch (err) {
-      toastError(err, tRoot);
-      setSaving(false);
-    }
-  }
+      ),
+    { onSuccess: () => onSaved() },
+  );
 
   const quitarBtn = (onClick: () => void) => (
     <Button type="button" variant="ghost" size="icon" onClick={onClick} aria-label={t("kit.quitar")} className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive">
@@ -215,12 +216,17 @@ export function PersonalizarKitDialog({
   const ROW = "grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-3 rounded-lg border px-3 py-2";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>{t("kit.titulo", { nombre: item.description ?? "" })}</DialogTitle>
-        </DialogHeader>
-
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="2xl"
+      title={t("kit.titulo", { nombre: item.description ?? "" })}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      // Saving before the recipe loads would send an empty list and wipe the kit (the old footer was hidden then).
+      blocked={cargando}
+      reason={cargando ? tc("loading") : null}
+    >
         {cargando ? (
           <DialogRowsSkeleton trailing="w-16" />
         ) : (
@@ -279,7 +285,14 @@ export function PersonalizarKitDialog({
             {/* Add a component (fine-grained permission; the BE enforces it). A product billed by áreas × días
                 asks for them right here, labelled — not an unlabelled number that only made sense after adding. */}
             {puedeAgregar && (
-              <div className="space-y-2 rounded-lg border border-dashed p-3">
+              <div
+                className="space-y-2 rounded-lg border border-dashed p-3"
+                // Enter in this row's inputs (product search, quantity) must not save the whole kit. Inputs only:
+                // Enter on a button here (Add, the picker's options) still activates it.
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") e.preventDefault();
+                }}
+              >
                 <Lbl>{t("kit.agregarComponente")}</Lbl>
                 <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-3">
                   <ProductoPicker
@@ -298,22 +311,17 @@ export function PersonalizarKitDialog({
                   ) : (
                     qtyInput(nuevaCant, setNuevaCant)
                   )}
-                  <Button size="sm" className="h-9" onClick={agregar} disabled={!nuevoId}>{tc("add")}</Button>
+                  <Button size="sm" className="h-9" onClick={agregar} disabled={addDisabled} aria-describedby={addHint ? addHintId : undefined}>{tc("add")}</Button>
                 </div>
+                <MissingHint id={addHintId} {...addRowState} />
               </div>
             )}
 
             {/* Qué implica: la duda de todos la primera vez. */}
             <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("kit.avisoFrontdesk")}</p>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tc("cancel")}</Button>
-              <Button size="sm" onClick={guardar} disabled={saving}>{tc("save")}</Button>
-            </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }
 

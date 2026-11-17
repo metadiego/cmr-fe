@@ -2,18 +2,17 @@
 
 import * as React from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import { getConfig, updateConfig, type BridgeConfig } from "@/lib/api/scheduling-bridge";
 import { useResource } from "@/hooks/use-resource";
-import { toastError } from "@/lib/api/errors";
 import { weekdayLabel, WEEKDAYS_MON_FIRST } from "@/lib/i18n/weekdays";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Switch } from "@/components/ui/switch";
 import { Field } from "@/components/kit/form-dialog";
+import { FormFooter } from "@/components/kit/form-footer";
+import { useSubmit } from "@/components/kit/use-submit";
 import {
   Select,
   SelectContent,
@@ -37,7 +36,6 @@ export function SchedulingBridgeConfigForm({
 }) {
   const t = useTranslations("schedulingBridge.config");
   const tc = useTranslations("common");
-  const tRoot = useTranslations();
   const locale = useLocale();
   const { state } = useResource<BridgeConfig>(() => getConfig(centroId), [centroId]);
 
@@ -46,7 +44,6 @@ export function SchedulingBridgeConfigForm({
   // updated synchronously from a successful PUT's own response (never re-derived from the async
   // `state`, which could still be reflecting an older reload by the time a later save fails).
   const [lastGood, setLastGood] = React.useState<BridgeConfig | null>(null);
-  const [busy, setBusy] = React.useState(false);
   // Adjust state during render (not an effect, per react-hooks/set-state-in-effect): reseed ONLY
   // when this is the first load, or the center picker moved to a DIFFERENT center — never on a
   // same-center reload, which must not silently clobber an in-progress unsaved edit.
@@ -56,6 +53,18 @@ export function SchedulingBridgeConfigForm({
     setLastGood(state.data);
     setDraft(state.data);
   }
+
+  // Enter never saves this form: it changes the live connection to the external scheduler.
+  const { submitting, submit } = useSubmit((d: BridgeConfig) => updateConfig(d, centroId), {
+    successMessage: tc("saved"),
+    onSuccess: (saved) => {
+      setDraft(saved);
+      setLastGood(saved);
+    },
+    onError: () => {
+      setDraft(lastGood); // rollback to the actual last-known-good, not a possibly-stale reload
+    },
+  });
 
   if (state.kind === "fail") return <p className="text-sm text-destructive">{state.message}</p>;
   if (state.kind === "loading" || !draft) return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
@@ -70,22 +79,6 @@ export function SchedulingBridgeConfigForm({
     const dias = draft.workDays ?? [];
     const on = dias.includes(d);
     patch({ workDays: on ? dias.filter((x) => x !== d) : [...dias, d].sort() });
-  }
-
-  async function onSave() {
-    if (!draft) return;
-    setBusy(true);
-    try {
-      const saved = await updateConfig(draft, centroId);
-      setDraft(saved);
-      setLastGood(saved);
-      toast.success(tc("saved"));
-    } catch (err) {
-      toastError(err, tRoot);
-      setDraft(lastGood); // rollback to the actual last-known-good, not a possibly-stale reload
-    } finally {
-      setBusy(false);
-    }
   }
 
   return (
@@ -167,9 +160,7 @@ export function SchedulingBridgeConfigForm({
       </Field>
 
       {puedeEscribir && (
-        <Button onClick={onSave} disabled={busy}>
-          {busy ? tc("saving") : tc("save")}
-        </Button>
+        <FormFooter primary={{ label: tc("save"), onClick: () => submit(draft) }} submitting={submitting} />
       )}
     </div>
   );

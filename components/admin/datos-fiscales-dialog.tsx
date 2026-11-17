@@ -1,8 +1,6 @@
 "use client";
 
-import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   updateDatosFiscales,
@@ -10,23 +8,15 @@ import {
   type Centro,
   type DatosFiscalesPayload,
 } from "@/lib/api/centers";
-import { apiErrorMessage } from "@/lib/api/errors";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
 
-// Los 10 campos editables (mapean 1:1 a UpdateDatosFiscalesDto). La dirección se
-// pre-llena y se envía como `direccionFiscal` (el GET la lee como `direccion`).
+// The 10 editable fields (1:1 with UpdateDatosFiscalesDto).
 type Form = {
   legalName: string;
   tradeName: string;
@@ -53,14 +43,27 @@ function fromCentro(c: Centro): Form {
     website: c.website ?? "",
     invoiceFooter: c.invoiceFooter ?? "",
     logoUrl: c.logoUrl ?? "",
-    // Default true si el BE aún no lo devuelve (comportamiento de fábrica del enganche).
+    // Defaults to true when the BE does not return it yet (the hook's factory behaviour).
     frontdeskAutoPresent: c.frontdeskAutoPresent ?? true,
   };
 }
 
-// Editor de datos fiscales (definición de empresa) por centro. Lo que se imprime
-// en la factura: razón social, registro fiscal, dirección, pie, logo, etc.
-// RBAC lo gatea el llamador (centro.fiscal.write). PUT parcial /datos-fiscales.
+const EMPTY_FORM: Form = {
+  legalName: "",
+  tradeName: "",
+  taxRegistration: "",
+  taxRegistrationLabel: "",
+  phone: "",
+  taxAddress: "",
+  zipCode: "",
+  website: "",
+  invoiceFooter: "",
+  logoUrl: "",
+  frontdeskAutoPresent: true,
+};
+
+// Per-center tax details (company definition): what prints on the invoice — legal name, tax
+// registration, address, footer, logo, etc. RBAC is gated by the caller (centro.fiscal.write). Partial PUT.
 export function DatosFiscalesDialog({
   centro,
   open,
@@ -74,56 +77,48 @@ export function DatosFiscalesDialog({
 }) {
   const t = useTranslations("admin.fiscal");
   const tc = useTranslations("admin");
-  const [form, setForm] = React.useState<Form>(() =>
-    centro ? fromCentro(centro) : ({} as Form),
+  // Re-seeded whenever the dialog opens or the target center changes. Every field is optional
+  // (partial PUT: an empty field is left untouched), so nothing is ever missing.
+  const [form, update] = useDialogForm<Form>(
+    () => (centro ? fromCentro(centro) : EMPTY_FORM),
+    open,
+    centro?.id,
   );
-  const [submitting, setSubmitting] = React.useState(false);
 
-  // Re-seed when the target center changes / dialog reopens.
-  const [prevId, setPrevId] = React.useState(centro?.id);
-  if (centro && centro.id !== prevId) {
-    setPrevId(centro.id);
-    setForm(fromCentro(centro));
-  }
-
-  function set<K extends keyof Form>(k: K, v: string) {
-    setForm((prev) => ({ ...prev, [k]: v }));
-  }
-
-  async function onSubmit() {
-    if (!centro) return;
-    setSubmitting(true);
-    try {
-      // Enviar solo campos string con contenido; trim. (Patch parcial: lo vacío no se toca.)
-      // El LOGO NO va aquí: /tax-details no lo acepta (por eso el membrete salía vacío). Va por
-      // PUT /centers/:id (updateCenter), abajo. Ver hojas-de-impresion-membrete-y-formatos.
+  const { submitting, submit } = useSubmit(
+    async () => {
+      // Unreachable: the caller opens the dialog only with a center.
+      if (!centro) throw new Error("no center");
+      // Send only string fields with content, trimmed. (Partial patch: empty fields are left alone.)
+      // The LOGO does not go here: /tax-details does not accept it (that is why the letterhead came out
+      // empty). It goes through PUT /centers/:id (updateCenter), below. See hojas-de-impresion-membrete-y-formatos.
       const payload: DatosFiscalesPayload = {};
       (Object.keys(form) as (keyof Form)[]).forEach((k) => {
-        if (k === "logoUrl") return; // el logo va por updateCenter, no por datos fiscales
+        if (k === "logoUrl") return; // the logo goes through updateCenter, not tax details
         const val = form[k];
-        if (typeof val !== "string") return; // el boolean se maneja aparte
+        if (typeof val !== "string") return; // the boolean is handled separately
         const v = val.trim();
         if (v) (payload as Record<string, string>)[k] = v;
       });
-      // Enganche autopresente (boolean): siempre se envía su estado explícito.
+      // Frontdesk auto-present hook (boolean): its explicit state is always sent.
       (payload as Record<string, unknown>).frontdeskAutoPresent = form.frontdeskAutoPresent;
       await updateDatosFiscales(centro.id, payload);
-      // Logo del membrete: solo si cambió (enviar "" borra el logo → hojas sin membrete gráfico).
+      // Letterhead logo: only when it changed (sending "" clears it → sheets with no graphic letterhead).
       const logo = form.logoUrl.trim();
       if (logo !== (centro.logoUrl ?? "").trim()) {
         await updateCenter(centro.id, { logoUrl: logo });
       }
-      toast.success(t("saved"));
-      onOpenChange(false);
-      onSaved?.();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
+    },
+    {
+      successMessage: t("saved"),
+      onSuccess: () => {
+        onOpenChange(false);
+        onSaved?.();
+      },
+    },
+  );
 
-  // Solo campos de texto (el boolean autopresente se pinta aparte con un Switch).
+  // Text fields only (the auto-present boolean is drawn separately with a Switch).
   type StrKey = Exclude<keyof Form, "frontdeskAutoPresent">;
   const FIELDS: { key: StrKey; area?: boolean }[] = [
     { key: "legalName" },
@@ -139,57 +134,58 @@ export function DatosFiscalesDialog({
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{t("title", { name: centro?.name ?? "" })}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </DialogHeader>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          {FIELDS.map(({ key, area }) => (
-            <div
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="lg"
+      title={t("title", { name: centro?.name ?? "" })}
+      description={t("description")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      submitLabel={t("save")}
+      submittingLabel={t("saving")}
+      cancelLabel={tc("cancel")}
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        {FIELDS.map(({ key, area }) => {
+          const id = `tax-details-${key}`;
+          return (
+            <Field
               key={key}
-              className={"space-y-1.5 " + (area ? "sm:col-span-2" : "")}
+              label={t(`field.${key}`)}
+              htmlFor={id}
+              className={area ? "sm:col-span-2" : undefined}
             >
-              <Label>{t(`field.${key}`)}</Label>
               {area ? (
                 <Textarea
+                  id={id}
                   value={form[key]}
-                  onChange={(e) => set(key, e.target.value)}
+                  onChange={(e) => update({ [key]: e.target.value } as Partial<Form>)}
                   rows={3}
                 />
               ) : (
                 <Input
+                  id={id}
                   value={form[key]}
-                  onChange={(e) => set(key, e.target.value)}
+                  onChange={(e) => update({ [key]: e.target.value } as Partial<Form>)}
                 />
               )}
-            </div>
-          ))}
-        </div>
+            </Field>
+          );
+        })}
+      </div>
 
-        <div className="mt-4 flex items-start justify-between gap-4 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
-          <div className="space-y-0.5">
-            <Label htmlFor="frontdesk-autopresente">{t("autopresenteLabel")}</Label>
-            <p className="text-xs text-muted-foreground">{t("autopresenteHelp")}</p>
-          </div>
-          <Switch
-            id="frontdesk-autopresente"
-            checked={form.frontdeskAutoPresent}
-            onCheckedChange={(v) => setForm((prev) => ({ ...prev, frontdeskAutoPresent: v }))}
-          />
+      <div className="flex items-start justify-between gap-4 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+        <div className="space-y-0.5">
+          <Label htmlFor="frontdesk-autopresente">{t("autopresenteLabel")}</Label>
+          <p className="text-xs text-muted-foreground">{t("autopresenteHelp")}</p>
         </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={submitting || !centro}>
-            {submitting ? t("saving") : t("save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <Switch
+          id="frontdesk-autopresente"
+          checked={form.frontdeskAutoPresent}
+          onCheckedChange={(v) => update({ frontdeskAutoPresent: v })}
+        />
+      </div>
+    </FormDialog>
   );
 }

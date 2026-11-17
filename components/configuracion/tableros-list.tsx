@@ -3,19 +3,19 @@
 import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   getTableros,
   crearTablero,
-  actualizarTablero,
   type TableroRegistro,
 } from "@/lib/api/tablero";
-import { toastError } from "@/lib/api/errors";
+import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
+import { RequiredLegend } from "@/components/kit/required-mark";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,37 +99,38 @@ export function TablerosList() {
 
 function CrearTableroDialog({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
   const t = useTranslations("configuracion.tableros");
-  const tRoot = useTranslations();
   const [clave, setClave] = React.useState("");
   const [labelKey, setLabelKey] = React.useState("");
   const [layout, setLayout] = React.useState("etapas");
   const [entidad, setEntidad] = React.useState("");
   const [icon, setIcon] = React.useState("");
   const [esVertical, setEsVertical] = React.useState(true);
-  const [busy, setBusy] = React.useState(false);
 
-  const canSubmit = !!clave.trim() && !!labelKey.trim() && !!layout && !!entidad.trim() && !busy;
+  const missing = missingFields([
+    [t("clave"), !!clave.trim()],
+    [t("label"), !!labelKey.trim()],
+    [t("layout"), !!layout],
+    [t("entidad"), !!entidad.trim()],
+  ]);
 
-  async function submit() {
-    setBusy(true);
-    try {
-      await crearTablero({
+  const { submitting, submit } = useSubmit(
+    () =>
+      crearTablero({
         slug: clave.trim(),
         labelKey: labelKey.trim(),
         layout,
         entity: entidad.trim(),
         icon: icon.trim() || undefined,
         isVertical: esVertical,
-      });
-      toast.success(t("created"));
-      onSaved();
-      onClose();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+      }),
+    {
+      successMessage: t("created"),
+      onSuccess: () => {
+        onSaved();
+        onClose();
+      },
+    },
+  );
 
   return (
     <FormDialog
@@ -137,32 +138,33 @@ function CrearTableroDialog({ onClose, onSaved }: { onClose: () => void; onSaved
       onOpenChange={(o) => !o && onClose()}
       title={t("new")}
       description={t("newHelp")}
-      onSubmit={submit}
-      submitting={busy}
-      canSubmit={canSubmit}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
     >
-      <Field label={t("clave")} hint={t("claveHint")}>
-        <Input value={clave} onChange={(e) => setClave(e.target.value)} placeholder="operaciones" />
+      <RequiredLegend />
+      <Field label={t("clave")} htmlFor="board-key" hint={t("claveHint")} required>
+        <Input id="board-key" aria-describedby="board-key-hint" value={clave} onChange={(e) => setClave(e.target.value)} placeholder="operaciones" />
       </Field>
-      <Field label={t("label")} hint={t("labelHint")}>
-        <Input value={labelKey} onChange={(e) => setLabelKey(e.target.value)} placeholder="nav.operaciones" />
+      <Field label={t("label")} htmlFor="board-label" hint={t("labelHint")} required>
+        <Input id="board-label" aria-describedby="board-label-hint" value={labelKey} onChange={(e) => setLabelKey(e.target.value)} placeholder="nav.operaciones" />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label={t("layout")}>
+        <Field label={t("layout")} htmlFor="board-layout" required>
           <Select value={layout} onValueChange={setLayout}>
-            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+            <SelectTrigger id="board-layout" className="w-full"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="etapas">etapas</SelectItem>
               <SelectItem value="tabla">tabla</SelectItem>
             </SelectContent>
           </Select>
         </Field>
-        <Field label={t("entidad")} hint={t("entidadHint")}>
-          <Input value={entidad} onChange={(e) => setEntidad(e.target.value)} placeholder="operacion" />
+        <Field label={t("entidad")} htmlFor="board-entity" hint={t("entidadHint")} required>
+          <Input id="board-entity" aria-describedby="board-entity-hint" value={entidad} onChange={(e) => setEntidad(e.target.value)} placeholder="operacion" />
         </Field>
       </div>
-      <Field label={t("icon")}>
-        <Input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="activity" />
+      <Field label={t("icon")} htmlFor="board-icon">
+        <Input id="board-icon" value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="activity" />
       </Field>
       <label className="flex items-center gap-2 text-sm">
         <Checkbox checked={esVertical} onCheckedChange={(v) => setEsVertical(v === true)} />

@@ -26,8 +26,6 @@ export type FormShellProps = {
   reason?: string | null;
   blocked?: boolean;
   extra?: ReactNode;
-  /** @deprecated use missing/blocked; removed in PR 4 */
-  canSubmit?: boolean;
 };
 
 /** Behaviour common to both shells: blocked close while submitting, Enter to submit, footer. */
@@ -36,7 +34,7 @@ export function useFormShell(p: FormShellProps) {
   const hintId = `${useId()}-hint`;
   const submitting = !!p.submitting;
   const actions = p.actions && p.actions.length > 0 ? p.actions : undefined;
-  const blocked = !!p.blocked || p.canSubmit === false;
+  const blocked = !!p.blocked;
   const { disabled } = footerState({
     missing: p.missing,
     reason: p.reason,

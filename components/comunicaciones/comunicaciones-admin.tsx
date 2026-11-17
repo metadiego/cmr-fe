@@ -20,12 +20,13 @@ import {
   type CreatePlantillaPayload,
   type Alerta,
 } from "@/lib/api/comunicaciones";
-import { apiErrorMessage, toastError } from "@/lib/api/errors";
+import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { useCreateClinic } from "@/hooks/use-create-clinic";
 import { createClinicReady } from "@/lib/create-clinic";
+import { missingFields } from "@/lib/forms/missing";
 import { isClinicViewAll } from "@/lib/tenant";
 import { CreateClinicField } from "@/components/kit/create-clinic-field";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
   Select,
@@ -339,30 +343,29 @@ function PlantillaForm({
   onSaved: () => void;
 }) {
   const t = useTranslations("comunicaciones");
-  const EMPTY = { clave: "", canal: "whatsapp", idioma: "", asunto: "", cuerpo: "" };
-  const [form, setForm] = React.useState(EMPTY);
-  const [submitting, setSubmitting] = React.useState(false);
-  const set = <K extends keyof typeof EMPTY>(k: K, v: (typeof EMPTY)[K]) =>
-    setForm((prev) => ({ ...prev, [k]: v }));
-
-  function handleOpenChange(next: boolean) {
-    if (!next) { setForm(EMPTY); setClinicPicked(""); }
-    onOpenChange(next);
-  }
+  const tRoot = useTranslations();
+  const [form, update] = useDialogForm(
+    () => ({ clave: "", canal: "whatsapp", idioma: "", asunto: "", cuerpo: "", clinicPicked: "" }),
+    open,
+  );
 
   // The clinic it is created in: the top bar's; on «Ambos» the form asks (lib/create-clinic.ts).
   const create = useCreateClinic("notificaciones.config", null);
-  const [clinicPicked, setClinicPicked] = React.useState("");
-  const clinicId = clinicPicked || create.defaultClinicId;
+  const clinicId = form.clinicPicked || create.defaultClinicId;
   const viewAll = isClinicViewAll();
+  const clinicReady = createClinicReady(clinicId, create.centers.length, viewAll);
+  // The clinic counts as a missing field only where a picker is shown; otherwise the list is still loading.
+  const clinicPicker = create.centers.length > 1;
+  const clinicsLoading = !clinicReady && !clinicPicker;
 
-  const canSubmit = !!form.clave.trim() && !!form.cuerpo.trim() && !submitting &&
-    createClinicReady(clinicId, create.centers.length, viewAll);
+  const missing = missingFields([
+    [t("col.clave"), !!form.clave.trim()],
+    [t("col.cuerpo"), !!form.cuerpo.trim()],
+    [tRoot("createClinic.label"), clinicReady || !clinicPicker],
+  ]);
 
-  async function onSubmit() {
-    if (!canSubmit) return;
-    setSubmitting(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
       const payload: CreatePlantillaPayload = {
         slug: form.clave.trim(),
         channel: form.canal as CreatePlantillaPayload["channel"],
@@ -371,37 +374,44 @@ function PlantillaForm({
         body: form.cuerpo.trim(),
       };
       await crearPlantilla(payload, clinicId || undefined);
-      toast.success(t("plantillaCreada"));
-      handleOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toastError(err);
-    } finally {
-      setSubmitting(false);
-    }
-  }
+    },
+    {
+      successMessage: t("plantillaCreada"),
+      onSuccess: () => {
+        onOpenChange(false);
+        onSaved();
+      },
+    },
+  );
 
   return (
     <FormDialog
       open={open}
-      onOpenChange={handleOpenChange}
+      onOpenChange={onOpenChange}
+      size="md"
       title={t("nuevaPlantilla")}
       description={t("nuevaPlantillaHelp")}
+      missing={missing}
+      blocked={clinicsLoading}
+      // Blocked because the clinic list is still loading, or because it failed or came back empty.
+      reason={clinicsLoading ? (create.loading ? tRoot("common.loading") : t("noClinicToCreate")) : null}
       submitting={submitting}
-      canSubmit={canSubmit}
-      onSubmit={onSubmit}
+      onSubmit={() => submit()}
     >
-      <Field label={t("col.clave")}>
+      {/* Three required fields only when the clinic picker shows (Clave, Cuerpo, Centro). */}
+      {clinicPicker && <RequiredLegend />}
+      <Field label={t("col.clave")} htmlFor="template-key" required>
         <Input
+          id="template-key"
           value={form.clave}
-          onChange={(e) => set("clave", e.target.value)}
+          onChange={(e) => update({ clave: e.target.value })}
           placeholder="cita_recordatorio"
           className="font-mono"
         />
       </Field>
-      <Field label={t("col.canal")}>
-        <Select value={form.canal} onValueChange={(v) => set("canal", v)}>
-          <SelectTrigger className="w-full">
+      <Field label={t("col.canal")} htmlFor="template-channel">
+        <Select value={form.canal} onValueChange={(v) => update({ canal: v })}>
+          <SelectTrigger id="template-channel" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -411,16 +421,29 @@ function PlantillaForm({
           </SelectContent>
         </Select>
       </Field>
-      <Field label={t("col.idioma")} hint={t("idiomaHint")}>
-        <Input value={form.idioma} onChange={(e) => set("idioma", e.target.value)} placeholder="es" />
+      <Field label={t("col.idioma")} htmlFor="template-language" hint={t("idiomaHint")}>
+        <Input
+          id="template-language"
+          aria-describedby="template-language-hint"
+          value={form.idioma}
+          onChange={(e) => update({ idioma: e.target.value })}
+          placeholder="es"
+        />
       </Field>
-      <Field label={t("col.asunto")}>
-        <Input value={form.asunto} onChange={(e) => set("asunto", e.target.value)} />
+      <Field label={t("col.asunto")} htmlFor="template-subject">
+        <Input id="template-subject" value={form.asunto} onChange={(e) => update({ asunto: e.target.value })} />
       </Field>
-      <Field label={t("col.cuerpo")}>
-        <Textarea rows={5} value={form.cuerpo} onChange={(e) => set("cuerpo", e.target.value)} />
+      <Field label={t("col.cuerpo")} htmlFor="template-body" required>
+        <Textarea id="template-body" rows={5} value={form.cuerpo} onChange={(e) => update({ cuerpo: e.target.value })} />
       </Field>
-      <CreateClinicField centers={create.centers} value={clinicId} onChange={setClinicPicked} show={viewAll} disabled={submitting} />
+      <CreateClinicField
+        centers={create.centers}
+        value={clinicId}
+        onChange={(id) => update({ clinicPicked: id })}
+        show={viewAll}
+        disabled={submitting}
+        required
+      />
     </FormDialog>
   );
 }
