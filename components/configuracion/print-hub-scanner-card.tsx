@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { toast } from "sonner";
 
 import { createScanner, deleteScanner, updateScanner, type PrintHubScanner, type ScannerSource } from "@/lib/api/print-hub";
@@ -40,6 +41,7 @@ interface Props {
 export function PrintHubScannerCard({ centerId, scanner, sortOrder, canEdit, canDelete, onSaved, onDeleted }: Props) {
   const t = useTranslations("aparienciaCorporativa");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const [form, setForm] = React.useState<Form>(() => fromScanner(scanner));
   const [busy, setBusy] = React.useState<"save" | "delete" | null>(null);
 
@@ -64,7 +66,8 @@ export function PrintHubScannerCard({ centerId, scanner, sortOrder, canEdit, can
 
   async function remove() {
     if (!scanner) return onDeleted();
-    if (!window.confirm(t("scannerRemoveConfirm", { name: scanner.name }))) return;
+    const ok = await confirm({ title: t("scannerRemoveConfirm", { name: scanner.name }), destructive: true });
+    if (!ok) return;
     setBusy("delete");
     try {
       await deleteScanner(centerId, scanner.id);

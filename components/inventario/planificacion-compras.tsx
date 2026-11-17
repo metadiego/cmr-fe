@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { toast } from "sonner";
 
 import {
@@ -42,6 +43,7 @@ export function PlanificacionCompras() {
   const t = useTranslations("compras");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const { can } = useCan();
 
   // Parámetros: borrador (editable) vs aplicados (los que dispara la consulta).
@@ -150,7 +152,8 @@ export function PlanificacionCompras() {
   }
 
   async function cancelar(poId: string, numero: string | null) {
-    if (!window.confirm(t("cancelarConfirm", { n: numero ?? poId.slice(0, 8) }))) return;
+    const ok = await confirm({ title: t("cancelarConfirm", { n: numero ?? poId.slice(0, 8) }), destructive: true });
+    if (!ok) return;
     try {
       await cancelarOrden(poId);
       toast.success(t("ordenCancelada"));
