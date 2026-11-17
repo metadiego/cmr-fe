@@ -76,9 +76,6 @@ export function PacienteFormSheet({
   const [emailTouched, setEmailTouched] = React.useState(false);
   const emailInvalido =
     !!form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
-  // Dueño, 30-sep: un número de ID sin su tipo no sirve — aviso EN LÍNEA (no bloquea el guardado,
-  // la autoridad final es la config de requeridos del centro, igual que el email).
-  const idTypeNeeded = !!form.docId.trim() && !form.idType;
 
   // The center a NEW patient is created in. Writes are tenant-scoped; master /
   // multi-center users have no auto-locked center, so they must choose one.
@@ -305,9 +302,9 @@ export function PacienteFormSheet({
               />
             </Field>
             {/* Tipo ANTES del ID (regla del dueño 30-sep): un número sin su tipo no sirve. */}
-            <Field label={t("idType")} required={req("idType")} error={idTypeNeeded ? t("idTypeNeeded") : null}>
+            <Field label={t("idType")} required={req("idType")}>
               <Select value={form.idType || undefined} onValueChange={(v) => set("idType", v as FormState["idType"])}>
-                <SelectTrigger className="w-full" aria-invalid={idTypeNeeded || errFields.has("idType") || undefined}>
+                <SelectTrigger className="w-full" aria-invalid={errFields.has("idType") || undefined}>
                   <SelectValue placeholder={t("idTypePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
