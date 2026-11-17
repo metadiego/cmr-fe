@@ -57,7 +57,10 @@ const DEBT = {
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)
   // se extrajeron a components/servicios/servicio-form-fields.tsx para hacerle lugar al toggle de
   // allowSessionFixWithoutPackage sin tocar el ceiling. Ver HANDOFF-sesiones-sin-paquete-listo.md.
-  "components/servicios/servicios-admin.tsx": 661,
+  // 17-nov-2026: 661 → 614 — the service sheet moved onto the standard FormSheet shell (kit Field,
+  // useDialogForm, useSubmit, useConfirm for "apply to all centers"); local canSubmit and the
+  // hand-built confirm went.
+  "components/servicios/servicios-admin.tsx": 614,
   // 10-nov-2026: 642 → 618 — Campo/CopiableCampo moved to components/auditoria/audit-fields.tsx.
   // 10-nov-2026: 618 → 567 — the detail panel moved to components/auditoria/audit-detail-sheet.tsx
   // (merge of the Claude connector "via" branch with main's entity filter).

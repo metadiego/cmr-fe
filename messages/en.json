@@ -3662,7 +3662,8 @@
     "multiAplicado": "Applied to {n} center(s)",
     "multiSinCambios": "No changes (all centers were already the same)",
     "cargaParcial": "Could not load services from: {centros}. The view may be incomplete.",
-    "ordenArrastrar": "Drag to reorder the tabs"
+    "ordenArrastrar": "Drag to reorder the tabs",
+    "sortOrderInvalid": "The order must be a number."
   },
   "transferencias": {
     "title": "Transfers",
