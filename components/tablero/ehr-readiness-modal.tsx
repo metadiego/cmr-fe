@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { updatePaciente } from "@/lib/api/pacientes";
 import { type EhrReadinessField } from "@/lib/api/ehr-integration";
+import { ID_TYPES } from "@/components/clientes/paciente-form-model";
 import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { todayPR } from "@/lib/format/fecha";
 import { ehrReadinessInvalid, ehrReadinessMissing, ehrReadinessOrder } from "@/lib/board/ehr-readiness-missing";
@@ -18,7 +19,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // BLOCKING dialog that asks for the data the EHR needs BEFORE marking Present. It paints ONLY the
 // `faltantes` the readiness check reports, with the same control as the patient form, saves them with the
 // usual PUT and only then lets the flow continue. Cancel = Present is not marked. Handoff be-ehr-integration-presente.
-const ID_TYPES = ["drivers_license", "passport", "green_card", "state_id"] as const;
 
 export function EhrReadinessModal({
   pacienteId,

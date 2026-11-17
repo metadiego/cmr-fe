@@ -27,6 +27,7 @@ import {
 // del CreatePacienteDto que el formulario de alta captura; la etiqueta sale de patients.form.* (i18n).
 const CAMPOS = [
   "apellidos",
+  "idType",
   "docId",
   "sexo",
   "fechaNacimiento",

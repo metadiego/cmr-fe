@@ -1171,6 +1171,7 @@
       "sinMedico": "No doctor",
       "otroCentro": "other center",
       "idTypeFirst": "Pick the ID type first",
+      "idTypeNeeded": "Pick which document this ID is from",
       "checkingRecord": "Checking the record number…"
     },
     "acciones": "Actions",

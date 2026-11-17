@@ -1171,6 +1171,7 @@
       "sinMedico": "Sin médico",
       "otroCentro": "otro centro",
       "idTypeFirst": "Elige primero el tipo de ID",
+      "idTypeNeeded": "Elige de qué documento es este ID",
       "checkingRecord": "Comprobando el número de récord…"
     },
     "acciones": "Acciones",
