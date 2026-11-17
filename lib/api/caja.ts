@@ -121,6 +121,15 @@ export interface ReporteDia {
     // documento, para marcarlo en la tabla combinada. Ausente (undefined) en el reporte por división.
     division?: CajaDivision;
   }>;
+  // Totales de `documentos[]` POR DIVISIÓN (BE PR #613, handoff documentos-del-dia-por-division):
+  // la suma de `general` + `consulta` es `total`. Pintar estos números tal cual, nunca recalcular
+  // sumando `documentos` a mano. En la hoja de un cajero/una división, `documentos` ya viene acotado
+  // a esa división — ahí `total` coincide con la única división presente.
+  documentosPorDivision?: {
+    general: { count: number; total: number };
+    consulta: { count: number; total: number };
+    total: { count: number; total: number };
+  };
   // Devoluciones del día con su detalle (bloque aparte, en rojo). `number` = nº de nota de crédito.
   devolucionesDetalle?: Array<{
     id: string;

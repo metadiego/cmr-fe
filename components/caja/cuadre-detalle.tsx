@@ -15,7 +15,9 @@ import { Button } from "@/components/ui/button";
 import { ProductSalesSection } from "@/components/caja/product-sales-section";
 import { productSalesPrintHtml, type ProductSalesPrintLabels } from "@/lib/caja/product-sales-print";
 import { signaturesPrintHtml, type PrintedSignature } from "@/lib/caja/sign-off";
+import { documentosPrintHtml } from "@/lib/caja/documentos-print";
 import { ConteoEfectivoSection, type ConteoEfectivoPanel } from "@/components/caja/conteo-efectivo-section";
+import { TablaDocumentos } from "@/components/caja/tabla-documentos";
 import { conteoTableHtml } from "@/lib/caja/conteo-table-print";
 
 // Números de la caja (modelo CMA) que también van en la hoja impresa.
@@ -89,9 +91,13 @@ export function CuadreDetalle({
   const tituloEfectivo = titulo ?? t("title");
 
   const documentos = React.useMemo(() => reporte.documentos ?? [], [reporte.documentos]);
-  // Columna «División» (handoff cuadre-unico-del-dia): solo en el cuadre TOTAL, donde cada documento
-  // trae la suya. En el reporte por división ningún documento la trae → la columna no se pinta.
+  // Por división (handoff documentos-del-dia-por-division): solo en el cuadre TOTAL, donde cada
+  // documento trae la suya, se parte en dos tablas (Venta general / Consultas) + un total general. En
+  // el reporte por división o de un cajero ningún documento la trae → una sola tabla, como siempre,
+  // ahora con su total al pie. Los totales son los del BE (`documentosPorDivision`), nunca recalculados.
   const conDivision = documentos.some((d) => d.division);
+  const porDivision = reporte.documentosPorDivision;
+  const totalDocumentos = (lista: typeof documentos) => lista.reduce((sum, d) => sum + Number(d.total ?? 0), 0);
   const devoluciones = reporte.devolucionesDetalle ?? [];
   const trib = reporte.tributario ?? null;
   const conteo = reporte.conteoEfectivo ?? null;
@@ -203,11 +209,15 @@ export function CuadreDetalle({
           colImpuesto: td("colImpuesto"),
           colLineas: td("colLineas"),
           documentos: td("documentos"),
+          ventaGeneral: td("ventaGeneral"),
+          consultas: td("consultas"),
+          totalVentaGeneral: td("totalVentaGeneral"),
+          totalConsultas: td("totalConsultas"),
+          totalGeneralDocumentos: td("totalGeneralDocumentos"),
           whoBilled: td("who.title"),
           whoTotal: td("who.total"),
           colCajero: td("who.col"),
           colNumero: td("colNumero"),
-          colDivision: td("colDivision"),
           colRecord: td("colRecord"),
           colPaciente: td("colPaciente"),
           colFacturo: td("colFacturo"),
@@ -305,42 +315,34 @@ export function CuadreDetalle({
         </h3>
         {documentos.length === 0 ? (
           <p className="px-4 py-3 text-sm text-muted-foreground">{td("sinDocumentos")}</p>
+        ) : conDivision ? (
+          <>
+            <TablaDocumentos
+              titulo={`${td("ventaGeneral")} (${porDivision?.general.count ?? documentos.filter((d) => d.division === "general").length})`}
+              documentos={documentos.filter((d) => d.division === "general")}
+              totalLabel={td("totalVentaGeneral")}
+              total={porDivision?.general.total ?? totalDocumentos(documentos.filter((d) => d.division === "general"))}
+              labels={td}
+            />
+            <TablaDocumentos
+              titulo={`${td("consultas")} (${porDivision?.consulta.count ?? documentos.filter((d) => d.division === "consulta").length})`}
+              documentos={documentos.filter((d) => d.division === "consulta")}
+              totalLabel={td("totalConsultas")}
+              total={porDivision?.consulta.total ?? totalDocumentos(documentos.filter((d) => d.division === "consulta"))}
+              labels={td}
+            />
+            <div className="flex items-center justify-between border-t bg-muted/30 px-4 py-3 text-sm font-semibold">
+              <span>{td("totalGeneralDocumentos")}</span>
+              <span className="tabular-nums">{money(porDivision?.total.total ?? totalDocumentos(documentos))}</span>
+            </div>
+          </>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-2 text-left font-semibold">{td("colNumero")}</th>
-                  {conDivision && <th className="px-4 py-2 text-left font-semibold">{td("colDivision")}</th>}
-                  <th className="px-4 py-2 text-left font-semibold">{td("colRecord")}</th>
-                  <th className="px-4 py-2 text-left font-semibold">{td("colPaciente")}</th>
-                  <th className="px-4 py-2 text-left font-semibold">{td("colFacturo")}</th>
-                  <th className="px-4 py-2 text-left font-semibold">{td("colFormaPago")}</th>
-                  <th className="px-4 py-2 text-right font-semibold">{td("colTotal")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {documentos.map((d) => (
-                  <tr key={d.id}>
-                    <td className="px-4 py-2 font-mono tabular-nums">{d.number || "—"}</td>
-                    {conDivision && (
-                      <td className="px-4 py-2 text-xs text-muted-foreground">
-                        {d.division ? t(`division.${d.division}`) : "—"}
-                      </td>
-                    )}
-                    {/* Sin récord = celda vacía (no "null" ni guion raro). */}
-                    <td className="px-4 py-2 tabular-nums text-muted-foreground">{d.medicalRecordNumber || ""}</td>
-                    <td className="px-4 py-2">{d.patient || "—"}</td>
-                    {/* Quién facturó: usuario.nombre; null (o nombre null = llave) → "—", nunca el id. */}
-                    <td className="px-4 py-2">{d.user?.name || "—"}</td>
-                    {/* Forma de pago YA resuelta en siglas: pintar tal cual. */}
-                    <td className="px-4 py-2 font-mono text-xs">{d.formaPago || "—"}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">{money(d.total)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TablaDocumentos
+            documentos={documentos}
+            totalLabel={td("colTotal")}
+            total={porDivision?.total.total ?? totalDocumentos(documentos)}
+            labels={td}
+          />
         )}
       </section>
 
@@ -546,20 +548,23 @@ function buildPrintHtml(args: {
        </table>`
     : "";
 
-  const docConDivision = documentos.some((d) => d.division);
-  const divCell = (d: (typeof documentos)[number]) =>
-    docConDivision ? `<td class="dim">${esc(d.division ? (divisionLabels?.[d.division] ?? d.division) : "—")}</td>` : "";
-  const docRows = documentos
-    .map(
-      (d) =>
-        `<tr><td class="mono">${esc(d.number || "—")}</td>${divCell(d)}<td class="mono dim">${esc(d.medicalRecordNumber || "")}</td><td>${esc(d.patient || "—")}</td><td>${esc(d.user?.name || "—")}</td><td class="mono">${esc(d.formaPago || "—")}</td><td class="r mono">${esc(money(d.total))}</td></tr>`,
-    )
-    .join("");
-  const docBlock = `<h2>${esc(L.documentos)} (${documentos.length})</h2>
-    <table>
-      <thead><tr><th>${esc(L.colNumero)}</th>${docConDivision ? `<th>${esc(L.colDivision)}</th>` : ""}<th>${esc(L.colRecord)}</th><th>${esc(L.colPaciente)}</th><th>${esc(L.colFacturo)}</th><th>${esc(L.colFormaPago)}</th><th class="r">${esc(L.colTotal)}</th></tr></thead>
-      <tbody>${docRows || `<tr><td colspan="${docConDivision ? 7 : 6}" class="dim">—</td></tr>`}</tbody>
-    </table>`;
+  // Por división (handoff documentos-del-dia-por-division): extraído a lib/caja/documentos-print.ts
+  // (ceiling) — el cuadre TOTAL parte «Documentos del día» en dos tablas + un total general; una
+  // división o un cajero, una sola tabla con su total al pie. Totales del BE, nunca recalculados.
+  const docBlock = documentosPrintHtml(documentos, reporte.documentosPorDivision, {
+    documentos: L.documentos,
+    ventaGeneral: L.ventaGeneral,
+    consultas: L.consultas,
+    totalVentaGeneral: L.totalVentaGeneral,
+    totalConsultas: L.totalConsultas,
+    totalGeneralDocumentos: L.totalGeneralDocumentos,
+    colNumero: L.colNumero,
+    colRecord: L.colRecord,
+    colPaciente: L.colPaciente,
+    colFacturo: L.colFacturo,
+    colFormaPago: L.colFormaPago,
+    colTotal: L.colTotal,
+  });
 
   const devBlock = devolucionesPrintHtml(devoluciones, L, esc);
 
