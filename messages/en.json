@@ -3108,6 +3108,14 @@
         "liveStock": {
           "title": "Live stock (scales)",
           "desc": "What the scales count on each warehouse pad, next to book stock."
+        },
+        "adjustments": {
+          "title": "Adjustments",
+          "desc": "One or several products in a single numbered adjustment; and the adjustments made."
+        },
+        "dailyKardex": {
+          "title": "Daily kardex",
+          "desc": "A product's inbound, applied and adjustments, day by day, and the management summary."
         }
       }
     },

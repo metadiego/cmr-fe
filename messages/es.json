@@ -3108,6 +3108,14 @@
         "liveStock": {
           "title": "Stock live (balanzas)",
           "desc": "Lo que cuentan las balanzas en cada plato del almacén, junto al contable."
+        },
+        "adjustments": {
+          "title": "Ajustes",
+          "desc": "Uno o varios productos en un solo ajuste, con su número; y los ajustes hechos."
+        },
+        "dailyKardex": {
+          "title": "Kardex diario",
+          "desc": "Entradas, aplicadas y ajustes de un producto, día por día, y el resumen gerencial."
         }
       }
     },
