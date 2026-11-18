@@ -10,9 +10,7 @@ import {
   WhatsappIcon,
   Mail01Icon,
   Location01Icon,
-  Calendar03Icon,
-  UserIcon,
-  Alert01Icon,
+  MoreVerticalIcon,
 } from "@hugeicons/core-free-icons";
 
 import {
@@ -31,6 +29,13 @@ import { Can } from "@/components/kit/can";
 import { useConfirm } from "@/components/kit/confirm-host";
 import { useSubmit } from "@/components/kit/use-submit";
 import { useCan } from "@/hooks/use-can";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import { CertificacionGastos } from "@/components/clientes/certificacion-gastos";
@@ -39,6 +44,8 @@ import { FichaAsistencia } from "@/components/clientes/ficha-asistencia";
 import { FichaCambioProtocolo } from "@/components/clientes/ficha-cambio-protocolo";
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import { OldRecordSuggestionBanner } from "@/components/clientes/old-record-suggestion-banner";
+import { Panel } from "@/components/clientes/record-ui";
+import { PatientRecordSkeleton } from "@/components/clientes/patient-record-skeleton";
 import { PatientMergeButton } from "@/components/clientes/patient-merge-dialog";
 import {
   fullName,
@@ -46,7 +53,7 @@ import {
   ageFrom,
   colorFromString,
 } from "@/components/clientes/helpers";
-import { PageContainer, PageHeader } from "@/components/ui/page";
+import { PageContainer } from "@/components/ui/page";
 import { useTabRoute } from "@/hooks/use-tab-route";
 import { PATIENT_TABS } from "@/lib/nav/tab-routes";
 
@@ -90,7 +97,7 @@ export default function PatientRecordLayout({ children }: { children: React.Reac
         </div>
       )}
 
-      {state.kind === "loading" && <DetailSkeleton />}
+      {state.kind === "loading" && <PatientRecordSkeleton />}
 
       {state.kind === "fail" && (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -132,7 +139,6 @@ function PacienteDetail({
   onDeleted: () => void;
 }) {
   const t = useTranslations("patients");
-  const tc = useTranslations("certificacionGastos");
   const format = useFormatter();
   const { can } = useCan();
   const puedeFactura = can("factura.read");
@@ -176,84 +182,83 @@ function PacienteDetail({
     if (ok) await deactivation.submit();
   }
 
-  return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-start gap-4">
-        <Avatar className="size-16 text-lg">
-          <AvatarFallback
-            style={{ backgroundColor: colorFromString(p.id), color: "white" }}
-          >
-            {initials(p)}
-          </AvatarFallback>
-        </Avatar>
+  const doctorName = (p as unknown as { doctorName?: string | null }).doctorName;
+  const canUpdate = can("pacientes.update");
+  const canDelete = can("pacientes.delete");
+  const showMore = p.active ? canDelete : canUpdate;
 
-        <div className="min-w-0 flex-1">
-          <PageHeader
-            title={`${fullName(p)}${p.medicalRecordNumber ? ` · ${p.medicalRecordNumber}` : ""}`}
-            description={
-              <span className="inline-flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {[formatDate(format, p.dateOfBirth), sexoLabel(t, p.sex)].filter((v) => v && v !== "—").join(" · ")}
-                </span>
+  return (
+    <div className="space-y-6">
+      {/* Header card: identity on the left, actions on the right, the alerts band as its footer. */}
+      <section className="overflow-hidden rounded-xl border bg-card shadow-xs">
+        <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <Avatar className="size-14 text-base font-semibold">
+              <AvatarFallback style={{ backgroundColor: colorFromString(p.id), color: "white" }}>
+                {initials(p)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-xl font-semibold tracking-tight">{fullName(p)}</h1>
                 {p.active ? (
                   <Badge variant="secondary">{t("active")}</Badge>
                 ) : (
                   <Badge variant="outline">{t("inactive")}</Badge>
                 )}
-                {age !== null && (
-                  <span className="text-sm text-muted-foreground">
-                    {t("yearsOld", { age })}
-                  </span>
-                )}
                 <PriorityFlagsBadges patientId={p.id} centroId={centroId} />
-              </span>
-            }
-            actions={
-              <>
-                {!p.active && (
-                  <Can permiso="pacientes.update">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => reactivation.submit()}
-                      disabled={busy}
-                    >
-                      {t("reactivate")}
-                    </Button>
-                  </Can>
-                )}
-                <Can permiso="pacientes.update">
-                  <Button variant="outline" size="sm" onClick={onEdit}>
-                    <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
-                    {t("edit")}
+              </div>
+              <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
+                {[
+                  p.medicalRecordNumber ? `#${p.medicalRecordNumber}` : null,
+                  formatDate(format, p.dateOfBirth),
+                  age !== null ? t("yearsOld", { age }) : null,
+                  sexoLabel(t, p.sex),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <Can permiso="pacientes.update">
+              <Button size="sm" onClick={onEdit}>
+                <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
+                {t("edit")}
+              </Button>
+            </Can>
+            <Can permiso="pacientes.merge">
+              <PatientMergeButton
+                current={{ id: p.id, name: fullName(p), record: p.medicalRecordNumber ?? null }}
+                centerId={centroId}
+                onMerged={onChanged}
+              />
+            </Can>
+            {showMore && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon-sm" aria-label={t("moreActions")} disabled={busy}>
+                    <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
                   </Button>
-                </Can>
-                <Can permiso="pacientes.merge">
-                  <PatientMergeButton
-                    current={{ id: p.id, name: fullName(p), record: p.medicalRecordNumber ?? null }}
-                    centerId={centroId}
-                    onMerged={onChanged}
-                  />
-                </Can>
-                {p.active && (
-                  <Can permiso="pacientes.delete">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => deactivate()}
-                      disabled={busy}
-                    >
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {p.active ? (
+                    <DropdownMenuItem variant="destructive" onSelect={() => void deactivate()}>
                       {t("deactivate")}
-                    </Button>
-                  </Can>
-                )}
-              </>
-            }
-          />
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onSelect={() => void reactivation.submit()}>
+                      {t("reactivate")}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
-      </div>
+
+      </section>
 
       <OldRecordSuggestionBanner
         patientId={p.id}
@@ -262,17 +267,9 @@ function PacienteDetail({
         onReemplazado={onChanged}
       />
 
-      {/* Banda de avisos siempre visible (como la referencia): alertas, alergias, implantes. La ausencia
-          también es información. (Se poblará con datos del BE cuando existan.) */}
-      <div className="space-y-1 rounded-md border border-warning/40 bg-warning/40 px-4 py-3 text-sm">
-        <AvisoRow label={t("hub.alerts")} value={t("hub.noAlerts")} />
-        <AvisoRow label={t("hub.allergies")} value={t("hub.noAllergies")} />
-        <AvisoRow label={t("hub.implants")} value={t("hub.noImplants")} />
-      </div>
-
       {/* The record as a hub. Each tab calls ONLY its own endpoint; tabs are shown by permission. */}
       <Tabs value={tab} onValueChange={selectTab}>
-        <TabsList className="mb-4">
+        <TabsList variant="line" className="mb-5 overflow-x-auto">
           <TabsTrigger value="summary">{t("tabs.summary")}</TabsTrigger>
           {puedeCitas && <TabsTrigger value="appointments">{t("tabs.appointments")}</TabsTrigger>}
           {puedeFrontdesk && <TabsTrigger value="therapies">{t("tabs.therapies")}</TabsTrigger>}
@@ -283,37 +280,48 @@ function PacienteDetail({
         </TabsList>
 
         <TabsContent value="summary">
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            <Card title={t("form.sectionContact")}>
-              <InfoRow icon={Call02Icon} label={t("columns.phone")} value={p.phone} />
-              <InfoRow icon={WhatsappIcon} label={t("form.whatsapp")} value={p.whatsapp} />
-              <InfoRow icon={Mail01Icon} label={t("columns.email")} value={p.email} />
-              <InfoRow
-                icon={Location01Icon}
-                label={t("form.direccion")}
-                value={[p.address, p.zipCode].filter(Boolean).join(", ") || null}
-              />
-            </Card>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
+              <DataCard
+                title={t("form.sectionPersonal")}
+                action={
+                  canUpdate ? (
+                    <Button variant="ghost" size="sm" onClick={onEdit}>
+                      <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
+                      {t("edit")}
+                    </Button>
+                  ) : undefined
+                }
+              >
+                <Field label={t("form.nombres")} value={p.firstName} />
+                <Field label={t("form.apellidos")} value={p.lastName} />
+                <Field label={t("form.fechaNacimiento")} value={formatDate(format, p.dateOfBirth)} />
+                <Field label={t("form.sexo")} value={sexoLabel(t, p.sex)} />
+                <Field label={t("form.nacionalidad")} value={p.nationality} />
+              </DataCard>
 
-            <Card title={t("form.sectionPersonal")}>
-              <InfoRow icon={UserIcon} label={t("form.sexo")} value={sexoLabel(t, p.sex)} />
-              <InfoRow
-                icon={Calendar03Icon}
-                label={t("form.fechaNacimiento")}
-                value={formatDate(format, p.dateOfBirth)}
-              />
-              <InfoRow icon={UserIcon} label={t("form.nacionalidad")} value={p.nationality} />
-            </Card>
+              <DataCard title={t("form.sectionContact")}>
+                <Field icon={Call02Icon} label={t("columns.phone")} value={p.phone} />
+                <Field icon={WhatsappIcon} label={t("form.whatsapp")} value={p.whatsapp} />
+                <Field icon={Mail01Icon} label={t("columns.email")} value={p.email} />
+                <Field
+                  icon={Location01Icon}
+                  label={t("form.direccion")}
+                  value={[p.address, p.zipCode].filter(Boolean).join(", ") || null}
+                />
+              </DataCard>
+            </div>
 
-            <Card title={t("form.sectionClinical")}>
-              <InfoRow label={t("form.record")} value={p.medicalRecordNumber} />
-              {/* Médico del paciente: `doctorName` lo computa el BE (ya lo sirve /patients/:id); cast por el
-                  hueco de tipos hasta que gen:api lo traiga. */}
-              <InfoRow label={t("form.medico")} value={(p as unknown as { doctorName?: string | null }).doctorName} />
-              <InfoRow label={t("form.aseguradora")} value={p.insurer} />
-            </Card>
+            <div className="space-y-6">
+              <DataCard title={t("form.sectionClinical")} columns={1}>
+                <Field label={t("form.record")} value={p.medicalRecordNumber} />
+                {/* `doctorName` is computed by the BE (already served by /patients/:id); cast until gen:api has it. */}
+                <Field label={t("form.medico")} value={doctorName} />
+                <Field label={t("form.aseguradora")} value={p.insurer} />
+              </DataCard>
+              <FichaUltimaVisita pacienteId={p.id} />
+            </div>
           </div>
-          <div className="mt-6"><FichaUltimaVisita pacienteId={p.id} /></div>
         </TabsContent>
 
         {puedeCitas && (
@@ -330,12 +338,9 @@ function PacienteDetail({
         )}
         {puedeFactura && (
           <TabsContent value="documents">
-            {/* «Documentos» del paciente. Por ahora: la Certificación de gastos (un documento, no una
-                pestaña propia). Aquí se irán sumando otros documentos. */}
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold">{tc("title")}</h2>
-              <CertificacionGastos pacienteId={p.id} centro={centroId} />
-            </div>
+            {/* The patient's documents. For now: the expense certification (a document, not a tab of
+                its own). Other documents will be added here. */}
+            <CertificacionGastos pacienteId={p.id} centro={centroId} />
           </TabsContent>
         )}
         {puedeProtocolo && (
@@ -348,33 +353,27 @@ function PacienteDetail({
   );
 }
 
-function AvisoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2">
-      <HugeiconsIcon icon={Alert01Icon} className="mt-0.5 size-4 shrink-0 text-warning-foreground/70" />
-      <span><span className="font-semibold">{label}</span> <span className="text-muted-foreground">{value}</span></span>
-    </div>
-  );
-}
-
-function Card({
+// A section of the record: titled header row, then label/value cells separated by hairlines. The
+// list is pulled down 1px under `overflow-hidden` so the last row's rule does not double the border.
+function DataCard({
   title,
+  action,
+  columns = 2,
   children,
 }: {
   title: string;
+  action?: React.ReactNode;
+  columns?: 1 | 2;
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-      <h2 className="mb-4 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-        {title}
-      </h2>
-      <dl className="space-y-3">{children}</dl>
-    </section>
+    <Panel title={title} actions={action}>
+      <dl className={cn("-mb-px grid", columns === 2 && "sm:grid-cols-2")}>{children}</dl>
+    </Panel>
   );
 }
 
-function InfoRow({
+function Field({
   icon,
   label,
   value,
@@ -383,19 +382,13 @@ function InfoRow({
   label: string;
   value?: string | null;
 }) {
+  const shown = value?.trim();
   return (
-    <div className="flex items-start gap-3">
-      {icon ? (
-        <HugeiconsIcon
-          icon={icon}
-          className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-        />
-      ) : (
-        <span className="mt-0.5 size-4 shrink-0" />
-      )}
+    <div className="flex min-w-0 items-start gap-3 border-b px-5 py-3.5">
+      {icon && <HugeiconsIcon icon={icon} className="mt-0.5 size-4 shrink-0 text-muted-foreground" />}
       <div className="min-w-0">
-        <dt className="text-xs text-muted-foreground">{label}</dt>
-        <dd className="truncate text-sm">{value?.trim() ? value : "—"}</dd>
+        <dt className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{label}</dt>
+        <dd className={cn("mt-1 truncate text-sm", !shown && "text-muted-foreground")}>{shown || "—"}</dd>
       </div>
     </div>
   );
@@ -420,23 +413,4 @@ function formatDate(
 ): string | null {
   const d = parseDayUTC(value);
   return d ? format.dateTime(d, "dayLong") : null;
-}
-
-function DetailSkeleton() {
-  return (
-    <div className="space-y-8">
-      <div className="flex items-center gap-4">
-        <div className="size-16 animate-pulse rounded-full bg-muted" />
-        <div className="space-y-2">
-          <div className="h-6 w-48 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-        </div>
-      </div>
-      <div className="grid gap-6 sm:grid-cols-2">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-40 animate-pulse rounded-lg bg-muted" />
-        ))}
-      </div>
-    </div>
-  );
 }

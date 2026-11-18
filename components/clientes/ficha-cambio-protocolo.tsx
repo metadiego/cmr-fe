@@ -8,10 +8,11 @@ import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { CambioProtocoloPorCentro } from "@/components/clientes/cambio-protocolo-por-centro";
+import { EmptyState, Panel } from "@/components/clientes/record-ui";
 
-// Pestaña «Cambio de protocolo» de la ficha del paciente: ARRIBA el historial (lo que ya tuvo, del más
-// reciente al más viejo) y ABAJO la acción (reemplazar terapias pendientes), ambas para el paciente ya
-// conocido. Handoff cambio-de-protocolo-a-la-ficha. El permiso lo gatea la ficha (tratamiento.cambio_protocolo).
+// «Cambio de protocolo» tab of the patient record: the action (replace pending therapies) and, beside
+// it, the history (newest first), both for the patient already known. Handoff
+// cambio-de-protocolo-a-la-ficha. The record gates the permission (tratamiento.cambio_protocolo).
 export function FichaCambioProtocolo({ pacienteId, centro }: { pacienteId: string; centro?: string }) {
   const t = useTranslations("pacientes.cambioProtocolo");
   const format = useFormatter();
@@ -22,7 +23,7 @@ export function FichaCambioProtocolo({ pacienteId, centro }: { pacienteId: strin
   );
   const historial = histRes.state.kind === "ok" ? histRes.state.data : [];
 
-  // Nombre del médico (el historial trae medicoId; puede ser null → se muestra «—»).
+  // Doctor name (the history carries the doctor id; it may be null → shown as «—»).
   const medRes = useResource<MedicoOpcion[]>(() => listMedicos(centro ?? undefined), [centro]);
   const medById = React.useMemo(() => {
     const m = new Map<string, string>();
@@ -31,37 +32,40 @@ export function FichaCambioProtocolo({ pacienteId, centro }: { pacienteId: strin
   }, [medRes.state]);
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-2">
-        <h2 className="text-sm font-semibold">{t("historialTitulo")}</h2>
+    <div className="grid gap-6 xl:grid-cols-5">
+      {/* The action first and wider: it is what this tab is opened for; the history sits beside it. */}
+      <Panel title={t("nuevoTitulo")} className="xl:col-span-3">
+        <div className="px-5 py-4">
+          <CambioProtocoloPorCentro pacienteId={pacienteId} fallback={centro ?? null} onApplied={() => histRes.reload()} />
+        </div>
+      </Panel>
+
+      <Panel title={t("historialTitulo")} className="self-start xl:col-span-2">
         {histRes.state.kind === "loading" ? (
-          <p className="text-xs text-muted-foreground">{t("cargando")}</p>
+          <EmptyState>{t("cargando")}</EmptyState>
         ) : historial.length === 0 ? (
-          <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">{t("sinHistorial")}</p>
+          <EmptyState>{t("sinHistorial")}</EmptyState>
         ) : (
-          <ul className="space-y-2">
+          <ol className="divide-y">
             {historial.map((c) => (
-              <li key={c.changeId} className="rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+              <li key={c.changeId} className="px-5 py-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-medium">{format.dateTime(parseDayUTC(c.date.slice(0, 10)) ?? new Date(c.date), "dayLong")}</span>
                   <span className="text-xs text-muted-foreground">
                     {t("cambioResumen", { cerrados: c.closedPackages.length, creados: c.createdPackages.length })}
                   </span>
                 </div>
-                <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-                  <span>{t("motivo")}: {c.reason || "—"}</span>
-                  <span>{t("medico")}: {c.doctorId ? (medById.get(c.doctorId) ?? "—") : "—"}</span>
-                </div>
+                <dl className="mt-1.5 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
+                  <dt className="text-muted-foreground">{t("motivo")}</dt>
+                  <dd>{c.reason || "—"}</dd>
+                  <dt className="text-muted-foreground">{t("medico")}</dt>
+                  <dd>{c.doctorId ? (medById.get(c.doctorId) ?? "—") : "—"}</dd>
+                </dl>
               </li>
             ))}
-          </ul>
+          </ol>
         )}
-      </section>
-
-      <section className="space-y-2">
-        <h2 className="text-sm font-semibold">{t("nuevoTitulo")}</h2>
-        <CambioProtocoloPorCentro pacienteId={pacienteId} fallback={centro ?? null} onApplied={() => histRes.reload()} />
-      </section>
+      </Panel>
     </div>
   );
 }
