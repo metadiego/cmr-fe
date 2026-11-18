@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trainLegsText } from "@/components/agenda/therapy-train-grid";
 import { PlanSummarySkeleton } from "@/components/agenda/therapy-day-skeleton";
+import { FormFooter } from "@/components/kit/form-footer";
+import { RequiredLegend } from "@/components/kit/required-mark";
 
 // Bottom bar of the therapy day scheduler: the live real time in the clinic, the warnings and the
-// «Agendar» buttons. Presentational: state and handlers come in by props.
+// «Agendar» buttons on the kit's FormFooter (what is missing shows above them). Presentational:
+// state and handlers come in by props.
 
 type TrainSlot = PatientTrain["slots"][number];
 
@@ -23,7 +26,8 @@ export type TherapyDaySummaryProps = {
   servById: Map<string, Servicio>;
   /** Text explaining why a slot does not fit. */
   slotReason: (slot: TrainSlot) => string;
-  canBook: boolean;
+  /** Labels of the required fields still empty (on-screen order); non-empty disables booking. */
+  missing: string[];
   submitting: boolean;
   /** A patient and at least one therapy are chosen (enables the series button). */
   hasSelection: boolean;
@@ -38,14 +42,13 @@ export function TherapyDaySummary({
   selectedSlot,
   servById,
   slotReason,
-  canBook,
+  missing,
   submitting,
   hasSelection,
   onOpenSeries,
   onBook,
 }: TherapyDaySummaryProps) {
   const t = useTranslations("therapyPlanner");
-  const tRoot = useTranslations();
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
@@ -76,21 +79,27 @@ export function TherapyDaySummary({
             ))}
           </>
         ) : null}
+        <p>
+          <RequiredLegend />
+        </p>
       </div>
       {/* Dos botones en vez de un cierre automático: el mostrador suele citar varias terapias del
           MISMO paciente en una sola visita — cerrar tras la primera obligaba a reabrir. «Seguir»
           limpia la selección y se queda en el mismo paciente/día; «Cerrar» hace lo de antes. */}
-      <div className="flex items-center gap-2">
-        <Button size="sm" variant="ghost" onClick={onOpenSeries} disabled={!hasSelection}>
-          {t("trainSeriesButton")}
-        </Button>
-        <Button size="lg" variant="outline" onClick={() => onBook(false)} disabled={!canBook}>
-          {submitting ? tRoot("common.saving") : t("bookAndContinue")}
-        </Button>
-        <Button size="lg" onClick={() => onBook(true)} disabled={!canBook}>
-          {submitting ? tRoot("common.saving") : t("bookAndClose")}
-        </Button>
-      </div>
+      <FormFooter
+        className="ml-auto"
+        missing={missing}
+        submitting={submitting}
+        primary={[
+          { label: t("bookAndContinue"), variant: "outline", onClick: () => onBook(false) },
+          { label: t("bookAndClose"), onClick: () => onBook(true) },
+        ]}
+        extra={
+          <Button size="sm" variant="ghost" onClick={onOpenSeries} disabled={!hasSelection}>
+            {t("trainSeriesButton")}
+          </Button>
+        }
+      />
     </div>
   );
 }

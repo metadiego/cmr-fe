@@ -11,7 +11,6 @@ import { getServiciosConSaldo, listSesionesRango, type ServicioConSaldo, type Se
 import { bookTrain, listResources, planPatientTrain, type PatientTrain, type Resource } from "@/lib/api/resources";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { todayPR, inDaysPR } from "@/lib/format/fecha";
-import { toastError } from "@/lib/api/errors";
 import { ApiError } from "@/lib/api/types";
 import { getMyPreferences } from "@/lib/api/preferences";
 import { type Paciente } from "@/lib/api/pacientes";
@@ -24,6 +23,9 @@ import { TherapyTrainGrid } from "@/components/agenda/therapy-train-grid";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RequiredMark } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
+import { therapyDayMissing, type TherapyDayField } from "@/lib/agenda/therapy-day-missing";
 import { TherapyDayCards } from "@/components/agenda/therapy-day-cards";
 import { TherapyDaySummary } from "@/components/agenda/therapy-day-summary";
 
@@ -81,7 +83,6 @@ export function TherapyDayScheduler({
   const [time, setTime] = React.useState("");
   // Apagado por defecto: el motor pone primero lo más pesado (trainWeight) y reordena lo ligero.
   const [keepOrder, setKeepOrder] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
   // Which card's "schedule a series" modal is open (its serviceId), or null — additive-only feature,
   // fully independent from the single-date flow above.
   const [recurringFor, setRecurringFor] = React.useState<string | null>(null);
@@ -201,16 +202,30 @@ export function TherapyDayScheduler({
     return base;
   }
 
-  const canBook = !!paciente && sel.size > 0 && !!date && !!time && !submitting;
+  // What booking still needs, in on-screen order: this list alone disables «Agendar» and is shown
+  // above the buttons (a Bayamón receptionist was stuck on a grey button that never said «hora»).
+  const fieldLabel: Record<TherapyDayField, string> = {
+    patient: t("pickPatient"),
+    therapies: t("pickServices"),
+    date: t("date"),
+    hour: tRoot("agenda.time"),
+  };
+  const missing = therapyDayMissing({ patientId: paciente?.id, serviceIds, date, time }).map((f) => fieldLabel[f]);
 
+  // The buttons are disabled while anything is missing, so this throw is only a backstop.
   async function book(close: boolean) {
-    if (!paciente || sel.size === 0 || !time) return;
-    setSubmitting(true);
-    try {
-      const { data, warnings, advertencias } = await bookTrain(
-        { patientId: paciente.id, date, time, serviceIds: [...sel], areas: areasPayload, keepOrder },
-        centro,
-      );
+    if (!paciente || sel.size === 0 || !time) throw new Error(missing.join(" · "));
+    const res = await bookTrain(
+      { patientId: paciente.id, date, time, serviceIds: [...sel], areas: areasPayload, keepOrder },
+      centro,
+    );
+    return { ...res, close };
+  }
+
+  // useSubmit: one booking at a time (double click / Enter never books twice); a failed booking keeps
+  // the selection and toasts why.
+  const { submitting, submit } = useSubmit(book, {
+    onSuccess: ({ data, warnings, advertencias, close }) => {
       toast.success(tp("resumen", { creadas: data.sessions.length, omitidas: 0 }));
       mostrarAvisos(warnings, tRoot);
       mostrarAvisos(advertencias, tRoot); // BE #547: la reserva avisó alguna regla no bloqueante, ya se guardó
@@ -225,7 +240,8 @@ export function TherapyDayScheduler({
       }
       upcomingRes.refresh();
       onBooked?.({ close });
-    } catch (err) {
+    },
+    onError: (err) => {
       if (err instanceof ApiError && err.code === "THERAPY_TRAIN_DOES_NOT_FIT") {
         const reasonKey = typeof err.data?.reasonKey === "string" ? err.data.reasonKey : undefined;
         const reasonKeys = Array.isArray(err.data?.reasonKeys) ? (err.data.reasonKeys as string[]) : undefined;
@@ -235,7 +251,9 @@ export function TherapyDayScheduler({
           reason({ fits: false, reasonKey, reasonKeys, serviceId: blockedId, resourceId: blockedResourceId }) || tRoot("therapies.trainDoesNotFit"),
         );
         trainRes.refresh();
-      } else if (err instanceof ApiError && err.code === "THERAPY_TRAIN_ROLLBACK_INCOMPLETE") {
+        return true;
+      }
+      if (err instanceof ApiError && err.code === "THERAPY_TRAIN_ROLLBACK_INCOMPLETE") {
         const left = Array.isArray(err.data?.left) ? (err.data.left as Array<{ serviceId?: string }>) : [];
         const names = left.map((l) => (l.serviceId ? (servById.get(l.serviceId)?.name ?? l.serviceId) : "")).filter(Boolean);
         toast.error(
@@ -243,14 +261,13 @@ export function TherapyDayScheduler({
           { duration: Infinity },
         );
         upcomingRes.refresh();
-      } else {
-        toastError(err, tRoot);
-        if (isSheetSlotTaken(err)) trainRes.refresh(); // someone took the seat after the grid was drawn
+        return true;
       }
-    } finally {
-      setSubmitting(false);
-    }
-  }
+      // Generic toast from useSubmit; someone took the seat after the grid was drawn → redraw it.
+      if (isSheetSlotTaken(err)) trainRes.refresh();
+      return false;
+    },
+  });
 
   const dragHint = (
     <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -320,6 +337,7 @@ export function TherapyDayScheduler({
                   />
                 ))}
                 {chosen.length ? t("entryHours") : t("pickCard")}
+                <RequiredMark />
               </div>
               {chosen.length > 0 && trainRes.state.kind === "loading" && <Skeleton aria-hidden className="mt-0.5 h-4 w-40" />}
               {train && train.patientMinutes > 0 && (
@@ -369,11 +387,11 @@ export function TherapyDayScheduler({
         selectedSlot={selectedSlot}
         servById={servById}
         slotReason={reason}
-        canBook={canBook}
+        missing={missing}
         submitting={submitting}
         hasSelection={!!paciente && sel.size > 0}
         onOpenSeries={() => setSeriesOpen(true)}
-        onBook={book}
+        onBook={(close) => submit(close)}
       />
 
       {paciente && sel.size > 0 && (

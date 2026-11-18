@@ -12,6 +12,7 @@ import { PacienteSelect } from "@/components/citas/paciente-select";
 import { ExistingSessionsBadge } from "@/components/agenda/existing-sessions-badge";
 import { AddTherapySelect } from "@/components/agenda/add-therapy-select";
 import { Input } from "@/components/ui/input";
+import { RequiredMark } from "@/components/kit/required-mark";
 import type { PatientLite } from "@/components/agenda/therapy-day-scheduler";
 
 // Left column of the therapy day scheduler: patient hero, bought-service chips and the day's therapy
@@ -105,7 +106,10 @@ export function TherapyDayCards({
       </div>
     ) : (
       <div className="space-y-1.5">
-        <label className="text-sm font-medium">{t("pickPatient")}</label>
+        <label className="text-sm font-medium">
+          {t("pickPatient")}
+          <RequiredMark />
+        </label>
         <PacienteSelect value={null} onChange={(p) => p && onPickPatient(p)} />
         <p className="text-xs text-muted-foreground">{t("choosePatientFirst")}</p>
       </div>
@@ -141,7 +145,10 @@ export function TherapyDayCards({
     {paciente && (
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">{t("pickServices")}</label>
+          <label className="text-sm font-medium">
+            {t("pickServices")}
+            <RequiredMark />
+          </label>
           <AddTherapySelect servicios={servicios} selectedIds={sel} onToggle={onToggle} label={t("addTherapy")} />
         </div>
         {chosen.length === 0 ? (
