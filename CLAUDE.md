@@ -318,9 +318,15 @@ destructive (red), neutral = secondary.
   where the data goes (`components/clientes/patient-record-skeleton.tsx`,
   `docs/specs/2026-10-10-skeletons-de-carga.md`). Never grey slabs.
 
-**Migrating the rest.** When you touch a screen, move **the region you touch** onto the kit. Never
-add a new hand-rolled card next to old ones "for consistency with the file". A file is not finished
-while it mixes both looks in one region.
+**Migrating the rest (`npm run lint`).** The hand-rolled card (`ring-foreground/10` or
+`shadow-[rgba(…)]` in a class string) is a lint **error** everywhere except `components/ui/**` and
+the files listed in `eslint/legacy-card-files.mjs`.
+- That list was taken on 18-nov-2026 (154 files) and **may only shrink**, like `DEBT`.
+- `lib/lint/legacy-card-files.test.ts` fails while a listed file is already clean, so moving a file
+  onto the kit means deleting its line in the same commit.
+- Adding a file to the list is admitting debt and gets discussed with the owner.
+- When you touch a listed screen, move **the region you touch** onto the kit. Never add a new
+  hand-rolled card next to old ones "for consistency with the file".
 
 **Done means seen.** Typecheck does not see layout. Before calling a UI change finished, look at it
 in a browser:
