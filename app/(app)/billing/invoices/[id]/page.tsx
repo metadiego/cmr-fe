@@ -274,7 +274,7 @@ export default function FacturacionPage() {
         title={tituloNombre}
         description={
           <>
-            {paciente?.documentId && <p className="text-xs text-muted-foreground">ID {paciente.documentId}</p>}
+            {paciente?.documentId && <div className="text-xs text-muted-foreground">ID {paciente.documentId}</div>}
             {/* Usuario responsable (de él salen las estadísticas de quién vende). Corregible con permiso;
                 el BE decide si escribe en creadoPor (borrador) o quién cobró (emitida). Handoff usuario-de-la-factura. */}
             <UsuarioResponsable
@@ -1154,7 +1154,7 @@ function UsuarioResponsable({
     : (factura.issuedBy ?? factura.emisor ?? factura.createdBy);
   const esLlave = !!u?.esLlave;
   return (
-    <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       <span>
         {label}: <span className="font-medium text-foreground">{esLlave ? integracionLabel : (u?.name || sinUsuarioLabel)}</span>
       </span>
@@ -1163,7 +1163,7 @@ function UsuarioResponsable({
           {corregirLabel}
         </button>
       )}
-    </p>
+    </div>
   );
 }
 
