@@ -150,7 +150,7 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
                         key={s}
                         type="button"
                         onClick={() => patch(i, { sign: s })}
-                        className={`rounded px-2.5 py-1 text-xs font-medium ${l.sign === s ? (s === "negativo" ? "bg-destructive text-white" : "bg-success text-white") : "text-muted-foreground"}`}
+                        className={`rounded px-2.5 py-1 text-xs font-medium ${l.sign === s ? (s === "negativo" ? "bg-destructive text-white" : "bg-success-foreground text-white") : "text-muted-foreground"}`}
                       >
                         {t(s === "negativo" ? "out" : "in")}
                       </button>
