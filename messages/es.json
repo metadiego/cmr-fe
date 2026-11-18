@@ -178,7 +178,16 @@
     },
     "print": "Imprimir",
     "csv": "CSV",
-    "printedBy": "Impreso por {who} · {when}"
+    "printedBy": "Impreso por {who} · {when}",
+    "email": "Email",
+    "emailTitle": "Enviar por email",
+    "emailTo": "Para",
+    "emailHint": "Uno o varios correos separados por coma. Va en PDF con el membrete.",
+    "emailSend": "Enviar",
+    "emailSending": "Enviando…",
+    "emailSent": "Enviado. Queda registrado en las exportaciones.",
+    "emailInvalid": "Revisa los correos: alguno no es válido.",
+    "cancel": "Cancelar"
   },
   "ehrIntegration": {
     "title": "Enganche con el EHR",
@@ -5755,6 +5764,36 @@
     "subtypeShort": {
       "nueva": "Nuevo",
       "seguimiento": "Seguimiento"
+    },
+    "daySummary": {
+      "open": "Ver el resumen del día",
+      "title": "Resumen del día · {service}",
+      "file": "resumen-del-dia",
+      "columns": "Columnas",
+      "columnsHint": "Columnas que ves",
+      "loadError": "No se pudo cargar el resumen.",
+      "retry": "Reintentar",
+      "empty": "No hay sesiones asistidas este día.",
+      "notComplete": "Ojo: el servicio no está completo ({attended}/{total}).",
+      "totals": "Totales",
+      "col": {
+        "record": "Récord",
+        "patient": "Paciente",
+        "quantity": "Cantidad",
+        "dose": "Dosis",
+        "nurse": "Enfermera",
+        "attendedBy": "Asistido por",
+        "time": "Hora",
+        "sealedVials": "Viales",
+        "content": "Contenido"
+      },
+      "stat": {
+        "patients": "Pacientes",
+        "sessions": "{n, plural, one {# sesión} other {# sesiones}}",
+        "vials": "Viales aplicados",
+        "content": "Contenido",
+        "proportion": "Proporción"
+      }
     }
   },
   "salesPackages": {

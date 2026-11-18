@@ -3,18 +3,23 @@
 import * as React from "react"
 import { useFormatter, useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Download04Icon, PrinterIcon } from "@hugeicons/core-free-icons"
+import { Download04Icon, Mail01Icon, PrinterIcon } from "@hugeicons/core-free-icons"
 
 import { toCsv } from "@/lib/caja/export"
 import { buildReportHtml, reportFileName } from "@/lib/reports/print-document"
+import { base64ToBytes } from "@/lib/frontdesk/day-summary"
+import { toastError } from "@/lib/api/errors"
+import type { ExportResult } from "@/lib/api/day-summary"
 import { useMe } from "@/hooks/use-me"
 import { Button } from "@/components/ui/button"
+import { EmailReportDialog } from "@/components/reports/email-report-dialog"
 
 // The house logo, same asset the cash and statistics reports print.
 const REPORT_LOGO = "/img/logo_cmr.png"
 
-// The report bar: Imprimir · CSV (and Email once the BE ships POST /reports/email, handoff
-// docs/specs/kardex-resumen-formato-dueno-handoff-be.md). One pattern for every report: the print goes to
+// The report bar: Imprimir · CSV · Email. With `exporter` (a resource of the BE export engine, POST
+// /export) the CSV comes from the BE and Email appears, both logged in /export/jobs; without it the CSV is
+// built here from `csv` and there is no Email yet. One pattern for every report: the print goes to
 // its own window with the same letterhead and footer (in place it printed blank: the shell isolates the
 // thermal receipt), the CSV opens in Excel. `target` is the element whose visible content is the report.
 export function ReportActions({
@@ -24,6 +29,7 @@ export function ReportActions({
   csv,
   fileParts,
   disabled,
+  exporter,
 }: {
   target: React.RefObject<HTMLElement | null>
   title: string
@@ -33,6 +39,8 @@ export function ReportActions({
   /** Pieces of the file name, e.g. [title, product, from, to]. */
   fileParts: string[]
   disabled?: boolean
+  /** The BE export of this report: CSV download and PDF by email go through it (traceable). */
+  exporter?: (format: "csv" | "pdf", channel: "download" | "email", destination?: string) => Promise<ExportResult>
 }) {
   const t = useTranslations("reports")
   const format = useFormatter()
@@ -75,7 +83,30 @@ export function ReportActions({
       ).then(go)
   }
 
+  const [emailOpen, setEmailOpen] = React.useState(false)
+  const [exporting, setExporting] = React.useState(false)
+  const tRoot = useTranslations()
+
+  async function exportCsv() {
+    if (!exporter) return
+    setExporting(true)
+    try {
+      const r = await exporter("csv", "download")
+      const url = URL.createObjectURL(new Blob([base64ToBytes(r.base64)], { type: r.mime || "text/csv" }))
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${reportFileName(...fileParts)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   function downloadCsv() {
+    if (exporter) return void exportCsv()
     if (!csv) return
     // BOM so Excel reads the accents as UTF-8.
     const blob = new Blob(["\uFEFF" + toCsv(csv())], {
@@ -91,12 +122,12 @@ export function ReportActions({
 
   return (
     <div className="no-print flex gap-2">
-      {csv && (
+      {(csv || exporter) && (
         <Button
           variant="outline"
           size="sm"
           onClick={downloadCsv}
-          disabled={disabled}
+          disabled={disabled || exporting}
         >
           <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("csv")}
         </Button>
@@ -104,6 +135,21 @@ export function ReportActions({
       <Button variant="outline" size="sm" onClick={print} disabled={disabled}>
         <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {t("print")}
       </Button>
+      {exporter && (
+        <>
+          <Button variant="outline" size="sm" onClick={() => setEmailOpen(true)} disabled={disabled}>
+            <HugeiconsIcon icon={Mail01Icon} className="size-4" /> {t("email")}
+          </Button>
+          {emailOpen && (
+            <EmailReportDialog
+              open={emailOpen}
+              onOpenChange={setEmailOpen}
+              title={subtitle ? `${title} · ${subtitle}` : title}
+              send={(to) => exporter("pdf", "email", to)}
+            />
+          )}
+        </>
+      )}
     </div>
   )
 }

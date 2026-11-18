@@ -1,0 +1,76 @@
+// The day's summary of ONE service on the patient desk (owner 18-nov-2026: the nurses print the vitamin C
+// sheet to reconcile the vials). Pure helpers, tested in day-summary.test.ts; the data comes from
+// GET /frontdesk/summary-of-day (cmr-be #632, handoff docs/specs/resumen-del-dia-por-servicio-handoff.md).
+
+export const DAY_SUMMARY_COLUMNS = [
+  "record",
+  "patient",
+  "quantity",
+  "dose",
+  "nurse",
+  "attendedBy",
+  "time",
+  "sealedVials",
+  "content",
+] as const;
+export type DaySummaryColumn = (typeof DAY_SUMMARY_COLUMNS)[number];
+
+/** What a user sees until they choose: the eight columns of the handoff (content is opt-in). */
+export const DEFAULT_DAY_SUMMARY_COLUMNS: readonly DaySummaryColumn[] = DAY_SUMMARY_COLUMNS.filter((c) => c !== "content");
+
+/** The preference key in the user's layer of /me/preferences: `{ reportColumns: { [report]: string[] } }`. */
+export const DAY_SUMMARY_REPORT = "frontdesk-day-summary";
+
+/** The saved choice, cleaned: only known columns, always in table order; nothing valid → the defaults. */
+export function visibleDaySummaryColumns(saved: unknown): DaySummaryColumn[] {
+  if (!Array.isArray(saved)) return [...DEFAULT_DAY_SUMMARY_COLUMNS];
+  const set = new Set(saved.filter((c): c is string => typeof c === "string"));
+  const cols = DAY_SUMMARY_COLUMNS.filter((c) => set.has(c));
+  return cols.length ? cols : [...DEFAULT_DAY_SUMMARY_COLUMNS];
+}
+
+/** Toggle one column; the last visible one cannot be hidden (an empty table prints nothing). */
+export function toggleDaySummaryColumn(current: readonly DaySummaryColumn[], col: DaySummaryColumn): DaySummaryColumn[] {
+  const on = current.includes(col);
+  if (on && current.length === 1) return [...current];
+  const set = new Set(on ? current.filter((c) => c !== col) : [...current, col]);
+  return DAY_SUMMARY_COLUMNS.filter((c) => set.has(c));
+}
+
+/** The services menu shows «arrived/attended»: the summary opens only when every arrival is attended (x/x). */
+export function isServiceDayComplete(s: { arrived: number; attended: number }): boolean {
+  return s.arrived > 0 && s.attended >= s.arrived;
+}
+
+/** The user's preference layer with this report's columns merged in (the PUT replaces the whole layer). */
+export function withReportColumns<T extends Record<string, unknown>>(
+  layer: T | null | undefined,
+  report: string,
+  cols: readonly string[]
+): T & { reportColumns: Record<string, string[]> } {
+  const base = { ...(layer ?? {}) } as T;
+  const prev = base.reportColumns;
+  const reportColumns = { ...(prev && typeof prev === "object" && !Array.isArray(prev) ? (prev as Record<string, string[]>) : {}), [report]: [...cols] };
+  return { ...base, reportColumns };
+}
+
+/** The saved columns of one report out of the user's layer (unknown shape until read). */
+export function savedReportColumns(layer: unknown, report: string): unknown {
+  if (!layer || typeof layer !== "object") return undefined;
+  const rc = (layer as { reportColumns?: unknown }).reportColumns;
+  return rc && typeof rc === "object" ? (rc as Record<string, unknown>)[report] : undefined;
+}
+
+/** The export endpoint answers the file in base64 (download channel). */
+export function base64ToBytes(b64: string): Uint8Array<ArrayBuffer> {
+  const bin = atob(b64);
+  const out = new Uint8Array(new ArrayBuffer(bin.length));
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+/** One to twenty comma-separated addresses, like the BE's own check (exigirDestinatarios). */
+export function validEmailList(s: string): boolean {
+  const parts = s.split(",").map((p) => p.trim()).filter(Boolean);
+  return parts.length > 0 && parts.length <= 20 && parts.every((p) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p));
+}

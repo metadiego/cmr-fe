@@ -1,5 +1,6 @@
 import { apiFetch } from "./client";
 import type { ThemeConfig } from "@/lib/theme/config";
+import { withReportColumns } from "@/lib/frontdesk/day-summary";
 
 // Config por capas (#51). The BE resolves the effective config by precedence
 // (override → usuario → centro → sistema) and returns it; the FE only paints it.
@@ -158,4 +159,11 @@ export function createOverride(payload: CreateOverridePayload): Promise<Override
 
 export function deleteOverride(id: string): Promise<void> {
   return apiFetch<void>(`/preferences/override/${id}`, { method: "DELETE" });
+}
+
+// Saves ONLY one report's visible columns in the user's layer (same merge as setMyTheme: the PUT replaces
+// the whole layer). Shape: `reportColumns: { [report]: string[] }` (helpers in lib/frontdesk/day-summary.ts).
+export async function setMyReportColumns(report: string, cols: readonly string[]): Promise<ThemeConfig> {
+  const prefs = await getMyPreferences();
+  return updateMyPreferences(withReportColumns(prefs.layers.user as Record<string, unknown> | null, report, cols) as unknown as ThemeConfig);
 }

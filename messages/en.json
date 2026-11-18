@@ -178,7 +178,16 @@
     },
     "print": "Print",
     "csv": "CSV",
-    "printedBy": "Printed by {who} · {when}"
+    "printedBy": "Printed by {who} · {when}",
+    "email": "Email",
+    "emailTitle": "Send by email",
+    "emailTo": "To",
+    "emailHint": "One or more addresses separated by commas. Sent as a PDF with the letterhead.",
+    "emailSend": "Send",
+    "emailSending": "Sending…",
+    "emailSent": "Sent. It is logged in the exports.",
+    "emailInvalid": "Check the addresses: one is not valid.",
+    "cancel": "Cancel"
   },
   "ehrIntegration": {
     "title": "EHR integration",
@@ -5755,6 +5764,36 @@
     "subtypeShort": {
       "nueva": "New",
       "seguimiento": "Follow-up"
+    },
+    "daySummary": {
+      "open": "Open the day's summary",
+      "title": "Day summary · {service}",
+      "file": "day-summary",
+      "columns": "Columns",
+      "columnsHint": "Columns you see",
+      "loadError": "The summary could not be loaded.",
+      "retry": "Retry",
+      "empty": "No attended sessions this day.",
+      "notComplete": "Note: the service is not complete ({attended}/{total}).",
+      "totals": "Totals",
+      "col": {
+        "record": "Record",
+        "patient": "Patient",
+        "quantity": "Quantity",
+        "dose": "Dose",
+        "nurse": "Nurse",
+        "attendedBy": "Attended by",
+        "time": "Time",
+        "sealedVials": "Vials",
+        "content": "Content"
+      },
+      "stat": {
+        "patients": "Patients",
+        "sessions": "{n, plural, one {# session} other {# sessions}}",
+        "vials": "Vials applied",
+        "content": "Content",
+        "proportion": "Proportion"
+      }
     }
   },
   "salesPackages": {

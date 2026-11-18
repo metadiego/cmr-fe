@@ -40,7 +40,8 @@ import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-pi
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
 import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip"
 import { PatientDeskSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
-import { ServiceFilterDropdown, consultSubtypeLabel } from "@/components/patient-desk/service-filter-dropdown"
+import { ServiceFilterDropdown, consultSubtypeLabel, type ServiceOfTheDay } from "@/components/patient-desk/service-filter-dropdown"
+import { DaySummaryDialog } from "@/components/patient-desk/day-summary-dialog"
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail"
 import { EnTerapiaSinAsistirBanner } from "@/components/frontdesk/en-terapia-sin-asistir-banner"
 import { PageContainer, PageHeader } from "@/components/ui/page"
@@ -138,6 +139,7 @@ export function PatientDesk() {
     setServiceArrivedPending(false)
     setConsultSubtypeFilter(null)
   }
+  const [summaryOf, setSummaryOf] = React.useState<ServiceOfTheDay | null>(null)
   const servicesToday = React.useMemo(
     () => servicesOfTheDay(day.patients),
     [day.patients]
@@ -289,6 +291,7 @@ export function PatientDesk() {
                 consultSubtypes={consultSubtypes}
                 onPickService={pickServiceFilter}
                 onPickConsultSubtype={setConsultSubtypeFilter}
+                onOpenSummary={setSummaryOf}
                 trigger={tab}
               />
             ) : (
@@ -417,6 +420,16 @@ export function PatientDesk() {
       {/* No margins here: PageContainer's gap spaces the rows, and a strip that renders nothing
           (no queue today) adds no gap, so no empty band is left behind. */}
       <TherapyQueueStrip centerId={gate.centro} date={date} />
+      {summaryOf && gate.centro && (
+        <DaySummaryDialog
+          open
+          onOpenChange={(v) => !v && setSummaryOf(null)}
+          service={{ id: summaryOf.serviceId, name: summaryOf.name }}
+          date={date}
+          centerId={gate.centro}
+          centerName={gate.centroNombre}
+        />
+      )}
 
       {gate.cargando ? (
         <PatientDeskSkeleton />

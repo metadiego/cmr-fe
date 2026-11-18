@@ -5,6 +5,7 @@ import type * as React from "react"
 import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
+import { isServiceDayComplete } from "@/lib/frontdesk/day-summary"
 import type { PatientKind } from "@/lib/frontdesk/patient-day"
 import {
   DropdownMenu,
@@ -49,6 +50,7 @@ export function ServiceFilterDropdown({
   consultSubtypes,
   onPickService,
   onPickConsultSubtype,
+  onOpenSummary,
   trigger,
 }: {
   kind: PatientKind
@@ -58,6 +60,8 @@ export function ServiceFilterDropdown({
   consultSubtypes: ConsultSubtype[]
   onPickService: (serviceId: string | null, pendingOnly?: boolean) => void
   onPickConsultSubtype: (subtype: string | null) => void
+  /** A complete service (x/x): its count opens the day's summary (owner 18-nov-2026). */
+  onOpenSummary?: (s: ServiceOfTheDay) => void
   /** What opens the menu: the active tab itself («Servicios ▾» / «Consulta ▾»), owner 17-nov-2026. */
   trigger: React.ReactElement
 }) {
@@ -77,6 +81,10 @@ export function ServiceFilterDropdown({
             <DropdownMenuRadioItem value={SUB_FILTER_ALL}>{t("allServices")}</DropdownMenuRadioItem>
             {servicesToday.map((s) => {
               const missing = s.arrived - s.attended
+              // Two actions on the count: missing → jump to who is pending; complete (x/x) → the day's
+              // summary. Otherwise the count is plain text (that click is reserved for a later feature).
+              const complete = !!onOpenSummary && isServiceDayComplete(s)
+              const act = missing > 0 ? () => onPickService(s.serviceId, true) : complete ? () => onOpenSummary!(s) : null
               return (
                 <DropdownMenuRadioItem key={s.serviceId} value={s.serviceId}>
                   <span className="flex w-full items-center gap-1.5">
@@ -88,32 +96,36 @@ export function ServiceFilterDropdown({
                     <span className="min-w-0 flex-1 truncate">{s.name}</span>
                     {s.arrived > 0 && (
                       <span
-                        role={missing > 0 ? "button" : undefined}
-                        tabIndex={missing > 0 ? 0 : undefined}
+                        role={act ? "button" : undefined}
+                        tabIndex={act ? 0 : undefined}
                         // Radix selects the radio item on pointer-up (and closes the menu right
                         // then, unmounting it) — a plain onClick fires AFTER that, often with no
                         // live target left to dispatch to. Acting on pointerDOWN preempts Radix's
                         // own handler entirely; stopping pointerUp too covers any Radix build that
                         // selects there instead.
                         onPointerDown={(e) => {
-                          if (missing <= 0) return
+                          if (!act) return
                           e.stopPropagation()
                           e.preventDefault()
-                          onPickService(s.serviceId, true)
+                          act()
                         }}
-                        onPointerUp={(e) => missing > 0 && e.stopPropagation()}
-                        onClick={(e) => missing > 0 && e.stopPropagation()}
+                        onPointerUp={(e) => act && e.stopPropagation()}
+                        onClick={(e) => act && e.stopPropagation()}
                         onKeyDown={(e) => {
-                          if (missing > 0 && (e.key === "Enter" || e.key === " ")) {
+                          if (act && (e.key === "Enter" || e.key === " ")) {
                             e.stopPropagation()
                             e.preventDefault()
-                            onPickService(s.serviceId, true)
+                            act()
                           }
                         }}
-                        title={missing > 0 ? t("serviceArrivedPendingHint") : undefined}
+                        title={missing > 0 ? t("serviceArrivedPendingHint") : complete ? t("daySummary.open") : undefined}
                         className={cn(
                           "shrink-0 rounded px-1 text-xs tabular-nums",
-                          missing > 0 ? "font-semibold text-destructive hover:underline" : "text-muted-foreground"
+                          missing > 0
+                            ? "font-semibold text-destructive hover:underline"
+                            : complete
+                              ? "font-semibold text-success-foreground hover:underline"
+                              : "text-muted-foreground"
                         )}
                       >
                         {s.arrived}/{s.attended}
