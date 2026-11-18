@@ -3965,6 +3965,10 @@
     },
     "grupo": {
       "producto": "Product"
+    },
+    "breakdown": {
+      "sessions": "Sessions",
+      "therapies": "Therapies"
     }
   },
   "configFactura": {
@@ -4550,7 +4554,11 @@
     "copyNone": "“{origen}” has no extra fields to copy.",
     "productSale": "Product sale (IVU)",
     "productSaleHint": "Its lines count as product sales in the cash reconciliation: taxable, exempt, exonerated and state + municipal IVU. Also applies to products added later.",
-    "productSaleBadge": "Product"
+    "productSaleBadge": "Product",
+    "quantityDisplay": "Quantity on documents",
+    "quantityDisplayHint": "How the quantity reads on the receipt, printed invoice and invoice view.",
+    "quantityDisplayTotal": "Total",
+    "quantityDisplayBreakdown": "Sessions × Areas = Therapies"
   },
   "tb": {
     "acc": {

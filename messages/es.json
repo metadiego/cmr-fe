@@ -3965,6 +3965,10 @@
     },
     "grupo": {
       "producto": "Producto"
+    },
+    "breakdown": {
+      "sessions": "Sesiones",
+      "therapies": "Terapias"
     }
   },
   "configFactura": {
@@ -4550,7 +4554,11 @@
     "copyNone": "«{origen}» no tiene campos extra para copiar.",
     "productSale": "Venta de producto (IVU)",
     "productSaleHint": "Sus líneas cuentan como venta de producto en el cuadre: tributable, exento, exonerado e IVU estatal y municipal. Vale también para los productos que se agreguen después.",
-    "productSaleBadge": "Producto"
+    "productSaleBadge": "Producto",
+    "quantityDisplay": "Cantidad en documentos",
+    "quantityDisplayHint": "Cómo se lee la cantidad en recibo, factura impresa y vista de la factura.",
+    "quantityDisplayTotal": "Total",
+    "quantityDisplayBreakdown": "Sesiones × Áreas = Terapias"
   },
   "tb": {
     "acc": {

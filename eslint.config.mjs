@@ -47,7 +47,9 @@ const DEBT = {
   // became a header button.
   // 16-nov-2026: lowered from 1460 to 1317 — its dialogs moved onto the standard form shell
   // (FormDialog/useSubmit/useConfirm); the rest of the gap was already slack.
-  "app/(app)/billing/invoices/[id]/page.tsx": 1317,
+  // 18-nov-2026: lowered from 1317 to 1305 — the multiplicadores/quantityBreakdown (cmr-be #619)
+  // helpers moved to lib/facturacion/line-quantity.ts, tested there instead of living inline.
+  "app/(app)/billing/invoices/[id]/page.tsx": 1305,
   // 17-nov-2026: 1048 → 1046 — the product sheet moved onto the standard FormSheet shell (kit Field,
   // useDialogForm, useSubmit); the local Field and canSubmit went.
   "components/inventario/productos-admin.tsx": 1046,

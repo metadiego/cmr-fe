@@ -42,6 +42,7 @@ import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { PatientTodaySummaryButton } from "@/components/facturacion/resumen-paciente-panel";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
+import { effectiveQuantity, lineLegend, lineMultipliers } from "@/lib/facturacion/line-quantity";
 import { ReceiptPrintDialog } from "@/components/facturacion/receipt-print-dialog";
 import { ShellCrumb } from "@/components/shell-crumb";
 import { InvoiceHeaderDialog as CabeceraDialog } from "@/components/facturacion/invoice-header-dialog";
@@ -501,7 +502,7 @@ function Editor({
     const editing = e && (e.quantity !== n(it.quantity) || e.unitPrice !== n(it.unitPrice));
     if (!editing) return n(it.total);
     const base = n(it.quantity) || 1;
-    const mult = base ? cantEfectiva(it) / base : 1;
+    const mult = base ? effectiveQuantity(it) / base : 1;
     return e.quantity * mult * e.unitPrice;
   };
   // Totales de CABECERA = los del BE (subtotal/descuento/impuesto/total). No se recalculan en el cliente.
@@ -576,22 +577,9 @@ function Editor({
   const impuestosDeLinea = (it: FacturaItem) =>
     (it as { taxes?: { slug?: string; name?: string; rate?: number; amount?: number }[] }).taxes ?? [];
 
-  // Multiplicadores (láser: áreas×días). Data-driven desde meta.multiplicadores; sin asumir cuáles ni cuántos.
-  // Cantidad EFECTIVA = base × Π(multiplicadores). El label de cada clave sale de fac.col.<clave> (i18n).
+  // Multiplicadores/quantityBreakdown de una línea (láser: áreas×días, cmr-be #619): lib/facturacion/line-quantity.ts.
   const tRootEd = useTranslations();
-  const multsDe = (it: FacturaItem): Record<string, number> | null => {
-    const m = (it.meta as { multiplicadores?: Record<string, number> } | null | undefined)?.multiplicadores;
-    return m && Object.keys(m).length ? m : null;
-  };
-  const cantEfectiva = (it: FacturaItem): number => {
-    const m = multsDe(it);
-    const base = n(it.quantity) || 1;
-    return m ? Object.values(m).reduce((p, v) => p * (Number(v) || 1), base) : base;
-  };
-  const multTexto = (m: Record<string, number>): string =>
-    Object.entries(m)
-      .map(([k, v]) => `${v} ${tRootEd.has(`fac.col.${k}`) ? tRootEd(`fac.col.${k}`) : k}`)
-      .join(" × ");
+  const rootLabel = (key: string) => (tRootEd.has(key) ? tRootEd(key) : key);
 
   return (
     <div className={EDITOR_GRID}>
@@ -662,16 +650,16 @@ function Editor({
                           {t("kit.abrir")}
                         </button>
                       )}
-                      {/* Desglose de multiplicadores (láser: días × áreas) — data-driven */}
-                      {multsDe(it) && (esBorrador && !isPackageLine(it) ? (
+                      {/* Desglose de multiplicadores/quantityBreakdown (láser: días × áreas) — data-driven */}
+                      {lineMultipliers(it) && (esBorrador && !isPackageLine(it) ? (
                         <LineMultipliersEditor
-                          key={JSON.stringify(multsDe(it))}
-                          multipliers={multsDe(it)!}
+                          key={JSON.stringify(lineMultipliers(it))}
+                          multipliers={lineMultipliers(it)!}
                           disabled={busy}
                           onSave={(meta) => run(() => actualizarItem(id, it.id, { meta }, centro))}
                         />
                       ) : (
-                        <span className="block text-[11px] text-muted-foreground">({multTexto(multsDe(it)!)})</span>
+                        <span className="block text-[11px] text-muted-foreground">({lineLegend(it, rootLabel)})</span>
                       ))}
                       {/* Impuestos de la línea DISCRIMINADOS (Estatal + Municipal + los que haya). N renglones,
                           data-driven: recorre el array del BE, no cablea dos. Handoff IVU compuesto. */}
@@ -699,8 +687,8 @@ function Editor({
                     </TableCell>
                     <TableCell className="text-right">
                       {/* Cantidad EFECTIVA (base × multiplicadores) read-only cuando hay multiplicadores. */}
-                      {multsDe(it) ? (
-                        <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{cantEfectiva(it)}</span>
+                      {lineMultipliers(it) ? (
+                        <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{effectiveQuantity(it)}</span>
                       ) : esBorrador && !isPackageLine(it) ? (
                         <Input
                           value={String(e.quantity)}

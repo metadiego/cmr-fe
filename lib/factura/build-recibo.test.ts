@@ -99,6 +99,27 @@ test("la cantidad EFECTIVA del láser multiplica áreas por días", () => {
   assert.deepEqual(linea.multiplicadores, { dias: 12, areas: 2 });
 });
 
+test("quantityBreakdown (BE #619) pasa de largo, en el item y en sus componentes", () => {
+  const qb = { factors: [{ key: "dias", labelKey: "fac.breakdown.sessions", value: 4 }], total: 4, totalLabelKey: "fac.breakdown.therapies" };
+  const f = {
+    ...(facturaBase as object),
+    items: [
+      {
+        description: "Protocolo rodilla",
+        quantity: 1,
+        unitPrice: 100,
+        discount: 0,
+        total: 100,
+        quantityBreakdown: null,
+        content: [{ name: "Terapia MLS", quantity: 4, quantityBreakdown: qb }],
+      },
+    ],
+  } as never;
+  const [linea] = buildRecibo(f).items;
+  assert.equal(linea.quantityBreakdown, undefined);
+  assert.deepEqual(linea.componentes?.[0].quantityBreakdown, qb);
+});
+
 // ── El recibo de la DEVOLUCIÓN ────────────────────────────────────────────────────────────────
 const devolucionBase = {
   displayNumber: "D-000016",

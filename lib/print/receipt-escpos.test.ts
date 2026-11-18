@@ -68,9 +68,11 @@ const ES: Record<string, string> = {
   packageLine: "Paquete {name}", regularPrice: "Precio regular", savings: "Ahorro", packagePrice: "Precio del paquete",
   youSaved: "Usted ahorró", originInvoice: "Factura de origen #{number}", refunded: "Reembolsado", refund: "Reembolso",
 };
+const ROOT: Record<string, string> = { "fac.breakdown.sessions": "Sesiones", "fac.col.areas": "Áreas", "fac.breakdown.therapies": "Terapias" };
 const TEXT: ReceiptText = {
   t: (k, v) => (ES[k] ?? k).replace("{n}", String(v?.n ?? "")).replace("{name}", String(v?.name ?? "")).replace("{number}", String(v?.number ?? "")),
   multiplierLabel: (k) => ({ dias: "Días", areas: "Áreas" })[k] ?? k,
+  rootLabel: (k) => ROOT[k] ?? k,
   paymentLabel: (p) => (p.clave === "efectivo" ? "Efectivo" : p.formaPagoNombre),
 };
 
@@ -201,6 +203,23 @@ test("kit components print indented under the line with their reference price", 
   assert.equal(lines[i + 1], "   " + "2 · PRP" + " ".repeat(45 - "2 · PRP".length - 7) + "$200.00");
   assert.equal(lines[i + 2], "   1 · Ácido hialurónico");
   assert.equal(lines[i + 3], "      lado izquierdo");
+});
+
+test("quantityBreakdown (BE #619) replaces multiplicadores, inline, in the kit and in the footer", () => {
+  const qb = { factors: [{ key: "dias", labelKey: "fac.breakdown.sessions", value: 4 }], total: 4, totalLabelKey: "fac.breakdown.therapies" };
+  const r: Recibo = {
+    ...QUOTE,
+    items: [
+      { cantidad: 4, descripcion: "Terapia MLS", precioUnitario: 70, descuento: 0, total: 280, multiplicadores: { dias: 4 }, quantityBreakdown: qb },
+      { cantidad: 1, descripcion: "Kit rodilla", precioUnitario: 500, descuento: 0, total: 500,
+        componentes: [{ cantidad: 4, descripcion: "PRP", multiplicadores: { dias: 4 }, quantityBreakdown: qb }] },
+    ],
+  };
+  const { lines } = decode(receiptToEscPos(r, TEXT));
+  assert.ok(lines.includes(row("4 (4 Sesiones = 4 Terapias) x $70.00", "$280.00")));
+  assert.ok(lines.some((l) => l.includes("4 Sesiones = 4 Terapias · PRP")));
+  assert.ok(lines.includes("* Terapia MLS - 4 Sesiones = 4 Terapias"));
+  assert.ok(!lines.some((l) => l.includes("Días")));
 });
 
 test("logo raster goes first when given", () => {

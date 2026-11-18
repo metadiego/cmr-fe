@@ -38,3 +38,18 @@ export function multipliersText(m: Record<string, number>, label: (key: string) 
 export function hasMultipliers(it: { multiplicadores?: Record<string, number> }): boolean {
   return !!it.multiplicadores && Object.keys(it.multiplicadores).length > 0;
 }
+
+// BE-computed projection (cmr-be #619) that replaces `multiplicadores` on a line once its group is
+// switched to "breakdown": the BE already did the multiplication, so the FE only joins what it sends.
+export type QuantityBreakdown = {
+  factors: { key: string; labelKey: string; value: number }[];
+  total: number;
+  totalLabelKey: string;
+};
+
+// "12 Sesiones × 2 Áreas = 24 Terapias" — `label` resolves a FULL i18n key (factors/total already
+// carry their own labelKey, unlike `multipliersText`'s bare multiplier key).
+export function quantityBreakdownText(qb: QuantityBreakdown, label: (key: string) => string): string {
+  const factors = qb.factors.map((f) => `${f.value} ${label(f.labelKey)}`).join(" × ");
+  return `${factors} = ${qb.total} ${label(qb.totalLabelKey)}`;
+}

@@ -217,6 +217,8 @@ function DetalleGrupo({
   const [division, setDivision] = React.useState(grupo.division);
   const [activo, setActivo] = React.useState(grupo.active);
   const [productSale, setProductSale] = React.useState(!!grupo.isProductSale);
+  // "Sesiones × Áreas = Terapias" en documentos (cmr-be #619) — display only, nunca cambia el total.
+  const [quantityDisplay, setQuantityDisplay] = React.useState(grupo.quantityDisplay ?? "total");
   const [savingGrupo, setSavingGrupo] = React.useState(false);
 
   // Membresía local (ids que quedan en el grupo). Init = miembros actuales.
@@ -259,6 +261,7 @@ function DetalleGrupo({
         division,
         active: activo,
         isProductSale: productSale,
+        quantityDisplay,
       });
       toast.success(t("updated"));
       onChanged();
@@ -327,6 +330,20 @@ function DetalleGrupo({
             <Switch checked={productSale} onCheckedChange={setProductSale} />
             {t("productSale")}
           </label>
+          {/* "Sesiones × Áreas = Terapias" en recibo/factura/vista (cmr-be #619) — solo cambia cómo se
+              lee la cantidad, nunca lo que se cobra. */}
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">{t("quantityDisplay")}</Label>
+            <Select value={quantityDisplay} onValueChange={(v) => setQuantityDisplay(v as "total" | "breakdown")}>
+              <SelectTrigger className="h-9 w-56" title={t("quantityDisplayHint")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="total">{t("quantityDisplayTotal")}</SelectItem>
+                <SelectItem value="breakdown">{t("quantityDisplayBreakdown")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button size="sm" onClick={guardarGrupo} disabled={savingGrupo}>
             {t("saveGroup")}
           </Button>

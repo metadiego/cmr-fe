@@ -2745,6 +2745,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/paquetes/{id}/entregadas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Corregir las sesiones ENTREGADAS de un paquete (p.ej. 7/12 → 8/12), con motivo; queda en el registro de cambios.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/paquetes/{id}/entregadas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["CorreccionDeEntregadasController_corregir[0]_v1"];
+        trace?: never;
+    };
+    "/api/v1/facturas/paquetes/{id}/delivered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Corregir las sesiones ENTREGADAS de un paquete (p.ej. 7/12 → 8/12), con motivo; queda en el registro de cambios.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/paquetes/{id}/delivered`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["CorreccionDeEntregadasController_corregir[1]_v1"];
+        trace?: never;
+    };
+    "/api/v1/invoices/packages/{id}/entregadas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Corregir las sesiones ENTREGADAS de un paquete (p.ej. 7/12 → 8/12), con motivo; queda en el registro de cambios.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/packages/{id}/entregadas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["CorreccionDeEntregadasController_corregir[2]_v1"];
+        trace?: never;
+    };
+    "/api/v1/invoices/packages/{id}/delivered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Corregir las sesiones ENTREGADAS de un paquete (p.ej. 7/12 → 8/12), con motivo; queda en el registro de cambios.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/packages/{id}/delivered`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["CorreccionDeEntregadasController_corregir[3]_v1"];
+        trace?: never;
+    };
+    "/api/v2/facturas/paquetes/{id}/entregadas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corregir las sesiones ENTREGADAS de un paquete (p.ej. 7/12 → 8/12), con motivo; queda en el registro de cambios. */
+        patch: operations["CorreccionDeEntregadasController_corregir[4]_v2"];
+        trace?: never;
+    };
+    "/api/v2/facturas/paquetes/{id}/delivered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corregir las sesiones ENTREGADAS de un paquete (p.ej. 7/12 → 8/12), con motivo; queda en el registro de cambios. */
+        patch: operations["CorreccionDeEntregadasController_corregir[5]_v2"];
+        trace?: never;
+    };
+    "/api/v2/invoices/packages/{id}/entregadas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corregir las sesiones ENTREGADAS de un paquete (p.ej. 7/12 → 8/12), con motivo; queda en el registro de cambios. */
+        patch: operations["CorreccionDeEntregadasController_corregir[6]_v2"];
+        trace?: never;
+    };
+    "/api/v2/invoices/packages/{id}/delivered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Corregir las sesiones ENTREGADAS de un paquete (p.ej. 7/12 → 8/12), con motivo; queda en el registro de cambios. */
+        patch: operations["CorreccionDeEntregadasController_corregir[7]_v2"];
+        trace?: never;
+    };
     "/api/v1/facturas/pendientes-entrega": {
         parameters: {
             query?: never;
@@ -38539,6 +38691,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/citas/en-consulta-sin-cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultas que quedaron «en consulta» en días anteriores, con quién las dejó así. / Consultations left «en consulta» on previous days, with the staff member who left them so.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/en-consulta-sin-cerrar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_leftInConsultation[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/at-consultation-without-close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultas que quedaron «en consulta» en días anteriores, con quién las dejó así. / Consultations left «en consulta» on previous days, with the staff member who left them so.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/at-consultation-without-close`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_leftInConsultation[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/en-consulta-sin-cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultas que quedaron «en consulta» en días anteriores, con quién las dejó así. / Consultations left «en consulta» on previous days, with the staff member who left them so.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/en-consulta-sin-cerrar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_leftInConsultation[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/at-consultation-without-close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultas que quedaron «en consulta» en días anteriores, con quién las dejó así. / Consultations left «en consulta» on previous days, with the staff member who left them so.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/at-consultation-without-close`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_leftInConsultation[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/en-consulta-sin-cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consultas que quedaron «en consulta» en días anteriores, con quién las dejó así. / Consultations left «en consulta» on previous days, with the staff member who left them so. */
+        get: operations["CitasController_leftInConsultation[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/at-consultation-without-close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consultas que quedaron «en consulta» en días anteriores, con quién las dejó así. / Consultations left «en consulta» on previous days, with the staff member who left them so. */
+        get: operations["CitasController_leftInConsultation[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/en-consulta-sin-cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consultas que quedaron «en consulta» en días anteriores, con quién las dejó así. / Consultations left «en consulta» on previous days, with the staff member who left them so. */
+        get: operations["CitasController_leftInConsultation[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/at-consultation-without-close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consultas que quedaron «en consulta» en días anteriores, con quién las dejó así. / Consultations left «en consulta» on previous days, with the staff member who left them so. */
+        get: operations["CitasController_leftInConsultation[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/citas/estados": {
         parameters: {
             query?: never;
@@ -63536,6 +63840,55 @@ export interface components {
             frontdeskAutoPresent?: boolean;
         };
         Object: Record<string, never>;
+        CorregirEntregadasDto: {
+            /**
+             * @description Sesiones entregadas correctas del paquete (p.ej. 8 para «8/12»).
+             * @example 8
+             */
+            deliveredSessions: number;
+            /**
+             * @description Por qué se corrige (queda en el rastro).
+             * @example El legado marca 8/12; la sesión del 16-nov no descontó
+             */
+            reason: string;
+            /**
+             * Format: uuid
+             * @description Personal que corrige (auditoría); por defecto, el de la sesión.
+             */
+            actorId?: string;
+            /** @description Centros donde buscar el paquete (opcional); por defecto, todos donde se puede editar la disponibilidad. */
+            centerIds?: string[];
+        };
+        PaqueteSesionEntity: {
+            clinicRef?: Record<string, never>;
+            invoiceId: string | null;
+            facturaIdRef?: Record<string, never>;
+            invoiceNumber: string | null;
+            invoiceItemId: string | null;
+            facturaItemIdRef?: Record<string, never>;
+            patientId: string;
+            pacienteIdRef?: Record<string, never>;
+            productId: string;
+            productoIdRef?: Record<string, never>;
+            quantity: number;
+            totalSessions: number;
+            deliveredSessions: number;
+            refundedSessions: number;
+            transferredSessions: number;
+            transferredFromPackageId: string | null;
+            transferidoDePaqueteIdRef?: Record<string, never>;
+            /** @enum {string} */
+            status: "activo" | "consumido" | "anulado" | "reemplazado" | "devuelto";
+            meta: Record<string, never> | null;
+            legacyOrigin: boolean;
+            legacyReference: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         TransferirTratamientoDto: {
             /** Format: uuid */
             destinationClinicId: string;
@@ -64190,6 +64543,11 @@ export interface components {
             /** @description «Venta de producto (IVU)»: switch the group as product sales (true) or not (false). Absent = unchanged. */
             isProductSale?: boolean;
             /**
+             * @description Switch how the group's lines show their quantity: total or breakdown. Absent = unchanged.
+             * @enum {string}
+             */
+            quantityDisplay?: "total" | "breakdown";
+            /**
              * Format: uuid
              * @description MEGAGRUPO: id del grupo padre bajo el que se totaliza en el reporte de ventas. `null` lo devuelve a ser su propio encabezado. Se valida que exista y que la jerarquía no haga ciclo.
              */
@@ -64207,6 +64565,13 @@ export interface components {
              *     See docs/specs/venta-de-productos-e-ivu-en-el-cuadre.md.
              */
             isProductSale: boolean;
+            /**
+             * @description How a line of this group shows its quantity on documents: 'total' (the quantity) or 'breakdown'
+             *     («12 Sesiones × 2 Áreas = 24 Terapias»). Set from the UI (owner, 18-nov-2026).
+             *     See docs/specs/sesiones-por-areas-en-documentos.md.
+             * @enum {string}
+             */
+            quantityDisplay: "total" | "breakdown";
             parentId: string | null;
             parentIdRef?: Record<string, never>;
             id: string;
@@ -64269,6 +64634,11 @@ export interface components {
             parentId?: string;
             /** @description «Venta de producto (IVU)»: the group's lines are product sales, separated in the cash report. Default false. */
             isProductSale?: boolean;
+            /**
+             * @description How the group's lines show their quantity on documents: total (default) or breakdown (Sesiones × Áreas = Terapias).
+             * @enum {string}
+             */
+            quantityDisplay?: "total" | "breakdown";
         };
         CrearColumnaFacturacionDto: {
             /** @description Solo multiplicadores: true = cuenta VISITAS y entra en las sesiones del paquete (días); false = describe la visita y solo multiplica el precio (áreas). */
@@ -65480,8 +65850,10 @@ export interface components {
             labelKey?: string;
             /** @description Encadenamiento: columnas con el mismo group se encadenan en el FE (p. ej. los toggles presente/en_consulta/asistido → group "flujo_atencion"). */
             group?: string;
-            /** @description Fuente de opciones de un select (medicos|enfermeras|tipos_cita|estados|productos_grupo). */
+            /** @description Fuente de opciones de un select (medicos|enfermeras|tecnicos|personal|tipos_cita|estados|productos_grupo). */
             optionsSource?: string;
+            /** @description Only with optionsSource=personal: the staff capabilities that fill this person-select (e.g. ["tecnico","enfermera"]). Active staff of the board's center holding ANY of them, once each. Empty = nobody. */
+            capabilities?: string[];
             /** @description Solo con optionsSource=productos_grupo: lista los productos de ESTE grupo de facturación en vez del grupo anclado al servicio. Sirve para que un select ofrezca otro catálogo sin reanclar el servicio entero. */
             billingGroupId?: string;
             /** @description Solo con optionsSource=productos_grupo: los productos ESCOGIDOS a mano para este select, en el orden en que deben salir (lo más usado primero). Gana sobre el grupo. Un id que ya no existe se omite. */
@@ -65814,6 +66186,11 @@ export interface components {
              * @description Impresora del centro donde sale el código de alta del EHR; null = la de cada pantalla. / Center printer for the EHR claim code; null = each screen's own.
              */
             claimCodePrinterId?: string | null;
+            /**
+             * @description Tipo de ID que se pone solo al paciente con número y sin tipo; null = ninguno. / ID type filled silently on a patient with an ID and no type; null = none.
+             * @enum {string|null}
+             */
+            defaultIdType?: "drivers_license" | "passport" | "green_card" | "state_id" | null;
             /** @description Dirección del API del EHR (se le llama a <baseUrl>/api/v1/…). */
             baseUrl?: string;
             /** @description Supabase del EHR contra el que nos autenticamos. */
@@ -75135,6 +75512,206 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "CorreccionDeEntregadasController_corregir[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregadasDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "CorreccionDeEntregadasController_corregir[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregadasDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "CorreccionDeEntregadasController_corregir[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregadasDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "CorreccionDeEntregadasController_corregir[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregadasDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "CorreccionDeEntregadasController_corregir[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregadasDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "CorreccionDeEntregadasController_corregir[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregadasDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "CorreccionDeEntregadasController_corregir[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregadasDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "CorreccionDeEntregadasController_corregir[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirEntregadasDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
             };
         };
     };
@@ -127693,6 +128270,198 @@ export interface operations {
                 serviceId?: string;
                 /** @description Only with serviceId: the patient's areas set the minutes, as in /resources/availability. */
                 patientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_leftInConsultation[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Días hacia atrás que se miran, sin contar hoy (1–90, por defecto 30). / Days back to look at, today excluded (1–90, default 30). */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_leftInConsultation[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Días hacia atrás que se miran, sin contar hoy (1–90, por defecto 30). / Days back to look at, today excluded (1–90, default 30). */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_leftInConsultation[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Días hacia atrás que se miran, sin contar hoy (1–90, por defecto 30). / Days back to look at, today excluded (1–90, default 30). */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_leftInConsultation[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Días hacia atrás que se miran, sin contar hoy (1–90, por defecto 30). / Days back to look at, today excluded (1–90, default 30). */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_leftInConsultation[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Días hacia atrás que se miran, sin contar hoy (1–90, por defecto 30). / Days back to look at, today excluded (1–90, default 30). */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_leftInConsultation[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Días hacia atrás que se miran, sin contar hoy (1–90, por defecto 30). / Days back to look at, today excluded (1–90, default 30). */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_leftInConsultation[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Días hacia atrás que se miran, sin contar hoy (1–90, por defecto 30). / Days back to look at, today excluded (1–90, default 30). */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_leftInConsultation[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Días hacia atrás que se miran, sin contar hoy (1–90, por defecto 30). / Days back to look at, today excluded (1–90, default 30). */
+                days?: number;
             };
             header?: never;
             path?: never;

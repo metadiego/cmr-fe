@@ -2,6 +2,7 @@ import { invoiceBalance } from "./balance.ts";
 import { line, readTotals } from "./totals.ts";
 import type { FacturaConItems, FacturaEmpresa, ReciboDevolucion } from "@/lib/api/facturas";
 import { invoiceSavings, packageEvidence, savingsPct } from "./sales-package.ts";
+import type { QuantityBreakdown } from "./receipt-format.ts";
 
 // Fiscal/branch block, projected by the BE per sucursal (getById `empresa`). NO
 // hardcoded company data here.
@@ -27,11 +28,17 @@ export type ReciboItem = {
     precio?: number;
     nota?: string | null;
     multiplicadores?: Record<string, number>;
+    // BE-computed "Sesiones × Áreas = Terapias" (cmr-be #619); reemplaza `multiplicadores` cuando el
+    // grupo del componente está en modo "breakdown". null/ausente = se muestra la cantidad como hoy.
+    quantityBreakdown?: QuantityBreakdown | null;
   }[];
   // Duración del protocolo del kit en visitas (producto.treatmentDays), si aplica.
   protocoloVisitas?: number;
   // Multiplicadores (láser: {dias:12, areas:2}) — el label lo resuelve el recibo (fac.col.<clave>).
   multiplicadores?: Record<string, number>;
+  // BE-computed "Sesiones × Áreas = Terapias" (cmr-be #619); reemplaza la leyenda de `multiplicadores`
+  // de esta línea cuando su grupo está en modo "breakdown". null/ausente = se muestra como hoy.
+  quantityBreakdown?: QuantityBreakdown | null;
   // Sales package evidence (item.meta.salesPackage, frozen by the BE): regular, savings, package price.
   paquete?: { nombre: string; precioRegular: number; ahorro: number; ahorroPct: number; precioPaquete: number };
 };
@@ -116,6 +123,9 @@ export function buildRecibo(
             price?: number | null;
             note?: string | null;
             multipliers?: Record<string, number> | null;
+            // cmr-be #619: aún no está en Swagger (drift de gen:api pendiente), verificado en vivo
+            // (S040541, Caguas) — no inventa nada, es un passthrough de lo que ya manda el BE.
+            quantityBreakdown?: QuantityBreakdown | null;
           }[];
         }
       ).content ?? [];
@@ -125,6 +135,7 @@ export function buildRecibo(
       ...(c.price != null ? { precio: num(c.price) } : {}),
       ...(c.note ? { nota: c.note } : {}),
       ...(c.multipliers && Object.keys(c.multipliers).length ? { multiplicadores: c.multipliers } : {}),
+      ...(c.quantityBreakdown ? { quantityBreakdown: c.quantityBreakdown } : {}),
     }));
     const visitas = it.productId ? diasTratamiento[String(it.productId)] : undefined;
     // Multiplicadores (láser: áreas×días) → cantidad EFECTIVA = base × Π(multiplicadores).
@@ -135,6 +146,8 @@ export function buildRecibo(
     const cantEfectiva = multiplicadores
       ? Object.values(multiplicadores).reduce((p, v) => p * (Number(v) || 1), base)
       : num(it.quantity);
+    // cmr-be #619: mismo passthrough que `content[].quantityBreakdown` arriba, aún no en Swagger.
+    const quantityBreakdown = (it as { quantityBreakdown?: QuantityBreakdown | null }).quantityBreakdown;
     return {
       cantidad: cantEfectiva,
       descripcion: it.description ?? "—",
@@ -144,6 +157,7 @@ export function buildRecibo(
       ...(itemComps.length ? { componentes: itemComps } : {}),
       ...(itemComps.length && visitas ? { protocoloVisitas: visitas } : {}),
       ...(multiplicadores ? { multiplicadores } : {}),
+      ...(quantityBreakdown ? { quantityBreakdown } : {}),
       ...(paqueteDe(it) ? { paquete: paqueteDe(it)! } : {}),
     };
   });
