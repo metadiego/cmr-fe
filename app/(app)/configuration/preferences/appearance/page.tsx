@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { getMyPreferences, updateMyPreferences } from "@/lib/api/preferences";
+import { userLayerForPut } from "@/lib/preferences/user-layer";
 import type { ThemeConfig } from "@/lib/theme/config";
 import { mezclarSoloTema } from "@/lib/theme/mezclar-capa";
 import { apiErrorMessage } from "@/lib/api/errors";
@@ -46,7 +47,8 @@ export default function AppearancePage() {
     if (!draft) return;
     setGuardando(true);
     try {
-      await updateMyPreferences(mezclarSoloTema(original, draft));
+      // The language read back as `language` goes out as `idioma`, or the BE stops reading it.
+      await updateMyPreferences(mezclarSoloTema(userLayerForPut(original as Record<string, unknown> | null), draft));
       toast.success(tc("saved"));
     } catch (err) {
       toast.error(apiErrorMessage(err));
