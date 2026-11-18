@@ -197,6 +197,7 @@ export function RecurringBookingModal({
   async function bookSeries() {
     if (!plan) throw new Error(t("recurringPreviewFirst"));
     const bookable = plan.filter((i) => i.status !== "unresolved");
+    if (bookable.length === 0) throw new Error(t("recurringNothingBookable"));
     const skipped = plan.length - bookable.length;
     // The BE endpoint takes ONE time for ALL its dates — group by exact resolved time so a series that
     // mostly landed on the preferred hour still goes out as one call per distinct time, not one per date.

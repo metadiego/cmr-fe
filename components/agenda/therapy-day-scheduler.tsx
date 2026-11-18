@@ -210,7 +210,12 @@ export function TherapyDayScheduler({
     date: t("date"),
     hour: tRoot("agenda.time"),
   };
-  const missing = therapyDayMissing({ patientId: paciente?.id, serviceIds, date, time }).map((f) => fieldLabel[f]);
+  // Once the catalogue has loaded, count only therapies actually shown (a preselected id missing from the
+  // centre's catalogue renders no card, so it must not hide «therapies» from the hint).
+  const missingServiceIds = servRes.state.kind === "ok" ? chosen.map((s) => s.id) : serviceIds;
+  const missing = therapyDayMissing({ patientId: paciente?.id, serviceIds: missingServiceIds, date, time }).map(
+    (f) => fieldLabel[f],
+  );
 
   // The buttons are disabled while anything is missing, so this throw is only a backstop.
   async function book(close: boolean) {

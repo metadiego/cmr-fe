@@ -81,170 +81,171 @@ export function TherapyDayCards({
 
   return (
     <>
-    {/* Héroe del paciente */}
-    {paciente ? (
-      <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-4 ring-1 ring-primary/20">
-        <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-sm">
-          {initials(paciente.name)}
-        </div>
-        <div className="min-w-0">
-          <div className="truncate text-lg font-semibold leading-tight">{paciente.name}</div>
-          <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-muted-foreground">
-            {paciente.record && <span>{tRoot("patients.hub.record")} #{paciente.record}</span>}
-            {paciente.phone && <span>· {paciente.phone}</span>}
+      {/* Héroe del paciente */}
+      {paciente ? (
+        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-4 ring-1 ring-primary/20">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-sm">
+            {initials(paciente.name)}
           </div>
-          {!lockedPatient && (
-            <button
-              type="button"
-              className="mt-1 text-xs text-primary hover:underline"
-              onClick={onChangePatient}
-            >
-              {t("change")}
-            </button>
-          )}
-        </div>
-      </div>
-    ) : (
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium">
-          {t("pickPatient")}
-          <RequiredMark />
-        </label>
-        <PacienteSelect value={null} onChange={(p) => p && onPickPatient(p)} />
-        <p className="text-xs text-muted-foreground">{t("choosePatientFirst")}</p>
-      </div>
-    )}
-
-    {/* Comprados con saldo — agregar de un toque */}
-    {paciente && saldo.length > 0 && (
-      <div className="space-y-1.5">
-        <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("bought")}</label>
-        <div className="flex flex-wrap gap-1.5">
-          {saldo.map((s) => {
-            const on = sel.has(s.serviceId);
-            return (
+          <div className="min-w-0">
+            <div className="truncate text-lg font-semibold leading-tight">{paciente.name}</div>
+            <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-muted-foreground">
+              {paciente.record && <span>{tRoot("patients.hub.record")} #{paciente.record}</span>}
+              {paciente.phone && <span>· {paciente.phone}</span>}
+            </div>
+            {!lockedPatient && (
               <button
-                key={s.serviceId}
                 type="button"
-                onClick={() => onToggle(s.serviceId)}
-                className={cn(
-                  "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
-                  on ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent",
-                )}
+                className="mt-1 text-xs text-primary hover:underline"
+                onClick={onChangePatient}
               >
-                {s.name}
-                <span className="ml-1 opacity-70">· {t("remaining", { n: s.pending })}</span>
+                {t("change")}
               </button>
-            );
-          })}
+            )}
+          </div>
         </div>
-      </div>
-    )}
-
-    {/* Terapias del día (mini-tarjetas) + agregar */}
-    {paciente && (
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
+      ) : (
+        <div className="space-y-1.5">
           <label className="text-sm font-medium">
-            {t("pickServices")}
+            {t("pickPatient")}
             <RequiredMark />
           </label>
-          <AddTherapySelect servicios={servicios} selectedIds={sel} onToggle={onToggle} label={t("addTherapy")} />
+          <PacienteSelect value={null} onChange={(p) => p && onPickPatient(p)} />
+          <p className="text-xs text-muted-foreground">{t("choosePatientFirst")}</p>
         </div>
-        {chosen.length === 0 ? (
-          <p className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
-            {t("noServices")}
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {chosen.map((s) => {
-              const active = selEff === s.id;
-              const existentes = upcomingByService.get(s.id) ?? [];
-              const color = s.color ?? "#4a90d9";
+      )}
+
+      {/* Comprados con saldo — agregar de un toque */}
+      {paciente && saldo.length > 0 && (
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("bought")}</label>
+          <div className="flex flex-wrap gap-1.5">
+            {saldo.map((s) => {
+              const on = sel.has(s.serviceId);
               return (
-                <div
-                  key={s.id}
-                  draggable
-                  onDragStart={(e) => {
-                    onActivate(s.id); e.dataTransfer.setData("text/plain", s.id);
-                    e.dataTransfer.effectAllowed = "move";
-                  }}
-                  onClick={() => onSelectCard(s.id)}
+                <button
+                  key={s.serviceId}
+                  type="button"
+                  onClick={() => onToggle(s.serviceId)}
                   className={cn(
-                    "group cursor-grab rounded-lg border-l-4 bg-card p-2.5 pl-3 ring-1 transition-all active:cursor-grabbing",
-                    active ? "shadow-md" : "ring-foreground/10 hover:ring-foreground/20",
+                    "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+                    on ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent",
                   )}
-                  style={{
-                    borderLeftColor: color,
-                    // Activa = mismo color de la tarjeta, no un azul genérico: es el vínculo visual
-                    // con el borde/punto del panel de horas a la derecha (mismo color en los dos lados).
-                    ...(active ? { boxShadow: `0 0 0 2px ${color}66`, backgroundColor: `${color}0f` } : {}),
-                  }}
                 >
-                  <div className="flex items-center gap-2">
-                    {active ? (
-                      <span aria-hidden className="size-2.5 shrink-0 animate-pulse rounded-full" style={{ backgroundColor: color }} />
-                    ) : (
-                      <HugeiconsIcon icon={DragDropIcon} className="size-4 shrink-0 text-muted-foreground/50" />
+                  {s.name}
+                  <span className="ml-1 opacity-70">· {t("remaining", { n: s.pending })}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Terapias del día (mini-tarjetas) + agregar */}
+      {paciente && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">
+              {t("pickServices")}
+              <RequiredMark />
+            </label>
+            <AddTherapySelect servicios={servicios} selectedIds={sel} onToggle={onToggle} label={t("addTherapy")} />
+          </div>
+          {chosen.length === 0 ? (
+            <p className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
+              {t("noServices")}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {chosen.map((s) => {
+                const active = selEff === s.id;
+                const existentes = upcomingByService.get(s.id) ?? [];
+                const color = s.color ?? "#4a90d9";
+                return (
+                  <div
+                    key={s.id}
+                    draggable
+                    onDragStart={(e) => {
+                      onActivate(s.id);
+                      e.dataTransfer.setData("text/plain", s.id);
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    onClick={() => onSelectCard(s.id)}
+                    className={cn(
+                      "group cursor-grab rounded-lg border-l-4 bg-card p-2.5 pl-3 ring-1 transition-all active:cursor-grabbing",
+                      active ? "shadow-md" : "ring-foreground/10 hover:ring-foreground/20",
                     )}
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium">{s.name}</div>
-                      {areaServiceIds.has(s.id) && (
-                        <label
-                          className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {t("areas")}
-                          <Input
-                            type="number"
-                            min={1}
-                            value={areasOf(s.id)}
-                            onChange={(e) => {
-                              onAreasChange(s.id, Math.max(1, Number(e.target.value) || 1));
-                            }}
-                            className="h-6 w-14 px-1 py-0 text-xs"
-                          />
-                        </label>
+                    style={{
+                      borderLeftColor: color,
+                      // Activa = mismo color de la tarjeta, no un azul genérico: es el vínculo visual
+                      // con el borde/punto del panel de horas a la derecha (mismo color en los dos lados).
+                      ...(active ? { boxShadow: `0 0 0 2px ${color}66`, backgroundColor: `${color}0f` } : {}),
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      {active ? (
+                        <span aria-hidden className="size-2.5 shrink-0 animate-pulse rounded-full" style={{ backgroundColor: color }} />
+                      ) : (
+                        <HugeiconsIcon icon={DragDropIcon} className="size-4 shrink-0 text-muted-foreground/50" />
                       )}
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium">{s.name}</div>
+                        {areaServiceIds.has(s.id) && (
+                          <label
+                            className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {t("areas")}
+                            <Input
+                              type="number"
+                              min={1}
+                              value={areasOf(s.id)}
+                              onChange={(e) => {
+                                onAreasChange(s.id, Math.max(1, Number(e.target.value) || 1));
+                              }}
+                              className="h-6 w-14 px-1 py-0 text-xs"
+                            />
+                          </label>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemove(s.id);
+                        }}
+                        className="shrink-0 rounded p-1 text-muted-foreground/50 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                        aria-label={tRoot("common.delete")}
+                      >
+                        <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
+                      </button>
                     </div>
+                    <ExistingSessionsBadge
+                      sesiones={existentes}
+                      centro={centro}
+                      // Reagendar puede liberar o consumir un puesto en la fecha/hora que la
+                      // tarjeta activa está mostrando ahora mismo — sin esto quedaban obsoletos.
+                      onChanged={onSessionsChanged}
+                    />
+                    {/* Additive-only entry point: opens the pattern-based bulk scheduler for THIS
+                        service, never touches the single-date flow above. */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onRemove(s.id);
+                        onOpenRecurring(s.id);
                       }}
-                      className="shrink-0 rounded p-1 text-muted-foreground/50 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                      aria-label={tRoot("common.delete")}
+                      className="mt-1 text-[11px] text-primary hover:underline"
                     >
-                      <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
+                      {t("recurringButton")}
                     </button>
                   </div>
-                  <ExistingSessionsBadge
-                    sesiones={existentes}
-                    centro={centro}
-                    // Reagendar puede liberar o consumir un puesto en la fecha/hora que la
-// tarjeta activa está mostrando ahora mismo — sin esto quedaban obsoletos.
-onChanged={onSessionsChanged}
-                  />
-                  {/* Additive-only entry point: opens the pattern-based bulk scheduler for THIS
-                      service, never touches the single-date flow above. */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenRecurring(s.id);
-                    }}
-                    className="mt-1 text-[11px] text-primary hover:underline"
-                  >
-                    {t("recurringButton")}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    )}
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
