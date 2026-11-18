@@ -225,8 +225,7 @@ missing. Every dialog and sheet was then moved onto one shell (spec
   nothing is loading.
 - **The hooks:** `useSubmit` (busy, double-submit guard, error toast), `useDialogForm(initial,
   open, record?.id)` (clean form on every open and on another record), `useConfirm()` for any
-  yes/no. The browser's `confirm()` is a **lint error**; the only exception is
-  `components/calendario/evento-modal.tsx`, until the agenda PR removes it.
+  yes/no. The browser's `confirm()` is a **lint error**, with no exceptions.
 - **A submit never "succeeds" without saving** (no bare `return` in an async submit: throw, or put
   the condition in `missing`/`blocked`), and **a failed save never closes the dialog or loses what
   was typed**.
