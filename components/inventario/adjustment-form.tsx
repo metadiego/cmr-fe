@@ -76,7 +76,9 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
       onSaved(res.number);
     } catch (err) {
       const index = err instanceof ApiError ? (err.data as { index?: unknown } | undefined)?.index : undefined;
-      if (typeof index === "number") setBadLine(index);
+      // The BE counts the lines it received (filled ones only): map back to the row on screen.
+      const filled = lines.map((l, i) => (l.productId ? i : -1)).filter((i) => i >= 0);
+      if (typeof index === "number" && filled[index] != null) setBadLine(filled[index]);
       toastError(err, tRoot);
     } finally {
       setBusy(false);
