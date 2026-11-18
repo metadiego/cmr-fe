@@ -5793,6 +5793,12 @@
         "vials": "Viales aplicados",
         "content": "Contenido",
         "proportion": "Proporción"
+      },
+      "byNurse": "Por enfermera",
+      "byUser": "Por usuario (asistido por)",
+      "group": {
+        "sessions": "Sesiones",
+        "unknown": "Sin indicar"
       }
     }
   },

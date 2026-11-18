@@ -11,10 +11,12 @@ import { toastError } from "@/lib/api/errors"
 import {
   DAY_SUMMARY_COLUMNS,
   DAY_SUMMARY_REPORT,
+  groupDaySummary,
   savedReportColumns,
   toggleDaySummaryColumn,
   visibleDaySummaryColumns,
   type DaySummaryColumn,
+  type DaySummaryGroup,
 } from "@/lib/frontdesk/day-summary"
 import { parseDayUTC } from "@/lib/format/fecha"
 import { useResource } from "@/hooks/use-resource"
@@ -234,11 +236,49 @@ export function DaySummaryDialog({
                 <Stat label={t("stat.content")} value={num(data.totals.content)} />
                 <Stat label={t("stat.proportion")} value={num(data.totals.proportion, 2)} />
               </div>
+
+              {data.rows.length > 0 && (
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Breakdown title={t("byNurse")} groups={groupDaySummary(data.rows, (r) => r.nurse)} />
+                  <Breakdown title={t("byUser")} groups={groupDaySummary(data.rows, (r) => r.attendedBy)} />
+                </div>
+              )}
             </div>
           )}
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+// Per nurse / per user (owner 18-nov-2026). It sits inside the printed block, so the print carries it.
+function Breakdown({ title, groups }: { title: string; groups: DaySummaryGroup[] }) {
+  const t = useTranslations("patientDesk.daySummary")
+  const format = useFormatter()
+  const n = (v: number) => format.number(v, { maximumFractionDigits: 2 })
+  return (
+    <div className="overflow-hidden rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{title}</TableHead>
+            <TableHead className="w-24 text-right">{t("group.sessions")}</TableHead>
+            <TableHead className="w-24 text-right">{t("col.sealedVials")}</TableHead>
+            <TableHead className="w-24 text-right">{t("col.content")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {groups.map((g) => (
+            <TableRow key={g.name ?? "—"}>
+              <TableCell>{g.name ?? t("group.unknown")}</TableCell>
+              <TableCell className="text-right tabular-nums">{n(g.sessions)}</TableCell>
+              <TableCell className="text-right tabular-nums">{n(g.sealedVials)}</TableCell>
+              <TableCell className="text-right tabular-nums">{n(g.content)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
 

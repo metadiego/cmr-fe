@@ -74,3 +74,22 @@ export function validEmailList(s: string): boolean {
   const parts = s.split(",").map((p) => p.trim()).filter(Boolean);
   return parts.length > 0 && parts.length <= 20 && parts.every((p) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p));
 }
+
+export type DaySummaryGroup = { name: string | null; sessions: number; sealedVials: number; content: number };
+
+/** Sessions, vials and content per nurse or per who marked it attended (owner 18-nov-2026: «contabilizar
+ *  por enfermera y por usuario»). Most sessions first, then by name; a missing name is its own group, last. */
+export function groupDaySummary<R extends { sealedVials: number; content: number }>(rows: readonly R[], key: (r: R) => string | null): DaySummaryGroup[] {
+  const map = new Map<string | null, DaySummaryGroup>();
+  for (const r of rows) {
+    const name = key(r)?.trim() || null;
+    const g = map.get(name) ?? { name, sessions: 0, sealedVials: 0, content: 0 };
+    g.sessions += 1;
+    g.sealedVials = Math.round((g.sealedVials + r.sealedVials) * 100) / 100;
+    g.content = Math.round((g.content + r.content) * 100) / 100;
+    map.set(name, g);
+  }
+  return [...map.values()].sort((a, b) =>
+    a.name == null ? 1 : b.name == null ? -1 : b.sessions - a.sessions || a.name.localeCompare(b.name)
+  );
+}

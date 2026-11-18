@@ -5793,6 +5793,12 @@
         "vials": "Vials applied",
         "content": "Content",
         "proportion": "Proportion"
+      },
+      "byNurse": "By nurse",
+      "byUser": "By user (attended by)",
+      "group": {
+        "sessions": "Sessions",
+        "unknown": "Not recorded"
       }
     }
   },

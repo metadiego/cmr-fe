@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   DEFAULT_DAY_SUMMARY_COLUMNS,
   base64ToBytes,
+  groupDaySummary,
   isServiceDayComplete,
   savedReportColumns,
   toggleDaySummaryColumn,
@@ -46,4 +47,20 @@ test("base64ToBytes and validEmailList", () => {
   assert.equal(validEmailList("a@b.co, c@d.com"), true);
   assert.equal(validEmailList("a@b"), false);
   assert.equal(validEmailList(" "), false);
+});
+
+test("groupDaySummary counts sessions, vials and content per person, most first, unnamed last", () => {
+  const rows = [
+    { nurse: "Glorimar", sealedVials: 1, content: 25 },
+    { nurse: "Britalie", sealedVials: 1, content: 25 },
+    { nurse: "Glorimar", sealedVials: 0, content: 10 },
+    { nurse: null, sealedVials: 1, content: 25 },
+    { nurse: "Glorimar ", sealedVials: 2, content: 40 },
+  ];
+  assert.deepEqual(groupDaySummary(rows, (r) => r.nurse), [
+    { name: "Glorimar", sessions: 3, sealedVials: 3, content: 75 },
+    { name: "Britalie", sessions: 1, sealedVials: 1, content: 25 },
+    { name: null, sessions: 1, sealedVials: 1, content: 25 },
+  ]);
+  assert.deepEqual(groupDaySummary([], (r: { n: null; sealedVials: number; content: number }) => r.n), []);
 });
