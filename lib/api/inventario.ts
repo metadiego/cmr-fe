@@ -462,27 +462,7 @@ export function confirmarRecepcion(payload: {
   }, clinicId);
 }
 
-// Recibo de una recepción por lote (para volver a verlo tras guardar). Perm inventario.read.
-export interface RecepcionLinea {
-  productId?: string;
-  product?: string | null;
-  quantity?: number;
-  unitCost?: number | null;
-  lotNumber?: string | null;
-  expirationDate?: string | null;
-}
-export interface Recepcion {
-  documentId?: string;
-  supplier?: string | null;
-  purchaseInvoiceNumber?: string | null;
-  effectiveDate?: string | null;
-  warehouse?: string | null;
-  notes?: string | null;
-  lines: RecepcionLinea[];
-}
-export function getRecepcion(documentId: string): Promise<Recepcion> {
-  return apiFetch<Recepcion>(`/inventory/operations/receipts/${encodeURIComponent(documentId)}`);
-}
+// The receipt of one purchase reception and the list of receptions: lib/api/inventory-receipts.ts.
 
 // ---- Ajuste de existencias ------------------------------------------------
 // Los MOTIVOS son un catálogo del BE (`motivos_movimiento`), no una lista escrita aquí: el select se
