@@ -3205,7 +3205,7 @@
       "sin_lineas": "The adjustment needs at least one product.",
       "cantidad_invalida": "A quantity in the adjustment is not valid.",
       "signo_invalido": "A line is missing «Out» or «In».",
-      "producto_inexistente": "A product in the adjustment no longer exists. Está marcada en rojo."
+      "producto_inexistente": "A product in the adjustment no longer exists; its line is marked in red."
     }
   },
   "receipt": {

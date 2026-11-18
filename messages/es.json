@@ -3205,7 +3205,7 @@
       "sin_lineas": "El ajuste necesita al menos un producto.",
       "cantidad_invalida": "Hay una cantidad que no es válida en el ajuste.",
       "signo_invalido": "Hay una línea sin «Sale» o «Entra».",
-      "producto_inexistente": "Hay un producto que ya no existe en el ajuste. Está marcada en rojo."
+      "producto_inexistente": "Hay un producto que ya no existe en el ajuste; su línea está marcada en rojo."
     }
   },
   "receipt": {
