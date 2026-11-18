@@ -264,11 +264,14 @@ export function CitaModal({
   };
   const missing = missingKeys.map((f) => fieldLabel[f]);
   const clinicPending = !isEdit && !needsCentro && !createClinicReady(effectiveCentro, centros.length, viewAll);
+  // Loading only while the list is really loading; loaded with none = the person has no clinic.
   const clinicReason = !clinicPending
     ? null
-    : centrosRes.state.kind === "fail"
-      ? centrosRes.state.message
-      : tc("loading");
+    : centrosRes.state.kind === "loading"
+      ? tc("loading")
+      : centrosRes.state.kind === "fail"
+        ? centrosRes.state.message
+        : tRoot("caja.sinCentro");
 
   async function avisarReagendo(fromId: string) {
     const prev = await getCita(fromId).catch(() => null);
@@ -350,8 +353,10 @@ export function CitaModal({
       onOpenChange={onOpenChange}
       size="xl"
       title={isEdit ? t("editTitle") : t("title")}
-      onSubmit={() => submit()}
-      submitLabel={warn ? t("saveAnyway") : t("save")}
+      // Booking over an overlap is a deliberate override: once the warning shows, only the button does it.
+      onSubmit={warn ? () => {} : () => submit()}
+      submitLabel={t("save")}
+      actions={warn ? [{ label: t("saveAnyway"), onClick: () => submit() }] : undefined}
       submitting={submitting}
       missing={missing}
       blocked={clinicPending}
