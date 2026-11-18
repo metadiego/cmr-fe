@@ -34,3 +34,22 @@ test("doseBalanceForRow: paciente sin entrada en el mapa o sin resolver → vac�
   assert.deepEqual(doseBalanceForRow(byPatient, null), []);
   assert.deepEqual(doseBalanceForRow(byPatient, undefined), []);
 });
+
+// patient-desk SIN REGRESIÓN: sus `sessionIds` ya vienen filtrados a UN solo paciente (groupByPatient,
+// hooks/use-patient-day.ts), así que el caso real ahí es "varias filas, un mismo patientId" — el mapa
+// por paciente debe colapsar exactamente al viejo comportamiento de un solo fetch con un solo arreglo
+// que llega IGUAL a cada fila, antes y después de este cambio (cmr-fe #139).
+test("caso patient-desk (un solo paciente): exactamente UN id a pedir, pase lo que pase con el número de filas", () => {
+  const byRow: Record<string, string> = { laser1: "p1", laser2: "p1", laser3: "p1" };
+  const ids = patientsNeedingDoseBalance(Object.keys(byRow), (id) => byRow[id], true);
+  assert.equal(ids.length, 1, "patient-desk solo debe disparar UN getPendingDeliveries, como antes");
+  assert.deepEqual(ids, ["p1"]);
+});
+
+test("caso patient-desk (un solo paciente): el MISMO saldoDosis llega a cada fila del paciente", () => {
+  const byRow: Record<string, string> = { laser1: "p1", laser2: "p1", laser3: "p1" };
+  const saldo = [{ nombre: "Dosis A", n: 4 }];
+  const byPatient = { p1: saldo };
+  const porFila = Object.keys(byRow).map((rowId) => doseBalanceForRow(byPatient, byRow[rowId]));
+  for (const recibido of porFila) assert.deepEqual(recibido, saldo);
+});
