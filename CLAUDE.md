@@ -320,7 +320,7 @@ destructive (red), neutral = secondary.
 **Migrating the rest (`npm run lint`).** The hand-rolled card (`ring-foreground/10` or
 `shadow-[rgba(…)]` in a class string) is a lint **error** everywhere except `components/ui/**` and
 the files listed in `eslint/legacy-card-files.mjs`.
-- That list was taken on 18-nov-2026 (154 files) and **may only shrink**, like `DEBT`.
+- That list was taken on 18-nov-2026 (156 files) and **may only shrink**, like `DEBT`.
 - `lib/lint/legacy-card-files.test.ts` fails while a listed file is already clean, so moving a file
   onto the kit means deleting its line in the same commit.
 - Adding a file to the list is admitting debt and gets discussed with the owner.

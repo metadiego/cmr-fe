@@ -2,7 +2,9 @@
  * Files that still hand-roll a card (`ring-1 ring-foreground/10` and/or `shadow-[rgba(…)]`) instead
  * of using the kit (`components/kit/panel.tsx`, `components/ui/card.tsx`). See CLAUDE.md rule 10.
  *
- * This list may only SHRINK. It was taken on 18-nov-2026 (154 files). When a file no longer
+ * This list may only SHRINK. It was taken on 18-nov-2026 (154 files); the two agenda therapy-day files
+ * were added the same day because they landed on main between the snapshot and this rule's merge
+ * (156). They are agenda work in progress: move them onto the kit there and delete their lines. When a file no longer
  * uses the pattern, delete its line: `lib/lint/legacy-card-files.test.ts` fails while a listed file
  * is already clean, so a stale entry cannot hide new debt. Adding a file here is admitting debt; it
  * gets discussed with the owner, not slipped into a passing commit.
@@ -57,7 +59,9 @@ export const LEGACY_CARD_FILES = [
   "components/agenda/service-day-view.tsx",
   "components/agenda/tablero-dinamico-skeleton.tsx",
   "components/agenda/tablero-dinamico.tsx",
+  "components/agenda/therapy-day-cards.tsx",
   "components/agenda/therapy-day-scheduler.tsx",
+  "components/agenda/therapy-day-summary.tsx",
   "components/auditoria/auditoria-log.tsx",
   "components/body-measurements/link-visit-dialog.tsx",
   "components/body-measurements/unlinked-measurements.tsx",

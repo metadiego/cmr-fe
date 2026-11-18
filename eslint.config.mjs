@@ -127,7 +127,7 @@ const noBrowserLocaleFormatting = [
 /**
  * Hand-rolled cards, as a rule that FAILS (CLAUDE.md rule 10).
  *
- * 154 files re-typed their own card (`rounded-md bg-card ring-1 ring-foreground/10
+ * 156 files re-typed their own card (`rounded-md bg-card ring-1 ring-foreground/10
  * shadow-[rgba(16,32,64,0.06)]`), each a little different, which is why the app reads as a dozen
  * apps stitched together. New code uses the kit: `Panel` (components/kit/panel.tsx) for a section,
  * `Card` (components/ui/card.tsx) or `DataTable` (components/kit/data-table.tsx) otherwise.
