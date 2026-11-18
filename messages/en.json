@@ -3753,7 +3753,8 @@
   "errores": {
     "TENANT_NOT_FOUND": "The specified center does not exist.",
     "VIGENCIA_INVALIDA": "The end date can't be earlier than the start date.",
-    "TENANT_REQUIRED": "Choose a center: this view works one center at a time."
+    "TENANT_REQUIRED": "Choose a center: this view works one center at a time.",
+    "REFERENCE_NOT_FOUND": "The operation couldn't complete: the server is missing some data it needs. Try again; if it keeps happening, contact support."
   },
   "configAlta": {
     "title": "Required patient data",

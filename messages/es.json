@@ -3753,7 +3753,8 @@
   "errores": {
     "TENANT_NOT_FOUND": "El centro indicado no existe.",
     "VIGENCIA_INVALIDA": "La fecha de fin no puede ser anterior a la de inicio.",
-    "TENANT_REQUIRED": "Elige un centro: esta vista trabaja con un centro a la vez."
+    "TENANT_REQUIRED": "Elige un centro: esta vista trabaja con un centro a la vez.",
+    "REFERENCE_NOT_FOUND": "No se pudo completar la operación: falta un dato que el servidor necesita. Intenta de nuevo; si persiste, avisa a soporte."
   },
   "configAlta": {
     "title": "Datos obligatorios del paciente",
