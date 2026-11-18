@@ -18,6 +18,8 @@ export type DaySummaryRow = {
   content: number;
 };
 
+export type DaySummaryGroupRow = { name: string | null; sessions: number; sealedVials: number; content: number };
+
 export type DaySummary = {
   service: { id: string; slug: string | null; name: string };
   centers: { id: string; name: string }[];
@@ -26,7 +28,17 @@ export type DaySummary = {
   attended: number;
   complete: boolean;
   rows: DaySummaryRow[];
-  totals: { sessions: number; patients: number; quantity: number; sealedVials: number; content: number; proportion: number | null };
+  totals: {
+    sessions: number;
+    patients: number;
+    quantity: number;
+    sealedVials: number;
+    content: number;
+    proportion: number | null;
+    /** Per nurse / per who marked it attended, most first (cmr-be #634). Absent before it deploys. */
+    byNurse?: DaySummaryGroupRow[];
+    byUser?: DaySummaryGroupRow[];
+  };
 };
 
 export const rowRecord = (r: Pick<DaySummaryRow, "medicalRecordNumber" | "record">): string | null =>

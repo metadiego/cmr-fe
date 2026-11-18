@@ -239,8 +239,8 @@ export function DaySummaryDialog({
 
               {data.rows.length > 0 && (
                 <div className="grid gap-3 md:grid-cols-2">
-                  <Breakdown title={t("byNurse")} groups={groupDaySummary(data.rows, (r) => r.nurse)} />
-                  <Breakdown title={t("byUser")} groups={groupDaySummary(data.rows, (r) => r.attendedBy)} />
+                  <Breakdown title={t("byNurse")} groups={data.totals.byNurse ?? groupDaySummary(data.rows, (r) => r.nurse)} />
+                  <Breakdown title={t("byUser")} groups={data.totals.byUser ?? groupDaySummary(data.rows, (r) => r.attendedBy)} />
                 </div>
               )}
             </div>
@@ -251,7 +251,8 @@ export function DaySummaryDialog({
   )
 }
 
-// Per nurse / per user (owner 18-nov-2026). It sits inside the printed block, so the print carries it.
+// Per nurse / per user (owner 18-nov-2026), from the BE's totals (cmr-be #634); the local grouping is only
+// the fallback while an older BE answers without them. Inside the printed block, so the print carries it.
 function Breakdown({ title, groups }: { title: string; groups: DaySummaryGroup[] }) {
   const t = useTranslations("patientDesk.daySummary")
   const format = useFormatter()
