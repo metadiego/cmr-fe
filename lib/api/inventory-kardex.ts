@@ -51,6 +51,8 @@ export type KardexSummary = {
   applied: number;
   appliedProportion: number | null;
   closing: number;
+  /** cmr-be #626; absent until it is deployed. */
+  ownerFormat?: KardexOwnerFormat;
 };
 
 // Query params stay in Spanish (productoId, desde, hasta, fecha): that is the BE controller today, not a
@@ -85,3 +87,18 @@ export function getKardexSummary(p: { productId: string; from: string; to: strin
     centerId ?? undefined,
   );
 }
+
+/** The management summary in the owner's sheet layout (cmr-be #626): classified by the BE, painted here. */
+export type KardexOwnerFormat = {
+  opening: number;
+  inbound: Array<{ date: string; supplier: string | null; documentNumber: string | null; quantity: number; notes: string | null }>;
+  /** Manual outputs (reasons with kardex_column = 'salidas'), shown as positive quantities. */
+  manualOutputs: Array<{ date: string; reason: string | null; adjustmentNumber: string | number | null; quantity: number; notes: string | null }>;
+  appliedNet: number;
+  appliedProportion: number | null;
+  /** Load corrections: one «Correcciones de carga» row only when the net is not 0. */
+  correctionsNet: number;
+  corrections: Array<{ date: string; reason: string | null; quantity: number; notes: string | null }>;
+  closing: number;
+  closingBySupplier: Array<{ supplier: string | null; quantity: number }>;
+};

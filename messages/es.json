@@ -6278,7 +6278,7 @@
     "badRange": "La fecha «Desde» debe ser anterior o igual a «Hasta».",
     "loading": "Cargando…",
     "tabDaily": "Por día",
-    "tabSummary": "Resumen gerencial",
+    "tabSummary": "Detalle de movimientos",
     "viewDay": "Ver día",
     "periodTotal": "Total del período",
     "noMovements": "Ese día no tiene movimientos.",
@@ -6325,7 +6325,23 @@
       "transferencia": "Transferencia",
       "vencimiento": "Vencimiento",
       "venta": "Venta"
-    }
+    },
+    "owner": {
+      "concept": "Concepto",
+      "quantity": "Cant.",
+      "opening": "Inventario inicial",
+      "inbound": "Entrada al almacén el {date}",
+      "noSupplier": "Sin proveedor",
+      "transfer": "Transferencia",
+      "adjustment": "Ajuste",
+      "corrections": "Correcciones de carga",
+      "applied": "Aplicadas al {date}",
+      "closing": "Inventario final al {date}",
+      "observations": "Observaciones:",
+      "units": "{n} unidades",
+      "mismatch": "La cuenta no cierra: da {computed} y el sistema dice {closing}. Avísale a soporte."
+    },
+    "tabOwner": "Resumen gerencial"
   },
   "inventoryReceipts": {
     "tabReceive": "Recibir",

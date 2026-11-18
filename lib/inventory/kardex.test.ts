@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { defaultKardexRange, readableDocument, sessionLabel, validRange } from "./kardex.ts";
+import { defaultKardexRange, ownerClosing, readableDocument, sessionLabel, validRange } from "./kardex.ts";
 
 test("defaultKardexRange: first of the month through today", () => {
   assert.deepEqual(defaultKardexRange("2026-11-16"), { from: "2026-11-01", to: "2026-11-16" });
@@ -27,4 +27,18 @@ test("validRange: two days in order", () => {
   assert.equal(validRange("2026-11-16", "2026-11-16"), true);
   assert.equal(validRange("2026-11-17", "2026-11-16"), false);
   assert.equal(validRange("", "2026-11-16"), false);
+});
+
+test("ownerClosing: the owner's October sheet closes at 133", () => {
+  const october = {
+    opening: 158,
+    inbound: [{ quantity: 100 }, { quantity: 100 }, { quantity: 160 }],
+    manualOutputs: [{ quantity: 1 }, { quantity: 1 }],
+    appliedNet: 383,
+    correctionsNet: 0,
+  };
+  assert.equal(ownerClosing(october), 133);
+  // manual outputs counted as outputs whatever their sign
+  assert.equal(ownerClosing({ ...october, manualOutputs: [{ quantity: -1 }, { quantity: -1 }] }), 133);
+  assert.equal(ownerClosing({ ...october, correctionsNet: 2 }), 135);
 });

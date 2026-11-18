@@ -23,3 +23,15 @@ export function validRange(from: string, to: string): boolean {
   const day = /^\d{4}-\d{2}-\d{2}$/;
   return day.test(from) && day.test(to) && from <= to;
 }
+
+/** The owner's sheet arithmetic: opening + Σinbound − Σmanual − appliedNet + correctionsNet. */
+export function ownerClosing(f: {
+  opening: number;
+  inbound: { quantity: number }[];
+  manualOutputs: { quantity: number }[];
+  appliedNet: number;
+  correctionsNet: number;
+}): number {
+  const sum = (xs: { quantity: number }[]) => xs.reduce((a, x) => a + (Number(x.quantity) || 0), 0);
+  return f.opening + sum(f.inbound) - Math.abs(sum(f.manualOutputs)) - f.appliedNet + f.correctionsNet;
+}

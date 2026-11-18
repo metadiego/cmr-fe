@@ -6278,7 +6278,7 @@
     "badRange": "«From» must be on or before «To».",
     "loading": "Loading…",
     "tabDaily": "By day",
-    "tabSummary": "Management summary",
+    "tabSummary": "Movement detail",
     "viewDay": "View day",
     "periodTotal": "Period total",
     "noMovements": "No movements that day.",
@@ -6325,7 +6325,23 @@
       "transferencia": "Transfer",
       "vencimiento": "Expiry",
       "venta": "Sale"
-    }
+    },
+    "owner": {
+      "concept": "Concept",
+      "quantity": "Qty",
+      "opening": "Opening inventory",
+      "inbound": "Received at the warehouse on {date}",
+      "noSupplier": "No supplier",
+      "transfer": "Transfer",
+      "adjustment": "Adjustment",
+      "corrections": "Load corrections",
+      "applied": "Applied through {date}",
+      "closing": "Closing inventory on {date}",
+      "observations": "Notes:",
+      "units": "{n} units",
+      "mismatch": "The math does not close: it gives {computed} and the system says {closing}. Tell support."
+    },
+    "tabOwner": "Management summary"
   },
   "inventoryReceipts": {
     "tabReceive": "Receive",

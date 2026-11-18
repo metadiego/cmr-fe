@@ -23,6 +23,8 @@ import { useCentroGate } from "@/hooks/use-centro-gate"
 import { ProductoPicker } from "@/components/inventario/producto-picker"
 import { Button } from "@/components/ui/button"
 import { ReportActions } from "@/components/reports/report-actions"
+import { KardexOwnerSummary } from "@/components/inventario/kardex-owner-summary"
+import { dailyCsv, movementsCsv, ownerCsv } from "@/lib/inventory/kardex-csv"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   Dialog,
@@ -55,6 +57,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 // which reason lands in which column (cmr-be docs/specs/kardex-diario-de-inventario.md, handoff
 // docs/specs/kardex-diario-handoff.md). Print = the browser's (PDF included); the filters are no-print.
 
+type KardexTab = "daily" | "owner" | "summary"
+
 export default function DailyKardexPage() {
   const t = useTranslations("inventoryKardex")
   const format = useFormatter()
@@ -69,7 +73,7 @@ export default function DailyKardexPage() {
   const [from, setFrom] = React.useState(initial.from)
   const [to, setTo] = React.useState(initial.to)
   const [day, setDay] = React.useState<string | null>(null)
-  const [tab, setTab] = React.useState<"daily" | "summary">("daily")
+  const [tab, setTab] = React.useState<KardexTab>("daily")
   const printRef = React.useRef<HTMLDivElement>(null)
 
   const ready = !!(centerId && productId && validRange(from, to))
@@ -123,70 +127,6 @@ export default function DailyKardexPage() {
     { inbound: 0, applied: 0, adjustments: 0 }
   )
 
-  // CSV of the tab on screen, in the same columns and words as the table.
-  const dailyCsv = () => [
-    [
-      t("col.date"),
-      t("col.opening"),
-      t("col.inbound"),
-      t("col.applied"),
-      ...(withProportion ? [t("col.proportion")] : []),
-      t("col.adjustments"),
-      t("col.closing"),
-    ],
-    ...(daily?.days ?? []).map((d) => [
-      d.date,
-      d.opening,
-      d.inbound,
-      d.applied,
-      ...(withProportion ? [d.appliedProportion ?? ""] : []),
-      d.adjustments,
-      d.closing,
-    ]),
-  ]
-  const summaryCsv = () =>
-    summary
-      ? [
-          [
-            t("col.date"),
-            t("summary.kind"),
-            t("day.reason"),
-            t("day.notes"),
-            t("day.quantity"),
-          ],
-          [
-            summary.from,
-            t("summary.opening", { date: summary.from }),
-            "",
-            "",
-            summary.opening,
-          ],
-          ...summary.lines.map((l) => [
-            l.date,
-            l.kind === "inbound"
-              ? t("summary.inbound")
-              : t("summary.adjustment"),
-            reasonText(l.reason),
-            l.notes ?? "",
-            l.quantity,
-          ]),
-          [
-            summary.to,
-            t("summary.applied", { date: summary.to }),
-            "",
-            "",
-            -summary.applied,
-          ],
-          [
-            summary.to,
-            t("summary.closing", { date: summary.to }),
-            "",
-            "",
-            summary.closing,
-          ],
-        ]
-      : []
-
   return (
     <PageContainer className="w-full">
       <PageHeader
@@ -202,7 +142,13 @@ export default function DailyKardexPage() {
               target={printRef}
               title={`${t("title")} · ${daily.product.name}`}
               subtitle={`${centerName} · ${dayText(from)} – ${dayText(to)}`}
-              csv={() => (tab === "summary" ? summaryCsv() : dailyCsv())}
+              csv={() =>
+                tab === "summary"
+                  ? movementsCsv(summary, t, reasonText)
+                  : tab === "owner"
+                    ? ownerCsv(summary, t, reasonText)
+                    : dailyCsv(daily, t)
+              }
               fileParts={[
                 t("title"),
                 daily.product.sku || daily.product.name,
@@ -274,12 +220,12 @@ export default function DailyKardexPage() {
 
       {daily && (
         <div ref={printRef}>
-          <Tabs
-            value={tab}
-            onValueChange={(v) => setTab(v as "daily" | "summary")}
-          >
+          <Tabs value={tab} onValueChange={(v) => setTab(v as KardexTab)}>
             <TabsList className="no-print">
               <TabsTrigger value="daily">{t("tabDaily")}</TabsTrigger>
+              {summary?.ownerFormat && (
+                <TabsTrigger value="owner">{t("tabOwner")}</TabsTrigger>
+              )}
               <TabsTrigger value="summary">{t("tabSummary")}</TabsTrigger>
             </TabsList>
 
@@ -396,6 +342,16 @@ export default function DailyKardexPage() {
                 </Table>
               </div>
             </TabsContent>
+
+            {summary?.ownerFormat && (
+              <TabsContent value="owner">
+                <KardexOwnerSummary
+                  data={summary.ownerFormat}
+                  from={summary.from}
+                  to={summary.to}
+                />
+              </TabsContent>
+            )}
 
             <TabsContent value="summary">
               {summaryRes.state.kind === "fail" && (
