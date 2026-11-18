@@ -6317,5 +6317,43 @@
       "vencimiento": "Vencimiento",
       "venta": "Venta"
     }
+  },
+  "inventoryReceipts": {
+    "tabReceive": "Recibir",
+    "tabReceipts": "Recepciones",
+    "title": "Recepciones de compra",
+    "subtitle": "Cada recepción tal como se cargó: cuándo, dónde, de quién y quién la cargó.",
+    "count": "{n, plural, one {# recepción} other {# recepciones}}",
+    "center": "Centro",
+    "allCenters": "Todos mis centros",
+    "from": "Desde",
+    "to": "Hasta",
+    "loading": "Cargando…",
+    "empty": "No hay recepciones en esas fechas.",
+    "effective": "Con fecha {date}",
+    "view": "Ver",
+    "total": "Total",
+    "detailTitle": "Recepción",
+    "by": "cargada por {name}",
+    "col": {
+      "date": "Fecha",
+      "center": "Centro · Almacén",
+      "supplier": "Proveedor",
+      "invoice": "Factura / PO",
+      "lines": "Líneas",
+      "units": "Unidades",
+      "cost": "Costo total",
+      "registeredBy": "Cargado por",
+      "actions": "Acciones"
+    },
+    "line": {
+      "product": "Producto",
+      "quantity": "Cantidad",
+      "unitCost": "Costo unitario",
+      "total": "Total",
+      "lot": "Lote",
+      "expires": "Vence",
+      "notes": "Nota"
+    }
   }
 }

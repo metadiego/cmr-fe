@@ -6317,5 +6317,43 @@
       "vencimiento": "Expiry",
       "venta": "Sale"
     }
+  },
+  "inventoryReceipts": {
+    "tabReceive": "Receive",
+    "tabReceipts": "Receipts",
+    "title": "Purchase receipts",
+    "subtitle": "Every receipt as it was loaded: when, where, from whom and who loaded it.",
+    "count": "{n, plural, one {# receipt} other {# receipts}}",
+    "center": "Center",
+    "allCenters": "All my centers",
+    "from": "From",
+    "to": "To",
+    "loading": "Loading…",
+    "empty": "No receipts in that period.",
+    "effective": "Dated {date}",
+    "view": "View",
+    "total": "Total",
+    "detailTitle": "Receipt",
+    "by": "loaded by {name}",
+    "col": {
+      "date": "Date",
+      "center": "Center · Warehouse",
+      "supplier": "Supplier",
+      "invoice": "Invoice / PO",
+      "lines": "Lines",
+      "units": "Units",
+      "cost": "Total cost",
+      "registeredBy": "Loaded by",
+      "actions": "Actions"
+    },
+    "line": {
+      "product": "Product",
+      "quantity": "Quantity",
+      "unitCost": "Unit cost",
+      "total": "Total",
+      "lot": "Lot",
+      "expires": "Expires",
+      "notes": "Note"
+    }
   }
 }
