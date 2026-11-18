@@ -9,7 +9,10 @@ export type DoctorSummaryStage = "scheduled" | "arrived" | "in_consultation" | "
 
 export type DoctorSummaryRow = {
   appointmentId: string;
-  record: string | null;
+  /** The v2 edge renames the BE's `record` to `medicalRecordNumber`, same as day-summary (verified
+   *  live 18-nov: a real row never carries `record`) — read via rowRecord. */
+  medicalRecordNumber?: string | null;
+  record?: string | null;
   patient: string | null;
   doctorId: string | null;
   doctor: string | null;
@@ -24,6 +27,9 @@ export type DoctorSummaryRow = {
   invoiceAmount: number | null;
   paymentMethods: string | null;
 };
+
+export const rowRecord = (r: Pick<DoctorSummaryRow, "medicalRecordNumber" | "record">): string | null =>
+  r.medicalRecordNumber ?? r.record ?? null;
 
 export type DoctorSummaryTypeCount = { slug: string; name: string; count: number };
 

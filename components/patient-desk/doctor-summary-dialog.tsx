@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useFormatter, useTranslations } from "next-intl"
 
-import { doctorSummaryExport, getDoctorSummary, type DoctorSummary, type DoctorSummaryRow } from "@/lib/api/doctor-summary"
+import { doctorSummaryExport, getDoctorSummary, rowRecord, type DoctorSummary, type DoctorSummaryRow } from "@/lib/api/doctor-summary"
 import { getMyPreferences, setMyReportColumns } from "@/lib/api/preferences"
 import { toastError } from "@/lib/api/errors"
 import { savedReportColumns } from "@/lib/frontdesk/day-summary"
@@ -84,7 +84,7 @@ export function DoctorSummaryDialog({
   const cell = (r: DoctorSummaryRow, c: DoctorSummaryColumn): React.ReactNode => {
     switch (c) {
       case "record":
-        return <span className="font-mono">{r.record ?? "—"}</span>
+        return <span className="font-mono">{rowRecord(r) ?? "—"}</span>
       case "patient":
         return r.patient ?? "—"
       case "doctor":
@@ -114,7 +114,7 @@ export function DoctorSummaryDialog({
       case "amount":
         return r.invoiceAmount == null ? "—" : money(r.invoiceAmount)
       case "record":
-        return r.record ?? "—"
+        return rowRecord(r) ?? "—"
       default:
         return String((r as unknown as Record<string, unknown>)[c] ?? "—")
     }
