@@ -2,6 +2,8 @@
 // sheet to reconcile the vials). Pure helpers, tested in day-summary.test.ts; the data comes from
 // GET /frontdesk/summary-of-day (cmr-be #632, handoff docs/specs/resumen-del-dia-por-servicio-handoff.md).
 
+import { toggleColumn, visibleColumns } from "./report-columns.ts";
+
 export const DAY_SUMMARY_COLUMNS = [
   "record",
   "patient",
@@ -23,18 +25,12 @@ export const DAY_SUMMARY_REPORT = "frontdesk-day-summary";
 
 /** The saved choice, cleaned: only known columns, always in table order; nothing valid → the defaults. */
 export function visibleDaySummaryColumns(saved: unknown): DaySummaryColumn[] {
-  if (!Array.isArray(saved)) return [...DEFAULT_DAY_SUMMARY_COLUMNS];
-  const set = new Set(saved.filter((c): c is string => typeof c === "string"));
-  const cols = DAY_SUMMARY_COLUMNS.filter((c) => set.has(c));
-  return cols.length ? cols : [...DEFAULT_DAY_SUMMARY_COLUMNS];
+  return visibleColumns(DAY_SUMMARY_COLUMNS, DEFAULT_DAY_SUMMARY_COLUMNS, saved);
 }
 
 /** Toggle one column; the last visible one cannot be hidden (an empty table prints nothing). */
 export function toggleDaySummaryColumn(current: readonly DaySummaryColumn[], col: DaySummaryColumn): DaySummaryColumn[] {
-  const on = current.includes(col);
-  if (on && current.length === 1) return [...current];
-  const set = new Set(on ? current.filter((c) => c !== col) : [...current, col]);
-  return DAY_SUMMARY_COLUMNS.filter((c) => set.has(c));
+  return toggleColumn(DAY_SUMMARY_COLUMNS, current, col);
 }
 
 /** The services menu shows «arrived/attended»: the summary opens only when every arrival is attended (x/x). */

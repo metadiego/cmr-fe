@@ -5810,6 +5810,39 @@
         "clear": "Clear filters",
         "none": "No record matches the filters."
       }
+    },
+    "doctorSummary": {
+      "title": "Patients per doctor",
+      "titleDoctor": "Patients per doctor · {doctor}",
+      "file": "doctor-summary",
+      "loadError": "The summary could not be loaded.",
+      "empty": "No consultations today.",
+      "noDoctor": "No doctor yet",
+      "carriedN": "carries {n}",
+      "carried": "Carried",
+      "waiting": "Waiting",
+      "count": "Count",
+      "attendedAndWaiting": "{attended} attended, {waiting} waiting",
+      "byDoctor": "By doctor",
+      "byType": "By type",
+      "col": {
+        "record": "Record",
+        "patient": "Patient",
+        "doctor": "Doctor",
+        "nurse": "Nurse",
+        "type": "Type",
+        "stage": "Stage",
+        "time": "Time",
+        "frontDesk": "Front desk",
+        "amount": "Amount",
+        "paymentMethod": "Payment method"
+      },
+      "stage": {
+        "scheduled": "Scheduled",
+        "arrived": "Arrived",
+        "in_consultation": "In consultation",
+        "attended": "Attended"
+      }
     }
   },
   "salesPackages": {

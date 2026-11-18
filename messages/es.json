@@ -5810,6 +5810,39 @@
         "clear": "Quitar filtros",
         "none": "Ningún registro cumple los filtros."
       }
+    },
+    "doctorSummary": {
+      "title": "Pacientes por médico",
+      "titleDoctor": "Pacientes por médico · {doctor}",
+      "file": "resumen-por-medico",
+      "loadError": "No se pudo cargar el resumen.",
+      "empty": "No hay consultas hoy.",
+      "noDoctor": "Aún sin médico",
+      "carriedN": "lleva {n}",
+      "carried": "Lleva",
+      "waiting": "Esperando",
+      "count": "Cantidad",
+      "attendedAndWaiting": "{attended} atendidas, {waiting} esperando",
+      "byDoctor": "Por médico",
+      "byType": "Por tipo",
+      "col": {
+        "record": "Récord",
+        "patient": "Paciente",
+        "doctor": "Médico",
+        "nurse": "Enfermera",
+        "type": "Tipo",
+        "stage": "Etapa",
+        "time": "Hora",
+        "frontDesk": "Recepción",
+        "amount": "Monto",
+        "paymentMethod": "Método de pago"
+      },
+      "stage": {
+        "scheduled": "Agendada",
+        "arrived": "Llegó",
+        "in_consultation": "En consulta",
+        "attended": "Atendida"
+      }
     }
   },
   "salesPackages": {
