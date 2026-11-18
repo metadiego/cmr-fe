@@ -231,6 +231,20 @@ function ReceiptDialog({ row, onClose, centerLabel }: { row: ReceiptRow | null; 
                   );
                 })}
               </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell className="font-semibold">{t("total")}</TableCell>
+                  <TableCell className="text-right font-semibold tabular-nums">{format.number(receipt.lines.reduce((a, l) => a + l.quantity, 0))}</TableCell>
+                  <TableCell />
+                  <TableCell className="text-right font-semibold tabular-nums">
+                    {(() => {
+                      const costs = receipt.lines.map((l) => lineTotal(l.quantity, l.unitCost)).filter((v): v is number => v != null);
+                      return costs.length ? USD.format(costs.reduce((a, v) => a + v, 0)) : "";
+                    })()}
+                  </TableCell>
+                  <TableCell colSpan={3} />
+                </TableRow>
+              </TableFooter>
             </Table>
           </div>
         )}
