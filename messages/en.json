@@ -1526,7 +1526,8 @@
     "confirmationPolicies": "Confirmations",
     "calendarAbsenceReview": "Absences to review",
     "paymentMethods": "Payment methods",
-    "inventory_daily_kardex": "Daily kardex"
+    "inventory_daily_kardex": "Daily kardex",
+    "inventory_adjustments": "Adjustments"
   },
   "admin": {
     "title": "Administration",
@@ -3759,7 +3760,11 @@
     "TENANT_NOT_FOUND": "The specified center does not exist.",
     "VIGENCIA_INVALIDA": "The end date can't be earlier than the start date.",
     "TENANT_REQUIRED": "Choose a center: this view works one center at a time.",
-    "REFERENCE_NOT_FOUND": "The operation couldn't complete: the server is missing some data it needs. Try again; if it keeps happening, contact support."
+    "REFERENCE_NOT_FOUND": "The operation couldn't complete: the server is missing some data it needs. Try again; if it keeps happening, contact support.",
+    "AJUSTE_SIN_LINEAS": "The adjustment needs at least one product.",
+    "AJUSTE_CANTIDAD_INVALIDA": "A quantity in the adjustment is not valid.",
+    "AJUSTE_SIGNO_INVALIDO": "A line is missing «Out» or «In».",
+    "AJUSTE_PRODUCTO_INEXISTENTE": "A product in the adjustment no longer exists."
   },
   "configAlta": {
     "title": "Required patient data",
@@ -6379,6 +6384,54 @@
       "lot": "Lot",
       "expires": "Expires",
       "notes": "Note"
+    }
+  },
+  "inventoryAdjustments": {
+    "title": "Inventory adjustments",
+    "subtitle": "One or several products in a single adjustment, with a number.",
+    "tabNew": "New adjustment",
+    "tabList": "Adjustments made",
+    "warehouse": "Warehouse",
+    "pickWarehouse": "Pick the warehouse",
+    "reason": "Reason",
+    "pickReason": "Pick the reason",
+    "date": "Date (if not today)",
+    "patient": "Patient (optional)",
+    "notes": "Note",
+    "notesPlaceholder": "Why the adjustment is made",
+    "product": "Product",
+    "pickProduct": "Search product…",
+    "direction": "Out / In",
+    "out": "Out",
+    "in": "In",
+    "quantity": "Quantity",
+    "lineNote": "Line note",
+    "removeLine": "Remove line",
+    "summary": "{n, plural, one {# product} other {# products}} · net {net}",
+    "save": "Save adjustment",
+    "saved": "Adjustment {number} saved ({n, plural, one {# product} other {# products}})",
+    "problem": {
+      "noWarehouse": "Warehouse missing",
+      "noReason": "Reason missing",
+      "noNotes": "Note missing",
+      "noLines": "Add at least one product"
+    },
+    "from": "From",
+    "to": "To",
+    "loading": "Loading…",
+    "empty": "No adjustments in that period.",
+    "listTitle": "Inventory adjustments",
+    "view": "View",
+    "by": "loaded by {name}",
+    "detailTitle": "Adjustment {number}",
+    "lot": "Lot",
+    "col": {
+      "number": "Number",
+      "date": "Date",
+      "lines": "Products",
+      "net": "Net",
+      "registeredBy": "Loaded by",
+      "actions": "Actions"
     }
   }
 }
