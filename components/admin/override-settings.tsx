@@ -27,6 +27,7 @@ import {
 import { DataTable } from "@/components/ui/data-table";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { useDialogForm } from "@/components/kit/use-dialog-form";
 import {
   Select,
@@ -53,6 +54,7 @@ export function OverrideSettings() {
   const [centers, setCenters] = React.useState<Centro[]>([]);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [busyId, setBusyId] = React.useState<string | null>(null);
+  const confirm = useConfirm();
 
   const centerName = React.useCallback(
     (id?: string | null) => centers.find((c) => c.id === id)?.name ?? id,
@@ -84,7 +86,18 @@ export function OverrideSettings() {
     };
   }, []);
 
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function onDelete(o: Override) {
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("removeTitle"),
+      description: t("removeBody", { name: o.name || t("global") }),
+      confirmLabel: t("remove"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setBusyId(o.id);
     try {
       await deleteOverride(o.id);

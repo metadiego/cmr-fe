@@ -9,6 +9,7 @@ import { useResource } from "@/hooks/use-resource";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { FormDialog } from "@/components/kit/form-dialog";
 import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { Button } from "@/components/ui/button";
 
 export type Draft = Record<string, unknown>;
@@ -52,6 +53,7 @@ export function MetaCrud<T extends { id: string }>({
 }) {
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const { state, reload } = useResource<T[]>(load, deps);
 
   const [editing, setEditing] = React.useState<T | "new" | null>(null);
@@ -83,8 +85,19 @@ export function MetaCrud<T extends { id: string }>({
     },
   );
 
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function del(row: T) {
     if (!remove) return;
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: tc("deleteConfirmTitle"),
+      description: tc("deleteConfirmBody"),
+      confirmLabel: tc("delete"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     try {
       await remove(row.id);
       toast.success(tc("saved"));

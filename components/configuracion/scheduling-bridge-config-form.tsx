@@ -24,9 +24,8 @@ import {
 const CODES = ["BAYAMON", "CAGUAS"] as const;
 
 // Settings form for ONE center at a time (the picker above swaps `centroId`).
-// Optimistic edit: `draft` is a local copy of the loaded config; Save PUTs only
-// the changed fields, and on failure the draft is reset back to the last known
-// server value (rollback) rather than left showing an unsent edit.
+// `draft` is a local copy of the loaded config; Save PUTs it. A failed save keeps
+// the draft as typed (error toast only): a failed save never loses input.
 export function SchedulingBridgeConfigForm({
   centroId,
   puedeEscribir,
@@ -40,17 +39,12 @@ export function SchedulingBridgeConfigForm({
   const { state } = useResource<BridgeConfig>(() => getConfig(centroId), [centroId]);
 
   const [draft, setDraft] = React.useState<BridgeConfig | null>(null);
-  // The last value we KNOW is correct on the server — seeded once per `centroId`, then only ever
-  // updated synchronously from a successful PUT's own response (never re-derived from the async
-  // `state`, which could still be reflecting an older reload by the time a later save fails).
-  const [lastGood, setLastGood] = React.useState<BridgeConfig | null>(null);
   // Adjust state during render (not an effect, per react-hooks/set-state-in-effect): reseed ONLY
   // when this is the first load, or the center picker moved to a DIFFERENT center — never on a
   // same-center reload, which must not silently clobber an in-progress unsaved edit.
   const [seededFor, setSeededFor] = React.useState<{ centroId?: string } | null>(null);
   if (state.kind === "ok" && (seededFor === null || seededFor.centroId !== centroId)) {
     setSeededFor({ centroId });
-    setLastGood(state.data);
     setDraft(state.data);
   }
 
@@ -59,10 +53,6 @@ export function SchedulingBridgeConfigForm({
     successMessage: tc("saved"),
     onSuccess: (saved) => {
       setDraft(saved);
-      setLastGood(saved);
-    },
-    onError: () => {
-      setDraft(lastGood); // rollback to the actual last-known-good, not a possibly-stale reload
     },
   });
 

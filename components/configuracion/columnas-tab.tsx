@@ -27,6 +27,7 @@ import { missingFields } from "@/lib/forms/missing";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { RequiredLegend } from "@/components/kit/required-mark";
 import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { ColumnConfigDialog } from "@/components/configuracion/column-config-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,6 +132,7 @@ function ColumnasEditor({
   const te = useTranslations("tableroEditor");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const { can } = useCan();
   const boardMode = can("tablero.config");
 
@@ -235,9 +237,20 @@ function ColumnasEditor({
   // solo tocaba ambitos: la columna quedaba fuera de este editor pero SEGUÍA activa en la
   // composición real del tablero — y un guardado posterior de OTRA columna (bulk = replace
   // completo) podía además borrarla del todo sin que nadie la tocara a propósito.
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function quitar(row: Row) {
     const cat = catById.get(row.columnaId);
     if (!cat) return;
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("colRemoveTitle"),
+      description: t("colRemoveBody", { name: tRoot(row.labelKey) }),
+      confirmLabel: t("colRemove"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setBusyId(row.columnaId);
     try {
       await setComposicionBulk(
