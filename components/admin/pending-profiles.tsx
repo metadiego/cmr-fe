@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { missingFields } from "@/lib/forms/missing";
 import {
   TableBody,
@@ -43,6 +44,7 @@ export function PendingProfiles() {
   const t = useTranslations("admin");
   const [state, setState] = React.useState<State>({ kind: "loading" });
   const [busyId, setBusyId] = React.useState<string | null>(null);
+  const confirm = useConfirm();
   // Reject dialog state.
   const [reject, setReject] = React.useState<{ profile: Perfil; motivo: string } | null>(null);
 
@@ -71,7 +73,18 @@ export function PendingProfiles() {
     };
   }, []);
 
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function onApprove(p: Perfil) {
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("approveTitle"),
+      description: t("approveBody", { email: p.email }),
+      confirmLabel: t("approve"),
+      destructive: false,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setBusyId(p.id);
     try {
       await approveProfile(p.id);

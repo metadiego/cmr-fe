@@ -672,7 +672,9 @@
       "cfgEscogeProductos": "O escoge los productos",
       "cfgBuscarProducto": "Buscar producto…",
       "cfgProductosHelp": "Arrastra para ordenar: lo más usado primero.",
-      "colArrastrar": "Arrastra para reordenar"
+      "colArrastrar": "Arrastra para reordenar",
+      "colRemoveTitle": "¿Quitar esta columna?",
+      "colRemoveBody": "Se quitará «{name}» de este tablero."
     },
     "prioridadFlags": {
       "title": "Prioridades del paciente",
@@ -1297,7 +1299,9 @@
     "close": "Cerrar",
     "add": "Agregar",
     "forbidden": "No tienes acceso a esta pantalla.",
-    "saved": "Guardado."
+    "saved": "Guardado.",
+    "deleteConfirmTitle": "¿Eliminar este elemento?",
+    "deleteConfirmBody": "Esta acción no se puede deshacer."
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -1667,7 +1671,9 @@
       "permisoClave": "Permiso requerido",
       "permisoClaveHint": "Vacío = visible para todos",
       "permisoClavePlaceholder": "Elige un permiso",
-      "permisoSinPermiso": "Sin permiso (visible para todos)"
+      "permisoSinPermiso": "Sin permiso (visible para todos)",
+      "deleteTitle": "¿Eliminar este ítem?",
+      "deleteBody": "Se eliminará «{name}» del menú. Esta acción no se puede deshacer."
     },
     "theme": {
       "systemTitle": "Color de marca del sistema",
@@ -1705,7 +1711,9 @@
       "createHelp": "Mientras esté activo, este tema prevalece sobre todos.",
       "creating": "Creando…",
       "createSubmit": "Crear",
-      "created": "Override creado."
+      "created": "Override creado.",
+      "removeTitle": "¿Quitar este override?",
+      "removeBody": "Se quitará «{name}». El tema normal vuelve a aplicarse. Esta acción no se puede deshacer."
     },
     "columns": {
       "email": "Email",
@@ -1925,7 +1933,9 @@
         "accion": "Acción",
         "descripcion": "Descripción"
       }
-    }
+    },
+    "approveTitle": "¿Aprobar este perfil?",
+    "approveBody": "{email} podrá entrar al sistema."
   },
   "login": {
     "title": "Iniciar sesión",

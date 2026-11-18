@@ -22,6 +22,7 @@ import { DataTable, type Column } from "@/components/kit/data-table";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { RequiredLegend } from "@/components/kit/required-mark";
 import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { useDialogForm } from "@/components/kit/use-dialog-form";
 import { missingFields } from "@/lib/forms/missing";
 import { getPermisos } from "@/lib/api/rbac";
@@ -53,8 +54,20 @@ export function MenuAdmin() {
   const [editing, setEditing] = React.useState<MenuItem | null>(null);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [busyId, setBusyId] = React.useState<string | null>(null);
+  const confirm = useConfirm();
 
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function onDelete(item: MenuItem) {
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("deleteTitle"),
+      description: t("deleteBody", { name: item.slug }),
+      confirmLabel: t("delete"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setBusyId(item.id);
     try {
       await deleteMenuItem(item.id);
