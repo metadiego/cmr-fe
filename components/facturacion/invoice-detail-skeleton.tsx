@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
-import { EDITOR_GRID, INVOICE_PAGE_FILL, CardSection, ReceiptPreviewCard } from "@/components/facturacion/receipt-preview-card";
+import { EDITOR_GRID, INVOICE_PAGE_FILL, CardSection } from "@/components/facturacion/receipt-preview-card";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Loading placeholders for the invoice screens (docs/specs/2026-10-10-skeletons-de-carga.md), kept out
@@ -191,9 +191,6 @@ export function InvoiceDetailSkeleton() {
       <div className={EDITOR_GRID}>
         <ItemsCardSkeleton />
         <SummaryCardSkeleton />
-        <ReceiptPreviewCard>
-          <ReceiptPaperSkeleton />
-        </ReceiptPreviewCard>
       </div>
     </PageContainer>
   );

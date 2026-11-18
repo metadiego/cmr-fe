@@ -49,7 +49,9 @@ const DEBT = {
   // (FormDialog/useSubmit/useConfirm); the rest of the gap was already slack.
   // 18-nov-2026: lowered from 1317 to 1305 — the multiplicadores/quantityBreakdown (cmr-be #619)
   // helpers moved to lib/facturacion/line-quantity.ts, tested there instead of living inline.
-  "app/(app)/billing/invoices/[id]/page.tsx": 1305,
+  // 18-nov-2026: 1305 → 1297 — the receipt preview left the editor grid for a header drawer
+  // (components/facturacion/receipt-preview-sheet.tsx).
+  "app/(app)/billing/invoices/[id]/page.tsx": 1297,
   // 17-nov-2026: 1048 → 1046 — the product sheet moved onto the standard FormSheet shell (kit Field,
   // useDialogForm, useSubmit); the local Field and canSubmit went.
   "components/inventario/productos-admin.tsx": 1046,
