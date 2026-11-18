@@ -7,7 +7,7 @@ import { getPatientAttendance, type PatientAttendance } from "@/lib/api/statisti
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmptyState, ErrorState, LoadingPanel, Panel, RecordTable, Stat, StatGrid, Td, Th } from "@/components/clientes/record-ui";
+import { EmptyState, ErrorState, LoadingPanel, Panel, RecordTable, Stat, StatGrid, Td, Th } from "@/components/kit/panel";
 
 // Patient record, «Asistencia» tab (BE cmr-be#546, spec analytics-screens.md): visit history, therapy
 // counts, upcoming appointments, packages and spend — all from ONE call, nothing recomputed here.

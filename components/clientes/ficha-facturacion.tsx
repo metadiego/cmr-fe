@@ -17,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { EmptyState, ErrorState, LoadingPanel, Panel, RecordTable, StatusBadge, Td, Th } from "@/components/clientes/record-ui";
+import { EmptyState, ErrorState, LoadingPanel, Panel, RecordTable, Td, Th } from "@/components/kit/panel";
+import { StatusBadge } from "@/components/kit/status-badge";
 
 // Patient record, «Facturación» tab: the patient's FULL invoice history, every department (consulta +
 // general), legacy invoices included (`legacyOrigin`), newest first, paginated — from GET /invoices?patientId
