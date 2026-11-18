@@ -238,6 +238,23 @@ missing. Every dialog and sheet was then moved onto one shell (spec
 - **Pure logic lives in `lib/`:** the kit's in `lib/forms/`; for money, cash, desks, board, patients
   and stock, each form's checks go in `lib/<area>/<form>-missing.ts` with a test (rule 5).
 
+### 9. Live screens, and the one that stays the reference
+
+| Screen | Route | Lives in | Status |
+| --- | --- | --- | --- |
+| Patient desk | `/boards/patient-desk` | `components/patient-desk/*`, `hooks/use-patient-day.ts` | **The reference.** Where new frontdesk work happens. |
+| Old frontdesk | `/boards/frontdesk` | `components/frontdesk/frontdesk-board.tsx` | **Deprecated — never a reference.** Still routed (`app/(app)/boards/[clave]/page.tsx`, nav manifest), no new work (see its own DEBT comment in `eslint.config.mjs`). |
+
+A secondary view over a live screen — a viewer, panel or modal that shows the same sessions, the
+same board, the same flow from somewhere else in the app — reuses that screen's OWN components and
+hooks. It never keeps a parallel copy of the data pipeline or the row component, and it never
+hardcodes a literal into a prop that should come from that shared pipeline (`sinSaldo={false}` while
+the real screen tracks it live is exactly the bug this rule exists to stop). Only the layout/chrome
+may differ. Confusing which screen is the reference costs real rework: this rule was written after a
+viewer got built against the deprecated frontdesk (cmr-fe #139, 18-nov-2026) and had to be redone
+against patient-desk's `usePatientDay`/`useServiceBoards`/`ServiceSessionsTable` instead. When in
+doubt about which screen governs, this table is the answer — not grep, not git history.
+
 ## Things worth knowing about the code
 
 - **`lib/env.ts` throws on import** if `NEXT_PUBLIC_SUPABASE_URL` or

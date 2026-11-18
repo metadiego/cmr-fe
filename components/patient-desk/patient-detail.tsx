@@ -531,7 +531,6 @@ export function PatientDetail({
                 definition={data.serviceDefinition}
                 sessionsById={data.sessionsById}
                 sessionIds={x.service.sessionIds}
-                patientId={patient.patientId}
                 date={date}
                 centerId={centerId}
                 onChanged={data.refresh}

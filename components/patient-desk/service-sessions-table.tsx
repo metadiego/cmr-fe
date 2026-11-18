@@ -16,6 +16,7 @@ import {
   type TableroDefinicion as BoardDefinition,
 } from "@/lib/api/tablero"
 import { flowColumns, renderColumns } from "@/lib/frontdesk/board-columns"
+import { doseBalanceForRow, patientsNeedingDoseBalance } from "@/lib/frontdesk/dose-balance"
 import {
   blockColumns,
   hideServiceStatus,
@@ -53,7 +54,6 @@ interface Props {
   definition: BoardDefinition | null
   sessionsById: Map<string, Session>
   sessionIds: string[]
-  patientId: string
   date: string
   centerId: string | undefined
   onChanged: () => void
@@ -78,7 +78,6 @@ export function ServiceSessionsTable({
   definition,
   sessionsById,
   sessionIds,
-  patientId,
   date,
   centerId,
   onChanged,
@@ -154,23 +153,39 @@ export function ServiceSessionsTable({
     }
   }, [optionKeys, slug, centerId])
 
-  // Dose balance of this patient, only when the service has a dose column.
+  // Dose balance, only when the service has a dose column — ONE fetch per DISTINCT patient on this
+  // board (never per row), and every row reads ONLY its own patient's entry (doseBalanceForRow),
+  // never another patient's. patient-desk's `rows` are already filtered to one patient, so this is
+  // exactly the old single-fetch behavior there; the general service viewer (all patients of one
+  // service) gets the same correctness for free. cmr-fe #139, lib/frontdesk/dose-balance.ts.
   const hasDose = columns.some(
     (c) =>
       (c.render as { optionsSource?: string } | null)?.optionsSource ===
       "productos_grupo"
   )
-  const [pending, setPending] = React.useState<PendingDelivery[]>([])
+  const patientIdOf = React.useCallback(
+    (rowId: string) => sessionsById.get(rowId)?.patientId,
+    [sessionsById]
+  )
+  const patientsToFetch = React.useMemo(
+    () => patientsNeedingDoseBalance(rows.map((r) => r.id), patientIdOf, hasDose),
+    [rows, patientIdOf, hasDose]
+  )
+  const [pendingByPatient, setPendingByPatient] = React.useState<Record<string, PendingDelivery[]>>({})
   React.useEffect(() => {
-    if (!hasDose || !centerId) return
+    if (!patientsToFetch.length || !centerId) return
     let active = true
-    getPendingDeliveries(patientId, centerId)
-      .then((r) => active && setPending(r))
-      .catch(() => {})
+    Promise.all(
+      patientsToFetch.map((id) =>
+        getPendingDeliveries(id, centerId)
+          .then((r) => [id, r] as const)
+          .catch(() => [id, [] as PendingDelivery[]] as const)
+      )
+    ).then((pairs) => active && setPendingByPatient(Object.fromEntries(pairs)))
     return () => {
       active = false
     }
-  }, [hasDose, patientId, centerId, board])
+  }, [patientsToFetch, centerId])
 
   return (
     <section
@@ -278,7 +293,7 @@ export function ServiceSessionsTable({
                   tablero={slug}
                   fecha={date}
                   optionsByCol={options}
-                  saldoDosis={pending}
+                  saldoDosis={doseBalanceForRow(pendingByPatient, sessionsById.get(row.id)?.patientId)}
                   centro={centerId}
                   sinSaldo={false}
                   canReparar={can("frontdesk.reparar")}
