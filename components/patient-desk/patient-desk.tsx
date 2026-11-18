@@ -32,7 +32,6 @@ import { useCan } from "@/hooks/use-can"
 import { todayISO } from "@/components/frontdesk/frontdesk-board.helpers"
 import { UbicacionEnVivoWidget as LiveLocationWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget"
 import { MedicosLibresWidget } from "@/components/frontdesk/medicos-libres-widget"
-import { DoctorCarriedWidget } from "@/components/patient-desk/doctor-carried-widget"
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button"
 import { TechnicianStatusButton } from "@/components/frontdesk/technician-status-button"
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler"
@@ -373,8 +372,7 @@ export function PatientDesk() {
             nombreServicio={serviceName}
             iconOnly
           />
-          <MedicosLibresWidget rows={data.consultations?.rows ?? []} date={date} centroId={gate.centro} iconOnly />
-          <DoctorCarriedWidget date={date} centerId={gate.centro} centerName={gate.centroNombre} iconOnly />
+          <MedicosLibresWidget rows={data.consultations?.rows ?? []} date={date} centroId={gate.centro} centroNombre={gate.centroNombre} iconOnly />
           <NurseStatusButton
             centro={gate.centro}
             fecha={date}
