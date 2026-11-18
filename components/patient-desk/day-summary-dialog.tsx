@@ -179,7 +179,13 @@ export function DaySummaryDialog({
             subtitle={subtitle}
             fileParts={[t("file"), data?.service.name ?? service.name, date]}
             disabled={!data || data.rows.length === 0}
-            exporter={daySummaryExport({ service: service.id, date, centerId })}
+            exporter={daySummaryExport({
+              service: service.id,
+              date,
+              centerId,
+              columns: [...cols],
+              ...(filtering ? { sessionIds: rows.map((r) => r.sessionId), filterLabel: filterLine } : {}),
+            })}
           />
         </div>
 

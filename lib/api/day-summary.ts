@@ -64,8 +64,12 @@ export function exportReport(req: ExportRequest, centerId: string): Promise<Expo
   return apiFetch<ExportResult>("/export", { method: "POST", body: JSON.stringify(req) }, centerId);
 }
 
-/** The export request for this report: the board's center, the service and the day. */
-export function daySummaryExport(p: { service: string; date: string; centerId: string }) {
+/** What the screen narrowed: only these sessions, these columns, and the «Filtrado:» line for the letterhead
+ *  (owner 18-nov-2026: «que esos filtros apliquen para csv, email y print»). Omitted = the whole day. */
+export type DaySummaryNarrowing = { sessionIds?: string[]; columns?: string[]; filterLabel?: string };
+
+/** The export request for this report: the board's center, the service, the day and what is on screen. */
+export function daySummaryExport(p: { service: string; date: string; centerId: string } & DaySummaryNarrowing) {
   return (format: "csv" | "pdf", channel: "download" | "email", destination?: string) =>
     exportReport(
       {
@@ -73,7 +77,14 @@ export function daySummaryExport(p: { service: string; date: string; centerId: s
         format,
         channel,
         destination,
-        filters: { servicio: p.service, fecha: p.date, centerIds: [p.centerId] },
+        filters: {
+          servicio: p.service,
+          fecha: p.date,
+          centerIds: [p.centerId],
+          ...(p.sessionIds ? { sessionIds: p.sessionIds } : {}),
+          ...(p.columns ? { columns: p.columns } : {}),
+          ...(p.filterLabel ? { filterLabel: p.filterLabel } : {}),
+        },
       },
       p.centerId
     );
