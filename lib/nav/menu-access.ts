@@ -8,6 +8,7 @@
 // Mismo criterio que hooks/use-can.ts `can()`, para que la barra y los gates coincidan.
 
 import type { MenuItem } from "@/lib/api/menu";
+import { holdsPermission } from "../rbac/permission-aliases.ts";
 
 type Gateable = Pick<MenuItem, "permissionSlug" | "visible">;
 
@@ -17,8 +18,7 @@ export function canSeeMenuItem(
 ): boolean {
   if (item.visible === false) return false;
   if (!item.permissionSlug) return true;
-  if (permissions.includes("*")) return true;
-  return permissions.includes(item.permissionSlug);
+  return holdsPermission(permissions, item.permissionSlug);
 }
 
 export function filterMenuByPermissions(
