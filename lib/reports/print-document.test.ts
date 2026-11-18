@@ -21,3 +21,8 @@ test("reportFileName: accents, symbols and spaces out", () => {
   assert.equal(reportFileName("Kardex diario", "VITAMINA C (25 g)", "2026-11-01"), "kardex-diario-vitamina-c-25-g-2026-11-01");
   assert.equal(reportFileName("Recepción · Bayamón"), "recepcion-bayamon");
 });
+
+test("buildReportHtml: the logo goes in the letterhead when given", () => {
+  assert.match(buildReportHtml({ title: "t", bodyHtml: "", logoUrl: "https://x/img/logo_cmr.png" }), /<header class="report-head"><img src="https:\/\/x\/img\/logo_cmr.png" alt="">/);
+  assert.doesNotMatch(buildReportHtml({ title: "t", bodyHtml: "" }), /<img/);
+});

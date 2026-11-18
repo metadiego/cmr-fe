@@ -159,6 +159,7 @@ function ReceiptDialog({ row, onClose, centerLabel }: { row: ReceiptRow | null; 
   const t = useTranslations("inventoryReceipts");
   const format = useFormatter();
   const res = useResource<Receipt | null>(() => (row ? getReceipt(row.documentId, row.clinicId) : Promise.resolve(null)), [row?.documentId]);
+  const printRef = React.useRef<HTMLDivElement>(null);
   const receipt = res.state.kind === "ok" ? res.state.data : null;
 
   const dayText = (d: string | null) => {
@@ -184,8 +185,20 @@ function ReceiptDialog({ row, onClose, centerLabel }: { row: ReceiptRow | null; 
         </DialogHeader>
         {res.state.kind === "loading" && <p className="text-sm text-muted-foreground">{t("loading")}</p>}
         {res.state.kind === "fail" && <p className="text-sm text-destructive">{res.state.message}</p>}
+        {receipt && row && (
+          <ReportActions
+            target={printRef}
+            title={[t("detailTitle"), row.purchaseInvoiceNumber].filter(Boolean).join(" · ")}
+            subtitle={[format.dateTime(new Date(row.createdAt), "dateAndTime"), centerLabel, row.warehouse, row.supplier, row.registeredBy && t("by", { name: row.registeredBy })].filter(Boolean).join(" · ")}
+            fileParts={[t("detailTitle"), row.purchaseInvoiceNumber || row.documentId.slice(0, 8), row.createdAt.slice(0, 10)]}
+            csv={() => [
+              [t("line.product"), "SKU", t("line.quantity"), t("line.unitCost"), t("line.total"), t("line.lot"), t("line.expires"), t("line.notes")],
+              ...receipt.lines.map((l) => [l.product?.name ?? l.productId, l.product?.sku ?? "", l.quantity, l.unitCost ?? "", lineTotal(l.quantity, l.unitCost) ?? "", l.lotNumber ?? "", l.expirationDate?.slice(0, 10) ?? "", l.notes ?? ""]),
+            ]}
+          />
+        )}
         {receipt && (
-          <div className="max-h-[70vh] overflow-auto rounded-lg border">
+          <div ref={printRef} className="max-h-[70vh] overflow-auto rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow>
