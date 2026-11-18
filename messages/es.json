@@ -3200,7 +3200,13 @@
     },
     "recepcion_sin_lineas": "La recepción no tiene líneas.",
     "recepcion_demasiadas_lineas": "Demasiadas líneas (máximo 200).",
-    "recepcion_cantidad_invalida": "Hay una cantidad inválida en alguna línea."
+    "recepcion_cantidad_invalida": "Hay una cantidad inválida en alguna línea.",
+    "ajuste": {
+      "sin_lineas": "El ajuste necesita al menos un producto.",
+      "cantidad_invalida": "Hay una cantidad que no es válida en el ajuste.",
+      "signo_invalido": "Hay una línea sin «Sale» o «Entra».",
+      "producto_inexistente": "Hay un producto que ya no existe en el ajuste. Está marcada en rojo."
+    }
   },
   "receipt": {
     "print": "Imprimir recibo",

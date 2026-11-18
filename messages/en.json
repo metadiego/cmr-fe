@@ -3200,7 +3200,13 @@
     },
     "recepcion_sin_lineas": "The reception has no lines.",
     "recepcion_demasiadas_lineas": "Too many lines (max 200).",
-    "recepcion_cantidad_invalida": "There is an invalid quantity in a line."
+    "recepcion_cantidad_invalida": "There is an invalid quantity in a line.",
+    "ajuste": {
+      "sin_lineas": "The adjustment needs at least one product.",
+      "cantidad_invalida": "A quantity in the adjustment is not valid.",
+      "signo_invalido": "A line is missing «Out» or «In».",
+      "producto_inexistente": "A product in the adjustment no longer exists. Está marcada en rojo."
+    }
   },
   "receipt": {
     "print": "Print receipt",
