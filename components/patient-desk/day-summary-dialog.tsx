@@ -19,6 +19,8 @@ import {
   type DaySummaryGroup,
 } from "@/lib/frontdesk/day-summary"
 import { parseDayUTC } from "@/lib/format/fecha"
+import { filterRows, sumRows } from "@/lib/frontdesk/day-summary-filters"
+import { DaySummaryFilterRow } from "@/components/patient-desk/day-summary-filter-row"
 import { useResource } from "@/hooks/use-resource"
 import { ReportActions } from "@/components/reports/report-actions"
 import { Button } from "@/components/ui/button"
@@ -77,6 +79,7 @@ export function DaySummaryDialog({
   }
 
   const data = res.state.kind === "ok" ? res.state.data : null
+  const [filters, setFilters] = React.useState<Record<string, string>>({})
   const num = (v: number | null | undefined, d = 0) =>
     v == null ? "—" : format.number(v, { minimumFractionDigits: d, maximumFractionDigits: 2 })
   const day = parseDayUTC(date)
@@ -107,11 +110,37 @@ export function DaySummaryDialog({
         return num(r.content)
     }
   }
+  // What a cell SAYS, as text: the filters match against exactly what the user sees.
+  const cellText = (r: DaySummaryRow, c: string): string => {
+    switch (c) {
+      case "record":
+        return rowRecord(r) ?? "—"
+      case "time":
+        return r.attendedAt ? format.dateTime(new Date(r.attendedAt), "time") : "—"
+      case "quantity":
+      case "sealedVials":
+      case "content":
+        return num(r[c])
+      default:
+        return String((r as Record<string, unknown>)[c] ?? "—")
+    }
+  }
+  // Filters on columns the user has hidden still apply only while visible: hiding a column drops its filter.
+  const activeFilters = Object.fromEntries(Object.entries(filters).filter(([c, v]) => v && cols.includes(c as DaySummaryColumn)))
+  const filtering = Object.keys(activeFilters).length > 0
+  const rows = data ? filterRows(data.rows, activeFilters, cellText) : []
+  // Filtered, the footer, the stats and the breakdowns speak for the rows shown; unfiltered, the BE's totals.
+  const shown = data && filtering ? sumRows(rows) : data?.totals
+  const proportion =
+    data && filtering ? (data.totals.proportion != null && data.totals.content ? (shown!.content * data.totals.proportion) / data.totals.content : null) : data?.totals.proportion
+  const filterLine = Object.entries(activeFilters)
+    .map(([c, v]) => `${t(`col.${c}`)}: ${v}`)
+    .join(" · ")
   const total = (c: DaySummaryColumn): React.ReactNode => {
-    if (!data) return null
-    if (c === "quantity") return num(data.totals.quantity)
-    if (c === "sealedVials") return num(data.totals.sealedVials)
-    if (c === "content") return num(data.totals.content)
+    if (!shown) return null
+    if (c === "quantity") return num(shown.quantity)
+    if (c === "sealedVials") return num(shown.sealedVials)
+    if (c === "content") return num(shown.content)
     return null
   }
 
@@ -182,6 +211,16 @@ export function DaySummaryDialog({
 
           {data && (
             <div ref={printRef} className="space-y-3">
+              {filtering && (
+                <div className="flex items-center gap-3 rounded-md bg-primary/5 px-3 py-2 text-sm">
+                  <span className="flex-1">
+                    {t("filter.showing", { n: rows.length, total: data.rows.length })} · {filterLine}
+                  </span>
+                  <Button variant="ghost" size="sm" className="no-print" onClick={() => setFilters({})}>
+                    {t("filter.clear")}
+                  </Button>
+                </div>
+              )}
               {!data.complete && <p className="no-print rounded-md bg-warning/10 px-3 py-2 text-sm text-warning-foreground">{t("notComplete", { attended: data.attended, total: data.total })}</p>}
               <div className="overflow-hidden rounded-lg border">
                 <Table>
@@ -194,16 +233,25 @@ export function DaySummaryDialog({
                         </TableHead>
                       ))}
                     </TableRow>
+                    {data.rows.length > 0 && (
+                      <DaySummaryFilterRow
+                        cols={cols}
+                        rows={data.rows}
+                        text={cellText}
+                        filters={filters}
+                        onChange={(c, v) => setFilters((f) => ({ ...f, [c]: v }))}
+                      />
+                    )}
                   </TableHeader>
                   <TableBody>
-                    {data.rows.length === 0 ? (
+                    {rows.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={cols.length + 1} className="py-8 text-center text-muted-foreground">
-                          {t("empty")}
+                          {filtering ? t("filter.none") : t("empty")}
                         </TableCell>
                       </TableRow>
                     ) : (
-                      data.rows.map((r, i) => (
+                      rows.map((r, i) => (
                         <TableRow key={r.sessionId}>
                           <TableCell className="text-muted-foreground tabular-nums">{i + 1}</TableCell>
                           {cols.map((c) => (
@@ -215,7 +263,7 @@ export function DaySummaryDialog({
                       ))
                     )}
                   </TableBody>
-                  {data.rows.length > 0 && (
+                  {rows.length > 0 && (
                     <TableFooter>
                       <TableRow>
                         <TableCell />
@@ -231,16 +279,16 @@ export function DaySummaryDialog({
               </div>
 
               <div className="grid gap-3 sm:grid-cols-4">
-                <Stat label={t("stat.patients")} value={num(data.totals.patients)} sub={t("stat.sessions", { n: data.totals.sessions })} />
-                <Stat label={t("stat.vials")} value={num(data.totals.sealedVials)} strong />
-                <Stat label={t("stat.content")} value={num(data.totals.content)} />
-                <Stat label={t("stat.proportion")} value={num(data.totals.proportion, 2)} />
+                <Stat label={t("stat.patients")} value={num(shown!.patients)} sub={t("stat.sessions", { n: shown!.sessions })} />
+                <Stat label={t("stat.vials")} value={num(shown!.sealedVials)} strong />
+                <Stat label={t("stat.content")} value={num(shown!.content)} />
+                <Stat label={t("stat.proportion")} value={num(proportion, 2)} />
               </div>
 
-              {data.rows.length > 0 && (
+              {rows.length > 0 && (
                 <div className="grid gap-3 md:grid-cols-2">
-                  <Breakdown title={t("byNurse")} groups={data.totals.byNurse ?? groupDaySummary(data.rows, (r) => r.nurse)} />
-                  <Breakdown title={t("byUser")} groups={data.totals.byUser ?? groupDaySummary(data.rows, (r) => r.attendedBy)} />
+                  <Breakdown title={t("byNurse")} groups={(!filtering && data.totals.byNurse) || groupDaySummary(rows, (r) => r.nurse)} />
+                  <Breakdown title={t("byUser")} groups={(!filtering && data.totals.byUser) || groupDaySummary(rows, (r) => r.attendedBy)} />
                 </div>
               )}
             </div>

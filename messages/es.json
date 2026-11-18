@@ -5801,6 +5801,14 @@
       "group": {
         "sessions": "Sesiones",
         "unknown": "Sin indicar"
+      },
+      "filter": {
+        "contains": "Contiene…",
+        "by": "Filtrar por {col}",
+        "all": "Todos",
+        "showing": "Mostrando {n} de {total}",
+        "clear": "Quitar filtros",
+        "none": "Ningún registro cumple los filtros."
       }
     }
   },
