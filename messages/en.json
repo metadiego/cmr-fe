@@ -440,7 +440,9 @@
     "recurringConfirming": "Scheduling…",
     "recurringSummary": "{booked} scheduled, {skipped} skipped",
     "fullWarns": "Full: booked with a warning",
-    "trainSeriesOverbooked": "Overbooked"
+    "trainSeriesOverbooked": "Overbooked",
+    "recurringPreviewFirst": "Run the preview first",
+    "recurringNothingBookable": "No date in the preview has an open slot"
   },
   "citas": {
     "calendario": {
