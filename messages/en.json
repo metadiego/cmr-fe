@@ -187,7 +187,9 @@
     "emailSending": "Sending…",
     "emailSent": "Sent. It is logged in the exports.",
     "emailInvalid": "Check the addresses: one is not valid.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "emailHintDomain": "Type just the name: @{domain} is added for you. Several, separated by commas. Sent as a PDF with the letterhead.",
+    "emailWillGo": "Goes to: {to}"
   },
   "ehrIntegration": {
     "title": "EHR integration",

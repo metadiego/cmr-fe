@@ -4,7 +4,7 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 
 import { missingFields } from "@/lib/forms/missing"
-import { validEmailList } from "@/lib/frontdesk/day-summary"
+import { completeEmailList, emailDomain, validEmailList } from "@/lib/frontdesk/day-summary"
 import { useMe } from "@/hooks/use-me"
 import { FormDialog } from "@/components/kit/form-dialog"
 import { Field } from "@/components/kit/field"
@@ -27,15 +27,17 @@ export function EmailReportDialog({
   const t = useTranslations("reports")
   const me = useMe()
   const mine = me.kind === "ok" ? (me.me.email ?? "") : ""
-  // Prefilled with my own address until I type (null = untouched).
+  // Prefilled with my own address until I type (null = untouched). A bare name gets my domain.
   const [to, setTo] = React.useState<string | null>(null)
   const value = to ?? mine
-  const sending = useSubmit(() => send(value.trim()), {
+  const domain = emailDomain(mine)
+  const resolved = completeEmailList(value, domain)
+  const sending = useSubmit(() => send(resolved), {
     successMessage: t("emailSent"),
     onSuccess: () => onOpenChange(false),
   })
   const missing = missingFields([[t("emailTo"), !!value.trim()]])
-  const invalid = !!value.trim() && !validEmailList(value)
+  const invalid = !!value.trim() && !validEmailList(resolved)
 
   return (
     <FormDialog
@@ -52,7 +54,12 @@ export function EmailReportDialog({
       reason={invalid ? t("emailInvalid") : null}
       blocked={invalid}
     >
-      <Field label={t("emailTo")} htmlFor="report-email-to" required hint={t("emailHint")}>
+      <Field
+        label={t("emailTo")}
+        htmlFor="report-email-to"
+        required
+        hint={resolved && resolved !== value.trim() ? t("emailWillGo", { to: resolved }) : domain ? t("emailHintDomain", { domain }) : t("emailHint")}
+      >
         <Input
           id="report-email-to"
           type="text"

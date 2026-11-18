@@ -4,6 +4,8 @@ import assert from "node:assert/strict";
 import {
   DEFAULT_DAY_SUMMARY_COLUMNS,
   base64ToBytes,
+  completeEmailList,
+  emailDomain,
   groupDaySummary,
   isServiceDayComplete,
   savedReportColumns,
@@ -63,4 +65,12 @@ test("groupDaySummary counts sessions, vials and content per person, most first,
     { name: null, sessions: 1, sealedVials: 1, content: 25 },
   ]);
   assert.deepEqual(groupDaySummary([], (r: { n: null; sealedVials: number; content: number }) => r.n), []);
+});
+
+test("completeEmailList adds the house domain to bare names only", () => {
+  assert.equal(completeEmailList("gerencia, ana@x.com ,", "cmr.com"), "gerencia@cmr.com, ana@x.com");
+  assert.equal(completeEmailList("gerencia", null), "gerencia");
+  assert.equal(emailDomain("Me@CMR.com"), "cmr.com");
+  assert.equal(emailDomain("nobody"), null);
+  assert.equal(emailDomain(undefined), null);
 });

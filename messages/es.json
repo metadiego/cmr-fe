@@ -187,7 +187,9 @@
     "emailSending": "Enviando…",
     "emailSent": "Enviado. Queda registrado en las exportaciones.",
     "emailInvalid": "Revisa los correos: alguno no es válido.",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "emailHintDomain": "Escribe solo el nombre: @{domain} se agrega solo. Varios, separados por coma. Va en PDF con el membrete.",
+    "emailWillGo": "Se envía a: {to}"
   },
   "ehrIntegration": {
     "title": "Enganche con el EHR",

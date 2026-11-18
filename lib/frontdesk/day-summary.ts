@@ -93,3 +93,20 @@ export function groupDaySummary<R extends { sealedVials: number; content: number
     a.name == null ? 1 : b.name == null ? -1 : b.sessions - a.sessions || a.name.localeCompare(b.name)
   );
 }
+
+/** The house domain is long (owner 18-nov-2026: «el dominio debe cargar solo»): a bare name gets the
+ *  sender's own domain, so «gerencia» → «gerencia@<domain>». Full addresses pass unchanged. */
+export function completeEmailList(s: string, domain: string | null): string {
+  return s
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => (p.includes("@") || !domain ? p : `${p}@${domain}`))
+    .join(", ");
+}
+
+/** The domain of an address, or null. */
+export function emailDomain(email: string | null | undefined): string | null {
+  const at = email?.lastIndexOf("@") ?? -1;
+  return email && at > 0 && at < email.length - 1 ? email.slice(at + 1).toLowerCase() : null;
+}
