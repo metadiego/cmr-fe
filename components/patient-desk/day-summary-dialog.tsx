@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { LayoutTable01Icon } from "@hugeicons/core-free-icons"
 
-import { daySummaryExport, getDaySummary, type DaySummary, type DaySummaryRow } from "@/lib/api/day-summary"
+import { daySummaryExport, getDaySummary, rowRecord, type DaySummary, type DaySummaryRow } from "@/lib/api/day-summary"
 import { getMyPreferences, setMyReportColumns } from "@/lib/api/preferences"
 import { toastError } from "@/lib/api/errors"
 import {
@@ -86,7 +86,7 @@ export function DaySummaryDialog({
   const cell = (r: DaySummaryRow, c: DaySummaryColumn): React.ReactNode => {
     switch (c) {
       case "record":
-        return <span className="font-mono">{r.record ?? "—"}</span>
+        return <span className="font-mono">{rowRecord(r) ?? "—"}</span>
       case "patient":
         return r.patient ?? "—"
       case "quantity":

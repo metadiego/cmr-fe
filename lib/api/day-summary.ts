@@ -5,7 +5,9 @@ import { apiFetch } from "./client";
 
 export type DaySummaryRow = {
   sessionId: string;
-  record: string | null;
+  /** The v2 edge renames the BE's `record` to `medicalRecordNumber` (verified live 18-nov); read via rowRecord. */
+  medicalRecordNumber?: string | null;
+  record?: string | null;
   patient: string | null;
   quantity: number;
   dose: string | null;
@@ -26,6 +28,9 @@ export type DaySummary = {
   rows: DaySummaryRow[];
   totals: { sessions: number; patients: number; quantity: number; sealedVials: number; content: number; proportion: number | null };
 };
+
+export const rowRecord = (r: Pick<DaySummaryRow, "medicalRecordNumber" | "record">): string | null =>
+  r.medicalRecordNumber ?? r.record ?? null;
 
 export function getDaySummary(p: { service: string; date: string; centerId: string }): Promise<DaySummary> {
   const q = new URLSearchParams({ servicio: p.service, fecha: p.date, centerIds: p.centerId });
