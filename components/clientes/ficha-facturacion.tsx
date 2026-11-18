@@ -16,6 +16,8 @@ import { BackupPrintButton } from "@/components/facturacion/backup-print-button"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { EmptyState, ErrorState, LoadingPanel, Panel, RecordTable, StatusBadge, Td, Th } from "@/components/clientes/record-ui";
 
 // Patient record, «Facturación» tab: the patient's FULL invoice history, every department (consulta +
 // general), legacy invoices included (`legacyOrigin`), newest first, paginated — from GET /invoices?patientId
@@ -37,8 +39,8 @@ export function FichaFacturacion({ pacienteId, centro }: { pacienteId: string; c
     [pacienteId, centro, page],
   );
 
-  if (res.state.kind === "loading") return <p className="py-6 text-center text-sm text-muted-foreground">{t("loading")}</p>;
-  if (res.state.kind === "fail") return <p className="text-sm text-destructive">{res.state.message}</p>;
+  if (res.state.kind === "loading") return <LoadingPanel rows={6} />;
+  if (res.state.kind === "fail") return <ErrorState message={res.state.message} />;
 
   const { items, pagination } = res.state.data;
   const total = pagination?.total ?? items.length;
@@ -49,61 +51,66 @@ export function FichaFacturacion({ pacienteId, centro }: { pacienteId: string; c
     return d ? dayFmt.format(d) : "—";
   };
 
-  if (items.length === 0) return <p className="py-6 text-center text-sm text-muted-foreground">{t("noFacturas")}</p>;
-
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">{t("invoiceHistoryCount", { n: total })}</p>
-      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/60">
-            <tr className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              <th className="px-3 py-2 text-left font-medium">{t("invoice")}</th>
-              <th className="px-3 py-2 text-left font-medium">{t("date")}</th>
-              <th className="px-3 py-2 text-left font-medium">{t("department")}</th>
-              <th className="px-3 py-2 text-left font-medium">{t("origin")}</th>
-              <th className="px-3 py-2 text-left font-medium">{t("status")}</th>
-              <th className="px-3 py-2 text-right font-medium">{t("total")}</th>
-              <th className="px-3 py-2 text-right font-medium">{t("collected")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {items.map((f) => {
-              const ctx = (f as { context?: string | null }).context;
-              return (
-                <tr key={f.id} className="hover:bg-muted/30">
-                  <td className="px-3 py-2 font-mono">
-                    <button type="button" className="text-primary underline-offset-2 hover:underline" onClick={() => setShown(f)}>
-                      {f.number || "—"}
-                    </button>
-                  </td>
-                  <td className="px-3 py-2 tabular-nums">{day(f.date)}</td>
-                  <td className="px-3 py-2">{ctx ? label(`caja.division.${ctx === "consulta" ? "consulta" : "general"}`, ctx) : "—"}</td>
-                  <td className="px-3 py-2">
-                    {f.legacyOrigin ? (
-                      <Badge variant="outline">{t("legacy", { origin: label(`grupo.${f.legacyOrigin}`, f.legacyOrigin) })}</Badge>
-                    ) : (
-                      <span className="text-muted-foreground">{t("newSystem")}</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2"><Badge variant="secondary">{f.status}</Badge></td>
-                  <td className="px-3 py-2 text-right font-medium tabular-nums">{money.format(Number(f.total) || 0)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money.format(Number(f.paidAmount) || 0)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <InvoiceQuickView invoice={shown} centro={centro} onClose={() => setShown(null)} />
+    <Panel title={t("invoicesTitle")} description={items.length > 0 ? t("invoiceHistoryCount", { n: total }) : undefined}>
+      {items.length === 0 ? (
+        <EmptyState>{t("noFacturas")}</EmptyState>
+      ) : (
+        <RecordTable
+          head={
+            <>
+              <Th>{t("invoice")}</Th>
+              <Th>{t("date")}</Th>
+              <Th>{t("department")}</Th>
+              <Th>{t("origin")}</Th>
+              <Th>{t("status")}</Th>
+              <Th right>{t("total")}</Th>
+              <Th right>{t("collected")}</Th>
+            </>
+          }
+        >
+          {items.map((f) => {
+            const ctx = (f as { context?: string | null }).context;
+            const amount = Number(f.total) || 0;
+            const paid = Number(f.paidAmount) || 0;
+            return (
+              <tr key={f.id} className="cursor-pointer hover:bg-muted/30" onClick={() => setShown(f)}>
+                <Td className="font-mono">
+                  <button type="button" className="text-primary underline-offset-2 hover:underline" onClick={(e) => { e.stopPropagation(); setShown(f); }}>
+                    {f.number || "—"}
+                  </button>
+                </Td>
+                <Td className="whitespace-nowrap tabular-nums">{day(f.date)}</Td>
+                <Td>{ctx ? label(`caja.division.${ctx === "consulta" ? "consulta" : "general"}`, ctx) : "—"}</Td>
+                <Td>
+                  {f.legacyOrigin ? (
+                    <Badge variant="outline">{t("legacy", { origin: label(`grupo.${f.legacyOrigin}`, f.legacyOrigin) })}</Badge>
+                  ) : (
+                    <span className="text-muted-foreground">{t("newSystem")}</span>
+                  )}
+                </Td>
+                <Td><StatusBadge kind="invoice" value={f.status} /></Td>
+                <Td className="text-right font-semibold tabular-nums">{money.format(amount)}</Td>
+                {/* Collected below the total is shown amber so an open balance stands out in the list. */}
+                <Td className={cn("text-right tabular-nums", paid < amount && f.status !== "anulada" ? "text-warning-foreground" : "text-muted-foreground")}>
+                  {money.format(paid)}
+                </Td>
+              </tr>
+            );
+          })}
+        </RecordTable>
+      )}
       {pages > 1 && (
-        <div className="flex items-center justify-end gap-2 text-sm">
-          <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t("prevPage")}</Button>
+        <div className="flex items-center justify-between gap-2 border-t px-5 py-2.5 text-sm">
           <span className="tabular-nums text-muted-foreground">{t("pageOf", { page, pages })}</span>
-          <Button size="sm" variant="outline" disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>{t("nextPage")}</Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t("prevPage")}</Button>
+            <Button size="sm" variant="outline" disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>{t("nextPage")}</Button>
+          </div>
         </div>
       )}
-    </div>
+      <InvoiceQuickView invoice={shown} centro={centro} onClose={() => setShown(null)} />
+    </Panel>
   );
 }
 

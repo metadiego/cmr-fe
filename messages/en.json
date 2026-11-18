@@ -137,6 +137,10 @@
       "noRate": "—"
     },
     "patientAttendanceTab": {
+      "subTabVisits": "Visits",
+      "subTabPurchases": "Purchases",
+      "visitsSummaryTitle": "Summary",
+      "packagesEmpty": "No packages.",
       "title": "Attendance",
       "firstVisit": "First visit",
       "lastVisit": "Last visit",
@@ -1057,6 +1061,7 @@
     }
   },
   "patients": {
+    "moreActions": "More actions",
     "title": "Patients",
     "total": "{count, plural, one {# patient} other {# patients}}",
     "backToCall": "Back to the call",
@@ -1192,13 +1197,17 @@
       "attendance": "Attendance"
     },
     "hub": {
+      "appointmentsUpcoming": "Upcoming",
+      "appointmentsPast": "Past",
+      "appointmentsAll": "All",
+      "appointmentsCount": "{n, plural, one {# appointment} other {# appointments}}",
+      "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
+      "nothingInView": "Nothing to show in this view.",
+      "invoicesTitle": "Invoices",
+      "certificationHelp": "Billed totals per concept in the range, refunds subtracted.",
+      "breakdownTitle": "Breakdown",
+      "today": "Today",
       "clinic": "Clinic",
-      "alerts": "Alerts & precautions",
-      "allergies": "Allergies",
-      "implants": "Implants & devices",
-      "noAlerts": "No known alerts",
-      "noAllergies": "No known allergies",
-      "noImplants": "No known implants",
       "loading": "Loading…",
       "noCitas": "No appointments.",
       "historialReagendamientos": "Reschedule history",

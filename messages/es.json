@@ -137,6 +137,10 @@
       "noRate": "—"
     },
     "patientAttendanceTab": {
+      "subTabVisits": "Visitas",
+      "subTabPurchases": "Compras",
+      "visitsSummaryTitle": "Resumen",
+      "packagesEmpty": "Sin paquetes.",
       "title": "Asistencia",
       "firstVisit": "Primera visita",
       "lastVisit": "Última visita",
@@ -1057,6 +1061,7 @@
     }
   },
   "patients": {
+    "moreActions": "Más acciones",
     "title": "Pacientes",
     "total": "{count, plural, one {# paciente} other {# pacientes}}",
     "backToCall": "Volver a la llamada",
@@ -1192,13 +1197,17 @@
       "attendance": "Asistencia"
     },
     "hub": {
+      "appointmentsUpcoming": "Próximas",
+      "appointmentsPast": "Anteriores",
+      "appointmentsAll": "Todas",
+      "appointmentsCount": "{n, plural, one {# cita} other {# citas}}",
+      "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
+      "nothingInView": "Nada que mostrar en esta vista.",
+      "invoicesTitle": "Facturas",
+      "certificationHelp": "Lo facturado por concepto en el rango, con las devoluciones restadas.",
+      "breakdownTitle": "Desglose",
+      "today": "Hoy",
       "clinic": "Centro",
-      "alerts": "Alertas y precauciones",
-      "allergies": "Alergias",
-      "implants": "Implantes y dispositivos",
-      "noAlerts": "Sin alertas conocidas",
-      "noAllergies": "Sin alergias conocidas",
-      "noImplants": "Sin implantes conocidos",
       "loading": "Cargando…",
       "noCitas": "Sin citas.",
       "historialReagendamientos": "Historial de reagendamientos",
