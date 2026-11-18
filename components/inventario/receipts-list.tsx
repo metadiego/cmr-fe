@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import { getProducto } from "@/lib/api/inventario";
 import { getReceipt, listReceipts, type Receipt, type ReceiptRow } from "@/lib/api/inventory-receipts";
 import { last30Days, lineTotal, receiptTotals } from "@/lib/inventory/receipts";
 import { parseDayUTC, todayPR } from "@/lib/format/fecha";
@@ -18,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // «Recepciones»: every purchase reception as it was loaded — when, where, from whom, how many lines and
-// units, cost and WHO loaded it — and «Ver» opens its lines (owner, 18-nov-2026; handoff
+// units, cost and WHO loaded it — and «Ver» opens its lines (each with its product name and SKU from the BE) (owner, 18-nov-2026; handoff
 // docs/specs/lista-de-recepciones-handoff.md). Read-only. USD pinned on purpose: digits only (rule 3b).
 const USD = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 const ALL = "__all__";
@@ -143,25 +142,6 @@ function ReceiptDialog({ row, onClose, centerLabel }: { row: ReceiptRow | null; 
   const res = useResource<Receipt | null>(() => (row ? getReceipt(row.documentId, row.clinicId) : Promise.resolve(null)), [row?.documentId]);
   const receipt = res.state.kind === "ok" ? res.state.data : null;
 
-  // The receipt carries productId only: resolve names (a reception has a handful of lines).
-  const ids = React.useMemo(() => [...new Set((receipt?.lines ?? []).map((l) => l.productId))], [receipt]);
-  const namesRes = useResource<Record<string, { name: string; sku: string | null }>>(
-    async () =>
-      Object.fromEntries(
-        await Promise.all(
-          ids.map(async (id) => {
-            try {
-              const p = await getProducto(id);
-              return [id, { name: String(p.name ?? id), sku: p.sku ?? null }] as const;
-            } catch {
-              return [id, { name: id, sku: null }] as const;
-            }
-          }),
-        ),
-      ),
-    [ids.join(",")],
-  );
-  const names = namesRes.state.kind === "ok" ? namesRes.state.data : {};
   const dayText = (d: string | null) => {
     const date = d ? parseDayUTC(d.slice(0, 10)) : null;
     return date ? format.dateTime(date, "dayShort") : "—";
@@ -201,12 +181,12 @@ function ReceiptDialog({ row, onClose, centerLabel }: { row: ReceiptRow | null; 
               </TableHeader>
               <TableBody>
                 {receipt.lines.map((l, i) => {
-                  const p = names[l.productId];
+                  const p = l.product;
                   const total = lineTotal(l.quantity, l.unitCost);
                   return (
                     <TableRow key={l.movementId ?? i}>
                       <TableCell>
-                        <div>{p?.name ?? "…"}</div>
+                        <div>{p?.name ?? l.productId}</div>
                         {p?.sku && <div className="font-mono text-xs text-muted-foreground">{p.sku}</div>}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{format.number(l.quantity)}</TableCell>

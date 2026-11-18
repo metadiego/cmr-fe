@@ -27,6 +27,8 @@ export interface ReceiptRow {
 export interface ReceiptLine {
   movementId?: string;
   productId: string;
+  /** Name and SKU, sent by the BE on each line (cmr-be#622 d19c6d5b). */
+  product?: { name: string; sku: string | null } | null;
   quantity: number;
   unitCost: number | null;
   lotId: string | null;
