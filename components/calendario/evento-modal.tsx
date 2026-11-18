@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   crearEvento,
@@ -12,10 +11,14 @@ import {
   type CalendarioCategoria,
   type CrearEventoPayload,
 } from "@/lib/api/calendario";
-import { apiErrorLabel } from "@/lib/api/errors";
+import { missingFields } from "@/lib/forms/missing";
 import { suggestAbsence, type AbsenceSuggestion, type EventWithAbsence, type LinkedAbsence } from "@/lib/api/calendar-absences";
 import { AbsenceChip } from "@/components/calendario/absence-chip";
 import { CreateClinicField } from "@/components/kit/create-clinic-field";
+import { FormDialog } from "@/components/kit/form-dialog";
+import { Field } from "@/components/kit/field";
+import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { createClinicReady } from "@/lib/create-clinic";
 import { isClinicViewAll } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
@@ -70,12 +73,12 @@ export function EventoModal({
   const [categoriaId, setCategoriaId] = React.useState(ev?.categoryId ?? "");
   const [descripcion, setDescripcion] = React.useState(ev?.description ?? "");
   const [esGlobal, setEsGlobal] = React.useState(!!ev?.isGlobal);
-  const [busy, setBusy] = React.useState(false);
   const [clinicPicked, setClinicPicked] = React.useState("");
   const createClinic = clinicPicked || defaultClinicId;
   // A new event on «Ambos» waits for its clinic (lib/create-clinic.ts); editing never moves it.
   const clinicReady = !!ev || createClinicReady(createClinic, createCenters.length, isClinicViewAll());
   const soloLectura = !puedeEditar;
+  const confirm = useConfirm();
 
   // What the title seems to say (debounced; writes nothing). Not for a linked event or a company-wide one.
   React.useEffect(() => {
@@ -96,110 +99,143 @@ export function EventoModal({
     };
   }, [titulo, dia, diaFin, todoDia, hora, horaFin, esGlobal, absence, absenceDone, ev?.origin, ev?.clinicId, createClinic]);
 
-  async function guardar() {
-    if (soloLectura || !titulo.trim() || busy || !clinicReady) return;
-    setBusy(true);
-    const payload: CrearEventoPayload = {
-      day: dia, endDay: diaFin || null,
-      time: todoDia ? null : (hora || null), endTime: todoDia ? null : (horaFin || null),
-      title: titulo.trim(), description: descripcion.trim() || null,
-      categoryId: categoriaId || null, isGlobal: esGlobal,
-    };
-    try {
+  // On a create, the clinic counts as missing only where a picker is shown; otherwise the button waits
+  // and says why (the modal only opens for someone who can create somewhere, so this is a backstop).
+  const clinicPicker = !ev && createCenters.length > 1;
+  const clinicPending = !clinicReady && !clinicPicker;
+  const missing = missingFields([
+    [t("field.titulo"), !!titulo.trim()],
+    [tRoot("createClinic.label"), clinicReady || !clinicPicker],
+  ]);
+
+  const save = useSubmit(
+    async () => {
+      // Backstops: the button is disabled while anything is missing or blocked.
+      if (!titulo.trim()) throw new Error(t("field.titulo"));
+      if (!clinicReady) throw new Error(tRoot("caja.sinCentro"));
+      const payload: CrearEventoPayload = {
+        day: dia, endDay: diaFin || null,
+        time: todoDia ? null : (hora || null), endTime: todoDia ? null : (horaFin || null),
+        title: titulo.trim(), description: descripcion.trim() || null,
+        categoryId: categoriaId || null, isGlobal: esGlobal,
+      };
       // The clinic travels only on CREATE; editing never moves an event to another clinic.
-      const saved = (ev ? await actualizarEvento(ev.id, payload) : await crearEvento(createClinic ? { ...payload, centerId: createClinic } : payload)) as EventWithAbsence;
-      toast.success(t("guardado"));
-      // A new event that reads like an absence: stay on it so the chip can be accepted (never blocks).
-      if (!ev && !saved.absence && saved.absenceSuggestion) {
-        setSavedEv(saved);
-        setSuggestion(saved.absenceSuggestion);
-        return;
-      }
-      onSaved();
-    } catch (e) {
-      toast.error(apiErrorLabel(e, tRoot));
-    } finally {
-      setBusy(false);
-    }
-  }
+      return (ev ? await actualizarEvento(ev.id, payload) : await crearEvento(createClinic ? { ...payload, centerId: createClinic } : payload)) as EventWithAbsence;
+    },
+    {
+      successMessage: t("guardado"),
+      onSuccess: (saved) => {
+        // A new event that reads like an absence: stay on it so the chip can be accepted (never blocks).
+        if (!ev && !saved.absence && saved.absenceSuggestion) {
+          setSavedEv(saved);
+          setSuggestion(saved.absenceSuggestion);
+          return;
+        }
+        onSaved();
+      },
+    },
+  );
+  const remove = useSubmit(
+    async () => {
+      if (!ev) throw new Error(t("borrarConfirm"));
+      await eliminarEvento(ev.id);
+    },
+    { successMessage: t("borrado"), onSuccess: () => onSaved() },
+  );
+  const busy = save.submitting || remove.submitting;
   async function borrar() {
     if (!ev || busy) return;
-    if (!window.confirm(t("borrarConfirm"))) return;
-    setBusy(true);
-    try {
-      await eliminarEvento(ev.id);
-      toast.success(t("borrado"));
-      onSaved();
-    } catch (e) {
-      toast.error(apiErrorLabel(e, tRoot));
-    } finally {
-      setBusy(false);
-    }
+    const ok = await confirm({ title: t("borrarConfirm"), confirmLabel: tc("delete"), destructive: true });
+    if (ok) await remove.submit();
+  }
+
+  // Closing after a save that stayed open (absence chip) or after the chip was used refreshes the list.
+  const close = () => (savedEv || absenceDone ? onSaved() : onClose());
+  const deleteButton = ev && puedeBorrar && (
+    <Button variant="outline" onClick={() => void borrar()} disabled={busy} className="text-destructive sm:mr-auto">{tc("delete")}</Button>
+  );
+
+  const fields = (
+    <div className="space-y-3 text-sm">
+      <Field label={t("field.titulo")} htmlFor="evento-titulo" required={!soloLectura}>
+        <Input id="evento-titulo" value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={soloLectura} autoFocus />
+      </Field>
+      <AbsenceChip
+        eventId={ev?.origin === "staff_absence" ? null : (ev?.id ?? null)}
+        centerId={ev?.clinicId ?? null}
+        absence={absence}
+        suggestion={absenceDone ? null : suggestion}
+        canManage={puedeAusencias}
+        onChanged={(linked) => {
+          setAbsence(linked);
+          setAbsenceDone(true);
+          if (!linked) setSuggestion(null);
+        }}
+      />
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.dia")} htmlFor="evento-dia"><DatePicker id="evento-dia" value={dia} onChange={setDia} disabled={soloLectura} /></Field>
+        <Field label={t("field.diaFin")} htmlFor="evento-dia-fin"><DatePicker id="evento-dia-fin" value={diaFin} onChange={setDiaFin} disabled={soloLectura} clearable /></Field>
+      </div>
+      <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={todoDia} onChange={(e) => setTodoDia(e.target.checked)} disabled={soloLectura} />{t("field.todoDia")}</label>
+      {!todoDia && (
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={t("field.hora")} htmlFor="evento-hora"><TimePicker id="evento-hora" clearable value={hora} onChange={setHora} disabled={soloLectura} /></Field>
+          <Field label={t("field.horaFin")} htmlFor="evento-hora-fin"><TimePicker id="evento-hora-fin" clearable value={horaFin} onChange={setHoraFin} disabled={soloLectura} /></Field>
+        </div>
+      )}
+      <Field label={t("field.categoria")} htmlFor="evento-categoria">
+        <Select value={categoriaId} onValueChange={setCategoriaId} disabled={soloLectura}>
+          <SelectTrigger id="evento-categoria"><SelectValue placeholder={t("field.selCategoria")} /></SelectTrigger>
+          <SelectContent>{cats.map((c) => <SelectItem key={c.id} value={c.id}>{catLabel(c)}</SelectItem>)}</SelectContent>
+        </Select>
+      </Field>
+      <Field label={t("field.descripcion")} htmlFor="evento-descripcion"><Textarea id="evento-descripcion" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={2} disabled={soloLectura} /></Field>
+      {ev ? (
+        showClinic && <Field label={t("field.centro")}><span className="text-sm">{clinicLabel(ev)}</span></Field>
+      ) : (
+        <CreateClinicField centers={createCenters} value={createClinic} onChange={setClinicPicked} show={showClinic} disabled={busy} required />
+      )}
+      <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={esGlobal} onChange={(e) => setEsGlobal(e.target.checked)} disabled={soloLectura} />{t("field.global")}</label>
+    </div>
+  );
+
+  // Read-only (no edit permission): a viewer, with no save button — only delete (if allowed) and cancel.
+  if (soloLectura) {
+    return (
+      <Dialog open onOpenChange={(o) => !o && !busy && close()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{ev ? t("editarTitulo") : t("nuevoTitulo")}</DialogTitle>
+            <DialogDescription>{t("modalDesc")}</DialogDescription>
+          </DialogHeader>
+          {fields}
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            {deleteButton}
+            <Button variant="outline" onClick={close} disabled={busy}>{tc("cancel")}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   }
 
   return (
-    <Dialog open onOpenChange={(o) => !o && (savedEv || absenceDone ? onSaved() : onClose())}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{ev ? t("editarTitulo") : t("nuevoTitulo")}</DialogTitle>
-          <DialogDescription>{t("modalDesc")}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 text-sm">
-          <Campo label={t("field.titulo")}><Input value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={soloLectura} autoFocus /></Campo>
-          <AbsenceChip
-            eventId={ev?.origin === "staff_absence" ? null : (ev?.id ?? null)}
-            centerId={ev?.clinicId ?? null}
-            absence={absence}
-            suggestion={absenceDone ? null : suggestion}
-            canManage={puedeAusencias}
-            onChanged={(linked) => {
-              setAbsence(linked);
-              setAbsenceDone(true);
-              if (!linked) setSuggestion(null);
-            }}
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Campo label={t("field.dia")}><DatePicker value={dia} onChange={setDia} disabled={soloLectura} /></Campo>
-            <Campo label={t("field.diaFin")}><DatePicker value={diaFin} onChange={setDiaFin} disabled={soloLectura} clearable /></Campo>
-          </div>
-          <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={todoDia} onChange={(e) => setTodoDia(e.target.checked)} disabled={soloLectura} />{t("field.todoDia")}</label>
-          {!todoDia && (
-            <div className="grid grid-cols-2 gap-3">
-              <Campo label={t("field.hora")}><TimePicker clearable value={hora} onChange={setHora} disabled={soloLectura} /></Campo>
-              <Campo label={t("field.horaFin")}><TimePicker clearable value={horaFin} onChange={setHoraFin} disabled={soloLectura} /></Campo>
-            </div>
-          )}
-          <Campo label={t("field.categoria")}>
-            <Select value={categoriaId} onValueChange={setCategoriaId} disabled={soloLectura}>
-              <SelectTrigger><SelectValue placeholder={t("field.selCategoria")} /></SelectTrigger>
-              <SelectContent>{cats.map((c) => <SelectItem key={c.id} value={c.id}>{catLabel(c)}</SelectItem>)}</SelectContent>
-            </Select>
-          </Campo>
-          <Campo label={t("field.descripcion")}><Textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={2} disabled={soloLectura} /></Campo>
-          {ev ? (
-            showClinic && <Campo label={t("field.centro")}><span className="text-sm">{clinicLabel(ev)}</span></Campo>
-          ) : (
-            <CreateClinicField centers={createCenters} value={createClinic} onChange={setClinicPicked} show={showClinic} disabled={busy} />
-          )}
-          <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={esGlobal} onChange={(e) => setEsGlobal(e.target.checked)} disabled={soloLectura} />{t("field.global")}</label>
-          <div className="flex justify-between gap-2 pt-1">
-            <div>{ev && puedeBorrar && <Button variant="outline" size="sm" onClick={borrar} disabled={busy} className="text-destructive">{tc("delete")}</Button>}</div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={savedEv || absenceDone ? onSaved : onClose} disabled={busy}>{savedEv ? tc("close") : tc("cancel")}</Button>
-              {!soloLectura && <Button size="sm" onClick={guardar} disabled={busy || !titulo.trim() || !clinicReady}>{busy ? tc("loading") : tc("save")}</Button>}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-    </label>
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && close()}
+      size="md"
+      title={ev ? t("editarTitulo") : t("nuevoTitulo")}
+      description={t("modalDesc")}
+      onSubmit={() => save.submit()}
+      submitLabel={tc("save")}
+      submitting={busy}
+      submittingLabel={remove.submitting ? tc("loading") : undefined}
+      cancelLabel={savedEv ? tc("close") : undefined}
+      missing={missing}
+      blocked={clinicPending}
+      reason={clinicPending ? tRoot("caja.sinCentro") : null}
+      extra={deleteButton}
+    >
+      {fields}
+    </FormDialog>
   );
 }

@@ -443,7 +443,11 @@
     "recurringConfirming": "Agendando…",
     "recurringSummary": "{booked} agendadas, {skipped} omitidas",
     "fullWarns": "Lleno: se agenda con aviso",
-    "trainSeriesOverbooked": "Sobrecupo"
+    "trainSeriesOverbooked": "Sobrecupo",
+    "recurringPreviewFirst": "Primero pulsa «Vista previa»",
+    "recurringNothingBookable": "Ninguna fecha de la vista previa tiene hueco",
+    "trainSeriesCalculateFirst": "Primero pulsa «Calcular»",
+    "trainSeriesNothingPlanned": "Ningún día del cálculo se puede agendar"
   },
   "citas": {
     "calendario": {

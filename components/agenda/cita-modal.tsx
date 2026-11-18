@@ -24,7 +24,6 @@ import { cappedBySheet } from "@/lib/agenda/sheet";
 import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
 import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
 import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
-import { toastError } from "@/lib/api/errors";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { datosFaltantesDe } from "@/lib/api/ehr-gate";
 import type { EhrReadinessField } from "@/lib/api/ehr-integration";
@@ -34,18 +33,13 @@ import { useMe } from "@/hooks/use-me";
 import { useEstados } from "@/hooks/use-estados";
 import { Badge } from "@/components/ui/badge";
 import { addMinutes, todayISO } from "@/lib/agenda/calendar";
-import { Button } from "@/components/ui/button";
+import { appointmentMissing, type AppointmentField } from "@/lib/agenda/appointment-missing";
 import { DatePicker } from "@/components/ui/date-picker";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
 import {
   Select,
   SelectContent,
@@ -206,7 +200,6 @@ export function CitaModal({
   const estadoCrear = estadoElegido ?? claveInicial;
   const [motivo, setMotivo] = React.useState(cita?.reason ?? "");
   const [notas, setNotas] = React.useState(cita?.notes ?? "");
-  const [submitting, setSubmitting] = React.useState(false);
   const [warn, setWarn] = React.useState<CitaConflicto[] | null>(null);
 
   const tipo = tipos.find((x) => x.id === tipoCitaId);
@@ -248,15 +241,37 @@ export function CitaModal({
     setWarn(null);
   }
 
-  const canSubmit =
-    !!paciente &&
-    !!tipoCitaId &&
-    !!fechaSel &&
-    !!hora &&
-    !!horaFin &&
-    (!medicoRequired || !!medicoId) &&
-    (isEdit || createClinicReady(effectiveCentro, centros.length, viewAll)) &&
-    !submitting;
+  // Several clinics on create: the picker asks. Otherwise an empty clinic only happens on «Ambos» while
+  // the clinic list has not arrived (or failed): the button waits and says why.
+  const missingKeys = appointmentMissing({
+    clinicPicker: needsCentro,
+    clinicId: effectiveCentro,
+    date: fechaSel,
+    time: hora,
+    endTime: horaFin,
+    patientId: paciente?.id,
+    doctorRequired: medicoRequired,
+    doctorId: medicoId,
+    typeId: tipoCitaId,
+  });
+  const fieldLabel: Record<AppointmentField, string> = {
+    clinic: t("centro"),
+    date: t("date"),
+    time: t("time"),
+    patient: t("patient"),
+    doctor: t("doctor"),
+    type: t("type"),
+  };
+  const missing = missingKeys.map((f) => fieldLabel[f]);
+  const clinicPending = !isEdit && !needsCentro && !createClinicReady(effectiveCentro, centros.length, viewAll);
+  // Loading only while the list is really loading; loaded with none = the person has no clinic.
+  const clinicReason = !clinicPending
+    ? null
+    : centrosRes.state.kind === "loading"
+      ? tc("loading")
+      : centrosRes.state.kind === "fail"
+        ? centrosRes.state.message
+        : tRoot("caja.sinCentro");
 
   async function avisarReagendo(fromId: string) {
     const prev = await getCita(fromId).catch(() => null);
@@ -264,270 +279,274 @@ export function CitaModal({
     toast.info(d ? t("rescheduledFrom", { date: format.dateTime(d, "dayMonth") }) : t("rescheduledFromUnknown"), { duration: 10000 });
   }
 
-  async function onSubmit() {
-    if (!paciente || !tipoCitaId) return;
-    setSubmitting(true);
-    try {
-      // Validate overlap first (unless the user already confirmed past a warning).
-      if (warn === null) {
-        const res = await validarCita(
-          {
-            doctorId: medicoId || undefined,
-            date: fechaSel,
-            time: hora,
-            endTime: horaFin,
-            appointmentTypeId: tipoCitaId,
-            excluirCitaId: cita?.id,
-          },
-          effectiveCentro || undefined,
-        );
-        if (res.conflictos.length > 0) {
-          setWarn(res.conflictos); // show warning; a second Guardar confirms
-          setSubmitting(false);
-          return;
-        }
-      }
+  // Either the overlap check found conflicts (shown; a second «Guardar» confirms) or the appointment
+  // was saved. The button is disabled while anything is missing, so the throw is only a backstop.
+  type Outcome =
+    | { kind: "conflicts"; conflicts: CitaConflicto[] }
+    | { kind: "saved"; saved: Cita | undefined; advertencias: Parameters<typeof mostrarAvisos>[0] };
+  async function save(): Promise<Outcome> {
+    if (!paciente || !tipoCitaId) throw new Error(t("patient"));
+    // Validate overlap first (unless the user already confirmed past a warning).
+    if (warn === null) {
+      const res = await validarCita(
+        {
+          doctorId: medicoId || undefined,
+          date: fechaSel,
+          time: hora,
+          endTime: horaFin,
+          appointmentTypeId: tipoCitaId,
+          excluirCitaId: cita?.id,
+        },
+        effectiveCentro || undefined,
+      );
+      if (res.conflictos.length > 0) return { kind: "conflicts", conflicts: res.conflictos };
+    }
 
-      const payload = {
-        patientId: paciente.id,
-        appointmentTypeId: tipoCitaId,
-        doctorId: medicoId || undefined,
-        date: fechaSel,
-        time: hora,
-        endTime: horaFin,
-        channel: canal,
-        isFirstVisit: esPrimeraVezEff,
-        reason: motivo.trim() || undefined,
-        notes: notas.trim() || undefined,
-      };
-      const { cita: saved, advertencias } = isEdit
-        ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
-        : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
-      if (effectiveCentro) setActiveCentro(effectiveCentro);
-      toast.success(isEdit ? t("updated") : t("created"));
-      // BE #547: interpola fecha/hora/opensAt/etc. en el labelKey (antes se perdían). No bloquea: la
-      // cita ya se guardó.
-      mostrarAvisos(advertencias, tRoot);
-      // One live appointment per patient: the BE MOVED the existing one instead of creating a second.
-      // Say so, or it looks like nothing happened.
-      if (!isEdit && saved?.rescheduledFromId) void avisarReagendo(saved.rescheduledFromId);
-      onSaved(saved);
-      onOpenChange(false);
-    } catch (err) {
-      const faltantes = datosFaltantesDe(err);
-      if (faltantes) {
-        setEhrGate(faltantes);
+    const payload = {
+      patientId: paciente.id,
+      appointmentTypeId: tipoCitaId,
+      doctorId: medicoId || undefined,
+      date: fechaSel,
+      time: hora,
+      endTime: horaFin,
+      channel: canal,
+      isFirstVisit: esPrimeraVezEff,
+      reason: motivo.trim() || undefined,
+      notes: notas.trim() || undefined,
+    };
+    const { cita: saved, advertencias } = isEdit
+      ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
+      : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
+    return { kind: "saved", saved, advertencias };
+  }
+
+  const { submitting, submit } = useSubmit(save, {
+    onSuccess: (r) => {
+      if (r.kind === "conflicts") {
+        setWarn(r.conflicts);
         return;
       }
-      toastError(err, tRoot);
-    } finally {
-      setSubmitting(false);
-    }
-  }
+      if (effectiveCentro) setActiveCentro(effectiveCentro);
+      toast.success(isEdit ? t("updated") : t("created"));
+      // BE #547: interpolates date/time/opensAt/etc. into the labelKey. Not blocking: the appointment
+      // is already saved.
+      mostrarAvisos(r.advertencias, tRoot);
+      // One live appointment per patient: the BE MOVED the existing one instead of creating a second.
+      // Say so, or it looks like nothing happened.
+      if (!isEdit && r.saved?.rescheduledFromId) void avisarReagendo(r.saved.rescheduledFromId);
+      onSaved(r.saved);
+      onOpenChange(false);
+    },
+    // The BE's PACIENTE_DATOS_REQUERIDOS lock: open the modal that says what is missing.
+    onError: (err) => {
+      const faltantes = datosFaltantesDe(err);
+      if (!faltantes) return false;
+      setEhrGate(faltantes);
+      return true;
+    },
+  });
 
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <div className="flex items-center justify-between gap-2 pr-6">
-            <DialogTitle>{isEdit ? t("editTitle") : t("title")}</DialogTitle>
-            {/* En edición, las ACCIONES DEL PUESTO (confirmar/reprogramar/cancelar/no-show) — se reusa
-                el mismo componente del tablero. Al cambiar el estado, recargar y cerrar. Handoff agenda-abrir-la-cita. */}
-            {isEdit && cita && (
-              <CitaActions
-                cita={cita}
-                onChanged={() => {
-                  onSaved();
-                  onOpenChange(false);
-                }}
-              />
-            )}
-          </div>
-        </DialogHeader>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="xl"
+      title={isEdit ? t("editTitle") : t("title")}
+      // Booking over an overlap is a deliberate override: once the warning shows, only the button does it.
+      onSubmit={warn ? () => {} : () => submit()}
+      submitLabel={t("save")}
+      actions={warn ? [{ label: t("saveAnyway"), onClick: () => submit() }] : undefined}
+      submitting={submitting}
+      missing={missing}
+      blocked={clinicPending}
+      reason={clinicReason}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <RequiredLegend />
+        {/* On edit, the desk ACTIONS (confirm/reschedule/cancel/no-show), the same component as the
+            board. A status change reloads and closes. Handoff agenda-abrir-la-cita. */}
+        {isEdit && cita && (
+          <CitaActions
+            cita={cita}
+            onChanged={() => {
+              onSaved();
+              onOpenChange(false);
+            }}
+          />
+        )}
+      </div>
 
-        <div className="space-y-4">
-          {needsCentro && (
-            <Field label={t("centro")} required>
-              <Select value={effectiveCentro || undefined} onValueChange={setCentroSel}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("centroPlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {centros.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+      {needsCentro && (
+        <Field label={t("centro")} required>
+          <Select value={effectiveCentro || undefined} onValueChange={setCentroSel}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("centroPlaceholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              {centros.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      )}
+
+      {/* Fecha y Hora LADO A LADO (aprovecha el ancho; deja aire para Notas abajo). La hora es por CUPOS
+          del tipo ese día, horas enteras, fin automática, no bloqueante. Handoff citas-hora-por-cupo. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label={t("date")} required>
+          <DatePicker value={fechaSel} onChange={(v) => v && setFechaSel(v)} />
+        </Field>
+        <Field label={t("time")} required>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <span className="text-xs text-muted-foreground">{t("endAuto", { time: horaFin })}</span>
+            <div className="inline-flex rounded-md border p-0.5 text-xs">
+              <button type="button" onClick={() => pickSlotVar("dropdown")}
+                className={"rounded px-2 py-0.5 " + (slotVar === "dropdown" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
+                {t("variantList")}
+              </button>
+              <button type="button" onClick={() => pickSlotVar("chips")}
+                className={"rounded px-2 py-0.5 " + (slotVar === "chips" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
+                {t("variantGrid")}
+              </button>
+            </div>
+          </div>
+          {festivoHoy && (
+            <p
+              role="status"
+              className={
+                "mb-2 rounded-md border px-3 py-2 text-xs " +
+                (festivoHoy.blocksSchedule
+                  ? "border-destructive/30 bg-destructive/10 text-destructive"
+                  : "border-warning/40 bg-warning/10 text-warning-foreground")
+              }
+            >
+              {festivoHoy.blocksSchedule
+                ? t("holidayClosed", { name: festivoHoy.name })
+                : t("holidayInfo", { name: festivoHoy.name })}
+            </p>
           )}
+          <SheetNotice sheet={cuposRes.state.kind === "ok" ? cuposRes.state.data?.sheet : null} className="mb-2" />
+          <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
+          {/* Aviso NO bloqueante: la hora elegida ya no tiene cupo. El BE no bloquea ni avisa en citas, así
+              que el aviso lo da el FE. Handoff citas-hora-por-cupo-handoff-be. */}
+          {slotLleno && (
+            <p className="mt-1.5 rounded-md border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-xs text-warning-foreground">
+              {t("slotFullWarn")}
+            </p>
+          )}
+        </Field>
+      </div>
 
-          {/* Fecha y Hora LADO A LADO (aprovecha el ancho; deja aire para Notas abajo). La hora es por CUPOS
-              del tipo ese día, horas enteras, fin automática, no bloqueante. Handoff citas-hora-por-cupo. */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label={t("date")} required>
-              <DatePicker value={fechaSel} onChange={(v) => v && setFechaSel(v)} />
-            </Field>
-            <Field label={t("time")} required>
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">{t("endAuto", { time: horaFin })}</span>
-                <div className="inline-flex rounded-md border p-0.5 text-xs">
-                  <button type="button" onClick={() => pickSlotVar("dropdown")}
-                    className={"rounded px-2 py-0.5 " + (slotVar === "dropdown" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                    {t("variantList")}
-                  </button>
-                  <button type="button" onClick={() => pickSlotVar("chips")}
-                    className={"rounded px-2 py-0.5 " + (slotVar === "chips" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                    {t("variantGrid")}
-                  </button>
-                </div>
-              </div>
-              {festivoHoy && (
-                <p
-                  role="status"
-                  className={
-                    "mb-2 rounded-md border px-3 py-2 text-xs " +
-                    (festivoHoy.blocksSchedule
-                      ? "border-destructive/30 bg-destructive/10 text-destructive"
-                      : "border-warning/40 bg-warning/10 text-warning-foreground")
-                  }
-                >
-                  {festivoHoy.blocksSchedule
-                    ? t("holidayClosed", { name: festivoHoy.name })
-                    : t("holidayInfo", { name: festivoHoy.name })}
-                </p>
-              )}
-              <SheetNotice sheet={cuposRes.state.kind === "ok" ? cuposRes.state.data?.sheet : null} className="mb-2" />
-              <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
-              {/* Aviso NO bloqueante: la hora elegida ya no tiene cupo. El BE no bloquea ni avisa en citas, así
-                  que el aviso lo da el FE. Handoff citas-hora-por-cupo-handoff-be. */}
-              {slotLleno && (
-                <p className="mt-1.5 rounded-md border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-xs text-warning-foreground">
-                  {t("slotFullWarn")}
-                </p>
-              )}
-            </Field>
-          </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label={t("patient")} required>
+          <PacienteSelect
+            value={paciente}
+            onChange={(p) => {
+              setPaciente(p);
+              // Preseleccionar el médico del paciente si aún no se eligió uno (no pisa una elección manual).
+              if (!medicoId && medicoDelPaciente(p)) setMedicoId(medicoDelPaciente(p));
+            }}
+          />
+        </Field>
+        {/* El selector NUNCA sale vacío: si no hay médico, queda en "Sin médico" (no bloquea el
+            guardado salvo que el TIPO exija médico). Handoff citas-medico-y-confirmada. */}
+        <Field label={t("doctor")} required={medicoRequired}>
+          <Select value={medicoId || NONE_MEDICO} onValueChange={(v) => { setMedicoId(v === NONE_MEDICO ? "" : v); setWarn(null); }}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE_MEDICO}>{t("noDoctor")}</SelectItem>
+              {medicos.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {[m.name, m.lastName].filter(Boolean).join(" ")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label={t("patient")} required>
-              <PacienteSelect
-                value={paciente}
-                onChange={(p) => {
-                  setPaciente(p);
-                  // Preseleccionar el médico del paciente si aún no se eligió uno (no pisa una elección manual).
-                  if (!medicoId && medicoDelPaciente(p)) setMedicoId(medicoDelPaciente(p));
-                }}
-              />
-            </Field>
-            {/* El selector NUNCA sale vacío: si no hay médico, queda en "Sin médico" (no bloquea el
-                guardado salvo que el TIPO exija médico). Handoff citas-medico-y-confirmada. */}
-            <Field label={t("doctor")} required={medicoRequired}>
-              <Select value={medicoId || NONE_MEDICO} onValueChange={(v) => { setMedicoId(v === NONE_MEDICO ? "" : v); setWarn(null); }}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NONE_MEDICO}>{t("noDoctor")}</SelectItem>
-                  {medicos.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {[m.name, m.lastName].filter(Boolean).join(" ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label={t("type")} required>
-              <Select value={tipoCitaId || undefined} onValueChange={onTipoChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("typePlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {tipos.map((x) => (
-                    <SelectItem key={x.id} value={x.id}>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label={t("type")} required>
+          <Select value={tipoCitaId || undefined} onValueChange={onTipoChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("typePlaceholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              {tipos.map((x) => (
+                <SelectItem key={x.id} value={x.id}>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="size-2.5 rounded-full" style={{ backgroundColor: x.color }} />
+                    {x.name}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label={t("status")}>
+          {isEdit ? (
+            <div className="flex h-9 items-center">
+              <Badge
+                variant="secondary"
+                style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
+              >
+                {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
+              </Badge>
+            </div>
+          ) : (
+            // Al crear: elegir con qué estado nace (allowlist BE). Confirmada = entra al tablero de
+            // Atención de una vez. Colores/etiquetas del catálogo (data-driven).
+            <Select value={estadoCrear} onValueChange={(v) => {
+                setEstadoElegido(v as "programada" | "confirmada");
+              }}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(["programada", "confirmada"] as const).map((clave) => {
+                  const d = estadosMap.get(clave);
+                  return (
+                    <SelectItem key={clave} value={clave}>
                       <span className="inline-flex items-center gap-2">
-                        <span className="size-2.5 rounded-full" style={{ backgroundColor: x.color }} />
-                        {x.name}
+                        <span className="size-2.5 rounded-full" style={{ backgroundColor: d?.color ?? "#999" }} />
+                        {d ? tRoot(d.labelKey) : clave}
                       </span>
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label={t("status")}>
-              {isEdit ? (
-                <div className="flex h-9 items-center">
-                  <Badge
-                    variant="secondary"
-                    style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
-                  >
-                    {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
-                  </Badge>
-                </div>
-              ) : (
-                // Al crear: elegir con qué estado nace (allowlist BE). Confirmada = entra al tablero de
-                // Atención de una vez. Colores/etiquetas del catálogo (data-driven).
-                <Select value={estadoCrear} onValueChange={(v) => {
-                    setEstadoElegido(v as "programada" | "confirmada");
-                  }}>
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {(["programada", "confirmada"] as const).map((clave) => {
-                      const d = estadosMap.get(clave);
-                      return (
-                        <SelectItem key={clave} value={clave}>
-                          <span className="inline-flex items-center gap-2">
-                            <span className="size-2.5 rounded-full" style={{ backgroundColor: d?.color ?? "#999" }} />
-                            {d ? tRoot(d.labelKey) : clave}
-                          </span>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              )}
-            </Field>
-          </div>
-
-          {/* Sin casilla "Primera vez" (regla del dueño): el tipo ya lo dice —Nueva/Seguimiento— y se decide
-              solo por si el paciente fue asistido alguna vez (`attendedBy`). */}
-
-          <Field label={t("reason")}>
-            <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} />
-          </Field>
-          <Field label={t("notes")}>
-            <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} />
-          </Field>
-
-          {/* Aviso de disponibilidad: si el médico no está ese día, lo advierte con el motivo (la fecha
-              aquí viene del slot del día, así que solo informa; el usuario decide). */}
-          <AvisoDisponibilidad doctorId={medicoId || undefined} date={fechaSel} centro={effectiveCentro || undefined} />
-
-          {warn && (
-            <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm">
-              <p className="font-medium text-warning-foreground">{t("overlapWarn")}</p>
-              <ul className="mt-1 text-xs text-muted-foreground">
-                {warn.map((c) => (
-                  <li key={c.appointmentId}>· {c.time}–{c.endTime}</li>
-                ))}
-              </ul>
-            </div>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           )}
-        </div>
+        </Field>
+      </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={!canSubmit}>
-            {submitting ? tc("saving") : warn ? t("saveAnyway") : t("save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {/* Sin casilla "Primera vez" (regla del dueño): el tipo ya lo dice —Nueva/Seguimiento— y se decide
+          solo por si el paciente fue asistido alguna vez (`attendedBy`). */}
+
+      <Field label={t("reason")}>
+        <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} />
+      </Field>
+      <Field label={t("notes")}>
+        <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} />
+      </Field>
+
+      {/* Aviso de disponibilidad: si el médico no está ese día, lo advierte con el motivo (la fecha
+          aquí viene del slot del día, así que solo informa; el usuario decide). */}
+      <AvisoDisponibilidad doctorId={medicoId || undefined} date={fechaSel} centro={effectiveCentro || undefined} />
+
+      {warn && (
+        <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm">
+          <p className="font-medium text-warning-foreground">{t("overlapWarn")}</p>
+          <ul className="mt-1 text-xs text-muted-foreground">
+            {warn.map((c) => (
+              <li key={c.appointmentId}>· {c.time}–{c.endTime}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </FormDialog>
     {ehrGate && paciente && (
       <EhrReadinessModal
         pacienteId={paciente.id}
@@ -536,30 +555,10 @@ export function CitaModal({
         onCancel={() => setEhrGate(null)}
         onCompleted={() => {
           setEhrGate(null);
-          void onSubmit();
+          void submit();
         }}
       />
     )}
     </>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label>
-        {label}
-        {required && <span className="ml-0.5 text-destructive">*</span>}
-      </Label>
-      {children}
-    </div>
   );
 }

@@ -19,8 +19,16 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Field } from "@/components/kit/form-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog } from "@/components/kit/form-dialog";
+import { Field } from "@/components/kit/field";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
+import {
+  recurringBookingBlock,
+  recurringBookingMissing,
+  type RecurringBookingBlock,
+  type RecurringBookingField,
+} from "@/lib/agenda/recurring-booking-missing";
 
 // 0=Sunday..6=Saturday, Monday-first display order (L-M-M-J-V-S-D). Labels come from i18n
 // (therapyPlanner.weekday*) so English shows M-T-W-T-F-S-S instead of the Spanish letters.
@@ -47,6 +55,9 @@ const STATUS_VARIANT: Record<RecurringPlanStatus, "success" | "warning" | "destr
   adjustedDate: "warning",
   unresolved: "destructive",
 };
+
+/** Some time-groups failed: each already showed its own error toast, so useSubmit adds none. */
+class SeriesPartlyFailed extends Error {}
 
 export function RecurringBookingModal({
   open,
@@ -89,7 +100,6 @@ export function RecurringBookingModal({
   const [count, setCount] = React.useState(10);
   const [plan, setPlan] = React.useState<RecurringPlanItem[] | null>(null);
   const [previewing, setPreviewing] = React.useState(false);
-  const [confirming, setConfirming] = React.useState(false);
   // Per-center preference (GET /resources/recurring-booking-config): does the planner prefer a
   // same-or-later time over the closest one in either direction? Loaded fresh each time the modal
   // opens (not on every keystroke) and editable right here — no separate settings screen needed for
@@ -129,8 +139,22 @@ export function RecurringBookingModal({
     setPlan(null);
   }
 
+  // The parent mounts this dialog only while it is open, so every open starts from a clean form.
+  const missingKeys = recurringBookingMissing({ startDate, time, weekdayCount: weekdays.size });
+  const fieldLabel: Record<RecurringBookingField, string> = {
+    startDate: t("recurringStartDate"),
+    time: t("recurringTime"),
+    weekdays: t("recurringWeekdays"),
+  };
+  const missing = missingKeys.map((f) => fieldLabel[f]);
+  const block = recurringBookingBlock(plan);
+  const blockReason: Record<RecurringBookingBlock, string> = {
+    noPreview: t("recurringPreviewFirst"),
+    nothingBookable: t("recurringNothingBookable"),
+  };
+  const bookableCount = plan?.filter((i) => i.status !== "unresolved").length ?? 0;
+
   async function preview() {
-    if (weekdays.size === 0) return;
     setPreviewing(true);
     setPlan(null);
     try {
@@ -168,10 +192,12 @@ export function RecurringBookingModal({
     setPlan((p) => (p ? p.filter((i) => i.index !== index) : p));
   }
 
-  async function confirm() {
-    if (!plan || confirming) return;
-    setConfirming(true);
+  // Books the previewed series. The button is blocked until a preview has a bookable date, so the throw
+  // is only a backstop.
+  async function bookSeries() {
+    if (!plan) throw new Error(t("recurringPreviewFirst"));
     const bookable = plan.filter((i) => i.status !== "unresolved");
+    if (bookable.length === 0) throw new Error(t("recurringNothingBookable"));
     const skipped = plan.length - bookable.length;
     // The BE endpoint takes ONE time for ALL its dates — group by exact resolved time so a series that
     // mostly landed on the preferred hour still goes out as one call per distinct time, not one per date.
@@ -205,129 +231,136 @@ export function RecurringBookingModal({
       toast.success(t("recurringSummary", { booked, skipped }));
       onBooked();
     }
-    setConfirming(false);
-    // Only close/reset on full success — a failed group leaves the plan visible so staff can see exactly
-    // what still needs a retry instead of a modal that vanished on a partial success.
-    if (failedGroups === 0) {
-      onOpenChange(false);
-      setPlan(null);
-    }
+    // Only close on full success — a failed group leaves the plan visible so staff can see exactly what
+    // still needs a retry instead of a modal that vanished on a partial success.
+    if (failedGroups > 0) throw new SeriesPartlyFailed();
   }
 
+  const { submitting, submit } = useSubmit(bookSeries, {
+    onSuccess: () => onOpenChange(false),
+    onError: (err) => err instanceof SeriesPartlyFailed,
+  });
+
+  // Booking many appointments at once is outward: only the button books, never Enter.
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {serviceColor && <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: serviceColor }} />}
-            {t("recurringTitle", { service: serviceName })}
-          </DialogTitle>
-          <DialogDescription>{t("recurringHelp")}</DialogDescription>
-        </DialogHeader>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="lg"
+      title={t("recurringTitle", { service: serviceName })}
+      description={t("recurringHelp")}
+      missing={missing}
+      blocked={block !== null}
+      reason={block ? blockReason[block] : null}
+      submitting={submitting}
+      submittingLabel={t("recurringConfirming")}
+      onSubmit={() => {}}
+      actions={[{ label: t("recurringConfirm", { n: bookableCount }), onClick: () => submit() }]}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+          {serviceColor && <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: serviceColor }} />}
+          <span className="truncate">{serviceName}</span>
+        </span>
+        <RequiredLegend />
+      </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Field label={t("recurringStartDate")}>
-            <DatePicker
-              min={floor}
-              value={startDate}
-              onChange={(v) => { setStartDate(v < floor ? floor : v); setPlan(null); }}
-            />
-          </Field>
-          <Field label={t("recurringTime")}>
-            <TimePicker value={time} onChange={(v) => { setTime(v); setPlan(null); }} />
-          </Field>
-          <div className="col-span-2 space-y-1.5">
-            <Field label={t("recurringWeekdays")}>
-              <div className="flex gap-1">
-                {WEEKDAY_ORDER.map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => toggleWeekday(d)}
-                    aria-pressed={weekdays.has(d)}
-                    className={cn(
-                      "flex size-8 items-center justify-center rounded-full border text-xs font-semibold transition-colors",
-                      weekdays.has(d)
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input text-muted-foreground hover:border-primary hover:text-primary",
-                    )}
-                  >
-                    {t(WEEKDAY_KEY[d])}
-                  </button>
-                ))}
-              </div>
-            </Field>
-            {weekdays.size === 0 && <p className="text-xs text-destructive">{t("recurringPickAWeekday")}</p>}
-          </div>
-          <Field label={t("recurringCount")}>
-            <Input
-              type="number"
-              min={1}
-              value={count}
-              onChange={(e) => { setCount(Math.max(1, Number(e.target.value) || 1)); setPlan(null); }}
-            />
-            {/* Sessions are DAYS, not raw calendar time: 12 sessions on Mon/Wed/Fri (3 days/week) is
-                exactly 4 weeks — owner's framing (2026-09-27), shown live as the two inputs change. */}
-            {weekdays.size > 0 && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                {t("recurringWeeksApprox", { n: Math.ceil(count / weekdays.size) })}
-              </p>
-            )}
-          </Field>
-        </div>
-
-        <div className="flex items-center justify-between gap-3 rounded-md border p-3">
-          <div className="space-y-0.5">
-            <p className="text-sm font-medium">{t("recurringPreferForward")}</p>
-            <p className="text-xs text-muted-foreground">{t("recurringPreferForwardHelp")}</p>
-          </div>
-          <Switch
-            checked={preferForwardTime}
-            onCheckedChange={togglePreferForward}
-            disabled={savingPreference}
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("recurringStartDate")} htmlFor="recurring-start-date" required>
+          <DatePicker
+            id="recurring-start-date"
+            min={floor}
+            value={startDate}
+            onChange={(v) => { setStartDate(v < floor ? floor : v); setPlan(null); }}
           />
-        </div>
-
-        <Button variant="outline" onClick={preview} disabled={previewing || weekdays.size === 0}>
-          {previewing ? t("recurringPreviewing") : t("recurringPreview")}
-        </Button>
-
-        {plan && (
-          <div className="max-h-64 space-y-1 overflow-y-auto rounded-md border p-2">
-            {plan.map((item) => (
-              <div key={item.index} className="flex items-center justify-between gap-2 rounded px-2 py-1 text-sm hover:bg-accent/50">
-                <span className="font-mono tabular-nums">
-                  {formatFechaSolo(item.date)} {item.time}
-                </span>
-                <span className="flex items-center gap-2">
-                  <Badge variant={STATUS_VARIANT[item.status]}>
-                    {item.status === "asRequested" && t("recurringAsRequested")}
-                    {item.status === "adjustedTime" && t("recurringAdjustedTime")}
-                    {item.status === "adjustedDate" && t("recurringAdjustedDate")}
-                    {item.status === "unresolved" && t("recurringUnresolved")}
-                  </Badge>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(item.index)}
-                    className="text-xs text-muted-foreground hover:text-destructive hover:underline"
-                  >
-                    {t("recurringRemove")}
-                  </button>
-                </span>
-              </div>
+        </Field>
+        <Field label={t("recurringTime")} htmlFor="recurring-time" required>
+          <TimePicker id="recurring-time" value={time} onChange={(v) => { setTime(v); setPlan(null); }} />
+        </Field>
+        <Field
+          className="col-span-2"
+          label={t("recurringWeekdays")}
+          required
+          error={weekdays.size === 0 ? t("recurringPickAWeekday") : null}
+        >
+          <div className="flex gap-1">
+            {WEEKDAY_ORDER.map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => toggleWeekday(d)}
+                aria-pressed={weekdays.has(d)}
+                className={cn(
+                  "flex size-8 items-center justify-center rounded-full border text-xs font-semibold transition-colors",
+                  weekdays.has(d)
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input text-muted-foreground hover:border-primary hover:text-primary",
+                )}
+              >
+                {t(WEEKDAY_KEY[d])}
+              </button>
             ))}
           </div>
-        )}
+        </Field>
+        {/* Sessions are DAYS, not raw calendar time: 12 sessions on Mon/Wed/Fri (3 days/week) is
+            exactly 4 weeks — owner's framing (2026-09-27), shown live as the two inputs change. */}
+        <Field
+          label={t("recurringCount")}
+          htmlFor="recurring-count"
+          hint={weekdays.size > 0 ? t("recurringWeeksApprox", { n: Math.ceil(count / weekdays.size) }) : undefined}
+        >
+          <Input
+            id="recurring-count"
+            type="number"
+            min={1}
+            value={count}
+            onChange={(e) => { setCount(Math.max(1, Number(e.target.value) || 1)); setPlan(null); }}
+          />
+        </Field>
+      </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={confirming}>
-            {tRoot("common.cancel")}
-          </Button>
-          <Button onClick={confirm} disabled={!plan || plan.length === 0 || confirming}>
-            {confirming ? t("recurringConfirming") : t("recurringConfirm", { n: plan?.filter((i) => i.status !== "unresolved").length ?? 0 })}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <div className="flex items-center justify-between gap-3 rounded-md border p-3">
+        <div className="space-y-0.5">
+          <p className="text-sm font-medium">{t("recurringPreferForward")}</p>
+          <p className="text-xs text-muted-foreground">{t("recurringPreferForwardHelp")}</p>
+        </div>
+        <Switch
+          checked={preferForwardTime}
+          onCheckedChange={togglePreferForward}
+          disabled={savingPreference}
+        />
+      </div>
+
+      <Button variant="outline" onClick={preview} disabled={previewing || missing.length > 0}>
+        {previewing ? t("recurringPreviewing") : t("recurringPreview")}
+      </Button>
+
+      {plan && (
+        <div className="max-h-64 space-y-1 overflow-y-auto rounded-md border p-2">
+          {plan.map((item) => (
+            <div key={item.index} className="flex items-center justify-between gap-2 rounded px-2 py-1 text-sm hover:bg-accent/50">
+              <span className="font-mono tabular-nums">
+                {formatFechaSolo(item.date)} {item.time}
+              </span>
+              <span className="flex items-center gap-2">
+                <Badge variant={STATUS_VARIANT[item.status]}>
+                  {item.status === "asRequested" && t("recurringAsRequested")}
+                  {item.status === "adjustedTime" && t("recurringAdjustedTime")}
+                  {item.status === "adjustedDate" && t("recurringAdjustedDate")}
+                  {item.status === "unresolved" && t("recurringUnresolved")}
+                </Badge>
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.index)}
+                  className="text-xs text-muted-foreground hover:text-destructive hover:underline"
+                >
+                  {t("recurringRemove")}
+                </button>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </FormDialog>
   );
 }
