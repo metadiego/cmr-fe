@@ -2,12 +2,16 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import type { LaserTipo } from "@/lib/api/laser";
 import { getDisponibilidadServicio, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
+import { setLegacySessionNumber } from "@/lib/api/frontdesk-legacy-number";
 import { getSessionSheet, type SessionSheet } from "@/lib/api/frontdesk-sheet";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
+import { parseLegacySessionNumber } from "@/lib/frontdesk/legacy-session-number";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +41,7 @@ export function FormatosModal({
   initialReport,
   centro,
   onHistorial,
+  onApplied,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -59,10 +64,14 @@ export function FormatosModal({
   initialReport?: ReportAccion; // report elegido desde el menú de Acciones → se preselecciona (salta la lista)
   centro?: string;
   onHistorial?: () => void;
+  // El paciente del legado quedó con disponibilidad al día (legacy-session-number aplicó): refresca
+  // la fila para que su columna SESIÓN deje de mostrar "—". Handoff numero-sesion-formato-legado.
+  onApplied?: () => void;
 }) {
   const t = useTranslations("frontdesk");
   // Report labelKeys come from the BE fully qualified ("frontdesk.formato.<slug>"): look them up from the root.
   const tRoot = useTranslations();
+  const { can } = useCan();
   const cfg = React.useMemo(() => parseAcciones(formAcciones), [formAcciones]);
   const [report, setReport] = React.useState<ReportAccion | null>(null);
   const [generado, setGenerado] = React.useState(false);
@@ -119,6 +128,26 @@ export function FormatosModal({
   const sheetPkg = tipo ? sheet?.packages.find((p) => `${p.productName ?? ""} ${p.sku ?? ""}`.toLowerCase().includes(tipo)) : undefined;
   const sesionAuto = sheetPkg?.xy ?? sheet?.display ?? String(sesionNN ?? "");
   const sesion = sesionOverride ?? sesionAuto;
+
+  // «Generar»: si la Sesión escrita es un "n/m" válido, se la pasa al BE ANTES de mostrar el
+  // formato (que recién entonces habilita su botón de imprimir). Nunca bloquea: cualquier reason
+  // ("not applied") o error de red/5xx se traga en silencio y el formato sigue igual. Handoff
+  // numero-sesion-formato-legado.
+  async function generar() {
+    const parsed = parseLegacySessionNumber(sesion);
+    if (parsed && sesionId && can("frontdesk.update")) {
+      try {
+        const result = await setLegacySessionNumber(sesionId, { ...parsed, reportId: tipo || undefined }, centro);
+        if (result.applied) {
+          toast.success(t("disponibilidadActualizada", { number: parsed.number, total: parsed.total }));
+          onApplied?.();
+        }
+      } catch {
+        /* nunca bloquea: ver comentario arriba */
+      }
+    }
+    setGenerado(true);
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -193,7 +222,7 @@ export function FormatosModal({
             )}
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setReport(null)}>{t("volver")}</Button>
-              <Button onClick={() => setGenerado(true)}>{t("generar")}</Button>
+              <Button onClick={generar}>{t("generar")}</Button>
             </div>
           </div>
         )}

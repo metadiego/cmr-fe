@@ -2271,6 +2271,7 @@
     "formatosTitle": "{servicio} formats",
     "generarFormato": "Generate format",
     "sinFormatos": "No formats configured for this service.",
+    "disponibilidadActualizada": "Availability updated {number}/{total}",
     "enviarTecnico": "Include technician name on the format ({nombre})",
     "colSesion": "Session",
     "colAreas": "Areas",

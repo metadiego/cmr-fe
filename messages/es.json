@@ -2271,6 +2271,7 @@
     "formatosTitle": "Formatos de {servicio}",
     "generarFormato": "Generar formato",
     "sinFormatos": "Este servicio no tiene formatos configurados.",
+    "disponibilidadActualizada": "Disponibilidad actualizada {number}/{total}",
     "enviarTecnico": "Incluir en el formato el nombre del técnico ({nombre})",
     "colSesion": "Sesión",
     "colAreas": "Áreas",

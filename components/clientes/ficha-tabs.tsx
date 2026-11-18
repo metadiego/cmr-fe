@@ -231,6 +231,7 @@ export function FichaTerapias({
           sesionId={formatoFila.id}
           fecha={formatoFila.date}
           centro={centro}
+          onApplied={() => res.refresh()}
         />
       )}
     </div>

@@ -662,7 +662,7 @@ export function FilaSesion({
             record={fila.fd_record != null ? String(fila.fd_record) : undefined}
             sesionId={fila.id} fecha={fecha}
             centro={centro}
-            onHistorial={() => setHistorialOpen(true)}
+            onHistorial={() => setHistorialOpen(true)} onApplied={onChanged}
           />
         )}
         {notificarCfg && sesion?.patientId && (

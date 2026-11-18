@@ -33255,6 +33255,174 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventario/reportes/recepciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The purchase receipts of a period, one row per receipt, as loaded (who, warehouse, supplier,
+         *     purchase invoice, lines, units, cost). Default: the last 30 days. docs/specs/lista-de-recepciones.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/recepciones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_recepcionesLista[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The purchase receipts of a period, one row per receipt, as loaded (who, warehouse, supplier,
+         *     purchase invoice, lines, units, cost). Default: the last 30 days. docs/specs/lista-de-recepciones.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/receipts`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_recepcionesLista[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/recepciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The purchase receipts of a period, one row per receipt, as loaded (who, warehouse, supplier,
+         *     purchase invoice, lines, units, cost). Default: the last 30 days. docs/specs/lista-de-recepciones.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/recepciones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_recepcionesLista[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The purchase receipts of a period, one row per receipt, as loaded (who, warehouse, supplier,
+         *     purchase invoice, lines, units, cost). Default: the last 30 days. docs/specs/lista-de-recepciones.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/receipts`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_recepcionesLista[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/recepciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The purchase receipts of a period, one row per receipt, as loaded (who, warehouse, supplier,
+         *     purchase invoice, lines, units, cost). Default: the last 30 days. docs/specs/lista-de-recepciones.md
+         */
+        get: operations["ReportesController_recepcionesLista[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The purchase receipts of a period, one row per receipt, as loaded (who, warehouse, supplier,
+         *     purchase invoice, lines, units, cost). Default: the last 30 days. docs/specs/lista-de-recepciones.md
+         */
+        get: operations["ReportesController_recepcionesLista[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/recepciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The purchase receipts of a period, one row per receipt, as loaded (who, warehouse, supplier,
+         *     purchase invoice, lines, units, cost). Default: the last 30 days. docs/specs/lista-de-recepciones.md
+         */
+        get: operations["ReportesController_recepcionesLista[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The purchase receipts of a period, one row per receipt, as loaded (who, warehouse, supplier,
+         *     purchase invoice, lines, units, cost). Default: the last 30 days. docs/specs/lista-de-recepciones.md
+         */
+        get: operations["ReportesController_recepcionesLista[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventario/productos/{productoId}/reglas": {
         parameters: {
             query?: never;
@@ -53657,6 +53825,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/sesiones/{id}/numero-legado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * For a patient with NO invoice of the new system (straight from the legacy): the session number typed on the printed format (n of total) creates or adjusts an invoice-less package of the format product (reports[].productSku, else the service product), with n−1 lived in the legacy plus this visit if attended. Only if the service allows fixing sessions without a package. Never blocks printing: 200 with applied=false and the reason otherwise.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/numero-legado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SessionSheetController_legacyNumber[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sessions/{id}/legacy-number": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * For a patient with NO invoice of the new system (straight from the legacy): the session number typed on the printed format (n of total) creates or adjusts an invoice-less package of the format product (reports[].productSku, else the service product), with n−1 lived in the legacy plus this visit if attended. Only if the service allows fixing sessions without a package. Never blocks printing: 200 with applied=false and the reason otherwise.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/legacy-number`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SessionSheetController_legacyNumber[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sesiones/{id}/numero-legado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** For a patient with NO invoice of the new system (straight from the legacy): the session number typed on the printed format (n of total) creates or adjusts an invoice-less package of the format product (reports[].productSku, else the service product), with n−1 lived in the legacy plus this visit if attended. Only if the service allows fixing sessions without a package. Never blocks printing: 200 with applied=false and the reason otherwise. */
+        post: operations["SessionSheetController_legacyNumber[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sessions/{id}/legacy-number": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** For a patient with NO invoice of the new system (straight from the legacy): the session number typed on the printed format (n of total) creates or adjusts an invoice-less package of the format product (reports[].productSku, else the service product), with n−1 lived in the legacy plus this visit if attended. Only if the service allows fixing sessions without a package. Never blocks printing: 200 with applied=false and the reason otherwise. */
+        post: operations["SessionSheetController_legacyNumber[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/frontdesk/sesiones/agendar-tren": {
         parameters: {
             query?: never;
@@ -69656,6 +69900,14 @@ export interface components {
              * @description Staff member who does it; defaults to the caller.
              */
             actorId?: string;
+        };
+        LegacySessionNumberDto: {
+            /** @description The session number of this visit (n of «n/m»). */
+            number: number;
+            /** @description Total sessions of the treatment (m of «n/m»). */
+            total: number;
+            /** @description Id of the printed format (form_actions.reports[].id, e.g. hilt, mls): its productSku anchors the package. */
+            reportId?: string;
         };
         BookTrainDto: {
             /** Format: uuid */
@@ -117942,7 +118194,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -117961,7 +118215,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -117980,7 +118236,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -117999,7 +118257,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -118018,7 +118278,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -118037,7 +118299,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -118056,7 +118320,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -118075,7 +118341,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -120387,6 +120655,190 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProductoEntity"][];
+                };
+            };
+        };
+    };
+    "ReportesController_recepcionesLista[0]_v1": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_recepcionesLista[1]_v1": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_recepcionesLista[2]_v1": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_recepcionesLista[3]_v1": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_recepcionesLista[4]_v2": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_recepcionesLista[5]_v2": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_recepcionesLista[6]_v2": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ReportesController_recepcionesLista[7]_v2": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -150478,6 +150930,102 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description { sessionId, serviceId, display, packages: [{ packageId, productId, productName, sku, number, total, xy, primary }], areas, areasSource } */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionSheetController_legacyNumber[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegacySessionNumberDto"];
+            };
+        };
+        responses: {
+            /** @description { applied, reason, packageId } */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionSheetController_legacyNumber[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegacySessionNumberDto"];
+            };
+        };
+        responses: {
+            /** @description { applied, reason, packageId } */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionSheetController_legacyNumber[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegacySessionNumberDto"];
+            };
+        };
+        responses: {
+            /** @description { applied, reason, packageId } */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "SessionSheetController_legacyNumber[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegacySessionNumberDto"];
+            };
+        };
+        responses: {
+            /** @description { applied, reason, packageId } */
             200: {
                 headers: {
                     [name: string]: unknown;
