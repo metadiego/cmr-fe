@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Loading state of the patient record, drawn with the real chrome (card borders, header rows, tab
 // rule, hairline-divided cells) so nothing jumps when the data lands. Mirrors the layout in
-// app/(app)/patients/[id]/layout.tsx and the cards of components/clientes/record-ui.tsx: change them
+// app/(app)/patients/[id]/layout.tsx and the cards of components/kit/panel.tsx: change them
 // together.
 export function PatientRecordSkeleton() {
   return (

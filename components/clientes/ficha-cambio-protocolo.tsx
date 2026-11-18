@@ -8,7 +8,7 @@ import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { CambioProtocoloPorCentro } from "@/components/clientes/cambio-protocolo-por-centro";
-import { EmptyState, Panel } from "@/components/clientes/record-ui";
+import { EmptyState, Panel } from "@/components/kit/panel";
 
 // «Cambio de protocolo» tab of the patient record: the action (replace pending therapies) and, beside
 // it, the history (newest first), both for the patient already known. Handoff

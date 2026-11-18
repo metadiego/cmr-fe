@@ -255,6 +255,81 @@ viewer got built against the deprecated frontdesk (cmr-fe #139, 18-nov-2026) and
 against patient-desk's `usePatientDay`/`useServiceBoards`/`ServiceSessionsTable` instead. When in
 doubt about which screen governs, this table is the answer — not grep, not git history.
 
+### 10. UI: one visual language, built from the kit
+
+The app grew screen by screen, each with its own idea of a card: **153 files** under `app/` and
+`components/` hand-roll `rounded-md bg-card ring-1 ring-foreground/10 shadow-[rgba(16,32,64,0.06)]`,
+every status is the same grey pill, and empty, loading and error states look different on every
+tab. The result reads as a dozen apps stitched together. The patient record (cmr-fe #141) was rebuilt
+as the **reference implementation**: `app/(app)/patients/[id]/layout.tsx` and
+`components/clientes/ficha-*.tsx`. Copy from there, not from the file next door.
+
+**Use the building blocks; do not re-roll them.**
+
+| Need | Use | Never |
+| --- | --- | --- |
+| Page frame | `PageContainer` / `PageHeader` (`components/ui/page.tsx`) | ad-hoc page padding or `<h1>` |
+| A section of a screen | `Panel` (`components/kit/panel.tsx`): titled header row, `actions`, content under a hairline | a hand-rolled `ring-1 … shadow-[rgba…]` box |
+| A full-page list | `DataTable` (`components/kit/data-table.tsx`): columns, pagination, skeleton | a bare `<table>` |
+| A table inside a section | `RecordTable` / `Th` / `Td` (`kit/panel.tsx`) | per-file `Th`/`Td` copies |
+| A row of numbers | `StatGrid` + `Stat` (`kit/panel.tsx`): one card divided into cells | one boxed card per number |
+| A status | `StatusBadge` (`components/kit/status-badge.tsx`): tone by meaning, label from the catalogue | `<Badge variant="secondary">{status}</Badge>`, a raw enum on screen, a per-screen colour |
+| Empty / error / loading | `EmptyState` / `ErrorState` / `LoadingPanel` (`kit/panel.tsx`), `kit/skeletons.tsx` | "Cargando…" text where a skeleton fits; a bare red `<p>` |
+| Forms and dialogs | rule 8 | — |
+
+A new status value gets its tone **once**, in `kit/status-badge.tsx`: done = success (green),
+in progress / upcoming = info (blue), needs attention = warning (amber), cancelled / voided =
+destructive (red), neutral = secondary.
+
+**Hierarchy and actions.**
+- **One primary button per region**: the thing the screen is for (Editar on a record). Everything
+  else is `outline` or `ghost`.
+- **Destructive or rare actions go in a ⋮ `DropdownMenu`** and confirm with `useConfirm()`. They are
+  never a permanent red button next to Edit.
+- An action that edits a section sits in that section's `Panel` header.
+- **Tabs:** a screen's top-level tabs use `variant="line"` (underlined, full width; the URL holds the
+  tab via `useTabRoute`). The default segmented control is for switching a view *inside* a section
+  (Visitas / Compras, Todas / Próximas / Anteriores), never for page navigation.
+
+**Tokens, not values.**
+- Cards: `rounded-xl border bg-card shadow-xs`, inner padding `px-5`, vertical rhythm `space-y-6` /
+  `gap-6`.
+- Section titles: `text-xs font-semibold uppercase tracking-wider text-muted-foreground`.
+- Field labels: `text-[11px] font-medium uppercase tracking-wide text-muted-foreground`; values
+  `text-sm`.
+- Every number, date, money amount and count is `tabular-nums`.
+- Colour comes **only** from theme tokens (`primary`, `muted`, `success`, `warning`, `info`,
+  `destructive`). No hex, no `rgba(…)`, no raw palette (`text-green-600`): those break dark mode.
+
+**Honest data.**
+- A missing value is a muted "—". It is never a guess, and never placeholder text that reads as a
+  fact.
+- If the backend has no source for a field, the UI does not show the section. The record used to
+  print "Sin alergias conocidas" for every patient with nothing behind it; #141 removed it, and
+  this app does not hold allergies, alerts or implants.
+- An empty state names what is missing. It never hides a sibling section that does have data
+  (Asistencia once hid a patient's purchases because they had no visits).
+
+**Layout.**
+- Use the whole width: two- or three-column grids on `lg:` that collapse to one column on mobile.
+- It must still work at **375px**: tables scroll inside their card (`overflow-x-auto`), tab strips
+  scroll, header actions wrap.
+- **Skeletons copy the real chrome**: the same borders, card header rows and tab rule, with bars
+  where the data goes (`components/clientes/patient-record-skeleton.tsx`,
+  `docs/specs/2026-10-10-skeletons-de-carga.md`). Never grey slabs.
+
+**Migrating the rest.** When you touch a screen, move **the region you touch** onto the kit. Never
+add a new hand-rolled card next to old ones "for consistency with the file". A file is not finished
+while it mixes both looks in one region.
+
+**Done means seen.** Typecheck does not see layout. Before calling a UI change finished, look at it
+in a browser:
+- light **and** dark theme
+- desktop **and** ~375px wide
+- the loading, empty and error states, not only the happy path
+
+Put the before/after screenshots in the PR.
+
 ## Things worth knowing about the code
 
 - **`lib/env.ts` throws on import** if `NEXT_PUBLIC_SUPABASE_URL` or
