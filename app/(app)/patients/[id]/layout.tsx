@@ -44,7 +44,7 @@ import { FichaAsistencia } from "@/components/clientes/ficha-asistencia";
 import { FichaCambioProtocolo } from "@/components/clientes/ficha-cambio-protocolo";
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import { OldRecordSuggestionBanner } from "@/components/clientes/old-record-suggestion-banner";
-import { Panel } from "@/components/clientes/record-ui";
+import { Panel } from "@/components/kit/panel";
 import { PatientRecordSkeleton } from "@/components/clientes/patient-record-skeleton";
 import { PatientMergeButton } from "@/components/clientes/patient-merge-dialog";
 import {
