@@ -9,6 +9,7 @@ import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { Button } from "@/components/ui/button";
+import { ReportActions } from "@/components/reports/report-actions";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -34,6 +35,7 @@ export function ReceiptsList() {
   const center = centerPick ?? gate.centro ?? ALL;
   const centerId = center === ALL ? null : center;
   const [open, setOpen] = React.useState<ReceiptRow | null>(null);
+  const printRef = React.useRef<HTMLDivElement>(null);
 
   const listRes = useResource<ReceiptRow[]>(() => listReceipts({ from, to, centerId }), [from, to, centerId]);
   const rows = listRes.state.kind === "ok" ? listRes.state.data : [];
@@ -46,7 +48,24 @@ export function ReceiptsList() {
 
   return (
     <PageContainer className="w-full">
-      <PageHeader title={t("title")} description={t("subtitle")} count={listRes.state.kind === "ok" ? t("count", { n: totals.receipts }) : undefined} />
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        count={listRes.state.kind === "ok" ? t("count", { n: totals.receipts }) : undefined}
+        actions={
+          <ReportActions
+            target={printRef}
+            title={t("title")}
+            subtitle={`${centerId ? centerName(centerId) : t("allCenters")} · ${dayText(from)} – ${dayText(to)}`}
+            disabled={rows.length === 0}
+            fileParts={[t("title"), from, to]}
+            csv={() => [
+              [t("col.date"), t("col.center"), t("col.supplier"), t("col.invoice"), t("col.lines"), t("col.units"), t("col.cost"), t("col.registeredBy")],
+              ...rows.map((r) => [r.createdAt, [centerName(r.clinicId, r.clinicName), r.warehouse].filter(Boolean).join(" · "), r.supplier ?? "", r.purchaseInvoiceNumber ?? "", r.lines, r.units, r.totalCost ?? "", r.registeredBy ?? ""]),
+            ]}
+          />
+        }
+      />
 
       <div className="flex flex-wrap items-end gap-3">
         {gate.centros.length > 1 && (
@@ -76,7 +95,7 @@ export function ReceiptsList() {
       {listRes.state.kind === "ok" && rows.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
 
       {rows.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border">
+        <div ref={printRef} className="overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -88,7 +107,7 @@ export function ReceiptsList() {
                 <TableHead className="text-right">{t("col.units")}</TableHead>
                 <TableHead className="text-right">{t("col.cost")}</TableHead>
                 <TableHead>{t("col.registeredBy")}</TableHead>
-                <TableHead className="text-right">{t("col.actions")}</TableHead>
+                <TableHead className="no-print text-right">{t("col.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -110,7 +129,7 @@ export function ReceiptsList() {
                   <TableCell className="text-right tabular-nums">{format.number(r.units)}</TableCell>
                   <TableCell className="text-right tabular-nums">{r.totalCost == null ? "" : USD.format(r.totalCost)}</TableCell>
                   <TableCell>{r.registeredBy || "—"}</TableCell>
-                  <TableCell className="py-1 text-right">
+                  <TableCell className="no-print py-1 text-right">
                     <Button size="sm" variant="ghost" onClick={() => setOpen(r)}>
                       {t("view")}
                     </Button>
@@ -124,7 +143,7 @@ export function ReceiptsList() {
                 <TableCell className="text-right font-semibold tabular-nums">{format.number(totals.lines)}</TableCell>
                 <TableCell className="text-right font-semibold tabular-nums">{format.number(totals.units)}</TableCell>
                 <TableCell className="text-right font-semibold tabular-nums">{totals.totalCost == null ? "" : USD.format(totals.totalCost)}</TableCell>
-                <TableCell colSpan={2} />
+                <TableCell /><TableCell className="no-print" />
               </TableRow>
             </TableFooter>
           </Table>

@@ -171,7 +171,10 @@
       "packagesTitle": "Paquetes",
       "spendTitle": "Gasto",
       "empty": "Sin visitas registradas."
-    }
+    },
+    "print": "Imprimir",
+    "csv": "CSV",
+    "printedBy": "Impreso por {who} · {when}"
   },
   "ehrIntegration": {
     "title": "Enganche con el EHR",
@@ -6261,7 +6264,6 @@
   "inventoryKardex": {
     "title": "Kardex diario",
     "subtitle": "Entradas, aplicadas y ajustes de un producto, día por día, en viales cerrados.",
-    "print": "Imprimir",
     "center": "Centro",
     "product": "Producto",
     "pickProduct": "Elige un producto",
@@ -6290,7 +6292,8 @@
       "inbound": "Entrada",
       "adjustment": "Ajuste",
       "applied": "Aplicadas hasta el {date}",
-      "closing": "Inventario final al {date}"
+      "closing": "Inventario final al {date}",
+      "kind": "Tipo"
     },
     "day": {
       "patient": "Paciente",

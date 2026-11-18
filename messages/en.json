@@ -171,7 +171,10 @@
       "packagesTitle": "Packages",
       "spendTitle": "Spend",
       "empty": "No recorded visits."
-    }
+    },
+    "print": "Print",
+    "csv": "CSV",
+    "printedBy": "Printed by {who} · {when}"
   },
   "ehrIntegration": {
     "title": "EHR integration",
@@ -6261,7 +6264,6 @@
   "inventoryKardex": {
     "title": "Daily kardex",
     "subtitle": "A product's inbound, applied and adjustments, day by day, in sealed vials.",
-    "print": "Print",
     "center": "Center",
     "product": "Product",
     "pickProduct": "Pick a product",
@@ -6290,7 +6292,8 @@
       "inbound": "Inbound",
       "adjustment": "Adjustment",
       "applied": "Applied through {date}",
-      "closing": "Closing inventory on {date}"
+      "closing": "Closing inventory on {date}",
+      "kind": "Kind"
     },
     "day": {
       "patient": "Patient",
