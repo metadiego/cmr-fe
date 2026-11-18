@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
-import { ErrorState, LoadingPanel, Panel } from "@/components/clientes/record-ui";
+import { ErrorState, LoadingPanel, Panel } from "@/components/kit/panel";
 import {
   Select,
   SelectContent,

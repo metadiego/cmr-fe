@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState as EmptyStateFrame } from "@/components/ui/empty-state";
 
-// The patient record's visual language, shared by every tab so they read as one screen: a titled
-// card (Panel), a hairline-divided table, a grid of numbers, a status pill coloured by meaning, and
-// one empty/loading/error treatment. Presentation only: no data fetching here.
+// The app's card language (see CLAUDE.md, "UI: one visual language"): a titled card (Panel), a
+// hairline-divided table inside it, a grid of numbers, and one empty / loading / error treatment.
+// Presentation only: no data fetching here. Status pills live in ./status-badge.tsx.
 
 export function Panel({
   title,
@@ -117,17 +116,14 @@ export function Stat({
   );
 }
 
-// Empty / loading / error, sized for the inside of a Panel or standing alone (`bare`).
+// Empty / loading / error, sized for the inside of a Panel or standing alone (`bare`). Built on the
+// shared ui/empty-state so there is one empty look in the app; inside a Panel it drops its frame.
 export function EmptyState({ children, bare }: { children: React.ReactNode; bare?: boolean }) {
   return (
-    <p
-      className={cn(
-        "px-5 py-10 text-center text-sm text-muted-foreground",
-        bare && "rounded-xl border border-dashed bg-card/50",
-      )}
-    >
-      {children}
-    </p>
+    <EmptyStateFrame
+      title={<span className="font-normal text-muted-foreground">{children}</span>}
+      className={bare ? "rounded-xl" : "rounded-none border-0 bg-transparent px-5 py-10"}
+    />
   );
 }
 
@@ -152,42 +148,4 @@ export function LoadingPanel({ rows = 4 }: { rows?: number }) {
       </div>
     </div>
   );
-}
-
-// Status pill coloured by meaning: done = green, in progress / upcoming = blue, needs attention =
-// amber, cancelled / voided = red. Labels come from the existing catalogues; unknown values show raw.
-type Tone = "success" | "info" | "warning" | "destructive" | "secondary";
-const TONE: Record<string, Tone> = {
-  // appointments
-  atendida: "success",
-  programada: "info",
-  confirmada: "info",
-  presente: "info",
-  triage: "info",
-  en_consulta: "info",
-  no_show: "warning",
-  reprogramada: "secondary",
-  cancelada: "destructive",
-  // therapy sessions
-  asistido: "success",
-  en_terapia: "info",
-  pendiente: "secondary",
-  // invoices
-  emitida: "success",
-  borrador: "secondary",
-  devuelta_parcial: "warning",
-  devuelta_total: "destructive",
-  anulada: "destructive",
-};
-const LABEL_NS = {
-  appointment: "citas.estado",
-  therapy: "servicios.estado",
-  invoice: "facturacionList.estado",
-} as const;
-
-export function StatusBadge({ kind, value }: { kind: keyof typeof LABEL_NS; value?: string | null }) {
-  const t = useTranslations();
-  if (!value) return <span className="text-muted-foreground">—</span>;
-  const key = `${LABEL_NS[kind]}.${value}`;
-  return <Badge variant={TONE[value] ?? "secondary"}>{t.has(key) ? t(key) : value}</Badge>;
 }

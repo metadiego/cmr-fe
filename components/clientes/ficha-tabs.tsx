@@ -19,16 +19,8 @@ import { HistorialDialog } from "@/components/citas/cita-actions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  EmptyState,
-  ErrorState,
-  LoadingPanel,
-  Panel,
-  RecordTable,
-  StatusBadge,
-  Td,
-  Th,
-} from "@/components/clientes/record-ui";
+import { EmptyState, ErrorState, LoadingPanel, Panel, RecordTable, Td, Th } from "@/components/kit/panel";
+import { StatusBadge } from "@/components/kit/status-badge";
 
 // Tabs of the patient record (hub): each one calls ONLY its own endpoint (nothing recomputes what the
 // BE already sums). Kept out of the page to keep it under the ceiling. Handoff
