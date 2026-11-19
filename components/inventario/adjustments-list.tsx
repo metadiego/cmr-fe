@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 
 import { getAdjustment, listAdjustments, patientName, type AdjustmentDetail, type AdjustmentRow } from "@/lib/api/inventory-adjustments";
 import { last30Days } from "@/lib/inventory/receipts";
+import { datesDiffer, dayPR } from "@/lib/inventory/backdate";
 import { formatFechaSolo, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
@@ -83,7 +84,16 @@ export function AdjustmentsList({ centerId, centerName, reloadKey }: { centerId:
               {rows.map((r) => (
                 <TableRow key={r.documentId}>
                   <TableCell className="font-mono text-xs">{r.number ?? "—"}</TableCell>
-                  <TableCell className="whitespace-nowrap tabular-nums">{format.dateTime(new Date(r.createdAt), "dateAndTime")}</TableCell>
+                  <TableCell className="whitespace-nowrap tabular-nums">
+                    {datesDiffer(r.effectiveDate, r.createdAt) && r.effectiveDate ? (
+                      <>
+                        <div>{t("effectiveOn", { day: formatFechaSolo(dayPR(r.effectiveDate)) })}</div>
+                        <div className="text-xs text-muted-foreground">{t("recordedOn", { when: format.dateTime(new Date(r.createdAt), "dateAndTime") })}</div>
+                      </>
+                    ) : (
+                      format.dateTime(new Date(r.createdAt), "dateAndTime")
+                    )}
+                  </TableCell>
                   <TableCell>{r.warehouse ?? "—"}</TableCell>
                   <TableCell>
                     <div>{reasonText(r.reason)}</div>
@@ -118,7 +128,11 @@ function AdjustmentDialog({ row, onClose, centerName, reasonText }: { row: Adjus
   const res = useResource<AdjustmentDetail | null>(() => (row ? getAdjustment(row.documentId, row.clinicId) : Promise.resolve(null)), [row?.documentId]);
   const d = res.state.kind === "ok" ? res.state.data : null;
   const subtitle = row
-    ? [format.dateTime(new Date(row.createdAt), "dateAndTime"), centerName, row.warehouse, reasonText(row.reason), patientName(row.patient), row.registeredBy && t("by", { name: row.registeredBy })]
+    ? [
+        datesDiffer(row.effectiveDate, row.createdAt) && row.effectiveDate
+          ? `${t("effectiveOn", { day: formatFechaSolo(dayPR(row.effectiveDate)) })} · ${t("recordedOn", { when: format.dateTime(new Date(row.createdAt), "dateAndTime") })}`
+          : format.dateTime(new Date(row.createdAt), "dateAndTime"),
+        centerName, row.warehouse, reasonText(row.reason), patientName(row.patient), row.registeredBy && t("by", { name: row.registeredBy })]
         .filter(Boolean)
         .join(" · ")
     : "";

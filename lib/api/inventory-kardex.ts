@@ -27,6 +27,9 @@ export type KardexDayMovement = {
   notes: string | null;
   /** Shape read from prod 16-nov (vitamin C, Caguas): an object, not a name. */
   patient: { id: string; medicalRecordNumber: string | null; name: string | null } | null;
+  /** When it was written, and whether it was dated in the past (cmr-be #646). */
+  recordedAt?: string | null;
+  isRetroactive?: boolean;
   patientId?: string | null;
   medicalRecordNumber: string | null;
   sessionNumber: number | null;

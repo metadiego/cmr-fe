@@ -125,6 +125,7 @@ function PanelItemRow({ item, centro, onChanged }: { item: PanelItem; centro: st
   if (item.clave === "camposObligatorios") return <CamposRow item={item} label={label} />;
   if (item.clave === "blockingRules") return <AgendaRulesRow item={item} label={label} />;
   if (item.clave === "countMode") return <CountModeRow item={item} label={label} />;
+  if (item.modulo === "inventario" && item.clave === "backdate") return <BackdateRow item={item} label={label} />;
   if (item.tipo === "otro" && typeof item.valor === "number") return <NumeroRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   return null;
 }
@@ -370,6 +371,21 @@ function CountModeRow({ item, label }: { item: PanelItem; label: string }) {
       <Label>{label}</Label>
       <Link href="/configuration/cash-count-mode" className="text-xs font-medium text-primary hover:underline">
         {mode && tRoot.has(`caja.countMode.${mode}`) ? tRoot(`caja.countMode.${mode}`) : mode}
+      </Link>
+    </div>
+  );
+}
+
+// Backdated inventory adjustments (cmr-be #646): window + negative-day policy, edited on their own screen.
+function BackdateRow({ item, label }: { item: PanelItem; label: string }) {
+  const t = useTranslations("inventoryBackdateSettings");
+  const v = (item.valor ?? {}) as { maxDays?: number; negativeBalance?: string };
+  const policy = v.negativeBalance && t.has(`policy.${v.negativeBalance}`) ? t(`policy.${v.negativeBalance}`) : v.negativeBalance;
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <Label>{label}</Label>
+      <Link href="/configuration/inventory-backdate" className="text-xs font-medium text-primary hover:underline tabular-nums">
+        {[v.maxDays != null ? t("daysShort", { n: v.maxDays }) : null, policy].filter(Boolean).join(" · ")}
       </Link>
     </div>
   );

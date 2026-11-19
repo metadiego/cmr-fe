@@ -6,11 +6,16 @@ import { toast } from "sonner";
 
 import { listAlmacenes, listMotivosMovimiento, type Almacen, type MotivoMovimiento } from "@/lib/api/inventario";
 import { createAdjustment } from "@/lib/api/inventory-adjustments";
+import { previewAdjustment, type BackdatePreview as Preview } from "@/lib/api/inventory-backdate";
+import { backdateBlock, isPastDay } from "@/lib/inventory/backdate";
+import { formatFechaSolo, todayPR } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { ApiError } from "@/lib/api/types";
 import { toastError } from "@/lib/api/errors";
 import { adjustmentPayload, draftNet, draftProblems, quantityInput, type DraftLine } from "@/lib/inventory/adjustments";
 import { useResource } from "@/hooks/use-resource";
+import { useSettled } from "@/hooks/use-settled";
+import { BackdatePreview } from "@/components/inventario/backdate-preview";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { PacienteSelect } from "@/components/citas/paciente-select";
 import { Button } from "@/components/ui/button";
@@ -32,7 +37,9 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
   const tRoot = useTranslations();
   const [warehouseId, setWarehouseId] = React.useState("");
   const [reason, setReason] = React.useState("");
-  const [date, setDate] = React.useState("");
+  // The center's today by default; past days are allowed (with rules, cmr-be #646), future ones never.
+  const today = todayPR();
+  const [date, setDate] = React.useState(today);
   const [patient, setPatient] = React.useState<Paciente | null>(null);
   const [notes, setNotes] = React.useState("");
   const [lines, setLines] = React.useState<DraftLine[]>(() => [blank()]);
@@ -55,6 +62,26 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
     problems.some((p) => typeof p === "object" && p.line === i && p.field === field);
   const net = draftNet(lines);
 
+  // A PAST day: ask the BE what it would do (debounced) and let its `problems` gate the save.
+  const past = isPastDay(date, today);
+  const effectiveDate = past ? date : undefined;
+  const lineIssues = problems.some((p) => typeof p === "object" || p === "noLines" || p === "noWarehouse");
+  const previewBody = past && !lineIssues ? adjustmentPayload({ warehouseId: warehouse, reason, notes, effectiveDate, lines }) : null;
+  const previewKey = previewBody ? JSON.stringify({ ...previewBody, notes: undefined }) : "";
+  const settledKey = useSettled(previewKey, 400);
+  const previewRes = useResource<Preview | null>(
+    () => (settledKey && previewBody ? previewAdjustment({ ...previewBody, notes: previewBody.notes || undefined }, centerId) : Promise.resolve(null)),
+    // previewBody is rebuilt every render; settledKey carries its content.
+    [settledKey, centerId],
+  );
+  const preview = previewRes.state.kind === "ok" ? previewRes.state.data : null;
+  const block = previewBody ? backdateBlock({ past, preview, loading: settledKey !== previewKey || previewRes.state.kind === "loading" }) : null;
+  const blockText =
+    block?.kind === "forbidden" ? tRoot("inventory.backdate.forbidden")
+    : block?.kind === "problem" ? (tRoot.has(block.labelKey) ? tRoot(block.labelKey) : block.labelKey)
+    : block?.kind === "loading" ? t("backdate.previewing")
+    : null;
+
   function patch(i: number, p: Partial<DraftLine>) {
     setLines((ls) => {
       const next = ls.map((l, j) => (j === i ? { ...l, ...p } : l));
@@ -68,14 +95,14 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
     setBusy(true);
     setBadLine(null);
     try {
-      const body = adjustmentPayload({ warehouseId: warehouse, reason, notes, effectiveDate: date || undefined, patientId: patient?.id ?? null, lines });
+      const body = adjustmentPayload({ warehouseId: warehouse, reason, notes, effectiveDate, patientId: patient?.id ?? null, lines });
       const res = await createAdjustment(body, centerId);
-      toast.success(t("saved", { number: res.number, n: body.lines.length }));
+      toast.success(t("saved", { number: res.number, n: body.lines.length }), res.isRetroactive ? { description: t("backdate.savedBackdated", { day: formatFechaSolo(date) }) } : undefined);
       setLines([blank()]);
       setFlipped(new Set());
       setNotes("");
       setPatient(null);
-      setDate("");
+      setDate(today);
       onSaved(res.number);
     } catch (err) {
       const index = err instanceof ApiError ? (err.data as { index?: unknown } | undefined)?.index : undefined;
@@ -115,7 +142,7 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="adj-date">{t("date")}</Label>
-          <DatePicker id="adj-date" value={date} onChange={setDate} />
+          <DatePicker id="adj-date" value={date} onChange={(v) => setDate(v || today)} max={today} />
         </div>
         <div className="flex flex-col gap-1">
           <Label>{t("patient")}</Label>
@@ -126,6 +153,10 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
           <Textarea id="adj-notes" rows={2} maxLength={500} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("notesPlaceholder")} />
         </div>
       </div>
+
+      {past && (
+        <p className="rounded-md bg-warning/10 px-3 py-2 text-sm text-warning-foreground">{t("backdate.banner")}</p>
+      )}
 
       <div className="rounded-lg border">
         <Table>
@@ -203,12 +234,15 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
         </Table>
       </div>
 
+      {previewBody && (previewRes.state.kind !== "ok" ? <BackdatePreview state={previewRes.state} /> : preview && <BackdatePreview state={{ kind: "ok", data: preview }} />)}
+
       <div className="flex flex-wrap items-center justify-end gap-4">
         <span className="text-sm text-muted-foreground">
           {t("summary", { n: lines.filter((l) => l.productId).length, net: (net > 0 ? "+" : "") + net })}
         </span>
         {problems.length > 0 && typeof problems[0] === "string" && <span className="text-sm text-muted-foreground">{t(`problem.${problems[0]}`)}</span>}
-        <Button onClick={save} disabled={busy || problems.length > 0}>
+        {problems.length === 0 && blockText && <span className={`text-sm ${block?.kind === "loading" ? "text-muted-foreground" : "text-destructive"}`}>{blockText}</span>}
+        <Button onClick={save} disabled={busy || problems.length > 0 || !!block}>
           {busy ? tRoot("common.loading") : t("save")}
         </Button>
       </div>

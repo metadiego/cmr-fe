@@ -479,7 +479,14 @@ export default function DailyKardexPage() {
                 <TableBody>
                   {dayGroups.map((g) => (
                     <TableRow key={g.key}>
-                      <TableCell>{g.patientName || "—"}</TableCell>
+                      <TableCell>
+                        {g.patientName || "—"}
+                        {g.retroactiveRecordedAt && (
+                          <span className="ml-2 rounded-full bg-warning/15 px-2 py-0.5 text-xs text-warning-foreground">
+                            {t("day.retroactive", { when: format.dateTime(new Date(g.retroactiveRecordedAt), "dateAndTime") })}
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="tabular-nums">{g.medicalRecordNumber ?? "—"}</TableCell>
                       <TableCell className="tabular-nums">
                         {sessionLabel(g.sessionNumber, g.sessionsTotal) ?? "—"}

@@ -55,7 +55,7 @@ test("groupKardexDayMovements: one delivery's vial + content rows collapse to on
     movement({ id: "c", documentId: "doc-1", patient: { id: "p", medicalRecordNumber: "15878", name: "CRUZ CASILLAS, CARMEN" }, sessionNumber: 1, sessionsTotal: 3, openVial: true, signedQuantity: -10 }),
   ]);
   assert.deepEqual(groups, [
-    { key: "doc-1", patientName: "CRUZ CASILLAS, CARMEN", medicalRecordNumber: "15878", sessionNumber: 1, sessionsTotal: 3, vials: -1, content: -25 },
+    { key: "doc-1", patientName: "CRUZ CASILLAS, CARMEN", medicalRecordNumber: "15878", sessionNumber: 1, sessionsTotal: 3, vials: -1, content: -25, retroactiveRecordedAt: null },
   ]);
 });
 
@@ -98,6 +98,15 @@ test("groupKardexDayMovements: order of first appearance is kept", () => {
     movement({ id: "c", documentId: "doc-b", signedQuantity: -1 }),
   ]);
   assert.deepEqual(groups.map((g) => g.key), ["doc-b", "doc-a"]);
+});
+
+test("groupKardexDayMovements: a backdated movement marks its row with when it was written", () => {
+  const [g, h] = groupKardexDayMovements([
+    movement({ id: "a", documentId: "adj-1", signedQuantity: 2, isRetroactive: true, recordedAt: "2026-11-19T15:00:00.000Z" }),
+    movement({ id: "b", documentId: "doc-2", signedQuantity: -1 }),
+  ]);
+  assert.equal(g.retroactiveRecordedAt, "2026-11-19T15:00:00.000Z");
+  assert.equal(h.retroactiveRecordedAt, null);
 });
 
 test("ownerClosing: the owner's October sheet closes at 133", () => {
