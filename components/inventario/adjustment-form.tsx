@@ -70,8 +70,9 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
   const previewKey = previewBody ? JSON.stringify({ ...previewBody, notes: undefined }) : "";
   const settledKey = useSettled(previewKey, 400);
   const previewRes = useResource<Preview | null>(
-    () => (settledKey && previewBody ? previewAdjustment({ ...previewBody, notes: previewBody.notes || undefined }, centerId) : Promise.resolve(null)),
-    // previewBody is rebuilt every render; settledKey carries its content.
+    () => (settledKey && previewBody ? previewAdjustment({ ...previewBody, reason: previewBody.reason || undefined, notes: previewBody.notes || undefined }, centerId) : Promise.resolve(null)),
+    // previewBody is rebuilt every render; settledKey carries its content. An empty reason/notes is left out:
+    // the preview DTO refuses "" (verified live 19-nov: «motivo should not be empty»).
     [settledKey, centerId],
   );
   const preview = previewRes.state.kind === "ok" ? previewRes.state.data : null;
