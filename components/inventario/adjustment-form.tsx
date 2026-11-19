@@ -9,7 +9,7 @@ import { createAdjustment } from "@/lib/api/inventory-adjustments";
 import type { Paciente } from "@/lib/api/pacientes";
 import { ApiError } from "@/lib/api/types";
 import { toastError } from "@/lib/api/errors";
-import { adjustmentPayload, draftNet, draftProblems, type DraftLine } from "@/lib/inventory/adjustments";
+import { adjustmentPayload, draftNet, draftProblems, quantityInput, type DraftLine } from "@/lib/inventory/adjustments";
 import { useResource } from "@/hooks/use-resource";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { PacienteSelect } from "@/components/citas/paciente-select";
@@ -37,6 +37,8 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
   const [notes, setNotes] = React.useState("");
   const [lines, setLines] = React.useState<DraftLine[]>(() => [blank()]);
   const [badLine, setBadLine] = React.useState<number | null>(null);
+  // Lines where a minus was typed and turned into «Sale»: they say so, so the switch is never silent.
+  const [flipped, setFlipped] = React.useState<ReadonlySet<string>>(() => new Set());
   const [busy, setBusy] = React.useState(false);
 
   const whRes = useResource<Almacen[]>(() => (centerId ? listAlmacenes(centerId) : Promise.resolve([])), [centerId]);
@@ -70,6 +72,7 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
       const res = await createAdjustment(body, centerId);
       toast.success(t("saved", { number: res.number, n: body.lines.length }));
       setLines([blank()]);
+      setFlipped(new Set());
       setNotes("");
       setPatient(null);
       setDate("");
@@ -161,10 +164,28 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
                   <Input
                     inputMode="decimal"
                     value={l.quantity}
-                    onChange={(e) => patch(i, { quantity: e.target.value })}
+                    onKeyDown={(e) => {
+                      // The amount is always positive; the toggle gives the direction.
+                      if (e.key === "-") {
+                        e.preventDefault();
+                        if (l.sign !== "negativo") patch(i, { sign: "negativo" });
+                        setFlipped((f) => new Set(f).add(l.key));
+                      }
+                    }}
+                    onChange={(e) => {
+                      const { quantity, hadMinus } = quantityInput(e.target.value);
+                      patch(i, hadMinus ? { quantity, sign: "negativo" } : { quantity });
+                      if (hadMinus) setFlipped((f) => new Set(f).add(l.key));
+                    }}
                     aria-invalid={lineProblem(i, "quantity")}
+                    aria-describedby={lineProblem(i, "quantity") || flipped.has(l.key) ? `${l.key}-qty-hint` : undefined}
                     className="text-right tabular-nums"
                   />
+                  {((lineProblem(i, "quantity") && l.quantity.trim() !== "") || flipped.has(l.key)) && (
+                    <p id={`${l.key}-qty-hint`} className={`mt-1 text-xs ${lineProblem(i, "quantity") ? "text-destructive" : "text-muted-foreground"}`}>
+                      {t("quantityPositive")}
+                    </p>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Input value={l.notes} onChange={(e) => patch(i, { notes: e.target.value })} maxLength={200} />

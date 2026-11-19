@@ -6548,6 +6548,7 @@
       "net": "Net",
       "registeredBy": "Loaded by",
       "actions": "Actions"
-    }
+    },
+    "quantityPositive": "The quantity is always positive; to subtract, use Out."
   }
 }

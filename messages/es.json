@@ -6548,6 +6548,7 @@
       "net": "Neto",
       "registeredBy": "Cargado por",
       "actions": "Acciones"
-    }
+    },
+    "quantityPositive": "La cantidad va en positivo; para restar usa Sale."
   }
 }

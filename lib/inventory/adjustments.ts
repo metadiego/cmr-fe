@@ -62,3 +62,19 @@ export function draftNet(lines: DraftLine[]): number {
     return l.productId && q > 0 ? a + (l.sign === "positivo" ? q : -q) : a;
   }, 0);
 }
+
+/** What the quantity box keeps from what was typed or pasted (cmr-be 19-nov: users typed «-5»). The amount is
+ *  always positive — the direction is the Sale/Entra toggle — so a minus is stripped and reported, letting
+ *  the form switch the line to «Sale». Only digits and one decimal separator survive. */
+export function quantityInput(raw: string): { quantity: string; hadMinus: boolean } {
+  const hadMinus = /[-−‒–]/.test(raw);
+  let seenSep = false;
+  const quantity = [...raw.replace(/[-−‒–\s]/g, "")]
+    .filter((c) => {
+      if (/\d/.test(c)) return true;
+      if ((c === "." || c === ",") && !seenSep) return (seenSep = true);
+      return false;
+    })
+    .join("");
+  return { quantity, hadMinus };
+}

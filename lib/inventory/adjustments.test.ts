@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { adjustmentPayload, draftNet, draftProblems, type DraftLine } from "./adjustments.ts";
+import { adjustmentPayload, draftNet, draftProblems, type DraftLine, quantityInput } from "./adjustments.ts";
 
 const line = (o: Partial<DraftLine> = {}): DraftLine => ({ key: "k", productId: "p1", productName: "A", quantity: "2", sign: "negativo", notes: "", ...o });
 
@@ -24,4 +24,12 @@ test("adjustmentPayload: drops empty lines, numbers the quantities, optional fie
 
 test("draftNet: in minus out, ignoring incomplete lines", () => {
   assert.equal(draftNet([line({ quantity: "5", sign: "positivo" }), line({ quantity: "2" }), line({ productId: "", quantity: "9" })]), 3);
+});
+
+test("quantityInput strips the minus (the toggle gives the direction) and keeps one separator", () => {
+  assert.deepEqual(quantityInput("-5"), { quantity: "5", hadMinus: true });
+  assert.deepEqual(quantityInput("\u22122,5"), { quantity: "2,5", hadMinus: true });
+  assert.deepEqual(quantityInput("12.5.3a"), { quantity: "12.53", hadMinus: false });
+  assert.deepEqual(quantityInput("-"), { quantity: "", hadMinus: true });
+  assert.deepEqual(quantityInput("0"), { quantity: "0", hadMinus: false });
 });
