@@ -5822,7 +5822,8 @@
       "carried": "Carried",
       "waiting": "Waiting",
       "count": "Count",
-      "attendedAndWaiting": "{attended} attended, {waiting} waiting",
+      "rightNow": "Now: {attended} attended, {inConsultation} in consultation, {waiting} waiting",
+      "typeBreakdown": "Today: {types}",
       "byDoctor": "By doctor",
       "byType": "By type",
       "col": {

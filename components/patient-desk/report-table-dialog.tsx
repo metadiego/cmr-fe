@@ -6,6 +6,7 @@ import { LayoutTable01Icon } from "@hugeicons/core-free-icons"
 
 import type { ExportResult } from "@/lib/api/day-summary"
 import { filterRows } from "@/lib/frontdesk/day-summary-filters"
+import { useDialogForm } from "@/components/kit/use-dialog-form"
 import { DaySummaryFilterRow } from "@/components/patient-desk/day-summary-filter-row"
 import { ReportActions } from "@/components/reports/report-actions"
 import { Button } from "@/components/ui/button"
@@ -61,6 +62,7 @@ export function ReportTableDialog<R, C extends string>({
   filterNoneText,
   filterShowingText,
   filterClearText,
+  initialFilters,
   fileParts,
   exporter,
   children,
@@ -103,13 +105,19 @@ export function ReportTableDialog<R, C extends string>({
   filterNoneText: string
   filterShowingText: (n: number, total: number) => string
   filterClearText: string
+  /** Pre-fills a column's filter the moment the dialog opens (e.g. a doctor clicked elsewhere); the
+   *  viewer can still clear it back to "all" like any other filter — it only seeds the start state. */
+  initialFilters?: Readonly<Record<string, string>>
   fileParts: string[]
   exporter: (visibleRows: R[], visibleCols: C[], filterLabel: string) => (format: "csv" | "pdf", channel: "download" | "email", destination?: string) => Promise<ExportResult>
   /** Whatever goes below the table (stats tiles, breakdowns) — given the filtered rows and whether a filter is active. */
   children?: (ctx: { rows: R[]; filtering: boolean }) => React.ReactNode
 }) {
   const printRef = React.useRef<HTMLDivElement>(null)
-  const [filters, setFilters] = React.useState<Record<string, string>>({})
+  // Resets to initialFilters every time the dialog opens, like any other dialog form in this repo
+  // (useDialogForm): a doctor clicked from elsewhere must start pre-filtered to them again on a fresh
+  // open, not keep whatever a previous viewer (or a previous doctor) last left in the filter row.
+  const [filters, setFilters] = useDialogForm<Record<string, string>>(() => ({ ...(initialFilters ?? {}) }), open)
 
   // Filters on columns the user has hidden still apply only while visible: hiding a column drops its filter.
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([c, v]) => v && visibleColumns.includes(c as C)))
@@ -187,7 +195,7 @@ export function ReportTableDialog<R, C extends string>({
                   <span className="flex-1">
                     {filterShowingText(filteredRows.length, rows.length)} · {filterLine}
                   </span>
-                  <Button variant="ghost" size="sm" className="no-print" onClick={() => setFilters({})}>
+                  <Button variant="ghost" size="sm" className="no-print" onClick={() => setFilters(() => ({}))}>
                     {filterClearText}
                   </Button>
                 </div>

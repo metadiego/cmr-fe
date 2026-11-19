@@ -5822,7 +5822,8 @@
       "carried": "Lleva",
       "waiting": "Esperando",
       "count": "Cantidad",
-      "attendedAndWaiting": "{attended} atendidas, {waiting} esperando",
+      "rightNow": "Ahora: {attended} atendidas, {inConsultation} en consulta, {waiting} esperando",
+      "typeBreakdown": "Hoy: {types}",
       "byDoctor": "Por médico",
       "byType": "Por tipo",
       "col": {

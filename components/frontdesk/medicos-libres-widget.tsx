@@ -61,7 +61,8 @@ export function MedicosLibresWidget({
     () => (centroId ? getDoctorSummary({ date, centerId: centroId }) : Promise.resolve(null)),
     [date, centroId],
   )
-  const [detailDoctor, setDetailDoctor] = React.useState<{ id?: string; name?: string } | null>(null)
+  const [detailOpen, setDetailOpen] = React.useState(false)
+  const [detailDoctorName, setDetailDoctorName] = React.useState<string | undefined>(undefined)
   const ocupados = React.useMemo(() => {
     const byDoctor = summaryRes.state.kind === "ok" && summaryRes.state.data ? summaryRes.state.data.totals.byDoctor : []
     return sortedByDoctor(byDoctor).filter((d) => d.carried > 0)
@@ -69,12 +70,20 @@ export function MedicosLibresWidget({
   const carried = summaryRes.state.kind === "ok" && summaryRes.state.data ? totalCarried(summaryRes.state.data.totals.byDoctor) : 0
 
   const ocupadoRow = (d: DoctorSummaryByDoctor) => {
-    const types = d.byType.map((ty) => `${ty.name}: ${ty.count}`).join(" · ")
+    // Two different questions, each on its own line, on purpose (owner, 18-nov-2026: these are for
+    // staff who must never have to add numbers up to trust the screen) — "today's visit types" and
+    // "where they are right now" are different counts (today's types include ones not arrived yet),
+    // so a doctor's type tally never equals "lleva": on one run-on line that reads as a mismatch.
+    const types = d.byType.map((ty) => `${ty.name} ${ty.count}`).join(" · ")
     return (
       <button
         key={d.doctorId ?? "—"}
         type="button"
-        onClick={() => centroId && setDetailDoctor({ id: d.doctorId ?? undefined, name: d.doctor ?? undefined })}
+        onClick={() => {
+          if (!centroId) return
+          setDetailDoctorName(d.doctor ?? undefined)
+          setDetailOpen(true)
+        }}
         className="flex w-full flex-col gap-0.5 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-muted"
       >
         <span className="flex items-center justify-between font-medium">
@@ -84,9 +93,9 @@ export function MedicosLibresWidget({
           </Badge>
         </span>
         <span className="text-xs text-muted-foreground">
-          {types && `${types} · `}
-          {tDoctor("attendedAndWaiting", { attended: d.attended, waiting: d.waiting })}
+          {tDoctor("rightNow", { attended: d.attended, inConsultation: d.inConsultation, waiting: d.waiting })}
         </span>
+        {types && <span className="text-xs text-muted-foreground">{tDoctor("typeBreakdown", { types })}</span>}
       </button>
     )
   }
@@ -132,13 +141,12 @@ export function MedicosLibresWidget({
       </DropdownMenu>
       {centroId && (
         <DoctorSummaryDialog
-          open={!!detailDoctor}
-          onOpenChange={(v) => !v && setDetailDoctor(null)}
+          open={detailOpen}
+          onOpenChange={setDetailOpen}
           date={date}
           centerId={centroId}
           centerName={centroNombre ?? ""}
-          doctorId={detailDoctor?.id}
-          doctorName={detailDoctor?.name}
+          doctorName={detailDoctorName}
         />
       )}
     </>

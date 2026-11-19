@@ -29,13 +29,16 @@ const NUMERIC: ReadonlySet<DoctorSummaryColumn> = new Set(["amount"])
 // no copiarlo" — with its own columns, its own preference key, and breakdowns taken straight from the
 // BE's `totals.byDoctor`/`totals.byType` rather than recomputed locally. Handoff
 // docs/specs/resumen-por-medico-handoff-be.md (cmr-be #637).
+//
+// Always fetches the WHOLE day: a doctor clicked from the popover only PRESETS the Médico column's
+// filter (owner, 18-nov-2026 — "si elige Todos que los muestre todos"), it never scopes the request,
+// so picking "Todos" in that filter genuinely reveals every doctor instead of staying stuck on one.
 export function DoctorSummaryDialog({
   open,
   onOpenChange,
   date,
   centerId,
   centerName,
-  doctorId,
   doctorName,
 }: {
   open: boolean
@@ -43,8 +46,7 @@ export function DoctorSummaryDialog({
   date: string
   centerId: string
   centerName: string
-  /** Scope to one doctor (clicked from the popover); omit for every doctor. */
-  doctorId?: string
+  /** Pre-selects the Médico filter to this doctor (clicked from the popover); omit to open unfiltered. */
   doctorName?: string
 }) {
   const t = useTranslations("patientDesk.doctorSummary")
@@ -54,10 +56,10 @@ export function DoctorSummaryDialog({
   const { can } = useCan()
   const canReadInvoices = can("factura.read")
 
-  const res = useResource<DoctorSummary>(
-    () => getDoctorSummary({ date, centerId, doctorIds: doctorId ? [doctorId] : undefined }),
-    [date, centerId, doctorId]
-  )
+  // Always the whole day, every doctor (owner, 18-nov-2026: "Todos" in the Médico filter must show
+  // every doctor, not just reveal nothing new — a doctor clicked from the popover only PRESETS that
+  // column's filter, below, rather than narrowing what the BE sends).
+  const res = useResource<DoctorSummary>(() => getDoctorSummary({ date, centerId }), [date, centerId])
   const prefs = useResource(() => getMyPreferences(), [])
   const [picked, setPicked] = React.useState<DoctorSummaryColumn[] | null>(null)
   const cols =
@@ -153,11 +155,11 @@ export function DoctorSummaryDialog({
       filterShowingText={(n, total) => tDay("filter.showing", { n, total })}
       filterClearText={tDay("filter.clear")}
       fileParts={[t("file"), centerName, date]}
+      initialFilters={doctorName ? { doctor: doctorName } : undefined}
       exporter={(visibleRows, visibleCols, filterLabel) =>
         doctorSummaryExport({
           date,
           centerId,
-          doctorIds: doctorId ? [doctorId] : undefined,
           columns: visibleCols,
           ...(filterLabel ? { appointmentIds: visibleRows.map((r) => r.appointmentId), filterLabel } : {}),
         })
