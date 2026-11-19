@@ -2578,7 +2578,11 @@
       "firma": "Firma del Paciente"
     },
     "formatoPage": "Pág. {page}",
-    "formatoFirmas": "Firmas:"
+    "formatoFirmas": "Firmas:",
+    "legacyLabel": {
+      "invalid": "La sesión va de 1 al total.",
+      "notMigrated": "Esta sesión la numera su paquete; corrígela desde el paquete."
+    }
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -6604,5 +6608,27 @@
       "actions": "Acciones"
     },
     "quantityPositive": "La cantidad va en positivo; para restar usa Sale."
+  },
+  "legacyLabel": {
+    "correct": "Corregir numeración",
+    "renumber": "Renumerar serie",
+    "session": "Sesión",
+    "of": "de",
+    "total": "Total de sesiones",
+    "startAt": "Empieza en",
+    "from": "Desde",
+    "to": "Hasta",
+    "reason": "Motivo",
+    "reasonHint": "Mínimo 3 caracteres. Queda registrado.",
+    "before": "Antes",
+    "after": "Después",
+    "date": "Fecha",
+    "apply": "Aplicar ({n, plural, one {# cambio} other {# cambios}})",
+    "corrected": "Sesión corregida: {before} → {after}",
+    "renumbered": "{n, plural, one {# sesión renumerada} other {# sesiones renumeradas}}",
+    "rangeHint": "La sesión va de 1 al total.",
+    "rangeDates": "«Desde» no puede ser después de «Hasta».",
+    "previewing": "Calculando la vista previa…",
+    "nothingToChange": "Con estos datos no cambia ninguna sesión."
   }
 }

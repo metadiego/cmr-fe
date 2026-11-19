@@ -2578,7 +2578,11 @@
       "firma": "Patient's signature"
     },
     "formatoPage": "Page {page}",
-    "formatoFirmas": "Signatures:"
+    "formatoFirmas": "Signatures:",
+    "legacyLabel": {
+      "invalid": "The session goes from 1 to the total.",
+      "notMigrated": "This session is numbered by its package; fix it from the package."
+    }
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -6604,5 +6608,27 @@
       "actions": "Actions"
     },
     "quantityPositive": "The quantity is always positive; to subtract, use Out."
+  },
+  "legacyLabel": {
+    "correct": "Fix numbering",
+    "renumber": "Renumber series",
+    "session": "Session",
+    "of": "of",
+    "total": "Total sessions",
+    "startAt": "Starts at",
+    "from": "From",
+    "to": "To",
+    "reason": "Reason",
+    "reasonHint": "At least 3 characters. It is logged.",
+    "before": "Before",
+    "after": "After",
+    "date": "Date",
+    "apply": "Apply ({n, plural, one {# change} other {# changes}})",
+    "corrected": "Session fixed: {before} → {after}",
+    "renumbered": "{n, plural, one {# session renumbered} other {# sessions renumbered}}",
+    "rangeHint": "The session goes from 1 to the total.",
+    "rangeDates": "«From» cannot be after «To».",
+    "previewing": "Working out the preview…",
+    "nothingToChange": "With these values no session changes."
   }
 }

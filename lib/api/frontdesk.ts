@@ -533,6 +533,8 @@ export type HistorialSesion = {
   totalSessions: number | null;
   areas: number | null;
   staffNombre: string | null;
+  /** Came from the legacy system: its «n/m» is its own text, fixed with legacy-label (cmr-be #641). */
+  migrated?: boolean;
 };
 export function getHistorialPaciente(
   pacienteId: string,

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Clock01Icon } from "@hugeicons/core-free-icons";
+import { Clock01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 
 import { listCitasEveryCenter, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
@@ -11,6 +11,9 @@ import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { parseAcciones } from "@/lib/frontdesk/acciones";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
+import { LegacyLabelDialog } from "@/components/clientes/legacy-label-dialog";
+import { LegacyRenumberDialog } from "@/components/clientes/legacy-renumber-dialog";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -195,6 +198,12 @@ export function FichaTerapias({
   const dia = useDia();
   const [filter, setFilter] = React.useState<string>(""); // "" = all; otherwise serviceId/name
   const [formatRow, setFormatRow] = React.useState<HistorialSesion | null>(null);
+  // Legacy «n/m» fixes (cmr-be #641): only migrated rows, only with the availability-edit permission and a center.
+  const { can } = useCan();
+  const tl = useTranslations("legacyLabel");
+  const canFix = !!centro && can("frontdesk.disponibilidad.editar");
+  const [labelRow, setLabelRow] = React.useState<HistorialSesion | null>(null);
+  const [renumberOpen, setRenumberOpen] = React.useState(false);
   const res = useResource<HistorialSesion[]>(() => getHistorialPaciente(pacienteId, undefined, centro), [pacienteId, centro]);
   const serviciosRes = useResource<Servicio[]>(() => getServicios(centro), [centro]);
   const servicioPorId = React.useMemo(
@@ -217,6 +226,9 @@ export function FichaTerapias({
     .sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")))
     .filter((s) => !filter || serviceKey(s) === filter);
 
+  const filteredService = filter ? hist.find((s) => s.serviceId === filter) : undefined;
+  const canRenumber = canFix && !!filteredService && rows.some((s) => s.migrated);
+
   if (res.state.kind === "loading") return <LoadingPanel />;
   if (res.state.kind === "fail") return <ErrorState message={res.state.message} />;
   return (
@@ -224,7 +236,11 @@ export function FichaTerapias({
       description={hist.length > 0 ? t("sessionsCount", { n: rows.length }) : undefined}
       actions={
         // Only when there is more than one service: with one, filtering does nothing.
-        services.length > 1 ? (
+        <>
+        {canRenumber && (
+          <Button variant="outline" size="sm" onClick={() => setRenumberOpen(true)}>{tl("renumber")}</Button>
+        )}
+        {services.length > 1 ? (
           <Select value={filter || "__all__"} onValueChange={(v) => setFilter(v === "__all__" ? "" : v)}>
             <SelectTrigger size="sm" className="w-64"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -234,7 +250,8 @@ export function FichaTerapias({
               ))}
             </SelectContent>
           </Select>
-        ) : undefined
+        ) : null}
+        </>
       }
     >
       {hist.length === 0 ? (
@@ -258,7 +275,16 @@ export function FichaTerapias({
               <tr key={s.id} className="hover:bg-muted/30">
                 <Td className="font-medium whitespace-nowrap tabular-nums">{dia(s.date)}</Td>
                 <Td className="font-medium">{s.serviceName ?? "—"}</Td>
-                <Td><SessionProgress n={s.sesionNumero} total={s.totalSessions} /></Td>
+                <Td>
+                  <div className="flex items-center gap-1">
+                    <SessionProgress n={s.sesionNumero} total={s.totalSessions} />
+                    {canFix && s.migrated && (
+                      <Button variant="ghost" size="icon" className="size-7" aria-label={tl("correct")} title={tl("correct")} onClick={() => setLabelRow(s)}>
+                        <HugeiconsIcon icon={PencilEdit02Icon} className="size-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                </Td>
                 <Td className="text-muted-foreground">{s.staffNombre ?? "—"}</Td>
                 <Td><StatusBadge kind="therapy" value={s.status} /></Td>
                 <Td className="text-right">
@@ -272,6 +298,31 @@ export function FichaTerapias({
             );
           })}
         </RecordTable>
+      )}
+      {labelRow && centro && (
+        <LegacyLabelDialog
+          open
+          onOpenChange={(o) => !o && setLabelRow(null)}
+          session={{
+            id: labelRow.id,
+            number: labelRow.sesionNumero,
+            total: labelRow.totalSessions,
+            label: `${dia(labelRow.date)} · ${labelRow.serviceName ?? ""} · ${labelRow.sesionNumero ?? "—"}/${labelRow.totalSessions ?? "—"}`,
+          }}
+          centerId={centro}
+          onDone={() => res.refresh()}
+        />
+      )}
+      {renumberOpen && filteredService && centro && (
+        <LegacyRenumberDialog
+          open
+          onOpenChange={setRenumberOpen}
+          patientId={pacienteId}
+          service={{ id: filteredService.serviceId, name: filteredService.serviceName ?? "" }}
+          centerId={centro}
+          day={dia}
+          onDone={() => res.refresh()}
+        />
       )}
       {formatRow && (
         <FormatosModal
