@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
+import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/patient-therapy-history";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Badge } from "@/components/ui/badge";
 import {

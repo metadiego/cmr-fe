@@ -82,4 +82,5 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/configuration/board-modules", labelKey: "nav.tableroModulos" },
   { path: "/configuration/scheduling-bridge", labelKey: "nav.schedulingBridge" },
   { path: "/configuration/cash-count-mode", labelKey: "nav.cashCountMode" },
+  { path: "/configuration/inventory-backdate", labelKey: "nav.inventoryBackdate" },
 ];

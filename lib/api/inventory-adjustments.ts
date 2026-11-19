@@ -55,7 +55,8 @@ export interface AdjustmentDetail extends Omit<AdjustmentRow, "lines"> {
 }
 
 export function createAdjustment(input: AdjustmentInput, centerId?: string | null) {
-  return apiFetch<{ documentId: string; number: string; lines: unknown[] }>(
+  // effectiveDate / isRetroactive: cmr-be #646 (a past day is stored at 12:00 of the center).
+  return apiFetch<{ documentId: string; number: string; lines: unknown[]; effectiveDate?: string; isRetroactive?: boolean }>(
     `/inventory/adjustments${centerId ? `?centerIds=${encodeURIComponent(centerId)}` : ""}`,
     { method: "POST", body: JSON.stringify(input) },
     centerId ?? undefined,

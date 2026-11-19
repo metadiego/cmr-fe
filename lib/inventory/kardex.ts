@@ -44,6 +44,8 @@ export type KardexDayGroup = {
   vials: number;
   /** Net change to opened-vial content, in the product's unit (movements with openVial = true). */
   content: number;
+  /** Set when a movement of the group was dated in the past (cmr-be #646): when it was really written. */
+  retroactiveRecordedAt: string | null;
 };
 
 /**
@@ -66,10 +68,12 @@ export function groupKardexDayMovements(movements: readonly KardexDayMovement[])
         sessionsTotal: m.sessionsTotal,
         vials: 0,
         content: 0,
+        retroactiveRecordedAt: null,
       };
       byKey.set(key, g);
       order.push(key);
     }
+    if (m.isRetroactive && !g.retroactiveRecordedAt) g.retroactiveRecordedAt = m.recordedAt ?? null;
     if (m.openVial) g.content += m.signedQuantity;
     else g.vials += m.signedQuantity;
   }

@@ -734,7 +734,8 @@
         "schedulingBridge": "Puente con Google Sheets",
         "pacientes": "Pacientes",
         "numeracion": "Numeración",
-        "caja": "Caja"
+        "caja": "Caja",
+        "inventario": "Inventario"
       },
       "frontdesk_autopresente": "Auto-presente al pagar",
       "auto_present_follow_up": "Auto-presente en seguimiento",
@@ -758,7 +759,8 @@
       "numeracion_devoluciones": "Devoluciones",
       "agenda_blocking_rules": "Qué bloquea al agendar",
       "cash_count_mode": "Cómo se cuenta el efectivo",
-      "cash_close_enabled": "Mostrar «Procesar cierre»"
+      "cash_close_enabled": "Mostrar «Procesar cierre»",
+      "inventory_backdate": "Ajustes de inventario con fecha pasada"
     },
     "agendaRules": {
       "title": "Qué bloquea al agendar",
@@ -1601,7 +1603,8 @@
     "calendarAbsenceReview": "Ausencias por revisar",
     "paymentMethods": "Formas de pago",
     "inventory_daily_kardex": "Kardex diario",
-    "inventory_adjustments": "Ajustes"
+    "inventory_adjustments": "Ajustes",
+    "inventoryBackdate": "Ajustes con fecha pasada"
   },
   "admin": {
     "title": "Administración",
@@ -6234,7 +6237,8 @@
       "addKitComponent": "Agregar un componente al kit de una factura emitida",
       "adminGrant": "Dar acceso total (rol Administrador)",
       "adminRevoke": "Quitar el acceso total (rol Administrador)",
-      "modifyPastCashDay": "Vas a cambiar el cuadre del {day}"
+      "modifyPastCashDay": "Vas a cambiar el cuadre del {day}",
+      "backdatedInventoryAdjustment": "Ajuste de inventario con fecha pasada"
     },
     "effect": {
       "returnsPackageSession": "Devuelve la sesión al paquete",
@@ -6250,7 +6254,11 @@
       "kitComponentAdded": "El componente se agrega al kit y se crean sus sesiones; el monto de la factura no cambia.",
       "fullAccessEveryCenter": "Esta persona podrá hacer todo, en todos los centros",
       "loosesFullAccess": "Esta persona pierde el acceso total",
-      "pastCashDayChanges": "Las firmas de ese día pedirán acusar la corrección"
+      "pastCashDayChanges": "Las firmas de ese día pedirán acusar la corrección",
+      "backdateRewritesBalances": "Cambia los saldos de cada día desde esa fecha hasta hoy.",
+      "backdateClosedPeriod": "Toca un periodo que ya tiene cierre.",
+      "backdateAfterCount": "Hay conteos físicos posteriores a esa fecha.",
+      "backdateNegativeBalance": "Algún día quedará en negativo."
     },
     "policies": {
       "title": "Confirmaciones",
@@ -6467,7 +6475,8 @@
       "notes": "Nota",
       "content": "(contenido)",
       "vials": "Viales",
-      "contentAmount": "Contenido"
+      "contentAmount": "Contenido",
+      "retroactive": "Con fecha pasada · registrado el {when}"
     },
     "reason": {
       "apertura": "Apertura",
@@ -6587,7 +6596,29 @@
       "registeredBy": "Cargado por",
       "actions": "Acciones"
     },
-    "quantityPositive": "La cantidad va en positivo; para restar usa Sale."
+    "quantityPositive": "La cantidad va en positivo; para restar usa Sale.",
+    "effectiveOn": "Fecha efectiva {day}",
+    "recordedOn": "registrado {when}",
+    "backdate": {
+      "banner": "Ajuste con fecha pasada: cambia los saldos de cada día desde esa fecha hasta hoy. Revisa la vista previa antes de guardar.",
+      "previewing": "Calculando la vista previa…",
+      "savedBackdated": "Con fecha efectiva {day}.",
+      "previewTitle": "Vista previa del ajuste con fecha pasada",
+      "previewHelp": "Desde el {day} ({n, plural, one {# día} other {# días}} atrás) hasta hoy, en viales cerrados.",
+      "effectiveDay": "Ese día",
+      "today": "Hoy",
+      "opening": "Inicial de {month}",
+      "negativeDays": "Quedan en negativo: {days}",
+      "laterCounts": "Hay conteos físicos posteriores: {days}",
+      "closings": "Cierres posteriores: {n, plural, one {#} other {#}}.",
+      "showDays": "Ver día a día ({n})",
+      "hideDays": "Ocultar día a día",
+      "col": {
+        "date": "Día",
+        "before": "Antes",
+        "after": "Después"
+      }
+    }
   },
   "legacyLabel": {
     "correct": "Corregir numeración",
@@ -6826,5 +6857,42 @@
       "cellFree": "{day} · {time}: {n} libres",
       "cellBooked": "{day} · {time}: {n} ocupados"
     }
+  },
+  "inventory": {
+    "backdate": {
+      "future": "No se puede ajustar un día futuro.",
+      "forbidden": "No tienes permiso para ajustar con fecha pasada en este centro.",
+      "tooOld": "Esa fecha está fuera de la ventana permitida ({maxDays} días).",
+      "reasonRequired": "Un ajuste con fecha pasada necesita un motivo.",
+      "negativeBalance": "Ese ajuste deja algún día en negativo.",
+      "invalidDate": "La fecha no es válida.",
+      "invalidSettings": "La configuración no es válida.",
+      "written": "Ajuste registrado con fecha pasada."
+    }
+  },
+  "inventoryBackdateSettings": {
+    "title": "Ajustes de inventario con fecha pasada",
+    "pageHelp": "Hasta cuántos días atrás se puede fechar un ajuste y qué pasa si algún día queda en negativo, por centro.",
+    "help": "Se aplica a ajustes, al «Ajustar» de Existencias y al conteo físico.",
+    "none": "Este centro no tiene configuración.",
+    "maxDays": "Días hacia atrás permitidos",
+    "maxDaysHint": "De 0 a 366. 0 = no se permiten fechas pasadas.",
+    "maxDaysInvalid": "Escribe un número entero de 0 a 366.",
+    "negativeBalance": "Si algún día queda en negativo",
+    "policy": {
+      "block": "Bloquear",
+      "confirm": "Pedir confirmación",
+      "allow": "Permitir"
+    },
+    "policyHint": {
+      "block": "No se guarda.",
+      "confirm": "Se guarda tras confirmar.",
+      "allow": "Se guarda sin preguntar."
+    },
+    "save": "Guardar",
+    "saved": "Configuración guardada",
+    "noChanges": "No hay cambios.",
+    "readOnly": "Solo lectura: cambiarla requiere el permiso inventory.backdate_settings.",
+    "daysShort": "{n} días"
   }
 }

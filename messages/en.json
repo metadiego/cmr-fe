@@ -734,7 +734,8 @@
         "schedulingBridge": "Google Sheets bridge",
         "pacientes": "Patients",
         "numeracion": "Numbering",
-        "caja": "Cash"
+        "caja": "Cash",
+        "inventario": "Inventory"
       },
       "frontdesk_autopresente": "Auto check-in on payment",
       "auto_present_follow_up": "Auto check-in on follow-up",
@@ -758,7 +759,8 @@
       "numeracion_devoluciones": "Returns",
       "agenda_blocking_rules": "What blocks booking",
       "cash_count_mode": "How cash is counted",
-      "cash_close_enabled": "Show «Process close»"
+      "cash_close_enabled": "Show «Process close»",
+      "inventory_backdate": "Backdated inventory adjustments"
     },
     "agendaRules": {
       "title": "What blocks booking",
@@ -1601,7 +1603,8 @@
     "calendarAbsenceReview": "Absences to review",
     "paymentMethods": "Payment methods",
     "inventory_daily_kardex": "Daily kardex",
-    "inventory_adjustments": "Adjustments"
+    "inventory_adjustments": "Adjustments",
+    "inventoryBackdate": "Backdated adjustments"
   },
   "admin": {
     "title": "Administration",
@@ -6234,7 +6237,8 @@
       "addKitComponent": "Add a component to the kit of an issued invoice",
       "adminGrant": "Give full access (Administrator role)",
       "adminRevoke": "Take away full access (Administrator role)",
-      "modifyPastCashDay": "You're about to change the {day} cash sheet"
+      "modifyPastCashDay": "You're about to change the {day} cash sheet",
+      "backdatedInventoryAdjustment": "Backdated inventory adjustment"
     },
     "effect": {
       "returnsPackageSession": "Returns the session to the package",
@@ -6250,7 +6254,11 @@
       "kitComponentAdded": "The component is added to the kit and its sessions are created; the invoice amount does not change.",
       "fullAccessEveryCenter": "This person will be able to do everything, in every center",
       "loosesFullAccess": "This person loses full access",
-      "pastCashDayChanges": "That day's signatures will ask to acknowledge the correction"
+      "pastCashDayChanges": "That day's signatures will ask to acknowledge the correction",
+      "backdateRewritesBalances": "Changes every day's balance from that date until today.",
+      "backdateClosedPeriod": "Touches a period that is already closed.",
+      "backdateAfterCount": "There are physical counts after that date.",
+      "backdateNegativeBalance": "Some day will go negative."
     },
     "policies": {
       "title": "Confirmations",
@@ -6467,7 +6475,8 @@
       "notes": "Note",
       "content": "(content)",
       "vials": "Vials",
-      "contentAmount": "Content"
+      "contentAmount": "Content",
+      "retroactive": "Backdated · recorded {when}"
     },
     "reason": {
       "apertura": "Opening",
@@ -6587,7 +6596,29 @@
       "registeredBy": "Loaded by",
       "actions": "Actions"
     },
-    "quantityPositive": "The quantity is always positive; to subtract, use Out."
+    "quantityPositive": "The quantity is always positive; to subtract, use Out.",
+    "effectiveOn": "Effective {day}",
+    "recordedOn": "recorded {when}",
+    "backdate": {
+      "banner": "Backdated adjustment: it changes every day's balance from that date until today. Check the preview before saving.",
+      "previewing": "Working out the preview…",
+      "savedBackdated": "Effective {day}.",
+      "previewTitle": "Backdated adjustment preview",
+      "previewHelp": "From {day} ({n, plural, one {# day} other {# days}} ago) until today, in sealed vials.",
+      "effectiveDay": "That day",
+      "today": "Today",
+      "opening": "{month} opening",
+      "negativeDays": "Go negative: {days}",
+      "laterCounts": "There are later physical counts: {days}",
+      "closings": "Later closings: {n, plural, one {#} other {#}}.",
+      "showDays": "Show day by day ({n})",
+      "hideDays": "Hide day by day",
+      "col": {
+        "date": "Day",
+        "before": "Before",
+        "after": "After"
+      }
+    }
   },
   "legacyLabel": {
     "correct": "Fix numbering",
@@ -6826,5 +6857,42 @@
       "cellFree": "{day} · {time}: {n} free",
       "cellBooked": "{day} · {time}: {n} booked"
     }
+  },
+  "inventory": {
+    "backdate": {
+      "future": "A future day cannot be adjusted.",
+      "forbidden": "You are not allowed to backdate adjustments in this center.",
+      "tooOld": "That date is outside the allowed window ({maxDays} days).",
+      "reasonRequired": "A backdated adjustment needs a reason.",
+      "negativeBalance": "That adjustment leaves some day negative.",
+      "invalidDate": "The date is not valid.",
+      "invalidSettings": "The settings are not valid.",
+      "written": "Adjustment recorded with a past date."
+    }
+  },
+  "inventoryBackdateSettings": {
+    "title": "Backdated inventory adjustments",
+    "pageHelp": "How many days back an adjustment may be dated and what happens if a day goes negative, per center.",
+    "help": "Applies to adjustments, Stock's «Adjust» and the physical count.",
+    "none": "This center has no settings.",
+    "maxDays": "Days back allowed",
+    "maxDaysHint": "0 to 366. 0 = past dates not allowed.",
+    "maxDaysInvalid": "Type a whole number from 0 to 366.",
+    "negativeBalance": "If a day goes negative",
+    "policy": {
+      "block": "Block",
+      "confirm": "Ask for confirmation",
+      "allow": "Allow"
+    },
+    "policyHint": {
+      "block": "It is not saved.",
+      "confirm": "It is saved after confirming.",
+      "allow": "It is saved without asking."
+    },
+    "save": "Save",
+    "saved": "Settings saved",
+    "noChanges": "No changes.",
+    "readOnly": "Read only: changing it needs the inventory.backdate_settings permission.",
+    "daysShort": "{n} days"
   }
 }

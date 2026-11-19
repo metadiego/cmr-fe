@@ -8,6 +8,7 @@ import { renumberLegacy, type RenumberRow } from "@/lib/api/legacy-numbering";
 import { changedCount, renumberCheck } from "@/lib/frontdesk/legacy-numbering-missing";
 import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
+import { useSettled } from "@/hooks/use-settled";
 import { FormDialog } from "@/components/kit/form-dialog";
 import { Field } from "@/components/kit/field";
 import { RecordTable, Td, Th } from "@/components/kit/panel";
@@ -139,14 +140,4 @@ export function LegacyRenumberDialog({
       )}
     </FormDialog>
   );
-}
-
-/** `value` once it has stopped changing for `ms`. */
-function useSettled(value: string, ms: number): string {
-  const [settled, setSettled] = React.useState(value);
-  React.useEffect(() => {
-    const h = setTimeout(() => setSettled(value), ms);
-    return () => clearTimeout(h);
-  }, [value, ms]);
-  return settled;
 }
