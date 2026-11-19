@@ -209,6 +209,7 @@ export function ReportTableDialog<R, C extends string>({
                         cols={visibleColumns}
                         rows={rows}
                         text={(r, c) => cellText(r, c as C)}
+                        columnLabel={(c) => columnLabel(c as C)}
                         filters={filters}
                         onChange={(c, v) => setFilters((f) => ({ ...f, [c]: v }))}
                       />

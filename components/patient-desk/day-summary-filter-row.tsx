@@ -11,16 +11,22 @@ const ALL = "__all__"
 
 // The filter row under the summary's headers (owner 18-nov-2026): a box per typed column, a list of the
 // day's values for the rest. Screen only: the print carries the result and a «Filtrado:» line instead.
+// `columnLabel` comes from the caller (ReportTableDialog): this row is shared by every report built on
+// that shell, each with its own column set and translation namespace, so it must never resolve a
+// column's name itself — doing that once broke the doctor-summary's filter labels (col.doctor etc. do
+// not exist under patientDesk.daySummary, where this component used to look them up).
 export function DaySummaryFilterRow<R>({
   cols,
   rows,
   text,
+  columnLabel,
   filters,
   onChange,
 }: {
   cols: readonly string[]
   rows: readonly R[]
   text: (r: R, col: string) => string
+  columnLabel: (col: string) => string
   filters: Readonly<Record<string, string>>
   onChange: (col: string, value: string) => void
 }) {
@@ -35,12 +41,12 @@ export function DaySummaryFilterRow<R>({
               value={filters[c] ?? ""}
               onChange={(e) => onChange(c, e.target.value)}
               placeholder={t("filter.contains")}
-              aria-label={t("filter.by", { col: t(`col.${c}`) })}
+              aria-label={t("filter.by", { col: columnLabel(c) })}
               className="h-7 text-xs font-normal"
             />
           ) : (
             <Select value={filters[c] || ALL} onValueChange={(v) => onChange(c, v === ALL ? "" : v)}>
-              <SelectTrigger size="sm" className="h-7 w-full text-xs font-normal" aria-label={t("filter.by", { col: t(`col.${c}`) })}>
+              <SelectTrigger size="sm" className="h-7 w-full text-xs font-normal" aria-label={t("filter.by", { col: columnLabel(c) })}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
