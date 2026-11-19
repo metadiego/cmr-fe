@@ -18,6 +18,30 @@ export function clampSessions(n: number): number {
 }
 
 /** Sessions left on the patient's package for this service when known (> 0), else 4; always 2–20. */
+/** The sessions stepper: one up or down inside MIN–MAX. Below MIN (rows dropped) minus does nothing. */
+export function stepSessions(current: number, delta: 1 | -1): number {
+  if (delta < 0) return current <= MIN_SESSIONS ? current : clampSessions(current - 1);
+  return current >= MAX_SESSIONS ? current : Math.max(MIN_SESSIONS, current + 1);
+}
+
+/** How the series stands at a glance: free rows, full ones (overbook) and blocked ones (fix or drop). */
+export function seriesHealth(rows: ReadonlyArray<{ status: "free" | "full" | "blocked" }>): {
+  free: number;
+  full: number;
+  blocked: number;
+} {
+  const h = { free: 0, full: 0, blocked: 0 };
+  for (const r of rows) h[r.status]++;
+  return h;
+}
+
+/** First and last date of the series (ISO days sort as text), for "from … to …". */
+export function seriesSpan(dates: readonly string[]): { first: string; last: string } | null {
+  if (dates.length === 0) return null;
+  const sorted = [...dates].sort();
+  return { first: sorted[0], last: sorted[sorted.length - 1] };
+}
+
 export function defaultSessions(sessionsLeft?: number | null): number {
   return sessionsLeft != null && sessionsLeft > 0 ? clampSessions(sessionsLeft) : DEFAULT_SESSIONS;
 }
@@ -85,6 +109,8 @@ export interface TimeOption {
   time: string; // HH:mm
   full: boolean;
   disabled: boolean;
+  /** Free places at that time (0 when full, or for the row's own time when the day does not offer it). */
+  free: number;
 }
 
 /**
@@ -96,9 +122,14 @@ export function rowTimeOptions(day: DaySlots | null | undefined, current: string
   const cur = normalizeTime(current);
   const out: TimeOption[] = (day?.slots ?? [])
     .filter((s) => s.state !== "unavailable")
-    .map((s) => ({ time: normalizeTime(s.time), full: s.state === "full" || s.free <= 0, disabled: false }));
+    .map((s) => ({
+      time: normalizeTime(s.time),
+      full: s.state === "full" || s.free <= 0,
+      disabled: false,
+      free: Math.max(0, s.free),
+    }));
   if (!out.some((o) => o.time === cur)) {
-    out.push({ time: cur, full: false, disabled: true });
+    out.push({ time: cur, full: false, disabled: true, free: 0 });
     out.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0));
   }
   return out;

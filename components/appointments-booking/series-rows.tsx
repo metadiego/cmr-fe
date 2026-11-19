@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import type { SeriesDay } from "@/hooks/use-series-availability";
@@ -52,6 +53,7 @@ export function SeriesRows({
   onDrop: (index: number) => void;
 }) {
   const t = useTranslations("appointmentsBooking.series");
+  const tDay = useTranslations("appointmentsBooking.day");
   const dayLabel = useDayLabel();
   const [refused, setRefused] = React.useState<{ index: number; reason: DateRejection } | null>(null);
   const today = todayPR();
@@ -64,19 +66,20 @@ export function SeriesRows({
   };
 
   return (
-    <ol className="flex flex-col gap-1.5" aria-label={t("dates")}>
-      {rows.map((r) => {
+    <ol className="divide-y rounded-xl border bg-card" aria-label={t("dates")}>
+      {rows.map((r, i) => {
         const day = days[r.date];
         const loading = checking || day === undefined;
         const failed = day === "error";
         const options = rowTimeOptions(day === "error" ? null : day, r.time);
         const blocked = !loading && !failed && r.status === "blocked";
+        // Free is the normal case: a quiet green dot. Only what needs a look gets a coloured pill.
         const chip = loading
           ? { label: t("checking"), tone: "text-muted-foreground" }
           : failed
             ? { label: t("checkFailed"), tone: "bg-destructive/10 text-destructive" }
             : r.status === "free"
-              ? { label: t("statusFree"), tone: "bg-success text-success-foreground" }
+              ? { label: t("statusFree"), tone: "text-success-foreground", dot: true }
               : r.status === "full"
                 ? { label: t("statusFull"), tone: "bg-warning text-warning-foreground" }
                 : {
@@ -95,42 +98,61 @@ export function SeriesRows({
         return (
           <li
             key={`${r.index}|${r.date}`}
-            className={cn(
-              "flex flex-col gap-1 rounded-md border px-2 py-1.5 text-sm",
-              (blocked || failed) && "border-destructive/50 bg-destructive/5",
-            )}
+            className={cn("flex flex-col gap-1 px-3 py-1.5 text-sm", (blocked || failed) && "bg-destructive/5")}
           >
-            <div className="flex items-center gap-2">
-              <div className="min-w-0 flex-1">
-                <DatePicker
-                  value={r.date}
-                  onChange={(d) => pickDate(r.index, d)}
-                  min={today}
-                  disabled={disabled}
-                  displayFormat="dayWeekdayShort"
-                  aria-label={t("changeDate", { date: dayLabel(r.date) })}
-                  title={t("changeDate", { date: dayLabel(r.date) })}
-                  className="h-7 w-auto max-w-full px-2 font-medium"
-                />
-              </div>
-              <select
-                aria-label={t("time")}
-                className="h-7 rounded-md border border-input bg-background px-1 text-sm tabular-nums outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                value={r.time}
-                disabled={disabled || loading}
-                onChange={(e) => onTime(r.index, e.target.value)}
+            {/* One line per date: number, day (opens the calendar), time, status, drop. */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="w-5 shrink-0 text-xs font-medium text-muted-foreground tabular-nums">{i + 1}</span>
+              <DatePicker
+                variant="button"
+                displayFormat="dayWeekdayShort"
+                value={r.date}
+                onChange={(d) => pickDate(r.index, d)}
+                min={today}
+                disabled={disabled}
+                aria-label={t("changeDate", { date: dayLabel(r.date) })}
+                title={t("changeDate", { date: dayLabel(r.date) })}
+                className="h-8 w-36 border-transparent bg-transparent px-2 font-medium shadow-none hover:border-input hover:bg-muted/50"
+              />
+              <Select value={r.time} onValueChange={(v) => onTime(r.index, v)} disabled={disabled || loading}>
+                <SelectTrigger
+                  size="sm"
+                  aria-label={t("time")}
+                  className="w-40 border-transparent bg-transparent tabular-nums shadow-none hover:border-input hover:bg-muted/50"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.map((o) => (
+                    <SelectItem key={o.time} value={o.time} disabled={o.disabled}>
+                      {/* Each hour with its free places, like the day panel, so another hour is chosen
+                          knowing what is open that day. */}
+                      <span className="tabular-nums">{shortTime(o.time)}</span>
+                      {!o.disabled && (
+                        <span className={cn("text-xs", o.full ? "text-warning-foreground" : "text-muted-foreground")}>
+                          {o.full ? t("fullShort") : tDay("left", { n: o.free })}
+                        </span>
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span
+                className={cn(
+                  "ml-auto inline-flex items-center gap-1.5 text-xs font-medium",
+                  chip.dot || loading ? "" : "rounded-full px-2 py-0.5",
+                  chip.tone,
+                )}
               >
-                {options.map((o) => (
-                  <option key={o.time} value={o.time} disabled={o.disabled}>
-                    {o.full ? t("fullOption", { time: shortTime(o.time) }) : shortTime(o.time)}
-                  </option>
-                ))}
-              </select>
+                {chip.dot && <span aria-hidden className="size-1.5 rounded-full bg-current" />}
+                {chip.label}
+              </span>
               {canDrop && (
                 <Button
                   type="button"
-                  size="icon-xs"
+                  size="icon-sm"
                   variant="ghost"
+                  className="text-muted-foreground"
                   aria-label={t("remove")}
                   title={t("remove")}
                   disabled={disabled}
@@ -144,25 +166,19 @@ export function SeriesRows({
               )}
             </div>
             {refused?.index === r.index && (
-              <p role="alert" className="text-xs text-destructive">
+              <p role="alert" className="pl-7 text-xs text-destructive">
                 {t(refused.reason === "past" ? "datePast" : refused.reason === "sunday" ? "dateSunday" : "dateTaken")}
               </p>
             )}
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className={cn("rounded px-1.5 py-0.5 text-[11px] font-medium", chip.tone)}>{chip.label}</span>
-              {s && (
-                <button
-                  type="button"
-                  className="text-xs font-medium text-primary hover:underline disabled:opacity-50"
-                  disabled={disabled}
-                  onClick={() => onSuggestion(r.index, s)}
-                >
+            {s && (
+              <div className="pl-7">
+                <Button type="button" size="xs" variant="outline" disabled={disabled} onClick={() => onSuggestion(r.index, s)}>
                   {s.date === r.date
                     ? t("useTimeInstead", { time: shortTime(s.time) })
                     : t("useDateInstead", { date: `${dayLabel(s.date)} · ${shortTime(s.time)}` })}
-                </button>
-              )}
-            </div>
+                </Button>
+              </div>
+            )}
           </li>
         );
       })}

@@ -357,7 +357,7 @@ export function BookingScreen() {
     },
   };
 
-  // ---- Service booking: the form under the day's times for the picked time (never while moving: the
+  // ---- Service booking: a dialog for the picked time, like the medical one (never while moving: the
   // calendar shows it only then). It books in the calendar's center; a patient chosen in the form
   // becomes the screen's patient once something is booked.
   const serviceForm =

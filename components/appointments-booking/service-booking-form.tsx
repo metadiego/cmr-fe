@@ -5,8 +5,10 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { SegmentedControl } from "@/components/kit/segmented-control";
 import { PacienteSelect } from "@/components/citas/paciente-select";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { SeriesRows, useDayLabel } from "@/components/appointments-booking/series-rows";
@@ -22,6 +24,9 @@ import {
   dropRow,
   groupByTime,
   notCreated,
+  seriesHealth,
+  seriesSpan,
+  stepSessions,
   overridesOf,
   setRowTime,
   suggestionExclusions,
@@ -43,16 +48,15 @@ import type { Paciente } from "@/lib/api/pacientes";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { warningText } from "@/lib/frontdesk/avisos";
 
-// The service booking form under the day's times (spec "Booking form", Service): the patient (the
-// screen's, or a search here), then Book for the picked day and time, or "Repeat weekly" → every 1|2
-// weeks, N sessions, one row per date with its own time, status and the planner's suggestion. A full
+// The service booking dialog, opened by picking a time in the day panel (spec "Booking form", Service),
+// the same way a medical time opens the appointment dialog: the patient (the
+// screen's, or a search here), then Book for the picked day and time; or Frequency = every week / every
+// 2 weeks with an N-sessions stepper, one row per date with its own time, status and the planner's suggestion. A full
 // time is bookable (overbook) with a warning; a blocked row (holiday, closed, already has the service
 // that day) must be fixed or dropped first. A series goes out as one bulk request per distinct time.
 // Once a row is edited (time, date, suggestion, drop, "+ Add date") the rows are that explicit list;
-// changing "every" or the number of sessions regenerates it from start + every + count.
+// changing the frequency or the number of sessions regenerates it from start + every + count.
 
-const SELECT_CLASS =
-  "h-8 rounded-md border border-input bg-background px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export interface ServiceBooked {
   patient: Paciente;
@@ -178,7 +182,22 @@ export function ServiceBookingForm({
   const seriesOk = rows.length > 0 && allLoaded && !anyFailed && canBookSeries(rows);
   const fullRows = rows.filter((r) => r.status === "full").length;
 
+  const span = seriesSpan(rows.map((r) => r.date));
+  const health = seriesHealth(rows);
   const ready = !!patient && canBook && !busy && (!repeat || seriesOk);
+  // What keeps «Agendar» grey, said above it (forms kit): the patient is a missing field; no permission
+  // or a series that cannot go yet is a reason.
+  const missing = patient ? [] : [t("series.patient")];
+  const reason =
+    permsReady && !canBook
+      ? t("series.noPermission")
+      : repeat && patient && !seriesOk
+        ? anyFailed
+          ? t("series.checkFailed")
+          : allLoaded
+            ? t("series.fixRed")
+            : t("series.checking")
+        : null;
 
   const bookSingle = async (p: Paciente) => {
     try {
@@ -252,84 +271,125 @@ export function ServiceBookingForm({
   };
 
   return (
-    <div
-      className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3 text-sm"
-      data-slot="service-booking-form"
+    <FormDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onBack();
+      }}
+      size="xl"
+      title={`${serviceName} · ${dayLabel(date)} · ${shortTime(time)}`}
+      onSubmit={book}
+      submitLabel={repeat ? t("series.bookSeries", { n: rows.length }) : t("series.book")}
+      submitting={busy}
+      missing={missing}
+      blocked={!!reason}
+      reason={reason}
     >
-      <p className="font-semibold">
-        {serviceName} · {dayLabel(date)} · {shortTime(time)}
-      </p>
-
-      <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-muted-foreground">{t("series.patient")}</span>
+      <Field label={t("series.patient")} required>
         {screenPatient ? (
-          <span className="font-medium">
+          <span className="block text-sm font-medium">
             {screenPatient.displayName || [screenPatient.firstName, screenPatient.lastName].filter(Boolean).join(" ")}
           </span>
         ) : (
           <PacienteSelect value={localPatient} onChange={setLocalPatient} centerIds={patientCenterIds} />
         )}
         {sessionsLeft != null && sessionsLeft > 0 && (
-          <span className="text-xs text-muted-foreground">{t("typePicker.sessionsLeft", { n: sessionsLeft })}</span>
+          <span className="block text-xs text-muted-foreground">{t("typePicker.sessionsLeft", { n: sessionsLeft })}</span>
+        )}
+      </Field>
+
+      {!repeat && pickedFull && <p className="text-sm text-warning-foreground">{t("series.fullWarning")}</p>}
+
+      {/* How often, in one control: once, every week or every two weeks. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <Field label={t("series.frequency")}>
+          <SegmentedControl
+            ariaLabel={t("series.frequency")}
+            disabled={busy}
+            value={repeat ? String(everyWeeks) : "once"}
+            options={[
+              { value: "once", label: t("series.once") },
+              { value: "1", label: t("series.weekly") },
+              { value: "2", label: t("series.biweekly") },
+            ]}
+            onChange={(v) => {
+              if (v === "once") return setRepeat(false);
+              setRepeat(true);
+              const weeks = v === "2" ? 2 : 1;
+              if (weeks !== everyWeeks) {
+                setEveryWeeks(weeks);
+                setEdits(null);
+              }
+            }}
+          />
+        </Field>
+        {repeat && (
+          <Field label={t("series.sessions")}>
+            <div className="flex h-9 items-center rounded-md border border-input" role="group" aria-label={t("series.sessions")}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-9"
+                aria-label={t("series.fewer")}
+                disabled={busy || items.length <= MIN_SESSIONS}
+                onClick={() => {
+                  setCountChoice(stepSessions(items.length, -1));
+                  setEdits(null);
+                }}
+              >
+                <HugeiconsIcon icon={MinusSignIcon} className="size-4" />
+              </Button>
+              <span className="w-8 text-center text-sm font-medium tabular-nums" aria-live="polite">
+                {items.length}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-9"
+                aria-label={t("series.more")}
+                disabled={busy || items.length >= MAX_SESSIONS}
+                onClick={() => {
+                  setCountChoice(stepSessions(items.length, 1));
+                  setEdits(null);
+                }}
+              >
+                <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
+              </Button>
+            </div>
+          </Field>
         )}
       </div>
 
-      {!repeat && pickedFull && <p className="text-warning-foreground">{t("series.fullWarning")}</p>}
-
-      <div className="flex items-center gap-2">
-        <Checkbox
-          id="service-booking-repeat"
-          checked={repeat}
-          disabled={busy}
-          onCheckedChange={(v) => setRepeat(v === true)}
-        />
-        <Label htmlFor="service-booking-repeat">{t("series.repeatWeekly")}</Label>
-      </div>
-
       {repeat && (
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Label htmlFor="service-booking-every">{t("series.every")}</Label>
-            <select
-              id="service-booking-every"
-              className={SELECT_CLASS}
-              value={everyWeeks}
-              disabled={busy}
-              onChange={(e) => {
-                setEveryWeeks(e.target.value === "2" ? 2 : 1);
-                setEdits(null);
-              }}
-            >
-              {[1, 2].map((n) => (
-                <option key={n} value={n}>
-                  {t("series.everyWeeks", { n })}
-                </option>
-              ))}
-            </select>
-            <Label htmlFor="service-booking-count">{t("series.sessions")}</Label>
-            <select
-              id="service-booking-count"
-              className={SELECT_CLASS}
-              value={items.length}
-              disabled={busy}
-              onChange={(e) => {
-                setCountChoice(Number(e.target.value));
-                setEdits(null);
-              }}
-            >
-              {sessionOptions(items.length).map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-            {edited && <span className="text-xs text-muted-foreground">{t("series.resetsEdits")}</span>}
-          </div>
+        <div className="flex flex-col gap-2 text-sm">
+          {edited && <p className="text-xs text-muted-foreground">{t("series.resetsEdits")}</p>}
 
           {!patient ? (
             <p className="text-muted-foreground">{t("series.pickPatient")}</p>
           ) : (
             <>
+              {span && (
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                  <p className="text-sm font-medium tabular-nums">
+                    {t("series.span", { n: rows.length, from: dayLabel(span.first), to: dayLabel(span.last) })}
+                  </p>
+                  {allLoaded && !anyFailed && (
+                    <p className="text-xs font-medium">
+                      {health.full === 0 && health.blocked === 0 ? (
+                        <span className="text-success-foreground">✓ {t("series.allFree")}</span>
+                      ) : (
+                        <>
+                          {health.blocked > 0 && <span className="text-destructive">{t("series.healthBlocked", { n: health.blocked })}</span>}
+                          {health.blocked > 0 && health.full > 0 && <span className="text-muted-foreground"> · </span>}
+                          {health.full > 0 && <span className="text-warning-foreground">{t("series.healthFull", { n: health.full })}</span>}
+                        </>
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
               <SeriesRows
                 rows={rows}
                 days={series.days}
@@ -371,23 +431,7 @@ export function ServiceBookingForm({
           )}
         </div>
       )}
-
-      {permsReady && !canBook && <p className="text-muted-foreground">{t("series.noPermission")}</p>}
-
-      <div className="flex gap-2">
-        <Button type="button" size="sm" onClick={book} disabled={!ready}>
-          {repeat ? t("series.bookSeries", { n: rows.length }) : t("series.book")}
-        </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={onBack} disabled={busy}>
-          {t("series.back")}
-        </Button>
-      </div>
-    </div>
+    </FormDialog>
   );
 }
 
-/** The sessions select: 2–20, plus the current row count when drops took it below 2. */
-function sessionOptions(current: number): number[] {
-  const range = Array.from({ length: MAX_SESSIONS - MIN_SESSIONS + 1 }, (_, i) => MIN_SESSIONS + i);
-  return current < MIN_SESSIONS ? [current, ...range] : range;
-}

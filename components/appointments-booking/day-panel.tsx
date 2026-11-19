@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 // The selected day's times: Morning and Afternoon groups in a 4-column grid. Open times are green with
 // "{n} left"; full ones are dashed grey and still clickable (overbook); unavailable ones are dashed,
 // inert, and say why on hover. Below the grid: the "Move here?" box while moving an appointment, or the
-// picked-time slot (`children`: the service form, or a medical no-permission note). Scrolls inside itself.
+// picked-time slot (`children`: the service booking dialog, or a medical no-permission note). Scrolls inside itself.
 // The Day view shows it as the main area (`large`): bigger times, more per row, and "Closed" on a closed
 // day (`closedLabel`), since its ‹ › walks every day.
 
