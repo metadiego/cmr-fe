@@ -45,6 +45,11 @@ export type FacturaPago = {
   id?: string;
   paymentMethodId?: string | null;
   formaPagoNombre?: string | null; // ya resuelto por el BE. OJO: clave NO está en el mapa api-ingles (sigue en español)
+  paymentMethodName?: string | null; // what v2 actually sends instead (verified live 19-nov)
+  // Who charged it (staff id / name): only once the BE projects them; absent today (19-nov). Handoff
+  // cambiar-usuario-de-pago-y-devolucion.
+  userId?: string | null;
+  userName?: string | null;
   amount: number;
   reference?: string | null;
   type?: "pago" | "reembolso" | string; // pago = abono de la factura; reembolso = de una devolución

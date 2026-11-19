@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PrinterIcon, ArrowLeft01Icon, Cancel01Icon, InvoiceIcon } from "@hugeicons/core-free-icons";
+import { PrinterIcon, ArrowLeft01Icon, Cancel01Icon, InvoiceIcon, Edit02Icon } from "@hugeicons/core-free-icons";
 
 import { anularDevolucion, getFormasPago, type FormaPago } from "@/lib/api/facturas";
 import { getRefundDetail, type RefundDetail } from "@/lib/api/refund-detail";
-import { getProfiles, type Perfil } from "@/lib/api/profiles";
+import { listPersonalAll } from "@/lib/api/personal";
+import { reassignRefundUser } from "@/lib/api/reassign-user";
+import { ReassignUserDialog } from "@/components/facturacion/reassign-user-dialog";
 import { invoiceDetailHref } from "@/lib/facturacion/invoice-clinics";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
@@ -47,12 +49,14 @@ export default function DevolucionDetallePage() {
   const { state, refresh } = useResource<RefundDetail>(() => getRefundDetail(id, devId, centro), [id, devId, centro]);
   const formasRes = useResource<FormaPago[]>(() => getFormasPago(centro), [centro]);
   const formas = formasRes.state.kind === "ok" ? formasRes.state.data : [];
-  const perfilesRes = useResource<Perfil[]>(() => getProfiles(), []);
-  const perfiles = perfilesRes.state.kind === "ok" ? perfilesRes.state.data : [];
+  // «Atendido por» picks STAFF (refunds.user_id → staff.id); inactive ones are fetched so the current one shows.
+  const staffRes = useResource(() => listPersonalAll({ includeInactive: true }, centro), [centro]);
+  const staff = staffRes.state.kind === "ok" ? staffRes.state.data : [];
 
   // Bumped on every save: part of the editor body's `key`, so it remounts and re-seeds every field
   // from the freshly refetched detail instead of keeping stale typed-over state.
   const [saveCount, setSaveCount] = React.useState(0);
+  const [reassign, setReassign] = React.useState(false);
   function onSaved() {
     setSaveCount((n) => n + 1);
     refresh();
@@ -124,7 +128,26 @@ export default function DevolucionDetallePage() {
             )}
             <span>·</span>
             <span>{refund.patient?.displayName || "—"}</span>
+            <span>·</span>
+            <span className="inline-flex items-center gap-1">
+              {t("atendidoPor")}: <span className="text-foreground">{refund.userName || "—"}</span>
+              {refund.status === "activa" && can("factura.refund.repair") && (
+                <Button variant="ghost" size="icon" className="size-6" aria-label={tRoot("reassignUser.title")} title={tRoot("reassignUser.title")} onClick={() => setReassign(true)}>
+                  <HugeiconsIcon icon={Edit02Icon} className="size-3.5" />
+                </Button>
+              )}
+            </span>
           </p>
+          <ReassignUserDialog
+            open={reassign}
+            onOpenChange={setReassign}
+            recordId={refund.id}
+            description={`${refund.displayNumber ?? ""} · ${refund.userName || "—"}`}
+            currentUserId={refund.userId}
+            centerId={centro}
+            save={(userId) => reassignRefundUser(id, devId, userId, centro)}
+            onDone={onSaved}
+          />
 
           {refund.status === "anulada" && (
             <p className="text-sm text-destructive">
@@ -139,12 +162,12 @@ export default function DevolucionDetallePage() {
               <TabsTrigger value="history">{t("editor.tabHistory")}</TabsTrigger>
             </TabsList>
             <TabsContent value="editor">
-              {formasRes.state.kind !== "loading" && perfilesRes.state.kind !== "loading" && (
+              {formasRes.state.kind !== "loading" && staffRes.state.kind !== "loading" && (
                 <RefundEditorBody
                   key={`${refund.id}|${saveCount}`}
                   detail={refund}
                   formas={formas}
-                  perfiles={perfiles}
+                  staff={staff}
                   invoiceId={id}
                   devId={devId}
                   centro={centro}

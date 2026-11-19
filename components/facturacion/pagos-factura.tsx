@@ -33,7 +33,9 @@ import { MissingHint } from "@/components/kit/missing-hint";
 import { useConfirm } from "@/components/kit/confirm-host";
 import { useSubmit } from "@/components/kit/use-submit";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Edit02Icon, Delete02Icon, Tick02Icon, Cancel01Icon, Add01Icon } from "@hugeicons/core-free-icons";
+import { Edit02Icon, Delete02Icon, Tick02Icon, Cancel01Icon, Add01Icon, UserSwitchIcon } from "@hugeicons/core-free-icons";
+import { reassignPaymentUser } from "@/lib/api/reassign-user";
+import { ReassignUserDialog } from "@/components/facturacion/reassign-user-dialog";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -72,6 +74,7 @@ export function PagosFactura({
 }) {
   const t = useTranslations("pagosFactura");
   const router = useRouter();
+  const tRoot = useTranslations();
   const { can } = useCan();
   // La puerta REST de editar/anular un pago es `factura.update`; el estado se comprueba en el server:
   // en borrador cualquiera que puede tocar la factura corrige su propio abono; ya emitida exige
@@ -79,6 +82,9 @@ export function PagosFactura({
   const puedeEditar = can("factura.update") && (esBorrador || can("factura.pago.anular"));
 
   const [editId, setEditId] = React.useState<string | null>(null);
+  // «Cambiar usuario» (cmr-be #644): who charged it, in one step, same gate as editing (`factura.update`).
+  const puedeReasignar = can("factura.update");
+  const [reasignar, setReasignar] = React.useState<FacturaPago | null>(null);
   const [agregando, setAgregando] = React.useState(false);
   const pagado = saldo <= 0.001;
   // Total = lo abonado + lo que falta. Sirve de tope: un abono no puede hacer que lo abonado exceda el total.
@@ -136,10 +142,24 @@ export function PagosFactura({
                 pastCashDay={pastCashDay}
                 onEdit={() => setEditId(p.id ?? null)}
                 onAnular={() => onAnular(p)}
+                onReassign={puedeReasignar && p.type !== "reembolso" && p.id ? () => setReasignar(p) : undefined}
               />
             ),
           )}
         </ul>
+      )}
+
+      {reasignar?.id && (
+        <ReassignUserDialog
+          open={!!reasignar}
+          onOpenChange={(v) => !v && setReasignar(null)}
+          recordId={reasignar.id}
+          description={`${formaPagoLabel(tRoot, formas.find((f) => f.id === reasignar.paymentMethodId)?.slug, reasignar.formaPagoNombre ?? reasignar.paymentMethodName)} · ${money(reasignar.amount)}`}
+          currentUserId={reasignar.userId}
+          centerId={centro}
+          save={(userId) => reassignPaymentUser(id, reasignar.id!, userId, centro)}
+          onDone={() => void run(async () => {})}
+        />
       )}
 
       {/* Estado del saldo, siempre a la vista para no confundir "Total" con "lo que falta":
@@ -206,6 +226,7 @@ function PagoViewRow({
   pastCashDay,
   onEdit,
   onAnular,
+  onReassign,
 }: {
   pago: FacturaPago;
   formas: FormaPago[];
@@ -214,6 +235,8 @@ function PagoViewRow({
   pastCashDay?: { day: string } | null;
   onEdit: () => void;
   onAnular: () => void;
+  /** «Cambiar usuario»; absent = not offered (no permission, or a refund's reimbursement). */
+  onReassign?: () => void;
 }) {
   const t = useTranslations("pagosFactura");
   const tRoot = useTranslations();
@@ -222,7 +245,7 @@ function PagoViewRow({
   const fecha = formatFechaSolo(pago.date);
   // El pago sólo trae `formaPagoNombre` (español); resolvemos la `clave` por `paymentMethodId` para traducir.
   const clave = formas.find((f) => f.id === pago.paymentMethodId)?.slug;
-  const label = formaPagoLabel(tRoot, clave, pago.formaPagoNombre);
+  const label = formaPagoLabel(tRoot, clave, pago.formaPagoNombre ?? pago.paymentMethodName);
 
   return (
     <li className="flex items-center gap-2 rounded-lg bg-muted/30 px-2.5 py-1.5 text-sm">
@@ -232,12 +255,27 @@ function PagoViewRow({
         {(fecha || pago.reference) && (
           <span className="block truncate text-xs text-muted-foreground">
             {pago.reference ? `${pago.reference} · ` : ""}{fecha}
+            {pago.userName ? ` · ${pago.userName}` : ""}
           </span>
         )}
       </span>
       <span className={"shrink-0 tabular-nums font-medium " + (esReembolso ? "text-destructive" : "")}>
         {esReembolso ? "−" : ""}{money(pago.amount)}
       </span>
+      {onReassign && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-7 shrink-0"
+          disabled={busy || !!pago.pastDayLocked}
+          title={pago.pastDayLocked ? tRoot("cash.pastDay.locked", { day: pastCashDay?.day ?? "" }) : tRoot("reassignUser.title")}
+          aria-label={tRoot("reassignUser.title")}
+          onClick={onReassign}
+        >
+          <HugeiconsIcon icon={UserSwitchIcon} className="size-3.5" />
+        </Button>
+      )}
       {puedeEditar && (() => {
         // BE PR #582-583: este pago toca el cuadre de un día pasado ya cerrado — ni anular ni
         // corregir, aunque la factura sea de hoy. Handoff .personal/handoff-bloqueo-dias-pasados.md.

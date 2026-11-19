@@ -2742,7 +2742,9 @@
       "byDelivery": "on delivery",
       "compNoReturnable": "not individually returnable",
       "returnOnlyIssued": "Only issued invoices can be returned. This invoice is not issued.",
-      "netExceeds": "The refund cannot exceed the invoice total ({total})."
+      "netExceeds": "The refund cannot exceed the invoice total ({total}).",
+      "legacyRoundingAdjustment": "Legacy rounding adjustment: −{amount}",
+      "returnDoneRounded": "Return recorded (rounding adjustment {amount})"
     },
     "columns": {
       "numero": "No.",
@@ -4220,6 +4222,9 @@
       "componentNeedsAmount": "Enter the component's amount",
       "reimbursementMismatch": "The reimbursements don't add up to the refunded amount",
       "blocked": "This center does not allow saving this change"
+    },
+    "reassign": {
+      "staffNotActive": "That person is not active."
     }
   },
   "patientMerge": {
@@ -6605,6 +6610,22 @@
     "rangeDates": "«From» cannot be after «To».",
     "previewing": "Working out the preview…",
     "nothingToChange": "With these values no session changes."
+  },
+  "reassignUser": {
+    "action": "Change user",
+    "title": "Change user",
+    "done": "User changed to {name}",
+    "user": "User",
+    "pick": "Pick the person",
+    "hint": "Moves it to that person in one step, nothing voided; the cash sheet follows.",
+    "same": "It is already under that person.",
+    "loadingStaff": "Loading staff…",
+    "staffFailed": "Could not load the staff."
+  },
+  "payment": {
+    "reassign": {
+      "notActive": "A voided payment keeps who made it."
+    }
   },
   "appointmentsBooking": {
     "title": "Appointments",

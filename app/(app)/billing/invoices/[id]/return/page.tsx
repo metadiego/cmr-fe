@@ -12,6 +12,7 @@ import {
   getFactura,
   getFormasPago,
   getPrecioBase,
+  getPoliticaDevolucion,
   devolverFactura,
   type FacturaConItems,
   type FacturaItem,
@@ -19,6 +20,7 @@ import {
   type DevolverPayload,
 } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
+import { legacyRefundCheck, toleranceFrom } from "@/lib/factura/legacy-refund-rounding";
 import { toastError, isRateLimited } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -291,7 +293,17 @@ function DevolverForm({
     compSelDe(it).forEach((c) => (x += compRefund(it, c)));
     return s + x;
   }, 0);
-  const excedeTotal = neto > n(factura.total) + 0.001;
+  // A legacy invoice's own rounding (a cent or two) does not block: the BE trims it (cmr-be #643).
+  const policy = useResource(() => getPoliticaDevolucion(id, centro), [id, centro]);
+  const redondeo = legacyRefundCheck({
+    net: neto,
+    cap: n(factura.total),
+    legacy: !!factura.legacyNumber,
+    everyLineHasAmount: seleccion.every((it) => lineSel(it) && !!precio[it.id]?.trim() && compSelDe(it).length === 0),
+    largestLine: Math.max(0, ...seleccion.map((it) => (lineSel(it) ? refundDe(it) : 0))),
+    tolerance: toleranceFrom(policy.state.kind === "ok" ? policy.state.data.config : null),
+  });
+  const excedeTotal = redondeo.exceeds;
 
   // precio_base: trae los precios base de referencia de los productos de la factura.
   React.useEffect(() => {
@@ -327,8 +339,9 @@ function DevolverForm({
           };
         }),
       };
-      await devolverFactura(id, payload, centro);
-      toast.success(t("returnDone"));
+      const out = (await devolverFactura(id, payload, centro)) as { roundingAdjustment?: number };
+      const adj = Number(out?.roundingAdjustment ?? 0);
+      toast.success(adj > 0 ? t("returnDoneRounded", { amount: money(adj) }) : t("returnDone"));
       router.push(backHref);
     } catch (err) {
       toastError(err, tRoot);
@@ -446,8 +459,11 @@ function DevolverForm({
         <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{neto >= 0 ? t("netRefund") : t("netOwed")}</span>
-            <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-success-foreground" : "text-destructive")}>{money(Math.abs(neto))}</span>
+            <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-success-foreground" : "text-destructive")}>{money(Math.abs(redondeo.net))}</span>
           </div>
+          {redondeo.adjustment > 0 && (
+            <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("legacyRoundingAdjustment", { amount: money(redondeo.adjustment) })}</p>
+          )}
           {excedeTotal && (
             <p className="mt-2 text-xs text-destructive">{t("netExceeds", { total: money(n(factura.total)) })}</p>
           )}

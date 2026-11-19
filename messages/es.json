@@ -2742,7 +2742,9 @@
       "byDelivery": "a la entrega",
       "compNoReturnable": "no devolvible individualmente",
       "returnOnlyIssued": "Solo se pueden devolver facturas emitidas. Esta factura no está emitida.",
-      "netExceeds": "El reembolso no puede superar el total de la factura ({total})."
+      "netExceeds": "El reembolso no puede superar el total de la factura ({total}).",
+      "legacyRoundingAdjustment": "Ajuste de redondeo del legado: −{amount}",
+      "returnDoneRounded": "Devolución registrada (ajuste de redondeo {amount})"
     },
     "columns": {
       "numero": "N.º",
@@ -4220,6 +4222,9 @@
       "componentNeedsAmount": "Escribe el monto del componente",
       "reimbursementMismatch": "Los reembolsos no suman el monto devuelto",
       "blocked": "El centro no permite guardar este cambio"
+    },
+    "reassign": {
+      "staffNotActive": "Esa persona no está activa."
     }
   },
   "patientMerge": {
@@ -6605,6 +6610,22 @@
     "rangeDates": "«Desde» no puede ser después de «Hasta».",
     "previewing": "Calculando la vista previa…",
     "nothingToChange": "Con estos datos no cambia ninguna sesión."
+  },
+  "reassignUser": {
+    "action": "Cambiar usuario",
+    "title": "Cambiar usuario",
+    "done": "Usuario cambiado a {name}",
+    "user": "Usuario",
+    "pick": "Elige a la persona",
+    "hint": "Pasa a esa persona en un paso, sin anular nada; el cuadre de caja lo refleja.",
+    "same": "Ya está a nombre de esa persona.",
+    "loadingStaff": "Cargando el personal…",
+    "staffFailed": "No se pudo cargar el personal."
+  },
+  "payment": {
+    "reassign": {
+      "notActive": "Un pago anulado conserva quién lo hizo."
+    }
   },
   "appointmentsBooking": {
     "title": "Citas",
