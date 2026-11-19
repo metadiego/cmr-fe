@@ -6,12 +6,8 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 
-import {
-  getPendientesEntrega,
-  aplicarCambioProtocolo,
-  type PendienteEntrega,
-  type CambioProtocaloNuevo,
-} from "@/lib/api/frontdesk";
+import { getPendientesEntrega, type PendienteEntrega } from "@/lib/api/frontdesk";
+import { aplicarCambioProtocolo, type CambioProtocaloNuevo } from "@/lib/api/protocol-change";
 import { getCatalogoFacturacion, type Producto } from "@/lib/api/facturas";
 import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
 import { isUsableLine, protocolChangeInvalid, protocolChangeMissing } from "@/lib/pacientes/protocol-change-missing";

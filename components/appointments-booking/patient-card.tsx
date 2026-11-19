@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { patientName } from "@/lib/pacientes/display-name";
 import type { Paciente } from "@/lib/api/pacientes";
 import type { Centro } from "@/lib/api/centers";
+import { Panel } from "@/components/kit/panel";
 
 // The chosen patient at the top of the rail: who is on the phone (name, record, phone, center), a link
 // to the record, and ✕ back to the start panels. `patient` is null while it loads from the URL
@@ -30,7 +31,7 @@ export function PatientCard({
   const center = patient?.clinicId ? centers.find((c) => c.id === patient.clinicId)?.name : undefined;
 
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+    <Panel className="flex items-start gap-3 p-4">
       <div className="min-w-0 flex-1">
         {patient ? (
           <>
@@ -57,6 +58,6 @@ export function PatientCard({
       <Button variant="ghost" size="icon" className="size-7 shrink-0" onClick={onClose} aria-label={t("patient.clear")}>
         <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
       </Button>
-    </div>
+    </Panel>
   );
 }

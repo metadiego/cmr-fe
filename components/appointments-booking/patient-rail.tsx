@@ -172,8 +172,8 @@ function AppointmentCard({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1.5 rounded-lg p-3 text-sm ring-1",
-        moving ? "bg-primary/10 ring-2 ring-primary" : "bg-card ring-foreground/10",
+        "flex flex-col gap-1.5 rounded-lg border p-3 text-sm",
+        moving ? "border-primary bg-primary/10 ring-2 ring-primary" : "bg-card shadow-xs",
         past && "opacity-60",
       )}
       data-slot="patient-appointment"

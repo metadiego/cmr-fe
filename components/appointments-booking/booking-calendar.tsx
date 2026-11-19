@@ -21,6 +21,7 @@ import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import type { TipoCita } from "@/lib/api/citas";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMedicos, type Personal } from "@/lib/api/personal";
+import { Panel } from "@/components/kit/panel";
 
 // The calendar half of the booking screen: toolbar, the period row (‹ Today › · title · Day/Week/Month)
 // and the period itself: Month (month of free spots + the selected day's times), Week (hours × days +
@@ -170,10 +171,7 @@ export function BookingCalendar({
   const fullDayHref = date && medical ? `/scheduling/appointments/${date}` : undefined;
 
   return (
-    <section
-      className="@container flex min-h-0 flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10"
-      data-slot="booking-calendar"
-    >
+    <Panel className="@container flex min-h-0 flex-col gap-3 p-4">
       <BookingToolbar
         label={label}
         typeName={typeName}
@@ -304,6 +302,6 @@ export function BookingCalendar({
           }}
         />
       )}
-    </section>
+    </Panel>
   );
 }

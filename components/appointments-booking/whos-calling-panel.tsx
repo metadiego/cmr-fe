@@ -13,6 +13,7 @@ import { useResource } from "@/hooks/use-resource";
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import type { Centro } from "@/lib/api/centers";
 import { patientName } from "@/lib/pacientes/display-name";
+import { Panel } from "@/components/kit/panel";
 
 // "Who's calling?": find the caller among the patients of every center where the user may read
 // patients (`centerIds` = the `pacientes.read` centers; the BE checks the permission in each), or create
@@ -51,7 +52,7 @@ export function WhosCallingPanel({
   const centerName = (id: string | null) => (id ? centers?.find((c) => c.id === id)?.name : undefined);
 
   return (
-    <section className="flex min-h-0 flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+    <Panel className="flex min-h-0 flex-col gap-3 p-4">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-base font-semibold">{t("title")}</h2>
         <Can permiso="pacientes.create">
@@ -126,6 +127,6 @@ export function WhosCallingPanel({
           onPick(saved);
         }}
       />
-    </section>
+    </Panel>
   );
 }

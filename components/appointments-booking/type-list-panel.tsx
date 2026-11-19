@@ -13,6 +13,7 @@ import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import { getServiciosConSaldo, type ServicioConSaldo } from "@/lib/api/frontdesk";
 import { getBookingHolidays } from "@/lib/api/festivos";
 import { inDaysPR, todayPR } from "@/lib/format/fecha";
+import { Panel } from "@/components/kit/panel";
 
 // "What are we booking?": a searchable list (accent- and case-insensitive) of the medical appointment
 // types and the center's services, each row with its next free time. With a patient chosen, the services
@@ -102,7 +103,7 @@ export function TypeListPanel({
   const loading = types.loading && types.medical.length === 0 && types.services.length === 0;
 
   return (
-    <section className="flex min-h-0 flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+    <Panel className="flex min-h-0 flex-col gap-3 p-4">
       <h2 className="text-base font-semibold">{title}</h2>
 
       {types.error ? (
@@ -158,6 +159,6 @@ export function TypeListPanel({
           </div>
         </>
       )}
-    </section>
+    </Panel>
   );
 }
