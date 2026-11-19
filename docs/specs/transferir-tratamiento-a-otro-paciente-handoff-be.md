@@ -1,5 +1,30 @@
 # FE → BE — Transferir disponibilidad de tratamiento a OTRO paciente (y exponer el de centro)
 
+## Nota permanente — el caso Martina/Santos, cerrado tal cual quedó (19-nov-2026)
+
+**Para que cualquier sesión futura, en cualquier equipo, tenga la respuesta sin tener que volver a
+investigar:** el 19-nov-2026 se transfirió a mano el paquete de Plaquex de Martina Vidro Vega (récord
+#102675, Bayamón, factura legado S243803, `copiadoDelLegado: true`) a Santos Ramírez Rodríguez
+(récord #103058), por pedido directo del dueño, carácter de emergencia, para que la sesión de hoy de
+Santos tuviera disponibilidad y pudiera atenderse (sesión 1/4).
+
+- El BE hizo el cambio por datos, con respaldo (`.personal/backups/...`) y traza en el `meta` del
+  paquete nuevo (`transferred_from_package_id`, `invoice_number` del legado).
+- **Discrepancia conocida y aceptada, no es un bug:** a Martina le quedaban 3 sesiones; Santos quedó
+  con 4 porque el dueño pidió explícitamente "1/4". El dueño, al verlo, confirmó que así se queda —
+  es su decisión de negocio, no algo que haya que corregir.
+- El paquete de origen (`284e32ef`) es del **legado** y de **otro centro/flujo** que esta sesión no
+  conoce a fondo (cómo el legado contaba sus propias sesiones, si Martina ya había usado alguna fuera
+  del sistema nuevo, etc.). El dueño decidió explícitamente **no investigarlo más** — "no sé cómo
+  trabajan, lo mejor es dejarlo así".
+- Pendiente de otra conversación, NO resuelto aquí: el BE señaló que Martina todavía tenía una sesión
+  de Plaquex propia "en terapia" hoy, anclada a su paquete ya cerrado — si era en realidad Santos
+  atendiéndose a nombre de ella, había que cancelarla. Si alguien pregunta por esto más adelante y no
+  hay otra nota que lo cierre, es que seguía abierto en ese momento — no asumir que se resolvió solo.
+
+Esta nota vive aquí (y no solo en el chat) porque el pedido del dueño fue justamente ese: que la
+respuesta esté en GitHub, no solo en una conversación que se pierde.
+
 ## Pedido del dueño, 19-nov-2026
 
 Casos reales, no hipotéticos: un paciente compra un paquete en un centro y se atiende en otro; o un
