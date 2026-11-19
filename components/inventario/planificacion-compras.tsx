@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { toast } from "sonner";
 
 import {
@@ -14,6 +15,7 @@ import {
   type PlanParams,
 } from "@/lib/api/compras";
 import { listProveedores, listAlmacenes, type Proveedor, type Almacen } from "@/lib/api/inventario";
+import { warehouseLabel } from "@/lib/warehouse-clinic";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { apiErrorLabel } from "@/lib/api/errors";
@@ -41,6 +43,7 @@ export function PlanificacionCompras() {
   const t = useTranslations("compras");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const { can } = useCan();
 
   // Parámetros: borrador (editable) vs aplicados (los que dispara la consulta).
@@ -149,7 +152,8 @@ export function PlanificacionCompras() {
   }
 
   async function cancelar(poId: string, numero: string | null) {
-    if (!window.confirm(t("cancelarConfirm", { n: numero ?? poId.slice(0, 8) }))) return;
+    const ok = await confirm({ title: t("cancelarConfirm", { n: numero ?? poId.slice(0, 8) }), destructive: true });
+    if (!ok) return;
     try {
       await cancelarOrden(poId);
       toast.success(t("ordenCancelada"));
@@ -243,7 +247,7 @@ export function PlanificacionCompras() {
           <Select value={almacenId} onValueChange={setAlmacenId}>
             <SelectTrigger className="w-52"><SelectValue placeholder={t("field.selAlmacen")} /></SelectTrigger>
             <SelectContent>
-              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{warehouseLabel(a, almacenes)}</SelectItem>)}
             </SelectContent>
           </Select>
         </Campo>

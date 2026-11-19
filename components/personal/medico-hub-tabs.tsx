@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 
-import { listCitas, listCitasRango, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
+import { citasReadableCenterIds, listCitasEveryCenter, listCitasRango, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
@@ -47,10 +47,11 @@ function Kpi({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export function MedicoAgenda({ doctorId, centro }: { doctorId: string; centro?: string }) {
+// The doctor's appointments in every clinic the person can read, each with its clinic.
+export function MedicoAgenda({ doctorId }: { doctorId: string }) {
   const t = useTranslations("medicoHub");
   const dia = useDia();
-  const citasRes = useResource<{ items: Cita[] }>(() => listCitas({ doctorId, limit: 100 }, centro), [doctorId, centro]);
+  const citasRes = useResource<{ items: Cita[] }>(() => listCitasEveryCenter({ doctorId, limit: 100 }), [doctorId]);
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
   const citas = citasRes.state.kind === "ok" ? citasRes.state.data.items : [];
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
@@ -59,11 +60,12 @@ export function MedicoAgenda({ doctorId, centro }: { doctorId: string; centro?: 
   if (citasRes.state.kind === "fail") return <p className="text-sm text-destructive">{citasRes.state.message}</p>;
   if (citas.length === 0) return <Vacio t={t("noCitas")} />;
   return (
-    <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("status")}</Th></tr>}>
+    <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("clinic")}</Th><Th>{t("status")}</Th></tr>}>
       {citas.map((c) => (
         <tr key={c.id} className="border-t">
           <Td>{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</Td>
           <Td>{tipoNombre(c.appointmentTypeId)}</Td>
+          <Td>{c.clinicName ?? "—"}</Td>
           <Td><Badge variant="secondary">{c.status}</Badge></Td>
         </tr>
       ))}
@@ -106,7 +108,11 @@ export function MedicoProduccion({ doctorId, centro }: { doctorId: string; centr
   const t = useTranslations("medicoHub");
   const { from, to } = React.useMemo(() => anio(), []);
   const pacRes = useResource<{ pagination: { total: number } }>(() => listPacientes({ doctorId, limit: 1 }, centro), [doctorId, centro]);
-  const citasRes = useResource<Cita[]>(() => listCitasRango({ doctorId, from, to, centroId: centro }), [doctorId, from, to, centro]);
+  // The year's appointments in every clinic the person can read, like the agenda tab.
+  const citasRes = useResource<Cita[]>(
+    () => citasReadableCenterIds().then((centerIds) => listCitasRango({ doctorId, from, to, centerIds })),
+    [doctorId, from, to],
+  );
   const totalPac = pacRes.state.kind === "ok" ? pacRes.state.data.pagination.total : 0;
   const citas = citasRes.state.kind === "ok" ? citasRes.state.data : [];
   const atendidas = citas.filter((c) => c.status === "atendida").length;

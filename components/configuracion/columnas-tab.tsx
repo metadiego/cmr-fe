@@ -23,7 +23,11 @@ import type { ColumnaEfectiva } from "@/lib/api/agenda-dia";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
+import { missingFields } from "@/lib/forms/missing";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { ColumnConfigDialog } from "@/components/configuracion/column-config-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,6 +132,7 @@ function ColumnasEditor({
   const te = useTranslations("tableroEditor");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const { can } = useCan();
   const boardMode = can("tablero.config");
 
@@ -232,9 +237,20 @@ function ColumnasEditor({
   // solo tocaba ambitos: la columna quedaba fuera de este editor pero SEGUÍA activa en la
   // composición real del tablero — y un guardado posterior de OTRA columna (bulk = replace
   // completo) podía además borrarla del todo sin que nadie la tocara a propósito.
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function quitar(row: Row) {
     const cat = catById.get(row.columnaId);
     if (!cat) return;
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("colRemoveTitle"),
+      description: t("colRemoveBody", { name: tRoot(row.labelKey) }),
+      confirmLabel: t("colRemove"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setBusyId(row.columnaId);
     try {
       await setComposicionBulk(
@@ -389,39 +405,40 @@ function ColumnasEditor({
 
 function NuevaColumnaDialog({ clave, onClose, onSaved }: { clave: string; onClose: () => void; onSaved: () => void }) {
   const t = useTranslations("configuracion.tableros");
-  const tRoot = useTranslations();
   const [v, setV] = React.useState({ clave: "", labelKey: "", tipo: "texto", binding: "", editable: false });
-  const [busy, setBusy] = React.useState(false);
-  const canSubmit = !!v.clave.trim() && !!v.labelKey.trim() && !!v.binding.trim() && !busy;
+  const missing = missingFields([
+    [t("clave"), !!v.clave.trim()],
+    [t("label"), !!v.labelKey.trim()],
+    [t("colBinding"), !!v.binding.trim()],
+  ]);
 
-  async function submit() {
-    setBusy(true);
-    try {
-      await crearColumna({
+  const { submitting, submit } = useSubmit(
+    () =>
+      crearColumna({
         slug: v.clave.trim(),
         labelKey: v.labelKey.trim(),
         type: (v.tipo || "texto") as never,
         binding: v.binding.trim(),
         editable: v.editable,
         scopes: [clave],
-      });
-      toast.success(t("created"));
-      onSaved();
-      onClose();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+      }),
+    {
+      successMessage: t("created"),
+      onSuccess: () => {
+        onSaved();
+        onClose();
+      },
+    },
+  );
 
   return (
-    <FormDialog open onOpenChange={(o) => !o && onClose()} title={t("addColumna")} onSubmit={submit} submitting={busy} canSubmit={canSubmit}>
-      <Field label={t("clave")}><Input value={v.clave} onChange={(e) => setV((s) => ({ ...s, clave: e.target.value }))} placeholder="prioridad" /></Field>
-      <Field label={t("label")}><Input value={v.labelKey} onChange={(e) => setV((s) => ({ ...s, labelKey: e.target.value }))} placeholder="op.col.prioridad" /></Field>
+    <FormDialog open onOpenChange={(o) => !o && onClose()} title={t("addColumna")} onSubmit={() => submit()} submitting={submitting} missing={missing}>
+      <RequiredLegend />
+      <Field label={t("clave")} htmlFor="new-column-key" required><Input id="new-column-key" value={v.clave} onChange={(e) => setV((s) => ({ ...s, clave: e.target.value }))} placeholder="prioridad" /></Field>
+      <Field label={t("label")} htmlFor="new-column-label" required><Input id="new-column-label" value={v.labelKey} onChange={(e) => setV((s) => ({ ...s, labelKey: e.target.value }))} placeholder="op.col.prioridad" /></Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label={t("colTipo")}><Input value={v.tipo} onChange={(e) => setV((s) => ({ ...s, tipo: e.target.value }))} placeholder="texto" /></Field>
-        <Field label={t("colBinding")} hint={t("colBindingHint")}><Input value={v.binding} onChange={(e) => setV((s) => ({ ...s, binding: e.target.value }))} placeholder="op.prioridad" /></Field>
+        <Field label={t("colTipo")} htmlFor="new-column-type"><Input id="new-column-type" value={v.tipo} onChange={(e) => setV((s) => ({ ...s, tipo: e.target.value }))} placeholder="texto" /></Field>
+        <Field label={t("colBinding")} htmlFor="new-column-binding" hint={t("colBindingHint")} required><Input id="new-column-binding" aria-describedby="new-column-binding-hint" value={v.binding} onChange={(e) => setV((s) => ({ ...s, binding: e.target.value }))} placeholder="op.prioridad" /></Field>
       </div>
       <label className="flex items-center gap-2 text-sm"><Checkbox checked={v.editable} onCheckedChange={(x) => setV((s) => ({ ...s, editable: x === true }))} />{t("colEditable")}</label>
     </FormDialog>

@@ -18,12 +18,24 @@ export function ConteoDenominaciones({
   onChange,
   disabled,
   hint,
+  saveState = "idle",
+  fondo,
+  aDepositar,
+  division,
 }: {
+  /** Split-mode count of one division: the title names it («Conteo de efectivo Consulta»). */
+  division?: string;
+  /** Opening float and what goes to the bank (counted − float): shown next to the total so the float is
+   *  not read as sales (Sheila, Caguas 10-nov: «$140 contado = $50 fondo + $90 ventas en efectivo»). */
+  fondo?: number;
+  aDepositar?: number;
   denominaciones: Denominacion[];
   cantidades: Record<string, number>;
   onChange: (denominacionId: string, cantidad: number) => void;
   disabled?: boolean;
   hint?: string;
+  // Autosave of the count (cuadre-caja): a quiet line so the cashier knows it persisted.
+  saveState?: "idle" | "saving" | "saved" | "error";
 }) {
   const t = useTranslations("caja.count");
 
@@ -42,7 +54,14 @@ export function ConteoDenominaciones({
   return (
     <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="border-b px-4 py-3">
-        <h3 className="text-sm font-semibold">{t("title")}</h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold">{division ? t("titleFor", { division }) : t("title")}</h3>
+          {saveState !== "idle" && (
+            <span className={"text-xs " + (saveState === "error" ? "text-destructive" : "text-muted-foreground")}>
+              {t(saveState === "saving" ? "saving" : saveState === "saved" ? "saved" : "saveError")}
+            </span>
+          )}
+        </div>
         {hint && (
           <p className="mt-0.5 text-xs text-warning-foreground">⚠ {hint}</p>
         )}
@@ -94,6 +113,18 @@ export function ConteoDenominaciones({
             <span className="text-sm font-semibold">{t("total")}</span>
             <span className="text-base font-semibold tabular-nums">{money(total)}</span>
           </div>
+          {fondo != null && aDepositar != null && (
+            <div className={cn("space-y-1 border-t px-4 py-2.5 text-sm", disabled && "opacity-70")}>
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span>{t("openingFloat")}</span>
+                <span className="tabular-nums">{money(fondo)}</span>
+              </div>
+              <div className="flex items-center justify-between font-semibold">
+                <span>{t("cashToDeposit")}</span>
+                <span className="tabular-nums">{money(aDepositar)}</span>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

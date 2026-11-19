@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useMe } from "@/hooks/use-me";
 import { getMyCentrosOperativos, type Centro } from "@/lib/api/centers";
 import { getMyPreferences } from "@/lib/api/preferences";
-import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll, setActiveCentro, setClinicViewAll } from "@/lib/tenant";
 import { urlAfterCenterSwitch } from "@/lib/navigation/after-center-switch";
 import { apiErrorMessage } from "@/lib/api/errors";
 import {
@@ -18,11 +18,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Active-center picker del NAV = «en qué centro estoy trabajando» (cambia el contexto de facturar/
-// cobrar/agendar). Fija la cookie X-Tenant-ID y recarga para que todo pida bajo el nuevo tenant. Ofrece
+// Active-center picker del NAV = «qué centro estoy viendo y en cuál trabajo»: Bayamón / Caguas / Ambos
+// (docs/specs/selector-de-centros-arriba.md). Un centro fija la cookie X-Tenant-ID; «Ambos» deja ese centro
+// de trabajo y hace que las lecturas abarquen todos los centros de la persona. Recarga para que todo pida
+// de nuevo. Ofrece
 // SOLO los centros OPERATIVOS (donde la persona tiene un rol), no todos los asignados: un acceso puntual
 // (p.ej. leer el calendario ajeno) no debe invitar a mudarse allí. Uno solo → no se enseña. Handoff
 // calendario-selector-de-centro §«El selector del NAV es OTRA cosa».
+const ALL = "__all__";
+
 export function CenterSelector() {
   const me = useMe();
   const t = useTranslations("nav");
@@ -49,10 +53,9 @@ export function CenterSelector() {
   // Se enseña solo si hay MÁS DE UN centro operativo — con uno no hay nada que elegir.
   if (centros.length <= 1) return null;
 
-  const current =
-    getActiveCentro() ??
-    (me.kind === "ok" ? me.me.activeClinicId : null) ??
-    "";
+  const current = isClinicViewAll()
+    ? ALL
+    : (getActiveCentro() ?? (me.kind === "ok" ? me.me.activeClinicId : null) ?? "");
   const dot = (id: string) =>
     colores[id] ? (
       <span
@@ -61,8 +64,32 @@ export function CenterSelector() {
         style={{ backgroundColor: colores[id] }}
       />
     ) : null;
+  // «AMBOS»: one dot split into every clinic's color, so it reads as all of them together.
+  const both = centros.map((c) => colores[c.id]).filter(Boolean);
+  const allDot =
+    both.length > 0 ? (
+      <span
+        aria-hidden
+        className="inline-block size-2.5 shrink-0 rounded-full ring-1 ring-black/10 dark:ring-white/20"
+        style={{
+          background:
+            both.length === 1
+              ? both[0]
+              : `linear-gradient(90deg, ${both.map((c, i) => `${c} ${(i * 100) / both.length}% ${((i + 1) * 100) / both.length}%`).join(", ")})`,
+        }}
+      />
+    ) : null;
 
   function onChange(id: string) {
+    if (id === ALL) {
+      // The working center (X-Tenant-ID, where writes go) stays; only the reads widen.
+      const working = getActiveCentro() ?? (me.kind === "ok" ? me.me.activeClinicId : null);
+      if (working) setActiveCentro(working);
+      setClinicViewAll(true);
+      window.location.reload();
+      return;
+    }
+    setClinicViewAll(false);
     setActiveCentro(id);
     // Full page load so everything refetches under the new tenant — but not always in place: a record
     // of the previous center goes back to its list, and a `?centro=` is re-pinned (see the helper).
@@ -88,6 +115,12 @@ export function CenterSelector() {
             </span>
           </SelectItem>
         ))}
+        <SelectItem value={ALL}>
+          <span className="flex min-w-0 items-center gap-2">
+            {allDot}
+            <span className="truncate">{t("bothCenters")}</span>
+          </span>
+        </SelectItem>
       </SelectContent>
     </Select>
   );

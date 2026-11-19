@@ -2,24 +2,32 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import { createPersonal } from "@/lib/api/personal";
-import { toastError } from "@/lib/api/errors";
-import { Button } from "@/components/ui/button";
+import { createClinicReady } from "@/lib/create-clinic";
+import { missingFields } from "@/lib/forms/missing";
+import { isClinicViewAll } from "@/lib/tenant";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CreateClinicField } from "@/components/kit/create-clinic-field";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
 
-// Alta de personal (handoff personal-crud-completo): solo el nombre es obligatorio; el resto (color, cargo,
-// sexo, centros…) se completa en la ficha tras crearla. Los CENTROS se asignan en la ficha porque el BE los
-// exige por su endpoint propio; aquí se avisa para que no se olvide. Devuelve el id creado para seleccionarlo.
+// New staff record (handoff personal-crud-completo): only the first name is required; the rest (color, job
+// title, sex, clinics…) is filled in on the record after creating it. CLINICS are assigned on the record
+// because the BE requires its own endpoint for them. Returns the created id so the caller can select it.
+// The record is born in ONE clinic (its home clinic, sent as X-Tenant-ID): `defaultClinicId` from
+// hooks/use-create-clinic.ts, switchable among `centers` (where the viewer holds personal.create).
 export function NuevoPersonalDialog({
-  centro,
+  centers,
+  defaultClinicId,
+  showClinic,
   onClose,
   onCreated,
 }: {
-  centro?: string;
+  centers: { id: string; name: string }[];
+  defaultClinicId: string;
+  /** The screen shows more than one clinic: always say which clinic the person is created in. */
+  showClinic: boolean;
   onClose: () => void;
   onCreated: (id: string) => void;
 }) {
@@ -27,44 +35,53 @@ export function NuevoPersonalDialog({
   const tRoot = useTranslations();
   const [name, setName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
+  const [picked, setPicked] = React.useState("");
+  const centro = picked || defaultClinicId || undefined;
+  // On «Ambos» `defaultClinicId` is empty: nothing is sent until a clinic is picked (lib/create-clinic.ts).
+  const clinicReady = createClinicReady(centro ?? "", centers.length, isClinicViewAll());
+  // The clinic counts as a missing field only where a picker is shown; otherwise the list is still loading.
+  const clinicPicker = centers.length > 1;
 
-  async function crear() {
-    if (busy || !name.trim()) return;
-    setBusy(true);
-    try {
-      const creada = await createPersonal({ name: name.trim(), lastName: lastName.trim() || null }, centro);
-      toast.success(t("creado"));
-      onCreated(creada.id);
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+  const missing = missingFields([
+    [t("nombre"), !!name.trim()],
+    [tRoot("createClinic.label"), clinicReady || !clinicPicker],
+  ]);
+  const clinicsLoading = !clinicReady && !clinicPicker;
+
+  const { submitting, submit } = useSubmit(
+    () => createPersonal({ name: name.trim(), lastName: lastName.trim() || null }, centro),
+    { successMessage: t("creado"), onSuccess: (creada) => onCreated(creada.id) },
+  );
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("nuevo")}</DialogTitle>
-          <DialogDescription>{t("nuevoAyuda")}</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-3">
-          <div className="grid gap-1.5">
-            <Label htmlFor="np-nombre">{t("nombre")}</Label>
-            <Input id="np-nombre" autoFocus value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="np-apellido">{t("apellido")}</Label>
-            <Input id="np-apellido" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={busy}>{tRoot("common.cancel")}</Button>
-          <Button onClick={crear} disabled={busy || !name.trim()}>{busy ? t("guardando") : t("crear")}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="md"
+      title={t("nuevo")}
+      description={t("nuevoAyuda")}
+      missing={missing}
+      blocked={clinicsLoading}
+      reason={clinicsLoading ? tRoot("common.loading") : null}
+      submitting={submitting}
+      submitLabel={t("crear")}
+      submittingLabel={t("guardando")}
+      onSubmit={() => submit()}
+    >
+      <Field label={t("nombre")} htmlFor="np-nombre" required>
+        <Input id="np-nombre" autoFocus value={name} onChange={(e) => setName(e.target.value)} />
+      </Field>
+      <Field label={t("apellido")} htmlFor="np-apellido">
+        <Input id="np-apellido" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+      </Field>
+      <CreateClinicField
+        centers={centers}
+        value={centro ?? ""}
+        onChange={setPicked}
+        show={showClinic}
+        disabled={submitting}
+        required
+      />
+    </FormDialog>
   );
 }

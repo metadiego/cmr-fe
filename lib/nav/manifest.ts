@@ -34,7 +34,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
   { key: "billing", labelKey: "nav.grupo.billing", icon: "invoice", order: 3 },
   { key: "reports", labelKey: "nav.grupo.reports", icon: "chart", order: 4 },
   { key: "inventory", labelKey: "nav.grupo.inventory", icon: "package", order: 5 },
-  { key: "communications", labelKey: "nav.grupo.communications", icon: "bell", order: 6 },
+  { key: "communications", labelKey: "nav.grupo.communications", icon: "tower", order: 6 },
   { key: "admin", labelKey: "nav.grupo.admin", icon: "users", order: 7 },
   { key: "configuration", labelKey: "nav.grupo.configuration", icon: "settings", order: 8 },
 ];
@@ -51,6 +51,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "citas", route: "/scheduling/appointments", group: "scheduling", order: 1 },
   { clave: "cupos", route: "/scheduling/slots", group: "scheduling", order: 2 },
   { clave: "calendario", route: "/scheduling/calendar", group: "scheduling", order: 3 },
+  // BE #558: calendar events that read like an absence, to accept or dismiss (BE path /calendario/ausencias).
+  { clave: "calendar-absence-review", route: "/scheduling/absences", group: "scheduling", order: 3.5 },
   { clave: "atencion", route: "/boards/atencion", group: "scheduling", order: 4 }, // board surfaced in scheduling
   { clave: "therapy-day", route: "/scheduling/therapy-day", group: "scheduling", order: 5 },
   // Services: front desk, Patient Center (patient desk) above Patients (owner, 02-nov-2026), Nursing Panel;
@@ -61,6 +63,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "panel-enfermeria", route: "/services/nursing-panel", group: "services", order: 4 },
   { clave: "servicios", route: "/boards/servicios", group: "services", order: 5 },
   { clave: "cambio-de-protocolo", route: "/patients/protocol-change", group: "services", order: 6 },
+  { clave: "body-measurements-unlinked", route: "/body-measurements/unlinked", group: "services", order: 7 }, // BE #509
   // Billing
   { clave: "facturacion", route: "/billing/invoices", group: "billing", order: 1 },
   { clave: "consultas", route: "/billing/consultations", group: "billing", order: 2 },
@@ -83,6 +86,17 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "estadisticas-diarias", route: "/reports/daily", group: "reports", order: 2 },
   { clave: "ventas-por-grupo", route: "/reports/sales-by-group", group: "reports", order: 4 },
   { clave: "ventas-por-usuario", route: "/reports/sales-by-user", group: "reports", order: 5 },
+  // Month-end IVU-exonerated product invoices (handoff cash-product-sales-ivu-handoff.md §3, BE #470).
+  { clave: "productos-exonerados", route: "/reports/exonerated-products", group: "reports", order: 6 },
+  // Analítica (BE cmr-be#546/#550, spec docs/specs/analytics-screens.md, cmr-fe PR #122): ventas y
+  // asistencia combinables, pacientes y tasa de retorno. 11-nov-2026: ya seeded en el catálogo con
+  // estas claves (`analitica-*`, no las que se habían puesto aquí de entrada) — sin esta fila el
+  // agrupador (lib/nav/nav-groups.ts) no las reconoce y las cae a un bucket `be:g-servicios` aparte,
+  // que se pinta como un SEGUNDO "Servicios" duplicado al final del rail.
+  { clave: "analitica-ventas", route: "/reports/sales-breakdown", group: "reports", order: 7 },
+  { clave: "analitica-asistencia", route: "/reports/attendance", group: "reports", order: 8 },
+  { clave: "analitica-pacientes", route: "/reports/patients-stats", group: "reports", order: 9 },
+  { clave: "analitica-retorno", route: "/reports/return-rate", group: "reports", order: 10 },
   // Inventory
   { clave: "inventario-index", route: "/inventory", group: "inventory", order: 1 },
   { clave: "inventario-existencias", route: "/inventory/stock", group: "inventory", order: 2 },
@@ -98,6 +112,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "paquetes-venta", route: "/inventory/sales-packages", group: "inventory", order: 11 },
   // Live stock from the inventory scales (handoff stock-live-balanzas, 27-oct-2026). Seeded by the BE.
   { clave: "inventory-live-stock", route: "/inventory/live-stock", group: "inventory", order: 12 },
+  { clave: "inventory-daily-kardex", route: "/inventory/kardex", group: "inventory", order: 13 }, // BE daily kardex (16-nov-2026)
+  { clave: "inventory-adjustments", route: "/inventory/adjustments", group: "inventory", order: 14 }, // multi-product adjustments (18-nov-2026, cmr-be #627)
   // Movido de Facturación/Reportes a Inventario (owner, 09-oct-2026): es cuánto insumo se consumió,
   // dato de inventario, no de facturación. También se quita el botón de Facturación (ver
   // facturas-list-view.tsx) que apuntaba acá.
@@ -116,6 +132,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   // grupo desde ahí (components/servicios/servicio-form-fields.tsx → GrupoSelect).
   { clave: "grupos-facturacion", route: "/configuration/billing-groups", group: "configuration", order: 3.5 },
   { clave: "config-factura", route: "/configuration/invoice", group: "configuration", order: 4 },
+  // BE #564: the payment-methods catalog («Lleva dinero»: Exonerada never counts as a payment).
+  { clave: "payment-methods", route: "/configuration/payment-methods", group: "configuration", order: 4.2 },
   { clave: "config-requeridos", route: "/configuration/required-fields", group: "configuration", order: 5 },
   { clave: "config-datos-paciente", route: "/configuration/patient-fields", group: "configuration", order: 6 },
   { clave: "config-formatos", route: "/configuration/formats", group: "configuration", order: 7 },
@@ -126,6 +144,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "ehr-integration", route: "/configuration/ehr-integration", group: "configuration", order: 12 },
   // clave real del BE confirmada en cmr-be/src/scripts/menu-items.ts: "config-panel".
   { clave: "config-panel", route: "/configuration/panel", group: "configuration", order: 13 },
+  // BE #529: which guarded actions ask «¿Aceptar o no?» (BE path /configuracion/confirmaciones).
+  { clave: "confirmation-policies", route: "/configuration/confirmations", group: "configuration", order: 13.6 },
   // clave INVENTADA del lado FE: el BE (06-oct-2026) todavía no sembró una fila de menú para esta
   // pantalla nueva — se llega hoy por el enlace "Catálogo" dentro del propio selector de banderas
   // de prioridad (components/clientes/priority-flags-badges.tsx), no por el menú lateral. Cuando el

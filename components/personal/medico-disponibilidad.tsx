@@ -176,14 +176,23 @@ function Ausencias({ doctorId, centro }: { doctorId: string; centro?: string }) 
   const { state, reload } = useResource<DoctorAbsence[]>(() => listDoctorAbsences(doctorId, undefined, undefined, centro), [doctorId, centro]);
   const ausencias = state.kind === "ok" ? state.data : [];
   const [busy, setBusy] = React.useState(false);
-  const [form, setForm] = React.useState<{ kind: "vacation" | "leave"; startDate: string; endDate: string; reason: string } | null>(null);
+  const [form, setForm] = React.useState<{ kind: "vacation" | "leave"; startDate: string; endDate: string; startTime: string; endTime: string; reason: string } | null>(null);
   const rangoInvalido = !!form && !!form.startDate && !!form.endDate && form.endDate < form.startDate;
+  // Both hours given: the end must come after the start (BE answers disponibilidad.ausencia.horas_invalidas).
+  const horasInvalidas = !!form && !!form.startTime && !!form.endTime && form.endTime <= form.startTime;
 
   async function crear() {
-    if (!form || !form.startDate || !form.endDate || rangoInvalido || busy) return;
+    if (!form || !form.startDate || !form.endDate || rangoInvalido || horasInvalidas || busy) return;
     setBusy(true);
     try {
-      await createDoctorAbsence({ doctorId, kind: form.kind, startDate: form.startDate, endDate: form.endDate, reason: form.reason.trim() || undefined }, centro);
+      await createDoctorAbsence(
+        {
+          doctorId, kind: form.kind, startDate: form.startDate, endDate: form.endDate,
+          ...(form.startTime ? { startTime: form.startTime } : {}), ...(form.endTime ? { endTime: form.endTime } : {}),
+          reason: form.reason.trim() || undefined,
+        },
+        centro,
+      );
       setForm(null);
       reload();
       toast.success(t("saved"));
@@ -198,7 +207,7 @@ function Ausencias({ doctorId, centro }: { doctorId: string; centro?: string }) 
     <Card
       title={t("absencesTitle")}
       action={puedeConfig && !form ? (
-        <Button type="button" size="sm" onClick={() => setForm({ kind: "vacation", startDate: "", endDate: "", reason: "" })}>{t("addAbsence")}</Button>
+        <Button type="button" size="sm" onClick={() => setForm({ kind: "vacation", startDate: "", endDate: "", startTime: "", endTime: "", reason: "" })}>{t("addAbsence")}</Button>
       ) : undefined}
     >
       {puedeConfig && form && (
@@ -222,15 +231,25 @@ function Ausencias({ doctorId, centro }: { doctorId: string; centro?: string }) 
               <Label htmlFor="ab-to">{t("to")}</Label>
               <DatePicker id="ab-to" value={form.endDate} onChange={(v) => setForm({ ...form, endDate: v })} className="h-8 w-40" aria-invalid={rangoInvalido || undefined} />
             </div>
+            {/* Part of the day (optional): away from «Desde la hora», until «Hasta la hora». */}
+            <div className="space-y-1">
+              <Label>{t("fromTime")}</Label>
+              <TimePicker clearable value={form.startTime} onChange={(v) => setForm({ ...form, startTime: v })} className="h-8 w-32" />
+            </div>
+            <div className="space-y-1">
+              <Label>{t("toTime")}</Label>
+              <TimePicker clearable value={form.endTime} onChange={(v) => setForm({ ...form, endTime: v })} className="h-8 w-32" />
+            </div>
           </div>
           <div className="space-y-1">
             <Label htmlFor="ab-reason">{t("reason")}</Label>
             <Input id="ab-reason" value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder={t("reasonPh")} />
           </div>
           {rangoInvalido && <p className="text-xs text-destructive">{t("rangeInvalid")}</p>}
+          {horasInvalidas && <p className="text-xs text-destructive">{t("hoursInvalid")}</p>}
           <div className="flex justify-end gap-2">
             <Button type="button" size="sm" variant="ghost" onClick={() => setForm(null)}>{t("cancel")}</Button>
-            <Button type="button" size="sm" disabled={!form.startDate || !form.endDate || rangoInvalido || busy} onClick={crear}>{t("save")}</Button>
+            <Button type="button" size="sm" disabled={!form.startDate || !form.endDate || rangoInvalido || horasInvalidas || busy} onClick={crear}>{t("save")}</Button>
           </div>
         </div>
       )}
@@ -243,7 +262,11 @@ function Ausencias({ doctorId, centro }: { doctorId: string; centro?: string }) 
           {ausencias.map((a) => (
             <li key={a.id} className="flex items-center gap-2 rounded-md bg-muted/30 px-2.5 py-1.5 text-sm">
               <Badge kind={a.kind} t={t} />
-              <span className="flex-1 tabular-nums">{dia(a.startDate)} – {dia(a.endDate)}{a.reason ? ` · ${a.reason}` : ""}</span>
+              <span className="flex-1 tabular-nums">
+                {dia(a.startDate)} – {dia(a.endDate)}
+                {a.startTime || a.endTime ? ` · ${a.startTime ?? ""}–${a.endTime ?? ""}` : ""}
+                {a.reason ? ` · ${a.reason}` : ""}
+              </span>
               {puedeConfig && (
                 <button type="button" onClick={() => quitar(a.id)} disabled={busy} className="shrink-0 text-destructive hover:underline" aria-label={t("remove")}>×</button>
               )}

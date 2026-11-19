@@ -1,0 +1,258 @@
+// Cash sheet sign-off («Acepto», BE #486, handoff docs/specs/cash-sign-off-handoff.md).
+// Pure helpers: which signature is live, whether the sheet moved after it was signed, the blocks the
+// screen and the printed sheet show, and the text the signer accepts. Mirrors cmr-be
+// src/modules/caja/sheet-report.ts (figuresOf / figuresChanged) and cash-sign-off.service.ts (forSheet).
+
+export type SignOffRole = "cashier" | "supervisor";
+
+// Signing as MANAGER is its own permission. caja.ver_todos cannot tell a manager from a biller: on prod
+// (6-nov-2026) all six cash roles hold it, Facturación and Facturador included, so billers saw
+// «Firmar como gerente». Handoff docs/specs/cash-sign-as-manager-permission-handoff-be.md.
+export const SIGN_AS_SUPERVISOR = "caja.sign_as_manager";
+
+export interface SignedFigures {
+  dayTotal: number;
+  salesCash: number;
+  countedCash: number;
+  difference: number;
+}
+
+export interface CashSignature {
+  id: string;
+  reconciliationId: string;
+  role: SignOffRole;
+  staffId: string;
+  signerName: string;
+  statement: string;
+  signedAt: string;
+  figures: SignedFigures;
+  voidedAt: string | null;
+  voidReason: string | null;
+  // BE #565: a manager acknowledged a correction of the signed figures (the figures as acknowledged).
+  acknowledgedFigures?: SignedFigures | null;
+  acknowledgedAt?: string | null;
+  acknowledgedBy?: string | null;
+  acknowledgedByName?: string | null;
+  acknowledgeReason?: string | null;
+}
+
+/**
+ * The BE's rule (BE #565): the sheet «changed» after the signature when the signed figures differ from
+ * today's AND nothing was acknowledged or the acknowledged ones differ too. `acknowledged` = it moved,
+ * but a manager confirmed exactly these figures — a quiet note, not the red warning.
+ */
+export function signatureState(s: CashSignature, now: SignedFigures | null): { changed: boolean; acknowledged: boolean } {
+  if (!now || !figuresChanged(s.figures, now)) return { changed: false, acknowledged: false };
+  const ack = s.acknowledgedFigures;
+  if (ack && !figuresChanged(ack, now)) return { changed: false, acknowledged: true };
+  return { changed: true, acknowledged: false };
+}
+
+const r2 = (n: unknown) => Math.round((Number(n) || 0) * 100) / 100;
+
+// The figures a signer agrees to, read from the day report exactly as the BE reads it: day total,
+// cash sales, and the BE's reconciliation (counted cash + difference). Same source both sides, so a
+// fresh signature never shows up as «signed with other figures».
+export function figuresOfReport(report: {
+  detalle?: { total?: number; efectivo?: { amount?: number } };
+  reconciliation?: { countedCash?: number; difference?: number } | null;
+}): SignedFigures {
+  return {
+    dayTotal: r2(report.detalle?.total),
+    salesCash: r2(report.detalle?.efectivo?.amount),
+    countedCash: r2(report.reconciliation?.countedCash),
+    difference: r2(report.reconciliation?.difference),
+  };
+}
+
+// Did the sheet move since it was signed? (a late phone sale, a corrected count)
+export function figuresChanged(signed: SignedFigures, now: SignedFigures): boolean {
+  return (
+    r2(signed.dayTotal) !== r2(now.dayTotal) ||
+    r2(signed.salesCash) !== r2(now.salesCash) ||
+    r2(signed.countedCash) !== r2(now.countedCash) ||
+    r2(signed.difference) !== r2(now.difference)
+  );
+}
+
+// The live (not voided) signature of a role; the newest wins if the history has more than one.
+export function liveSignature(list: CashSignature[], role: SignOffRole): CashSignature | null {
+  let best: CashSignature | null = null;
+  for (const s of list) {
+    if (s.role !== role || s.voidedAt) continue;
+    if (!best || s.signedAt > best.signedAt) best = s;
+  }
+  return best;
+}
+
+// 409 CASH_SHEET_ALREADY_SIGNED: someone else signed in that role. The body carries who and when.
+export function alreadySignedBy(
+  err: { code?: string; status?: number; data?: Record<string, unknown> } | null | undefined,
+): { signedBy: string; signedAt: string | null } | null {
+  if (!err || (err.code !== "CASH_SHEET_ALREADY_SIGNED" && err.status !== 409)) return null;
+  const by = err.data?.signedBy;
+  const at = err.data?.signedAt;
+  return { signedBy: typeof by === "string" ? by : "—", signedAt: typeof at === "string" ? at : null };
+}
+
+// The text the signer accepts: center preference caja.signOff.statement (the BE stores the one it
+// actually used on each signature, so this is only what the dialog shows BEFORE signing).
+export function readSignOffStatement(config: unknown): string | null {
+  const s = (config as { caja?: { signOff?: { statement?: unknown } } } | null)?.caja?.signOff?.statement;
+  return typeof s === "string" && s.trim() ? s.trim() : null;
+}
+
+/** A cashier sheet a consolidated / day-total sheet sums. `id` is absent when she has no sheet
+ * yet (she collected today but never opened one) — signing creates it via "Firmar la mía". */
+export interface SiblingSheet {
+  id?: string;
+  userId: string;
+  name: string | null;
+  division?: string | null;
+}
+
+/** Who actually collected today (`reporte.porCajero`, BE keeps these keys in Spanish). */
+export interface PorCajeroEntry {
+  usuarioId: string | null;
+  nombre: string | null;
+}
+
+/** The fields of a `cuadre` (reconciliation sheet) rule 4 needs — same on `CuadreCaja`. */
+export interface CuadreSheetInfo {
+  id: string;
+  userId: string | null;
+  countedCash: number;
+  declaredPettyCash: number;
+  pettyCashApplies: boolean;
+  division?: string | null;
+}
+
+/**
+ * Rules 1-3 (handoff docs/specs/firmas-consolidado-desde-ventas-handoff-be.md, BE #605): the
+ * consolidated / day-total signature blocks are the cashiers who actually COLLECTED today
+ * (`porCajero`), in that order — not whoever happened to open a sheet. Each is matched to her own
+ * sheet if she has one already (so her real signature/count shows); with none yet, the block
+ * stays unsigned and sheet-less (signing creates the sheet). Sheet owners who did NOT collect are
+ * returned separately as `leftoverSheets` — rule 4 needs to know whether each already has a live
+ * signature, which can only be learned by fetching it, so the caller (who can do that fetch)
+ * decides which of those to still include.
+ */
+export function cashierSiblingsFromReport(args: {
+  porCajero: PorCajeroEntry[];
+  cuadres: CuadreSheetInfo[];
+  /** Fallback division for a cashier with NO sheet yet (unused once she has one — her own sheet's
+   * division wins, needed to re-read HER report correctly once she does sign). */
+  division?: string | null;
+  nameFor?: (userId: string) => string | null;
+}): { siblings: SiblingSheet[]; leftoverSheets: CuadreSheetInfo[] } {
+  const byUser = new Map<string, CuadreSheetInfo>();
+  for (const c of args.cuadres) if (c.userId) byUser.set(c.userId, c);
+  const incluidos = new Set<string>();
+  const siblings: SiblingSheet[] = [];
+  for (const p of args.porCajero) {
+    if (!p.usuarioId || incluidos.has(p.usuarioId)) continue;
+    incluidos.add(p.usuarioId);
+    const sheet = byUser.get(p.usuarioId);
+    siblings.push({
+      id: sheet?.id,
+      userId: p.usuarioId,
+      division: sheet?.division ?? args.division,
+      name: args.nameFor?.(p.usuarioId) ?? p.nombre ?? null,
+    });
+  }
+  const leftoverSheets = args.cuadres.filter((c) => c.userId && !incluidos.has(c.userId));
+  return { siblings, leftoverSheets };
+}
+
+/** Rule 4b: a real count beyond petty cash — the only part of rule 4 decidable without fetching
+ * signatures (the other part, "already signed", needs a live signature check by the caller). */
+export function hasRealCashCount(c: CuadreSheetInfo): boolean {
+  return r2(c.countedCash) - (c.pettyCashApplies ? r2(c.declaredPettyCash) : 0) !== 0;
+}
+
+/** One signature block: its label under the line; over it, who accepted and when (blank if unsigned). */
+export interface SignatureBlock {
+  key: string;
+  role: SignOffRole;
+  /** Name for «Cajero — NAME» blocks; null = the plain role label. */
+  cashierName: string | null;
+  signature: CashSignature | null;
+  /** The sheet moved after this signature: shown in red with the figures it accepted. */
+  changed: boolean;
+  /** It moved, and a manager acknowledged the correction: «Cifras corregidas · confirmado por …». */
+  acknowledged: boolean;
+  /** The sheet this signature lives on (where an acknowledgement is posted). */
+  sheetId: string | null;
+  /** Today's figures for THIS block (own `now` or the sibling's) — null for an unsigned/no-data block.
+   * Needed to say "signed with $X · today $Y · change −$Z", not just the signed figures alone (owner,
+   * 13-nov: "diferencia $0.00" read as "nothing changed" when `difference` is the CASH difference at
+   * signing time, not the delta since). */
+  now: SignedFigures | null;
+}
+
+/**
+ * What a "signed with other figures" warning needs to say: the signed total, today's total, the
+ * delta between them, and — ONLY if non-zero — the cash difference that was true at signing time
+ * (NOT the delta: that was the bug, owner 13-nov — "diferencia $0.00" at signing read as "nothing
+ * changed" when the day total had actually moved $220). Null when there is nothing to warn about.
+ */
+export function signatureChangeFigures(b: SignatureBlock): { signed: number; now: number; delta: number; signedDifference: number | null } | null {
+  if (!b.signature || !b.changed || !b.now) return null;
+  return {
+    signed: b.signature.figures.dayTotal,
+    now: b.now.dayTotal,
+    delta: r2(b.now.dayTotal - b.signature.figures.dayTotal),
+    signedDifference: b.signature.figures.difference !== 0 ? b.signature.figures.difference : null,
+  };
+}
+
+// The blocks of a sheet, as the BE email draws them: a cashier's sheet = «Cajero» + «Gerente»; a
+// consolidated / day total = one «Cajero — name» per cashier sheet it sums (her signature THERE, judged
+// against that sheet's own figures), then «Gerente» (the signature on this sheet).
+export function signatureBlocks(args: {
+  own: CashSignature[];
+  now: SignedFigures;
+  isCashierSheet: boolean;
+  siblings?: Array<SiblingSheet & { signatures: CashSignature[]; now: SignedFigures | null }>;
+}): SignatureBlock[] {
+  const { own, now, isCashierSheet, siblings = [] } = args;
+  const block = (key: string, role: SignOffRole, cashierName: string | null, s: CashSignature | null, current: SignedFigures | null): SignatureBlock => {
+    const st = s ? signatureState(s, current) : { changed: false, acknowledged: false };
+    return { key, role, cashierName, signature: s, changed: st.changed, acknowledged: st.acknowledged, sheetId: s?.reconciliationId ?? null, now: current };
+  };
+  const supervisor = block("supervisor", "supervisor", null, liveSignature(own, "supervisor"), now);
+  if (isCashierSheet) return [block("cashier", "cashier", null, liveSignature(own, "cashier"), now), supervisor];
+  const cashiers = siblings.map((sib) => {
+    const s = liveSignature(sib.signatures, "cashier");
+    return block(`cashier:${sib.id ?? sib.userId}`, "cashier", s?.signerName ?? sib.name ?? "—", s, sib.now);
+  });
+  return [...(cashiers.length ? cashiers : [block("cashier", "cashier", null, null, null)]), supervisor];
+}
+
+/** A block already put into words (translated + formatted) for the printed sheet. */
+export interface PrintedSignature {
+  label: string;
+  line?: string;
+  warning?: string;
+  /** A neutral note (an acknowledged correction). */
+  note?: string;
+}
+
+function esc(s: unknown): string {
+  return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+}
+
+// The signature row of the printed sheet: the accepted statement, then per block «Aceptado por … ·
+// fecha» (and the red note) OVER the line, the label UNDER it.
+export function signaturesPrintHtml(blocks: PrintedSignature[], statement?: string | null): string {
+  if (!blocks.length) return "";
+  const cells = blocks
+    .map(
+      (b) =>
+        `<div class="firma-wrap"><div class="firma-sello">${b.line ? esc(b.line) : "&nbsp;"}${
+          b.warning ? `<div class="rojo">${esc(b.warning)}</div>` : ""
+        }${b.note ? `<div class="dim">${esc(b.note)}</div>` : ""}</div><div class="firma">${esc(b.label)}</div></div>`,
+    )
+    .join("");
+  return `${statement ? `<p class="firma-texto">${esc(statement)}</p>` : ""}<div class="firmas">${cells}</div>`;
+}

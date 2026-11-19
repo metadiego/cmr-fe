@@ -1,4 +1,5 @@
 import { apiFetch } from "./client"
+import { isAssignablePermission } from "@/lib/access/role-keys"
 
 // RBAC fino (#6, F2). Admin management of roles + permisos. All endpoints are
 // admin/super_admin on the BE. GET /permisos and /roles return arrays directly.
@@ -28,8 +29,10 @@ function asArray<T>(res: unknown): T[] {
   return Array.isArray(items) ? (items as T[]) : []
 }
 
+// '*' (full access) belongs to the admin role only: the backend refuses it anywhere else (cmr-be #557), so
+// no picker or list ever offers it.
 export async function getPermisos(): Promise<Permiso[]> {
-  return asArray<Permiso>(await apiFetch(`/permissions`))
+  return asArray<Permiso>(await apiFetch(`/permissions`)).filter((p) => isAssignablePermission(p.slug))
 }
 
 // Catálogo de permisos (rbac.create/update/delete). La CLAVE va `modulo.accion` (la acción puede llevar

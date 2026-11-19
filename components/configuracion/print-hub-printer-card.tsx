@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { useConfirm } from "@/components/kit/confirm-host";
 import { toast } from "sonner";
 
 import { createPrinter, deletePrinter, updatePrinter, type CenterPrinter } from "@/lib/api/print-hub";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { DEFAULT_PORTS, buildHubDiscoverUrl, buildHubRequestUrls, type HubDiscovery, type PrintHubProtocol } from "@/lib/print/hub-target";
-import { sendToHubs, testTicketToEscPos } from "@/lib/print/hub";
+import { bytesForPrinter, sendToHubs, testTicketToEscPos, type EscPosFont } from "@/lib/print/hub";
 import { PrintHubLogin } from "@/components/configuracion/print-hub-login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,12 +23,22 @@ interface Form {
   printerHost: string;
   printerPort: string;
   printerQueue: string;
+  model: string;
+  font: EscPosFont | "";
 }
 
 const fromPrinter = (p: CenterPrinter | null): Form =>
   p
-    ? { name: p.name, protocol: p.protocol, printerHost: p.printerHost ?? "", printerPort: String(p.printerPort), printerQueue: p.printerQueue }
-    : { name: "", protocol: "ipp", printerHost: "", printerPort: String(DEFAULT_PORTS.ipp), printerQueue: "" };
+    ? {
+        name: p.name,
+        protocol: p.protocol,
+        printerHost: p.printerHost ?? "",
+        printerPort: String(p.printerPort),
+        printerQueue: p.printerQueue,
+        model: p.model ?? "",
+        font: p.escposFont ?? "",
+      }
+    : { name: "", protocol: "ipp", printerHost: "", printerPort: String(DEFAULT_PORTS.ipp), printerQueue: "", model: "", font: "" };
 
 interface Props {
   centerId: string;
@@ -51,6 +62,7 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
   const t = useTranslations("aparienciaCorporativa");
   const tReceipt = useTranslations("receipt");
   const tRoot = useTranslations();
+  const confirm = useConfirm();
   const [form, setForm] = React.useState<Form>(() => fromPrinter(printer));
   const [discovery, setDiscovery] = React.useState<Discovery>({ kind: "idle" });
   const [busy, setBusy] = React.useState<"save" | "test" | "delete" | null>(null);
@@ -91,6 +103,8 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
       printerHost: form.printerHost.trim(),
       printerPort: Number(form.printerPort),
       printerQueue: form.printerQueue.trim(),
+      model: form.model.trim() || null,
+      escposFont: form.font || null,
     };
     try {
       const saved = printer ? await updatePrinter(centerId, printer.id, body) : await createPrinter(centerId, body);
@@ -105,7 +119,8 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
 
   async function remove() {
     if (!printer) return onDeleted();
-    if (!window.confirm(t("printerRemoveConfirm", { name: printer.name }))) return;
+    const ok = await confirm({ title: t("printerRemoveConfirm", { name: printer.name }), destructive: true });
+    if (!ok) return;
     setBusy("delete");
     try {
       await deletePrinter(centerId, printer.id);
@@ -122,7 +137,8 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
     setBusy("test");
     try {
       const stamp = new Date().toISOString().slice(0, 19).replace("T", " ");
-      const i = await sendToHubs(requestUrls, testTicketToEscPos([tReceipt("hubTestTitle"), `${centerName} · ${form.name}`, form.printerQueue, stamp]));
+      const ticket = testTicketToEscPos([tReceipt("hubTestTitle"), `${centerName} · ${form.name}`, form.printerQueue, stamp]);
+      const i = await sendToHubs(requestUrls, bytesForPrinter(ticket, form.font || null));
       toast.success(t("hubTestSentVia", { hub: new URL(requestUrls[i]).host }));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));
@@ -201,6 +217,27 @@ export function PrintHubPrinterCard({ centerId, centerName, printer, hubUrls, di
           </div>
         </div>
         <p className="text-xs text-muted-foreground">{form.protocol === "smb" ? t("printerHelpWindows") : t("printerHelpLinuxMac")}</p>
+
+        <div className="grid gap-3 sm:grid-cols-[1fr_14rem]">
+          <div className="space-y-1.5">
+            <Label htmlFor={`pm-${id}`}>{tRoot("printHub.model")}</Label>
+            <Input id={`pm-${id}`} value={form.model} maxLength={120} onChange={setField("model")} placeholder={tRoot("printHub.modelPlaceholder")} />
+          </div>
+          <div className="space-y-1.5">
+            {/* Only a Star in Epson emulation needs «Pequeña (B)»; every Epson stays «Sin cambio». */}
+            <Label htmlFor={`pf-${id}`}>{tRoot("printHub.font")}</Label>
+            <select
+              id={`pf-${id}`}
+              value={form.font}
+              onChange={(e) => setForm((f) => ({ ...f, font: e.target.value as EscPosFont | "" }))}
+              className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+            >
+              <option value="">{tRoot("printHub.fontNone")}</option>
+              <option value="A">{tRoot("printHub.fontA")}</option>
+              <option value="B">{tRoot("printHub.fontB")}</option>
+            </select>
+          </div>
+        </div>
       </fieldset>
 
       <div className="flex flex-wrap gap-2">

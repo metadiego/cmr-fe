@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchPaged } from "./client";
+import { apiFetch, apiFetchPaged, oneCenterPath } from "./client";
 import type { Paginated } from "./types";
 
 // Stock por centro y consolidado (BE PR #248). SOLO LECTURA. Tenant-scoped: gerente ve su centro; admin
@@ -89,7 +89,7 @@ export type StockConsolidadoParams = {
   page?: number;
   limit?: number;
 };
-export function getStockConsolidado(
+export async function getStockConsolidado(
   params: StockConsolidadoParams = {},
   centro?: string | null,
 ): Promise<Paginated<StockConsolidadoFila>> {
@@ -100,8 +100,10 @@ export function getStockConsolidado(
   if (params.includeNonInventoryItems) sp.set("includeNonInventoryItems", "true");
   sp.set("page", String(params.page ?? 1));
   sp.set("limit", String(Math.min(params.limit ?? 50, 100)));
-  // `centro` undefined → admin combinado (todos los centros); un id → recortado a ese centro (1 columna).
-  return apiFetchPaged<StockConsolidadoFila>(`/inventory/stock/consolidated?${sp.toString()}`, {}, centro);
+  // `centro` an id → that center; undefined/null → the top bar's clinic, or on «Ambos» every center the
+  // person can read (one column each).
+  const path = await oneCenterPath(`/inventory/stock/consolidated?${sp.toString()}`, centro ?? undefined);
+  return apiFetchPaged<StockConsolidadoFila>(path, {}, centro ?? undefined);
 }
 
 // Detalle de la existencia de UN producto: desglose por almacén/lote con los estados que componen la
@@ -122,9 +124,9 @@ export type StockDetalleFila = {
   dañado?: number;
   disponible?: number;
 };
-export function getStockDetalle(productId: string, centro?: string | null): Promise<StockDetalleFila[]> {
+export async function getStockDetalle(productId: string, centro?: string | null): Promise<StockDetalleFila[]> {
   return apiFetch<unknown>(
-    `/inventory/stock/detail?productId=${encodeURIComponent(productId)}`,
+    await oneCenterPath(`/inventory/stock/detail?productId=${encodeURIComponent(productId)}`, centro ?? undefined),
     {},
     centro,
   ).then((r) => (Array.isArray(r) ? (r as StockDetalleFila[]) : (((r as { items?: StockDetalleFila[] })?.items) ?? [])));

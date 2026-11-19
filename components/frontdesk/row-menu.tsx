@@ -6,14 +6,20 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
+import { cancelarSesion } from "@/lib/api/frontdesk";
+import { useCan } from "@/hooks/use-can";
+import { ChangeLogSheet } from "@/components/change-log/change-log-sheet";
+import { cancelPatientDay, reopenPatientDay, reopenSession } from "@/lib/api/frontdesk-day";
+import { ApiError } from "@/lib/api/types";
+import { todayISO } from "@/lib/agenda/calendar";
+import { canReopen, duplicatesReopen, REOPEN_ERROR_KEYS, skippedReasons } from "@/lib/frontdesk/reopen";
+import { sessionReasonMissing } from "@/lib/frontdesk/session-reason-missing";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,9 +34,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Menú "···" de acciones de la fila (extraído de fila-sesion.tsx): historial, formatos, acciones
-// data-driven, cancelar y reparar (admin). El BE es la autoridad de qué transiciones aplican; esto
-// solo las pinta y confirma lo que pide confirmación.
+// Row "···" actions menu (extracted from fila-sesion.tsx): history, report formats, data-driven
+// actions, cancel and repair (admin). The BE decides which transitions apply; this only lists them
+// and confirms the ones that ask for it.
 export function RowMenu({
   disabled,
   cancelada,
@@ -43,7 +49,8 @@ export function RowMenu({
   accionesMenu,
   onAccion,
   onProgramar,
-  onCancelar,
+  day,
+  onDone,
   onReparar,
 }: {
   disabled: boolean;
@@ -56,24 +63,78 @@ export function RowMenu({
   onReport?: (id: string) => void;
   // Acciones data-driven aplicables desde el estado actual (p. ej. reactivar una cancelada). El BE es la
   // autoridad (transiciones + permiso); el FE solo las pinta y confirma si la transición lo pide.
-  accionesMenu?: { clave: string; label: string; confirmar?: boolean }[];
+  accionesMenu?: { clave: string; label: string; confirmar?: boolean; from?: string[] | null }[];
   onAccion?: (clave: string) => void;
   onProgramar?: () => void; // abrir "Programar citas" desde la fila (agendar la próxima aunque ya esté asistido)
-  onCancelar: (motivo: string) => void;
+  // The row's session and its patient's day: Cancelar, Cancelar todas, Reabrir, Reabrir todas (BE #508).
+  day: { sessionId: string; status: string; patientId?: string | null; date?: string | null; centerId?: string };
+  onDone: () => void;
   onReparar: (payload: { reason: string; status?: string }) => void;
 }) {
   const t = useTranslations("frontdesk");
-  const tc = useTranslations("common");
-  const [cancelOpen, setCancelOpen] = React.useState(false);
+  const tRoot = useTranslations();
+  const { can } = useCan();
+  // Which cancel the dialog confirms: this session, or every open session of the patient's day.
+  const [cancelOpen, setCancelOpen] = React.useState<false | "one" | "all">(false);
   const [repararOpen, setRepararOpen] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
   const [estadoNuevo, setEstadoNuevo] = React.useState("");
+  const [changesOpen, setChangesOpen] = React.useState(false); // «Historial de cambios» of this session
+
+  // Reopen is offered only on a cancelled session of TODAY; the BE re-checks it (409 otherwise).
+  const reopenable = canReopen(day.status, day.date, todayISO());
+  const patientId = day.patientId ?? null;
+  const acciones = reopenable ? (accionesMenu ?? []).filter((a) => !duplicatesReopen(a.from)) : (accionesMenu ?? []);
+
+  const say = (code: string) => {
+    const key = REOPEN_ERROR_KEYS[code];
+    return key && tRoot.has(key) ? tRoot(key) : code;
+  };
+  const confirm = useConfirm();
+  // One guard for cancel / reopen: the cancel dialog stays open (and un-closable) while it runs.
+  const { submitting: busy, submit: act } = useSubmit((fn: () => Promise<string | null>) => fn(), {
+    onSuccess: (msg) => {
+      if (msg) toast.success(msg);
+      setCancelOpen(false);
+      onDone();
+    },
+    onError: (err) => {
+      if (!(err instanceof ApiError && REOPEN_ERROR_KEYS[err.code])) return false;
+      toast.error(say(err.code));
+      return true;
+    },
+  });
+  const missing = sessionReasonMissing({ reason: motivo }).map(() => t("motivo"));
+  const cancel = (mode: "one" | "all", reason: string) =>
+    act(async () => {
+      if (mode === "one") {
+        await cancelarSesion(day.sessionId, reason, day.centerId);
+        return null;
+      }
+      const r = await cancelPatientDay(patientId!, reason, day.centerId);
+      return t("cancelledMany", { n: r.count });
+    });
+  const reopenOne = () =>
+    act(async () => {
+      await reopenSession(day.sessionId, undefined, day.centerId);
+      return t("reopened");
+    });
+  const reopenAll = () =>
+    act(async () => {
+      const r = await reopenPatientDay(patientId!, day.centerId);
+      const skipped = skippedReasons(r.skipped);
+      if (skipped.length) {
+        toast.warning(t("reopenSkipped", { n: r.reopened.length, reasons: skipped.map((x) => `${say(x.code)} (${x.n})`).join(" · ") }));
+        return null;
+      }
+      return t("reopenedMany", { n: r.reopened.length });
+    });
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8" disabled={disabled} aria-label={t("acciones")}>
+          <Button variant="ghost" size="icon" className="size-8" disabled={disabled || busy} aria-label={t("acciones")}>
             <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -86,19 +147,24 @@ export function RowMenu({
             </DropdownMenuItem>
           ))}
           {/* Acciones data-driven desde el estado actual (p. ej. Reactivar una cancelada → segunda
-              oportunidad). Confirmación con toast cuando la transición del BE la exige. */}
-          {(accionesMenu ?? []).map((a) => (
+              oportunidad). Blocking confirm when the BE transition asks for it. */}
+          {reopenable && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); reopenOne(); }}>
+              {t("reopen")}
+            </DropdownMenuItem>
+          )}
+          {reopenable && patientId && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); reopenAll(); }}>
+              {t("reopenAll")}
+            </DropdownMenuItem>
+          )}
+          {acciones.map((a) => (
             <DropdownMenuItem
               key={a.clave}
-              onSelect={(e) => {
+              onSelect={async (e) => {
                 e.preventDefault();
-                if (a.confirmar) {
-                  toast(t("confirmarAccion", { accion: a.label }), {
-                    action: { label: a.label, onClick: () => onAccion?.(a.clave) },
-                  });
-                } else {
+                if (!a.confirmar || (await confirm({ title: t("confirmarAccion", { accion: a.label }), confirmLabel: a.label })))
                   onAccion?.(a.clave);
-                }
               }}
             >
               {a.label}
@@ -114,9 +180,19 @@ export function RowMenu({
               {t("historial")}
             </DropdownMenuItem>
           )}
+          {can("change_log.read") && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setChangesOpen(true); }}>
+              {tRoot("changeLog.title")}
+            </DropdownMenuItem>
+          )}
           {!cancelada && (
-            <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen(true); }}>
+            <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("one"); }}>
               {t("cancelar")}
+            </DropdownMenuItem>
+          )}
+          {!cancelada && patientId && (
+            <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("all"); }}>
+              {t("cancelAll")}
             </DropdownMenuItem>
           )}
           {canReparar && (
@@ -127,49 +203,59 @@ export function RowMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader><DialogTitle>{t("cancelarTitle")}</DialogTitle></DialogHeader>
-          <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivo")} autoFocus />
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setCancelOpen(false)}>{tc("cancel")}</Button>
-            <Button
-              variant="destructive"
-              disabled={!motivo.trim()}
-              onClick={() => { setCancelOpen(false); onCancelar(motivo.trim()); }}
-            >
-              {t("cancelar")}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ChangeLogSheet
+        open={changesOpen}
+        onOpenChange={setChangesOpen}
+        filter={{ entityType: "frontdesk_session", entityId: day.sessionId, centerIds: day.centerId ? [day.centerId] : undefined }}
+        onUndone={onDone}
+      />
 
-      <Dialog open={repararOpen} onOpenChange={setRepararOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader><DialogTitle>{t("repararTitle")}</DialogTitle></DialogHeader>
-          <div className="space-y-2">
-            <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivo")} autoFocus />
-            <Select value={estadoNuevo} onValueChange={setEstadoNuevo}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("estadoNuevo")} /></SelectTrigger>
-              <SelectContent>
-                {estados.map((e) => <SelectItem key={e.clave} value={e.clave}>{e.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setRepararOpen(false)}>{tc("cancel")}</Button>
-            <Button
-              disabled={!motivo.trim()}
-              onClick={() => {
-                setRepararOpen(false);
-                onReparar({ reason: motivo.trim(), ...(estadoNuevo ? { status: estadoNuevo } : {}) });
-              }}
-            >
-              {t("reparar")}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={!!cancelOpen}
+        onOpenChange={(v) => !v && setCancelOpen(false)}
+        size="sm"
+        title={cancelOpen === "all" ? t("cancelAllTitle") : t("cancelarTitle")}
+        description={cancelOpen === "all" ? t("cancelAllHint") : undefined}
+        onSubmit={() => cancel(cancelOpen || "one", motivo.trim())}
+        actions={[
+          {
+            label: cancelOpen === "all" ? t("cancelAll") : t("cancelar"),
+            variant: "destructive",
+            onClick: () => cancel(cancelOpen || "one", motivo.trim()),
+          },
+        ]}
+        submitting={busy}
+        missing={missing}
+      >
+        <Field label={t("motivo")} htmlFor="row-cancel-reason" required>
+          <Input id="row-cancel-reason" value={motivo} onChange={(e) => setMotivo(e.target.value)} autoFocus />
+        </Field>
+      </FormDialog>
+
+      <FormDialog
+        open={repararOpen}
+        onOpenChange={setRepararOpen}
+        size="sm"
+        title={t("repararTitle")}
+        onSubmit={() => {
+          setRepararOpen(false);
+          onReparar({ reason: motivo.trim(), ...(estadoNuevo ? { status: estadoNuevo } : {}) });
+        }}
+        submitLabel={t("reparar")}
+        missing={missing}
+      >
+        <Field label={t("motivo")} htmlFor="row-repair-reason" required>
+          <Input id="row-repair-reason" value={motivo} onChange={(e) => setMotivo(e.target.value)} autoFocus />
+        </Field>
+        <Field label={t("estadoNuevo")} htmlFor="row-repair-status">
+          <Select value={estadoNuevo} onValueChange={setEstadoNuevo}>
+            <SelectTrigger id="row-repair-status" className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
+            <SelectContent>
+              {estados.map((e) => <SelectItem key={e.clave} value={e.clave}>{e.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Field>
+      </FormDialog>
     </>
   );
 }

@@ -14,8 +14,11 @@ import {
 
 import {
   filterByConsultationSubtype,
+  sortByArrival,
+  asConsultationView,
   filterByKind,
   filterByService,
+  filterByServiceArrivedPending,
   filterPatients,
   orderSections,
   servicesOfTheDay,
@@ -23,24 +26,27 @@ import {
 } from "@/lib/frontdesk/patient-day"
 import { useMyFrontdeskPreference } from "@/hooks/use-frontdesk-default-tab"
 import { cn } from "@/lib/utils"
-import { usePatientDay } from "@/hooks/use-patient-day"
+import { usePatientDay, useServiceBoards } from "@/hooks/use-patient-day"
 import { useCentroGate as useCenterGate } from "@/hooks/use-centro-gate"
 import { useCan } from "@/hooks/use-can"
 import { todayISO } from "@/components/frontdesk/frontdesk-board.helpers"
 import { UbicacionEnVivoWidget as LiveLocationWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget"
+import { MedicosLibresWidget } from "@/components/frontdesk/medicos-libres-widget"
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button"
+import { TechnicianStatusButton } from "@/components/frontdesk/technician-status-button"
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler"
 import { AgregarCitaModal as AddConsultationModal } from "@/components/tablero/agregar-cita-modal"
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker"
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
 import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip"
 import { PatientDeskSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
+import { ServiceFilterDropdown, consultSubtypeLabel, type ServiceOfTheDay } from "@/components/patient-desk/service-filter-dropdown"
+import { DaySummaryDialog } from "@/components/patient-desk/day-summary-dialog"
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail"
-import { LiveBadge } from "@/components/live-badge"
+import { EnTerapiaSinAsistirBanner } from "@/components/frontdesk/en-terapia-sin-asistir-banner"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   Dialog,
@@ -52,12 +58,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-const SUB_FILTER_ALL = "__all__"
+import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
 
 // Patient desk — the frontdesk turned around (alternative to /boards/frontdesk, which stays as is):
 // the day's patients first, services and consultation together; pick one to see and work all their
@@ -98,7 +102,7 @@ export function PatientDesk() {
     | { open: false }
   >({ open: false })
 
-  const data = usePatientDay(gate.centro, date)
+  const day = usePatientDay(gate.centro, date)
   // Services / consultation / all. Starts on consultation for whoever has «lands on Consulta» in their
   // staff record (the reception people, set per person in the staff screen — not a role list here).
   const preference = useMyFrontdeskPreference(gate.centro)
@@ -122,46 +126,91 @@ export function PatientDesk() {
   const [consultSubtypeFilter, setConsultSubtypeFilter] = React.useState<
     string | null
   >(() => (freshToday ? initialParams.get("subtype") : null))
+  // Narrows the service filter further to "arrived but not yet attended" — the owner's N=presente/
+  // N=asistidos gap (06-nov-2026), one click away from the dropdown's own counts.
+  const [serviceArrivedPending, setServiceArrivedPending] = React.useState(false)
+  const pickServiceFilter = (serviceId: string | null, pendingOnly = false) => {
+    setServiceFilter(serviceId)
+    setServiceArrivedPending(serviceId ? pendingOnly : false)
+  }
   const pickKind = (k: PatientKind) => {
     setKindPicked(k)
     setServiceFilter(null)
+    setServiceArrivedPending(false)
     setConsultSubtypeFilter(null)
   }
+  const [summaryOf, setSummaryOf] = React.useState<ServiceOfTheDay | null>(null)
   const servicesToday = React.useMemo(
-    () => servicesOfTheDay(data.patients),
-    [data.patients]
+    () => servicesOfTheDay(day.patients),
+    [day.patients]
   )
   const consultSubtypes = React.useMemo(
     () =>
-      [...(data.consultationDefinition?.subtypes ?? [])].sort(
+      [...(day.consultationDefinition?.subtypes ?? [])].sort(
         (a, b) => a.sortOrder - b.sortOrder
       ),
-    [data.consultationDefinition]
+    [day.consultationDefinition]
   )
   const patients = React.useMemo(() => {
-    let list = filterByKind(data.patients, kind)
+    let list = filterByKind(day.patients, kind)
     const serviceFiltered = kind === "services" && !!serviceFilter
-    if (serviceFiltered) list = filterByService(list, serviceFilter)
+    if (serviceFiltered) {
+      list =
+        serviceArrivedPending
+          ? filterByServiceArrivedPending(list, serviceFilter!)
+          : filterByService(list, serviceFilter!)
+    }
     if (kind === "consultation")
-      list = filterByConsultationSubtype(list, consultSubtypeFilter)
+      list = sortByArrival(
+        filterByConsultationSubtype(list, consultSubtypeFilter).map(
+          asConsultationView
+        )
+      )
     // Pending sections first, unless a service filter sets the order (handoff lo-pendiente-primero).
     list = orderSections(list, {
       serviceFiltered,
-      isTerminal: data.isConsultationTerminal,
+      isTerminal: day.isConsultationTerminal,
     })
     return filterPatients(list, query)
   }, [
-    data.patients,
-    data.isConsultationTerminal,
+    day.patients,
+    day.isConsultationTerminal,
     kind,
     serviceFilter,
+    serviceArrivedPending,
     consultSubtypeFilter,
     query,
   ])
+  // Nuevos/seguimiento EN SALA HOY (dueño, 06-nov-2026): solo pacientes PRESENTES — contar la lista
+  // completa (agendados que ni han llegado) no dice nada útil sobre lo que está pasando ahora mismo.
+  // `presentAt` ya es el de la CONSULTA (asConsultationView lo pisa con consultationPresentAt), no el
+  // de un servicio. Data-driven del catálogo de subtipos del tablero (consultSubtypes), nunca
+  // "nueva"/"seguimiento" a mano, para que cubra cualquier subtipo que el centro configure.
+  // Same numbers in every tab (the toolbar does not change when switching): the whole day's
+  // consultations, not the tab's filtered list.
+  const consultSubtypeCounts = React.useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const s of consultSubtypes) counts.set(s.slug, 0)
+    for (const p of filterByKind(day.patients, "consultation").map(asConsultationView)) {
+      if (!p.presentAt) continue
+      for (const slug of p.consultationSubtypes) {
+        if (counts.has(slug)) counts.set(slug, (counts.get(slug) ?? 0) + 1)
+      }
+    }
+    return counts
+  }, [day.patients, consultSubtypes])
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId)
     ? selectedId
     : (patients[0]?.patientId ?? null)
+  // Only the open patient's service boards are fetched (and refetched on every refresh).
+  const boardsBySlug = useServiceBoards(
+    gate.centro,
+    date,
+    (day.patients.find((p) => p.patientId === effectiveSelected)?.services ?? []).map((s) => s.slug),
+    day.refreshTick
+  )
+  const data = React.useMemo(() => ({ ...day, boardsBySlug }), [day, boardsBySlug])
 
   // First load (or a new date/center): skeleton instead of a "0 patients" count and an empty list.
   const loadingDay =
@@ -199,9 +248,97 @@ export function PatientDesk() {
       {/* Title only: on this sidebar destination the shell shows it, so PageHeader renders nothing.
           The live badge sits in the toolbar instead of costing the page a row of its own. */}
       <PageHeader title={t("title")} />
+      {!gate.cargando && !gate.sinCentro && !gate.necesitaPicker && (
+        <EnTerapiaSinAsistirBanner centro={gate.centro} />
+      )}
 
+      {/* ONE row, the same in every tab (owner, 17-nov-2026): what the list shows on the left (tab,
+          sub-filter, date, search), who is free right now and «Citar» on the right. Facts about the
+          list («En sala») and «En vivo» (a dot) head the list itself. */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[240px] flex-1 sm:max-w-md">
+        <div
+          className="inline-flex rounded-md border p-0.5"
+          role="group"
+          aria-label={t("kindLabel")}
+        >
+          {(["all", "services", "consultation"] as const).map((k) => {
+            const active = kind === k
+            // The active Servicios/Consulta tab carries its own sub-filter: clicking it opens the menu
+            // (owner, 17-nov-2026: no separate ▾ button floating next to the tabs).
+            const hasMenu = active && k !== "all"
+            const tab = (
+              <button
+                key={k}
+                type="button"
+                onClick={hasMenu ? undefined : () => pickKind(k)}
+                aria-pressed={active}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded px-3 py-1 text-xs font-medium",
+                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {t(`kind.${k}`)}
+                {hasMenu && <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />}
+              </button>
+            )
+            return hasMenu ? (
+              <ServiceFilterDropdown
+                key={k}
+                kind={kind}
+                serviceFilter={serviceFilter}
+                consultSubtypeFilter={consultSubtypeFilter}
+                servicesToday={servicesToday}
+                consultSubtypes={consultSubtypes}
+                onPickService={pickServiceFilter}
+                onPickConsultSubtype={setConsultSubtypeFilter}
+                onOpenSummary={setSummaryOf}
+                trigger={tab}
+              />
+            ) : (
+              tab
+            )
+          })}
+        </div>
+        {/* El filtro activo se ve, no solo se infiere del ícono relleno — antes alguien dejaba
+            "Seguimiento" puesto y no se daba cuenta de que algunos pacientes no aparecían (handoff
+            quejas-de-mostrador-2026-10-20 §3). */}
+        {kind === "services" && serviceFilter && (
+          <button
+            type="button"
+            onClick={() => pickServiceFilter(null)}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
+              serviceArrivedPending ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
+            )}
+          >
+            {t(serviceArrivedPending ? "filteringByPending" : "filteringBy", {
+              name: servicesToday.find((s) => s.serviceId === serviceFilter)?.name ?? serviceFilter,
+            })}
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3" />
+          </button>
+        )}
+        {kind === "consultation" && consultSubtypeFilter && (
+          <button
+            type="button"
+            onClick={() => setConsultSubtypeFilter(null)}
+            className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+          >
+            {t("filteringBy", {
+              name: (() => {
+                const s = consultSubtypes.find((x) => x.slug === consultSubtypeFilter)
+                return s ? consultSubtypeLabel(s, t, tRoot) : consultSubtypeFilter
+              })(),
+            })}
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3" />
+          </button>
+        )}
+        <DatePicker
+          className="w-40"
+          value={date}
+          onChange={setDate}
+          aria-label={t("date")}
+        />
+        <div className="relative min-w-48 flex-1 sm:max-w-md">
           <HugeiconsIcon
             icon={Search01Icon}
             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -229,212 +366,69 @@ export function PatientDesk() {
             </button>
           )}
         </div>
-        <DatePicker
-          className="w-40"
-          value={date}
-          onChange={setDate}
-          aria-label={t("date")}
-        />
-        <div
-          className="inline-flex rounded-md border p-0.5"
-          role="group"
-          aria-label={t("kindLabel")}
-        >
-          {(["all", "services", "consultation"] as const).map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => pickKind(k)}
-              aria-pressed={kind === k}
-              className={cn(
-                "rounded px-3 py-1 text-xs font-medium",
-                kind === k
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              {t(`kind.${k}`)}
-            </button>
-          ))}
-        </div>
-        {kind === "services" || kind === "consultation" ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant={
-                  (kind === "services" && serviceFilter) ||
-                  (kind === "consultation" && consultSubtypeFilter)
-                    ? "default"
-                    : "outline"
-                }
-                size="icon"
-                className="size-7"
-                aria-label={
-                  kind === "services" ? t("filterByService") : t("filterByType")
-                }
-              >
-                <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {kind === "services" ? (
-                <DropdownMenuRadioGroup
-                  value={serviceFilter ?? SUB_FILTER_ALL}
-                  onValueChange={(v) =>
-                    setServiceFilter(v === SUB_FILTER_ALL ? null : v)
-                  }
-                >
-                  <DropdownMenuRadioItem value={SUB_FILTER_ALL}>
-                    {t("allServices")}
-                  </DropdownMenuRadioItem>
-                  {servicesToday.map((s) => (
-                    <DropdownMenuRadioItem
-                      key={s.serviceId}
-                      value={s.serviceId}
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <span
-                          className="size-2 rounded-full"
-                          style={{
-                            backgroundColor:
-                              s.color ?? "var(--muted-foreground)",
-                          }}
-                          aria-hidden
-                        />
-                        {s.name}
-                      </span>
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              ) : (
-                <DropdownMenuRadioGroup
-                  value={consultSubtypeFilter ?? SUB_FILTER_ALL}
-                  onValueChange={(v) =>
-                    setConsultSubtypeFilter(v === SUB_FILTER_ALL ? null : v)
-                  }
-                >
-                  <DropdownMenuRadioItem value={SUB_FILTER_ALL}>
-                    {t("allTypes")}
-                  </DropdownMenuRadioItem>
-                  {consultSubtypes.map((s) => (
-                    <DropdownMenuRadioItem key={s.id} value={s.slug}>
-                      {tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : null}
-        {/* El filtro activo se ve, no solo se infiere del ícono relleno — antes alguien dejaba
-            "Seguimiento" puesto y no se daba cuenta de que algunos pacientes no aparecían (handoff
-            quejas-de-mostrador-2026-10-20 §3). */}
-        {kind === "services" && serviceFilter && (
-          <button
-            type="button"
-            onClick={() => setServiceFilter(null)}
-            className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
-          >
-            {t("filteringBy", {
-              name: servicesToday.find((s) => s.serviceId === serviceFilter)?.name ?? serviceFilter,
-            })}
-            <HugeiconsIcon icon={Cancel01Icon} className="size-3" />
-          </button>
-        )}
-        {kind === "consultation" && consultSubtypeFilter && (
-          <button
-            type="button"
-            onClick={() => setConsultSubtypeFilter(null)}
-            className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
-          >
-            {t("filteringBy", {
-              name: (() => {
-                const s = consultSubtypes.find((x) => x.slug === consultSubtypeFilter)
-                return s ? (tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug) : consultSubtypeFilter
-              })(),
-            })}
-            <HugeiconsIcon icon={Cancel01Icon} className="size-3" />
-          </button>
-        )}
-        {loadingDay ? (
-          <Skeleton aria-hidden className="h-3 w-20" />
-        ) : (
-          <span className="text-xs text-muted-foreground">
-            {t("patientsCount", { n: patients.length })}
-          </span>
-        )}
-        {data.live && <LiveBadge label={t("live")} />}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <LiveLocationWidget
             centroId={gate.centro}
             nombreServicio={serviceName}
             iconOnly
           />
+          <MedicosLibresWidget rows={data.consultations?.rows ?? []} date={date} centroId={gate.centro} centroNombre={gate.centroNombre} iconOnly />
           <NurseStatusButton
             centro={gate.centro}
             fecha={date}
             onChanged={data.refresh}
           />
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/scheduling/appointments">
-              {t("serviceAppointments")}
-            </Link>
-          </Button>
-          {/* «Citar» follows the toggle: Servicios books therapies (the filtered service preselected),
-              Consulta adds a consultation to today's board, Todos asks which. */}
-          {can("citas.create") &&
-            (kind === "all" ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm">
-                    <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
-                    {t("book")}
-                    <HugeiconsIcon
-                      icon={ArrowDown01Icon}
-                      className="size-3.5"
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+          <TechnicianStatusButton centro={gate.centro} fecha={date} />
+          {/* «Citar» is the same menu in every tab, so the toolbar does not change; in Servicios a
+              filtered service is preselected. The service appointments list lives here too. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm">
+                <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
+                {t("book")}
+                <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {can("citas.create") && (
+                <>
                   <DropdownMenuItem
-                    onSelect={() => setSchedule({ open: true, pacienteId: "" })}
+                    onSelect={() =>
+                      setSchedule({
+                        open: true,
+                        pacienteId: "",
+                        servicioId: kind === "services" ? (serviceFilter ?? undefined) : undefined,
+                      })
+                    }
                   >
                     {t("bookService")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => setAddingConsultation({ open: true })}
-                  >
+                  <DropdownMenuItem onSelect={() => setAddingConsultation({ open: true })}>
                     {t("bookConsultation")}
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button
-                size="sm"
-                onClick={() =>
-                  kind === "consultation"
-                    ? setAddingConsultation({ open: true })
-                    : setSchedule({
-                        open: true,
-                        pacienteId: "",
-                        servicioId: serviceFilter ?? undefined,
-                      })
-                }
-              >
-                <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
-                {t(
-                  kind === "consultation" ? "bookConsultation" : "bookService"
-                )}
-              </Button>
-            ))}
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem asChild>
+                <Link href="/scheduling/appointments">{t("serviceAppointments")}</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* No margins here: PageContainer's gap spaces the rows, and a strip that renders nothing
           (no queue today) adds no gap, so no empty band is left behind. */}
-      {kind !== "consultation" && (
-        <TherapyQueueStrip centerId={gate.centro} date={date} />
+      <TherapyQueueStrip centerId={gate.centro} date={date} />
+      {summaryOf && gate.centro && (
+        <DaySummaryDialog
+          open
+          onOpenChange={(v) => !v && setSummaryOf(null)}
+          service={{ id: summaryOf.serviceId, name: summaryOf.name }}
+          date={date}
+          centerId={gate.centro}
+          centerName={gate.centroNombre}
+        />
       )}
 
       {gate.cargando ? (
@@ -444,9 +438,7 @@ export function PatientDesk() {
           {tRoot("facturacion.general.sinCentro")}
         </p>
       ) : gate.necesitaPicker ? (
-        <div className="max-w-xl">
-          <CenterPicker centros={gate.centros} onPick={gate.pick} />
-        </div>
+        <CenterPicker centros={gate.centros} onPick={gate.pick} />
       ) : data.error ? (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {data.error}
@@ -459,9 +451,32 @@ export function PatientDesk() {
         </p>
       ) : (
         <PatientListView
+          live={data.live}
+          headerEnd={
+            // Consultation patients in the room: meaningful in Todos and Consulta, not in Servicios.
+            kind !== "services" && consultSubtypes.length > 0 && (
+              <span className="inline-flex flex-wrap items-center gap-x-3">
+                <span>{t("enSala")}:</span>
+                {consultSubtypes.map((s) => (
+                  <span key={s.slug} className="whitespace-nowrap">
+                    {consultSubtypeLabel(s, t, tRoot)}{" "}
+                    <span className="font-semibold text-foreground tabular-nums">{consultSubtypeCounts.get(s.slug) ?? 0}</span>
+                  </span>
+                ))}
+                {/* La suma, para no obligar al usuario a sumarlas de cabeza (dueño, 06-nov-2026). */}
+                <span className="whitespace-nowrap">
+                  {t("enSalaTotal")}{" "}
+                  <span className="font-semibold text-foreground tabular-nums">
+                    {[...consultSubtypeCounts.values()].reduce((sum, n) => sum + n, 0)}
+                  </span>
+                </span>
+              </span>
+            )
+          }
           patients={patients}
           data={data}
           kind={kind}
+          serviceFilter={kind === "services" ? serviceFilter : null}
           date={date}
           centerId={gate.centro}
           selectedId={effectiveSelected}
@@ -505,7 +520,7 @@ export function PatientDesk() {
 
       {addingConsultation.open && (
         <AddConsultationModal
-          tablero="atencion"
+          tablero={CONSULTATION_BOARD}
           centroId={gate.centro}
           lockedPatient={
             addingConsultation.pacienteId

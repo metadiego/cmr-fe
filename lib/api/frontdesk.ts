@@ -1,7 +1,8 @@
 import type { components } from "./schema";
 import type { ApiWarning } from "./types";
-import { apiFetch, apiFetchEnvelope } from "./client";
-import { normalizeBookMultiple, type BookMultipleResponseRaw } from "@/lib/frontdesk/book-multiple";
+import { apiFetch, apiFetchEnvelope, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
+import { normalizeBookMultipleResult, type BookMultipleResultRaw } from "./book-multiple";
 
 // Escritura con avisos NO bloqueantes (BE PR #168): la operación se realiza y el BE adjunta
 // `meta.warnings` (p. ej. cupo excedido). El FE los muestra como toast traducido por labelKey.
@@ -13,7 +14,7 @@ export type EmbeddedPatient = { id: string; medicalRecordNumber: string | null; 
 
 // Service session (frontdesk). Day-based (no hora/horaFin). `patient` viene adjunto (ver EmbeddedPatient),
 // opcional en el tipo porque el schema aún no lo declara, pero el API ya lo manda (verificado prod 29-sep).
-export type Sesion = components["schemas"]["FrontdeskSesionEntity"] & { patient?: EmbeddedPatient | null };
+export type Sesion = components["schemas"]["FrontdeskSesionEntity"] & { patient?: EmbeddedPatient | null; clinicName?: string | null };
 export type CreateSesionPayload = components["schemas"]["CreateSesionDto"];
 export type EstadoSesion = Sesion["status"];
 
@@ -23,21 +24,22 @@ function asArray<T>(res: unknown): T[] {
   return Array.isArray(items) ? (items as T[]) : [];
 }
 
-// GET /frontdesk/sesiones?desde&hasta&servicioId?&tecnicoId? — flat array (NOT
-// paginated) of sessions in the range; for the month calendar.
+// GET /frontdesk/sesiones?desde&hasta&servicioId?&tecnicoId? — flat array (NOT paginated) of the range.
 export async function listSesionesRango(params: {
   desde: string;
   hasta: string;
   servicioId?: string;
   tecnicoId?: string;
   pacienteId?: string; // historial de servicios de un paciente (ficha → Acciones)
-  centroId?: string; // fuerza el centro de la lectura vía X-Tenant-ID (selector de centro EN la pantalla)
+  centroId?: CenterChoice; // one center (X-Tenant-ID), several or `null` (every readable one: calendar)
 }): Promise<Sesion[]> {
   const sp = new URLSearchParams({ from: params.desde, to: params.hasta });
   if (params.servicioId) sp.set("serviceId", params.servicioId);
   if (params.tecnicoId) sp.set("technicianId", params.tecnicoId);
   if (params.pacienteId) sp.set("patientId", params.pacienteId);
-  return asArray<Sesion>(await apiFetch(`/frontdesk/sesiones?${sp.toString()}`, {}, params.centroId));
+  // A patient's history spans every readable center; a day view is one; the calendar, those shown.
+  const path = `/frontdesk/sesiones?${sp.toString()}`;
+  return asArray<Sesion>(await apiFetch(params.pacienteId ? path : await oneCenterPath(path, params.centroId), {}, tenantOf(params.centroId)));
 }
 
 export function getSesion(id: string): Promise<Sesion> {
@@ -93,41 +95,39 @@ export async function crearSesion(
 
 // ——— AGENDAR (programar citas de servicio) — BE en prod 2026-07-23 ———
 
-// Agenda VARIAS fechas de un servicio para un paciente (una cita por fecha). El BE avisa si excede la
-// disponibilidad (no bloquea). Devuelve las sesiones creadas (o un resumen).
+// Agenda VARIAS fechas de un servicio (una cita por fecha); el BE avisa si excede disponibilidad (no bloquea).
 export type AgendarMultiplePayload = components["schemas"]["AgendarMultipleDto"];
 export async function agendarMultiple(
   payload: AgendarMultiplePayload,
   centroId?: string,
-): Promise<ConWarnings<unknown>> {
+): Promise<ConWarnings<unknown> & { advertencias: ApiWarning[] }> {
   const env = await apiFetchEnvelope<unknown>(`/frontdesk/sesiones/agendar-multiple`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
-  return { data: env.data, warnings: env.meta.warnings ?? [] };
+  return { data: env.data, warnings: env.meta.warnings ?? [], advertencias: env.meta.advertencias ?? [] }; // BE #547: avisa, no bloquea
 }
 
 // Agenda VARIOS servicios en VARIAS fechas (el cruce completo) para un paciente, en UNA sola llamada
-// (POST /frontdesk/sessions/book-multiple), en inglés: `serviceIds` y `dates` (el BE mapeó `fechas→dates`
-// el 2026-09-17, commit 3334d3b; la v2 aún acepta `fechas`, verificado 2026-10-08). Devuelve `creadas` (las sesiones nuevas) y `omitidas` (cuántos
-// pares ya existían: idempotente), + avisos de cupo (meta.warnings) y de disponibilidad excedida por
-// servicio (data.aviso). Nunca bloquea. Handoff citar-varios-servicios.
+// (POST /frontdesk/sessions/book-multiple), en inglés: `serviceIds` y `dates`. Devuelve `creadas`/`omitidas`
+// (idempotente) + avisos de cupo y disponibilidad excedida. Nunca bloquea. Handoff citar-varios-servicios.
 export type BookMultipleResult = { creadas: Sesion[]; omitidas: number; aviso: unknown | null };
-type BookMultipleRaw = BookMultipleResponseRaw<Sesion>;
 export async function agendarVariosServicios(
   // Handoff citar-varios-servicios / citar-marcar-los-servicios-con-saldo.
   payload: { patientId: string; serviceIds: string[]; dates: string[]; time?: string },
   centroId?: string,
-): Promise<ConWarnings<BookMultipleResult>> {
-  const env = await apiFetchEnvelope<BookMultipleRaw>(`/frontdesk/sessions/book-multiple`, {
+): Promise<ConWarnings<BookMultipleResult> & { advertencias: ApiWarning[] }> {
+  const env = await apiFetchEnvelope<BookMultipleResultRaw<Sesion>>(`/frontdesk/sessions/book-multiple`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
+  // `advertencias` (BE #547): BOOKING_DAY_SKIPPED — un día se saltó por una regla que bloquea; el resto sí se agendó.
   return {
-    data: normalizeBookMultiple(env.data),
+    data: normalizeBookMultipleResult(env.data),
     warnings: env.meta.warnings ?? [],
+    advertencias: env.meta.advertencias ?? [],
   };
 }
 
@@ -146,7 +146,7 @@ export interface FrontdeskTab {
   slug: string;
   name: string;
   labelKey: string;
-  boardSlug: string; // "servicios" | "atencion"
+  boardSlug: string; // "servicios" | "atencion" ("frontdesk_consultation" after cmr-be #557: compare with isConsultationBoard)
   entity: string; // "sesion" | "cita"
   serviceId: string | null;
   sortOrder: number;
@@ -173,14 +173,15 @@ export type AgendaItem = {
   serviceName: string | null; // antes `servicioNombre`; el BE lo renombró a `serviceName` (2026-09-17)
   color: string | null;
 };
-export function getAgendaPaciente(
+export async function getAgendaPaciente(
   pacienteId: string,
   desde: string,
   hasta: string,
   centroId?: string,
 ): Promise<AgendaItem[]> {
   const sp = new URLSearchParams({ from: desde, to: hasta });
-  return apiFetch<unknown>(`/frontdesk/pacientes/${pacienteId}/agenda?${sp}`, {}, centroId).then((r) =>
+  const path = await oneCenterPath(`/frontdesk/pacientes/${pacienteId}/agenda?${sp}`, centroId);
+  return apiFetch<unknown>(path, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as AgendaItem[]) : (((r as { items?: AgendaItem[] })?.items) ?? []),
   );
 }
@@ -492,24 +493,25 @@ export interface FrontdeskAvisosReporte {
   byType: Record<string, number>; // se traduce al inglés en /api/v2 (verificado live 1-oct; sus claves de tipo son datos)
   avisos: FrontdeskAviso[]; // `avisos` NO en el mapa — dejado en español
 }
-export function getAvisosFrontdesk(
+export async function getAvisosFrontdesk(
   desde: string,
   hasta: string,
   centroId?: string,
 ): Promise<FrontdeskAvisosReporte> {
   const sp = new URLSearchParams({ from: desde, to: hasta });
-  return apiFetch<FrontdeskAvisosReporte>(`/frontdesk/reportes/avisos?${sp.toString()}`, {}, centroId);
+  const path = await oneCenterPath(`/frontdesk/reportes/avisos?${sp.toString()}`, centroId);
+  return apiFetch<FrontdeskAvisosReporte>(path, {}, centroId);
 }
 
-// Estatus de enfermeras del día (triage/vitales): actuales + catálogo de tipos (color/labelKey) +
-// set tipado (PR #141: SetNurseStatusDto — statusTipoId null = reset).
+// Estatus de personal del día (triage/vitales/descanso): actuales + catálogo + set (PR #141, statusTipoId null = reset).
 export type NurseStatusTipo = components["schemas"]["NurseStatusTipoEntity"];
-export type SetNurseStatusPayload = components["schemas"]["SetNurseStatusDto"];
+export type SetNurseStatusPayload = components["schemas"]["SetNurseStatusDto"] & { durationMinutes?: number }; // caducidad, BE PR #498 — a mano hasta gen:api
 export type NurseStatusActual = {
   staffId: string;
   personalNombre?: string | null; // NO en el mapa — dejado en español
   statusTypeId: string | null;
   date?: string;
+  expiresAt?: string | null; // caducidad (BE PR #498); vencido = ya no viene en la lectura
 };
 export function getNurseStatusTipos(centroId?: string): Promise<NurseStatusTipo[]> {
   return apiFetch<NurseStatusTipo[]>(`/frontdesk/nurse-status/tipos`, {}, centroId);
@@ -531,6 +533,8 @@ export type HistorialSesion = {
   totalSessions: number | null;
   areas: number | null;
   staffNombre: string | null;
+  /** Came from the legacy system: its «n/m» is its own text, fixed with legacy-label (cmr-be #641). */
+  migrated?: boolean;
 };
 export function getHistorialPaciente(
   pacienteId: string,

@@ -37,6 +37,8 @@ export async function subscribeCitas(opts: {
   onId?: (id: string) => void; // last event id, for resume
   lastEventId?: string;
   signal: AbortSignal;
+  // Another SSE bus with the same framing (e.g. RIGHT_NOW_STREAM_PATH). Default: the board bus.
+  path?: string;
 }): Promise<void> {
   const supabase = createClient();
   const {
@@ -52,7 +54,7 @@ export async function subscribeCitas(opts: {
   // El SSE `tablero/stream` NO tiene alias en inglés en el BE (@Sse('tablero/stream')
   // sin `board/stream`), así que la ruta se mantiene `tablero/stream`; solo cambia el
   // prefijo de versión v1→v2 para que la capa api-ingles traduzca las claves del evento.
-  const res = await fetch(`${env.API_BASE_URL}/api/v2/tablero/stream`, {
+  const res = await fetch(`${env.API_BASE_URL}${opts.path ?? "/api/v2/tablero/stream"}`, {
     headers,
     signal: opts.signal,
   });

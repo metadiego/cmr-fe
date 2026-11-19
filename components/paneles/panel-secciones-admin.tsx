@@ -14,13 +14,15 @@ import {
   reordenarSecciones,
   getPanelContadores,
   ASIGNA_A,
-  type PanelSeccion,
+  type PanelSeccionAdmin,
   type PanelContador,
   type CreatePanelSeccionPayload,
 } from "@/lib/api/paneles";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { getActiveCentro } from "@/lib/tenant";
+import { todayPR } from "@/lib/format/fecha";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { missingFields } from "@/lib/forms/missing";
 import { ApiError } from "@/lib/api/types";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
@@ -37,16 +39,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Field } from "@/components/kit/field";
+import { FormFooter } from "@/components/kit/form-footer";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
 
 // Capacidades por defecto SÓLO si el centro aún no tiene personal cargado (el BE hace el mismo
 // fallback). Con personal, el desplegable sale de sus capacidades reales — nada quemado.
@@ -61,14 +57,14 @@ type FormState = {
   asignaA: string;
   visible: boolean;
 };
-function fromSeccion(s: PanelSeccion): FormState {
+function fromSeccion(s: PanelSeccionAdmin): FormState {
   return {
-    clave: s.clave,
+    clave: s.slug,
     labelKey: s.labelKey,
     color: s.color ?? "",
     audio: s.audio ?? "",
-    capacidad: s.capacidad ?? "",
-    asignaA: s.asignaA ?? ASIGNA_A[0],
+    capacidad: s.capacity ?? "",
+    asignaA: s.assignsTo ?? ASIGNA_A[0],
     visible: s.visible,
   };
 }
@@ -93,12 +89,12 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
 
   const [nonce, setNonce] = React.useState(0);
   const reload = () => setNonce((n) => n + 1);
-  const { state } = useResource<PanelSeccion[]>(
+  const { state } = useResource<PanelSeccionAdmin[]>(
     () => getPanelSecciones(clave, { includeInactive: true }, centro),
     [clave, centro, nonce],
   );
   const secciones = React.useMemo(
-    () => (state.kind === "ok" ? [...state.data].sort((a, b) => a.orden - b.orden) : []),
+    () => (state.kind === "ok" ? [...state.data].sort((a, b) => a.sortOrder - b.sortOrder) : []),
     [state],
   );
 
@@ -115,8 +111,9 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
     return set.size > 0 ? [...set].sort() : CAPACIDADES_FALLBACK;
   }, [personalState]);
 
-  // Contador de avisos del día por sección (suma sobre el personal).
-  const hoy = new Date().toISOString().slice(0, 10);
+  // Contador de avisos del día por sección (suma sobre el personal). `todayPR()`, no toISOString
+  // (UTC): después de las 8pm AST ya es "mañana" en UTC y contaría el día equivocado.
+  const hoy = todayPR();
   const { state: contState } = useResource<PanelContador[]>(
     () => getPanelContadores(clave, hoy, centro).catch(() => []),
     [clave, centro, hoy, nonce],
@@ -130,11 +127,10 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
   const [selId, setSelId] = React.useState<string | null>(null);
   const [creando, setCreando] = React.useState(false);
   const [form, setForm] = React.useState<FormState>(EMPTY);
-  const [saving, setSaving] = React.useState(false);
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
 
-  function seleccionar(s: PanelSeccion) {
+  function seleccionar(s: PanelSeccionAdmin) {
     setCreando(false);
     setSelId(s.id);
     setForm(fromSeccion(s));
@@ -158,7 +154,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
     if (from < 0 || to < 0) return;
     const [moved] = arr.splice(from, 1);
     arr.splice(to, 0, moved);
-    const ordenes = arr.map((s, i) => ({ id: s.id, orden: i }));
+    const ordenes = arr.map((s, i) => ({ id: s.id, sortOrder: i }));
     try {
       await reordenarSecciones(clave, ordenes, centro);
       reload();
@@ -167,7 +163,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
     }
   }
 
-  async function toggle(s: PanelSeccion, campo: "visible" | "activo") {
+  async function toggle(s: PanelSeccionAdmin, campo: "visible" | "active") {
     try {
       await updatePanelSeccion(s.id, { [campo]: !s[campo] }, centro);
       reload();
@@ -176,44 +172,57 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
     }
   }
 
-  async function guardar() {
-    if (!form.clave.trim() || !form.labelKey.trim()) return;
-    setSaving(true);
-    const payload: CreatePanelSeccionPayload = {
-      clave: form.clave.trim(),
-      labelKey: form.labelKey.trim(),
-      color: form.color.trim() || null,
-      audio: form.audio.trim() || null,
-      capacidad: form.capacidad || undefined,
-      asignaA: (form.asignaA || ASIGNA_A[0]) as (typeof ASIGNA_A)[number],
-      visible: form.visible,
-    };
-    try {
+  const missing = missingFields([
+    [t("clave"), !!form.clave.trim()],
+    [t("labelKey"), !!form.labelKey.trim()],
+  ]);
+
+  const { submitting: saving, submit: guardar } = useSubmit(
+    async () => {
+      const payload: CreatePanelSeccionPayload = {
+        slug: form.clave.trim(),
+        labelKey: form.labelKey.trim(),
+        color: form.color.trim() || null,
+        audio: form.audio.trim() || null,
+        capacity: form.capacidad || undefined,
+        assignsTo: (form.asignaA || ASIGNA_A[0]) as (typeof ASIGNA_A)[number],
+        visible: form.visible,
+      };
       if (creando) {
         await createPanelSeccion(clave, payload, centro);
-        toast.success(t("creada"));
-      } else if (selId) {
-        // En edición no se manda la clave (es única/inmutable).
-        const { clave: _clave, ...rest } = payload;
-        void _clave;
-        await updatePanelSeccion(selId, rest, centro);
-        toast.success(t("guardada"));
+        return t("creada");
       }
-      setCreando(false);
-      reload();
-    } catch (e) {
-      toast.error(apiErrorMessage(e));
-    } finally {
-      setSaving(false);
-    }
-  }
+      if (!selId) throw new Error("no section selected"); // unreachable: the form shows only when creating or editing
+      // When editing the slug is not sent (it is unique/immutable).
+      const { slug: _slug, ...rest } = payload;
+      void _slug;
+      await updatePanelSeccion(selId, rest, centro);
+      return t("guardada");
+    },
+    {
+      onSuccess: (message) => {
+        toast.success(message);
+        setCreando(false);
+        reload();
+      },
+      onError: (e) => {
+        toast.error(apiErrorMessage(e));
+        return true;
+      },
+    },
+  );
 
-  // Borrado con 409 esperado (tiene histórico): mostrar el mensaje y ofrecer desactivar.
-  const [toDelete, setToDelete] = React.useState<PanelSeccion | null>(null);
-  async function confirmarBorrado() {
-    if (!toDelete) return;
-    const s = toDelete;
-    setToDelete(null);
+  // Delete with an expected 409 (it has history): show the message and offer to deactivate instead.
+  const confirm = useConfirm();
+  async function borrar(s: PanelSeccionAdmin) {
+    const nombre = tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.labelKey;
+    const ok = await confirm({
+      title: t("borrarTitulo"),
+      description: t("borrarCuerpo", { nombre }),
+      confirmLabel: t("borrar"),
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deletePanelSeccion(s.id, centro);
       toast.success(t("borrada"));
@@ -221,11 +230,11 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
       reload();
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) {
-        // El 409 trae el conteo del histórico en el mensaje. Ofrecer desactivar en su lugar.
+        // The 409 carries the history count in its message. Offer to deactivate instead.
         toast.error(e.message, {
           action: {
             label: t("desactivar"),
-            onClick: () => void toggle(s, "activo"),
+            onClick: () => void toggle(s, "active"),
           },
         });
       } else {
@@ -279,7 +288,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                   selId === s.id && "ring-2 ring-primary",
                   overId === s.id && dragId && "border-primary",
                   dragId === s.id && "opacity-50",
-                  !s.activo && "opacity-60",
+                  !s.active && "opacity-60",
                 )}
               >
                 <span className="cursor-grab text-muted-foreground" aria-hidden>
@@ -294,7 +303,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                   <span className="font-medium">
                     {tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.labelKey}
                   </span>
-                  <span className="ml-2 text-xs text-muted-foreground">{contadorDe(s.clave)}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{contadorDe(s.slug)}</span>
                 </span>
                 <span
                   className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex"
@@ -308,7 +317,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                   onClick={(e) => e.stopPropagation()}
                 >
                   {t("activa")}
-                  <Switch checked={s.activo} onCheckedChange={() => toggle(s, "activo")} />
+                  <Switch checked={s.active} onCheckedChange={() => toggle(s, "active")} />
                 </span>
                 {puedeBorrar && (
                   <Button
@@ -318,7 +327,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                     aria-label={t("borrar")}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setToDelete(s);
+                      void borrar(s);
                     }}
                   >
                     <HugeiconsIcon icon={Delete02Icon} className="size-4" />
@@ -337,40 +346,56 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
         </h2>
         {creando || selId ? (
           <div className="space-y-3">
-            <Campo label={t("clave")} hint={t("claveHint")}>
+            <Field label={t("clave")} htmlFor="panel-section-key" hint={t("claveHint")} required={creando}>
               <Input
+                id="panel-section-key"
+                aria-describedby="panel-section-key-hint"
                 value={form.clave}
                 onChange={(e) => set("clave", e.target.value)}
                 disabled={!creando}
                 placeholder="intravenoso"
                 className="font-mono"
               />
-            </Campo>
-            <Campo label={t("labelKey")} hint={t("labelKeyHint")}>
+            </Field>
+            <Field label={t("labelKey")} htmlFor="panel-section-label-key" hint={t("labelKeyHint")} required>
               <Input
+                id="panel-section-label-key"
+                aria-describedby="panel-section-label-key-hint"
                 value={form.labelKey}
                 onChange={(e) => set("labelKey", e.target.value)}
                 placeholder="panel.seccion.intravenoso"
                 className="font-mono"
               />
-            </Campo>
-            <Campo label={t("color")}>
+            </Field>
+            <Field label={t("color")} htmlFor="panel-section-color">
               <div className="flex items-center gap-2">
                 <Input
                   type="color"
+                  aria-label={t("color")}
                   value={/^#/.test(form.color) ? form.color : "#3b82f6"}
                   onChange={(e) => set("color", e.target.value)}
                   className="h-9 w-12 p-1"
                 />
-                <Input value={form.color} onChange={(e) => set("color", e.target.value)} placeholder="#3b82f6" />
+                <Input
+                  id="panel-section-color"
+                  value={form.color}
+                  onChange={(e) => set("color", e.target.value)}
+                  placeholder="#3b82f6"
+                />
               </div>
-            </Campo>
-            <Campo label={t("audio")} hint={t("audioHint")}>
-              <Input value={form.audio} onChange={(e) => set("audio", e.target.value)} placeholder="alarma" />
-            </Campo>
-            <Campo label={t("capacidad")} hint={t("capacidadHint")}>
+            </Field>
+            <Field label={t("audio")} htmlFor="panel-section-audio" hint={t("audioHint")}>
+              <Input
+                id="panel-section-audio"
+                aria-describedby="panel-section-audio-hint"
+                value={form.audio}
+                onChange={(e) => set("audio", e.target.value)}
+                placeholder="alarma"
+              />
+            </Field>
+            <Field label={t("capacidad")} htmlFor="panel-section-capacity" hint={t("capacidadHint")}>
               <Select value={form.capacidad || undefined} onValueChange={(v) => set("capacidad", v)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="panel-section-capacity" aria-describedby="panel-section-capacity-hint" className="w-full">
                   <SelectValue placeholder={t("capacidadPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -381,10 +406,10 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                   ))}
                 </SelectContent>
               </Select>
-            </Campo>
-            <Campo label={t("asignaA")} hint={t("asignaAHint")}>
+            </Field>
+            <Field label={t("asignaA")} htmlFor="panel-section-assigns-to" hint={t("asignaAHint")}>
               <Select value={form.asignaA} onValueChange={(v) => set("asignaA", v)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="panel-section-assigns-to" aria-describedby="panel-section-assigns-to-hint" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -395,62 +420,22 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
                   ))}
                 </SelectContent>
               </Select>
-            </Campo>
+            </Field>
             <div className="flex items-center justify-between">
-              <Label className="text-sm">{t("visible")}</Label>
-              <Switch checked={form.visible} onCheckedChange={(v) => set("visible", v)} />
+              <Label htmlFor="panel-section-visible" className="text-sm">{t("visible")}</Label>
+              <Switch id="panel-section-visible" checked={form.visible} onCheckedChange={(v) => set("visible", v)} />
             </div>
-            <Button
-              className="w-full"
-              onClick={guardar}
-              disabled={saving || !form.clave.trim() || !form.labelKey.trim()}
-            >
-              {saving ? tRoot("common.saving") : tRoot("common.save")}
-            </Button>
+            {/* Inline side panel, not a dialog: the footer alone, no cancel. Enter does not save here. */}
+            <FormFooter
+              primary={{ label: tRoot("common.save"), onClick: () => guardar() }}
+              missing={missing}
+              submitting={saving}
+            />
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">{t("elegirAyuda")}</p>
         )}
       </aside>
-
-      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("borrarTitulo")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("borrarCuerpo", {
-                nombre: toDelete
-                  ? tRoot.has(toDelete.labelKey)
-                    ? tRoot(toDelete.labelKey)
-                    : toDelete.labelKey
-                  : "",
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tRoot("common.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarBorrado}>{t("borrar")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-}
-
-function Campo({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-xs">{label}</Label>
-      {children}
-      {hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}
     </div>
   );
 }

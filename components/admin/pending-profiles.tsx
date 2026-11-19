@@ -14,6 +14,10 @@ import { ApiError } from "@/lib/api/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { missingFields } from "@/lib/forms/missing";
 import {
   TableBody,
   TableCell,
@@ -22,14 +26,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTable } from "@/components/ui/data-table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 type State =
   | { kind: "loading" }
@@ -48,9 +44,9 @@ export function PendingProfiles() {
   const t = useTranslations("admin");
   const [state, setState] = React.useState<State>({ kind: "loading" });
   const [busyId, setBusyId] = React.useState<string | null>(null);
+  const confirm = useConfirm();
   // Reject dialog state.
   const [reject, setReject] = React.useState<{ profile: Perfil; motivo: string } | null>(null);
-  const [rejecting, setRejecting] = React.useState(false);
 
   // Refetch the pending list. Called on mount and after a mutation. Does not
   // set "loading" synchronously (initial state is already loading); handlers
@@ -77,7 +73,18 @@ export function PendingProfiles() {
     };
   }, []);
 
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function onApprove(p: Perfil) {
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("approveTitle"),
+      description: t("approveBody", { email: p.email }),
+      confirmLabel: t("approve"),
+      destructive: false,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setBusyId(p.id);
     try {
       await approveProfile(p.id);
@@ -90,20 +97,25 @@ export function PendingProfiles() {
     }
   }
 
-  async function onConfirmReject() {
-    if (!reject || !reject.motivo.trim()) return;
-    setRejecting(true);
-    try {
+  const rejectMissing = missingFields([[t("rejectReason"), !!reject?.motivo.trim()]]);
+  const { submitting: rejecting, submit: confirmReject } = useSubmit(
+    async () => {
+      if (!reject) throw new Error("no profile"); // unreachable: the dialog is open only with a profile
       await rejectProfile(reject.profile.id, reject.motivo.trim());
-      toast.success(t("rejected", { email: reject.profile.email }));
-      setReject(null);
-      load();
-    } catch (err) {
-      toast.error(errMessage(err));
-    } finally {
-      setRejecting(false);
-    }
-  }
+      return reject.profile.email;
+    },
+    {
+      onSuccess: (email) => {
+        toast.success(t("rejected", { email }));
+        setReject(null);
+        load();
+      },
+      onError: (err) => {
+        toast.error(errMessage(err));
+        return true;
+      },
+    },
+  );
 
   if (state.kind === "loading") {
     return <p className="text-sm text-muted-foreground">{t("loading")}</p>;
@@ -128,7 +140,6 @@ export function PendingProfiles() {
           <TableRow>
             <TableHead>{t("columns.email")}</TableHead>
             <TableHead>{t("columns.name")}</TableHead>
-            <TableHead>{t("columns.accessMode")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
             <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
@@ -138,7 +149,6 @@ export function PendingProfiles() {
             <TableRow key={p.id}>
               <TableCell className="font-medium">{p.email}</TableCell>
               <TableCell>{[p.name, p.lastName].filter(Boolean).join(" ")}</TableCell>
-              <TableCell>{p.accessMode}</TableCell>
               <TableCell>
                 <Badge variant="secondary">{p.status}</Badge>
               </TableCell>
@@ -164,18 +174,24 @@ export function PendingProfiles() {
         </TableBody>
       </DataTable>
 
-      <Dialog
+      <FormDialog
         open={reject !== null}
         onOpenChange={(open) => !open && setReject(null)}
+        size="md"
+        title={t("rejectTitle")}
+        description={t("rejectDescription", { email: reject?.profile.email ?? "" })}
+        // Rejecting is outward and final: only the button fires it (Enter in the textarea is a newline).
+        onSubmit={() => {}}
+        actions={[
+          { label: t("confirmReject"), variant: "destructive", onClick: () => confirmReject() },
+        ]}
+        cancelLabel={t("cancel")}
+        submitting={rejecting}
+        missing={rejectMissing}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("rejectTitle")}</DialogTitle>
-            <DialogDescription>
-              {t("rejectDescription", { email: reject?.profile.email ?? "" })}
-            </DialogDescription>
-          </DialogHeader>
+        <Field label={t("rejectReason")} htmlFor="reject-profile-reason" required>
           <Textarea
+            id="reject-profile-reason"
             value={reject?.motivo ?? ""}
             onChange={(e) =>
               setReject((r) => (r ? { ...r, motivo: e.target.value } : r))
@@ -183,20 +199,8 @@ export function PendingProfiles() {
             placeholder={t("motivoPlaceholder")}
             rows={3}
           />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReject(null)}>
-              {t("cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={onConfirmReject}
-              disabled={rejecting || !reject?.motivo.trim()}
-            >
-              {t("confirmReject")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </Field>
+      </FormDialog>
     </>
   );
 }

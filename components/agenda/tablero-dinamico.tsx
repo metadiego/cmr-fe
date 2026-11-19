@@ -445,6 +445,7 @@ export function TableroDinamico({
           options={optionsByCol?.[col.clave] ?? []}
           centroId={centroId}
           etiqueta={col.label ?? (tRoot.has(col.labelKey) ? tRoot(col.labelKey) : col.clave)}
+          clearable={!!(col.render as { clearable?: boolean } | null)?.clearable}
           onSaved={onRefresh}
         />
       );

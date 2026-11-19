@@ -6,12 +6,14 @@ import { toast } from "sonner";
 
 import { getStatus, runNow, runOk, type ClinicStatus } from "@/lib/api/scheduling-bridge";
 import { useResource } from "@/hooks/use-resource";
-import { toastError } from "@/lib/api/errors";
+import { missingFields } from "@/lib/forms/missing";
 import { cn } from "@/lib/utils";
+import { todayPR } from "@/lib/format/fecha";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
 
 // Overview cards, one per visible center — GET /status returns ALL requested
 // centers in one call, independent of the single-center editor below.
@@ -109,37 +111,38 @@ function RunNowDialog({
   onDone: () => void;
 }) {
   const t = useTranslations("schedulingBridge.status");
-  const tRoot = useTranslations();
-  const today = new Date().toISOString().slice(0, 10);
+  // `todayPR()`, no toISOString (UTC): after 8pm AST that's already tomorrow.
+  const today = todayPR();
   const [desde, setDesde] = React.useState(today);
   const [hasta, setHasta] = React.useState(today);
-  const [busy, setBusy] = React.useState(false);
 
   // Off-schedule "run now" is for QA / hot-fixing a handful of days, never a bulk backfill —
   // cap it so a typo'd range (e.g. wrong year) can't fire thousands of dates at the BE.
   const MAX_DIAS = 31;
+  const missing = missingFields([
+    [t("from"), !!desde],
+    [t("to"), !!hasta],
+  ]);
   const dayCount = Math.floor((new Date(`${hasta}T00:00:00Z`).getTime() - new Date(`${desde}T00:00:00Z`).getTime()) / 86400000) + 1;
   const rangoValido = dayCount >= 1 && dayCount <= MAX_DIAS;
 
-  async function onSubmit() {
-    if (!rangoValido) return;
-    setBusy(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    () => {
       const dates: string[] = [];
       for (let d = new Date(`${desde}T00:00:00Z`); d <= new Date(`${hasta}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 1)) {
         dates.push(d.toISOString().slice(0, 10));
       }
-      const res = await runNow(clinic.clinicId, dates, clinic.clinicId);
-      if (res.ok) toast.success(t("runNowOk"));
-      else toast.error(res.reason ?? t("runNowNoCode"));
-      onClose();
-      onDone();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+      return runNow(clinic.clinicId, dates, clinic.clinicId);
+    },
+    {
+      onSuccess: (res) => {
+        if (res.ok) toast.success(t("runNowOk"));
+        else toast.error(res.reason ?? t("runNowNoCode"));
+        onClose();
+        onDone();
+      },
+    },
+  );
 
   return (
     <FormDialog
@@ -147,20 +150,19 @@ function RunNowDialog({
       onOpenChange={(o) => !o && onClose()}
       title={`${t("runNowTitle")} — ${centroNombre}`}
       description={t("runNowHelp")}
-      onSubmit={onSubmit}
-      submitting={busy}
-      canSubmit={rangoValido}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+      blocked={!rangoValido}
+      reason={rangoValido ? null : t("runNowRangeInvalid", { max: MAX_DIAS })}
       submitLabel={t("runNowSubmit")}
     >
-      <Field label={t("from")}>
-        <DatePicker value={desde} onChange={setDesde} />
+      <Field label={t("from")} htmlFor="run-now-from" required>
+        <DatePicker id="run-now-from" value={desde} onChange={setDesde} />
       </Field>
-      <Field label={t("to")}>
-        <DatePicker value={hasta} onChange={setHasta} />
+      <Field label={t("to")} htmlFor="run-now-to" required>
+        <DatePicker id="run-now-to" value={hasta} onChange={setHasta} />
       </Field>
-      {!rangoValido && (
-        <p className="text-xs text-destructive">{t("runNowRangeInvalid", { max: MAX_DIAS })}</p>
-      )}
     </FormDialog>
   );
 }

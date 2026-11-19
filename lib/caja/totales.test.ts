@@ -7,6 +7,7 @@ import {
   diferenciaCaja,
   ordenarDenominaciones,
   estadoCuadreVivo,
+  subtotalesTarjeta,
   money,
 } from "./totales.ts";
 
@@ -115,4 +116,29 @@ test("money formatea a $0.00, con separador de miles, y tolera NaN", () => {
   assert.equal(money(1234.5), "$1,234.50");
   assert.equal(money(0), "$0.00");
   assert.equal(money(Number.NaN), "$0.00");
+});
+
+test("subtotalesTarjeta: sin grupo padre (ningún porGrupo iguala totalTarjetas) no da subtotales", () => {
+  const grupos = [{ slug: "visa_mc", labelKey: "x", name: "Visa+MC", paymentMethods: ["visa", "mc"] }];
+  assert.deepEqual(subtotalesTarjeta(grupos, { visa_mc: 50 }, 100), []);
+});
+
+test("subtotalesTarjeta: subconjunto estricto del padre se reporta; el padre y los que no son subconjunto no", () => {
+  const grupos = [
+    { slug: "tarjetas", labelKey: "k.tarjetas", name: "Tarjetas", paymentMethods: ["visa", "mc", "amex"] },
+    { slug: "visa_mc", labelKey: "k.visa_mc", name: "Visa+MC", paymentMethods: ["visa", "mc"] },
+    { slug: "ath", labelKey: "k.ath", name: "ATH", paymentMethods: ["ath"] }, // no es tarjeta: no entra
+  ];
+  const porGrupo = { tarjetas: 100, visa_mc: 80, ath: 40 };
+  assert.deepEqual(subtotalesTarjeta(grupos, porGrupo, 100), [
+    { clave: "visa_mc", labelKey: "k.visa_mc", nombre: "Visa+MC", monto: 80 },
+  ]);
+});
+
+test("subtotalesTarjeta: un subconjunto en $0 se omite (nada que mostrar)", () => {
+  const grupos = [
+    { slug: "tarjetas", labelKey: "k.tarjetas", name: "Tarjetas", paymentMethods: ["visa", "mc"] },
+    { slug: "mc_solo", labelKey: "k.mc_solo", name: "Solo MC", paymentMethods: ["mc"] },
+  ];
+  assert.deepEqual(subtotalesTarjeta(grupos, { tarjetas: 100, mc_solo: 0 }, 100), []);
 });

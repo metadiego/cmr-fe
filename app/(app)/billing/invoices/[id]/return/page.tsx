@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { pickableMethods } from "@/lib/factura/payment-methods";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -437,7 +438,7 @@ function DevolverForm({
             <span className="text-xs font-medium text-muted-foreground">{t("returnRefund")}</span>
             <Select value={formaId} onValueChange={setFormaId}>
               <SelectTrigger><SelectValue placeholder={t("returnRefundNone")} /></SelectTrigger>
-              <SelectContent>{formas.map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}</SelectContent>
+              <SelectContent>{pickableMethods(formas).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}</SelectContent>
             </Select>
           </label>
         </div>

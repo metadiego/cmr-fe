@@ -14,6 +14,7 @@ import {
   type RolConPermisos,
 } from "@/lib/api/rbac"
 import { apiErrorMessage } from "@/lib/api/errors"
+import { isAdminRole } from "@/lib/access/role-keys"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -100,6 +101,8 @@ function RoleCard({
   // Estado inicial para detectar cambios (dirty): guardar solo cuando hay algo distinto.
   const inicial = React.useMemo(() => [...role.permissions].sort().join(","), [role.permissions])
   const sucio = [...selected].sort().join(",") !== inicial
+  // The admin role holds full access and cannot be edited (the backend answers 400 rbac.adminRoleFixed).
+  const fixed = isAdminRole(role)
 
   function toggle(clave: string, on: boolean) {
     setSelected((prev) => {
@@ -137,10 +140,11 @@ function RoleCard({
         <span className="ml-auto text-xs text-muted-foreground tabular-nums">
           {t("nSeleccionados", { n: selected.size })}
         </span>
-        <Button size="sm" onClick={guardar} disabled={!sucio || saving}>
+        <Button size="sm" onClick={guardar} disabled={!sucio || saving || fixed}>
           {saving ? t("saving") : t("save")}
         </Button>
       </header>
+      {fixed && <p className="border-b px-4 py-2 text-xs text-muted-foreground">{t("adminRoleFixed")}</p>}
 
       <div className="max-h-[26rem] space-y-2 overflow-y-auto p-3">
         {modulos.length === 0 ? (
@@ -157,7 +161,7 @@ function RoleCard({
               <div className="grid grid-cols-1 gap-1.5 px-3 pb-2 pt-1 sm:grid-cols-2">
                 {list.map((p) => (
                   <label key={p.slug} className="flex items-center gap-2 text-sm">
-                    <Checkbox checked={selected.has(p.slug)} onCheckedChange={(v) => toggle(p.slug, v === true)} />
+                    <Checkbox checked={selected.has(p.slug)} disabled={fixed} onCheckedChange={(v) => toggle(p.slug, v === true)} />
                     <span className="font-mono text-xs">{p.action}</span>
                   </label>
                 ))}

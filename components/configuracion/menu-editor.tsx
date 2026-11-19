@@ -30,16 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
 
 const ROOT = "__root__";
 const MAX_LEVELS = 4;
@@ -165,7 +156,7 @@ export function MenuEditor() {
   const [dragId, setDragId] = React.useState<string | null>(null);
   const [over, setOver] = React.useState<{ id: string; zone: Zone } | null>(null);
   const [saving, setSaving] = React.useState(false);
-  const [toDelete, setToDelete] = React.useState<MenuItem | null>(null);
+  const confirm = useConfirm();
   // Edición en línea del nombre libre (labelCustom).
   const [editing, setEditing] = React.useState<{ id: string; value: string } | null>(null);
   // Pila de deshacer: instantáneas del árbol (parentClave/orden/visible) antes de cada cambio.
@@ -360,10 +351,15 @@ export function MenuEditor() {
     }
   }
 
-  async function confirmDelete() {
-    if (!toDelete) return;
-    const it = toDelete;
-    setToDelete(null);
+  async function confirmDelete(it: MenuItem) {
+    const ok = await confirm({
+      title: t("deleteTitle"),
+      description: t("deleteBody", { name: label(it) }),
+      confirmLabel: t("delete"),
+      cancelLabel: t("cancel"),
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteMenuItem(it.id);
       toast.success(t("deleted"));
@@ -464,7 +460,7 @@ export function MenuEditor() {
               variant="ghost"
               className="size-7 text-muted-foreground opacity-0 group-hover:opacity-100"
               aria-label={t("delete")}
-              onClick={() => setToDelete(it)}
+              onClick={() => confirmDelete(it)}
             >
               <HugeiconsIcon icon={Delete02Icon} className="size-4" />
             </Button>
@@ -601,7 +597,7 @@ export function MenuEditor() {
             variant="ghost"
             className="size-7 text-muted-foreground opacity-0 group-hover:opacity-100"
             aria-label={t("delete")}
-            onClick={() => setToDelete(it)}
+            onClick={() => confirmDelete(it)}
           >
             <HugeiconsIcon icon={Delete02Icon} className="size-4" />
           </Button>
@@ -680,21 +676,6 @@ export function MenuEditor() {
           )}
         </div>
       </aside>
-
-      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("deleteBody", { name: toDelete ? label(toDelete) : "" })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>{t("delete")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

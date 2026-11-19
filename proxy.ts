@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
 import { HOME_ROUTE } from "@/lib/home-route";
+import { safeNextPath } from "@/lib/auth/next-path";
 
 // Next 16 renamed `middleware` to `proxy`. Refreshes the Supabase session cookie
 // AND gates access: every route is auth-by-default except the public allowlist —
@@ -48,14 +49,18 @@ export async function proxy(request: NextRequest) {
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    // Remember where they were going, so the login sends them back there (the Claude connector's
+    // consent page must keep its authorization_id). The login only follows it via safeNextPath.
+    url.search = "";
+    const next = safeNextPath(`${pathname}${request.nextUrl.search}`);
+    if (next) url.searchParams.set("next", next);
     return NextResponse.redirect(url);
   }
 
-  // Already signed in and landing on /login → straight home.
+  // Already signed in and landing on /login → where they were going, else home.
   if (user && pathname === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = HOME_ROUTE;
-    return NextResponse.redirect(url);
+    const next = safeNextPath(request.nextUrl.searchParams.get("next"));
+    return NextResponse.redirect(new URL(next ?? HOME_ROUTE, request.url));
   }
 
   return response;

@@ -2,8 +2,21 @@ import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
-import { getActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { handleSessionExpired } from "@/lib/auth/session-expired";
+import { oneCenterIds, type CenterChoice } from "@/lib/clinic-read-scope";
+import {
+  askConfirmation,
+  askPastDayReason,
+  CONFIRM_HEADER,
+  CONFIRMATION_DECLINED,
+  CHANGE_REASON_HEADER,
+  PAST_DAY_ACTION,
+  notifyPastDayChanged,
+  readConfirmation,
+  readPastDayConfirmation,
+  readPastDayReasonRequired,
+} from "./confirm-action";
 import {
   ApiError,
   type ApiEnvelope,
@@ -119,8 +132,64 @@ async function rawRequest<T>(
     }
   }
 
-  const body: unknown =
+  let body: unknown =
     res.status === 204 ? null : await res.json().catch(() => null);
+
+  // The safety shield (428 ACTION_REQUIRES_CONFIRMATION, lib/api/confirm-action.ts): ask, and on
+  // «Aceptar» repeat the SAME request with X-Confirm-Action. A LOOP, not a single retry: the past-day
+  // guard (BE PR #582-583) can make the SAME write need a reason first (400, no header at all) and
+  // THEN the usual confirmation (428) once it has one — and a write can need its generic confirmation
+  // AND the past-day one, in either order. Confirmed actions accumulate comma-joined
+  // (`X-Confirm-Action: invoice.void,cash.past_day.modify`); the reason, once given, rides every
+  // retry after it (`X-Change-Reason`). Bounded so a BE bug can't loop forever.
+  const confirmedActions = new Set<string>();
+  let changeReason: string | null = null;
+  for (let attempt = 0; attempt < 4 && !res.ok; attempt++) {
+    const errBody = (body as ApiErrorShape | null)?.error;
+
+    const reasonReq = readPastDayReasonRequired(res.status, errBody);
+    if (reasonReq) {
+      const picked = await askPastDayReason({ day: reasonReq.day });
+      if (!picked) {
+        throw new ApiError(CONFIRMATION_DECLINED, "Not confirmed", res.status, undefined, undefined, errBody);
+      }
+      changeReason = picked.reason;
+    } else {
+      const pastDayShield = readPastDayConfirmation(res.status, errBody);
+      if (pastDayShield) {
+        const picked = await askPastDayReason({ ...pastDayShield, reason: changeReason ?? undefined });
+        if (!picked) {
+          throw new ApiError(CONFIRMATION_DECLINED, "Not confirmed", 428, undefined, undefined, errBody);
+        }
+        changeReason = picked.reason;
+        confirmedActions.add(PAST_DAY_ACTION);
+      } else {
+        const shield = readConfirmation(res.status, errBody);
+        if (!shield) break; // not a confirmation-shaped error — let it fall through and throw below
+        if (!(await askConfirmation(shield))) {
+          throw new ApiError(CONFIRMATION_DECLINED, "Not confirmed", 428, undefined, undefined, errBody);
+        }
+        confirmedActions.add(shield.action);
+      }
+    }
+
+    init = {
+      ...init,
+      headers: {
+        ...(init.headers as Record<string, string> | undefined),
+        ...(confirmedActions.size ? { [CONFIRM_HEADER]: Array.from(confirmedActions).join(",") } : {}),
+        ...(changeReason ? { [CHANGE_REASON_HEADER]: encodeURIComponent(changeReason) } : {}),
+      },
+    };
+    ({ res } = await doFetch());
+    body = res.status === 204 ? null : await res.json().catch(() => null);
+  }
+
+  // Aviso silencioso (no bloquea nada, ya se escribió): la hoja de un día ya firmado cambió.
+  const advertencias = (body as { meta?: { advertencias?: Array<{ code?: string; labelKey?: string; day?: string; action?: string }> } } | null)?.meta?.advertencias;
+  advertencias?.forEach((w) => {
+    if (w.code === "CASH_PAST_DAY_CHANGED") notifyPastDayChanged(w);
+  });
 
   if (!res.ok) {
     const err = (body as ApiErrorShape | null)?.error;
@@ -148,7 +217,7 @@ export async function apiRequest<T>(
   return envelope == null ? (undefined as T) : envelope.data;
 }
 
-// Like apiRequest but keeps meta.pagination, returning { items, pagination }.
+// Like apiRequest but keeps meta.pagination (and meta.clinicScope), returning { items, pagination, clinicScope }.
 // Falls back to a single-page shape when the BE omits meta.pagination.
 export async function apiRequestPaged<T>(
   path: string,
@@ -162,7 +231,7 @@ export async function apiRequestPaged<T>(
     page: 1,
     limit: items.length,
   };
-  return { items, pagination };
+  return { items, pagination, clinicScope: envelope?.meta.clinicScope };
 }
 
 // Convenience for versioned feature endpoints: apiFetch("/api-keys") → /api/v2/api-keys.
@@ -217,3 +286,21 @@ export function apiFetchPagedV1<T>(
 ): Promise<Paginated<T>> {
   return apiRequestPaged<T>(`/api/v1${path}`, init, tenant);
 }
+
+// `path` of a read with its centers named as `?centerIds=` (lib/clinic-read-scope.ts `oneCenterIds`):
+// the picked `tenant`, a clinic filter's list, nothing for every center in scope (`null` or `[]`), else
+// the center X-Tenant-ID carries — or, with the top bar on «Ambos», nothing. The BE reads every center in
+// scope when none is named.
+export async function oneCenterPath(path: string, tenant?: CenterChoice): Promise<string> {
+  const active = getActiveCentro();
+  let sessionCenter: string | null = null;
+  if (tenant === undefined && !active) {
+    const { data } = await createClient().auth.getSession();
+    sessionCenter = (data.session?.user.app_metadata?.clinic_id as string | undefined) ?? null;
+  }
+  const ids = oneCenterIds(tenant, active, sessionCenter, isClinicViewAll());
+  if (!ids) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}centerIds=${ids.map(encodeURIComponent).join(",")}`;
+}
+
+export { tenantOf } from "@/lib/clinic-read-scope";

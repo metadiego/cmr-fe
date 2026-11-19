@@ -1,6 +1,6 @@
 import type { components } from "./schema";
 import type { Paginated } from "./types";
-import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
+import { apiFetch, apiFetchPaged } from "./client";
 
 // Facturación (BE PR #39+). Tenant-scoped: pasar centroId (X-Tenant-ID) en escrituras.
 export type Factura = components["schemas"]["FacturaEntity"];
@@ -50,6 +50,9 @@ export type FacturaPago = {
   type?: "pago" | "reembolso" | string; // pago = abono de la factura; reembolso = de una devolución
   refundId?: string | null; // liga el reembolso a su devolución (solo type=reembolso)
   date?: string | null;
+  // BE PR #582-583 (handoff .personal/handoff-bloqueo-dias-pasados.md): anular/corregir este pago
+  // concreto tocaría el cuadre de un día pasado ya firmado — deshabilitar aunque la factura sea de hoy.
+  pastDayLocked?: boolean;
 };
 
 // Factura + líneas + proyección enriquecida de GET /invoices/:id (patient/doctor/empresa/payments/emisor…).
@@ -71,6 +74,10 @@ export type FacturaConItems = Omit<Factura, "createdBy" | "issuedBy"> & {
   // integración, no una persona (no ofrecer corregirlo como empleado). Handoff usuario-de-la-factura.
   emisor?: { id?: string; profileId?: string | null; name?: string | null; esLlave?: boolean } | null;
   createdBy?: { id?: string; profileId?: string | null; name?: string | null; esLlave?: boolean } | null;
+  // BE PR #582-583: el cuadre del día de esta factura, SI ya tiene uno (handoff
+  // .personal/handoff-bloqueo-dias-pasados.md). `locked` deshabilita anular/corregir/reabrir/cambiar
+  // paciente/anular factura/editar; `canModify` solo avisa (quien tiene `caja.past_day.modify`).
+  pastCashDay?: { day: string; reconciled: boolean; locked: boolean; canModify: boolean } | null;
   issuedBy?: { id?: string; profileId?: string | null; name?: string | null; esLlave?: boolean } | null;
   emitidaEn?: string | null;
   displayNumber?: string | null;
@@ -113,75 +120,6 @@ export function listFacturas(
   if (patientId) sp.set("patientId", patientId);
   if (context) sp.set("context", context);
   return apiFetchPaged<Factura>(`/invoices?${sp.toString()}`, {}, centroId);
-}
-
-// Lista metadata-driven de facturación (GET /invoices/board): columnas RESUELTAS por el BE
-// (fac_numero/fac_fecha/fac_paciente/fac_medico/fac_estado/fac_total/fac_medio/fac_acciones) + filas
-// con esos valores YA resueltos (nombre de paciente, etc.) — a diferencia de GET /invoices (entidad cruda).
-// Es la fuente correcta para la LISTA de facturas. context=general excluye consultas.
-// OJO: `columns`/`rows` son bolsas OPACAS (el BE traduce la CLAVE columnas→columns/filas→rows pero NO su
-// CONTENIDO): las claves internas de la columna (clave/rol/tipo) siguen en español a propósito (motor de tableros).
-export interface FacturaTableroColumna {
-  clave: string;
-  labelKey: string;
-  rol?: string | null;
-  // Columnas editables inline (fac_medico/fac_usuario): el BE las declara select con writeBinding
-  // (factura.medicoId / factura.usuarioId) y optionsSource; la fila trae `<clave>__valor` = el id crudo
-  // (perfilId/medicoId). Se escribe por PUT /invoices/:id/header. Handoff usuario-de-la-factura.
-  tipo?: string;
-  editable?: boolean;
-  render?: { writeBinding?: string; optionsSource?: string; [k: string]: unknown } | null;
-}
-export type FacturaTableroFila = { id: string } & Record<string, unknown>;
-export interface FacturaTablero {
-  columns: FacturaTableroColumna[];
-  rows: FacturaTableroFila[];
-}
-export function getFacturasTablero(
-  params: ListFacturasParams = {},
-  centroId?: string,
-): Promise<FacturaTablero> {
-  const { page = 1, limit = 20, q, status, from, to, context } = params;
-  const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
-  if (q?.trim()) sp.set("q", q.trim());
-  if (status) sp.set("status", status);
-  if (from) sp.set("from", from);
-  if (to) sp.set("to", to);
-  if (context) sp.set("context", context);
-  return apiFetch<FacturaTablero>(`/invoices/board?${sp.toString()}`, {}, centroId);
-}
-
-// Resumen del RANGO filtrado (total del servidor, no de la página): importe/exentas/cobradas del
-// `meta.resumen` de GET /invoices + el conteo total del `meta.pagination`. Mismos filtros que la lista.
-// La lista pinta filas resueltas vía /invoices/board (sin resumen); este es el único que trae el
-// total del rango — no sumar la página (número falso si hay paginación). Handoff facturación-totales.
-// `meta` es una bolsa OPACA: el BE NO traduce su contenido → `resumen.importe/exentas/cobradas` van en español.
-export interface FacturasResumen {
-  importe: number;
-  exentas: number;
-  cobradas: number;
-  total: number; // nº de facturas del rango (meta.pagination.total)
-}
-export async function getFacturasResumen(
-  params: ListFacturasParams = {},
-  centroId?: string,
-): Promise<FacturasResumen> {
-  const { q, status, from, to, context } = params;
-  // limit=1: solo interesa el meta (resumen + total); no traer filas de más.
-  const sp = new URLSearchParams({ page: "1", limit: "1" });
-  if (q?.trim()) sp.set("q", q.trim());
-  if (status) sp.set("status", status);
-  if (from) sp.set("from", from);
-  if (to) sp.set("to", to);
-  if (context) sp.set("context", context);
-  const env = await apiFetchEnvelope<unknown>(`/invoices?${sp.toString()}`, {}, centroId);
-  const r = env.meta.resumen;
-  return {
-    importe: Number(r?.importe ?? 0),
-    exentas: Number(r?.exentas ?? 0),
-    cobradas: Number(r?.cobradas ?? 0),
-    total: Number(env.meta.pagination?.total ?? 0),
-  };
 }
 
 // Crear/obtener la factura BORRADOR de una cita (idempotente: si existe activa,
@@ -307,6 +245,21 @@ export function getResumenPaciente(
 // /invoices/expenses-certificate?patientId=&desde=&hasta=. Handoff ficha-del-paciente-hub-y-certificacion-de-gastos.
 // La RESPUESTA SÍ se englishifica (verificado live 1-oct): patient/from/to/refunds/reconciliation, conceptos
 // con slug/refunds/invoices. Antes el tipo estaba en español y el nombre del paciente salía en blanco.
+// Línea de una factura dentro de un concepto (cmr-be PR #496): para "sin_clasificar" es lo único que
+// dice QUÉ compró el paciente, no solo el monto agregado.
+export interface CertificacionConceptoLinea {
+  invoiceItemId: string;
+  productId: string;
+  description: string;
+  amount: number;
+}
+export interface CertificacionConceptoFactura {
+  invoiceId: string;
+  number: string;
+  date: string;
+  amount: number;
+  lines: CertificacionConceptoLinea[];
+}
 export interface CertificacionConcepto {
   grupoId: string;
   slug: string;
@@ -314,6 +267,7 @@ export interface CertificacionConcepto {
   total: number;
   refunds: number;
   invoices: number;
+  detail?: CertificacionConceptoFactura[];
 }
 export interface CertificacionGastos {
   patient: { id: string; name: string; medicalRecordNumber?: string | null; documentId?: string | null };
@@ -370,6 +324,25 @@ export interface ItemOpcional {
 export function getItemOpcionales(facturaId: string, itemId: string, centroId?: string): Promise<ItemOpcional[]> {
   return apiFetch<ItemOpcional[]>(`/invoices/${facturaId}/items/${itemId}/optional-items`, {}, centroId);
 }
+// BE #574: adds an optional left out of a kit line of an ISSUED invoice, without changing the amount.
+// Guarded by the 428 shield (invoice.kit.add_component), answered by the shared confirm dialog. The body
+// keeps `componenteId` as the DTO names it. 201 → { invoice, added: [{ sku, sessions }] }.
+export interface AddKitComponentResult {
+  invoice: FacturaConItems;
+  added: { sku: string; sessions: number }[];
+}
+export function addKitComponent(
+  facturaId: string,
+  itemId: string,
+  payload: { componenteId: string; reason: string },
+  centroId?: string,
+): Promise<AddKitComponentResult> {
+  return apiFetch<AddKitComponentResult>(
+    `/invoices/${facturaId}/items/${itemId}/add-component`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
 // incluidos = ids de componentes que quedan marcados. El BE re-precifica la línea (base + Σ incluidos)
 // y recomputa los totales; devuelve la factura proyectada (total en vivo). La clave `incluidos` NO está en
 // el mapa api-ingles → se envía tal cual (el BE no la traduce y el DTO la espera en español).
@@ -382,15 +355,15 @@ export function setItemOpcionales(facturaId: string, itemId: string, incluidos: 
 }
 
 // Personalizar un KIT en la factura (BE PR #293): cambiar cantidad / quitar / AGREGAR componentes de un
-// producto compuesto SOLO en ESTA línea, sin tocar la receta general. Se manda la LISTA FINAL completa
-// ({productId,quantity}[]): lo ausente se interpreta como quitado. Esto es lo que entra al frontdesk
-// (menos PEMF = menos disponibilidad). Agregar exige el permiso fino `factura.kit_agregar` (el BE lo
-// valida; el FE no muestra la puerta sin permiso). Devuelve la línea con su `personalizacion` guardada.
-// La clave `componentes` NO está en el mapa api-ingles → se envía tal cual (el DTO la espera en español).
+// producto compuesto SOLO en ESTA línea, sin tocar la receta general. Se manda la LISTA FINAL completa:
+// lo ausente se interpreta como quitado (menos PEMF = menos disponibilidad en frontdesk). Agregar exige
+// el permiso fino `factura.kit_agregar` (el BE lo valida). `componentes`/`multipliers` (áreas×días) NO
+// están en el mapa api-ingles → se envían tal cual; con `multipliers` el BE recalcula `quantity` =
+// áreas × días ÷ kits, o 400 KIT_MULTIPLIERS_INVALID.
 export function personalizarKit(
   facturaId: string,
   itemId: string,
-  componentes: { productId: string; quantity: number }[],
+  componentes: { productId: string; quantity: number; multipliers?: Record<string, number> }[],
   centroId?: string,
 ): Promise<FacturaItem> {
   return apiFetch<FacturaItem>(
@@ -453,6 +426,17 @@ export function anularFactura(facturaId: string, motivo: string, centroId?: stri
 export function getFormasPago(centroId?: string): Promise<FormaPago[]> {
   return apiFetch<FormaPago[]>(`/billing/payment-methods`, {}, centroId);
 }
+// The catalog's CRUD (admin): create, edit (name, isCash, carriesMoney, active) and deactivate — never
+// deleted, past payments point at it. BE #564 adds carriesMoney («Lleva dinero»).
+export function crearFormaPago(payload: components["schemas"]["CreateFormaPagoDto"]): Promise<FormaPago> {
+  return apiFetch<FormaPago>(`/billing/payment-methods`, { method: "POST", body: JSON.stringify(payload) });
+}
+export function actualizarFormaPago(id: string, payload: components["schemas"]["UpdateFormaPagoDto"]): Promise<FormaPago> {
+  return apiFetch<FormaPago>(`/billing/payment-methods/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+}
+export function desactivarFormaPago(id: string): Promise<unknown> {
+  return apiFetch(`/billing/payment-methods/${id}`, { method: "DELETE" });
+}
 
 // Enviar la factura por email (BE PR #106). Sin `email` usa el del paciente (400 si no hay ninguno).
 // RBAC notificaciones.create. El DTO no está tipado en swagger → shape del handoff.
@@ -465,7 +449,7 @@ export function emailFactura(facturaId: string, payload: { email?: string; body?
 // Anular (mismo día, error) ≠ Devolver (día siguiente/24h). El actor lo sella el BE (RequestContext).
 // displayNumber = correlativo PROPIO de la devolución (p. ej. "D-000001"), secuencia independiente de
 // facturas (BE PR #113). Lo proyecta el BE en la lista/detalle aunque no esté en la entidad base.
-export type Devolucion = components["schemas"]["DevolucionEntity"] & { displayNumber?: string | null };
+export type Devolucion = components["schemas"]["DevolucionEntity"] & { displayNumber?: string | null; clinicName?: string | null };
 export type DevolverPayload = components["schemas"]["DevolverDto"];
 
 // Recibo PROPIO de una devolución (documento "Devolución #D-000001", no la factura). El BE no tipó la
@@ -490,6 +474,11 @@ export type ReciboDevolucion = {
   refundedAmount: number; // total con impuesto
   refundedTax: number;
   formaReembolso: string | null;
+  // BE PR #579: una entrada por reembolso ACTIVO, cualquier cantidad (reembolso dividido en varias
+  // formas) — `formaReembolso` queda de respaldo (texto ya unido) para cuando esto no venga o venga
+  // vacío. `reimbursements` NO está en el mapa api-ingles porque api-ingles solo traduce CLAVES, no
+  // VALORES del array — pero el nombre de la clave sí viene ya en inglés del v2, se declara tal cual.
+  reimbursements?: Array<{ paymentMethodName: string; amount: number }> | null;
   reason: string | null;
   items: ReciboDevolucionItem[];
   patient: { firstName?: string; lastName?: string | null; medicalRecordNumber?: string | null; documentId?: string | null } | null;
@@ -503,6 +492,9 @@ export function getReciboDevolucion(
 ): Promise<ReciboDevolucion> {
   return apiFetch<ReciboDevolucion>(`/invoices/${facturaId}/refunds/${devolucionId}/receipt`, {}, centroId);
 }
+
+// El detalle propio de una devolución (reparar motivo/notas/reembolsos, BE PR #577) vive en su propio
+// archivo, lib/api/refund-detail.ts — este ya rozaba el techo de 600 líneas.
 
 // Registrar una devolución (total o parcial) de una factura. items = líneas a devolver.
 export function devolverFactura(facturaId: string, payload: DevolverPayload, centroId?: string): Promise<FacturaConItems> {
@@ -536,28 +528,6 @@ export function getPrecioBase(productoId: string, centroId?: string): Promise<{ 
     {},
     centroId,
   );
-}
-
-// Lista GLOBAL de devoluciones (por centro), paginada + filtros. Cada fila = DevolucionEntity
-// (invoiceNumber incluido). Multi-tenant por X-Tenant-ID.
-export interface ListDevolucionesParams {
-  page?: number;
-  limit?: number;
-  q?: string; // nº de factura
-  status?: string; // activa|anulada
-  from?: string;
-  to?: string;
-  context?: "general" | "consulta"; // filtra por tipo de factura de la devolución
-}
-export function listDevoluciones(params: ListDevolucionesParams = {}, centroId?: string): Promise<Paginated<Devolucion>> {
-  const { page = 1, limit = 20, q, status, from, to, context } = params;
-  const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
-  if (q?.trim()) sp.set("q", q.trim());
-  if (status) sp.set("status", status);
-  if (from) sp.set("from", from);
-  if (to) sp.set("to", to);
-  if (context) sp.set("context", context);
-  return apiFetchPaged<Devolucion>(`/billing/refunds?${sp.toString()}`, {}, centroId);
 }
 
 export function registrarPago(facturaId: string, payload: RegistrarPagoPayload, centroId?: string): Promise<unknown> {
@@ -598,3 +568,5 @@ export function anularPago(
 // Series de numeración (SerieNumeracion + get/actualizar/establecerArranque) extraídas a
 // ./facturas-series por el techo de tamaño (max-lines); se re-exportan para no tocar consumidores.
 export * from "./facturas-series";
+// The list reads that span clinics (invoice board, range summary, refunds) live in ./facturas-listas.
+export * from "./facturas-listas";

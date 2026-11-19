@@ -9,6 +9,7 @@ import { getLiveLocation, type PatientLiveLocation } from "@/lib/api/pacientes"
 import { claveUbicacion, fechaDesdeValida } from "@/lib/pacientes/ubicacion"
 import { useResource } from "@/hooks/use-resource"
 import { useCitaStream } from "@/hooks/use-cita-stream"
+import { StatusCountButton } from "@/components/frontdesk/status-count-button"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -55,21 +56,19 @@ export function UbicacionEnVivoWidget({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          title={iconOnly ? t("titulo") : undefined}
-          aria-label={iconOnly ? t("titulo") : undefined}
-        >
-          <HugeiconsIcon icon={Location01Icon} className="size-4" />
-          {!iconOnly && t("titulo")}
-          {items.length > 0 && (
-            <Badge variant="secondary" className="tabular-nums">
-              {items.length}
-            </Badge>
-          )}
-        </Button>
+        {iconOnly ? (
+          <StatusCountButton icon={Location01Icon} count={items.length} label={t("titulo")} />
+        ) : (
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <HugeiconsIcon icon={Location01Icon} className="size-4" />
+            {t("titulo")}
+            {items.length > 0 && (
+              <Badge variant="secondary" className="tabular-nums">
+                {items.length}
+              </Badge>
+            )}
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"

@@ -4,6 +4,193 @@
     "noProfileTitle": "Your account has no profile assigned",
     "noProfileBody": "You're signed in, but an administrator hasn't linked your account to a profile with permissions yet. Contact an administrator to get it assigned."
   },
+  "reports": {
+    "clinicScope": {
+      "many": "{count, plural, one {# clinic} other {# clinics}}",
+      "total": "{label} ({scope})",
+      "covers": "Covers: {scope}"
+    },
+    "analytics": {
+      "none": "Unassigned",
+      "dim": {
+        "clinic": "Clinic",
+        "day": "Day",
+        "month": "Month",
+        "weekday": "Day of week",
+        "hour": "Hour",
+        "doctor": "Doctor",
+        "seller": "Seller",
+        "product": "Product",
+        "patient": "Patient",
+        "source": "Source",
+        "paymentMethod": "Payment method",
+        "division": "Division",
+        "kind": "Kind",
+        "service": "Service",
+        "technician": "Technician",
+        "visitType": "Visit type",
+        "channel": "Channel",
+        "status": "Status"
+      },
+      "weekday": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "kind": {
+        "appointment": "Appointment",
+        "therapy": "Therapy"
+      }
+    },
+    "salesBreakdown": {
+      "title": "Sales",
+      "help": "Invoiced by 1 to 3 cuts at once. Gross/Refunds/Net is what was INVOICED; Hour and Payment method is what was COLLECTED (payments) and does not combine with Product.",
+      "cutBy": "Cut by",
+      "from": "From",
+      "to": "To",
+      "search": "Search",
+      "exportCsv": "Export CSV",
+      "col": {
+        "invoices": "Invoices",
+        "patients": "Patients",
+        "gross": "Gross",
+        "refunds": "Refunds",
+        "net": "Net",
+        "quantity": "Quantity"
+      },
+      "totals": "Totals",
+      "empty": "No sales in that range.",
+      "truncated": "{n} additional rows were left out — narrow the range or add another cut.",
+      "pickAtLeastOne": "Pick at least one cut.",
+      "productWithPaymentCut": "Product cannot combine with Hour or Payment method (those are what was collected, not invoiced)."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "help": "Appointments and therapies by 1 to 3 cuts. A future range shows who's coming (scheduled); a past range not marked yet counts as pending.",
+      "cutBy": "Cut by",
+      "from": "From",
+      "to": "To",
+      "search": "Search",
+      "col": {
+        "events": "Events",
+        "attended": "Attended",
+        "noShows": "No-shows",
+        "cancelled": "Cancelled",
+        "scheduled": "Scheduled",
+        "unrecorded": "Unmarked",
+        "patients": "Patients",
+        "attendedPatients": "Patients who attended"
+      },
+      "totals": "Totals",
+      "empty": "No events in that range.",
+      "truncated": "{n} additional rows were left out — narrow the range or add another cut.",
+      "pickAtLeastOne": "Pick at least one cut."
+    },
+    "patientsStats": {
+      "title": "Patients",
+      "help": "Visits and spend per patient in the range. \"Lapsed\" = no visit in N days and nothing scheduled.",
+      "from": "From",
+      "to": "To",
+      "search": "Search",
+      "minVisits": "Frequent (≥ visits)",
+      "lapsedDays": "Lapsed (days without a visit)",
+      "newOnly": "New only",
+      "col": {
+        "patient": "Patient",
+        "visits": "Visits",
+        "therapies": "Therapies",
+        "firstVisit": "First visit",
+        "lastVisit": "Last visit",
+        "nextVisit": "Next visit",
+        "avgDays": "Avg. days between visits",
+        "spend": "Spend",
+        "isNew": "New"
+      },
+      "distribution": "Distribution by visit count",
+      "empty": "No patients in that range.",
+      "truncated": "Showing the first {shown} of {total} patients — narrow the range or raise the filters.",
+      "viewPatient": "View record"
+    },
+    "returnRate": {
+      "title": "Return rate",
+      "help": "Of those whose return window is over, how many came back within the chosen days. \"Pending\" hasn't decided yet: the window is still open.",
+      "from": "From",
+      "to": "To",
+      "withinDays": "Return within (days)",
+      "cutBy": "Cut by",
+      "none": "No cut",
+      "search": "Search",
+      "col": {
+        "cohort": "Cohort",
+        "returned": "Returned",
+        "notReturned": "Did not return",
+        "pending": "Pending",
+        "rate": "Rate",
+        "avgDays": "Avg. days to return"
+      },
+      "totals": "Totals",
+      "empty": "No cohort in that range.",
+      "noRate": "—"
+    },
+    "patientAttendanceTab": {
+      "subTabVisits": "Visits",
+      "subTabPurchases": "Purchases",
+      "visitsSummaryTitle": "Summary",
+      "packagesEmpty": "No packages.",
+      "title": "Attendance",
+      "firstVisit": "First visit",
+      "lastVisit": "Last visit",
+      "avgDays": "Avg. days between visits",
+      "visitsTotal": "Visits",
+      "visitsAppointments": "Appointments",
+      "visitsTherapies": "Therapies",
+      "visitsDays": "Distinct days",
+      "noShows": "No-shows",
+      "cancelled": "Cancelled",
+      "unrecorded": "Unmarked",
+      "therapiesTitle": "Therapies",
+      "col": {
+        "service": "Service",
+        "sessions": "Sessions",
+        "first": "First",
+        "last": "Last",
+        "product": "Product",
+        "total": "Total",
+        "delivered": "Delivered",
+        "returned": "Returned",
+        "transferred": "Transferred",
+        "remaining": "Remaining",
+        "invoices": "Invoices",
+        "gross": "Gross",
+        "refunds": "Refunds",
+        "net": "Net"
+      },
+      "visitsByMonthTitle": "Visits by month",
+      "upcomingTitle": "Upcoming appointments",
+      "upcomingEmpty": "No upcoming appointments.",
+      "packagesTitle": "Packages",
+      "spendTitle": "Spend",
+      "empty": "No recorded visits."
+    },
+    "print": "Print",
+    "csv": "CSV",
+    "printedBy": "Printed by {who} · {when}",
+    "email": "Email",
+    "emailTitle": "Send by email",
+    "emailTo": "To",
+    "emailHint": "One or more addresses separated by commas. Sent as a PDF with the letterhead.",
+    "emailSend": "Send",
+    "emailSending": "Sending…",
+    "emailSent": "Sent. It is logged in the exports.",
+    "emailInvalid": "Check the addresses: one is not valid.",
+    "cancel": "Cancel",
+    "emailHintDomain": "Type just the name: @{domain} is added for you. Several, separated by commas. Sent as a PDF with the letterhead.",
+    "emailWillGo": "Goes to: {to}"
+  },
   "ehrIntegration": {
     "title": "EHR integration",
     "description": "When you mark Present, the patient is also registered in the EHR. Consultations and Services are switched on separately, per center.",
@@ -95,7 +282,9 @@
       "roleMedico": "Doctor",
       "patientsPerStaff": "Handles at once",
       "patientsPerStaffHelp": "\"Handles at once\": 1 = one-on-one with the patient; more than 1 = several at once (like the chambers)",
-      "laserWarning": "One-on-one with the patient: takes a whole technician; if it shares the role with laser, it steals stations."
+      "laserWarning": "One-on-one with the patient: takes a whole technician; if it shares the role with laser, it steals stations.",
+      "everyLineHelp": "Every line must fit at once: if any line lacks its station or its person, the time does not fit.",
+      "staffSuffix": "· staff"
     },
     "add": "New resource",
     "colName": "Name",
@@ -126,6 +315,7 @@
     "fSlug": "Key",
     "fKind": "Kind",
     "fCapacity": "Capacity (patients at once)",
+    "capacityInvalid": "Capacity must be greater than 0.",
     "fConcurrency": "Concurrency",
     "fMaxMin": "Max minutes per patient",
     "fMaxMinPlaceholder": "no cap",
@@ -134,10 +324,23 @@
     "fStaffIdPlaceholder": "No person assigned",
     "fBlocksAgenda": "The resource is a person and blocks their agenda",
     "fBlocksAgendaHelp": "For the EMPOWER doctor: booking them blocks their consultation hours.",
+    "fTrainWeight": "Weight in the train",
+    "fTrainWeightHelp": "Scarce resources (laser rooms, IV chairs, the EMPOWER doctor) anchor the therapy train: the higher the weight, the earlier it goes.",
+    "nurses": "Nursing",
+    "lineRepeated": "That resource is already on another line of this service: merge them into one.",
+    "role": {
+      "tecnico": "Technician",
+      "enfermera": "Nurse",
+      "medico": "Doctor",
+      "noStaffShort": "no staff"
+    },
     "kind": {
       "room": "Room",
       "chair": "Chair",
-      "person": "Person"
+      "person": "Person",
+      "machine": "Machine",
+      "staff": "Staff (a pool of one role)",
+      "staffCapacityHelp": "Does not limit: the ceiling is who of that role is on shift."
     },
     "concurrency": {
       "sequential": "Sequential",
@@ -151,9 +354,25 @@
   "therapies": {
     "full": "Full: no stations left at that time.",
     "noStaff": "No staff: nobody to provide it at that time.",
-    "endsAfterClosing": "Ends after closing: the session would not finish before the last time slot ends.",
     "overMaxPerPatient": "Exceeds the per-patient minute cap.",
-    "holiday": "Holiday: the schedule is closed."
+    "holiday": "Holiday: the schedule is closed.",
+    "trainPastClosing": "Too late: the train would run past closing.",
+    "trainRollbackIncomplete": "A therapy failed and not everything could be undone: check the ones left booked.",
+    "trainOneCenter": "A train is booked in one center only.",
+    "trainDoesNotFit": "The whole train no longer fits at that time. Nothing was booked.",
+    "trainTimeNotOffered": "That entry time is not offered.",
+    "seriesNoTimeWithinShift": "No time fits within the allowed shift.",
+    "seriesNoTime": "No time fits that day.",
+    "seriesCountRequired": "Say how many sessions for these therapies.",
+    "seriesStartInThePast": "A series starts today or later.",
+    "seriesDayDoesNotFit": "The train of {date} no longer fits at its time. Nothing was booked.",
+    "seriesDaysInvalid": "Invalid series days.",
+    "sheetFull": "Full on the call-center sheet",
+    "notAStartTime": "This service only starts on the hour: pick a whole hour",
+    "outsideHours": "Outside the center's hours",
+    "pastClosing": "Ends after the center closes",
+    "notConfigured": "Service has no resource configured",
+    "endsAfterClosing": "Ends after closing: the session would not finish before the last time slot ends."
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -181,6 +400,28 @@
     "remaining": "{n} left",
     "addTherapy": "Add therapy",
     "hoursFor": "Hours · {service}",
+    "entryHours": "Entry hours",
+    "trainBlockedBy": "{reason} — {service}",
+    "blockedByResource": "{reason} — {resource}",
+    "trainEndsAt": "Leaves at {time}",
+    "keepOrder": "Keep my order",
+    "bookTrain": "Book the train ({n})",
+    "trainSeriesButton": "Schedule a train series",
+    "trainSeriesTitle": "Train series — {patient}",
+    "trainSeriesSessions": "Sessions",
+    "trainSeriesSessionsPlaceholder": "How many?",
+    "trainSeriesMoved": "moved from {from} to {to}",
+    "trainSeriesSkipped": "skipped",
+    "trainSeriesUnmet": "Not placed: {list}",
+    "trainSeriesBooked": "{n} sessions booked over {days} days",
+    "trainSeriesUntil": "Until",
+    "trainSeriesMaxDays": "At most (days)",
+    "trainSeriesCalculate": "Calculate",
+    "trainSeriesCalculating": "Calculating…",
+    "trainSeriesConfirmButton": "Confirm ({days} days)",
+    "trainSeriesContinue": "Schedule the rest",
+    "trainSeriesFromPurchased": "(purchased)",
+    "maxShift": "Max time shift (min)",
     "pickCard": "Pick a therapy to see its hours",
     "dragHint": "Drag the card onto a time, or click",
     "noHour": "Pick a time to check the day fits",
@@ -216,7 +457,13 @@
     "recurringRemove": "Remove",
     "recurringConfirm": "Confirm {n} session(s)",
     "recurringConfirming": "Scheduling…",
-    "recurringSummary": "{booked} scheduled, {skipped} skipped"
+    "recurringSummary": "{booked} scheduled, {skipped} skipped",
+    "fullWarns": "Full: booked with a warning",
+    "trainSeriesOverbooked": "Overbooked",
+    "recurringPreviewFirst": "Run the preview first",
+    "recurringNothingBookable": "No date in the preview has an open slot",
+    "trainSeriesCalculateFirst": "Press «Calculate» first",
+    "trainSeriesNothingPlanned": "No day in the calculation can be booked"
   },
   "citas": {
     "calendario": {
@@ -270,7 +517,8 @@
       "useSuggested": "Use suggested"
     },
     "medico_requerido_en_consulta": "To enter consultation the appointment needs an assigned doctor.",
-    "datos_requeridos_para_presente": "The patient is missing required data to be marked present."
+    "datos_requeridos_para_presente": "The patient is missing required data to be marked present.",
+    "closedByHoliday": "Holiday: the schedule is closed"
   },
   "tableroBoard": {
     "live": "Live",
@@ -399,6 +647,8 @@
       "cfgOptionsSource": "Options source",
       "cfgWriteBinding": "Writes to (FK)",
       "cfgWriteBindingHint": "Field saved on select, e.g. cita.medicoId.",
+      "cfgCapacidades": "Capabilities",
+      "cfgCapacidadesHelp": "Who can fill this select: the union of staff with any of these capabilities. None checked, the list comes out empty, on purpose.",
       "cfgTransition": "Transition",
       "cfgEstampa": "Stamps time in",
       "cfgEstampaHint": "Sealed-time field, e.g. llegadaEn.",
@@ -434,7 +684,9 @@
       "cfgEscogeProductos": "Or pick the products",
       "cfgBuscarProducto": "Search product…",
       "cfgProductosHelp": "Drag to reorder: most used first.",
-      "colArrastrar": "Drag to reorder"
+      "colArrastrar": "Drag to reorder",
+      "colRemoveTitle": "Remove this column?",
+      "colRemoveBody": "“{name}” will be removed from this board."
     },
     "prioridadFlags": {
       "title": "Patient priorities",
@@ -481,7 +733,8 @@
         "ehrIntegration": "EHR integration",
         "schedulingBridge": "Google Sheets bridge",
         "pacientes": "Patients",
-        "numeracion": "Numbering"
+        "numeracion": "Numbering",
+        "caja": "Cash"
       },
       "frontdesk_autopresente": "Auto check-in on payment",
       "auto_present_follow_up": "Auto check-in on follow-up",
@@ -502,8 +755,25 @@
       "numeracion_facturas": "Invoices",
       "numeracion_presupuestos": "Quotes",
       "numeracion_record_paciente": "Patient record",
-      "numeracion_devoluciones": "Returns"
+      "numeracion_devoluciones": "Returns",
+      "agenda_blocking_rules": "What blocks booking",
+      "cash_count_mode": "How cash is counted",
+      "cash_close_enabled": "Show «Process close»"
+    },
+    "agendaRules": {
+      "title": "What blocks booking",
+      "help": "The holiday blocks by default. Everything else (capacity, hours, start step, per-patient cap) can be left as warn-only: the booking still happens, with a non-blocking warning.",
+      "guardado": "Saved",
+      "valorPorDefecto": "This center hasn't set it — default value (only the holiday blocks).",
+      "bloquea": "Blocks",
+      "soloAvisa": "Warns only",
+      "showOffStepStartsHelp": "Also show the times off the service's start step (e.g. :30 on one that starts on the hour); they still book, with a warning."
     }
+  },
+  "cashCountMode": {
+    "title": "How the day's cash is counted",
+    "help": "Flexible leaves each day free to choose between the cashiers' sum or a single count, like today. Two counts counts consultation and general separately, always summed. One single count replaces the two with one of the whole drawer.",
+    "guardado": "Saved"
   },
   "tableroEditor": {
     "title": "Board columns",
@@ -535,6 +805,9 @@
       "prox_cita": "Next appt",
       "pago": "Payment",
       "testimonio": "Testimonial"
+    },
+    "source": {
+      "personal": "Staff by capability"
     }
   },
   "agenda": {
@@ -672,11 +945,13 @@
       "endAuto": "Ends {time} (auto)",
       "variantList": "List",
       "variantGrid": "Grid",
-      "editLocked": "To change the date, type or patient, use Reschedule in the actions menu (⋯).",
-      "editLockedError": "An edit cannot change the date, type or patient: use Reschedule.",
       "slotFullWarn": "That time is full; it books anyway (non-blocking).",
       "rescheduledFrom": "The patient already had an appointment on {date}: it was moved to this date (one live appointment per patient).",
-      "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date."
+      "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date.",
+      "holidayClosed": "{name} — holiday, the schedule is closed that day.",
+      "holidayInfo": "{name} — holiday.",
+      "editLocked": "To change the date, type or patient, use Reschedule in the actions menu (⋯).",
+      "editLockedError": "An edit cannot change the date, type or patient: use Reschedule."
     },
     "fecha": "Date",
     "prevDay": "Previous day",
@@ -689,8 +964,18 @@
       "full": "full",
       "placeholder": "Pick an available time",
       "variantDropdown": "List",
-      "variantChips": "Grid"
-    }
+      "variantChips": "Grid",
+      "fullInSheet": "Full on the sheet"
+    },
+    "rule": {
+      "capacity": "No room (stations or staff)",
+      "closing": "Outside the center's hours",
+      "startStep": "Outside the service's start step",
+      "maxPerPatient": "Exceeds the per-patient minute cap",
+      "holiday": "Holiday",
+      "unknown": "Another schedule rule"
+    },
+    "showOffStepStarts": "Show times off the start step"
   },
   "appointments": {
     "title": "Appointments",
@@ -783,7 +1068,7 @@
       "time": "Time",
       "channel": "Channel",
       "channels": {
-        "atencion": "Front desk",
+        "frontdesk": "Front desk",
         "callcenter": "Call center",
         "webhook": "Webhook",
         "ia": "AI"
@@ -796,6 +1081,7 @@
     }
   },
   "patients": {
+    "moreActions": "More actions",
     "title": "Patients",
     "total": "{count, plural, one {# patient} other {# patients}}",
     "backToCall": "Back to the call",
@@ -809,6 +1095,36 @@
     "reactivate": "Reactivate",
     "deactivated": "Patient deactivated.",
     "reactivated": "Patient reactivated.",
+    "merge": {
+      "action": "Merge with…",
+      "title": "Merge with another record",
+      "hint": "All history moves to the GOOD record; the other one disappears.",
+      "searchPlaceholder": "Search the other record by name or record #…",
+      "searchHint": "Type at least 2 letters.",
+      "whichIsGood": "Which is the GOOD record?",
+      "colTable": "Table",
+      "colRows": "Rows",
+      "table": {
+        "invoices": "Invoices",
+        "appointments": "Appointments",
+        "sessions": "Sessions",
+        "packages": "Packages"
+      },
+      "policy": {
+        "drop-duplicate-row": "The good record's row stays",
+        "retire-duplicate-appointment": "The duplicate's live appointment is marked rescheduled",
+        "abort": "Cannot resolve automatically"
+      },
+      "changesPastReportsWarning": "Money and cash sheets don't change. Past-period PEOPLE counts do: months {months}.",
+      "acceptPastReportImpact": "I understand this changes past-period counts",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why these two records are being merged",
+      "merge": "Merge",
+      "mergedOk": "Records merged",
+      "otherRecord": "The other record",
+      "simulationFailed": "The merge could not be worked out. Pick the record again.",
+      "blockedReason": "The merge is blocked: see the notices above."
+    },
     "confirmDeactivateTitle": "Deactivate patient?",
     "confirmDeactivateBody": "{name} will no longer appear in the list. Their history is kept and you can reactivate them later.",
     "yearsOld": "{age} years old",
@@ -884,11 +1200,11 @@
       "recordDuenoInactivo": "inactive",
       "camposFaltantes": "Required fields missing: {campos}",
       "emailInvalido": "Enter a valid email, e.g. name@domain.com",
-      "requiredLegend": "Required fields",
       "medico": "Doctor",
       "sinMedico": "No doctor",
       "otroCentro": "other center",
-      "idTypeFirst": "Pick the ID type first"
+      "idTypeFirst": "Pick the ID type first",
+      "checkingRecord": "Checking the record number…"
     },
     "acciones": "Actions",
     "tabs": {
@@ -897,15 +1213,69 @@
       "appointments": "Appointments",
       "therapies": "Therapies",
       "billing": "Billing",
-      "protocolChange": "Protocol change"
+      "protocolChange": "Protocol change",
+      "attendance": "Attendance",
+      "transferTreatment": "Transfer treatment"
+    },
+    "transferTreatment": {
+      "title": "Transfer treatment",
+      "help": "Move a package's pending sessions from this patient to another person, another center, or both.",
+      "step1": "What gets transferred",
+      "noPending": "This patient has no pending sessions in any package.",
+      "pendingN": "Pending: {n} of {total}",
+      "step2": "Where to",
+      "scope": {
+        "otherPatient": "To another person",
+        "otherClinic": "To another center",
+        "both": "To another person, at another center"
+      },
+      "destinationPatient": "Destination patient",
+      "searchPatientPlaceholder": "Search by name or record…",
+      "searchHint": "Type at least 2 letters.",
+      "changeSelection": "Change",
+      "destinationClinic": "Destination center",
+      "chooseClinic": "Choose a center",
+      "sessions": "Sessions to transfer",
+      "sessionsHint": "Empty = the {n} pending.",
+      "sessionsOutOfRange": "Enter a number between 1 and {n}.",
+      "nothingPending": "This package has no pending sessions.",
+      "mode": "How",
+      "virtual": "Treatment only",
+      "virtualHelp": "The destination draws from its own stock when applied.",
+      "fisica": "Treatment + inventory",
+      "fisicaHelp": "Also moves the physical material between warehouses.",
+      "sourceWarehouse": "Source warehouse",
+      "destinationWarehouse": "Destination warehouse",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why it's going to another person…",
+      "confirm": "Transfer",
+      "done": "Transfer applied",
+      "resultTitle": "Here's how it landed",
+      "resultSource": "On this patient",
+      "resultDestination": "On the destination",
+      "historyTitle": "Transfer history",
+      "historyEmpty": "No transfers yet.",
+      "void": "Undo",
+      "voidConfirmTitle": "Undo the transfer",
+      "voidConfirmBody": "The sessions and, if applicable, the inventory, go back to the source.",
+      "voidOk": "Transfer undone",
+      "status": {
+        "aplicada": "Applied",
+        "anulada": "Voided"
+      }
     },
     "hub": {
-      "alerts": "Alerts & precautions",
-      "allergies": "Allergies",
-      "implants": "Implants & devices",
-      "noAlerts": "No known alerts",
-      "noAllergies": "No known allergies",
-      "noImplants": "No known implants",
+      "appointmentsUpcoming": "Upcoming",
+      "appointmentsPast": "Past",
+      "appointmentsAll": "All",
+      "appointmentsCount": "{n, plural, one {# appointment} other {# appointments}}",
+      "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
+      "nothingInView": "Nothing to show in this view.",
+      "invoicesTitle": "Invoices",
+      "certificationHelp": "Billed totals per concept in the range, refunds subtracted.",
+      "breakdownTitle": "Breakdown",
+      "today": "Today",
+      "clinic": "Clinic",
       "loading": "Loading…",
       "noCitas": "No appointments.",
       "historialReagendamientos": "Reschedule history",
@@ -921,6 +1291,7 @@
       "technician": "Technician / Nurse",
       "doctor": "Doctor",
       "session": "Session",
+      "formats": "Formats",
       "invoice": "Invoice",
       "concept": "Concept",
       "net": "Net",
@@ -929,7 +1300,17 @@
       "pending": "Pending",
       "refunded": "Refunded",
       "lastVisit": "Last visit",
-      "noLastVisit": "No visits on record."
+      "noLastVisit": "No visits on record.",
+      "invoiceHistoryCount": "{n, plural, one {# invoice} other {# invoices}} in the history",
+      "department": "Department",
+      "origin": "Origin",
+      "legacy": "Legacy · {origin}",
+      "newSystem": "New system",
+      "prevPage": "Previous",
+      "nextPage": "Next",
+      "pageOf": "Page {page} of {pages}",
+      "printInvoice": "Print",
+      "openInvoice": "Open invoice"
     },
     "centerFilter": {
       "label": "Clinics",
@@ -947,6 +1328,11 @@
     "errorBody": "This screen hit an error. The rest of the system keeps working. You can retry.",
     "save": "Save",
     "saving": "Saving…",
+    "form": {
+      "missingPrefix": "To continue, fill in:",
+      "required": "required",
+      "requiredLegend": "Required fields"
+    },
     "cancel": "Cancel",
     "confirm": "Confirm",
     "delete": "Delete",
@@ -975,7 +1361,9 @@
     "close": "Close",
     "add": "Add",
     "forbidden": "You do not have access to this screen.",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "deleteConfirmTitle": "Delete this item?",
+    "deleteConfirmBody": "This cannot be undone."
   },
   "pending": {
     "title": "Access pending",
@@ -1084,6 +1472,12 @@
     "expand": "Expand"
   },
   "nav": {
+    "agendaRules": "What blocks booking",
+    "cashCountMode": "How cash is counted",
+    "estadisticasVentas": "Sales (analytics)",
+    "estadisticasAsistencia": "Attendance (analytics)",
+    "estadisticasPacientes": "Patients (analytics)",
+    "tasaRetorno": "Return rate",
     "home": "Home",
     "appointments": "Appointments",
     "signIn": "Sign in",
@@ -1121,7 +1515,7 @@
       "patients": "Patients",
       "services": "Services",
       "billing": "Billing",
-      "reports": "Reports",
+      "reports": "Analytics",
       "inventory": "Inventory",
       "communications": "Communications",
       "admin": "Admin",
@@ -1198,7 +1592,17 @@
     "expandNav": "Expand menu",
     "patientDesk": "Patient Center",
     "paquetesVenta": "Sales packages",
-    "inventory_live_stock": "Live stock (scales)"
+    "inventory_live_stock": "Live stock (scales)",
+    "ahora_mismo": "Right now",
+    "productosExonerados": "Exonerated products (IVU)",
+    "bothCenters": "BOTH",
+    "bodyMeasurementsUnlinked": "Unlinked measurements",
+    "changeLog": "Change history",
+    "confirmationPolicies": "Confirmations",
+    "calendarAbsenceReview": "Absences to review",
+    "paymentMethods": "Payment methods",
+    "inventory_daily_kardex": "Daily kardex",
+    "inventory_adjustments": "Adjustments"
   },
   "admin": {
     "title": "Administration",
@@ -1209,7 +1613,6 @@
     "tabs": {
       "personal": "Staff",
       "pending": "Pending",
-      "users": "Users",
       "centers": "Centers",
       "theme": "Theme",
       "roles": "Roles",
@@ -1219,16 +1622,14 @@
     },
     "editorRol": {
       "title": "Unified role editor (beta)",
-      "help": "Pick a role and adjust what it sees and what it can do, in one screen. Doesn't replace Roles/Permissions/Menu yet.",
+      "help": "Pick a role and adjust what it can do. Each person's menu follows from their permissions.",
       "selectRole": "Pick a role",
       "loading": "Loading…",
       "empty": "Pick a role to get started.",
       "retry": "Retry",
       "save": "Save",
       "saving": "Saving…",
-      "saved": "Role editor saved.",
-      "savedMenuOnly": "Menu saved, but permissions failed: {error}",
-      "savedPermisosOnly": "Permissions saved, but menu failed: {error}"
+      "saved": "Role editor saved."
     },
     "rbac": {
       "title": "Roles & permissions",
@@ -1263,14 +1664,10 @@
       "edit": "Edit",
       "editTitle": "Edit role",
       "updated": "Role updated.",
-      "menuRol": "Menu",
-      "menuRolTitle": "Menu for role {role}",
-      "menuRolHelp": "Check the menu options this role sees. Translated to permissions; non-menu permissions are untouched.",
-      "menuRolSaved": "Role menu updated",
-      "menuRolSinPermiso": "visible to everyone",
       "confirmDelete": "Delete role {role}? Users holding it will lose it.",
       "todosLosCentros": "Operates in all centers",
-      "todosLosCentrosAyuda": "Whoever gets this role inherits it; the role is assigned globally (not to a center)."
+      "todosLosCentrosAyuda": "Whoever gets this role inherits it; the role is assigned globally (not to a center).",
+      "adminRoleFixed": "The Administrator role has full access and cannot be edited."
     },
     "access": {
       "title": "User access",
@@ -1336,7 +1733,9 @@
       "permisoClave": "Required permission",
       "permisoClaveHint": "Empty = visible to everyone",
       "permisoClavePlaceholder": "Pick a permission",
-      "permisoSinPermiso": "No permission (visible to everyone)"
+      "permisoSinPermiso": "No permission (visible to everyone)",
+      "deleteTitle": "Delete this item?",
+      "deleteBody": "“{name}” will be deleted from the menu. This cannot be undone."
     },
     "theme": {
       "systemTitle": "System brand color",
@@ -1374,12 +1773,13 @@
       "createHelp": "While active, this theme prevails over everything.",
       "creating": "Creating…",
       "createSubmit": "Create",
-      "created": "Override created."
+      "created": "Override created.",
+      "removeTitle": "Remove this override?",
+      "removeBody": "“{name}” will be removed. The normal theme applies again. This cannot be undone."
     },
     "columns": {
       "email": "Email",
       "name": "Name",
-      "accessMode": "Access mode",
       "status": "Status",
       "actions": "Actions",
       "roles": "Role(s)",
@@ -1393,12 +1793,11 @@
     "rejectTitle": "Reject profile",
     "rejectDescription": "Provide the reason for rejecting {email}.",
     "motivoPlaceholder": "Rejection reason",
+    "rejectReason": "Rejection reason",
     "confirmReject": "Reject",
     "cancel": "Cancel",
     "users": {
       "invite": "Invite user",
-      "empty": "No users yet.",
-      "assign": "Assign center",
       "access": "Access",
       "centros": "Centers",
       "editar": "Edit user",
@@ -1406,12 +1805,10 @@
       "reactivar": "Reactivate",
       "suspendido": "User suspended",
       "reactivado": "User reactivated",
-      "buscar": "Search by email, name, role or center…",
       "sinRol": "No role",
       "sinCentro": "No center",
       "hasta": "until {fecha}",
       "masAcciones": "More actions",
-      "sinResultados": "No user matches the search.",
       "generarCodigo": "Generate access code",
       "codigo": {
         "titulo": "Access code",
@@ -1434,23 +1831,32 @@
         "cancelar": "Cancel",
         "guardar": "Change email",
         "guardando": "Changing…",
-        "ok": "Access email updated"
+        "ok": "Access email updated",
+        "unchanged": "Same as the current email"
+      },
+      "adminBadge": "Administrator",
+      "allCenters": "All centers",
+      "status": {
+        "aprobado": "Approved",
+        "pendiente": "Pending",
+        "suspendido": "Suspended",
+        "rechazado": "Rejected"
       }
     },
     "invite": {
       "title": "Invite user",
       "description": "Creates the user and an approved profile in one step.",
-      "persona": "Is this someone already on staff?",
-      "personaHint": "Optional. Links the account to that person and keeps their history.",
+      "persona": "Do they already have a staff record (doctor, technician…)?",
+      "personaHint": "If they already work here, pick them to avoid a duplicate. Their history stays with the account.",
       "personaPlaceholder": "Pick the person (or leave empty)",
-      "personaNadie": "Nobody — new account without a staff record",
+      "personaNadie": "No — new person",
       "personaEnlazando": "Will link to: {nombre} (keeps their history)",
+      "suggestion": "{nombre} already has a staff record in {centro}. Is this the person?",
+      "suggestionNoCenter": "{nombre} already has a staff record. Is this the person?",
+      "suggestionLink": "Yes, link",
       "email": "Email",
       "name": "First name",
       "lastName": "Last name",
-      "accessMode": "Access mode",
-      "operativo": "Operational",
-      "gerencial": "Managerial",
       "submit": "Invite",
       "submitting": "Inviting…",
       "success": "{email} invited.",
@@ -1466,12 +1872,16 @@
       "done": "Done",
       "centro": "Center",
       "centroPlaceholder": "Pick a center",
+      "centroTodos": "All centers ({n})",
       "centroHint": "Optional; without a center the user can't sign in until one is assigned.",
       "temporal": "Temporary access to this center",
       "vigenteHasta": "Valid until",
       "rol": "Role",
       "rolPlaceholder": "Pick a role",
       "rolHint": "Optional. Choosing a role WITHOUT a center grants it in ALL centers.",
+      "rolAdminHint": "To make them an administrator, give them the Administrator role from their access once created.",
+      "centerFailed": "The user was created, but access to {centro} could not be given. Add it from their centers.",
+      "roleFailed": "The user was created, but the role could not be assigned. Assign it from their access.",
       "clone": {
         "label": "Clone from (optional)",
         "hint": "Copies their access right now. After that, each user is managed separately.",
@@ -1483,7 +1893,6 @@
         "roles": "{n} roles ({ya} already had)",
         "permisos": "{n} exceptions ({ya} already had)",
         "centros": "{n} centers ({ya} already had)",
-        "modo": "The user switches to {modo} mode (read-only), like the original.",
         "ok": "Access copied from {origen}.",
         "falloAviso": "The user was created, but access could not be copied. Retry from their access sheet."
       }
@@ -1555,13 +1964,9 @@
     },
     "editarPerfil": {
       "title": "Edit {email}",
-      "help": "Basic data and access mode.",
+      "help": "Basic details of the user.",
       "nombre": "First name",
       "apellido": "Last name",
-      "accessMode": "Access mode",
-      "operativo": "Operational (one center at a time)",
-      "gerencial": "Managerial (sees all their centers, read-only)",
-      "accessModeHelp": "Managerial sees several centers at once but cannot write.",
       "guardado": "Profile updated"
     },
     "permisos": {
@@ -1590,7 +1995,9 @@
         "accion": "Action",
         "descripcion": "Description"
       }
-    }
+    },
+    "approveTitle": "Approve this profile?",
+    "approveBody": "{email} will be able to sign in."
   },
   "login": {
     "title": "Sign in",
@@ -1690,7 +2097,8 @@
     "stepPresent": "Present",
     "stepConsult": "In consult",
     "stepAttended": "Attended",
-    "now": "now"
+    "now": "now",
+    "noPatient": "This row has no patient; the appointment can't be booked."
   },
   "settingsModulos": {
     "title": "Modal modules",
@@ -1722,7 +2130,19 @@
     "sin_grupo": "No group",
     "pago": {
       "excede_total": "The payment cannot exceed the invoice total.",
-      "requiere_permiso_anular": "You do not have permission to void payments."
+      "requiere_permiso_anular": "You do not have permission to void payments.",
+      "forma_sin_dinero": "{formaPago} carries no money: an exonerated consultation is a 100% discount, not a payment."
+    },
+    "kit": {
+      "multiplicadoresInvalidos": "The therapies (areas × days) don't split evenly among the line's kits.",
+      "componente": {
+        "motivoRequerido": "Write the reason (3 to 500 characters).",
+        "soloEmitida": "A component can only be added to an issued invoice.",
+        "noEsKit": "That line is not a kit.",
+        "noEsOpcional": "That component is not an optional of this kit.",
+        "yaIncluido": "That component is already included in the kit.",
+        "kitPersonalizado": "This line’s kit was customized; fix it from «Customize kit»."
+      }
     }
   },
   "zona": {
@@ -1734,7 +2154,20 @@
   "personal": {
     "ya_tiene_cuenta": "That person already has an account. Unlink it before creating another.",
     "de_otro_centro": "That person belongs to another center.",
-    "no_existe": "That person is no longer in the list; refresh and try again."
+    "no_existe": "That person is no longer in the list; refresh and try again.",
+    "cargo": {
+      "medico": "Doctor",
+      "enfermera": "Nurse",
+      "tecnico": "Technician",
+      "recepcion": "Front desk",
+      "operadora": "Operator",
+      "cajero": "Cashier",
+      "facturacion": "Billing",
+      "contabilidad": "Accounting",
+      "inventario": "Inventory",
+      "gerente": "Manager",
+      "otro": "Other"
+    }
   },
   "estadisticasDiarias": {
     "title": "Daily statistics",
@@ -1746,6 +2179,11 @@
     "correo": "Email",
     "copiar": "Copy",
     "copiado": "Report copied",
+    "snapshot": "Snapshot",
+    "snapshotTip": "Copies the card as an image, to paste straight into WhatsApp Web.",
+    "snapshotCopiado": "Image copied — paste it with Ctrl+V (or Cmd+V)",
+    "snapshotDescargado": "Your browser won't let images be copied; the PNG was downloaded instead",
+    "snapshotError": "Could not generate the image",
     "atencionMedica": "Medical attention",
     "total": "Total",
     "servicios": "Specialized services",
@@ -1754,14 +2192,23 @@
     "col": {
       "servicio": "Service",
       "aplicados": "Applied",
-      "vendidos": "Sold"
+      "aplicadosUnidades": "{visits} pts / {therapies} u.",
+      "vendidos": "Sold",
+      "devueltos": "Returned"
     },
     "tip": {
       "nuevas": "First-time attended appointments (what happened, not what was scheduled).",
       "seguimientos": "Follow-up appointments attended.",
       "aplicados": "Sessions delivered today at the frontdesk (work done).",
-      "vendidos": "Sessions promised by today's invoices (what was billed). Need not match applied."
-    }
+      "aplicadosUnidades": "Patients attended / units applied (laser areas, vials or doses where the service declares them).",
+      "vendidos": "Sessions promised by today's invoices (what was billed). Need not match applied.",
+      "devueltos": "Sessions given back by the day's refunds"
+    },
+    "devoluciones": "Refunds",
+    "ingresoNeto": "Net revenue",
+    "nuevos": "New",
+    "seguimiento": "Follow-up",
+    "verDevueltos": "Show returned per service"
   },
   "estadisticasServicios": {
     "title": "Service Statistics",
@@ -1789,7 +2236,14 @@
       "enfermera": "Nursing",
       "tecnico": "Technician",
       "medico": "Physician"
-    }
+    },
+    "vitales": "Vitals",
+    "colVisitas": "Visits",
+    "colPacientesDistintos": "Distinct patients",
+    "colTerapias": "Therapies",
+    "colTomas": "Takings",
+    "tipVisitas": "Sessions the person attended (the legacy called it «Pacientes #»)",
+    "tipTerapias": "Units applied: areas in laser, doses in Vit C"
   },
   "frontdesk": {
     "title": "Patient Center",
@@ -1813,7 +2267,8 @@
     "saldoError": "Could not load availability",
     "sinPaquetes": "No pending packages",
     "pendienteTotal": "Total pending",
-    "sesionXdeN": "Session {x} of {n}",
+    "sesionXdeN": "Next: {x} of {n}",
+    "aplicadasPropuesto": "Suggested from availability — confirm or edit",
     "mult": {
       "dias": "days",
       "areas": "areas",
@@ -1826,6 +2281,8 @@
     "corregirSesiones": "Total sessions",
     "corregirGuardar": "Save correction",
     "corregirMenorConsumido": "Cannot be less than what is already delivered ({n}).",
+    "fixAvailabilityMultiplierPositive": "Each value must be greater than 0.",
+    "fixAvailabilityNoPackageId": "This package has no id; reload the page.",
     "corregirOk": "Availability updated",
     "corregirError": "Could not update availability",
     "fijarSinPaquete": "Fix sessions",
@@ -1834,7 +2291,7 @@
     "fijarSinPaqueteCampoSesiones": "Total sessions",
     "fijarSinPaqueteCampoProducto": "Product (the service uses a billing group)",
     "fijarSinPaqueteElegirProducto": "Choose product…",
-    "fijarSinPaqueteProductoRequerido": "Choose which product in the group to anchor the new package to.",
+    "fixSessionsNegative": "Must be 0 or more.",
     "fijarSinPaqueteGuardar": "Fix sessions",
     "fijarSinPaqueteOk": "Sessions fixed",
     "acciones": "Actions",
@@ -1847,6 +2304,18 @@
     "nurseTitle": "Nursing",
     "nurseEmpty": "No statuses recorded today",
     "nurseSinStatus": "No status",
+    "nurseElegirDuracion": "For how long? · {tipo}",
+    "nurseMinutos": "{n} min",
+    "nurseSinLimite": "No limit",
+    "nurseHasta": "until {hora}",
+    "tecnicosTitle": "Technicians",
+    "tecnicosLibres": "Free",
+    "tecnicosEnTerapia": "In therapy",
+    "tecnicosEmpty": "Nobody on shift right now",
+    "tecnicosDescanso": "Break",
+    "tecnicosElegir": "Pick technician",
+    "tecnicosMinutos": "{n} min",
+    "tecnicosHasta": "until {hora}",
     "historial": "Therapy history",
     "programarCitas": "Schedule appointments",
     "histTitle": "Therapy history",
@@ -1868,6 +2337,7 @@
     "rangoHint": "Date range (management): leave empty for a single day.",
     "elegir": "Pick…",
     "sinOpciones": "No options",
+    "sinAsignar": "Unassigned",
     "faltanCampos": "Missing: {campos}",
     "calDiaTitle": "Day calendar",
     "calPacienteTitle": "Patient calendar",
@@ -1876,7 +2346,9 @@
     "calSinCitas": "No upcoming appointments",
     "calVacios": "{vacios}/{cupo} free",
     "deshacerPregunta": "Undo “{paso}”?",
+    "deshacerAviso": "This clears the stamped time and it cannot be recovered automatically.",
     "deshacer": "Undo",
+    "enTerapiaSinAsistir": "{nombre} left {n, plural, one {# patient} other {# patients}} unattended from previous days.",
     "aviso": {
       "cupo_excedido": "Day capacity exceeded (booked {agendadas} / capacity {cupo}).",
       "sin_cupo_configurado": "No capacity configured for this date."
@@ -1885,6 +2357,7 @@
     "formatosTitle": "{servicio} formats",
     "generarFormato": "Generate format",
     "sinFormatos": "No formats configured for this service.",
+    "disponibilidadActualizada": "Availability updated {number}/{total}",
     "enviarTecnico": "Include technician name on the format ({nombre})",
     "colSesion": "Session",
     "colAreas": "Areas",
@@ -1914,7 +2387,8 @@
         "tecnico": "TECHNICIAN"
       },
       "mia_glp1_order": "Mía order · GLP-1 (Semaglutide / Tirzepatide)",
-      "mia_peptides_order": "Mía order · Peptides"
+      "mia_peptides_order": "Mía order · Peptides",
+      "sessionNumber": "SESSION # :"
     },
     "recordLabel": "Record",
     "triggerPoint": "Trigger point",
@@ -1995,6 +2469,7 @@
       "sesiones": "Sessions to transfer",
       "sesionesAyuda": "Empty = all ({n}). Or type how many for a partial transfer.",
       "sesionesInvalida": "Must be between 1 and {n}.",
+      "nothingPending": "This package has no pending sessions to transfer.",
       "modo": "Mode",
       "virtual": "Virtual",
       "virtualAyuda": "Only the treatment; the other center uses its own inventory.",
@@ -2039,8 +2514,78 @@
       "enServicioEsperando": "{servicio} — waiting",
       "enServicio": "In {servicio}"
     },
+    "medicosLibres": {
+      "titulo": "Free doctors",
+      "vacio": "No doctor is free right now."
+    },
     "patientNotFound": "That patient does not exist in this center.",
-    "serviceNotFound": "One of the chosen services does not exist in this center."
+    "serviceNotFound": "One of the chosen services does not exist in this center.",
+    "removeStep": "Remove {step}",
+    "formatoTherapyCount": "Therapies to print",
+    "reopen": "Reopen",
+    "reopenAll": "Reopen all",
+    "cancelAll": "Cancel all",
+    "cancelAllTitle": "Cancel all of the day's sessions",
+    "cancelAllHint": "This patient's pending, present and in-therapy sessions today are cancelled. Attended ones are left alone. One reason for all.",
+    "reopened": "Session reopened",
+    "reopenedMany": "{n, plural, one {# session reopened} other {# sessions reopened}}",
+    "cancelledMany": "{n, plural, one {# session cancelled} other {# sessions cancelled}}",
+    "reopenSkipped": "Reopened: {n}. Did not come back: {reasons}",
+    "error": {
+      "reopenOnlyToday": "A session can only be reopened the same day",
+      "reopenPackageClosed": "The package is no longer active: invoice voided, refunded or protocol changed",
+      "reopenNotCancelled": "The session is not cancelled",
+      "sessionSameDay": "There is already another session of this service today",
+      "sheetSlotTaken": "The sheet has no seat at that time"
+    },
+    "evento": {
+      "reopened": "Reopened"
+    },
+    "mls": {
+      "title": "MLS",
+      "paciente": "Patient :",
+      "fecha": "Date :",
+      "record": "Record #",
+      "patologia": "Pathology",
+      "frec": "Freq",
+      "tiempo": "Time",
+      "int": "Int.",
+      "comentarios": "Comments:",
+      "tecnico": "Technician:",
+      "proxima": "Next appointment:",
+      "nTerapias": "Number of therapies # :",
+      "horaEntrada": "Time in :",
+      "horaSalida": "Time out :",
+      "ctd": "CTD :",
+      "firma": "Patient's signature"
+    },
+    "hilt": {
+      "title": "HILT",
+      "paciente": "Patient :",
+      "fecha": "Date :",
+      "record": "Record #",
+      "patologia": "Pathology",
+      "step": "Step {n}",
+      "mjcm": "mj/cm",
+      "hz": "Hz",
+      "totEnergy": "Tot. Energy",
+      "comentarios": "Comments:",
+      "triggerPoint": "Trigger Point:",
+      "si": "Yes:",
+      "no": "No:",
+      "tecnico": "Technician:",
+      "proxima": "Next appointment:",
+      "nTerapias": "Number of therapies # :",
+      "horaEntrada": "Time in:",
+      "horaSalida": "Time out:",
+      "firma": "Patient's signature"
+    },
+    "formatoPage": "Page {page}",
+    "formatoFirmas": "Signatures:",
+    "legacyLabel": {
+      "invalid": "The session goes from 1 to the total.",
+      "notMigrated": "This session is numbered by its package; fix it from the package."
+    }
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -2119,7 +2664,11 @@
     "exceedsTotal": "Cannot exceed the total (max {max})",
     "splitHint": "To split across methods, add one payment per method (max {max})",
     "settled": "Paid in full",
-    "overpaid": "Overpaid"
+    "overpaid": "Overpaid",
+    "viaRefundTitle": "That reimbursement belongs to a return",
+    "viaRefundLink": "Go to the return",
+    "amountNotPositive": "The amount must be greater than 0.",
+    "noChanges": "No changes."
   },
   "formasPago": {
     "efectivo": "Cash",
@@ -2221,15 +2770,20 @@
       "cienDescuento": "100% off",
       "cobradas": "charged",
       "pagina": "Page",
-      "rango": "Range"
+      "rango": "Range",
+      "centros": "Total ({n} clinics)"
     },
-    "live": "Live"
+    "live": "Live",
+    "nuevaVentaEn": "New sale in {centro}",
+    "colCentro": "Clinic",
+    "searchAllDates": "Searching every date"
   },
   "facturacionTabs": {
     "facturas": "Invoices",
     "devoluciones": "Returns",
     "caja": "Cash count",
-    "estadisticas": "Statistics"
+    "estadisticas": "Statistics",
+    "cuadreTotal": "Day total"
   },
   "inventario": {
     "prov": {
@@ -2630,6 +3184,14 @@
         "liveStock": {
           "title": "Live stock (scales)",
           "desc": "What the scales count on each warehouse pad, next to book stock."
+        },
+        "adjustments": {
+          "title": "Adjustments",
+          "desc": "One or several products in a single numbered adjustment; and the adjustments made."
+        },
+        "dailyKardex": {
+          "title": "Daily kardex",
+          "desc": "A product's inbound, applied and adjustments, day by day, and the management summary."
         }
       }
     },
@@ -2714,11 +3276,19 @@
     },
     "recepcion_sin_lineas": "The reception has no lines.",
     "recepcion_demasiadas_lineas": "Too many lines (max 200).",
-    "recepcion_cantidad_invalida": "There is an invalid quantity in a line."
+    "recepcion_cantidad_invalida": "There is an invalid quantity in a line.",
+    "ajuste": {
+      "sin_lineas": "The adjustment needs at least one product.",
+      "cantidad_invalida": "A quantity in the adjustment is not valid.",
+      "signo_invalido": "A line is missing «Out» or «In».",
+      "producto_inexistente": "A product in the adjustment no longer exists; its line is marked in red."
+    }
   },
   "receipt": {
     "print": "Print receipt",
     "previewTitle": "Receipt preview",
+    "preview": "Preview",
+    "previewDescription": "How the printed receipt will look.",
     "loadFailed": "Couldn't load the receipt",
     "preparing": "Preparing receipt…",
     "void": "VOID",
@@ -2744,7 +3314,13 @@
     "regularPrice": "Regular price",
     "savings": "Savings",
     "packagePrice": "Package price",
-    "youSaved": "You saved"
+    "youSaved": "You saved",
+    "originInvoice": "Original invoice #{number}",
+    "refundOption": "Refund #{number} · ${amount}",
+    "invoiceOption": "Invoice (original)",
+    "voided": "voided",
+    "refunded": "Refunded",
+    "refund": "Refund"
   },
   "facturacion": {
     "title": "Bill consultation",
@@ -2811,8 +3387,8 @@
       "recordLabel": "Record",
       "cambiarPaciente": "Change",
       "lista": "Price list",
-      "pickCentroTitle": "Select the center",
-      "pickCentroGo": "Bill here",
+      "pickCentroTitle": "Which center are you working in?",
+      "pickCentroHelp": "This screen shows one center at a time. Choose which one to work in.",
       "centroLabel": "Center:",
       "cambiarCentro": "Change center",
       "medico": "Attending physician",
@@ -2875,7 +3451,16 @@
       "agregado": "added",
       "agregarComponente": "Add component",
       "buscarProducto": "Search product…",
-      "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe."
+      "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe.",
+      "terapias": "Therapies",
+      "addComponentIssued": "Add component (amount unchanged)",
+      "addComponentIssuedHint": "For an optional left out by mistake. The invoice stays issued, the total does not change and its sessions are created.",
+      "addComponentConfirm": "Add component",
+      "componentAdded": "Component added to the kit",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why it is added (required)",
+      "component": "Component",
+      "reasonTooShort": "The reason needs at least 3 characters."
     },
     "imprimirNoEmitida": "The invoice was not issued when printing.",
     "corregirImpuesto": {
@@ -2895,7 +3480,7 @@
       "exportCsv": "Export CSV",
       "div": {
         "todas": "All",
-        "general": "General",
+        "general": "Services & Products",
         "consulta": "Consultations"
       },
       "atajo": {
@@ -2931,7 +3516,7 @@
       "exportCsv": "Export CSV",
       "div": {
         "todas": "All",
-        "general": "General",
+        "general": "Services & Products",
         "consulta": "Consultations"
       },
       "atajo": {
@@ -2967,8 +3552,6 @@
       "backupHubRetry": "Retry",
       "backupHubOpen": "Open hub",
       "backupHubCertHint": "Open it and accept the security warning if it is the first time on this machine; then Retry.",
-      "backupHubFallbackNote": "Using the backup hub: the main one ({hub}) is not answering from this machine, or its certificate has not been accepted. The backup may not detect a powered-off printer.",
-      "backupHubOpenMain": "Open main hub",
       "backupPrinter": {
         "disabled": "Printer paused on its machine.",
         "disconnected": "Printer off or unplugged.",
@@ -2983,13 +3566,29 @@
     "descuentoPasaBase": "The discount (${valor}) is larger than the subtotal (${base}).",
     "descuentoUsarBase": "Give the whole total: ${base}",
     "removeDiscount": "Remove discount",
-    "descuentoActual": "Discount applied: ${monto}"
+    "descuentoActual": "Discount applied: ${monto}",
+    "unitsAreasDays": "Quantity (areas × days)",
+    "unitsAreasDaysHint": "Computed: areas × days. Not typed.",
+    "packages": "Packages",
+    "packagesHint": "How many packages are sold (usually 1).",
+    "returnedBadge": "Returned",
+    "error": {
+      "pago_supera_total": "The money taken is above the invoice total ({sobrante} over). Void the extra payment before issuing.",
+      "multiplicador_invalido": "{field}: must be a whole number of 1 or more.",
+      "meta_solo_borrador": "Areas and days can only be changed on a draft invoice."
+    },
+    "multipliersEditHint": "Fix areas or days here: saved when you leave the field.",
+    "lineProduct": "Product/service",
+    "priceLoading": "Looking up the price…"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
+    "eyebrowScheduled": "Appointment",
     "title": "Add appointment",
     "subline": "Register a patient on today's board (created as confirmed).",
+    "sublineScheduled": "Book an appointment for another day.",
     "today": "Today",
+    "scheduledFor": "For",
     "patient": "Patient",
     "type": "Type",
     "doctor": "Doctor",
@@ -2999,9 +3598,16 @@
     "firstTime": "First visit",
     "notes": "Notes",
     "notesPlaceholder": "Reason / notes…",
+    "hasAppointment": "Already has an appointment on {date} with {doctor}",
+    "hasAppointmentNoDoctor": "Already has an appointment on {date}",
+    "reasonRequired": "Reason for the change",
+    "reasonRequiredPh": "Reason for the change (required)",
+    "moveTo": "Move to {date}",
     "cancel": "Cancel",
     "save": "Add to board",
-    "retired": "Retired"
+    "saveScheduled": "Book appointment",
+    "retired": "Retired",
+    "noAppointmentType": "No appointment types are loaded; the appointment can't be booked."
   },
   "precios": {
     "title": "Prices",
@@ -3147,8 +3753,15 @@
       "badge": "Show counter",
       "allowSessionFixWithoutPackage": "Allow fixing sessions without a package",
       "allowSessionFixWithoutPackageHint": "In Frontdesk, lets staff correct a patient's session count for this service even if they have no package purchased yet.",
-      "activo": "Active"
+      "primaryPackageRule": "Session number when it consumes several packages",
+      "primaryPackageRuleHint": "Which package numbers the visit when the service uses more than one at once (e.g. laser: MLS + HILT together).",
+      "activo": "Active",
+      "startStep": "Minutes between start times",
+      "startStepHint": "60 = on the hour only, like the call-center sheet. Empty = any slot of the day. It does not change the duration.",
+      "startStepAny": "Any time"
     },
+    "primaryPackageRuleRow": "Per row (each package counts its own session)",
+    "primaryPackageRuleMostDelivered": "The one with the most delivered (e.g. MLS over the HILT anchor)",
     "centro": {
       "todos": "All centers"
     },
@@ -3164,7 +3777,8 @@
     "multiAplicado": "Applied to {n} center(s)",
     "multiSinCambios": "No changes (all centers were already the same)",
     "cargaParcial": "Could not load services from: {centros}. The view may be incomplete.",
-    "ordenArrastrar": "Drag to reorder the tabs"
+    "ordenArrastrar": "Drag to reorder the tabs",
+    "sortOrderInvalid": "The order must be a number."
   },
   "transferencias": {
     "title": "Transfers",
@@ -3193,6 +3807,7 @@
     "confirmAprobarBody": "Received amounts will be recorded and the remainder handled as: {politica}.",
     "rechazarTitle": "Reject transfer",
     "rechazarBody": "All stock returns to origin. State the reason.",
+    "lineQuantityInvalid": "Enter a quantity greater than zero for the chosen product.",
     "motivoPlaceholder": "Rejection reason…",
     "estado": {
       "pendiente": "Pending",
@@ -3245,7 +3860,18 @@
   "errores": {
     "TENANT_NOT_FOUND": "The specified center does not exist.",
     "VIGENCIA_INVALIDA": "The end date can't be earlier than the start date.",
-    "TENANT_REQUIRED": "Choose a center: this view works one center at a time."
+    "TENANT_REQUIRED": "Choose a center: this view works one center at a time.",
+    "REFERENCE_NOT_FOUND": "The operation couldn't complete: the server is missing some data it needs. Try again; if it keeps happening, contact support.",
+    "AJUSTE_SIN_LINEAS": "The adjustment needs at least one product.",
+    "AJUSTE_CANTIDAD_INVALIDA": "A quantity in the adjustment is not valid.",
+    "AJUSTE_SIGNO_INVALIDO": "A line is missing «Out» or «In».",
+    "AJUSTE_PRODUCTO_INEXISTENTE": "A product in the adjustment no longer exists."
+  },
+  "transferencia": {
+    "sesionesExcedenDisponible": "You asked for more sessions than are still pending on that package.",
+    "pacienteDestinoNoExiste": "The destination patient does not exist at that center.",
+    "nadaCambia": "Choose another person, another center, or both: otherwise there's nothing to transfer.",
+    "motivoObligatorio": "A reason is required when it goes to another person."
   },
   "configAlta": {
     "title": "Required patient data",
@@ -3355,7 +3981,8 @@
       "metodo": "Method",
       "resultado": "Result",
       "duracion": "Duration",
-      "centro": "Center"
+      "centro": "Center",
+      "via": "Via"
     },
     "verbo": {
       "creo": "Created",
@@ -3373,7 +4000,14 @@
       "frontdesk": "Frontdesk",
       "tablero": "Board",
       "auth": "Authentication"
-    }
+    },
+    "via": {
+      "app": "App",
+      "claude": "Claude"
+    },
+    "tool": "Tool",
+    "filtroEntidad": "Entity {id}",
+    "filtrarPorEntidad": "Filter by this entity"
   },
   "comunicaciones": {
     "title": "Alerts",
@@ -3405,7 +4039,8 @@
       "estado": "Status",
       "destino": "Recipient",
       "fecha": "Date",
-      "cuerpo": "Body"
+      "cuerpo": "Body",
+      "centro": "Clinic"
     },
     "estadoNotif": {
       "pendiente": "Pending",
@@ -3419,7 +4054,8 @@
       "clinico": "Clinical",
       "agenda": "Schedule",
       "otras": "Other"
-    }
+    },
+    "noClinicToCreate": "You have no center to create templates in."
   },
   "fac": {
     "col": {
@@ -3439,12 +4075,21 @@
       "numero": "Invoice #",
       "fecha": "Date",
       "paciente": "Client",
+      "record": "Record",
       "medico": "Doctor",
       "estado": "Status",
       "total": "Total",
       "medio": "Referral",
       "usuario": "User",
-      "acciones": "Actions"
+      "acciones": "Actions",
+      "metodoPago": "Payment"
+    },
+    "grupo": {
+      "producto": "Product"
+    },
+    "breakdown": {
+      "sessions": "Sessions",
+      "therapies": "Therapies"
     }
   },
   "configFactura": {
@@ -3505,6 +4150,43 @@
     "anularBody": "The return will be voided. Recorded with your user.",
     "anularReason": "Void reason",
     "anuladaOk": "Return voided",
+    "verDevolucion": "View return",
+    "sectionTitle": "Returns ({count})",
+    "fromInvoiceLabel": "Origin invoice",
+    "atendidoPor": "Handled by",
+    "colCantidad": "Quantity",
+    "colPrecio": "Price",
+    "colMonto": "Amount",
+    "formaReembolso": "Refund method",
+    "sinReembolso": "No refund method recorded",
+    "notas": "Notes",
+    "colMetodo": "Method",
+    "agregarLinea": "Add line",
+    "anuladaInfo": "Voided on {fecha} by {quien}.",
+    "anuladaPor": "Voided by {quien} on {fecha}",
+    "editor": {
+      "tabEditor": "Editor",
+      "tabHistory": "History",
+      "headerTitle": "Header",
+      "linesTitle": "Lines",
+      "colConcepto": "Concept",
+      "colVendidas": "Sold",
+      "colEntregadas": "Delivered",
+      "colDevueltasOtras": "Refunded elsewhere",
+      "colDevolvible": "Refundable",
+      "colCantidad": "Quantity",
+      "colMonto": "Amount",
+      "savedOk": "Return updated",
+      "previewTitle": "Preview",
+      "previewCalculating": "calculating…",
+      "invoiceStatus": "Invoice status",
+      "packageEffect": "{sessions} session(s) return to the package · {status}",
+      "inventoryEffect": "Inventory movement: {delta}",
+      "changeReason": "Reason for the change",
+      "changeReasonPlaceholder": "Why this return is being edited",
+      "historyLoading": "Loading history…",
+      "historyEmpty": "No changes recorded."
+    },
     "estado": {
       "activa": "Active",
       "anulada": "Voided"
@@ -3521,18 +4203,54 @@
       "monto": "Amount",
       "estado": "Status",
       "motivo": "Reason",
-      "acciones": "Actions"
+      "acciones": "Actions",
+      "centro": "Clinic"
+    }
+  },
+  "refund": {
+    "reimbursementSumMismatch": "Reimbursements must add up to {expected}; they added up to {received}",
+    "notActive": "The return is voided; it cannot be repaired",
+    "reimbursementViaRefund": "That payment is the reimbursement of an active return — void it from the return, not from here",
+    "edit": {
+      "exceedsRefundable": "Asking for {requested}, but only {available} is still refundable",
+      "exceedsPaid": "Refunds ({refunds}) exceed what was paid ({paid})",
+      "cashDayClosed": "The {date} cash sheet is already closed",
+      "packageReplaced": "The package was closed by a protocol change",
+      "packageVoided": "The package is voided",
+      "amountAboveLine": "Refunding more than the line cost",
+      "componentNeedsAmount": "Enter the component's amount",
+      "reimbursementMismatch": "The reimbursements don't add up to the refunded amount",
+      "blocked": "This center does not allow saving this change"
+    }
+  },
+  "patientMerge": {
+    "same": "A record cannot be merged with itself",
+    "conflict": "Something needs to be resolved before merging",
+    "changesPastReports": "This changes past-period counts — it must be accepted before merging"
+  },
+  "cash": {
+    "pastDay": {
+      "locked": "The {day} cash sheet is already closed. Ask a manager to correct it.",
+      "reasonRequired": "A reason is needed to change the {day} cash sheet",
+      "changed": "You changed the {day} cash sheet; signers will be asked to acknowledge the correction",
+      "dateAndCenterRequired": "Date and center are required",
+      "dialogTitle": "You're about to change the {day} cash sheet",
+      "alreadySigned": "Already signed by:",
+      "deltaTotal": "Total",
+      "reasonLabel": "Reason for the change",
+      "confirmButton": "Yes, change the {day} cash sheet",
+      "canModifyWarning": "This invoice is from {day}, which already has a cash sheet: any change alters it"
     }
   },
   "caja": {
     "title": "Cash count",
-    "help": "Count the cash and reconcile the day's drawer, keeping consultation and general apart.",
+    "help": "Count the cash and balance the day's register, keeping Consultation apart from Services & Products.",
     "date": "Date",
     "loading": "Loading…",
     "sinCentro": "You have no centers assigned.",
     "division": {
       "consulta": "Consultation",
-      "general": "General"
+      "general": "Services & Products"
     },
     "scope": {
       "label": "Cashier",
@@ -3563,7 +4281,18 @@
       "saved": "Count saved",
       "hint": "Select a cashier to enable counting.",
       "pastLocked": "Editing past dates requires permission (caja.retroactivo).",
-      "consolidatedHint": "Consolidated count (read-only): sum of all cashiers."
+      "consolidatedHint": "Consolidated count (read-only): sum of all cashiers.",
+      "saveError": "The count could not be saved; it will retry on the next change.",
+      "managerCount": "Manager's count",
+      "managerCountHint": "This single count overrides the cashiers' sum.",
+      "cashiersSum": "Cashiers' sum",
+      "cashiersSumHint": "Read only: the sum of each cashier's count.",
+      "countMyself": "Do a single count",
+      "backToSum": "Back to the cashiers' sum",
+      "backToSumConfirm": "The manager's count will be cleared and the cashiers' sum used.",
+      "openingFloat": "Opening float",
+      "cashToDeposit": "Cash sales (to deposit)",
+      "titleFor": "Cash count {division}"
     },
     "petty": "Petty cash",
     "summary": {
@@ -3618,7 +4347,9 @@
         "ok": "balanced",
         "short": "short",
         "over": "over"
-      }
+      },
+      "cardSales": "Card sales (before refunds)",
+      "chargedRefunded": "Charged {charged} · Refunded −{refunded}"
     },
     "processClose": "Process close",
     "print": "Print",
@@ -3654,6 +4385,11 @@
       "colLineas": "Lines",
       "documentos": "Documents of the day",
       "sinDocumentos": "No documents this day.",
+      "ventaGeneral": "General sales",
+      "consultas": "Consultations",
+      "totalVentaGeneral": "Total general sales",
+      "totalConsultas": "Total consultations",
+      "totalGeneralDocumentos": "Grand total",
       "colNumero": "No.",
       "colRecord": "Record",
       "colPaciente": "Patient",
@@ -3675,14 +4411,49 @@
         "total": "Day total",
         "col": "Biller"
       },
-      "colFacturo": "Billed by"
+      "colFacturo": "Billed by",
+      "colAntesDescuento": "Before discount",
+      "colBaseNeta": "Net (base)",
+      "colFacturaOrigen": "Original invoice",
+      "colFormaReembolso": "Refund method"
+    },
+    "cuadre_total": {
+      "titulo": "Day total",
+      "tituloImpreso": "Day total reconciliation",
+      "help": "Both divisions, every cashier, one single count — checked against the sum of the two individual reconciliations. This is the sheet for treasury; the per-cashier and per-division reconciliations do not change.",
+      "sinAbrir": "This day's total reconciliation hasn't been opened yet.",
+      "comprobacion": {
+        "titulo": "Check",
+        "consulta": "Consultation",
+        "general": "Services & Products",
+        "suma": "Sum",
+        "dia": "Day",
+        "esperado": "Expected",
+        "contado": "Counted",
+        "fondo": "Fund",
+        "diferencia": "Difference"
+      },
+      "suma_cajeros": "Using the cashiers' sum",
+      "conteo_unico": "Do a single count",
+      "descuadre": "The day count differs by {monto}",
+      "divisionConsulta": "Consultation",
+      "divisionGeneral": "Services & Products",
+      "sinContarAviso": "Not counted yet"
+    },
+    "countMode": {
+      "divisionNotCounted": "Missing the {division} count",
+      "singleCountNotUsed": "There's a saved single count this center doesn't use (it counts per division)",
+      "dayNotCounted": "Missing the day's single count",
+      "flexible": "Flexible (today's)",
+      "split": "Two counts (Consultation and Services & Products)",
+      "single": "One single count"
     },
     "cuadreGeneral": {
       "title": "General cash-up",
-      "help": "Daily sales by division and payment method. General bundles products, IV and laser; Consultation is separate. The general total sums both.",
+      "help": "The day's sales by division and payment method. Services & Products covers products, IV and laser; Consultation is separate. The grand total adds both.",
       "fecha": "Date",
       "buscar": "Search",
-      "general": "General billing",
+      "general": "Services & Products",
       "consulta": "Consultation billing",
       "totalGeneral": "General total",
       "efectivo": "Cash",
@@ -3697,6 +4468,157 @@
         "volver": "Show all",
         "descuadre": "The per-biller sum does not match the day total ({total}). Report it — it is a backend defect."
       }
+    },
+    "productSales": {
+      "title": "Product sales (IVU)",
+      "taxable": "Taxable",
+      "exempt": "Exempt",
+      "exonerated": "Exonerated",
+      "taxCollected": "IVU collected",
+      "taxWouldBe": "IVU that was due",
+      "refunds": "Refunds",
+      "refundDocs": "{n} documents",
+      "net": "Product net",
+      "amount": "Amount",
+      "base": "Base",
+      "discount": "Discount",
+      "taxShort": "IVU",
+      "lines": "Lines",
+      "colNumber": "Invoice",
+      "colRecord": "Record",
+      "colPatient": "Patient",
+      "colBase": "Base",
+      "colDiscount": "Discount",
+      "colTotal": "Total",
+      "colExonerated": "Exonerated",
+      "colRefunded": "Refunded",
+      "colPayment": "Payment",
+      "totals": "Totals ({n})",
+      "none": "No product sales.",
+      "yes": "Yes",
+      "no": "No",
+      "check": "Reconciliation",
+      "products": "Products",
+      "services": "Services",
+      "dayNet": "Day net",
+      "squares": "Squares",
+      "gap": "Off by {amount}"
+    },
+    "emailPanel": {
+      "recipients": "Recipients",
+      "placeholder": "accounting@centrodemedicinaregenerativa.com, other@…",
+      "hint": "Separate several addresses with commas. Empty = the center's list.",
+      "invalid": "Not valid addresses: {list}",
+      "send": "Send",
+      "sending": "Sending…",
+      "saveDefault": "Save as the center's list",
+      "defaultSaved": "Center list saved",
+      "sentTo": "Sent to {to}",
+      "attachmentsCount": "with {n, plural, one {# attachment} other {# attachments}}",
+      "attachmentsSkipped": "{n, plural, one {# attachment could not be included} other {# attachments could not be included}}",
+      "notSent": "The mail server did not accept the message. It was not sent.",
+      "notConfigured": "The server has no email configured. It was not sent.",
+      "noRecipients": "Say who to send it to: no recipients and no center list."
+    },
+    "signOff": {
+      "title": "Sheet sign-off",
+      "signCashier": "Sign and accept",
+      "signSupervisor": "Sign as manager",
+      "signAgain": "Sign again",
+      "accept": "I accept",
+      "signing": "Signing…",
+      "cancel": "Cancel",
+      "dialogTitle": "Accept the sheet",
+      "dialogHint": "Your name, the date and time, and these figures are saved. The sheet is not closed: if a sale comes in later, it will show you signed other figures.",
+      "defaultStatement": "I confirm that the count and the totals on this sheet are correct.",
+      "acceptedBy": "Accepted by {name} · {when}",
+      "otherFigures": "Signed with {signed} · today {now} · change {delta}",
+      "signedDifference": "cash difference at signing {difference}",
+      "unsigned": "Not signed",
+      "cashier": "Cashier",
+      "cashierNamed": "Cashier — {name}",
+      "supervisor": "Manager",
+      "signed": "Sheet signed",
+      "alreadySigned": "Someone else already signed the sheet in that role.",
+      "alreadySignedBy": "Already signed by {name} ({when}).",
+      "loadError": "Could not read the sheet's signatures.",
+      "dayTotal": "Day total",
+      "salesCash": "Cash sales",
+      "countedCash": "Cash in drawer",
+      "difference": "Difference",
+      "signMine": "Sign my sheet",
+      "acknowledge": "Acknowledge correction",
+      "acknowledgeHint": "The sheet changed after this signature. Confirm the corrected figures are right; the reason, who and when are kept.",
+      "acknowledgeReason": "Reason: what was corrected and why",
+      "acknowledged": "Correction acknowledged",
+      "acknowledgedNote": "Figures corrected · confirmed by {name} · {when}",
+      "acknowledgeReasonLabel": "Reason",
+      "reasonTooShort": "The reason needs at least 3 characters."
+    },
+    "attachments": {
+      "title": "Scanned settlements",
+      "add": "Attach settlements",
+      "uploading": "Uploading…",
+      "uploaded": "Attachment saved",
+      "empty": "No attachments yet",
+      "unavailable": "File unavailable",
+      "uploadedBy": "Uploaded by {name}",
+      "uploadedByUnknown": "—",
+      "loadError": "The attachments could not be loaded",
+      "typeNotAllowed": "Only photos (JPG, PNG, WEBP) or PDF are accepted.",
+      "tooLarge": "The file is over 20MB.",
+      "pickCashier": "Pick a cashier to attach their settlements",
+      "count": "{n, plural, one {# attachment} other {# attachments}}",
+      "scan": "Scan",
+      "scanDialogTitle": "Scan settlements",
+      "scanScanner": "Scanner",
+      "scanOptions": "Options",
+      "scanSource": "Source",
+      "scanSourceAdf": "Feeder",
+      "scanSourcePlaten": "Glass",
+      "scanDuplex": "Double-sided",
+      "scanColorMode": "Color",
+      "scanColorBw": "Black and white",
+      "scanColorGray": "Grayscale",
+      "scanColorRgb": "Color",
+      "scanResolution": "Resolution",
+      "scanStart": "Scan",
+      "scanRetry": "Retry",
+      "scanCancel": "Cancel",
+      "scanWaiting": "Waiting for the scanner…",
+      "scanning": "Scanning…",
+      "scanDone": "Scanned",
+      "scanFailed": "Could not scan",
+      "scanExpired": "The scan expired: nobody picked it up in time",
+      "cropToggle": "Crop before scanning",
+      "cropPreviewStart": "Preview",
+      "cropHelp": "Drag over the image to pick the area to keep, or choose «Scan everything».",
+      "cropRetake": "Retake preview",
+      "cropFullPage": "Scan everything",
+      "cropUseSelection": "Scan this area",
+      "cropRegionDebug": "Area: x={x}, y={y}, width={width}, height={height} (1/300″)",
+      "delete": "Delete",
+      "deleteConfirmTitle": "Delete this attachment",
+      "deleteConfirmDesc": "It's removed from the cash sheet's list; this can't be undone from here.",
+      "deleteReasonLabel": "Reason",
+      "deleteReasonPlaceholder": "Why it's being deleted…",
+      "deleteCancel": "Cancel",
+      "deleteConfirm": "Delete attachment",
+      "deleted": "Attachment deleted",
+      "deleteReasonTooShort": "The reason needs at least 3 characters."
+    },
+    "attachment": {
+      "notFound": "That attachment no longer exists on this cash sheet.",
+      "reasonRequired": "Write the reason before deleting."
+    },
+    "otherDivision": {
+      "inConsulta": "You billed in Consultation today: your sheet and your signature are in the Consultation cash count, not this one.",
+      "inGeneral": "Today you took payments in Services & Products: your sheet and signature are in that count, not this one.",
+      "goConsulta": "Go to the Consultation cash count",
+      "goGeneral": "Go to the Services & Products count"
+    },
+    "error": {
+      "closeDisabled": "Closing the cash count is turned off for this center."
     }
   },
   "gruposFacturacion": {
@@ -3750,7 +4672,14 @@
     "copyFrom": "Copy the setup from another group",
     "copyFromPlaceholder": "Copy from…",
     "copyDone": "Copied {n} fields from “{origen}”.",
-    "copyNone": "“{origen}” has no extra fields to copy."
+    "copyNone": "“{origen}” has no extra fields to copy.",
+    "productSale": "Product sale (IVU)",
+    "productSaleHint": "Its lines count as product sales in the cash reconciliation: taxable, exempt, exonerated and state + municipal IVU. Also applies to products added later.",
+    "productSaleBadge": "Product",
+    "quantityDisplay": "Quantity on documents",
+    "quantityDisplayHint": "How the quantity reads on the receipt, printed invoice and invoice view.",
+    "quantityDisplayTotal": "Total",
+    "quantityDisplayBreakdown": "Sessions × Areas = Therapies"
   },
   "tb": {
     "acc": {
@@ -3767,7 +4696,6 @@
       "vitales": "Vitals",
       "intravenoso": "IV"
     },
-    "activarSonido": "Enable sound",
     "cancelarAviso": "Cancel alert",
     "tema": "Theme",
     "sinSecciones": "No sections configured.",
@@ -3775,12 +4703,18 @@
     "record": "Record",
     "soloEnfermeria": "Only Nursing can take the alert.",
     "sinPermiso": "You don't have access to this panel (panel.read).",
+    "sinCentro": "You have no center assigned.",
     "estatus": {
       "titulo": "Send nurse status",
       "elegirEnfermera": "Pick nurse",
       "reset": "Reset (available)",
       "actuales": "Current statuses",
       "sin": "No status right now"
+    },
+    "staffOrder": {
+      "notEligible": "{n, plural, one {# person is no longer on the panel and was removed from the order} other {# people are no longer on the panel and were removed from the order}}",
+      "up": "Move up",
+      "down": "Move down"
     }
   },
   "requeridos": {
@@ -3926,15 +4860,18 @@
       "historialTitulo": "Previous changes",
       "sinHistorial": "No protocol changes.",
       "cargando": "Loading…",
+      "enCentro": "At {centro}",
       "cambioResumen": "{cerrados} closed · {creados} new",
-      "nuevoTitulo": "New change"
+      "nuevoTitulo": "New change",
+      "sessionsAtLeastOne": "Sessions must be 1 or more."
     }
   },
   "perfiles": {
     "vigencia_invalida": "The end date is before the start date"
   },
   "tenant": {
-    "no_encontrado": "The selected center does not exist"
+    "no_encontrado": "The selected center does not exist",
+    "oneCenterOnly": "This operation is for one center only"
   },
   "persistencia": {
     "guardado": "Saved",
@@ -4042,7 +4979,25 @@
     "printerDiscard": "Discard",
     "printerSaved": "Printer «{name}» saved.",
     "printerRemoved": "Printer «{name}» removed.",
-    "printerRemoveConfirm": "Remove printer «{name}»? Machines that used it will move to the first one in the list."
+    "printerRemoveConfirm": "Remove printer «{name}»? Machines that used it will move to the first one in the list.",
+    "scannersTitle": "Scanners of this center",
+    "scannersHelp": "The «Scan» button on the cash sheet offers them to pick from. Needs the scanner's eSCL URL (e.g. https://192.130.80.164/eSCL).",
+    "scannersEmpty": "No scanners yet. Add the first one.",
+    "scannerAdd": "Add scanner",
+    "scannerName": "Name",
+    "scannerNamePlaceholder": "Caguas front desk…",
+    "scannerUrl": "eSCL URL",
+    "scannerUrlPlaceholder": "https://192.130.80.164/eSCL",
+    "scannerDefaultSource": "Default source",
+    "scannerSourceAdf": "Feeder",
+    "scannerSourcePlaten": "Glass",
+    "scannerActive": "Active",
+    "scannerSave": "Save scanner",
+    "scannerCreate": "Create scanner",
+    "scannerRemove": "Remove scanner",
+    "scannerSaved": "Scanner «{name}» saved.",
+    "scannerRemoved": "Scanner «{name}» removed.",
+    "scannerRemoveConfirm": "Remove scanner «{name}»? It will no longer be selectable from the cash sheet."
   },
   "numeracion": {
     "title": "Document numbering",
@@ -4112,7 +5067,9 @@
     "vialesCerrados": "Closed vials of {presentacion}",
     "vialesAbiertos": "Open ({unidad})",
     "vialesSinVista": "Some vial content is in another measure: the total is worked out on saving.",
-    "vialesAjustado": "Counted {contado}, the system had {sistema}: adjusted."
+    "vialesAjustado": "Counted {contado}, the system had {sistema}: adjusted.",
+    "vialCount": "What you counted",
+    "quantityInvalid": "The quantity must be greater than zero."
   },
   "inventarioViales": {
     "titulo": "Vials",
@@ -4223,7 +5180,8 @@
       "categoria": "Category",
       "selCategoria": "Pick category",
       "descripcion": "Description",
-      "global": "Global event (all centers)"
+      "global": "Global event (all centers)",
+      "centro": "Clinic"
     },
     "proximos": "Upcoming events",
     "anterior": "Previous",
@@ -4412,7 +5370,11 @@
       "workEnd": "End time",
       "externalCode": "External center code",
       "selectCode": "Pick a code",
-      "none": "None"
+      "none": "None",
+      "sheetDownPolicy": "If the call-center sheet does not respond",
+      "sheetDownPolicyHelp": "With the sheet reservation on: what to do when booking if the sheet does not answer.",
+      "sheetDownPolicyAllow": "Warn and book",
+      "sheetDownPolicyBlock": "Block"
     },
     "doctorMappings": {
       "title": "Doctor mapping",
@@ -4453,7 +5415,6 @@
     "buscar": "Search by name or role…",
     "cargando": "Loading…",
     "vacio": "No staff.",
-    "elegirCentro": "Pick a center to see its staff.",
     "elegirPersona": "Pick a person from the list.",
     "sinCargo": "No role",
     "sinCuenta": "no login account",
@@ -4463,28 +5424,20 @@
     "nombre": "First name",
     "apellido": "Last name",
     "email": "Email",
-    "telefono": "Phone",
     "especialidad": "Specialty",
-    "sexo": "Sex",
-    "sexoF": "Female",
-    "sexoM": "Male",
-    "color": "Color",
     "reactivar": "Reactivate",
     "darDeBaja": "Deactivate",
     "reactivado": "Person reactivated",
     "dadoDeBaja": "Person deactivated",
     "nuevo": "New",
-    "nuevoAyuda": "Create the person with their name; fill the rest (color, job title, centers) in the ficha.",
+    "nuevoAyuda": "Create the person with their name; the rest (job title, responsibilities, centers) is filled in on the record.",
     "crear": "Create",
     "creado": "Person created",
     "verInactivos": "Show inactive",
-    "capacidades": "Does",
     "guardarCambios": "Save",
     "guardando": "Saving…",
     "guardado": "Saved",
     "acceso": "System access",
-    "aprobado": "approved",
-    "verUsuario": "View user",
     "sinCuentaAyuda": "No login account.",
     "darAcceso": "Grant system access",
     "darAccesoTitulo": "Grant access to {nombre}",
@@ -4496,15 +5449,11 @@
     "accesoDado": "Access created for {nombre}.",
     "centros": "Service centers",
     "centrosAyuda": "Mark where they should appear in the dropdowns. If they cover another center one day, check it; uncheck when they return.",
-    "guardarCentros": "Save centers",
-    "centrosGuardados": "Centers saved",
     "frontdeskConsultaLabel": "Land directly on Consultation in Frontdesk",
     "frontdeskConsultaAyuda": "On entering Frontdesk, start on the Consultation tab instead of the first service tab.",
-    "frontdeskConsultaGuardado": "Preference saved",
     "consultaInicialLabel": "When opening Consultation, show",
     "consultaInicialAyuda": "Which tab the Consultation board opens on. The tab order does not change; only which one is selected.",
     "consultaInicialAsIs": "As configured",
-    "consultaInicialGuardado": "Preference saved",
     "verHub": "Full profile",
     "ehrLabel": "EHR account",
     "ehrSinVinculo": "No EHR account linked yet.",
@@ -4520,7 +5469,28 @@
     "ehrGuardando": "Saving…",
     "ehrGuardar": "Save",
     "ehrVinculado": "Linked with the EHR.",
-    "ehrActualizado": "EHR role updated."
+    "ehrActualizado": "EHR role updated.",
+    "centroOrigen": "Home clinic: {nombre}",
+    "centrosColumna": "Clinic(s)",
+    "extension": "Extension (phone system)",
+    "extensionesTitulo": "Telephony",
+    "extensionesVacio": "No extensions.",
+    "extensionesCentral": "PBX (e.g. ucm-bayamon, 3cx)",
+    "extensionesAgregar": "Add PBX",
+    "extensionesQuitar": "Remove",
+    "extensionesCentralDuplicada": "Each PBX can only appear once.",
+    "responsibilities": "Responsibilities",
+    "responsibilitiesHelp": "Decide which lists the person appears in (doctors, nurses, technicians, operators…). «Doctor» also shows their agenda, patients and production tabs.",
+    "nameRequired": "The name is required.",
+    "unsavedChanges": "Unsaved changes",
+    "accessFilter": "System access",
+    "access": {
+      "all": "All",
+      "withAccess": "With access",
+      "noAccess": "No access",
+      "suspended": "Suspended"
+    },
+    "suspendida": "access suspended"
   },
   "acciones": {
     "subtitle": "Their whole history, without leaving here.",
@@ -4560,6 +5530,7 @@
     "issuedOn": "Issued on {fecha}."
   },
   "medicoHub": {
+    "clinic": "Clinic",
     "back": "Staff",
     "loading": "Loading…",
     "active": "Active",
@@ -4624,11 +5595,15 @@
     "dateOk": "That date works.",
     "suggested": "Suggested",
     "noSlot": "no slot in 60 days",
-    "holidaysNote": "Holidays are shared (global or per center); configured in Agenda/Configuration."
+    "holidaysNote": "Holidays are shared (global or per center); configured in Agenda/Configuration.",
+    "fromTime": "From time",
+    "toTime": "Until time",
+    "hoursInvalid": "The end time must be after the start time"
   },
   "disponibilidad": {
     "ausencia": {
-      "rango_invalido": "The absence range is invalid (end before start)."
+      "rango_invalido": "The absence range is invalid (end before start).",
+      "horas_invalidas": "The end time must be after the start time"
     }
   },
   "printHub": {
@@ -4639,14 +5614,33 @@
     "notFound": "This center has no backup print hub configured.",
     "printerNameRequired": "Give the printer a name.",
     "duplicatePrinterName": "There is already a printer with that name in this center.",
-    "printerNotFound": "That printer no longer exists."
+    "printerNotFound": "That printer no longer exists.",
+    "invalidCommandSet": "The printer language must be Epson (ESC/POS) or Star (Star Line Mode).",
+    "model": "Model",
+    "modelPlaceholder": "e.g. Epson TM-T20II",
+    "font": "Font",
+    "fontNone": "Unchanged",
+    "fontA": "Normal (A)",
+    "fontB": "Small (B)",
+    "scannerInvalid": "The scanner's {field} field is not valid.",
+    "scannerNotFound": "That scanner no longer exists."
+  },
+  "cashScan": {
+    "scannerNotFound": "That scanner does not exist or is not active in this center.",
+    "invalidSettings": "The scan's {field} option is not valid."
+  },
+  "cashReconciliation": {
+    "error": {
+      "attachmentTypeNotAllowed": "That file type is not accepted: only photos (JPG, PNG, WEBP) or PDF.",
+      "attachmentPathInvalid": "The attachment could not be registered; attach it again."
+    }
   },
   "invoiceReopen": {
     "action": "Reopen",
     "hint": "Back to draft with its same number, to correct it",
     "title": "Reopen the invoice",
     "description": "It goes back to draft with its same number. Stock is returned and payments are kept; correct it and issue it again.",
-    "reasonLabel": "Reason (required)",
+    "reasonLabel": "Reason",
     "reasonPlaceholder": "E.g. exonerated by mistake, the patient pays 10 dollars",
     "confirm": "Reopen",
     "done": "Invoice reopened: correct it and issue it again.",
@@ -4672,6 +5666,21 @@
     "dateOutOfRangeFrom": "That date does not fit the number sequence: it must be on or after {from}.",
     "dateOutOfRangeTo": "That date does not fit the number sequence: it must be on or before {to}."
   },
+  "invoiceChangePatient": {
+    "action": "Change patient",
+    "hint": "For when the invoice was billed to the wrong patient",
+    "title": "Change the invoice's patient",
+    "description": "The invoice keeps its number and total; only who it's billed to changes.",
+    "currentPatient": "Current patient",
+    "changeSelection": "Change",
+    "searchPlaceholder": "Search patient: name, record or ID…",
+    "searchHint": "Type at least 2 letters to search.",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "E.g.: patient 16034 was billed by mistake instead of 680",
+    "confirm": "Change patient",
+    "done": "Invoice patient updated.",
+    "patient": "New patient"
+  },
   "invoice": {
     "notFound": "The invoice does not exist.",
     "reopen": {
@@ -4682,6 +5691,23 @@
       "cashClosed": "That day's cash count is already closed: correcting it changes it.",
       "reasonRequired": "Write the reason to reopen.",
       "dateOutOfSequence": "That date does not fit between the previous and the next invoice."
+    },
+    "changePatient": {
+      "INVOICE_CHANGE_PATIENT_SAME": "That is already this invoice's patient.",
+      "INVOICE_CHANGE_PATIENT_UNKNOWN": "That patient does not exist in this center.",
+      "INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT": "This is a consultation linked to an appointment: change the appointment's patient first."
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "tax": "Tax",
+      "shipping": "Shipping",
+      "total": "Total",
+      "paid": "Paid",
+      "refunded": "Refunded",
+      "balance": "Balance",
+      "payment": "Payment",
+      "refund": "Refund"
     }
   },
   "picker": {
@@ -4691,7 +5717,12 @@
     "clear": "Clear",
     "hour": "Hour",
     "minute": "Min",
-    "period": "AM/PM"
+    "period": "AM/PM",
+    "typedFormat": "Type the date as MM/DD/YYYY (e.g. 03/15/1958).",
+    "typedInvalid": "That's not a real date.",
+    "typedFuture": "The date can't be in the future.",
+    "typedAge": "Check the year — the age doesn't look right.",
+    "typedRange": "That date is outside the allowed range."
   },
   "patientDesk": {
     "title": "Patient Center",
@@ -4707,7 +5738,7 @@
     "pickPatient": "Pick a patient from the list to see their services.",
     "record": "Record",
     "firstAt": "first booking {time}",
-    "markPresent": "Present",
+    "markPresent": "Not present",
     "undoPresent": "Undo",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "vitalsBy": "Vitals: {name}",
@@ -4717,8 +5748,12 @@
     "filterByType": "Filter by type",
     "allServices": "All services",
     "allTypes": "All types",
-    "filteringBy": "filtering: {name}",
+    "filteringBy": "{name}",
+    "filteringByPending": "unattended: {name}",
+    "serviceArrivedPendingHint": "See who's still unattended for this service",
     "clearSearch": "Clear search",
+    "enSala": "In the room",
+    "enSalaTotal": "Total",
     "kind": {
       "all": "All",
       "services": "Services",
@@ -4727,6 +5762,7 @@
     "queue": {
       "pillLabel": "{waiting} waiting · {inTherapy} in therapy",
       "panelTitle": "{service} queue",
+      "openViewer": "View {service}'s general viewer",
       "panelDescription": "Arrival order, who is in therapy now, and who is free to take them.",
       "empty": "No one waiting or in therapy right now.",
       "sectionWaiting": "Waiting",
@@ -4740,6 +5776,7 @@
       "uncall": "Undo",
       "pickTechnician": "Pick technician",
       "busyLoad": "busy · {n}",
+      "notYetToday": "no patients today",
       "calledLabel": "Called · {technician} · {time}",
       "busyIn": "Busy in {service}",
       "free": "Free: {names}",
@@ -4750,7 +5787,88 @@
     "bookService": "Book a service",
     "bookConsultation": "Book a consultation",
     "cancelled": "Cancelled",
-    "presentAt": "Present {time}"
+    "presentAt": "Present {time}",
+    "markPendingPresent": "Mark present (pending: {n})",
+    "markPresentHint": "Click to mark present",
+    "filteredSections": {
+      "showingOnly": "Showing only: {service}",
+      "showingAll": "Showing all therapies",
+      "seeAll": "see all ({n} more)",
+      "onlyFiltered": "only {service}"
+    },
+    "serviceDone": "Done",
+    "subtypeShort": {
+      "nueva": "New",
+      "seguimiento": "Follow-up"
+    },
+    "daySummary": {
+      "open": "Open the day's summary",
+      "title": "Day summary · {service}",
+      "file": "day-summary",
+      "columns": "Columns",
+      "columnsHint": "Columns you see",
+      "loadError": "The summary could not be loaded.",
+      "retry": "Retry",
+      "empty": "No attended sessions this day.",
+      "notComplete": "Note: the service is not complete ({attended}/{total}).",
+      "totals": "Totals",
+      "col": {
+        "record": "Record",
+        "patient": "Patient",
+        "quantity": "Quantity",
+        "dose": "Dose",
+        "nurse": "Nurse",
+        "attendedBy": "Attended by",
+        "time": "Time",
+        "sealedVials": "Vials",
+        "content": "Content"
+      },
+      "stat": {
+        "patients": "Patients",
+        "sessions": "{n, plural, one {# session} other {# sessions}}",
+        "vials": "Vials applied",
+        "content": "Content",
+        "proportion": "Proportion"
+      },
+      "byNurse": "By nurse",
+      "byUser": "By user (attended by)",
+      "group": {
+        "sessions": "Sessions",
+        "unknown": "Not recorded"
+      },
+      "filter": {
+        "contains": "Contains…",
+        "by": "Filter by {col}",
+        "all": "All",
+        "showing": "Showing {n} of {total}",
+        "clear": "Clear filters",
+        "none": "No record matches the filters."
+      }
+    },
+    "doctorSummary": {
+      "title": "Patients per doctor",
+      "titleDoctor": "Patients per doctor · {doctor}",
+      "file": "doctor-summary",
+      "loadError": "The summary could not be loaded.",
+      "empty": "No consultations today.",
+      "noDoctor": "No doctor yet",
+      "attendedN": "{n} attended",
+      "attended": "Attended",
+      "count": "Count",
+      "byDoctor": "By doctor",
+      "byType": "By type",
+      "col": {
+        "record": "Record",
+        "patient": "Patient",
+        "doctor": "Doctor",
+        "nurse": "Nurse",
+        "type": "Type",
+        "time": "Time",
+        "frontDesk": "Front desk",
+        "amount": "Amount",
+        "paymentMethod": "Payment method"
+      }
+    }
   },
   "salesPackages": {
     "title": "Sales packages",
@@ -4860,6 +5978,634 @@
     "notMovable": "This appointment is no longer open and cannot be moved from here.",
     "noneThatDay": "No follow-up room left that day.",
     "freeDay": "Follow-up room that day ({n} free)."
+  },
+  "createClinic": {
+    "label": "Clinic",
+    "placeholder": "Choose a clinic…",
+    "help": "It is created in this clinic."
+  },
+  "rightNow": {
+    "title": "Right now",
+    "description": "What is happening in each office, live.",
+    "updatedAt": "Updated {time}",
+    "live": "Live",
+    "offline": "Live updates offline",
+    "combined": "All centers",
+    "kpi": {
+      "netSales": "Net sales",
+      "invoices": "Invoices",
+      "refunds": "Refunds",
+      "present": "Patients present",
+      "attended": "Attended",
+      "pending": "Pending",
+      "calls": "Calls",
+      "alerts": "Alerts"
+    },
+    "sales": {
+      "title": "Sales",
+      "net": "Net today",
+      "refunds": "Refunds: {n}",
+      "topSellers": "Top sellers",
+      "noSellers": "No sales yet.",
+      "unknownSeller": "No name"
+    },
+    "patients": {
+      "title": "Patients (consultations)",
+      "present": "Present",
+      "firstVisit": "First visit",
+      "followUp": "Follow-up",
+      "attended": "Attended",
+      "pending": "Pending"
+    },
+    "doctors": {
+      "title": "Doctors",
+      "colDoctor": "Doctor",
+      "colTotal": "Appts",
+      "colAttended": "Attended",
+      "colFirst": "1st",
+      "colFollow": "F/U",
+      "colNet": "Billed",
+      "empty": "No consultations today.",
+      "noDoctor": "No doctor",
+      "pendingDoctor": "New patients waiting for a doctor to be assigned",
+      "pendingDoctorEmpty": "No doctor-less invoice right now.",
+      "pendingDoctorLoading": "Looking…",
+      "byAmount": "By amount",
+      "byAttended": "By attended"
+    },
+    "prescriptions": {
+      "title": "Prescriptions",
+      "empty": "Prescriptions will come from the medical record (EHR); no data yet."
+    },
+    "services": {
+      "title": "Services",
+      "colService": "Service",
+      "colWaiting": "Waiting",
+      "colInCare": "In care",
+      "colCompleted": "Completed",
+      "colStaff": "Staff",
+      "empty": "No services today.",
+      "waitingList": "Waiting · {service}",
+      "completedList": "Completed · {service}",
+      "minutes": "{n} min",
+      "attendedBy": "Seen by {name}",
+      "none": "Nobody."
+    },
+    "calls": {
+      "title": "Calls",
+      "total": "Total",
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "missed": "Missed",
+      "answerRate": "Answered",
+      "byPbx": "By PBX",
+      "ranking": "Operators",
+      "colExtension": "Ext.",
+      "colName": "Operator",
+      "colAnswered": "Answered",
+      "colOutbound": "Outbound",
+      "empty": "No calls recorded yet.",
+      "unassigned": "Ext {extension} (unassigned)"
+    },
+    "externalSource": {
+      "legacy": "Legacy data · {time}",
+      "stale": "No new legacy data since {time}"
+    },
+    "externalSourceConfig": {
+      "title": "Legacy plug",
+      "description": "Per center: when on, Right now shows sales, doctors, patients and services computed by the legacy system instead of ours.",
+      "lastReceived": "Last received: {time}",
+      "neverReceived": "Hasn't received anything yet.",
+      "enabled": "Legacy plug turned on for {center}.",
+      "disabled": "Legacy plug turned off for {center}."
+    },
+    "noCenters": "You have no centers to view.",
+    "error": "Could not load «Right now»."
+  },
+  "exoneratedProducts": {
+    "title": "IVU-exonerated products",
+    "help": "Product invoices that should have carried IVU and went out without it, with the IVU that was due per component. For Accounting's month-end.",
+    "from": "From",
+    "to": "To",
+    "search": "Search",
+    "thisMonth": "This month",
+    "lastMonth": "Last month",
+    "export": "Export CSV",
+    "range": "From {from} to {to}",
+    "empty": "No exonerated product invoices in the range.",
+    "totals": "Totals ({n} invoices)",
+    "kpi": {
+      "invoices": "Invoices",
+      "exoneratedBase": "Exonerated base",
+      "taxWouldBe": "IVU that was due",
+      "total": "Total billed"
+    },
+    "col": {
+      "number": "Invoice",
+      "date": "Date",
+      "record": "Record",
+      "patient": "Patient",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "total": "Total",
+      "exoneratedBase": "Exonerated base",
+      "status": "Status",
+      "payment": "Payment"
+    }
+  },
+  "emailInput": {
+    "suggestions": "Suggested domains",
+    "tabHint": "Tab ↹"
+  },
+  "bodyMeasurements": {
+    "title": "Unlinked measurements",
+    "description": "Scale and tape readings that found no GLP-1 visit: a wrong record, or a patient never put on the frontdesk. Linking one moves it to that visit's patient and day.",
+    "count": "{n, plural, one {# measurement} other {# measurements}}",
+    "from": "From",
+    "empty": "No loose measurements",
+    "emptyHint": "Every reading in this range is already on its visit.",
+    "loadError": "The measurements could not be loaded",
+    "retry": "Retry",
+    "noPermission": "You do not have permission to see body measurements.",
+    "noPatient": "No patient",
+    "link": "Link",
+    "linking": "Linking…",
+    "linked": "Measurement linked to the visit",
+    "cancel": "Cancel",
+    "linkTitle": "Link to a visit",
+    "linkHint": "Frontdesk visits on {date} at {center}. The same patient's first.",
+    "glp1Only": "Can only link to a GLP-1 visit.",
+    "searchVisit": "Search by name, record or service",
+    "visitsError": "That day's visits could not be loaded",
+    "noVisits": "No visits that day match",
+    "visit": "The visit",
+    "samePatient": "Same patient",
+    "kind": {
+      "scale": "Scale",
+      "tape": "Tape"
+    },
+    "col": {
+      "date": "Date",
+      "center": "Center",
+      "kind": "Kind",
+      "patient": "Patient",
+      "values": "Values",
+      "source": "Source"
+    },
+    "field": {
+      "weightKg": "Weight (kg)",
+      "bodyFatPct": "Body fat %",
+      "bmi": "BMI",
+      "skeletalMusclePct": "Skeletal muscle %",
+      "muscleMassKg": "Muscle mass (kg)",
+      "proteinPct": "Protein %",
+      "bmrKcal": "BMR (kcal)",
+      "visceralFat": "Visceral fat",
+      "hydrationPct": "Hydration %",
+      "boneMassKg": "Bone mass (kg)",
+      "metabolicAge": "Metabolic age",
+      "neck": "Neck",
+      "shoulder": "Shoulder",
+      "leftBiceps": "Left biceps",
+      "rightBiceps": "Right biceps",
+      "chest": "Chest",
+      "waist": "Waist",
+      "abdomen": "Abdomen",
+      "hip": "Hip",
+      "leftThigh": "Left thigh",
+      "rightThigh": "Right thigh",
+      "leftCalf": "Left calf",
+      "rightCalf": "Right calf",
+      "waistHipRatio": "Waist/hip ratio"
+    },
+    "error": {
+      "alreadyLinked": "That visit already has its measurement of this kind",
+      "visionNotConfigured": "Reading by image is not configured on the server yet",
+      "visionUnreadable": "The scale image could not be read",
+      "visitTakesNoReadings": "Can only link to a GLP-1 visit"
+    }
+  },
+  "sheet": {
+    "slotTaken": "That hour no longer has a seat on the call-center sheet",
+    "unavailable": "The call-center sheet is not answering; nothing was booked",
+    "unavailableWarn": "The call-center sheet did not answer; the appointment was saved here but not on the sheet",
+    "noOwnerCode": "The patient has no portfolio owner with a code on the sheet",
+    "ownerNoteFailed": "The portfolio owner could not be noted on the sheet",
+    "down": "The call-center sheet is not answering: availability may be out of date",
+    "noSeatDays": "No seat on the sheet: {days}"
+  },
+  "oauthConsent": {
+    "loading": "Loading…",
+    "invalidLink": "Invalid authorization link",
+    "genericError": "The authorization could not be completed. Try again from Claude.",
+    "backToCmr": "Back to CMR",
+    "unknownClient": "An application",
+    "title": "{client} wants to access CMR",
+    "signedInAs": "As:",
+    "notYou": "Not you? Sign out",
+    "whatItCanDo": "{client} will be able to do everything you can do in CMR, with your permissions and in your centers.",
+    "auditNote": "Every action is recorded in the audit log as done through {client}.",
+    "returnTo": "You will return to:",
+    "approve": "Approve",
+    "deny": "Cancel",
+    "working": "One moment…",
+    "disconnectHint": "You can disconnect {client} at any time from its connector settings."
+  },
+  "confirmation": {
+    "required": "This action needs your confirmation before it is saved.",
+    "unknownAction": "Confirm: {action}",
+    "cancel": "Cancel",
+    "accept": "Accept",
+    "action": {
+      "unattend": "Unattend the session",
+      "deleteSession": "Delete the session",
+      "cancelDay": "Cancel all of the day's sessions",
+      "repair": "Repair the session",
+      "cancelSession": "Cancel the session",
+      "undoPresent": "Undo present",
+      "undoChange": "Undo the change",
+      "voidInvoice": "Void the invoice",
+      "voidRefund": "Void the refund",
+      "addKitComponent": "Add a component to the kit of an issued invoice",
+      "adminGrant": "Give full access (Administrator role)",
+      "adminRevoke": "Take away full access (Administrator role)",
+      "modifyPastCashDay": "You're about to change the {day} cash sheet"
+    },
+    "effect": {
+      "returnsPackageSession": "Returns the session to the package",
+      "returnsStock": "Returns what was discharged to stock",
+      "clearsAttendedTime": "Clears the attended time",
+      "sessionDeleted": "The session leaves the board",
+      "cancelsOpenSessionsOfTheDay": "Cancels the day's open sessions",
+      "redoesDischarge": "Redoes the stock discharge",
+      "sessionCancelled": "The session is cancelled",
+      "backToPending": "The session goes back to pending",
+      "invoiceVoided": "The invoice is voided",
+      "refundVoided": "The refund is voided",
+      "kitComponentAdded": "The component is added to the kit and its sessions are created; the invoice amount does not change.",
+      "fullAccessEveryCenter": "This person will be able to do everything, in every center",
+      "loosesFullAccess": "This person loses full access",
+      "pastCashDayChanges": "That day's signatures will ask to acknowledge the correction"
+    },
+    "policies": {
+      "title": "Confirmations",
+      "hint": "Which sensitive actions ask «Accept or not?» before saving, per center.",
+      "action": "Action",
+      "default": "default",
+      "saved": "Saved",
+      "noPermission": "You do not have permission to configure confirmations."
+    }
+  },
+  "changeLog": {
+    "title": "Change history",
+    "dayTitle": "Day history",
+    "screenHint": "Who changed what, with before and after, and undo where allowed.",
+    "noPermission": "You do not have permission to see the change history.",
+    "loadError": "The history could not be loaded",
+    "empty": "No changes recorded",
+    "system": "System",
+    "undo": "Undo",
+    "undoing": "Undoing…",
+    "undone": "Change undone",
+    "undoneBy": "Undone by {name}",
+    "more": "Show {n} more",
+    "changedId": "(changed)",
+    "filter": {
+      "from": "From",
+      "to": "To",
+      "user": "User",
+      "allUsers": "All",
+      "patient": "Patient",
+      "patientHint": "Name or record"
+    },
+    "action": {
+      "create": "Created",
+      "present": "Present",
+      "undo_present": "Undo present",
+      "start_therapy": "In therapy",
+      "back_to_present": "Back to present",
+      "back_to_pending": "Back to pending",
+      "attend": "Attended",
+      "unattend": "Unattended",
+      "cancel": "Cancelled",
+      "reopen": "Reopened",
+      "reschedule": "Rescheduled",
+      "edit": "Edited",
+      "delete": "Deleted",
+      "status": "Status change",
+      "absence_create": "Absence created",
+      "absence_link": "Absence linked",
+      "absence_cancel": "Absence cancelled",
+      "absence_restore": "Absence restored",
+      "absence_edit": "Absence edited",
+      "absence_delete": "Absence deleted",
+      "invoice_line_add": "Line added",
+      "invoice_line_edit": "Line edited",
+      "invoice_line_multipliers": "Areas / days changed",
+      "invoice_line_remove": "Line removed",
+      "invoice_line_component_added": "Component added to the kit"
+    },
+    "field": {
+      "estado": "Status",
+      "presenteEn": "Present",
+      "terapiaInEn": "In therapy",
+      "asistidoEn": "Attended",
+      "productoAplicadoId": "Dose",
+      "cantidad": "Quantity",
+      "enfermeraId": "Nurse",
+      "tecnicoId": "Technician",
+      "medicoId": "Doctor",
+      "datos": "Data",
+      "fecha": "Date",
+      "hora": "Time",
+      "paqueteId": "Package",
+      "vialAbiertoId": "Open vial"
+    },
+    "status": {
+      "pendiente": "Pending",
+      "presente": "Present",
+      "en_terapia": "In therapy",
+      "asistido": "Attended",
+      "cancelada": "Cancelled"
+    },
+    "error": {
+      "superseded": "Someone changed those fields later: undo the later change first",
+      "alreadyUndone": "That change was already undone",
+      "notUndoable": "That change cannot be undone"
+    }
+  },
+  "calendar": {
+    "absence": {
+      "linked": "Absence",
+      "remove": "Remove the absence",
+      "removed": "Absence removed",
+      "vacation": "Vacation",
+      "leave": "Leave",
+      "until": "arrives {time}",
+      "from": "leaves {time}",
+      "between": "away {from}–{until}",
+      "wholeDay": "All day",
+      "question": "Absence of {name} · {when}?",
+      "questionNoName": "Absence · {when}?",
+      "pick": "Pick the person",
+      "accept": "Accept",
+      "notAbsence": "Not an absence",
+      "accepted": "Absence recorded",
+      "dismissed": "Marked as not an absence",
+      "afterSave": "Can be accepted once saved",
+      "noPermission": "You do not have permission to review absences.",
+      "reviewHint": "Calendar events that look like vacation or leave. Accepting takes the person out of available staff.",
+      "count": "{n, plural, one {# to review} other {# to review}}",
+      "since": "From",
+      "acceptAllHigh": "Accept the high-confidence ones ({n})",
+      "acceptedMany": "{n, plural, one {# absence recorded} other {# absences recorded}}",
+      "reviewEmpty": "Nothing to review",
+      "high": "High",
+      "low": "Low",
+      "col": {
+        "date": "Date",
+        "title": "Event",
+        "person": "Person",
+        "kind": "Kind",
+        "hours": "Hours",
+        "confidence": "Confidence"
+      },
+      "ambiguousStaff": "More than one person has that name",
+      "noStaff": "No one by that name in this center",
+      "unclear": "A day swap or still to be confirmed",
+      "unclearHours": "The hour is missing",
+      "staffNotInCenter": "That person does not work in this event's center",
+      "globalEvent": "A company-wide event is not one person's absence"
+    }
+  },
+  "paymentMethods": {
+    "title": "Payment methods",
+    "hint": "The methods the cashier can pick. «Cash» counts in the cash count; without «Carries money» (e.g. Exonerada) it is never offered as a payment nor added to the cash count.",
+    "saved": "Saved",
+    "created": "Payment method created",
+    "deactivateConfirm": "Deactivate «{name}»? Past payments keep it.",
+    "noMoney": "no money",
+    "newName": "New payment method",
+    "newSlug": "key (optional)",
+    "add": "Add",
+    "col": {
+      "name": "Method",
+      "slug": "Key",
+      "isCash": "Cash",
+      "carriesMoney": "Carries money",
+      "active": "Active"
+    },
+    "tip": {
+      "isCash": "Counted as cash in the cash count",
+      "carriesMoney": "Off: it cannot take a payment and the cash count never adds it (Exonerada = a 100% discount, not a payment)"
+    }
+  },
+  "cashCloseSetting": {
+    "help": "Off, the button does not appear on the cashier count or the total count, and the system does not allow closing. Already closed counts and «Reopen» do not change.",
+    "saved": "Saved"
+  },
+  "auth": {
+    "full_access_required": "Managing users, roles, permissions and API keys requires full access (an administrator)."
+  },
+  "rbac": {
+    "lastAdmin": "This is the last administrator: give the role to someone else first.",
+    "adminIsGlobal": "The Administrator role is given for every center, never for one.",
+    "adminPersonRequired": "Only an administrator signed in as a person (not an API key) can give or take away the Administrator role.",
+    "adminTargetNeedsAdmin": "Only an administrator can change another administrator's account.",
+    "adminRoleFixed": "The Administrator role has full access and cannot be edited.",
+    "fullAccessOnlyAdmin": "Full access (\"*\") belongs to the Administrator role only."
+  },
+  "apiKeys": {
+    "clinicKeyTooBroad": "A center API key cannot carry full access or access-management permissions.",
+    "beyondCreator": "An API key cannot have permissions its creator does not have."
+  },
+  "inventoryKardex": {
+    "title": "Daily kardex",
+    "subtitle": "A product's inbound, applied and adjustments, day by day, in sealed vials.",
+    "center": "Center",
+    "product": "Product",
+    "pickProduct": "Pick a product",
+    "from": "From",
+    "to": "To",
+    "badRange": "«From» must be on or before «To».",
+    "loading": "Loading…",
+    "tabDaily": "By day",
+    "tabSummary": "Movement detail",
+    "viewDay": "View day",
+    "periodTotal": "Period total",
+    "noMovements": "No movements that day.",
+    "dayTitle": "Detail for {date}",
+    "col": {
+      "date": "Date",
+      "opening": "Opening",
+      "inbound": "Inbound",
+      "applied": "Applied",
+      "proportion": "Applied (proportion)",
+      "adjustments": "Adjustments",
+      "closing": "Total",
+      "actions": "Actions"
+    },
+    "summary": {
+      "opening": "Opening inventory on {date}",
+      "inbound": "Inbound",
+      "adjustment": "Adjustment",
+      "applied": "Applied through {date}",
+      "closing": "Closing inventory on {date}",
+      "kind": "Kind"
+    },
+    "day": {
+      "patient": "Patient",
+      "record": "Record",
+      "reason": "Reason",
+      "quantity": "Quantity",
+      "session": "Session",
+      "notes": "Note",
+      "content": "(content)",
+      "vials": "Vials",
+      "contentAmount": "Content"
+    },
+    "reason": {
+      "apertura": "Opening",
+      "apertura_vial": "Vial opened",
+      "aplicacion": "Application",
+      "compra": "Purchase",
+      "consumo_interno": "Internal use",
+      "conteo_fisico": "Physical count",
+      "correccion": "Correction",
+      "dano_rotura": "Damage / breakage",
+      "devolucion": "Return",
+      "merma": "Shrinkage",
+      "perdida": "Loss",
+      "transferencia": "Transfer",
+      "vencimiento": "Expiry",
+      "venta": "Sale"
+    },
+    "owner": {
+      "concept": "Concept",
+      "quantity": "Qty",
+      "opening": "Opening inventory",
+      "inbound": "Received at the warehouse on {date}",
+      "noSupplier": "No supplier",
+      "transfer": "Transfer",
+      "adjustment": "Adjustment",
+      "corrections": "Load corrections",
+      "applied": "Applied through {date}",
+      "closing": "Closing inventory on {date}",
+      "observations": "Notes:",
+      "units": "{n} units",
+      "mismatch": "The math does not close: it gives {computed} and the system says {closing}. Tell support."
+    },
+    "tabOwner": "Management summary"
+  },
+  "inventoryReceipts": {
+    "tabReceive": "Receive",
+    "tabReceipts": "Receipts",
+    "title": "Purchase receipts",
+    "subtitle": "Every receipt as it was loaded: when, where, from whom and who loaded it.",
+    "count": "{n, plural, one {# receipt} other {# receipts}}",
+    "center": "Center",
+    "allCenters": "All my centers",
+    "from": "From",
+    "to": "To",
+    "loading": "Loading…",
+    "empty": "No receipts in that period.",
+    "effective": "Dated {date}",
+    "view": "View",
+    "total": "Total",
+    "detailTitle": "Receipt",
+    "by": "loaded by {name}",
+    "col": {
+      "date": "Date",
+      "center": "Center · Warehouse",
+      "supplier": "Supplier",
+      "invoice": "Invoice / PO",
+      "lines": "Lines",
+      "units": "Units",
+      "cost": "Total cost",
+      "registeredBy": "Loaded by",
+      "actions": "Actions"
+    },
+    "line": {
+      "product": "Product",
+      "quantity": "Quantity",
+      "unitCost": "Unit cost",
+      "total": "Total",
+      "lot": "Lot",
+      "expires": "Expires",
+      "notes": "Note"
+    }
+  },
+  "inventoryAdjustments": {
+    "title": "Inventory adjustments",
+    "subtitle": "One or several products in a single adjustment, with a number.",
+    "tabNew": "New adjustment",
+    "tabList": "Adjustments made",
+    "warehouse": "Warehouse",
+    "pickWarehouse": "Pick the warehouse",
+    "reason": "Reason",
+    "pickReason": "Pick the reason",
+    "date": "Date (if not today)",
+    "patient": "Patient (optional)",
+    "notes": "Note",
+    "notesPlaceholder": "Why the adjustment is made",
+    "product": "Product",
+    "pickProduct": "Search product…",
+    "direction": "Out / In",
+    "out": "Out",
+    "in": "In",
+    "quantity": "Quantity",
+    "lineNote": "Line note",
+    "removeLine": "Remove line",
+    "summary": "{n, plural, one {# product} other {# products}} · net {net}",
+    "save": "Save adjustment",
+    "saved": "Adjustment {number} saved ({n, plural, one {# product} other {# products}})",
+    "problem": {
+      "noWarehouse": "Warehouse missing",
+      "noReason": "Reason missing",
+      "noNotes": "Note missing",
+      "noLines": "Add at least one product"
+    },
+    "from": "From",
+    "to": "To",
+    "loading": "Loading…",
+    "empty": "No adjustments in that period.",
+    "listTitle": "Inventory adjustments",
+    "view": "View",
+    "by": "loaded by {name}",
+    "detailTitle": "Adjustment {number}",
+    "lot": "Lot",
+    "col": {
+      "number": "Number",
+      "date": "Date",
+      "lines": "Products",
+      "net": "Net",
+      "registeredBy": "Loaded by",
+      "actions": "Actions"
+    },
+    "quantityPositive": "The quantity is always positive; to subtract, use Out."
+  },
+  "legacyLabel": {
+    "correct": "Fix numbering",
+    "renumber": "Renumber series",
+    "session": "Session",
+    "of": "of",
+    "total": "Total sessions",
+    "startAt": "Starts at",
+    "from": "From",
+    "to": "To",
+    "reason": "Reason",
+    "reasonHint": "At least 3 characters. It is logged.",
+    "before": "Before",
+    "after": "After",
+    "date": "Date",
+    "apply": "Apply ({n, plural, one {# change} other {# changes}})",
+    "corrected": "Session fixed: {before} → {after}",
+    "renumbered": "{n, plural, one {# session renumbered} other {# sessions renumbered}}",
+    "rangeHint": "The session goes from 1 to the total.",
+    "rangeDates": "«From» cannot be after «To».",
+    "previewing": "Working out the preview…",
+    "nothingToChange": "With these values no session changes."
   },
   "appointmentsBooking": {
     "title": "Appointments",

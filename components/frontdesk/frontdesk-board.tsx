@@ -32,6 +32,7 @@ import { getDefinicion, getOpciones, getTableros, type TableroDefinicion, type O
 import { useRouter } from "next/navigation";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
+import { hideCancelledRow } from "@/lib/frontdesk/reopen";
 import { flowColumns, plainColumns, renderColumns, sortBoardRowsNatural } from "@/lib/frontdesk/board-columns";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
@@ -50,6 +51,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 import { LiveBadge } from "@/components/live-badge";
+import { CONSULTATION_BOARD, isConsultationBoard } from "@/lib/frontdesk/consultation-board";
 
 // ————————————————————————————————————————————————————————————————————————————
 // Frontdesk del día (F4): tabs por servicio (data-driven /servicios) + KPIs-filtro + tabla dinámica
@@ -101,9 +103,8 @@ export function FrontdeskBoard() {
   const puedeRango = can("frontdesk.rango");
   const rango = puedeRango && hasta && hasta > fecha ? { desde: fecha, hasta } : undefined;
   const [estadoFiltro, setEstadoFiltro] = React.useState("");
-  // Ocultar canceladas: ENCENDIDO por defecto (la jornada se recarga y las anteriores quedan canceladas
-  // como borrado lógico; no son bug, pero estorban el día). Filtro de cliente sobre estado==='cancelada'.
-  // Se ignora cuando el usuario filtra explícitamente por el KPI "Cancelada" (quiere verlas para reactivar).
+  // Hide cancelled: ON by default, except TODAY's, which stay visible so they can be reopened (BE #508,
+  // lib/frontdesk/reopen.ts). Ignored when the user filters by the «Cancelada» KPI.
   const [ocultarCanceladas, setOcultarCanceladas] = React.useState(true);
   const [q, setQ] = React.useState("");
   // Cockpit de agendar: disparado por Citar (sin paciente) o por postAccion de una columna (con paciente).
@@ -136,15 +137,14 @@ export function FrontdeskBoard() {
         .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
     [servRes.state],
   );
-  // Pestañas del frontdesk (BE): las de servicio coinciden por slug con `servicios`; esta solo AÑADE la de
-  // Consulta (boardSlug "atencion"), que monta el tablero de Atención que ya existe. Degrada a null si el
-  // endpoint no responde → el frontdesk queda EXACTAMENTE como antes. Handoff consulta-como-pestana-del-frontdesk.
+  // Frontdesk tabs (BE): this only ADDS Consulta (boardSlug "atencion", "frontdesk_consultation" after cmr-be #557). Null if the
+  // endpoint fails → the frontdesk stays EXACTLY as before. Handoff consulta-como-pestana-del-frontdesk.
   const tabsRes = useResource<FrontdeskTab[]>(
     () => (gate.centro ? getFrontdeskTabs(gate.centro).catch(() => []) : Promise.resolve([])),
     [gate.centro],
   );
   const consultaTab = React.useMemo(
-    () => (tabsRes.state.kind === "ok" ? tabsRes.state.data.find((tb) => tb.boardSlug === "atencion") ?? null : null),
+    () => (tabsRes.state.kind === "ok" ? tabsRes.state.data.find((tb) => isConsultationBoard(tb.boardSlug)) ?? null : null),
     [tabsRes.state],
   );
   const [tab, setTab, consultaInitialEstado] = useFrontdeskTab(gate.centro, consultaTab); // handoff aterrizar-en-consulta
@@ -405,7 +405,7 @@ export function FrontdeskBoard() {
     });
     const conVisibilidad =
       ocultarCanceladas && estadoFiltro !== "cancelada"
-        ? conBusqueda.filter((f) => estadoFila(f) !== "cancelada")
+        ? conBusqueda.filter((f) => !hideCancelledRow(estadoFila(f), sesiones.get(f.id)?.date, todayISO()))
         : conBusqueda;
     return estadoFiltro
       ? conVisibilidad.filter((f) => estadoFila(f) === estadoFiltro)
@@ -450,9 +450,9 @@ export function FrontdeskBoard() {
     }
     // "Todos" refleja lo VISIBLE: si se ocultan canceladas, no las cuenta (evita "Todos: 25" con 22 filas).
     // Los `counts` quedan completos para que la ficha "Cancelada" siga mostrando su número y poder revelarlas.
-    const ocultas = ocultarCanceladas && estadoFiltro !== "cancelada" ? (counts.get("cancelada") ?? 0) : 0;
+    const ocultas = ocultarCanceladas && estadoFiltro !== "cancelada" ? filas.filter((f) => hideCancelledRow(estadoFila(f), sesiones.get(f.id)?.date, todayISO())).length : 0;
     return { counts, total: filas.length - ocultas };
-  }, [board, estadoFila, ocultarCanceladas, estadoFiltro]);
+  }, [board, estadoFila, ocultarCanceladas, estadoFiltro, sesiones]);
 
   // Until the tabs (services + Consulta) and the board resolve, KPIs/rows would read "0"/empty: skeleton instead.
   const cargando = [servRes, tabsRes, boardRes, defRes].some((r) => r.state.kind === "loading");
@@ -528,12 +528,12 @@ export function FrontdeskBoard() {
       ) : gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
-        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
+        <CentroPicker centros={gate.centros} onPick={gate.pick} />
       ) : (
         <>
           {isConsulta ? (
             /* "Volver" al facturar se autodetecta de la URL. El buscador de arriba ("Viendo: X") también filtra este tablero. */
-            <GenericBoard tablero="atencion" initialEstado={consultaInitialEstado} pacienteFiltro={pacienteFiltro ? { id: pacienteFiltro.id, nombre: filtroPacienteNombre } : null} q={q} />
+            <GenericBoard tablero={CONSULTATION_BOARD} initialEstado={consultaInitialEstado} pacienteFiltro={pacienteFiltro ? { id: pacienteFiltro.id, nombre: filtroPacienteNombre } : null} q={q} />
           ) : (
           <>
           {/* KPIs = filtros */}

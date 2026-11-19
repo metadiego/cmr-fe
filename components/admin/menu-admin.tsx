@@ -20,6 +20,11 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { missingFields } from "@/lib/forms/missing";
 import { getPermisos } from "@/lib/api/rbac";
 import {
   Select,
@@ -29,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Radix Select no admite value=""; centinela para "sin permiso" (visible a todos).
+// Radix Select does not accept value=""; sentinel for "no permission" (visible to everyone).
 const SIN_PERMISO = "__sin_permiso__";
 
 const EMPTY: MenuItemPayload = {
@@ -49,8 +54,20 @@ export function MenuAdmin() {
   const [editing, setEditing] = React.useState<MenuItem | null>(null);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [busyId, setBusyId] = React.useState<string | null>(null);
+  const confirm = useConfirm();
 
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
   async function onDelete(item: MenuItem) {
+    if (asking.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("deleteTitle"),
+      description: t("deleteBody", { name: item.slug }),
+      confirmLabel: t("delete"),
+      destructive: true,
+    }).finally(() => (asking.current = false));
+    if (!ok) return;
     setBusyId(item.id);
     try {
       await deleteMenuItem(item.id);
@@ -151,27 +168,23 @@ function MenuItemForm({
   onSaved: () => void;
 }) {
   const t = useTranslations("admin.menu");
-  const [form, setForm] = React.useState<MenuItemPayload>(
-    item ? toPayload(item) : EMPTY,
+  const [form, update] = useDialogForm<MenuItemPayload>(
+    () => (item ? toPayload(item) : EMPTY),
+    open,
+    item?.id,
   );
-  const [submitting, setSubmitting] = React.useState(false);
-  // Catálogo de permisos para el picker (reemplaza el texto libre).
+  // Permission catalogue for the picker (replaces free text).
   const { state: permisosState } = useResource(() => getPermisos(), [open]);
   const permisos = permisosState.kind === "ok" ? permisosState.data : [];
 
-  function set<K extends keyof MenuItemPayload>(k: K, v: MenuItemPayload[K]) {
-    setForm((prev) => ({ ...prev, [k]: v }));
-  }
+  const missing = missingFields([
+    [t("clave"), !!form.slug.trim()],
+    [t("labelKey"), !!form.labelKey?.trim()],
+    [t("path"), !!form.path?.trim()],
+  ]);
 
-  function handleOpenChange(next: boolean) {
-    if (!next) setForm(item ? toPayload(item) : EMPTY);
-    onOpenChange(next);
-  }
-
-  async function onSubmit() {
-    if (!form.slug.trim() || !form.labelKey?.trim() || !form.path?.trim()) return;
-    setSubmitting(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
       const payload: MenuItemPayload = {
         ...form,
         parentSlug: form.parentSlug?.trim() || null,
@@ -180,69 +193,72 @@ function MenuItemForm({
       };
       if (item) await updateMenuItem(item.id, payload);
       else await createMenuItem(payload);
-      toast.success(t("saved"));
-      handleOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toastError(err);
-    } finally {
-      setSubmitting(false);
-    }
-  }
+    },
+    {
+      successMessage: t("saved"),
+      onSuccess: () => {
+        onOpenChange(false);
+        onSaved();
+      },
+    },
+  );
 
   return (
     <FormDialog
       open={open}
-      onOpenChange={handleOpenChange}
+      onOpenChange={onOpenChange}
       title={item ? t("editTitle") : t("createTitle")}
       description={t("formHelp")}
       submitting={submitting}
-      canSubmit={
-        !!form.slug.trim() && !!form.labelKey?.trim() && !!form.path?.trim()
-      }
-      onSubmit={onSubmit}
+      missing={missing}
+      onSubmit={() => submit()}
     >
-      <Field label={t("clave")}>
+      <RequiredLegend />
+      <Field label={t("clave")} htmlFor="menu-item-slug" required>
         <Input
+          id="menu-item-slug"
           value={form.slug}
-          onChange={(e) => set("slug", e.target.value)}
+          onChange={(e) => update({ slug: e.target.value })}
           placeholder="pacientes"
           className="font-mono"
         />
       </Field>
-      <Field label={t("labelKey")} hint={t("labelKeyHint")}>
+      <Field label={t("labelKey")} htmlFor="menu-item-label-key" hint={t("labelKeyHint")} required>
         <Input
+          id="menu-item-label-key"
           value={form.labelKey}
-          onChange={(e) => set("labelKey", e.target.value)}
+          onChange={(e) => update({ labelKey: e.target.value })}
           placeholder="nav.patients"
           className="font-mono"
+          aria-describedby="menu-item-label-key-hint"
         />
       </Field>
-      <Field label={t("path")}>
+      <Field label={t("path")} htmlFor="menu-item-path" required>
         <Input
+          id="menu-item-path"
           value={form.path}
-          onChange={(e) => set("path", e.target.value)}
+          onChange={(e) => update({ path: e.target.value })}
           placeholder="/patients"
           className="font-mono"
         />
       </Field>
-      <Field label={t("parentClave")} hint={t("parentClaveHint")}>
+      <Field label={t("parentClave")} htmlFor="menu-item-parent" hint={t("parentClaveHint")}>
         <Input
+          id="menu-item-parent"
           value={form.parentSlug ?? ""}
-          onChange={(e) => set("parentSlug", e.target.value)}
+          onChange={(e) => update({ parentSlug: e.target.value })}
           className="font-mono"
+          aria-describedby="menu-item-parent-hint"
         />
       </Field>
-      {/* Picker contra el catálogo real: el texto libre dejaba ítems con
-          permisos inexistentes (invisibles para todos). */}
-      <Field label={t("permisoClave")} hint={t("permisoClaveHint")}>
+      {/* Picker over the real catalogue: free text left items with non-existent permissions
+          (invisible to everyone). */}
+      <Field label={t("permisoClave")} htmlFor="menu-item-permission" hint={t("permisoClaveHint")}>
         <Select
           value={form.permissionSlug || SIN_PERMISO}
-          onValueChange={(v) =>
-            set("permissionSlug", v === SIN_PERMISO ? "" : v)
-          }
+          onValueChange={(v) => update({ permissionSlug: v === SIN_PERMISO ? "" : v })}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger id="menu-item-permission" className="w-full">
             <SelectValue placeholder={t("permisoClavePlaceholder")} />
           </SelectTrigger>
           <SelectContent>
@@ -255,17 +271,18 @@ function MenuItemForm({
           </SelectContent>
         </Select>
       </Field>
-      <Field label={t("orden")}>
+      <Field label={t("orden")} htmlFor="menu-item-order">
         <Input
+          id="menu-item-order"
           type="number"
           value={String(form.sortOrder ?? 0)}
-          onChange={(e) => set("sortOrder", Number(e.target.value))}
+          onChange={(e) => update({ sortOrder: Number(e.target.value) })}
         />
       </Field>
       <label className="flex items-center gap-2 text-sm">
         <Checkbox
           checked={form.visible ?? true}
-          onCheckedChange={(v) => set("visible", v === true)}
+          onCheckedChange={(v) => update({ visible: v === true })}
         />
         {t("visible")}
       </label>

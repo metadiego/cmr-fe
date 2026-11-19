@@ -7,12 +7,14 @@ import { ApiError } from "./types";
 // print-hub.read/update/delete IN that center; printing reads GET /me/print-hub, which needs no admin
 // permission. Handoff docs/specs/print-hub-several-printers-handoff-be.md.
 
-export type PrintHub = components["schemas"]["PrintHubResponseDto"];
+// Each printer carries `model` (a label) and `escposFont` ('A' | 'B' | null) since BE #540; the retired
+// Star Line Mode (`commandSet`, BE PR #513) is gone.
 export type CenterPrinter = components["schemas"]["PrinterResponseDto"];
 export type CreatePrinterPayload = components["schemas"]["CreatePrinterDto"];
 export type UpdatePrinterPayload = components["schemas"]["UpdatePrinterDto"];
-export type PrintHubForPrinting = components["schemas"]["MyPrintHubResponseDto"];
 export type PrinterForPrinting = components["schemas"]["PrinterForPrintingDto"];
+export type PrintHub = Omit<components["schemas"]["PrintHubResponseDto"], "printers"> & { printers: CenterPrinter[] };
+export type PrintHubForPrinting = Omit<components["schemas"]["MyPrintHubResponseDto"], "printers"> & { printers: PrinterForPrinting[] };
 
 // One center's configuration, or null when it has none (BE answers 404 PRINT_HUB_NOT_CONFIGURED).
 export async function getPrintHub(centerId: string): Promise<PrintHub | null> {
@@ -49,4 +51,45 @@ export function deletePrinter(centerId: string, id: string): Promise<unknown> {
 // its active printers. A center with nothing configured answers enabled:false, not an error.
 export function getPrintHubForPrinting(centerId: string): Promise<PrintHubForPrinting> {
   return apiFetch<PrintHubForPrinting>("/me/print-hub", { headers: { "X-Tenant-ID": centerId } });
+}
+
+// Escáneres del hub (BE PR #586, handoff .personal/handoff-escanear-al-cuadre.md): NO está desplegado
+// todavía (CI del BE bloqueado por facturación) — tipado a mano contra el handoff, sin Swagger propio.
+// Independiente de printers/hubUrls: un centro puede tener escáneres sin tener impresoras configuradas.
+// `defaultSource` (BE PR #592): el BE lo usa en /scans y /scans/preview cuando el pedido no manda
+// `source` explícito — el diálogo de Escanear debe precargarlo en vez de asumir "adf" a secas.
+export type ScannerSource = "adf" | "platen";
+export interface PrintHubScanner {
+  id: string;
+  name: string;
+  esclUrl: string;
+  documentFormat: string;
+  defaultSource: ScannerSource;
+  active: boolean;
+  sortOrder: number;
+}
+export interface CreateScannerPayload {
+  name: string;
+  esclUrl: string;
+  documentFormat?: string;
+  defaultSource?: ScannerSource;
+  active?: boolean;
+  sortOrder?: number;
+}
+export type UpdateScannerPayload = Partial<CreateScannerPayload>;
+
+export function listScanners(centerId: string): Promise<PrintHubScanner[]> {
+  return apiFetch<PrintHubScanner[]>(`/print-hubs/${centerId}/scanners`);
+}
+
+export function createScanner(centerId: string, payload: CreateScannerPayload): Promise<PrintHubScanner> {
+  return apiFetch<PrintHubScanner>(`/print-hubs/${centerId}/scanners`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export function updateScanner(centerId: string, id: string, payload: UpdateScannerPayload): Promise<PrintHubScanner> {
+  return apiFetch<PrintHubScanner>(`/print-hubs/${centerId}/scanners/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+}
+
+export function deleteScanner(centerId: string, id: string): Promise<unknown> {
+  return apiFetch<unknown>(`/print-hubs/${centerId}/scanners/${id}`, { method: "DELETE" });
 }

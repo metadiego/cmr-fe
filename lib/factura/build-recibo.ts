@@ -1,5 +1,8 @@
+import { invoiceBalance } from "./balance.ts";
+import { line, readTotals } from "./totals.ts";
 import type { FacturaConItems, FacturaEmpresa, ReciboDevolucion } from "@/lib/api/facturas";
 import { invoiceSavings, packageEvidence, savingsPct } from "./sales-package.ts";
+import type { QuantityBreakdown } from "./receipt-format.ts";
 
 // Fiscal/branch block, projected by the BE per sucursal (getById `empresa`). NO
 // hardcoded company data here.
@@ -17,11 +20,25 @@ export type ReciboItem = {
   // "Incluye:" de un kit (item.content, disponible en borrador+emitida). Vacío = compacto.
   // `precio` = REFERENCIA (mapeado del catálogo por productId); NO suma al total.
   // `nota` = programación/protocolo del componente (PR #100), opcional.
-  componentes?: { descripcion: string; cantidad: number; precio?: number; nota?: string | null }[];
+  // `multiplicadores` del componente (kit con terapia de áreas×días, PR areas-y-dias-en-el-kit):
+  // el label lo resuelve el recibo igual que el de arriba (fac.col.<clave>).
+  componentes?: {
+    descripcion: string;
+    cantidad: number;
+    precio?: number;
+    nota?: string | null;
+    multiplicadores?: Record<string, number>;
+    // BE-computed "Sesiones × Áreas = Terapias" (cmr-be #619); reemplaza `multiplicadores` cuando el
+    // grupo del componente está en modo "breakdown". null/ausente = se muestra la cantidad como hoy.
+    quantityBreakdown?: QuantityBreakdown | null;
+  }[];
   // Duración del protocolo del kit en visitas (producto.treatmentDays), si aplica.
   protocoloVisitas?: number;
   // Multiplicadores (láser: {dias:12, areas:2}) — el label lo resuelve el recibo (fac.col.<clave>).
   multiplicadores?: Record<string, number>;
+  // BE-computed "Sesiones × Áreas = Terapias" (cmr-be #619); reemplaza la leyenda de `multiplicadores`
+  // de esta línea cuando su grupo está en modo "breakdown". null/ausente = se muestra como hoy.
+  quantityBreakdown?: QuantityBreakdown | null;
   // Sales package evidence (item.meta.salesPackage, frozen by the BE): regular, savings, package price.
   paquete?: { nombre: string; precioRegular: number; ahorro: number; ahorroPct: number; precioPaquete: number };
 };
@@ -33,6 +50,10 @@ export type Recibo = {
   logoUrl: string | null;
   // "factura" (por defecto) o "devolucion" → el encabezado dice "Factura #" vs "Devolución #".
   tipoDocumento?: "factura" | "devolucion" | "presupuesto";
+  /** A refund's receipt: the invoice it comes from («Factura de origen #L006875»). */
+  facturaOrigen?: string | null;
+  /** A refund's own reason (`d.reason`) — not printed on the paper, only on «Ver devolución». */
+  motivo?: string | null;
   numeroDisplay: string;
   fecha: string;
   estado: string;
@@ -47,14 +68,25 @@ export type Recibo = {
   ahorroPaquetes?: number; // «Usted ahorró»: sum of the package lines' savings (0 = none → not printed)
   total: number;
   montoAbonado: number;
+  /** What was refunded, negative (BE totals `refunded` line); 0 = nothing. */
+  reembolsado?: number;
   saldo: number;
   // `clave` = clave estable de la forma (efectivo/cheque/…) para traducir el label en el recibo; el
   // `formaPagoNombre` (español) queda de fallback para formas personalizadas.
-  pagos: { formaPagoNombre: string; clave?: string | null; monto: number; referencia?: string | null }[];
+  // `reembolso`: a refund move (negative), printed as «Reembolso <method>».
+  pagos: { formaPagoNombre: string; clave?: string | null; monto: number; referencia?: string | null; reembolso?: boolean }[];
   atendidoPor?: string;
 };
 
 const num = (v: unknown) => Number(v ?? 0);
+
+// Cantidad devuelta de una línea: `quantity`, o `sessions` cuando aquella es 0 — una devolución de un
+// paquete de sesiones (HILT, MLS, …) se descuenta por sesiones, no por unidades. Expuesta aparte
+// (no solo usada dentro de buildReciboDevolucion) para quien solo necesita el número, como la sección
+// «Devoluciones» de la factura. cmr-be-48, refund D-000028/invoice 001232, Caguas.
+export function cantidadDevuelta(it: { quantity?: number | null; sessions?: number | null }): number {
+  return num(it.quantity) || num(it.sessions) || 1;
+}
 
 function paqueteDe(it: { salesPackageId?: string | null; meta?: unknown }): ReciboItem["paquete"] | undefined {
   const e = packageEvidence(it);
@@ -82,12 +114,28 @@ export function buildRecibo(
     // El PRECIO viene RESUELTO en content[].price (cascada centro→global→base, BE #99) → leerlo
     // tal cual; NO mapear del catálogo (que solo tiene precios por-centro y omitía componentes).
     const content =
-      (it as { content?: { productId?: string; name?: string; quantity?: number; price?: number | null; note?: string | null }[] }).content ?? [];
+      (
+        it as {
+          content?: {
+            productId?: string;
+            name?: string;
+            quantity?: number;
+            price?: number | null;
+            note?: string | null;
+            multipliers?: Record<string, number> | null;
+            // cmr-be #619: aún no está en Swagger (drift de gen:api pendiente), verificado en vivo
+            // (S040541, Caguas) — no inventa nada, es un passthrough de lo que ya manda el BE.
+            quantityBreakdown?: QuantityBreakdown | null;
+          }[];
+        }
+      ).content ?? [];
     const itemComps = content.map((c) => ({
       descripcion: c.name ?? "—",
       cantidad: num(c.quantity),
       ...(c.price != null ? { precio: num(c.price) } : {}),
       ...(c.note ? { nota: c.note } : {}),
+      ...(c.multipliers && Object.keys(c.multipliers).length ? { multiplicadores: c.multipliers } : {}),
+      ...(c.quantityBreakdown ? { quantityBreakdown: c.quantityBreakdown } : {}),
     }));
     const visitas = it.productId ? diasTratamiento[String(it.productId)] : undefined;
     // Multiplicadores (láser: áreas×días) → cantidad EFECTIVA = base × Π(multiplicadores).
@@ -98,6 +146,8 @@ export function buildRecibo(
     const cantEfectiva = multiplicadores
       ? Object.values(multiplicadores).reduce((p, v) => p * (Number(v) || 1), base)
       : num(it.quantity);
+    // cmr-be #619: mismo passthrough que `content[].quantityBreakdown` arriba, aún no en Swagger.
+    const quantityBreakdown = (it as { quantityBreakdown?: QuantityBreakdown | null }).quantityBreakdown;
     return {
       cantidad: cantEfectiva,
       descripcion: it.description ?? "—",
@@ -107,14 +157,18 @@ export function buildRecibo(
       ...(itemComps.length ? { componentes: itemComps } : {}),
       ...(itemComps.length && visitas ? { protocoloVisitas: visitas } : {}),
       ...(multiplicadores ? { multiplicadores } : {}),
+      ...(quantityBreakdown ? { quantityBreakdown } : {}),
       ...(paqueteDe(it) ? { paquete: paqueteDe(it)! } : {}),
     };
   });
-  const subtotal = num(f.subtotal) || items.reduce((s, it) => s + it.total, 0);
-  const descuento = num(f.discount);
-  const impuesto = num(f.tax);
-  const total = num(f.total) || Math.max(0, subtotal - descuento + impuesto);
-  const montoAbonado = num(f.paidAmount);
+  // BE #536: the receipt's footer comes from the SAME totals block as the screen; the old fields are the
+  // fallback for an invoice projection without it.
+  const tot = readTotals(f);
+  const subtotal = line(tot, "subtotal") ?? (num(f.subtotal) || items.reduce((s, it) => s + it.total, 0));
+  const descuento = tot ? -(line(tot, "discount") ?? 0) : num(f.discount);
+  const impuesto = line(tot, "tax") ?? num(f.tax);
+  const total = line(tot, "total") ?? (num(f.total) || Math.max(0, subtotal - descuento + impuesto));
+  const montoAbonado = line(tot, "paid") ?? num(f.paidAmount);
 
   // Tax breakdown when the BE projects it (products); consulta has none.
   const impuestosRaw =
@@ -153,13 +207,16 @@ export function buildRecibo(
     ahorroPaquetes: invoiceSavings(f.items ?? []),
     total,
     montoAbonado,
-    saldo: Math.max(0, total - montoAbonado),
-    pagos: (f.payments ?? []).map((p) => ({
-      formaPagoNombre: p.formaPagoNombre ?? "—",
-      clave: p.paymentMethodId ? clavePorFormaId[String(p.paymentMethodId)] : undefined,
-      monto: num(p.amount),
-      referencia: p.reference ?? null,
-    })),
+    reembolsado: line(tot, "refunded") ?? 0,
+    saldo: Math.max(0, line(tot, "balance") ?? invoiceBalance(String(f.status ?? ""), total, montoAbonado)),
+    pagos: tot
+      ? tot.moves.map((m) => ({ formaPagoNombre: m.method ?? "—", monto: m.amount, reembolso: m.kind === "refund" }))
+      : (f.payments ?? []).map((p) => ({
+          formaPagoNombre: p.formaPagoNombre ?? "—",
+          clave: p.paymentMethodId ? clavePorFormaId[String(p.paymentMethodId)] : undefined,
+          monto: num(p.amount),
+          referencia: p.reference ?? null,
+        })),
     // "Atendido por" = quien COBRÓ (issuedBy) o, si aún es borrador, quien la CREÓ (createdBy).
     // BE PR #82; `emisor` queda como fallback legacy. NUNCA el médico.
     atendidoPor: f.issuedBy?.name ?? f.createdBy?.name ?? f.emisor?.name ?? undefined,
@@ -181,15 +238,15 @@ export function buildReciboDevolucion(
 ): Recibo {
   const items: ReciboItem[] = (d.items ?? []).map((it) => {
     const base = num(it.amount);
-    const cant = num(it.quantity) || 1;
+    const cant = cantidadDevuelta(it);
     return {
-      cantidad: num(it.quantity),
+      cantidad: cant,
       // El BE manda la descripción; el mapa de la factura de origen es el respaldo.
       descripcion:
         (it as { description?: string | null }).description?.trim() ||
         nombres[it.invoiceItemId] ||
         "—",
-      precioUnitario: cant ? base / cant : base,
+      precioUnitario: base / cant,
       descuento: 0,
       total: base, // base pre-impuesto por línea; el impuesto va al pie, igual que la factura
     };
@@ -204,6 +261,8 @@ export function buildReciboDevolucion(
     logoUrl: d.empresa?.logoUrl ?? null,
     tipoDocumento: "devolucion",
     numeroDisplay: d.displayNumber ?? "—",
+    facturaOrigen: d.invoiceNumber ?? null,
+    motivo: d.reason ?? null,
     fecha: d.date ?? "",
     estado: String(d.status ?? ""),
     anulada: String(d.status ?? "") === "anulada",
@@ -221,11 +280,16 @@ export function buildReciboDevolucion(
     total,
     montoAbonado: 0,
     saldo: 0,
-    // El reembolso se muestra como "pago" del recibo (forma + monto), si el BE ya lo resolvió.
-    // `formaReembolso` NO está en el mapa api-ingles → el BE la deja en español.
-    pagos: d.formaReembolso
-      ? [{ formaPagoNombre: d.formaReembolso, clave: clavePorFormaNombre[d.formaReembolso], monto: total }]
-      : [],
+    // El reembolso se muestra como "pago" del recibo: una línea POR CADA forma (BE PR #579) — un
+    // reembolso dividido (Visa $320 + Cheque $120) antes salía «Visa $440.00», la forma del PRIMER pago
+    // con el TOTAL de todos. `formaReembolso` (texto ya unido) es el respaldo de cuando `reimbursements`
+    // no viene o viene vacío. cmr-be-48, refund D-000028/invoice 001232, Caguas.
+    pagos:
+      d.reimbursements && d.reimbursements.length > 0
+        ? d.reimbursements.map((r) => ({ formaPagoNombre: r.paymentMethodName, clave: clavePorFormaNombre[r.paymentMethodName], monto: num(r.amount) }))
+        : d.formaReembolso
+          ? [{ formaPagoNombre: d.formaReembolso, clave: clavePorFormaNombre[d.formaReembolso], monto: total }]
+          : [],
     atendidoPor: d.emisor?.name ?? undefined,
   };
 }

@@ -13,7 +13,6 @@ import {
   type Unidad,
 } from "@/lib/api/inventario";
 import { apiErrorMessage } from "@/lib/api/errors";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Switch } from "@/components/ui/switch";
@@ -24,14 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { FormSheet } from "@/components/kit/form-sheet";
+import { Field } from "@/components/kit/field";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 
 const NONE = "__none__";
 
@@ -86,10 +82,10 @@ function fromEntity(p: PresentacionProveedor): FormState {
   };
 }
 
-// Alta/edición de una presentación de proveedor (AMP). Aquí vive TODO lo que cambia
-// cuando cambia el proveedor/presentación — el producto base no se toca. La pieza
-// clave es `factorABase` (unidades base por empaque): el BE la usa para convertir la
-// compra a la unidad base del producto.
+// Create/edit a supplier presentation (AMP). Everything that changes when the supplier or its
+// presentation changes lives here; the base product is untouched. The key piece is
+// `baseConversionFactor` (base units per package): the BE uses it to convert a purchase to the
+// product's base unit.
 export function PPFormSheet({
   open,
   productoId,
@@ -110,31 +106,23 @@ export function PPFormSheet({
   onSaved: () => void;
 }) {
   const t = useTranslations("inventario.pp");
-  const tc = useTranslations("common");
   const isEdit = !!presentacion;
 
-  const [form, setForm] = React.useState<FormState>(
-    presentacion ? fromEntity(presentacion) : EMPTY,
+  // Re-initialised when the sheet opens or another presentation is loaded.
+  const [form, update] = useDialogForm<FormState>(
+    () => (presentacion ? fromEntity(presentacion) : EMPTY),
+    open,
+    presentacion?.id,
   );
-  const [submitting, setSubmitting] = React.useState(false);
-
-  const [prevId, setPrevId] = React.useState(presentacion?.id);
-  const targetId = presentacion?.id;
-  if (targetId !== prevId) {
-    setPrevId(targetId);
-    setForm(presentacion ? fromEntity(presentacion) : EMPTY);
-  }
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
-    setForm((prev) => ({ ...prev, [k]: v }));
+    update({ [k]: v } as Partial<FormState>);
   }
 
-  const canSubmit = form.name.trim().length > 0 && !submitting;
+  const missing = missingFields([[t("field.nombre"), form.name.trim().length > 0]]);
 
-  async function onSubmit() {
-    if (!form.name.trim()) return;
-    setSubmitting(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
       const num = (s: string) => {
         const n = Number(s);
         return s.trim() && !Number.isNaN(n) ? n : undefined;
@@ -166,159 +154,146 @@ export function PPFormSheet({
           ...base,
         } as CreatePresentacionProveedorPayload);
       }
-      toast.success(isEdit ? t("updated") : t("created"));
-      onOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col overflow-y-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>{isEdit ? t("editTitle") : t("newTitle")}</SheetTitle>
-          <SheetDescription>{t("description")}</SheetDescription>
-        </SheetHeader>
-
-        <div className="grid gap-4 px-4">
-          <Field label={t("field.nombre")}>
-            <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
-          </Field>
-
-          {/* factorABase — la pieza clave: se resalta. */}
-          <div className="rounded-md bg-primary/5 p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-            <Field label={t("field.factorABase")} hint={t("field.factorABaseHint")}>
-              <Input
-                inputMode="decimal"
-                value={form.baseConversionFactor}
-                onChange={(e) => set("baseConversionFactor", e.target.value)}
-                placeholder="60"
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.fabricante")}>
-              <CatalogSelect
-                value={form.manufacturerId}
-                onChange={(v) => set("manufacturerId", v)}
-                options={fabricantes.map((c) => ({ id: c.id, nombre: c.name }))}
-                placeholder={t("field.none")}
-              />
-            </Field>
-            <Field label={t("field.marca")}>
-              <CatalogSelect
-                value={form.brandId}
-                onChange={(v) => set("brandId", v)}
-                options={marcas.map((c) => ({ id: c.id, nombre: c.name }))}
-                placeholder={t("field.none")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.concentracion")}>
-              <Input
-                inputMode="decimal"
-                value={form.concentration}
-                onChange={(e) => set("concentration", e.target.value)}
-              />
-            </Field>
-            <Field label={t("field.unidadConcentracion")}>
-              <CatalogSelect
-                value={form.concentrationUnitId}
-                onChange={(v) => set("concentrationUnitId", v)}
-                options={unidades.map((u) => ({ id: u.id, nombre: u.name }))}
-                placeholder={t("field.none")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.contenido")}>
-              <Input
-                inputMode="decimal"
-                value={form.contentPerPackage}
-                onChange={(e) => set("contentPerPackage", e.target.value)}
-              />
-            </Field>
-            <Field label={t("field.unidadContenido")}>
-              <CatalogSelect
-                value={form.contentUnitId}
-                onChange={(v) => set("contentUnitId", v)}
-                options={unidades.map((u) => ({ id: u.id, nombre: u.name }))}
-                placeholder={t("field.none")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.sku")}>
-              <Input value={form.sku} onChange={(e) => set("sku", e.target.value)} />
-            </Field>
-            <Field label={t("field.barcode")}>
-              <Input value={form.barcode} onChange={(e) => set("barcode", e.target.value)} />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.vigenciaDesde")}>
-              <DatePicker value={form.validFrom} onChange={(v) => set("validFrom", v)} clearable />
-            </Field>
-            <Field label={t("field.vigenciaHasta")}>
-              <DatePicker value={form.validUntil} onChange={(v) => set("validUntil", v)} clearable />
-            </Field>
-          </div>
-
-          {isEdit && (
-            <div className="flex items-center justify-between rounded-lg border px-3 py-2">
-              <span className="text-sm">{t("field.activo")}</span>
-              <Switch checked={form.active} onCheckedChange={(v) => set("active", v)} />
-            </div>
-          )}
-        </div>
-
-        <SheetFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={!canSubmit}>
-            {submitting ? tc("saving") : tc("save")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+    },
+    {
+      successMessage: isEdit ? t("updated") : t("created"),
+      onSuccess: () => {
+        onOpenChange(false);
+        onSaved();
+      },
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
   );
-}
 
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-      {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
-    </label>
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      size="sm"
+      title={isEdit ? t("editTitle") : t("newTitle")}
+      description={t("description")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+    >
+      <Field label={t("field.nombre")} htmlFor="pp-name" required>
+        <Input id="pp-name" value={form.name} onChange={(e) => set("name", e.target.value)} />
+      </Field>
+
+      {/* baseConversionFactor, the key piece: highlighted. */}
+      <div className="rounded-md bg-primary/5 p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+        <Field label={t("field.factorABase")} htmlFor="pp-factor" hint={t("field.factorABaseHint")}>
+          <Input
+            id="pp-factor"
+            inputMode="decimal"
+            value={form.baseConversionFactor}
+            onChange={(e) => set("baseConversionFactor", e.target.value)}
+            placeholder="60"
+            aria-describedby="pp-factor-hint"
+          />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.fabricante")} htmlFor="pp-manufacturer">
+          <CatalogSelect
+            id="pp-manufacturer"
+            value={form.manufacturerId}
+            onChange={(v) => set("manufacturerId", v)}
+            options={fabricantes.map((c) => ({ id: c.id, nombre: c.name }))}
+            placeholder={t("field.none")}
+          />
+        </Field>
+        <Field label={t("field.marca")} htmlFor="pp-brand">
+          <CatalogSelect
+            id="pp-brand"
+            value={form.brandId}
+            onChange={(v) => set("brandId", v)}
+            options={marcas.map((c) => ({ id: c.id, nombre: c.name }))}
+            placeholder={t("field.none")}
+          />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.concentracion")} htmlFor="pp-concentration">
+          <Input
+            id="pp-concentration"
+            inputMode="decimal"
+            value={form.concentration}
+            onChange={(e) => set("concentration", e.target.value)}
+          />
+        </Field>
+        <Field label={t("field.unidadConcentracion")} htmlFor="pp-concentration-unit">
+          <CatalogSelect
+            id="pp-concentration-unit"
+            value={form.concentrationUnitId}
+            onChange={(v) => set("concentrationUnitId", v)}
+            options={unidades.map((u) => ({ id: u.id, nombre: u.name }))}
+            placeholder={t("field.none")}
+          />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.contenido")} htmlFor="pp-content">
+          <Input
+            id="pp-content"
+            inputMode="decimal"
+            value={form.contentPerPackage}
+            onChange={(e) => set("contentPerPackage", e.target.value)}
+          />
+        </Field>
+        <Field label={t("field.unidadContenido")} htmlFor="pp-content-unit">
+          <CatalogSelect
+            id="pp-content-unit"
+            value={form.contentUnitId}
+            onChange={(v) => set("contentUnitId", v)}
+            options={unidades.map((u) => ({ id: u.id, nombre: u.name }))}
+            placeholder={t("field.none")}
+          />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.sku")} htmlFor="pp-sku">
+          <Input id="pp-sku" value={form.sku} onChange={(e) => set("sku", e.target.value)} />
+        </Field>
+        <Field label={t("field.barcode")} htmlFor="pp-barcode">
+          <Input id="pp-barcode" value={form.barcode} onChange={(e) => set("barcode", e.target.value)} />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.vigenciaDesde")} htmlFor="pp-valid-from">
+          <DatePicker id="pp-valid-from" value={form.validFrom} onChange={(v) => set("validFrom", v)} clearable />
+        </Field>
+        <Field label={t("field.vigenciaHasta")} htmlFor="pp-valid-until">
+          <DatePicker id="pp-valid-until" value={form.validUntil} onChange={(v) => set("validUntil", v)} clearable />
+        </Field>
+      </div>
+
+      {isEdit && (
+        <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+          <span className="text-sm">{t("field.activo")}</span>
+          <Switch checked={form.active} onCheckedChange={(v) => set("active", v)} />
+        </div>
+      )}
+    </FormSheet>
   );
 }
 
 function CatalogSelect({
+  id,
   value,
   onChange,
   options,
   placeholder,
 }: {
+  id?: string;
   value: string;
   onChange: (v: string) => void;
   options: { id: string; nombre: string }[];
@@ -326,7 +301,7 @@ function CatalogSelect({
 }) {
   return (
     <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
-      <SelectTrigger className="w-full">
+      <SelectTrigger id={id} className="w-full">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

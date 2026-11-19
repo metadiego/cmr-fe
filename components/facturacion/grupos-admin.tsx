@@ -17,6 +17,7 @@ import {
 import type { Producto } from "@/lib/api/inventario";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { contarPorGrupo, particionarMembresia } from "@/lib/facturacion/grupos";
+import { newBillingGroupMissing } from "@/lib/facturacion/billing-group-missing";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { cn } from "@/lib/utils";
@@ -34,15 +35,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { FormSheet } from "@/components/kit/form-sheet";
+import { Field } from "@/components/kit/field";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Administración de GRUPOS DE FACTURACIÓN (crear/editar + membresía de productos). Layout
@@ -165,6 +161,7 @@ function Contenido({
               <span className="font-medium">
                 {label(g.labelKey, g.slug)}
                 <span className="ml-1 text-xs text-muted-foreground">{g.slug}</span>
+                {g.isProductSale && <Badge variant="outline" className="ml-2 font-normal">{t("productSaleBadge")}</Badge>}
               </span>
               <span>
                 <Badge variant="secondary" className="font-normal">
@@ -219,6 +216,9 @@ function DetalleGrupo({
   const [labelKey, setLabelKey] = React.useState(grupo.labelKey);
   const [division, setDivision] = React.useState(grupo.division);
   const [activo, setActivo] = React.useState(grupo.active);
+  const [productSale, setProductSale] = React.useState(!!grupo.isProductSale);
+  // "Sesiones × Áreas = Terapias" en documentos (cmr-be #619) — display only, nunca cambia el total.
+  const [quantityDisplay, setQuantityDisplay] = React.useState(grupo.quantityDisplay ?? "total");
   const [savingGrupo, setSavingGrupo] = React.useState(false);
 
   // Membresía local (ids que quedan en el grupo). Init = miembros actuales.
@@ -260,6 +260,8 @@ function DetalleGrupo({
         labelKey: labelKey.trim() || grupo.labelKey,
         division,
         active: activo,
+        isProductSale: productSale,
+        quantityDisplay,
       });
       toast.success(t("updated"));
       onChanged();
@@ -322,6 +324,26 @@ function DetalleGrupo({
             <Switch checked={activo} onCheckedChange={setActivo} />
             {t("active")}
           </label>
+          {/* Product sale (IVU): its lines — today's and any product added later — feed the cuadre's
+              product-sales section (taxable / exempt / exonerated, state + municipal IVU). */}
+          <label className="flex items-center gap-2 text-sm" title={t("productSaleHint")}>
+            <Switch checked={productSale} onCheckedChange={setProductSale} />
+            {t("productSale")}
+          </label>
+          {/* "Sesiones × Áreas = Terapias" en recibo/factura/vista (cmr-be #619) — solo cambia cómo se
+              lee la cantidad, nunca lo que se cobra. */}
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">{t("quantityDisplay")}</Label>
+            <Select value={quantityDisplay} onValueChange={(v) => setQuantityDisplay(v as "total" | "breakdown")}>
+              <SelectTrigger className="h-9 w-56" title={t("quantityDisplayHint")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="total">{t("quantityDisplayTotal")}</SelectItem>
+                <SelectItem value="breakdown">{t("quantityDisplayBreakdown")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button size="sm" onClick={guardarGrupo} disabled={savingGrupo}>
             {t("saveGroup")}
           </Button>
@@ -426,77 +448,75 @@ function NuevoGrupo({
   const t = useTranslations("gruposFacturacion");
   const tRoot = useTranslations();
   const [open, setOpen] = React.useState(false);
-  const [clave, setClave] = React.useState("");
-  const [labelKey, setLabelKey] = React.useState("");
-  const [division, setDivision] = React.useState(divisiones[0]?.slug ?? "general");
-  const [saving, setSaving] = React.useState(false);
+  const [form, setForm] = useDialogForm(
+    () => ({ clave: "", labelKey: "", division: divisiones[0]?.slug ?? "general" }),
+    open,
+  );
+  const { clave, labelKey, division } = form;
+  const missing = newBillingGroupMissing({ key: clave }).map(() => t("clave"));
 
-  async function crear() {
-    setSaving(true);
-    try {
-      const g = await crearGrupoFacturacion({
+  const { submitting, submit } = useSubmit(
+    () =>
+      crearGrupoFacturacion({
         slug: clave.trim(),
         labelKey: labelKey.trim() || `fac.grupo.${clave.trim()}`,
         division,
-      });
-      toast.success(t("created"));
-      setOpen(false);
-      setClave("");
-      setLabelKey("");
-      onCreated(g);
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  }
+      }),
+    {
+      successMessage: t("created"),
+      onSuccess: (g) => {
+        setOpen(false);
+        onCreated(g);
+      },
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
+  );
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button size="sm">{t("new")}</Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>{t("new")}</SheetTitle>
-          <SheetDescription>{t("newHelp")}</SheetDescription>
-        </SheetHeader>
-        <div className="space-y-4 px-4">
-          <div className="space-y-1">
-            <Label htmlFor="g-clave">{t("clave")}</Label>
-            <Input id="g-clave" value={clave} onChange={(e) => setClave(e.target.value)} />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="g-label">{t("labelKey")}</Label>
-            <Input
-              id="g-label"
-              value={labelKey}
-              onChange={(e) => setLabelKey(e.target.value)}
-              placeholder={clave ? `fac.grupo.${clave}` : "fac.grupo.…"}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label>{t("division")}</Label>
-            <Select value={division} onValueChange={setDivision}>
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {divisiones.map((d) => (
-                  <SelectItem key={d.slug} value={d.slug}>
-                    {tRoot.has(d.labelKey) ? tRoot(d.labelKey) : d.slug}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <SheetFooter>
-          <Button onClick={crear} disabled={saving || !clave.trim()}>
-            {t("create")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Button size="sm" onClick={() => setOpen(true)}>
+        {t("new")}
+      </Button>
+      <FormSheet
+        open={open}
+        onOpenChange={setOpen}
+        size="sm"
+        title={t("new")}
+        description={t("newHelp")}
+        onSubmit={() => submit()}
+        submitLabel={t("create")}
+        submitting={submitting}
+        missing={missing}
+      >
+        <Field label={t("clave")} htmlFor="g-clave" required>
+          <Input id="g-clave" value={clave} onChange={(e) => setForm({ clave: e.target.value })} />
+        </Field>
+        <Field label={t("labelKey")} htmlFor="g-label">
+          <Input
+            id="g-label"
+            value={labelKey}
+            onChange={(e) => setForm({ labelKey: e.target.value })}
+            placeholder={clave ? `fac.grupo.${clave}` : "fac.grupo.…"}
+          />
+        </Field>
+        <Field label={t("division")} htmlFor="g-division">
+          <Select value={division} onValueChange={(v) => setForm({ division: v })}>
+            <SelectTrigger id="g-division" className="h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {divisiones.map((d) => (
+                <SelectItem key={d.slug} value={d.slug}>
+                  {tRoot.has(d.labelKey) ? tRoot(d.labelKey) : d.slug}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </FormSheet>
+    </>
   );
 }

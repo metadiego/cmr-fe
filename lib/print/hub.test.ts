@@ -59,6 +59,18 @@ test("health: hub up but printer unplugged → printerDown with the reason", asy
   assert.deepEqual(h, { kind: "printerDown", hub: 0, state: "disabled", detail: "Unplugged or turned off" });
 });
 
+test("health: one hub says the printer is down, another sees it ready → ready on that one", async () => {
+  const h = await checkHubs(["a", "b"], async (u) =>
+    u === "a" ? { printer: "disconnected", detail: "printer-state=3 reasons=offline-report" } : { printer: "ready" },
+  );
+  assert.deepEqual(h, { kind: "ready", hub: 1 });
+});
+
+test("health: every hub says down → the first one's reason", async () => {
+  const h = await checkHubs(["a", "b"], async (u) => ({ printer: u === "a" ? "disconnected" : "unreachable", detail: u }));
+  assert.deepEqual(h, { kind: "printerDown", hub: 0, state: "disconnected", detail: "a" });
+});
+
 test("health: unknown state does not block printing", async () => {
   assert.equal((await checkHubs(["a"], async () => ({ printer: "unknown" }))).kind, "ready");
 });
@@ -76,4 +88,21 @@ test("checkHubs: the local hub's 'disconnected' (USB printer off or unplugged) d
 test("checkHubs: a state this build does not know does not lock the button", async () => {
   const h = await checkHubs(["a"], async () => ({ printer: "warming-up" as never }));
   assert.deepEqual(h, { kind: "ready", hub: 0 });
+});
+
+import { bytesForPrinter } from "./hub.ts";
+
+test("font: null leaves the bytes identical, byte for byte (every Epson)", () => {
+  const b = new Uint8Array([0x1b, 0x40, 0x41, 0x42]);
+  assert.equal(bytesForPrinter(b, null), b);
+  assert.equal(bytesForPrinter(b, undefined), b);
+});
+
+test("font B goes right after the ticket's leading ESC @ (lab-test, Star in Epson emulation)", () => {
+  const out = bytesForPrinter(new Uint8Array([0x1b, 0x40, 0x41]), "B");
+  assert.deepEqual([...out], [0x1b, 0x40, 0x1b, 0x4d, 1, 0x41]);
+});
+
+test("font A first when the ticket has no ESC @", () => {
+  assert.deepEqual([...bytesForPrinter(new Uint8Array([0x41]), "A")], [0x1b, 0x4d, 0, 0x41]);
 });

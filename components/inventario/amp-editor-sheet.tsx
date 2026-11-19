@@ -14,7 +14,6 @@ import {
   type CreatePresentacionProveedorPayload,
 } from "@/lib/api/inventario";
 import { apiErrorMessage } from "@/lib/api/errors";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -23,20 +22,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { FormSheet } from "@/components/kit/form-sheet";
+import { Field } from "@/components/kit/field";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 
 const NONE = "__none__";
 
-// Editor de AMP (presentación de proveedor) — §2 del hand-off. Side-sheet (no inline):
-// más fricción = menos errores en datos sensibles. Proveedor + Cantidad/Unidad arriba;
-// concentración/marca/fabricante/sku/barcode en avanzado colapsable.
+// AMP (supplier presentation) editor — §2 of the hand-off. A side sheet, not inline: more friction
+// means fewer mistakes in sensitive data. Supplier + content/unit on top; concentration, brand,
+// manufacturer, SKU and barcode in a collapsible advanced section.
 export function AmpEditorSheet({
   open,
   productoId,
@@ -64,40 +60,42 @@ export function AmpEditorSheet({
   const tc = useTranslations("common");
   const isEdit = !!amp;
 
-  const [proveedorId, setProveedorId] = React.useState("");
-  const [nombre, setNombre] = React.useState("");
-  const [nombreTouched, setNombreTouched] = React.useState(false);
-  const [contenido, setContenido] = React.useState("");
-  const [unidadContenidoId, setUnidadContenidoId] = React.useState("");
-  const [concentracion, setConcentracion] = React.useState("");
-  const [unidadConcentracionId, setUnidadConcentracionId] = React.useState("");
-  const [marcaId, setMarcaId] = React.useState("");
-  const [fabricanteId, setFabricanteId] = React.useState("");
-  const [sku, setSku] = React.useState("");
-  const [barcode, setBarcode] = React.useState("");
-  const [advanced, setAdvanced] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
+  // Re-initialised when the sheet opens or the edited AMP changes.
+  const [form, update] = useDialogForm(
+    () => ({
+      proveedorId: amp?.supplierId ?? "",
+      nombre: amp?.name ?? "",
+      nombreTouched: !!amp,
+      contenido: amp?.contentPerPackage != null ? String(amp.contentPerPackage) : "",
+      unidadContenidoId: amp?.contentUnitId ?? "",
+      concentracion: amp?.concentration != null ? String(amp.concentration) : "",
+      unidadConcentracionId: amp?.concentrationUnitId ?? "",
+      marcaId: amp?.brandId ?? "",
+      fabricanteId: amp?.manufacturerId ?? "",
+      sku: amp?.sku ?? "",
+      barcode: amp?.barcode ?? "",
+      advanced: false,
+    }),
+    open,
+    amp?.id ?? `new:${productoId}`,
+  );
+  const {
+    proveedorId,
+    nombre,
+    nombreTouched,
+    contenido,
+    unidadContenidoId,
+    concentracion,
+    unidadConcentracionId,
+    marcaId,
+    fabricanteId,
+    sku,
+    barcode,
+    advanced,
+  } = form;
 
-  // Rehidrata el form cuando cambia el AMP editado (o al abrir para crear).
-  const [prevKey, setPrevKey] = React.useState<string | null>(null);
-  const key = open ? (amp?.id ?? `new:${productoId}`) : null;
-  if (key !== prevKey) {
-    setPrevKey(key);
-    setProveedorId(amp?.supplierId ?? "");
-    setNombre(amp?.name ?? "");
-    setNombreTouched(!!amp);
-    setContenido(amp?.contentPerPackage != null ? String(amp.contentPerPackage) : "");
-    setUnidadContenidoId(amp?.contentUnitId ?? "");
-    setConcentracion(amp?.concentration != null ? String(amp.concentration) : "");
-    setUnidadConcentracionId(amp?.concentrationUnitId ?? "");
-    setMarcaId(amp?.brandId ?? "");
-    setFabricanteId(amp?.manufacturerId ?? "");
-    setSku(amp?.sku ?? "");
-    setBarcode(amp?.barcode ?? "");
-    setAdvanced(false);
-  }
-
-  const activos = proveedores.filter((p) => p.active);
+  // Active suppliers, plus the AMP's own one if it was deactivated: the current pick must stay visible.
+  const opciones = proveedores.filter((p) => p.active || p.id === proveedorId);
   const unidadNombre = (id: string) => unidades.find((u) => u.id === id)?.name ?? "";
 
   // Autogenera el nombre "{producto} — {cantidad} {unidad}" mientras no se edite a mano.
@@ -107,12 +105,13 @@ export function AmpEditorSheet({
       : productoNombre;
   const effectiveNombre = nombreTouched ? nombre : autoNombre;
 
-  const canSubmit = !!proveedorId && effectiveNombre.trim().length > 0 && !submitting;
+  const missing = missingFields([
+    [t("field.proveedor"), !!proveedorId],
+    [t("field.nombre"), effectiveNombre.trim().length > 0],
+  ]);
 
-  async function onSubmit() {
-    if (!canSubmit) return;
-    setSubmitting(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
       const num = (s: string) => (s.trim() ? Number(s) : undefined);
       const id = (s: string) => (s && s !== NONE ? s : undefined);
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
@@ -136,55 +135,109 @@ export function AmpEditorSheet({
           ...body,
         } as CreatePresentacionProveedorPayload);
       }
-      toast.success(isEdit ? t("updated") : t("created"));
-      onOpenChange(false);
-      onSaved();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  }
+    },
+    {
+      successMessage: isEdit ? t("updated") : t("created"),
+      onSuccess: () => {
+        onOpenChange(false);
+        onSaved();
+      },
+      onError: (err) => {
+        toast.error(apiErrorMessage(err));
+        return true;
+      },
+    },
+  );
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col overflow-y-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>{isEdit ? t("editTitle") : t("newTitle")}</SheetTitle>
-          <SheetDescription>{productoNombre}</SheetDescription>
-        </SheetHeader>
+    <FormSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      size="sm"
+      title={isEdit ? t("editTitle") : t("newTitle")}
+      description={productoNombre}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+    >
+      <Field label={t("field.proveedor")} htmlFor="amp-proveedor" required>
+        <Select value={proveedorId} onValueChange={(v) => update({ proveedorId: v })}>
+          <SelectTrigger id="amp-proveedor" className="w-full">
+            <SelectValue placeholder={t("field.selectProveedor")} />
+          </SelectTrigger>
+          <SelectContent>
+            {opciones.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.active ? p.name : `${p.name} (${tc("inactive")})`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
 
-        <div className="grid gap-4 px-4">
-          <Field label={t("field.proveedor")} required>
-            <Select value={proveedorId} onValueChange={setProveedorId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={t("field.selectProveedor")} />
-              </SelectTrigger>
-              <SelectContent>
-                {activos.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.contenido")} htmlFor="amp-contenido">
+          <Input
+            id="amp-contenido"
+            inputMode="decimal"
+            value={contenido}
+            onChange={(e) => update({ contenido: e.target.value })}
+            placeholder="300"
+          />
+        </Field>
+        <Field label={t("field.unidad")} htmlFor="amp-unidad">
+          <Select
+            value={unidadContenidoId || NONE}
+            onValueChange={(v) => update({ unidadContenidoId: v === NONE ? "" : v })}
+          >
+            <SelectTrigger id="amp-unidad" className="w-full">
+              <SelectValue placeholder={t("field.none")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>{t("field.none")}</SelectItem>
+              {unidades.map((u) => (
+                <SelectItem key={u.id} value={u.id}>
+                  {u.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </div>
 
+      <Field label={t("field.nombre")} htmlFor="amp-nombre" required>
+        <Input
+          id="amp-nombre"
+          value={effectiveNombre}
+          onChange={(e) => update({ nombreTouched: true, nombre: e.target.value })}
+        />
+      </Field>
+
+      <button
+        type="button"
+        onClick={() => update((s) => ({ ...s, advanced: !s.advanced }))}
+        className="text-left text-xs font-medium text-primary hover:underline"
+      >
+        {advanced ? t("hideAdvanced") : t("showAdvanced")}
+      </button>
+
+      {advanced && (
+        <div className="grid gap-4 rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <div className="grid grid-cols-2 gap-3">
-            <Field label={t("field.contenido")}>
+            <Field label={t("field.concentracion")} htmlFor="amp-concentracion">
               <Input
+                id="amp-concentracion"
                 inputMode="decimal"
-                value={contenido}
-                onChange={(e) => setContenido(e.target.value)}
-                placeholder="300"
+                value={concentracion}
+                onChange={(e) => update({ concentracion: e.target.value })}
               />
             </Field>
-            <Field label={t("field.unidad")}>
+            <Field label={t("field.unidadConc")} htmlFor="amp-unidad-conc">
               <Select
-                value={unidadContenidoId || NONE}
-                onValueChange={(v) => setUnidadContenidoId(v === NONE ? "" : v)}
+                value={unidadConcentracionId || NONE}
+                onValueChange={(v) => update({ unidadConcentracionId: v === NONE ? "" : v })}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="amp-unidad-conc" className="w-full">
                   <SelectValue placeholder={t("field.none")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -198,113 +251,36 @@ export function AmpEditorSheet({
               </Select>
             </Field>
           </div>
-
-          <Field label={t("field.nombre")}>
-            <Input
-              value={effectiveNombre}
-              onChange={(e) => {
-                setNombreTouched(true);
-                setNombre(e.target.value);
-              }}
-            />
-          </Field>
-
-          <button
-            type="button"
-            onClick={() => setAdvanced((a) => !a)}
-            className="text-left text-xs font-medium text-primary hover:underline"
-          >
-            {advanced ? t("hideAdvanced") : t("showAdvanced")}
-          </button>
-
-          {advanced && (
-            <div className="grid gap-4 rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-              <div className="grid grid-cols-2 gap-3">
-                <Field label={t("field.concentracion")}>
-                  <Input
-                    inputMode="decimal"
-                    value={concentracion}
-                    onChange={(e) => setConcentracion(e.target.value)}
-                  />
-                </Field>
-                <Field label={t("field.unidadConc")}>
-                  <Select
-                    value={unidadConcentracionId || NONE}
-                    onValueChange={(v) => setUnidadConcentracionId(v === NONE ? "" : v)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("field.none")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NONE}>{t("field.none")}</SelectItem>
-                      {unidades.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label={t("field.marca")}>
-                  <ClasSelect value={marcaId} onChange={setMarcaId} options={marcas} noneLabel={t("field.none")} />
-                </Field>
-                <Field label={t("field.fabricante")}>
-                  <ClasSelect value={fabricanteId} onChange={setFabricanteId} options={fabricantes} noneLabel={t("field.none")} />
-                </Field>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label={t("field.sku")}>
-                  <Input value={sku} onChange={(e) => setSku(e.target.value)} />
-                </Field>
-                <Field label={t("field.barcode")}>
-                  <Input value={barcode} onChange={(e) => setBarcode(e.target.value)} />
-                </Field>
-              </div>
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t("field.marca")} htmlFor="amp-marca">
+              <ClasSelect id="amp-marca" value={marcaId} onChange={(v) => update({ marcaId: v })} options={marcas} noneLabel={t("field.none")} />
+            </Field>
+            <Field label={t("field.fabricante")} htmlFor="amp-fabricante">
+              <ClasSelect id="amp-fabricante" value={fabricanteId} onChange={(v) => update({ fabricanteId: v })} options={fabricantes} noneLabel={t("field.none")} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t("field.sku")} htmlFor="amp-sku">
+              <Input id="amp-sku" value={sku} onChange={(e) => update({ sku: e.target.value })} />
+            </Field>
+            <Field label={t("field.barcode")} htmlFor="amp-barcode">
+              <Input id="amp-barcode" value={barcode} onChange={(e) => update({ barcode: e.target.value })} />
+            </Field>
+          </div>
         </div>
-
-        <SheetFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={!canSubmit}>
-            {submitting ? tc("saving") : tc("save")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">
-        {label}
-        {required && <span className="ml-0.5 text-destructive">*</span>}
-      </span>
-      {children}
-    </label>
+      )}
+    </FormSheet>
   );
 }
 
 function ClasSelect({
+  id,
   value,
   onChange,
   options,
   noneLabel,
 }: {
+  id?: string;
   value: string;
   onChange: (v: string) => void;
   options: Clasificacion[];
@@ -312,7 +288,7 @@ function ClasSelect({
 }) {
   return (
     <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
-      <SelectTrigger className="w-full">
+      <SelectTrigger id={id} className="w-full">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

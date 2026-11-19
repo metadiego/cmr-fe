@@ -22,10 +22,13 @@ export function initialAgendaCenter(opts: {
   activeCenter: string | null;
   /** The centers this profile is assigned to. */
   centers: string[];
+  /** The center the link asked for (`?centro=`, the month calendar's clinic): wins when assigned. */
+  requested?: string | null;
 }): string | null {
-  const { canSeeAllCenters, saved, activeCenter, centers } = opts;
+  const { canSeeAllCenters, saved, activeCenter, centers, requested = null } = opts;
   const assigned = (id: string | null): string | null =>
     id && centers.includes(id) ? id : null;
+  if (assigned(requested)) return requested;
 
   if (canSeeAllCenters) {
     return saved === ALL_CENTERS ? ALL_CENTERS : (assigned(saved) ?? ALL_CENTERS);

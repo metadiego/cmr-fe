@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { getGruposFacturacion, type GrupoFacturacion } from "@/lib/api/servicios";
@@ -13,13 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Field } from "@/components/kit/field";
 
-// Field/Toggle/GrupoSelect: piezas genéricas del formulario de servicio, extraídas de
-// servicios-admin.tsx (que vive en su ceiling de DEBT) para hacerle lugar a un campo nuevo sin
-// subir ese número. Sin lógica propia del dominio — puro layout de formulario.
+// Toggle/GrupoSelect/…: generic pieces of the service form, moved out of servicios-admin.tsx (which
+// lives at its DEBT ceiling). No domain logic — form layout only. Labels use the kit Field; every
+// control takes the `id` its Field points at.
 
 // Selector de grupo de facturación (catálogo del BE, data-driven). "" = sin grupo.
-export function GrupoSelect({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+export function GrupoSelect({ id, value, onChange }: { id?: string; value: string; onChange: (id: string) => void }) {
   const t = useTranslations("servicios");
   const tRoot = useTranslations();
   const { state } = useResource<GrupoFacturacion[]>(() => getGruposFacturacion(), []);
@@ -27,7 +27,7 @@ export function GrupoSelect({ value, onChange }: { value: string; onChange: (id:
   const NONE = "__none__";
   return (
     <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
-      <SelectTrigger className="w-full"><SelectValue placeholder={t("field.grupoNone")} /></SelectTrigger>
+      <SelectTrigger id={id} className="w-full"><SelectValue placeholder={t("field.grupoNone")} /></SelectTrigger>
       <SelectContent>
         <SelectItem value={NONE}>{t("field.grupoNone")}</SelectItem>
         {grupos.map((g) => (
@@ -38,13 +38,29 @@ export function GrupoSelect({ value, onChange }: { value: string; onChange: (id:
   );
 }
 
-export function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+// Cómo numerar la visita cuando el servicio consume más de un paquete a la vez (BE #598, p. ej.
+// láser: MLS + HILT juntos). "row" = cada paquete cuenta su propio renglón (default histórico);
+// "most_delivered" = el paquete con más entregas numera la visita.
+export function PrimaryPackageRuleSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id?: string;
+  value: "row" | "most_delivered";
+  onChange: (v: "row" | "most_delivered") => void;
+}) {
+  const t = useTranslations("servicios");
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-      {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
-    </label>
+    <Field label={t("field.primaryPackageRule")} htmlFor={id} hint={t("field.primaryPackageRuleHint")}>
+      <Select value={value} onValueChange={(v) => onChange(v as "row" | "most_delivered")}>
+        <SelectTrigger id={id} className="w-full"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="row">{t("primaryPackageRuleRow")}</SelectItem>
+          <SelectItem value="most_delivered">{t("primaryPackageRuleMostDelivered")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </Field>
   );
 }
 
@@ -67,5 +83,33 @@ export function Toggle({
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
     </div>
+  );
+}
+
+// The service colour (calendar / board accent).
+export function ColorField({ id, label, value, onChange }: { id?: string; label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <Field label={label} htmlFor={id}>
+      <input id={id} type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-9 w-16 cursor-pointer rounded border bg-transparent" />
+    </Field>
+  );
+}
+
+// Minutes between the start times the service offers and accepts (BE #525, `startStepMinutes`): 60 =
+// on the hour only, like the call-center sheet for Láser / IV / Vit C. Empty = every slot. It does not
+// change how long the session takes.
+export function StartStepField({ id, value, onChange }: { id?: string; value: string; onChange: (v: string) => void }) {
+  const t = useTranslations("servicios");
+  return (
+    <Field label={t("field.startStep")} htmlFor={id} hint={t("field.startStepHint")}>
+      <input
+        id={id}
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ""))}
+        placeholder={t("field.startStepAny")}
+        className="h-9 w-full rounded-md border bg-transparent px-3 text-sm"
+      />
+    </Field>
   );
 }

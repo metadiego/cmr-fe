@@ -24,11 +24,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Field } from "@/components/kit/form-dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { RequiredLegend } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 import { DataTable } from "@/components/ui/data-table";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/ui/page";
 import { TableRowsSkeleton, type CellShape } from "@/components/kit/skeletons";
 
@@ -120,7 +122,7 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
           {state.data.map((r) => (
             <TableRow key={r.id} className={r.active ? "" : "opacity-50"}>
               <TableCell className="font-medium">{r.name}</TableCell>
-              <TableCell className="text-muted-foreground">{r.kind}</TableCell>
+              <TableCell className="text-muted-foreground">{t.has(`kind.${r.kind}`) ? t(`kind.${r.kind}`) : r.kind}</TableCell>
               <TableCell className="text-right tabular-nums">{r.capacity}</TableCell>
               <TableCell>{concLabel(r.concurrency)}</TableCell>
               <TableCell className="text-muted-foreground">
@@ -219,20 +221,18 @@ function ResourcesTableSkeleton({ puedeEscribir }: { puedeEscribir: boolean }) {
 type Form = {
   slug: string; name: string; labelKey: string; kind: string;
   capacity: string; concurrency: ResourceConcurrency; maxMinutesPerPatient: string;
-  staffRole: string; staffId: string; blocksStaffAgenda: boolean;
+  staffRole: string; staffId: string; blocksStaffAgenda: boolean; trainWeight: string;
 };
 const EMPTY: Form = {
   slug: "", name: "", labelKey: "", kind: "room",
   capacity: "1", concurrency: "sequential", maxMinutesPerPatient: "",
-  staffRole: "", staffId: "", blocksStaffAgenda: false,
+  staffRole: "", staffId: "", blocksStaffAgenda: false, trainWeight: "0",
 };
 
 function ResourceDialog({ resource, centroId, onClose, onSaved }: {
   resource: Resource | null; centroId?: string; onClose: () => void; onSaved: () => void;
 }) {
   const t = useTranslations("resources");
-  const tc = useTranslations("common");
-  const tRoot = useTranslations();
   const [form, setForm] = React.useState<Form>(() =>
     resource
       ? {
@@ -240,109 +240,134 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
           capacity: String(resource.capacity), concurrency: resource.concurrency,
           maxMinutesPerPatient: resource.maxMinutesPerPatient != null ? String(resource.maxMinutesPerPatient) : "",
           staffRole: resource.staffRole ?? "", staffId: resource.staffId ?? "", blocksStaffAgenda: resource.blocksStaffAgenda,
+          trainWeight: String(resource.trainWeight ?? 0),
         }
       : EMPTY,
   );
-  const [busy, setBusy] = React.useState(false);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
-  const puedeGuardar = form.slug.trim() && form.name.trim() && Number(form.capacity) > 0;
+  // A `staff` resource (one role's pool, BE PR #518) always has capacity 1 and needs `staffRole`: it is
+  // the role the pool represents (e.g. "enfermera"); without it the engine does not know which shifts to read.
+  const isStaff = form.kind === "staff";
+  const missing = missingFields([
+    [t("fName"), !!form.name.trim()],
+    [t("fSlug"), !!form.slug.trim()],
+    [t("fCapacity"), isStaff || !!form.capacity.trim()],
+    [t("fStaffRole"), !isStaff || !!form.staffRole.trim()],
+  ]);
+  const capacityInvalid = !isStaff && !!form.capacity.trim() && !(Number(form.capacity) > 0);
 
-  async function guardar() {
-    if (!puedeGuardar || busy) return;
-    setBusy(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
       const payload = {
         slug: form.slug.trim(), name: form.name.trim(), labelKey: form.labelKey.trim() || null,
-        kind: form.kind, capacity: Number(form.capacity), concurrency: form.concurrency,
+        kind: form.kind, capacity: isStaff ? 1 : Number(form.capacity), concurrency: form.concurrency,
         maxMinutesPerPatient: form.maxMinutesPerPatient.trim() ? Number(form.maxMinutesPerPatient) : null,
         staffRole: form.staffRole.trim() || null,
         staffId: form.staffId.trim() || null, blocksStaffAgenda: form.blocksStaffAgenda,
+        trainWeight: form.trainWeight.trim() ? Number(form.trainWeight) : 0,
       };
       if (resource) await updateResource(resource.id, payload, centroId);
       else await createResource(payload, centroId);
-      toast.success(resource ? t("updated") : t("created"));
-      onSaved();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    { successMessage: resource ? t("updated") : t("created"), onSuccess: () => onSaved() },
+  );
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{resource ? t("editTitle") : t("createTitle")}</DialogTitle>
-          <DialogDescription>{t("createHelp")}</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("fName")}><Input value={form.name} onChange={(e) => set("name", e.target.value)} /></Field>
-          <Field label={t("fSlug")}><Input value={form.slug} onChange={(e) => set("slug", e.target.value)} className="font-mono" placeholder="laser_rooms" /></Field>
-          <Field label={t("fKind")}>
-            <Select
-              value={form.kind}
-              onValueChange={(v) =>
-                setForm((f) =>
-                  // Leaving "person": staffId/blocksStaffAgenda are meaningless for a room/chair/machine
-                  // and must not ride along silently — otherwise a room could save with a real staffId
-                  // and blocksStaffAgenda:true from before the kind change, telling the scheduler to
-                  // block an unrelated person's agenda for a room booking. Found by adversarial review
-                  // before merging (2026-09-27) — impossible before this PR (staffId was always null).
-                  v === "person" ? { ...f, kind: v } : { ...f, kind: v, staffId: "", blocksStaffAgenda: false },
-                )
-              }
-            >
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="lg"
+      title={resource ? t("editTitle") : t("createTitle")}
+      description={t("createHelp")}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
+      blocked={capacityInvalid}
+      reason={capacityInvalid ? t("capacityInvalid") : null}
+    >
+      <RequiredLegend />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={t("fName")} htmlFor="resource-name" required><Input id="resource-name" value={form.name} onChange={(e) => set("name", e.target.value)} /></Field>
+        <Field label={t("fSlug")} htmlFor="resource-slug" required><Input id="resource-slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} className="font-mono" placeholder="laser_rooms" /></Field>
+        <Field label={t("fKind")} htmlFor="resource-kind">
+          <Select
+            value={form.kind}
+            onValueChange={(v) =>
+              setForm((f) =>
+                // Leaving "person": staffId/blocksStaffAgenda are meaningless for a room/chair/machine
+                // and must not ride along silently — otherwise a room could save with a real staffId
+                // and blocksStaffAgenda:true from before the kind change, telling the scheduler to
+                // block an unrelated person's agenda for a room booking. Found by adversarial review
+                // before merging (2026-09-27) — impossible before this PR (staffId was always null).
+                v === "person" ? { ...f, kind: v } : { ...f, kind: v, staffId: "", blocksStaffAgenda: false },
+              )
+            }
+          >
+            <SelectTrigger id="resource-kind" className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="room">{t("kind.room")}</SelectItem>
+              <SelectItem value="chair">{t("kind.chair")}</SelectItem>
+              <SelectItem value="person">{t("kind.person")}</SelectItem>
+              <SelectItem value="machine">{t("kind.machine")}</SelectItem>
+              <SelectItem value="staff">{t("kind.staff")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <div className="grid gap-1.5">
+          <Field label={t("fCapacity")} htmlFor="resource-capacity" required={!isStaff}>
+            <Input
+              id="resource-capacity"
+              type="number"
+              min={1}
+              value={form.kind === "staff" ? "1" : form.capacity}
+              onChange={(e) => set("capacity", e.target.value)}
+              disabled={form.kind === "staff"}
+            />
+          </Field>
+          {form.kind === "staff" && <p className="text-xs text-muted-foreground">{t("kind.staffCapacityHelp")}</p>}
+        </div>
+        <div className="sm:col-span-2 grid gap-1.5">
+          <Field label={t("fConcurrency")}>
+            <Select value={form.concurrency} onValueChange={(v) => set("concurrency", v as ResourceConcurrency)}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="room">{t("kind.room")}</SelectItem>
-                <SelectItem value="chair">{t("kind.chair")}</SelectItem>
-                <SelectItem value="person">{t("kind.person")}</SelectItem>
+                <SelectItem value="sequential">{t("concurrency.sequential")}</SelectItem>
+                <SelectItem value="simultaneous">{t("concurrency.simultaneous")}</SelectItem>
               </SelectContent>
             </Select>
           </Field>
-          <Field label={t("fCapacity")}><Input type="number" min={1} value={form.capacity} onChange={(e) => set("capacity", e.target.value)} /></Field>
-          <div className="sm:col-span-2 grid gap-1.5">
-            <Field label={t("fConcurrency")}>
-              <Select value={form.concurrency} onValueChange={(v) => set("concurrency", v as ResourceConcurrency)}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sequential">{t("concurrency.sequential")}</SelectItem>
-                  <SelectItem value="simultaneous">{t("concurrency.simultaneous")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-            {/* La regla que va al revés: hay que explicarla en pantalla. */}
-            <p className="text-xs text-muted-foreground">{t(`concurrency.help.${form.concurrency}`)}</p>
-          </div>
-          <Field label={t("fMaxMin")}><Input type="number" min={0} value={form.maxMinutesPerPatient} onChange={(e) => set("maxMinutesPerPatient", e.target.value)} placeholder={t("fMaxMinPlaceholder")} /></Field>
-          <Field label={t("fStaffRole")}><Input value={form.staffRole} onChange={(e) => set("staffRole", e.target.value)} placeholder="tecnico" /></Field>
-          {/* Solo cuando el recurso ES una persona (kind: person, p. ej. la doctora de EMPOWER): antes no
-              había forma de elegirla, así que `staffId` siempre se guardaba null y el bloqueo de agenda
-              (staffBlocks) nunca se activaba. Handoff HANDOFF-FE-staff-picker-recursos-persona. */}
-          {form.kind === "person" && (
-            <Field label={t("fStaffId")}>
-              <StaffSelectField value={form.staffId} onChange={(v) => set("staffId", v)} centroId={centroId} />
-            </Field>
-          )}
+          {/* La regla que va al revés: hay que explicarla en pantalla. */}
+          <p className="text-xs text-muted-foreground">{t(`concurrency.help.${form.concurrency}`)}</p>
         </div>
-        {/* Solo tiene sentido para un recurso que ES una persona (la doctora de EMPOWER) — antes se
-            mostraba siempre, para cualquier kind, aunque staffId nunca se pudiera elegir. */}
+        <Field label={t("fMaxMin")}><Input type="number" min={0} value={form.maxMinutesPerPatient} onChange={(e) => set("maxMinutesPerPatient", e.target.value)} placeholder={t("fMaxMinPlaceholder")} /></Field>
+        <Field label={t("fStaffRole")} htmlFor="resource-staff-role" required={isStaff}><Input id="resource-staff-role" value={form.staffRole} onChange={(e) => set("staffRole", e.target.value)} placeholder="tecnico" /></Field>
+        <div className="sm:col-span-2 grid gap-1.5">
+          <Field label={t("fTrainWeight")}>
+            <Input type="number" min={0} value={form.trainWeight} onChange={(e) => set("trainWeight", e.target.value)} />
+          </Field>
+          <p className="text-xs text-muted-foreground">{t("fTrainWeightHelp")}</p>
+        </div>
+        {/* Solo cuando el recurso ES una persona (kind: person, p. ej. la doctora de EMPOWER): antes no
+            había forma de elegirla, así que `staffId` siempre se guardaba null y el bloqueo de agenda
+            (staffBlocks) nunca se activaba. Handoff HANDOFF-FE-staff-picker-recursos-persona. */}
         {form.kind === "person" && (
-          <div className="mt-2 flex items-start justify-between gap-4 rounded-md bg-muted/30 p-3">
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">{t("fBlocksAgenda")}</p>
-              <p className="text-xs text-muted-foreground">{t("fBlocksAgendaHelp")}</p>
-            </div>
-            <Switch checked={form.blocksStaffAgenda} onCheckedChange={(v) => set("blocksStaffAgenda", v)} />
-          </div>
+          <Field label={t("fStaffId")}>
+            <StaffSelectField value={form.staffId} onChange={(v) => set("staffId", v)} centroId={centroId} />
+          </Field>
         )}
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={busy}>{tc("cancel")}</Button>
-          <Button onClick={guardar} disabled={!puedeGuardar || busy}>{busy ? tc("saving") : tc("save")}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </div>
+      {/* Solo tiene sentido para un recurso que ES una persona (la doctora de EMPOWER) — antes se
+          mostraba siempre, para cualquier kind, aunque staffId nunca se pudiera elegir. */}
+      {form.kind === "person" && (
+        <div className="mt-2 flex items-start justify-between gap-4 rounded-md bg-muted/30 p-3">
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium">{t("fBlocksAgenda")}</p>
+            <p className="text-xs text-muted-foreground">{t("fBlocksAgendaHelp")}</p>
+          </div>
+          <Switch checked={form.blocksStaffAgenda} onCheckedChange={(v) => set("blocksStaffAgenda", v)} />
+        </div>
+      )}
+    </FormDialog>
   );
 }
 

@@ -74,6 +74,10 @@ export interface BridgeConfig {
   workStartTime: string;
   workEndTime: string;
   externalClinicCode: "BAYAMON" | "CAGUAS" | null;
+  // Qué hace agendar si la hoja no responde, CON la reserva encendida: 'block' = no se agenda (503
+  // SHEET_UNAVAILABLE); 'allow' = se agenda aquí con aviso (meta.advertencias: sheet.unavailable) y
+  // sin asiento allá. Por defecto del BE 'block'. Handoff .personal/handoff-hoja-caida-avisar-o-bloquear.md.
+  sheetDownPolicy: "block" | "allow";
 }
 
 const DEFAULT_CONFIG: BridgeConfig = {
@@ -83,6 +87,7 @@ const DEFAULT_CONFIG: BridgeConfig = {
   workStartTime: "",
   workEndTime: "",
   externalClinicCode: null,
+  sheetDownPolicy: "block",
 };
 
 // GET responds with `data` as an ARRAY (verified live — the endpoint shares the same

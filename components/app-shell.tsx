@@ -1,5 +1,6 @@
 "use client";
 
+import { ConfirmHost } from "@/components/kit/confirm-host";
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,8 +10,10 @@ import { isActive } from "@/lib/nav";
 import { routeForClave } from "@/lib/nav/manifest";
 import { screenPathOf } from "@/lib/nav/tab-routes";
 import { useMenu } from "@/hooks/use-menu";
-import { useMe } from "@/hooks/use-me";
+import { isAdmin, useMe } from "@/hooks/use-me";
 import { MeProvider } from "@/components/me-provider";
+import { ConfirmActionHost } from "@/components/confirm-action-host";
+import { PastDayConfirmHost } from "@/components/caja/past-day-confirm-host";
 import { MenuProvider } from "@/components/menu-provider";
 import { TooltipProvider } from "@/components/ui/tooltip-radix";
 import {
@@ -63,6 +66,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <MeProvider>
       <MenuProvider>
         <ShellChrome>{children}</ShellChrome>
+        <ConfirmActionHost />
+        <ConfirmHost />
+        <PastDayConfirmHost />
       </MenuProvider>
     </MeProvider>
   );
@@ -78,7 +84,7 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
   // perfil con permisos (ni es master). Antes se veía una pantalla muda; ahora se avisa para diagnosticar
   // rápido (p. ej. cuenta sin perfil enlazado). Handoff atencion-usuarios-sin-perfil-rbac-handoff-be.
   const sinPerfil =
-    me.kind === "ok" && !me.me.isMaster && !me.me.profileId && (me.me.permissions?.length ?? 0) === 0;
+    me.kind === "ok" && !isAdmin(me.me) && !me.me.profileId && (me.me.permissions?.length ?? 0) === 0;
 
   // Título de sección: el ítem de menú activo más específico (path más largo que
   // matchea la ruta). Deriva del mismo menú del BE; sin match, se omite.

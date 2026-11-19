@@ -13,6 +13,8 @@ const SECTIONS: { key: string; href: string }[] = [
   { key: "existencias", href: "/inventory/stock" },
   { key: "viales", href: "/inventory/vials" },
   { key: "liveStock", href: "/inventory/live-stock" },
+  { key: "adjustments", href: "/inventory/adjustments" },
+  { key: "dailyKardex", href: "/inventory/kardex" },
   { key: "productos", href: "/inventory/products" },
   { key: "recepcion", href: "/inventory/receive-purchase" },
   { key: "planificacion", href: "/inventory/planning" },

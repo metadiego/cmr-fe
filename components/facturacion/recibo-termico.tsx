@@ -8,10 +8,12 @@ import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 import {
   hasMultipliers,
   multipliersText,
+  quantityBreakdownText,
   receiptDateParts,
   receiptFooter,
   receiptMoney as money,
   receiptTitleKey,
+  type QuantityBreakdown,
 } from "@/lib/factura/receipt-format";
 
 function Dashed() {
@@ -48,8 +50,17 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
   // Label de un multiplicador (fac.col.<clave>), data-driven; fallback a la clave.
   const multLabel = (k: string) => (tRoot.has(`fac.col.${k}`) ? tRoot(`fac.col.${k}`) : k);
   const multTexto = (m: Record<string, number>) => multipliersText(m, multLabel);
-  // Terapias con multiplicadores → leyenda al pie (una por línea).
-  const conMultiplicadores = recibo.items.filter(hasMultipliers);
+  // Leyenda de una línea/componente: si el BE manda quantityBreakdown (grupo en modo "breakdown",
+  // cmr-be #619) esa sustituye a la de multiplicadores — nunca las dos juntas. labelKey ya viene
+  // completo (fac.breakdown.sessions, fac.col.areas…), así que se resuelve con tRoot directo.
+  const legend = (it: { multiplicadores?: Record<string, number>; quantityBreakdown?: QuantityBreakdown | null }) =>
+    it.quantityBreakdown
+      ? quantityBreakdownText(it.quantityBreakdown, tRoot)
+      : hasMultipliers(it)
+        ? multTexto(it.multiplicadores!)
+        : null;
+  // Terapias con multiplicadores o breakdown → leyenda al pie (una por línea).
+  const conMultiplicadores = recibo.items.filter((it) => hasMultipliers(it) || !!it.quantityBreakdown);
   const emp = recibo.empresa;
 
   return (
@@ -100,6 +111,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         </span>
         <span className="font-normal">{fecha}</span>
       </div>
+      {recibo.facturaOrigen && <div>{t("originInvoice", { number: recibo.facturaOrigen })}</div>}
 
       <Dashed />
 
@@ -123,7 +135,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           <div className="flex justify-between gap-2">
             <span>
               {it.cantidad}
-              {hasMultipliers(it) ? ` (${multTexto(it.multiplicadores!)})` : ""}
+              {legend(it) ? ` (${legend(it)})` : ""}
               {" "}x {money(it.precioUnitario)}
               {it.descuento > 0 ? ` − ${money(it.descuento)}` : ""}
             </span>
@@ -149,9 +161,14 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
               {it.componentes.map((c, j) => (
                 <div key={j}>
                   <div className="flex justify-between gap-2">
-                    <span>{c.cantidad} · {c.descripcion}</span>
+                    {/* El número suelto se sustituye por el desglose cuando el grupo del componente
+                        está en modo "breakdown" (cmr-be #619) — "4 Sesiones × 1 Área = 4 Terapias". */}
+                    <span>{c.quantityBreakdown ? quantityBreakdownText(c.quantityBreakdown, tRoot) : c.cantidad} · {c.descripcion}</span>
                     {c.precio != null && <span className="shrink-0 tabular-nums">{money(c.precio)}</span>}
                   </div>
+                  {!c.quantityBreakdown && c.multiplicadores && Object.keys(c.multiplicadores).length > 0 && (
+                    <div className="pl-3 text-[0.9em] italic opacity-80">({multTexto(c.multiplicadores)})</div>
+                  )}
                   {c.nota && <div className="pl-3 text-[0.9em] italic opacity-80">{c.nota}</div>}
                 </div>
               ))}
@@ -188,6 +205,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       {recibo.montoAbonado > 0 && (
         <Line label={t("paid")} value={money(recibo.montoAbonado)} />
       )}
+      {(recibo.reembolsado ?? 0) !== 0 && <Line label={t("refunded")} value={money(recibo.reembolsado ?? 0)} />}
       {recibo.saldo > 0 && (
         <Line label={t("balance")} value={money(recibo.saldo)} bold />
       )}
@@ -199,7 +217,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           {recibo.pagos.map((p, i) => (
             <Line
               key={i}
-              label={formaPagoLabel(tRoot, p.clave, p.formaPagoNombre) + (p.referencia ? ` ${p.referencia}` : "")}
+              label={(p.reembolso ? `${t("refund")} ` : "") + formaPagoLabel(tRoot, p.clave, p.formaPagoNombre) + (p.referencia ? ` ${p.referencia}` : "")}
               value={money(p.monto)}
             />
           ))}
@@ -215,13 +233,13 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         </>
       )}
 
-      {/* Leyenda de terapias con multiplicadores (láser: días × áreas) — una por terapia, data-driven */}
+      {/* Leyenda de terapias con multiplicadores o breakdown (láser: días × áreas) — una por terapia */}
       {conMultiplicadores.length > 0 && (
         <>
           <Dashed />
           <div className="space-y-0.5 text-[7.5pt]">
             {conMultiplicadores.map((it, i) => (
-              <div key={i}>* {it.descripcion} — {multTexto(it.multiplicadores!)}</div>
+              <div key={i}>* {it.descripcion} — {legend(it)}</div>
             ))}
           </div>
         </>

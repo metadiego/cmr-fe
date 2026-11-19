@@ -20,6 +20,14 @@ export interface ApiMeta {
   // se pudo releer). El FE lo muestra en un toast y, si ok:false, devuelve la celda a `campos` (la verdad).
   // Handoff HANDOFF-toast-que-certifica-la-persistencia.
   persistencia?: Persistencia;
+  // Which centers a read covered (cmr-be clinic-read-scope). `filtered`: narrowed with `centerIds`.
+  clinicScope?: ClinicScope;
+}
+
+export interface ClinicScope {
+  all: boolean;
+  clinicIds: string[];
+  filtered: boolean;
 }
 
 export interface Persistencia {
@@ -49,6 +57,7 @@ export interface ApiEnvelope<T> {
 export interface Paginated<T> {
   items: T[];
   pagination: { total: number; page: number; limit: number };
+  clinicScope?: ClinicScope;
 }
 
 export interface ApiErrorDetail {

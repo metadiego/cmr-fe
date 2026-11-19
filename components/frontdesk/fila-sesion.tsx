@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
-  cancelarSesion,
   repararSesion,
   type PendienteEntrega,
   type FrontdeskColumna,
@@ -14,6 +13,7 @@ import {
 } from "@/lib/api/frontdesk";
 import type { Servicio } from "@/lib/api/servicios";
 import { fmtHora, POSTACCION_PROGRAMAR, STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
+import { requiredStateMet } from "@/lib/frontdesk/required-state";
 import { editarCelda, ejecutarAccion, type Opcion, type Transicion } from "@/lib/api/tablero";
 import { useCan } from "@/hooks/use-can";
 import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
@@ -33,6 +33,7 @@ import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useConfirm } from "@/components/kit/confirm-host";
 import {
   Select,
   SelectContent,
@@ -51,6 +52,7 @@ import { Tick02Icon, Notification03Icon, ShoppingCart01Icon } from "@hugeicons/c
 // pasos, el menú de acciones y los modales que solo ella usa (historial, compras, transferir
 // tratamiento). Handoff: HANDOFF-banderas-de-prioridad-del-paciente.md (celda "paciente" ahora
 // también deja ver/asignar/quitar banderas de prioridad, sin abrir la ficha).
+const SIN_ASIGNAR = "__none__"; // Radix no admite value="" — handoff vaciar-recurso-asignado.
 export function FilaSesion({
   fila,
   sesion,
@@ -102,16 +104,14 @@ export function FilaSesion({
   const [historialOpen, setHistorialOpen] = React.useState(false);
   const [comprasOpen, setComprasOpen] = React.useState(false);
   const [notificarCfg, setNotificarCfg] = React.useState<{ panel: string; seccion: string } | null>(null);
-  // Reports del servicio (HILT/MLS, o formatos genéricos): se listan PLANOS en el menú de Acciones,
-  // cada uno abre su documento imprimible. Handoff HANDOFF-formato-laser-hilt-mls (§3).
+  // Reports del servicio (HILT/MLS o formatos genéricos): listados PLANOS en Acciones, cada uno abre su documento imprimible. Handoff HANDOFF-formato-laser-hilt-mls (§3).
   const reportsAcc = React.useMemo(() => (parseAcciones(servicio?.formActions).reports ?? []), [servicio]);
   const [formatoReport, setFormatoReport] = React.useState<ReportAccion | null>(null);
   // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
   // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
   const [pendSelect, setPendSelect] = React.useState<Record<string, string>>({});
-  // Cartel CENTRADO (no bloqueante) cuando el usuario elige una dosis que el paciente NO compró teniendo
-  // dosis compradas pendientes. Guarda todo lo necesario para confirmar/revertir sin recalcular. El dueño
-  // lo pidió a la vista (no un toast abajo): que se dé cuenta cuando aún puede corregir. Handoff §1.
+  // Cartel CENTRADO (no bloqueante) cuando elige una dosis que el paciente NO compró con dosis compradas
+  // pendientes: guarda todo para confirmar/revertir sin recalcular. El dueño lo pidió a la vista, no un toast abajo. Handoff §1.
   const [dosisAviso, setDosisAviso] = React.useState<{
     clave: string;
     valor: string;
@@ -120,16 +120,16 @@ export function FilaSesion({
     eligiendo: string;
     comprado: { nombre: string; n: number }[];
   } | null>(null);
+  const confirm = useConfirm();
   // Verdad del flujo: el `estado` top-level que ahora manda el BE en cada fila (PR #195). Antes el FE lo
   // deducía de los sellos y pintaba ASISTIDO en filas que estaban en terapia; ya no se deduce.
   const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.status ?? "");
   const cancelada = estadoActual === "cancelada";
   const pacienteNombre = String(fila.paciente ?? fila.fd_paciente ?? fila.fac_paciente ?? "");
 
-  // Devuelve true SOLO si la acción tuvo éxito. Así quien encadena un postAccion (p. ej. abrir "Programar
-  // citas" tras Asistido) no lo dispara cuando la acción falló (sesión caducada, requerido faltante): antes
-  // el `.then` corría igual y parecía que había asistido sin haberlo hecho (QA-002). El error se avisa con
-  // un toast (mensaje del BE, i18n); si la sesión expiró, el cliente muestra el aviso y va al login.
+  // Devuelve true SOLO si la acción tuvo éxito, así quien encadena un postAccion (p. ej. abrir "Programar
+  // citas" tras Asistido) no lo dispara si falló (sesión caducada, requerido faltante) — antes `.then` corría
+  // igual y parecía asistido sin haberlo hecho (QA-002). El error se avisa con un toast; sesión expirada → login.
   async function run(fn: () => Promise<unknown>): Promise<boolean> {
     setBusy(true);
     try {
@@ -276,15 +276,14 @@ export function FilaSesion({
       const conSaldo = esDosis && compradas.length > 0;
       const shownOpt = ops.find((o) => o.value === shown);
       const label = shownOpt ? (esDosis ? etiquetaDosis(shownOpt) : shownOpt.label) : (raw || undefined);
-      // Gate data-driven: si la columna declara render.requiereEstado, el select se deshabilita hasta que
-      // la sesión alcanzó ese estado (p. ej. técnico bloqueado hasta 'presente'). Genérico, sin hardcode.
-      const reqEstado = (c.render as { requiereEstado?: string } | null)?.requiereEstado;
-      const estadoNoCumplido = !!reqEstado && !(sesion && STAMP_FIELD[reqEstado] && sesion[STAMP_FIELD[reqEstado]]);
+      const reqEstado = (c.render as { requiereEstado?: string } | null)?.requiereEstado; // data-driven gate (lib/frontdesk/required-state.ts)
+      const estadoNoCumplido = !requiredStateMet({ required: reqEstado, sessionStamp: reqEstado && STAMP_FIELD[reqEstado] ? sesion?.[STAMP_FIELD[reqEstado]] : null, rowState: estadoActual, rowStamp: reqEstado ? fila[reqEstado] : null });
       return (
         <Select
           value={shown}
           disabled={busy || cancelada || ops.length === 0 || estadoNoCumplido}
           onValueChange={(valor) => {
+            if (valor === SIN_ASIGNAR) { setPendSelect((p) => ({ ...p, [c.clave]: "" })); run(() => guardarCelda(c.clave, null, etiquetaCol(c))); return; }
             setPendSelect((p) => ({ ...p, [c.clave]: valor })); // reflejo instantáneo
             // Eligió una dosis que el paciente NO compró teniendo compradas pendientes → cartel CENTRADO,
             // no bloqueante (§1). Reflejamos la elección mientras decide y DIFERIMOS la escritura al confirmar.
@@ -323,6 +322,7 @@ export function FilaSesion({
             <SelectValue placeholder={ops.length ? t("elegir") : t("sinOpciones")}>{label}</SelectValue>
           </SelectTrigger>
           <SelectContent>
+            {(c.render as { clearable?: boolean } | null)?.clearable && <SelectItem value={SIN_ASIGNAR}>{t("sinAsignar")}</SelectItem>}
             {conSaldo ? (
               <>
                 {/* Las dosis que compró, primero, con su saldo. */}
@@ -354,8 +354,8 @@ export function FilaSesion({
     if (c.tipo === "medicion" && c.render) {
       return (
         <MedicionCell
-          col={c}
-          sesion={sesion}
+          col={c} sesion={sesion}
+          sessionId={sesion?.id} centroId={centro}
           disabled={busy || cancelada}
           onSave={(valor) => run(() => guardarCelda(c.clave, valor, etiquetaCol(c)))}
         />
@@ -492,7 +492,7 @@ export function FilaSesion({
     .map((tr) => ({
       clave: tr.slug,
       label: tr.labelKey && tRoot.has(tr.labelKey) ? tRoot(tr.labelKey) : (t.has(tr.slug) ? t(tr.slug) : tr.slug),
-      confirmar: tr.requiresConfirmation,
+      confirmar: tr.requiresConfirmation, from: tr.fromStatuses,
     }));
 
   // Campos requeridos por servicio (data-driven, servicio.formAcciones). Para un estado destino, los que
@@ -539,7 +539,6 @@ export function FilaSesion({
   const flujoCell = (
     <div className="flex items-start gap-0">
       {pasos.map((paso, i) => {
-        if (pasosOcultos?.has(paso.estado)) return null;
         const hecho = !!paso.stamp;
         const siguiente = i === nextIdx; // accionable ahora, según el estado del BE (nunca si cancelada)
         const faltan = siguiente ? faltantesPara(paso.estado) : [];
@@ -558,12 +557,12 @@ export function FilaSesion({
             }
           });
         };
-        const deshacer = () => {
+        const deshacer = async () => { // blocking confirm: a hasty click on a toast action once lost a real attendance (06-nov-2026)
           if (!puedeDeshacer || !reversa) return;
-          toast(t("deshacerPregunta", { paso: tRoot(paso.labelKey) }), {
-            action: { label: t("deshacer"), onClick: () => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: reversa }, centro)) },
-          });
+          if (await confirm({ title: t("deshacerPregunta", { paso: tRoot(paso.labelKey) }), description: t("deshacerAviso"), confirmLabel: t("deshacer") }))
+            run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: reversa }, centro));
         };
+        if (pasosOcultos?.has(paso.estado)) return hecho && puedeDeshacer ? <button key={paso.key} type="button" onClick={deshacer} className="mt-1 mr-2 shrink-0 self-start rounded-md border border-dashed px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground">{t("removeStep", { step: tRoot(paso.labelKey) })}</button> : null; // hidden per-row step (patient desk): still undoable, per service
         return (
           <React.Fragment key={paso.key}>
             {i > 0 && !pasos.slice(0, i).every((p) => pasosOcultos?.has(p.estado)) && <span className="mt-3 h-px w-4 shrink-0" style={{ backgroundColor: hecho && col ? col : "var(--border)" }} aria-hidden />}
@@ -624,7 +623,8 @@ export function FilaSesion({
           accionesMenu={accionesMenu}
           onAccion={(clave) => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: clave }, centro))}
           onProgramar={sesion?.patientId ? () => onProgramar({ pacienteId: sesion.patientId!, pacienteNombre, servicioId: servicio?.id }) : undefined}
-          onCancelar={(motivo) => run(() => cancelarSesion(fila.id, motivo, centro))}
+          day={{ sessionId: fila.id, status: estadoActual, patientId: sesion?.patientId, date: sesion?.date, centerId: centro }}
+          onDone={onChanged}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />
         {sesion?.patientId && (
@@ -662,7 +662,7 @@ export function FilaSesion({
             record={fila.fd_record != null ? String(fila.fd_record) : undefined}
             sesionId={fila.id} fecha={fecha}
             centro={centro}
-            onHistorial={() => setHistorialOpen(true)}
+            onHistorial={() => setHistorialOpen(true)} onApplied={onChanged}
           />
         )}
         {notificarCfg && sesion?.patientId && (

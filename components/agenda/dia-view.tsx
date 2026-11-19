@@ -214,7 +214,7 @@ export function DiaView({ fecha }: { fecha: string }) {
             <Can permiso="citas.create">
               <Button
                 size="sm"
-                onClick={() => setModal({ fecha, centroId: centro && centro !== ALL ? centro : (centros[0]?.id ?? undefined) })}
+                onClick={() => setModal({ fecha, centroId: centro && centro !== ALL ? centro : undefined })}
               >
                 <HugeiconsIcon icon={Add01Icon} className="size-4" />
                 {t("new")}

@@ -66,11 +66,13 @@ const ES: Record<string, string> = {
   paid: "Total pagado", balance: "Saldo", attendedBy: "Atendido por", thanks: "¡Gracias por su visita!",
   includes: "Incluye", protocolVisits: "Protocolo de {n} visitas",
   packageLine: "Paquete {name}", regularPrice: "Precio regular", savings: "Ahorro", packagePrice: "Precio del paquete",
-  youSaved: "Usted ahorró",
+  youSaved: "Usted ahorró", originInvoice: "Factura de origen #{number}", refunded: "Reembolsado", refund: "Reembolso",
 };
+const ROOT: Record<string, string> = { "fac.breakdown.sessions": "Sesiones", "fac.col.areas": "Áreas", "fac.breakdown.therapies": "Terapias" };
 const TEXT: ReceiptText = {
-  t: (k, v) => (ES[k] ?? k).replace("{n}", String(v?.n ?? "")).replace("{name}", String(v?.name ?? "")),
+  t: (k, v) => (ES[k] ?? k).replace("{n}", String(v?.n ?? "")).replace("{name}", String(v?.name ?? "")).replace("{number}", String(v?.number ?? "")),
   multiplierLabel: (k) => ({ dias: "Días", areas: "Áreas" })[k] ?? k,
+  rootLabel: (k) => ROOT[k] ?? k,
   paymentLabel: (p) => (p.clave === "efectivo" ? "Efectivo" : p.formaPagoNombre),
 };
 
@@ -203,6 +205,23 @@ test("kit components print indented under the line with their reference price", 
   assert.equal(lines[i + 3], "      lado izquierdo");
 });
 
+test("quantityBreakdown (BE #619) replaces multiplicadores, inline, in the kit and in the footer", () => {
+  const qb = { factors: [{ key: "dias", labelKey: "fac.breakdown.sessions", value: 4 }], total: 4, totalLabelKey: "fac.breakdown.therapies" };
+  const r: Recibo = {
+    ...QUOTE,
+    items: [
+      { cantidad: 4, descripcion: "Terapia MLS", precioUnitario: 70, descuento: 0, total: 280, multiplicadores: { dias: 4 }, quantityBreakdown: qb },
+      { cantidad: 1, descripcion: "Kit rodilla", precioUnitario: 500, descuento: 0, total: 500,
+        componentes: [{ cantidad: 4, descripcion: "PRP", multiplicadores: { dias: 4 }, quantityBreakdown: qb }] },
+    ],
+  };
+  const { lines } = decode(receiptToEscPos(r, TEXT));
+  assert.ok(lines.includes(row("4 (4 Sesiones = 4 Terapias) x $70.00", "$280.00")));
+  assert.ok(lines.some((l) => l.includes("4 Sesiones = 4 Terapias · PRP")));
+  assert.ok(lines.includes("* Terapia MLS - 4 Sesiones = 4 Terapias"));
+  assert.ok(!lines.some((l) => l.includes("Días")));
+});
+
 test("logo raster goes first when given", () => {
   const logo = rgbaToEscPosRaster(new Uint8Array(16 * 2 * 4), 16, 2);
   const { raster } = decode(receiptToEscPos(QUOTE, TEXT, logo));
@@ -255,4 +274,27 @@ test("a package line prints regular, savings and package price; the foot, «Uste
   assert.match(text, /Usted ahorró/);
   // Without packages, none of it is printed.
   assert.doesNotMatch(decode(receiptToEscPos(QUOTE, TEXT)).lines.join("\n"), /Usted ahorró|Precio regular/);
+});
+
+test("refund receipt through the hub: title, origin invoice, the refund method (D-000026)", () => {
+  const r: Recibo = {
+    ...QUOTE, tipoDocumento: "devolucion", numeroDisplay: "D-000026", facturaOrigen: "L006875", estado: "activa",
+    fecha: "2026-11-10", montoAbonado: 0, saldo: 0, subtotal: 6360, descuento: 0, total: 6360,
+    pagos: [{ formaPagoNombre: "Care Credit", monto: 6360 }],
+  };
+  const { lines } = decode(receiptToEscPos(r, TEXT));
+  assert.ok(lines.includes(row("Devolución #D-000026", "11/10/2026")));
+  assert.ok(lines.includes("Factura de origen #L006875"));
+  assert.ok(lines.includes(row("Care Credit", "$6360.00")));
+});
+
+test("invoice with a refund: Reembolsado line and the refund move printed as «Reembolso <forma>»", () => {
+  const r: Recibo = {
+    ...QUOTE, tipoDocumento: "factura", numeroDisplay: "L006875", estado: "devuelta_total", montoAbonado: 6360, reembolsado: -6360, saldo: 0,
+    pagos: [{ formaPagoNombre: "Care Credit", monto: 6360 }, { formaPagoNombre: "Care Credit", monto: -6360, reembolso: true }],
+  };
+  const { lines } = decode(receiptToEscPos(r, TEXT));
+  assert.ok(lines.some((l) => l.startsWith("Reembolsado")));
+  assert.ok(lines.some((l) => l.startsWith("Reembolso Care Credit")));
+  assert.ok(!lines.some((l) => l.startsWith("Saldo")), "a refunded invoice owes nothing");
 });

@@ -46,6 +46,7 @@ export function DataTable<T>({
   onRowClick,
   pagination,
   labels,
+  fill = false,
 }: {
   columns: Column<T>[];
   state: ResourceState<T[]>;
@@ -55,6 +56,8 @@ export function DataTable<T>({
   pagination?: { meta: Pagination; onPageChange: (page: number) => void };
   /** `loading` is kept for callers; the skeleton announces the shared common.loading. */
   labels?: { loading?: string; empty?: string; retry?: string };
+  /** The card stops at the bottom of the window and the rows scroll under a pinned header. */
+  fill?: boolean;
 }) {
   const t = useTranslations("common");
   const emptyLabel = labels?.empty ?? t("empty");
@@ -70,7 +73,7 @@ export function DataTable<T>({
   // The real headers render at once; skeleton rows stand in for the body (shapes from `loadingShape`).
   if (state.kind === "loading") {
     return (
-      <DataTableFrame>
+      <DataTableFrame fill={fill}>
         <TableHeader>
           <TableRow>
             {columns.map((col) => (
@@ -106,7 +109,7 @@ export function DataTable<T>({
 
   return (
     <div className="space-y-3">
-      <DataTableFrame>
+      <DataTableFrame fill={fill}>
         <TableHeader>
           <TableRow>
             {columns.map((col) => (

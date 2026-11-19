@@ -99,6 +99,27 @@ test("la cantidad EFECTIVA del láser multiplica áreas por días", () => {
   assert.deepEqual(linea.multiplicadores, { dias: 12, areas: 2 });
 });
 
+test("quantityBreakdown (BE #619) pasa de largo, en el item y en sus componentes", () => {
+  const qb = { factors: [{ key: "dias", labelKey: "fac.breakdown.sessions", value: 4 }], total: 4, totalLabelKey: "fac.breakdown.therapies" };
+  const f = {
+    ...(facturaBase as object),
+    items: [
+      {
+        description: "Protocolo rodilla",
+        quantity: 1,
+        unitPrice: 100,
+        discount: 0,
+        total: 100,
+        quantityBreakdown: null,
+        content: [{ name: "Terapia MLS", quantity: 4, quantityBreakdown: qb }],
+      },
+    ],
+  } as never;
+  const [linea] = buildRecibo(f).items;
+  assert.equal(linea.quantityBreakdown, undefined);
+  assert.deepEqual(linea.componentes?.[0].quantityBreakdown, qb);
+});
+
 // ── El recibo de la DEVOLUCIÓN ────────────────────────────────────────────────────────────────
 const devolucionBase = {
   displayNumber: "D-000016",
@@ -140,11 +161,45 @@ test("el reembolso se muestra como el pago del recibo", () => {
   assert.deepEqual(r.pagos.map((p) => [p.formaPagoNombre, p.monto]), [["Efectivo", 170.46]]);
 });
 
+test("un reembolso dividido en 2 formas imprime una línea por cada una, no «el primero + el total»", () => {
+  // cmr-be-48, refund D-000028/invoice 001232 (Caguas): antes salía «Visa $440.00» (la forma del
+  // primer reembolso, con el monto TOTAL) en vez de Visa $320 + Cheque $120.
+  const d = {
+    ...(devolucionBase as object),
+    refundedAmount: 440,
+    reimbursements: [
+      { paymentMethodName: "Visa", amount: 320 },
+      { paymentMethodName: "Cheque", amount: 120 },
+    ],
+  } as never;
+  const r = buildReciboDevolucion(d);
+  assert.deepEqual(r.pagos.map((p) => [p.formaPagoNombre, p.monto]), [["Visa", 320], ["Cheque", 120]]);
+});
+
+test("reimbursements vacío cae al formaReembolso de siempre, no deja el recibo sin pago", () => {
+  const d = { ...(devolucionBase as object), reimbursements: [] } as never;
+  const r = buildReciboDevolucion(d);
+  assert.deepEqual(r.pagos.map((p) => [p.formaPagoNombre, p.monto]), [["Efectivo", 170.46]]);
+});
+
 test("el paciente del recibo de devolución se compone igual que en la factura", () => {
   assert.equal(
     buildReciboDevolucion(devolucionBase).paciente.nombre,
     buildRecibo(facturaBase).paciente.nombre,
   );
+});
+
+test("devolución de un paquete de sesiones: quantity 0 no imprime «0 … $300», usa sessions", () => {
+  // cmr-be-48, refund D-000028/invoice 001232 (Caguas): el BE manda quantity:0 porque lo devuelto
+  // fueron sesiones, no unidades — HILT salió «0 … $300» en vez de «2 x $150».
+  const d = {
+    ...(devolucionBase as object),
+    items: [{ invoiceItemId: "li-2", productId: "p-hilt", quantity: 0, sessions: 2, amount: 300, description: "HILT" }],
+  } as never;
+  const [linea] = buildReciboDevolucion(d).items;
+  assert.equal(linea.cantidad, 2);
+  assert.equal(linea.precioUnitario, 150);
+  assert.equal(linea.total, 300);
 });
 
 // Sales packages (handoff paquetes-de-venta, 14-oct-2026): the REAL line the BE returns.

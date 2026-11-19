@@ -69,7 +69,7 @@ test("old ?tab= values map to the new slugs, unchanged names included", () => {
   assert.equal(legacyTab(BILLING_CONSULTATION_TABS, "estadisticas"), null);
   assert.equal(TAB_ROUTES.some((r) => r.pattern === "/scheduling/appointments"), false);
   assert.equal(legacyTab(ADMIN_TABS, "editorRol"), "role-editor");
-  assert.equal(legacyTab(ADMIN_TABS, "users"), "users");
+  assert.equal(legacyTab(ADMIN_TABS, "users"), "staff", "Users merged into Staff");
   assert.equal(legacyTab(ADMIN_TABS, "nope"), null);
   assert.equal(legacyTab(ADMIN_TABS, null), null);
 });

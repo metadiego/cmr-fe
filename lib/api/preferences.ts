@@ -1,5 +1,7 @@
 import { apiFetch } from "./client";
 import type { ThemeConfig } from "@/lib/theme/config";
+import { withReportColumns } from "@/lib/frontdesk/day-summary";
+import { userLayerForPut } from "@/lib/preferences/user-layer";
 
 // Config por capas (#51). The BE resolves the effective config by precedence
 // (override → usuario → centro → sistema) and returns it; the FE only paints it.
@@ -83,10 +85,10 @@ export async function setMyLanguage(idioma: string | null): Promise<ThemeConfig>
 // be-el-tema-arranca-en-claro.
 export async function setMyTheme(tema: string | null): Promise<ThemeConfig> {
   const prefs = await getMyPreferences();
-  // PRESERVAR toda la capa del usuario (idioma/colores/fondo) y solo mezclar `tema`. NO borrar `language`
-  // aquí: hoy la capa guarda el idioma bajo esa clave (verificado en vivo: layers.user = {language:"es"}),
-  // y borrarla dejaría al usuario sin idioma. Solo setMyLanguage migra esa clave.
-  const usuario: ThemeConfig = { ...(prefs.layers.user ?? {}) };
+  // PRESERVE the whole user layer (language/colors/background) and merge only `tema`. The language comes
+  // back as `language` and must go out as `idioma` (lib/preferences/user-layer.ts): sent back raw, the BE
+  // stops reading it and the user drops to the default language.
+  const usuario = userLayerForPut(prefs.layers.user as Record<string, unknown> | null) as ThemeConfig;
   if (tema) usuario.tema = tema;
   else delete usuario.tema;
   return updateMyPreferences(usuario);
@@ -158,4 +160,11 @@ export function createOverride(payload: CreateOverridePayload): Promise<Override
 
 export function deleteOverride(id: string): Promise<void> {
   return apiFetch<void>(`/preferences/override/${id}`, { method: "DELETE" });
+}
+
+// Saves ONLY one report's visible columns in the user's layer (same merge as setMyTheme: the PUT replaces
+// the whole layer). Shape: `reportColumns: { [report]: string[] }` (helpers in lib/frontdesk/day-summary.ts).
+export async function setMyReportColumns(report: string, cols: readonly string[]): Promise<ThemeConfig> {
+  const prefs = await getMyPreferences();
+  return updateMyPreferences(withReportColumns(userLayerForPut(prefs.layers.user as Record<string, unknown> | null), report, cols) as unknown as ThemeConfig);
 }

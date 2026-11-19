@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import { LEGACY_CARD_FILES } from "./eslint/legacy-card-files.mjs";
 
 /**
  * File size, as a rule that FAILS.
@@ -45,15 +46,34 @@ const DEBT = {
   // components/facturacion/receipt-preview-card.tsx (shared with the skeleton), the receipt print dialog
   // to components/facturacion/receipt-print-dialog.tsx; back link removed; the patient-today summary
   // became a header button.
-  "app/(app)/billing/invoices/[id]/page.tsx": 1460,
-  "components/inventario/productos-admin.tsx": 1048,
-  "components/configuracion/menu-editor.tsx": 700,
+  // 16-nov-2026: lowered from 1460 to 1317 — its dialogs moved onto the standard form shell
+  // (FormDialog/useSubmit/useConfirm); the rest of the gap was already slack.
+  // 18-nov-2026: lowered from 1317 to 1305 — the multiplicadores/quantityBreakdown (cmr-be #619)
+  // helpers moved to lib/facturacion/line-quantity.ts, tested there instead of living inline.
+  // 18-nov-2026: 1305 → 1297 — the receipt preview left the editor grid for a header drawer
+  // (components/facturacion/receipt-preview-sheet.tsx).
+  "app/(app)/billing/invoices/[id]/page.tsx": 1297,
+  // 17-nov-2026: 1048 → 1046 — the product sheet moved onto the standard FormSheet shell (kit Field,
+  // useDialogForm, useSubmit); the local Field and canSubmit went.
+  "components/inventario/productos-admin.tsx": 1046,
+  // 17-nov-2026: 700 → 681 — the delete AlertDialog became a useConfirm prompt (standard form kit);
+  // the stray blank line after </aside> went, and the delete confirm gained `destructive: true` (net 0).
+  "components/configuracion/menu-editor.tsx": 681,
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)
   // se extrajeron a components/servicios/servicio-form-fields.tsx para hacerle lugar al toggle de
   // allowSessionFixWithoutPackage sin tocar el ceiling. Ver HANDOFF-sesiones-sin-paquete-listo.md.
-  "components/servicios/servicios-admin.tsx": 661,
-  "components/auditoria/auditoria-log.tsx": 642,
-  "components/clientes/paciente-form-sheet.tsx": 550,
+  // 17-nov-2026: 661 → 614 — the service sheet moved onto the standard FormSheet shell (kit Field,
+  // useDialogForm, useSubmit, useConfirm for "apply to all centers"); local canSubmit and the
+  // hand-built confirm went.
+  "components/servicios/servicios-admin.tsx": 614,
+  // 10-nov-2026: 642 → 618 — Campo/CopiableCampo moved to components/auditoria/audit-fields.tsx.
+  // 10-nov-2026: 618 → 567 — the detail panel moved to components/auditoria/audit-detail-sheet.tsx
+  // (merge of the Claude connector "via" branch with main's entity filter).
+  // 17-nov-2026: 567 → 554 — the purge AlertDialog became a useConfirm prompt (standard form kit).
+  "components/auditoria/auditoria-log.tsx": 554,
+  // 16-nov-2026: 550 → 480 — moved onto the standard FormSheet shell (kit Field, useSubmit, useDialogForm);
+  // the required/blocked checks live in lib/pacientes/patient-form-missing.ts.
+  "components/clientes/paciente-form-sheet.tsx": 480,
   // 20-oct-2026: first entry for this file — same EHR-gate wiring as above, in both CentroSheet and
   // CentroSheetV2 (the classic and beta day views share this file). Admitted debt, not a silent bump.
   "components/agenda/dia-view.tsx": 605,
@@ -104,6 +124,26 @@ const noBrowserLocaleFormatting = [
   },
 ];
 
+/**
+ * Hand-rolled cards, as a rule that FAILS (CLAUDE.md rule 10).
+ *
+ * 156 files re-typed their own card (`rounded-md bg-card ring-1 ring-foreground/10
+ * shadow-[rgba(16,32,64,0.06)]`), each a little different, which is why the app reads as a dozen
+ * apps stitched together. New code uses the kit: `Panel` (components/kit/panel.tsx) for a section,
+ * `Card` (components/ui/card.tsx) or `DataTable` (components/kit/data-table.tsx) otherwise.
+ * The files that already did it are listed in eslint/legacy-card-files.mjs — a list that may only
+ * shrink. esquery regexes cannot contain "/", hence `ring-foreground.10`.
+ */
+const HAND_ROLLED_CARD =
+  "Hand-rolled card style (ring-foreground/10 or shadow-[rgba(…)]). Use Panel from components/kit/panel.tsx, Card from components/ui/card.tsx or DataTable from components/kit/data-table.tsx. See CLAUDE.md rule 10.";
+const noHandRolledCard = [
+  { selector: "Literal[value=/ring-foreground.10|shadow-\\[rgba\\(/]", message: HAND_ROLLED_CARD },
+  { selector: "TemplateElement[value.raw=/ring-foreground.10|shadow-\\[rgba\\(/]", message: HAND_ROLLED_CARD },
+];
+
+const NO_BROWSER_CONFIRM =
+  "Use useConfirm() from components/kit/confirm-host instead of the browser's confirm(). See 'Forms and dialogs' in CLAUDE.md.";
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -128,13 +168,34 @@ const eslintConfig = defineConfig([
     files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "hooks/**/*.{ts,tsx}"],
     // `i18n/` and `lib/format/` are where formatting is DEFINED, and the tests assert on it.
     ignores: ["lib/format/**", "lib/i18n/**", "**/*.test.ts"],
+    rules: { "no-restricted-syntax": ["error", ...noBrowserLocaleFormatting, ...noHandRolledCard] },
+  },
+  {
+    // The legacy card files keep every OTHER restricted-syntax check. In flat config the last block
+    // wins and replaces the rule's options wholesale, so the locale checks are repeated here.
+    files: LEGACY_CARD_FILES.map(asGlob),
     rules: { "no-restricted-syntax": ["error", ...noBrowserLocaleFormatting] },
+  },
+  {
+    // The browser's confirm() blocks the page, cannot be styled or translated per button, and was
+    // replaced everywhere by the app's own prompt (docs/plans/2026-11-16-campos-obligatorios-y-que-falta-plan.md).
+    // A local `confirm` returned by useConfirm() is not the global, so it passes.
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "hooks/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-globals": ["error", { name: "confirm", message: NO_BROWSER_CONFIRM }],
+      "no-restricted-properties": [
+        "error",
+        { object: "window", property: "confirm", message: NO_BROWSER_CONFIRM },
+        { object: "globalThis", property: "confirm", message: NO_BROWSER_CONFIRM },
+      ],
+    },
   },
   {
     // shadcn primitives vendored into the repo and regenerated by its CLI: their size is not our
     // decision, so measuring it would only produce noise.
+    // The same goes for their styling: shadcn's own Card is where the ring/shadow look is defined.
     files: ["components/ui/**"],
-    rules: { "max-lines": "off" },
+    rules: { "max-lines": "off", "no-restricted-syntax": ["error", ...noBrowserLocaleFormatting] },
   },
   ...Object.entries(DEBT).map(([file, max]) => ({
     files: [asGlob(file)],

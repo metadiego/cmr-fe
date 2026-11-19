@@ -11,7 +11,7 @@ import { apiFetch } from "./client";
 export type FormatoColumna = { clave: string; label?: string | null; labelKey?: string | null; subtitulo?: string | null; ancho?: string | null }; // ancho: CSS width ("28%")
 // Etiqueta de firma: el BE la manda como OBJETO { label, labelKey } (no string). Se acepta también string
 // por compatibilidad. Se PREFIERE `label`. (Verificado en vivo: apex_rf firmas.lineas son objetos.)
-export type FormatoFirmaLinea = string | { label?: string | null; labelKey?: string | null };
+export type FormatoFirmaLinea = string | { label?: string | null; labelKey?: string | null; valor?: string | null };
 export type FormatoFila = Record<string, string>; // dentro de `filas` (opaca): sus claves son claves de columna (datos)
 
 // Celda de `tabla_tematica` con varios grupos de casillas independientes dentro de la misma celda (p. ej.
@@ -61,7 +61,10 @@ export type FormatoSeccion =
   // OBSERVACIONES: caja (por defecto) o N líneas regladas (`estilo:"lineas"`, `lineas` = nº de renglones).
   | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number }
   // Firmas simples: línea horizontal + label debajo. `lineas` son objetos { label, labelKey } (o string).
-  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: FormatoFirmaLinea[] }
+  // `estilo:"en_linea"` = the legacy «LABEL: ________» (label first, the line after it), `columnas` per row
+  // (default 2: «TÉCNICO | FIRMA DEL PACIENTE», then «HORA»). A line's `valor` is printed on it (e.g. the
+  // therapist of the row on TÉCNICO, like ondas_choque_form.php). Absent = line with its label under it.
+  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: FormatoFirmaLinea[]; estilo?: "en_linea" | null; columnas?: number | null }
   // Párrafo estático (p. ej. el texto legal de una constancia). `texto` puede traer "\n" entre líneas
   // (Peptide Rx: "By signing this prescription, you acknowledge that:" + 3 líneas). `titulo` opcional.
   | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string; titulo?: string | null; tamano?: number | null; negrita?: boolean }
@@ -124,10 +127,25 @@ export type FormatoPie = { prefix?: string; user?: string; login?: string; fecha
 // - tablasLadoALado: nº de tablas en paralelo (MLS=2). casillas: selectores de tipo (RADIAL/FOCAL).
 // - notas / porPagina: para `layout:"sessions"` — las 2 cajas de notas VACÍAS y cuántas sesiones por página.
 // - subtitulo: línea más chica arriba del título (p. ej. "Cámara Energética" arriba de "CONTROL DE
-//   SESIONES"). `numerarFilas`/`numerarComoFraccion` son internos del BE (quién "hornea" el contador de la
-//   rejilla): el FE nunca los lee ni recalcula — siempre pinta el valor de la fila tal cual llega.
+//   SESIONES"). `numerarFilas`/`numerarComoFraccion`: el BE "hornea" el contador de la rejilla y el FE pinta
+//   el valor tal cual, SALVO cuando el usuario escribe cuántas terapias imprimir (solo impresión,
+//   lib/formatos/print-rows.ts): ahí el FE renumera esa columna.
+// - camposEnLinea: claves de `fields` que van JUNTAS en la primera línea del layout "campos", en ese orden.
+//   Sin la clave, un campo por línea como el legacy.
+// - camposEnPares: la rejilla 2 columnas del legacy — una fila por CADA PAR de `fields` consecutivos, en
+//   el orden que mande el BE (APEX RF, 06-nov-2026: Fecha|Paciente, Hora entrada|Hora salida,
+//   Sesión|Record). Distinto de camposEnLinea (que junta TODOS los elegidos en una sola línea).
 export type FormatoRenderMeta = {
   ocultarEmpresa?: boolean;
+  // Session sheets (layout "sesiones"): «caja» = the Nano Aer Plus family (bordered note boxes, SESION #
+  // at the right, Enfermero | Firma on one row); absent = the Vit C / Láser IV grey bands.
+  estiloSesion?: "caja" | "franjas";
+  camposEnLinea?: string[];
+  camposEnPares?: boolean;
+  // Values of the "campos" header written ON a line («NOMBRE DEL PACIENTE: ̲M̲I̲G̲E̲N̲E̲S̲…», legacy `.fill`).
+  subrayarValores?: boolean;
+  numerarFilas?: string;
+  numerarComoFraccion?: boolean;
   casillasEnFilas?: boolean;
   imagenEscalaDolor?: string | null;
   imagenCuerpo?: string | null; // GLP-1: diagrama hombre/mujer, ruta ya resuelta por el BE según sexo del paciente
@@ -151,7 +169,10 @@ export type FormatoRenderMeta = {
 // Bloque por SESIÓN (láser a color multipágina). Verificado en vivo (GET /formats/terapia_laser_iv/assembly):
 // el BE ya manda estos 3 campos en INGLÉS (`session`/`date`/`notes`) — no son los nombres en español que
 // asumía esta definición antes, y por eso el número de sesión y la fecha nunca se imprimían.
-export type FormatoSesion = { session?: string | null; date?: string | null; notes?: string[] };
+// `fields`: per-session header values printed left of «SESIÓN #», e.g. «DOSIS VITAMINA C : 25g» (legacy
+// sueroterapia_form.php). Handoff docs/specs/session-sheet-dose-handoff-be.md; absent → nothing printed.
+export type FormatoSesionCampo = { clave?: string; label?: string | null; labelKey?: string | null; valor?: string | null };
+export type FormatoSesion = { session?: string | null; date?: string | null; notes?: string[]; fields?: FormatoSesionCampo[] };
 
 // Documento ARMADO (print-ready) para una sesión. El `layout` es el discriminador:
 // "campos" = encabezado de pares etiqueta/valor (no rejilla); "tabla" = rejilla de columnas/filas.

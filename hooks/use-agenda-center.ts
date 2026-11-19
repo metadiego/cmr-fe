@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useSearchParams } from "next/navigation";
 
 import { initialAgendaCenter } from "@/lib/agenda/initial-center";
 import { getActiveCentro } from "@/lib/tenant";
@@ -30,6 +31,8 @@ export function useAgendaCenter(opts: {
     typeof window === "undefined" ? null : window.localStorage.getItem(CENTER_KEY),
   );
   const [chosen, setChosen] = React.useState<string | null>(null);
+  // `?centro=`: the month calendar opens the day on the clinic it was showing (clinic-read-scope).
+  const requested = useSearchParams().get("centro");
 
   // Serialized so the memo key stays stable across the array identity the caller rebuilds.
   const key = centerIds.join(",");
@@ -41,15 +44,24 @@ export function useAgendaCenter(opts: {
             saved,
             activeCenter: getActiveCentro(),
             centers: key ? key.split(",") : [],
+            requested,
           })
         : null,
-    [ready, canSeeAllCenters, saved, key],
+    [ready, canSeeAllCenters, saved, key, requested],
   );
 
   const pick = React.useCallback((id: string) => {
     setChosen(id);
     if (typeof window !== "undefined") window.localStorage.setItem(CENTER_KEY, id);
   }, []);
+
+  // A clinic the link asked for and the day opened on is remembered like a pick, so going day by day
+  // (links without `?centro=`) stays on it instead of falling back to an older saved one.
+  React.useEffect(() => {
+    if (requested && resolved === requested && typeof window !== "undefined") {
+      window.localStorage.setItem(CENTER_KEY, requested);
+    }
+  }, [requested, resolved]);
 
   return { center: chosen ?? resolved, pick };
 }

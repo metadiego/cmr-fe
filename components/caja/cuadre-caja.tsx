@@ -27,31 +27,35 @@ import {
 } from "@/lib/api/caja";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { toCsv } from "@/lib/caja/export";
-import { totalConteo, estadoCuadreVivo, diferenciaCaja } from "@/lib/caja/totales";
+import { todayPR } from "@/lib/format/fecha";
+import { totalConteo, estadoCuadreVivo, diferenciaCaja, subtotalesTarjeta as calcSubtotalesTarjeta } from "@/lib/caja/totales";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
+import { useCashCountAutosave } from "@/hooks/use-cash-count-autosave";
+import { consolidatedCount } from "@/lib/caja/consolidated-count";
+import { ConsolidatedCountBar } from "@/components/caja/consolidated-count-bar";
+import { CashEmailPanel } from "@/components/caja/cash-email-panel";
+import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-off";
+import { figuresOfReport, SIGN_AS_SUPERVISOR } from "@/lib/caja/sign-off";
+import { resolveCashierSiblings } from "@/lib/caja/cash-signoff-siblings";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
+import { OtherDivisionHint } from "@/components/caja/other-division-hint";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
+import { CuadreAttachments, CuadreAttachmentsOverview } from "@/components/caja/cuadre-attachments";
+import { CuadreScopeSelector } from "@/components/caja/cuadre-scope-selector";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
+import { useCashCloseEnabled } from "@/components/configuracion/cash-close-setting";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 // Default de INTERFAZ del Inicio (fondo de apertura). Acordado con el BE (PR #120): dato del FE,
 // el backend NO lo hardcodea. Configurable a futuro por centro si el negocio lo pide.
@@ -83,7 +87,10 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   // Editar fechas ANTERIORES está bloqueado por defecto (seguridad); lo habilita el permiso
   // `caja.retroactivo` (RBAC puro, data-driven — ya no colgado de isGerencia/caja.ver_todos).
   const puedeRetroactivo = can("caja.retroactivo");
-  const hoy = React.useMemo(() => new Date().toISOString().slice(0, 10), []);
+  // `todayPR()`, NO `new Date().toISOString()`: esta última da el día en UTC, que ya es "mañana" en
+  // Puerto Rico después de las 8pm AST (bug real, 05-nov-2026, encontrado al armar el cuadre total
+  // — ver lib/format/fecha.ts).
+  const hoy = React.useMemo(() => todayPR(), []);
   const [fecha, setFecha] = React.useState(hoy);
   const [scope, setScope] = React.useState<Scope | null>(null);
   const [filterSlot, setFilterSlot] = React.useState<HTMLDivElement | null>(null);
@@ -127,6 +134,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
 
       {/* While the centre gate / profile resolve, the date row is already real and the editor area
           shows its skeleton. Permissions arrive with the profile, so until then it is the cashier layout. */}
+      {!loadingGate && <OtherDivisionHint division={division} fecha={fecha} meId={myStaffId(me)} />}
       {loadingGate ? (
         <CuadreCajaSkeleton isGerencia={isGerencia} esConsolidado={effScope === "consolidated"} filterSlot={filterSlot} />
       ) : (
@@ -142,6 +150,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
           puedeRetroactivo={puedeRetroactivo}
           meId={myStaffId(me)}
           canCerrar={canCerrar}
+          canSignSupervisor={can(SIGN_AS_SUPERVISOR)}
           centro={gate.centro}
           centroNombre={gate.centroNombre}
         />
@@ -171,6 +180,8 @@ type LoaderProps = {
   puedeRetroactivo: boolean;
   meId: string | null;
   canCerrar: boolean;
+  /** Signing as manager has its own permission: every cash role holds caja.ver_todos, billers included. */
+  canSignSupervisor: boolean;
   centro?: string;
   centroNombre?: string;
   /** The date row's slot: the cashier selector renders there, on the same line as the date. */
@@ -198,21 +209,14 @@ function Loader(props: LoaderProps) {
       // Grupos configurables de método de pago (para subtotales informativos, p.ej. visa_mc).
       getGruposMetodoPago(),
     ]);
-    // Cuadre editable: un cajero concreto (no el consolidado). En consolidado se traen TODOS los
-    // cuadres con su conteo para UNIR (sumar) las cantidades por denominación (vista solo lectura).
+    // One cashier: their cuadre. Consolidated: every cuadre — the manager's own count (userId null)
+    // wins, else the sum of the cashiers' (lib/caja/consolidated-count.ts).
     const found = esConsolidado ? null : lista[0];
-    const detalles = esConsolidado
-      ? await Promise.all(lista.map((c) => getCuadre(c.id)))
-      : found
-        ? [await getCuadre(found.id)]
-        : [];
-    const cuadre = esConsolidado ? null : (detalles[0] ?? null);
-    // Conteo inicial = unión de las líneas de conteo de los cuadres traídos (por denominacionId).
-    const conteoInicial: Record<string, number> = {};
-    for (const d of detalles)
-      for (const l of d.conteo)
-        conteoInicial[l.denominationId] = (conteoInicial[l.denominationId] ?? 0) + l.quantity;
-    return { reporte, denoms, cuadre, conteoInicial, cuadres: lista, cajeros, grupos };
+    const detalles = esConsolidado ? await Promise.all(lista.map((c) => getCuadre(c.id))) : found ? [await getCuadre(found.id)] : [];
+    const cc = consolidatedCount(detalles);
+    const cuadre = esConsolidado ? cc.manager : (detalles[0] ?? null);
+    const conteoInicial = cc.initial;
+    return { reporte, denoms, cuadre, conteoInicial, conteoSuma: cc.sum, managerCounted: cc.managerCounted, cuadres: lista, cajeros, grupos };
   }, []);
 
   if (bundle.state.kind === "loading")
@@ -220,15 +224,18 @@ function Loader(props: LoaderProps) {
   if (bundle.state.kind !== "ok")
     return <p className="text-sm text-destructive">{bundle.state.message}</p>;
 
-  const { reporte, denoms, cuadre, conteoInicial, cuadres, cajeros, grupos } = bundle.state.data;
+  const { reporte, denoms, cuadre, conteoInicial, conteoSuma, managerCounted, cuadres, cajeros, grupos } = bundle.state.data;
   return (
     <Editor
-      key={cuadre?.id ?? (props.scope === "consolidated" ? "consolidado" : "nuevo")}
+      // Stable: the first autosave creates the cuadre (null → id) and a remount would drop keystrokes.
+      key="editor"
       {...props}
       reporte={reporte}
       denoms={denoms}
       cuadreInicial={cuadre}
       conteoInicial={conteoInicial}
+      conteoSuma={conteoSuma}
+      managerCounted={managerCounted}
       cuadres={cuadres}
       cajeros={cajeros}
       grupos={grupos}
@@ -248,6 +255,7 @@ function Editor({
   puedeRetroactivo,
   meId,
   canCerrar,
+  canSignSupervisor,
   centro,
   centroNombre,
   filterSlot,
@@ -255,6 +263,8 @@ function Editor({
   denoms,
   cuadreInicial,
   conteoInicial,
+  conteoSuma,
+  managerCounted,
   cuadres,
   cajeros,
   grupos,
@@ -264,6 +274,8 @@ function Editor({
   denoms: Denominacion[];
   cuadreInicial: CuadreConItems | null;
   conteoInicial: Record<string, number>;
+  conteoSuma: Record<string, number>;
+  managerCounted: boolean;
   cuadres: CuadreRow[];
   cajeros: Cajero[];
   grupos: GrupoMetodoPago[];
@@ -274,10 +286,12 @@ function Editor({
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
   const cerrado = cuadreInicial?.status === "cerrado";
-  // Contar habilitado: cajero concreto, no cerrado, y (hoy O permiso de retroactivo — RBAC). El
-  // consolidado NO se cuenta (es la UNIÓN de todos los cajeros); tampoco fechas pasadas sin permiso.
-  const contarHabilitado =
-    !cerrado && !esConsolidado && (esHoy || puedeRetroactivo);
+  const closeEnabled = useCashCloseEnabled(centro); // BE #575: the center can turn the close off
+  // Counting: not closed, today (or caja.retroactivo), and a concrete cashier — or the consolidated,
+  // only for caja.ver_todos once the manager chose to do ONE count (else it is the read-only sum).
+  const [managerCounting, setManagerCounting] = React.useState(managerCounted);
+  const puedeContarDia = !cerrado && (esHoy || puedeRetroactivo);
+  const contarHabilitado = puedeContarDia && (!esConsolidado || (isGerencia && managerCounting));
 
   // Conteo inicial: en un cajero = su conteo; en consolidado = la UNIÓN (Σ) de todos (solo lectura).
   const [conteo, setConteo] = React.useState<Record<string, number>>(() => ({ ...conteoInicial }));
@@ -293,7 +307,9 @@ function Editor({
     cuadreInicial?.pettyCashApplies ?? true,
   );
   const [procesando, setProcesando] = React.useState(false);
-  const [emailing, setEmailing] = React.useState(false);
+  // The Inicio input is saved as typed; «Aplica» travels apart without zeroing it (see procesarCierre).
+  const openPayload = { division, userId: usuarioId, date: fecha, declaredPettyCash: esConsolidado ? 0 : Math.max(0, Number(inicioStr) || 0), pettyCashApplies: !esConsolidado && aplicarInicio }; // consolidated Inicio = the cashiers' funds
+  const autosave = useCashCountAutosave(contarHabilitado, openPayload, conteo, onReload);
 
   // Conteo/inicio por cajero (de los cuadres del día) para UNIR en el consolidado.
   const conteoPorCajero = React.useMemo(() => {
@@ -306,13 +322,13 @@ function Editor({
     [denoms, conteo],
   );
   const salesCash = reporte.detalle.efectivo.amount;
-  const inicioInput = aplicarInicio ? Math.max(0, Number(inicioStr) || 0) : 0;
+  const inicioInput = esConsolidado ? (reporte.reconciliation?.fondoInicial ?? 0) : aplicarInicio ? Math.max(0, Number(inicioStr) || 0) : 0;
   // Mientras el cajero está TECLEANDO su propio conteo se usa la fórmula legacy en vivo (el BE no
   // puede conocer lo que aún no se guardó); en cualquier otro caso — recién abierto, o el
   // consolidado de gerencia (ya NO se suma a mano, bug real 03-oct-2026) — manda siempre la
   // reconciliación resuelta por el BE. El cuadre ya CERRADO queda fuera: su diferencia está
   // sellada y no se toca (no-scope del handoff).
-  const escribiendo = !esConsolidado && !cerrado && Object.values(conteo).some((c) => c > 0);
+  const escribiendo = (!esConsolidado || managerCounting) && !cerrado && Object.values(conteo).some((c) => c > 0);
   const vivo = estadoCuadreVivo({
     escribiendo,
     contadoLocal,
@@ -333,36 +349,38 @@ function Editor({
   const diferencia = cerrado ? (cuadreInicial?.difference ?? 0) : diferenciaEnVivo;
   const aDepositar = cerrado ? contado - inicio : contado - inicioEnVivo;
   // Nadie ha guardado un conteo real todavía: nunca el verde de "cuadra" (handoff
-  // cuadre-efectivo-sin-conteo-descuadra-handoff-fe.md).
-  const sinContar = !cerrado && vivo.sinContar;
+  // cuadre-efectivo-sin-conteo-descuadra-handoff-fe.md). EXCEPTO con `countRequired: false`
+  // (centro en modo `single`, BE #566): el conteo de esta división es respaldo, no obligatorio —
+  // no parpadear "sin contar" por no haberlo hecho. Ausente/`true` = como siempre.
+  const sinContar = !cerrado && vivo.sinContar && reporte.countMode?.countRequired !== false;
   const porCajero = reporte.porCajero ?? [];
 
-  // Subtotales informativos de tarjetas (p.ej. "VISA + MASTERCARD"): grupos configurables cuyas
-  // formas son subconjunto ESTRICTO del grupo de tarjetas (el que suma detalle.totalTarjetas).
-  // 100% data-driven (config `grupos_metodo_pago` + `porGrupo`), sin nombres hardcodeados.
-  const subtotalesTarjeta = React.useMemo(() => {
-    const parent = grupos.find(
-      (g) =>
-        (g.paymentMethods?.length ?? 0) > 0 &&
-        (reporte.porGrupo[g.slug] ?? null) === reporte.detalle.totalTarjetas,
-    );
-    if (!parent) return [];
-    const parentFormas = new Set(parent.paymentMethods ?? []);
-    return grupos
-      .filter(
-        (g) =>
-          g.slug !== parent.slug &&
-          (g.paymentMethods?.length ?? 0) > 0 &&
-          (g.paymentMethods ?? []).every((f) => parentFormas.has(f)),
-      )
-      .map((g) => ({
-        clave: g.slug,
-        labelKey: g.labelKey,
-        nombre: g.name,
-        monto: reporte.porGrupo[g.slug] ?? 0,
-      }))
-      .filter((s) => s.monto !== 0);
-  }, [grupos, reporte]);
+  // Sign-off («Acepto»): the cashier signs her own sheet; caja.ver_todos signs any sheet as manager.
+  const signNow = figuresOfReport(reporte);
+  const canSignCashier = !esConsolidado && (usuarioId === undefined || usuarioId === meId);
+  const signOff = useCashSignOff({
+    sheetId: cuadreInicial?.id ?? null,
+    ensureSheet: async () => (await abrirCuadre(openPayload)).id,
+    isCashierSheet: !esConsolidado,
+    now: signNow,
+    meId,
+    canSignCashier,
+    canSignSupervisor,
+    centerId: centro,
+    // BE #605, handoff firmas-consolidado-desde-ventas: los bloques son quien COBRÓ hoy
+    // (`porCajero`), no quien abrió una hoja — Waldemar cobró sin hoja propia y antes no salía.
+    siblings: esConsolidado
+      ? () => resolveCashierSiblings({ porCajero, cuadres, division, centerId: centro, nameFor: (uid) => cajeros.find((x) => x.userId === uid)?.name ?? null })
+      : undefined,
+    siblingNow: async (sib) => figuresOfReport(await getReporteDia(fecha, division, sib.userId)),
+    onSigned: onReload,
+  });
+
+  // Subtotales informativos de tarjetas (p.ej. "VISA + MASTERCARD"): ver lib/caja/totales.ts.
+  const subtotalesTarjeta = React.useMemo(
+    () => calcSubtotalesTarjeta(grupos, reporte.porGrupo, reporte.detalle.totalTarjetas),
+    [grupos, reporte],
+  );
   // Ya vienen acotadas a esta (fecha × división) por el BE (PR #439): vacío = "nadie cobró", no un
   // roster roto — se pinta el aviso, sin fallback que lo oculte.
   const opcionesCajero: Array<{ usuarioId: string; nombre: string }> = cajeros.map((c) => ({
@@ -380,17 +398,9 @@ function Editor({
   async function procesarCierre() {
     setProcesando(true);
     try {
-      // `inicio` (arriba) es de presentación y puede caer a 0 sin haber contado nada — mandarlo
-      // tal cual aquí BORRABA el Inicio escrito al cerrar sin contar antes (bug real, visto en la
-      // fila de prod). Se guarda siempre el valor del input; Aplica viaja aparte, sin poner el
-      // número en 0.
-      const abierto = await abrirCuadre({
-        division,
-        userId: usuarioId,
-        date: fecha,
-        declaredPettyCash: Math.max(0, Number(inicioStr) || 0),
-        pettyCashApplies: aplicarInicio,
-      });
+      // Never `inicio` (presentation, may fall to 0): it wiped the typed Inicio on close (real bug).
+      await autosave.flush(); // no autosave in flight while closing (the BE re-inserts count lines)
+      const abierto = await abrirCuadre(openPayload);
       const lineas = Object.entries(conteo)
         .filter(([, c]) => c > 0)
         .map(([denominationId, quantity]) => ({ denominationId, quantity }));
@@ -402,19 +412,6 @@ function Editor({
       toast.error(apiErrorMessage(err));
     } finally {
       setProcesando(false);
-    }
-  }
-
-  async function enviarEmail(email: string) {
-    if (!cuadreInicial) return;
-    setEmailing(true);
-    try {
-      await enviarCuadreEmail(cuadreInicial.id, { email });
-      toast.success(t("emailSent"));
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setEmailing(false);
     }
   }
 
@@ -452,7 +449,7 @@ function Editor({
     toast.success(t("exported"));
   }
 
-  const hint = esConsolidado
+  const hint = esConsolidado && !managerCounting
     ? t("count.consolidatedHint")
     : !esHoy && !puedeRetroactivo
       ? t("count.pastLocked")
@@ -460,31 +457,13 @@ function Editor({
 
   // Selector de alcance (solo gerencia), on the date's row when the page gives us its slot.
   const scopeSelector = isGerencia && (
-    <div className="flex items-center gap-2">
-      <Label className="text-sm text-muted-foreground">{t("scope.label")}</Label>
-      <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
-        <SelectTrigger className="h-9 w-64">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="consolidated">{t("scope.consolidated")}</SelectItem>
-          {opcionesCajero.length > 0 ? (
-            opcionesCajero.map((c) => (
-              <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
-                {c.usuarioId === meId ? `${c.nombre} · ${t("scope.mine")}` : c.nombre}
-              </SelectItem>
-            ))
-          ) : (
-            <div className="px-2 py-1.5 text-xs text-muted-foreground">
-              {t("cajeros.vacio")}
-            </div>
-          )}
-        </SelectContent>
-      </Select>
-      {cerrado && (
-        <Badge variant="secondary">{t("status.cerrado")}</Badge>
-      )}
-    </div>
+    <CuadreScopeSelector
+      scope={scope}
+      onChange={(v) => setScope(v as Scope)}
+      opcionesCajero={opcionesCajero}
+      meId={meId}
+      cerrado={cerrado}
+    />
   );
 
   return (
@@ -494,11 +473,15 @@ function Editor({
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         {/* Panel izquierdo: conteo + inicio + resumen por cajero */}
         <div className="space-y-4">
+          {esConsolidado && isGerencia && puedeContarDia && <ConsolidatedCountBar counting={managerCounting} onCount={() => setManagerCounting(true)} backToSum={async () => { await autosave.flush(); await contarCuadre((await abrirCuadre(openPayload)).id, []); setManagerCounting(false); setConteo({ ...conteoSuma }); onReload(); }} />}
           <ConteoDenominaciones
             denominaciones={denoms}
             cantidades={conteo}
             disabled={!contarHabilitado}
             hint={hint}
+            saveState={contarHabilitado ? autosave.state : "idle"}
+            fondo={cerrado ? inicio : inicioEnVivo}
+            aDepositar={aDepositar}
             onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
           />
 
@@ -557,15 +540,26 @@ function Editor({
           sinContar={sinContar}
           cerrado={cerrado}
           cerradoEn={cuadreInicial?.closedAt ?? null}
-          canProcesar={contarHabilitado && canCerrar}
+          canProcesar={contarHabilitado && canCerrar && closeEnabled}
           procesando={procesando}
           onProcesar={procesarCierre}
           onExport={exportar}
           canEmail={!!cuadreInicial}
-          emailing={emailing}
-          onEmail={enviarEmail}
+          emailPanel={cuadreInicial && <CashEmailPanel centerId={centro} send={(emails) => enviarCuadreEmail(cuadreInicial.id, emails, centro)} />}
         />
       </div>
+
+      {/* A biller on the consolidated (caja.ver_todos) signs HER sheet: one click takes her to it. */}
+      <CashSignOffPanel signOff={signOff} now={signNow} meId={meId} canSignCashier={canSignCashier} canSignSupervisor={canSignSupervisor} onSignMine={esConsolidado && meId && cajeros.some((c) => c.userId === meId) ? () => setScope(`user:${meId}`) : undefined} />
+
+      {/* Settlements escaneado: junto a la firma (antes solo vivía al pie del cuadre, fuera de vista
+          y SIN pintar nada en consolidado/sin abrir — el dueño no lo encontraba). Handoff
+          .personal/handoff-cuadre-adjuntar-settlements.md. */}
+      {cuadreInicial?.id ? (
+        <CuadreAttachments reconciliationId={cuadreInicial.id} centroId={centro} />
+      ) : (
+        <CuadreAttachmentsOverview cuadres={cuadres} cajeros={cajeros} centroId={centro} onPick={(uid) => setScope(`user:${uid}`)} />
+      )}
 
       {/* Facturas pendientes */}
       <FacturasPendientes pendientes={reporte.pendientes} centroId={centro} />
@@ -574,10 +568,15 @@ function Editor({
           En el consolidado los números del resumen son la UNIÓN de cajeros; el detalle/tributario del BE
           es del reporte del día (mismos filtros: división + centro). Handoff HANDOFF-pie-del-cuadre. */}
       <CuadreDetalle
-        division={division}
+        division={t(`division.${division}`)}
         fecha={fecha}
         centroNombre={centroNombre}
         reporte={reporte}
+        subtotalesTarjeta={subtotalesTarjeta}
+        firmas={signOff.printed}
+        firmaTexto={signOff.statement}
+        reconciliationId={cuadreInicial?.id}
+        centroId={centro}
         resumen={{
           inicio,
           salesCash,

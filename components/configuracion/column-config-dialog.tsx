@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   actualizarColumna,
@@ -13,9 +12,12 @@ import {
 } from "@/lib/api/tablero";
 import { listProductos, type Producto } from "@/lib/api/inventario";
 import { listGruposFacturacion } from "@/lib/api/grupos-facturacion";
-import { toastError } from "@/lib/api/errors";
+import { listPersonalAll, type PersonalEnAlcance } from "@/lib/api/personal";
+import { responsibilityOptions } from "@/lib/personal/responsibilities";
+import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -32,7 +34,7 @@ import {
 // Column `tipo` vocabulary (BE Swagger enum) + option sources (BE-documented).
 // Listing a fixed contract enum in a control is not business hardcode.
 const TIPOS = ["texto", "select", "toggle", "hora", "fecha", "badge", "accion", "derivado"];
-const OPTION_SOURCES = ["medicos", "enfermeras", "tipos_cita", "estados"];
+const OPTION_SOURCES = ["medicos", "enfermeras", "tipos_cita", "estados", "personal"];
 
 interface AccionRow {
   key: string;
@@ -84,6 +86,12 @@ export function ColumnConfigDialog({
   const [permiso, setPermiso] = React.useState(col.permissionSlug ?? "");
   const [optionsSource, setOptionsSource] = React.useState((r.optionsSource as string) ?? "");
   const [writeBinding, setWriteBinding] = React.useState((r.writeBinding as string) ?? "");
+  // BE #615, handoff select-personal-por-capacidades: optionsSource "personal" + render.capacidades
+  // (qué capacidades llenan la lista — unión, no una por una). Sin ninguna marcada, la lista sale
+  // vacía A PROPÓSITO (nunca "todo el personal" por omisión).
+  const [capacidades, setCapacidades] = React.useState<string[]>(
+    Array.isArray(r.capacidades) ? (r.capacidades as string[]).map(String) : [],
+  );
   const [transition, setTransition] = React.useState((r.transition as string) ?? "");
   const [estampa, setEstampa] = React.useState((r.estampa as string) ?? "");
   const [group, setGroup] = React.useState((r.group as string) ?? "");
@@ -95,7 +103,7 @@ export function ColumnConfigDialog({
   // una columna entera de la tabla. `asignadoDe` dice de qué columna sale el nombre.
   const [mostrarAsignado, setMostrarAsignado] = React.useState(!!r.mostrarAsignado);
   const [asignadoDe, setAsignadoDe] = React.useState((r.asignadoDe as string) ?? "");
-  const [busy, setBusy] = React.useState(false);
+  const missing = missingFields([[t("colBinding"), !!binding.trim()]]);
 
   // Preserva las claves NO gestionadas por este diálogo (group, postAccion, color,
   // background, ancho…): parte del render existente y solo setea/limpia las del tipo.
@@ -108,6 +116,8 @@ export function ColumnConfigDialog({
     if (tipo === "select") {
       setOrDel("optionsSource", optionsSource);
       setOrDel("writeBinding", writeBinding);
+      if (optionsSource === "personal") base.capacidades = capacidades;
+      else delete base.capacidades;
     } else if (tipo === "toggle") {
       setOrDel("transition", transition);
       setOrDel("estampa", estampa);
@@ -123,9 +133,8 @@ export function ColumnConfigDialog({
     return Object.keys(base).length ? base : null;
   }
 
-  async function submit() {
-    setBusy(true);
-    try {
+  const { submitting, submit } = useSubmit(
+    async () => {
       const payload = {
         type: tipo,
         binding: binding.trim(),
@@ -148,29 +157,31 @@ export function ColumnConfigDialog({
         else delete compRender.grupoFacturacionId;
       }
       await setComposicionRender(tablero, col.id, compRender);
-      toast.success(t("saved"));
-      onSaved();
-      onClose();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+    {
+      successMessage: t("saved"),
+      onSuccess: () => {
+        onSaved();
+        onClose();
+      },
+    },
+  );
 
   return (
     <FormDialog
       open
       onOpenChange={(o) => !o && onClose()}
       title={`${t("configure")}: ${tRoot(col.labelKey)}`}
-      onSubmit={submit}
-      submitting={busy}
-      canSubmit={!busy && !!binding.trim()}
+      onSubmit={() => submit()}
+      submitting={submitting}
+      missing={missing}
     >
       {/* Nombre propio del negocio para esta columna EN ESTE servicio (re-etiquetar sin desplegar). El
           marcador es el nombre actual traducido; vacío = volver al de siempre. */}
-      <Field label={t("cfgLabel")} hint={t("cfgLabelHelp")}>
+      <Field label={t("cfgLabel")} htmlFor="column-config-label" hint={t("cfgLabelHelp")}>
         <Input
+          id="column-config-label"
+          aria-describedby="column-config-label-hint"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder={tRoot(col.labelKey)}
@@ -186,8 +197,14 @@ export function ColumnConfigDialog({
             </SelectContent>
           </Select>
         </Field>
-        <Field label={t("colBinding")} hint={t("colBindingHint")}>
-          <Input value={binding} onChange={(e) => setBinding(e.target.value)} placeholder="cita.motivo" />
+        <Field label={t("colBinding")} htmlFor="column-config-binding" hint={t("colBindingHint")} required>
+          <Input
+            id="column-config-binding"
+            aria-describedby="column-config-binding-hint"
+            value={binding}
+            onChange={(e) => setBinding(e.target.value)}
+            placeholder="cita.motivo"
+          />
         </Field>
       </div>
 
@@ -208,7 +225,9 @@ export function ColumnConfigDialog({
             <Select value={optionsSource} onValueChange={setOptionsSource}>
               <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
               <SelectContent>
-                {OPTION_SOURCES.map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
+                {OPTION_SOURCES.map((x) => (
+                  <SelectItem key={x} value={x}>{tRoot.has(`tablero.source.${x}`) ? tRoot(`tablero.source.${x}`) : x}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
@@ -226,6 +245,11 @@ export function ColumnConfigDialog({
           productoIds={productoIds}
           onProductoIds={setProductoIds}
         />
+      )}
+
+      {/* Capacidades del select "personal" (BE #615): qué etiquetas de staff.capabilities lo llenan. */}
+      {tipo === "select" && optionsSource === "personal" && (
+        <PersonalCapacidadesConfig capacidades={capacidades} onChange={setCapacidades} />
       )}
 
       {tipo === "toggle" && (
@@ -350,7 +374,13 @@ function ProductosGrupoConfig({
       <div className="space-y-1.5">
         <span className="text-xs font-medium text-muted-foreground">{t("cfgEscogeProductos")}</span>
         <div className="relative">
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("cfgBuscarProducto")} />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            // Enter while searching a product must not save the whole column config.
+            onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+            placeholder={t("cfgBuscarProducto")}
+          />
           {resultados.length > 0 && (
             <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border bg-background shadow-md">
               {resultados.map((p) => (
@@ -399,6 +429,55 @@ function ProductosGrupoConfig({
           </ul>
         )}
         {productoIds.length > 0 && <p className="text-[11px] text-muted-foreground">{t("cfgProductosHelp")}</p>}
+      </div>
+    </div>
+  );
+}
+
+// Capacidades del select "personal" (BE #615, handoff select-personal-por-capacidades): las chips
+// son las que YA están en uso por alguien del staff (responsibilityOptions, lib/personal/
+// responsibilities.ts — NO una lista escrita a mano), más las que ya estaban marcadas (si alguien
+// quitó esa capacidad de todo el personal, la chip no desaparece sola de la config).
+function PersonalCapacidadesConfig({
+  capacidades,
+  onChange,
+}: {
+  capacidades: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const t = useTranslations("configuracion.tableros");
+  const tRoot = useTranslations();
+  const personalRes = useResource<PersonalEnAlcance[]>(() => listPersonalAll(), []);
+  const personal = React.useMemo(() => (personalRes.state.kind === "ok" ? personalRes.state.data : []), [personalRes.state]);
+  const options = React.useMemo(
+    () => [...new Set([...responsibilityOptions(personal), ...capacidades])],
+    [personal, capacidades],
+  );
+  const label = (slug: string) => (tRoot.has(`personal.cargo.${slug}`) ? tRoot(`personal.cargo.${slug}`) : slug);
+  const toggle = (c: string) => onChange(capacidades.includes(c) ? capacidades.filter((x) => x !== c) : [...capacidades, c]);
+
+  return (
+    <div className="space-y-1.5 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("cfgCapacidades")}</span>
+      <p className="text-[11px] text-muted-foreground">{t("cfgCapacidadesHelp")}</p>
+      <div className="flex flex-wrap gap-2">
+        {options.map((c) => {
+          const on = capacidades.includes(c);
+          return (
+            <button
+              key={c}
+              type="button"
+              aria-pressed={on}
+              onClick={() => toggle(c)}
+              className={
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors " +
+                (on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent")
+              }
+            >
+              {on ? "✓ " : ""}{label(c)}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

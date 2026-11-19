@@ -4,6 +4,193 @@
     "noProfileTitle": "Tu cuenta no tiene un perfil asignado",
     "noProfileBody": "Iniciaste sesión, pero un administrador aún no ha enlazado tu cuenta a un perfil con permisos. Contacta a un administrador para que te lo asigne."
   },
+  "reports": {
+    "clinicScope": {
+      "many": "{count, plural, one {# centro} other {# centros}}",
+      "total": "{label} ({scope})",
+      "covers": "Cubre: {scope}"
+    },
+    "analytics": {
+      "none": "Sin asignar",
+      "dim": {
+        "clinic": "Centro",
+        "day": "Día",
+        "month": "Mes",
+        "weekday": "Día de la semana",
+        "hour": "Hora",
+        "doctor": "Médico",
+        "seller": "Vendedor",
+        "product": "Producto",
+        "patient": "Paciente",
+        "source": "Origen",
+        "paymentMethod": "Forma de pago",
+        "division": "División",
+        "kind": "Tipo",
+        "service": "Servicio",
+        "technician": "Técnico",
+        "visitType": "Tipo de visita",
+        "channel": "Canal",
+        "status": "Estado"
+      },
+      "weekday": {
+        "monday": "Lunes",
+        "tuesday": "Martes",
+        "wednesday": "Miércoles",
+        "thursday": "Jueves",
+        "friday": "Viernes",
+        "saturday": "Sábado",
+        "sunday": "Domingo"
+      },
+      "kind": {
+        "appointment": "Cita médica",
+        "therapy": "Terapia"
+      }
+    },
+    "salesBreakdown": {
+      "title": "Ventas",
+      "help": "Factura por 1 a 3 cortes a la vez. Bruto/Devoluciones/Neto es lo FACTURADO; Hora y Forma de pago es lo COBRADO (pagos) y no se combinan con Producto.",
+      "cutBy": "Cortar por",
+      "from": "Desde",
+      "to": "Hasta",
+      "search": "Buscar",
+      "exportCsv": "Exportar CSV",
+      "col": {
+        "invoices": "Facturas",
+        "patients": "Pacientes",
+        "gross": "Bruto",
+        "refunds": "Devoluciones",
+        "net": "Neto",
+        "quantity": "Cantidad"
+      },
+      "totals": "Totales",
+      "empty": "Sin ventas en ese rango.",
+      "truncated": "Se omitieron {n} filas adicionales — acota el rango o agrega otro corte.",
+      "pickAtLeastOne": "Elige al menos un corte.",
+      "productWithPaymentCut": "Producto no se puede combinar con Hora ni Forma de pago (son lo cobrado, no lo facturado)."
+    },
+    "attendance": {
+      "title": "Asistencia",
+      "help": "Citas y terapias por 1 a 3 cortes. Un rango futuro muestra quién vendrá (programadas); un rango pasado sin marcar cuenta como pendiente.",
+      "cutBy": "Cortar por",
+      "from": "Desde",
+      "to": "Hasta",
+      "search": "Buscar",
+      "col": {
+        "events": "Eventos",
+        "attended": "Asistió",
+        "noShows": "No asistió",
+        "cancelled": "Canceladas",
+        "scheduled": "Programadas",
+        "unrecorded": "Sin marcar",
+        "patients": "Pacientes",
+        "attendedPatients": "Pacientes que asistieron"
+      },
+      "totals": "Totales",
+      "empty": "Sin eventos en ese rango.",
+      "truncated": "Se omitieron {n} filas adicionales — acota el rango o agrega otro corte.",
+      "pickAtLeastOne": "Elige al menos un corte."
+    },
+    "patientsStats": {
+      "title": "Pacientes",
+      "help": "Visitas y gasto por paciente en el rango. \"Perdidos\" = sin visita hace N días y nada agendado.",
+      "from": "Desde",
+      "to": "Hasta",
+      "search": "Buscar",
+      "minVisits": "Frecuentes (≥ visitas)",
+      "lapsedDays": "Perdidos (días sin visitar)",
+      "newOnly": "Solo nuevos",
+      "col": {
+        "patient": "Paciente",
+        "visits": "Visitas",
+        "therapies": "Terapias",
+        "firstVisit": "Primera visita",
+        "lastVisit": "Última visita",
+        "nextVisit": "Próxima visita",
+        "avgDays": "Días prom. entre visitas",
+        "spend": "Gasto",
+        "isNew": "Nuevo"
+      },
+      "distribution": "Distribución por nº de visitas",
+      "empty": "Sin pacientes en ese rango.",
+      "truncated": "Mostrando los primeros {shown} de {total} pacientes — acota el rango o sube los filtros.",
+      "viewPatient": "Ver ficha"
+    },
+    "returnRate": {
+      "title": "Tasa de retorno",
+      "help": "De quienes terminaron su ventana de retorno, cuántos volvieron dentro de los días elegidos. \"Pendiente\" todavía no decide: la ventana sigue abierta.",
+      "from": "Desde",
+      "to": "Hasta",
+      "withinDays": "Volver dentro de (días)",
+      "cutBy": "Cortar por",
+      "none": "Sin corte",
+      "search": "Buscar",
+      "col": {
+        "cohort": "Cohorte",
+        "returned": "Volvieron",
+        "notReturned": "No volvieron",
+        "pending": "Pendientes",
+        "rate": "Tasa",
+        "avgDays": "Días prom. a volver"
+      },
+      "totals": "Totales",
+      "empty": "Sin cohorte en ese rango.",
+      "noRate": "—"
+    },
+    "patientAttendanceTab": {
+      "subTabVisits": "Visitas",
+      "subTabPurchases": "Compras",
+      "visitsSummaryTitle": "Resumen",
+      "packagesEmpty": "Sin paquetes.",
+      "title": "Asistencia",
+      "firstVisit": "Primera visita",
+      "lastVisit": "Última visita",
+      "avgDays": "Días prom. entre visitas",
+      "visitsTotal": "Visitas",
+      "visitsAppointments": "Citas",
+      "visitsTherapies": "Terapias",
+      "visitsDays": "Días distintos",
+      "noShows": "No asistió",
+      "cancelled": "Canceladas",
+      "unrecorded": "Sin marcar",
+      "therapiesTitle": "Terapias",
+      "col": {
+        "service": "Servicio",
+        "sessions": "Sesiones",
+        "first": "Primera",
+        "last": "Última",
+        "product": "Producto",
+        "total": "Total",
+        "delivered": "Entregado",
+        "returned": "Devuelto",
+        "transferred": "Transferido",
+        "remaining": "Restante",
+        "invoices": "Facturas",
+        "gross": "Bruto",
+        "refunds": "Devoluciones",
+        "net": "Neto"
+      },
+      "visitsByMonthTitle": "Visitas por mes",
+      "upcomingTitle": "Próximas citas",
+      "upcomingEmpty": "Sin citas próximas.",
+      "packagesTitle": "Paquetes",
+      "spendTitle": "Gasto",
+      "empty": "Sin visitas registradas."
+    },
+    "print": "Imprimir",
+    "csv": "CSV",
+    "printedBy": "Impreso por {who} · {when}",
+    "email": "Email",
+    "emailTitle": "Enviar por email",
+    "emailTo": "Para",
+    "emailHint": "Uno o varios correos separados por coma. Va en PDF con el membrete.",
+    "emailSend": "Enviar",
+    "emailSending": "Enviando…",
+    "emailSent": "Enviado. Queda registrado en las exportaciones.",
+    "emailInvalid": "Revisa los correos: alguno no es válido.",
+    "cancel": "Cancelar",
+    "emailHintDomain": "Escribe solo el nombre: @{domain} se agrega solo. Varios, separados por coma. Va en PDF con el membrete.",
+    "emailWillGo": "Se envía a: {to}"
+  },
   "ehrIntegration": {
     "title": "Enganche con el EHR",
     "description": "Al marcar Presente, el paciente se registra también en el EHR. Consultas y Servicios se encienden por separado, por centro.",
@@ -95,7 +282,9 @@
       "roleMedico": "Médico",
       "patientsPerStaff": "Lleva a la vez",
       "patientsPerStaffHelp": "«Lleva a la vez»: 1 = se queda con el paciente; más de 1 = atiende a varios (como en las cámaras)",
-      "laserWarning": "1-a-1 con el paciente: ocupa un técnico completo; si comparte cargo con el láser, le resta puestos."
+      "laserWarning": "1-a-1 con el paciente: ocupa un técnico completo; si comparte cargo con el láser, le resta puestos.",
+      "everyLineHelp": "Cada línea tiene que caber a la vez: si falta el puesto o la persona de cualquiera, la hora no cabe.",
+      "staffSuffix": "· personal"
     },
     "add": "Nuevo recurso",
     "colName": "Nombre",
@@ -126,6 +315,7 @@
     "fSlug": "Clave",
     "fKind": "Tipo",
     "fCapacity": "Capacidad (pacientes a la vez)",
+    "capacityInvalid": "La capacidad debe ser mayor que 0.",
     "fConcurrency": "Concurrencia",
     "fMaxMin": "Máximo de minutos por paciente",
     "fMaxMinPlaceholder": "sin tope",
@@ -134,10 +324,23 @@
     "fStaffIdPlaceholder": "Sin persona asignada",
     "fBlocksAgenda": "El recurso es una persona y bloquea su agenda",
     "fBlocksAgendaHelp": "Para la doctora de EMPOWER: al agendarla, se bloquean sus horas de consulta.",
+    "fTrainWeight": "Peso en el tren",
+    "fTrainWeightHelp": "Los recursos escasos (rooms de láser, sillas de suero, la doctora de EMPOWER) anclan el tren de terapias: cuanto más alto, antes va.",
+    "nurses": "Enfermería",
+    "lineRepeated": "Ese recurso ya está en otra línea de este servicio: júntalas en una.",
+    "role": {
+      "tecnico": "Técnico",
+      "enfermera": "Enfermera",
+      "medico": "Médico",
+      "noStaffShort": "sin personal"
+    },
     "kind": {
       "room": "Cuarto",
       "chair": "Silla",
-      "person": "Persona"
+      "person": "Persona",
+      "machine": "Máquina",
+      "staff": "Personal (pozo de un cargo)",
+      "staffCapacityHelp": "No limita: el techo es la gente de turno de ese cargo."
     },
     "concurrency": {
       "sequential": "Secuencial",
@@ -151,9 +354,25 @@
   "therapies": {
     "full": "Lleno: no quedan puestos a esa hora.",
     "noStaff": "Sin personal: no hay quien lo dé a esa hora.",
-    "endsAfterClosing": "Termina después del cierre: la sesión no acabaría antes de que termine la última franja.",
     "overMaxPerPatient": "Se pasa del tope de minutos por paciente.",
-    "holiday": "Día festivo: la agenda está cerrada."
+    "holiday": "Día festivo: la agenda está cerrada.",
+    "trainPastClosing": "No da tiempo: el tren termina después del cierre.",
+    "trainRollbackIncomplete": "Falló una terapia y no se pudo deshacer todo: revisa las que quedaron agendadas.",
+    "trainOneCenter": "El tren se agenda en un solo centro.",
+    "trainDoesNotFit": "El tren completo ya no cabe a esa hora. No se agendó nada.",
+    "trainTimeNotOffered": "Esa hora de entrada no se ofrece.",
+    "seriesNoTimeWithinShift": "Ninguna hora cabe dentro del desplazamiento permitido.",
+    "seriesNoTime": "Ninguna hora cabe ese día.",
+    "seriesCountRequired": "Indica cuántas sesiones para estas terapias.",
+    "seriesStartInThePast": "La serie empieza hoy o después.",
+    "seriesDayDoesNotFit": "El tren del {date} ya no cabe a su hora. No se agendó nada.",
+    "seriesDaysInvalid": "Días de la serie no válidos.",
+    "sheetFull": "Lleno en la hoja del call center",
+    "notAStartTime": "Este servicio solo empieza en punto: elige una hora entera",
+    "outsideHours": "Fuera del horario del centro",
+    "pastClosing": "Termina después del cierre del centro",
+    "notConfigured": "Servicio sin recurso configurado",
+    "endsAfterClosing": "Termina después del cierre: la sesión no acabaría antes de que termine la última franja."
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -181,6 +400,28 @@
     "remaining": "quedan {n}",
     "addTherapy": "Agregar terapia",
     "hoursFor": "Horas · {service}",
+    "entryHours": "Horas de entrada",
+    "trainBlockedBy": "{reason} — {service}",
+    "blockedByResource": "{reason} — {resource}",
+    "trainEndsAt": "Sale a las {time}",
+    "keepOrder": "Mantener mi orden",
+    "bookTrain": "Agendar el tren ({n})",
+    "trainSeriesButton": "Programar una serie del tren",
+    "trainSeriesTitle": "Serie del tren — {patient}",
+    "trainSeriesSessions": "Sesiones",
+    "trainSeriesSessionsPlaceholder": "¿Cuántas?",
+    "trainSeriesMoved": "movido de {from} a {to}",
+    "trainSeriesSkipped": "saltado",
+    "trainSeriesUnmet": "Sin colocar: {list}",
+    "trainSeriesBooked": "{n} sesiones agendadas en {days} días",
+    "trainSeriesUntil": "Hasta el",
+    "trainSeriesMaxDays": "Como mucho (días)",
+    "trainSeriesCalculate": "Calcular",
+    "trainSeriesCalculating": "Calculando…",
+    "trainSeriesConfirmButton": "Confirmar ({days} días)",
+    "trainSeriesContinue": "Programar el resto",
+    "trainSeriesFromPurchased": "(comprado)",
+    "maxShift": "Máximo de desplazamiento (min)",
     "pickCard": "Elige una terapia para ver sus horas",
     "dragHint": "Arrastra la tarjeta a una hora o haz clic",
     "noHour": "Elige una hora para ver si el día cuadra",
@@ -216,7 +457,13 @@
     "recurringRemove": "Quitar",
     "recurringConfirm": "Confirmar {n} sesión(es)",
     "recurringConfirming": "Agendando…",
-    "recurringSummary": "{booked} agendadas, {skipped} omitidas"
+    "recurringSummary": "{booked} agendadas, {skipped} omitidas",
+    "fullWarns": "Lleno: se agenda con aviso",
+    "trainSeriesOverbooked": "Sobrecupo",
+    "recurringPreviewFirst": "Primero pulsa «Vista previa»",
+    "recurringNothingBookable": "Ninguna fecha de la vista previa tiene hueco",
+    "trainSeriesCalculateFirst": "Primero pulsa «Calcular»",
+    "trainSeriesNothingPlanned": "Ningún día del cálculo se puede agendar"
   },
   "citas": {
     "calendario": {
@@ -270,7 +517,8 @@
       "useSuggested": "Usar sugerida"
     },
     "medico_requerido_en_consulta": "Para entrar en consulta la cita necesita un médico asignado.",
-    "datos_requeridos_para_presente": "Faltan datos obligatorios del paciente para marcarlo presente."
+    "datos_requeridos_para_presente": "Faltan datos obligatorios del paciente para marcarlo presente.",
+    "closedByHoliday": "Día feriado: la agenda está cerrada"
   },
   "tableroBoard": {
     "live": "En vivo",
@@ -399,6 +647,8 @@
       "cfgOptionsSource": "Fuente de opciones",
       "cfgWriteBinding": "Escribe en (FK)",
       "cfgWriteBindingHint": "Campo que se guarda al elegir, ej. cita.medicoId.",
+      "cfgCapacidades": "Capacidades",
+      "cfgCapacidadesHelp": "Quién puede llenar este select: la unión del personal con cualquiera de estas capacidades. Sin ninguna marcada, la lista sale vacía, a propósito.",
       "cfgTransition": "Transición",
       "cfgEstampa": "Sella hora en",
       "cfgEstampaHint": "Campo de la hora sellada, ej. llegadaEn.",
@@ -434,7 +684,9 @@
       "cfgEscogeProductos": "O escoge los productos",
       "cfgBuscarProducto": "Buscar producto…",
       "cfgProductosHelp": "Arrastra para ordenar: lo más usado primero.",
-      "colArrastrar": "Arrastra para reordenar"
+      "colArrastrar": "Arrastra para reordenar",
+      "colRemoveTitle": "¿Quitar esta columna?",
+      "colRemoveBody": "Se quitará «{name}» de este tablero."
     },
     "prioridadFlags": {
       "title": "Prioridades del paciente",
@@ -481,7 +733,8 @@
         "ehrIntegration": "Integración con el EHR",
         "schedulingBridge": "Puente con Google Sheets",
         "pacientes": "Pacientes",
-        "numeracion": "Numeración"
+        "numeracion": "Numeración",
+        "caja": "Caja"
       },
       "frontdesk_autopresente": "Auto-presente al pagar",
       "auto_present_follow_up": "Auto-presente en seguimiento",
@@ -502,8 +755,25 @@
       "numeracion_facturas": "Facturas",
       "numeracion_presupuestos": "Presupuestos",
       "numeracion_record_paciente": "Récord de paciente",
-      "numeracion_devoluciones": "Devoluciones"
+      "numeracion_devoluciones": "Devoluciones",
+      "agenda_blocking_rules": "Qué bloquea al agendar",
+      "cash_count_mode": "Cómo se cuenta el efectivo",
+      "cash_close_enabled": "Mostrar «Procesar cierre»"
+    },
+    "agendaRules": {
+      "title": "Qué bloquea al agendar",
+      "help": "El feriado bloquea por defecto. Todo lo demás (capacidad, horario, paso de inicio, tope por paciente) se puede dejar en solo avisa: la reserva se hace igual y queda un aviso no bloqueante.",
+      "guardado": "Guardado",
+      "valorPorDefecto": "Este centro no lo ha configurado — valor por defecto (solo el feriado bloquea).",
+      "bloquea": "Bloquea",
+      "soloAvisa": "Solo avisa",
+      "showOffStepStartsHelp": "Enseñar también las horas que no son de inicio del servicio (p. ej. las :30 en uno que empieza en punto); se agendan igual, con aviso."
     }
+  },
+  "cashCountMode": {
+    "title": "Cómo se cuenta el efectivo del día",
+    "help": "Flexible deja cada día elegir entre la suma de los cajeros o un conteo único, como hoy. Dos conteos cuenta consulta y general por separado, siempre sumados. Un solo conteo reemplaza los dos por uno de toda la caja.",
+    "guardado": "Guardado"
   },
   "tableroEditor": {
     "title": "Columnas del tablero",
@@ -535,6 +805,9 @@
       "prox_cita": "Próx-cita",
       "pago": "Pago",
       "testimonio": "Testimonio"
+    },
+    "source": {
+      "personal": "Personal por capacidades"
     }
   },
   "agenda": {
@@ -672,11 +945,13 @@
       "endAuto": "Fin automático {time}",
       "variantList": "Lista",
       "variantGrid": "Rejilla",
-      "editLocked": "Para cambiar la fecha, el tipo o el paciente, use Reagendar en el menú de acciones (⋯).",
-      "editLockedError": "Una edición no cambia la fecha, el tipo ni el paciente: use Reagendar.",
       "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea).",
       "rescheduledFrom": "El paciente ya tenía una cita el {date}: se movió a esta fecha (una cita viva por paciente).",
-      "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha."
+      "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha.",
+      "holidayClosed": "{name} — día feriado, la agenda está cerrada ese día.",
+      "holidayInfo": "{name} — día feriado.",
+      "editLocked": "Para cambiar la fecha, el tipo o el paciente, use Reagendar en el menú de acciones (⋯).",
+      "editLockedError": "Una edición no cambia la fecha, el tipo ni el paciente: use Reagendar."
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",
@@ -689,8 +964,18 @@
       "full": "lleno",
       "placeholder": "Elige una hora disponible",
       "variantDropdown": "Lista",
-      "variantChips": "Rejilla"
-    }
+      "variantChips": "Rejilla",
+      "fullInSheet": "Lleno en la hoja"
+    },
+    "rule": {
+      "capacity": "Sin cupo (puestos o personal)",
+      "closing": "Fuera del horario del centro",
+      "startStep": "Fuera del paso de inicio del servicio",
+      "maxPerPatient": "Pasa el tope de minutos por paciente",
+      "holiday": "Día feriado",
+      "unknown": "Otra regla de la agenda"
+    },
+    "showOffStepStarts": "Enseñar horas fuera del paso"
   },
   "appointments": {
     "title": "Citas",
@@ -783,7 +1068,7 @@
       "time": "Hora",
       "channel": "Canal",
       "channels": {
-        "atencion": "Atención",
+        "frontdesk": "Recepción",
         "callcenter": "Call center",
         "webhook": "Webhook",
         "ia": "IA"
@@ -796,6 +1081,7 @@
     }
   },
   "patients": {
+    "moreActions": "Más acciones",
     "title": "Pacientes",
     "total": "{count, plural, one {# paciente} other {# pacientes}}",
     "backToCall": "Volver a la llamada",
@@ -809,6 +1095,36 @@
     "reactivate": "Reactivar",
     "deactivated": "Paciente desactivado.",
     "reactivated": "Paciente reactivado.",
+    "merge": {
+      "action": "Fusionar con…",
+      "title": "Fusionar con otra ficha",
+      "hint": "Todo el historial pasa a la ficha BUENA; la otra desaparece.",
+      "searchPlaceholder": "Buscar la otra ficha por nombre o récord…",
+      "searchHint": "Escribe al menos 2 letras.",
+      "whichIsGood": "¿Cuál es la ficha BUENA?",
+      "colTable": "Tabla",
+      "colRows": "Filas",
+      "table": {
+        "invoices": "Facturas",
+        "appointments": "Citas",
+        "sessions": "Sesiones",
+        "packages": "Paquetes"
+      },
+      "policy": {
+        "drop-duplicate-row": "Se queda la fila de la ficha buena",
+        "retire-duplicate-appointment": "La cita viva de la duplicada queda como reprogramada",
+        "abort": "No se puede resolver automáticamente"
+      },
+      "changesPastReportsWarning": "El dinero y los cuadres no cambian. Cambian los conteos de personas de periodos pasados: meses {months}.",
+      "acceptPastReportImpact": "Entiendo que esto cambia conteos de periodos pasados",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué se fusionan estas dos fichas",
+      "merge": "Fusionar",
+      "mergedOk": "Fichas fusionadas",
+      "otherRecord": "La otra ficha",
+      "simulationFailed": "No se pudo calcular la fusión. Vuelve a elegir la ficha.",
+      "blockedReason": "La fusión está bloqueada: revisa los avisos de arriba."
+    },
     "confirmDeactivateTitle": "¿Desactivar paciente?",
     "confirmDeactivateBody": "{name} dejará de aparecer en la lista. Su historial se conserva y puedes reactivarlo después.",
     "yearsOld": "{age} años",
@@ -884,11 +1200,11 @@
       "recordDuenoInactivo": "inactivo",
       "camposFaltantes": "Faltan campos obligatorios: {campos}",
       "emailInvalido": "Escribe un correo válido, p. ej. nombre@dominio.com",
-      "requiredLegend": "Campos obligatorios",
       "medico": "Médico",
       "sinMedico": "Sin médico",
       "otroCentro": "otro centro",
-      "idTypeFirst": "Elige primero el tipo de ID"
+      "idTypeFirst": "Elige primero el tipo de ID",
+      "checkingRecord": "Comprobando el número de récord…"
     },
     "acciones": "Acciones",
     "tabs": {
@@ -897,15 +1213,69 @@
       "appointments": "Citas",
       "therapies": "Terapias",
       "billing": "Facturación",
-      "protocolChange": "Cambio de protocolo"
+      "protocolChange": "Cambio de protocolo",
+      "attendance": "Asistencia",
+      "transferTreatment": "Transferir tratamiento"
+    },
+    "transferTreatment": {
+      "title": "Transferir tratamiento",
+      "help": "Mueve las sesiones pendientes de un paquete de este paciente a otra persona, a otro centro, o ambos.",
+      "step1": "Qué se transfiere",
+      "noPending": "Este paciente no tiene sesiones pendientes de ningún paquete.",
+      "pendingN": "Pendientes: {n} de {total}",
+      "step2": "A dónde",
+      "scope": {
+        "otherPatient": "A otra persona",
+        "otherClinic": "A otro centro",
+        "both": "A otra persona, en otro centro"
+      },
+      "destinationPatient": "Paciente destino",
+      "searchPatientPlaceholder": "Buscar por nombre o récord…",
+      "searchHint": "Escribe al menos 2 letras.",
+      "changeSelection": "Cambiar",
+      "destinationClinic": "Centro destino",
+      "chooseClinic": "Elige un centro",
+      "sessions": "Sesiones a transferir",
+      "sessionsHint": "Vacío = las {n} pendientes.",
+      "sessionsOutOfRange": "Pon un número entre 1 y {n}.",
+      "nothingPending": "Este paquete no tiene sesiones pendientes.",
+      "mode": "Cómo",
+      "virtual": "Solo el tratamiento",
+      "virtualHelp": "El destino descuenta su propio stock al aplicar.",
+      "fisica": "Tratamiento + inventario",
+      "fisicaHelp": "También mueve el material físico entre almacenes.",
+      "sourceWarehouse": "Almacén origen",
+      "destinationWarehouse": "Almacén destino",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué se transfiere a otra persona…",
+      "confirm": "Transferir",
+      "done": "Transferencia aplicada",
+      "resultTitle": "Quedó así",
+      "resultSource": "En este paciente",
+      "resultDestination": "En el destino",
+      "historyTitle": "Historial de transferencias",
+      "historyEmpty": "Sin transferencias todavía.",
+      "void": "Deshacer",
+      "voidConfirmTitle": "Deshacer la transferencia",
+      "voidConfirmBody": "Las sesiones y, si aplica, el inventario, vuelven al origen.",
+      "voidOk": "Transferencia deshecha",
+      "status": {
+        "aplicada": "Aplicada",
+        "anulada": "Deshecha"
+      }
     },
     "hub": {
-      "alerts": "Alertas y precauciones",
-      "allergies": "Alergias",
-      "implants": "Implantes y dispositivos",
-      "noAlerts": "Sin alertas conocidas",
-      "noAllergies": "Sin alergias conocidas",
-      "noImplants": "Sin implantes conocidos",
+      "appointmentsUpcoming": "Próximas",
+      "appointmentsPast": "Anteriores",
+      "appointmentsAll": "Todas",
+      "appointmentsCount": "{n, plural, one {# cita} other {# citas}}",
+      "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
+      "nothingInView": "Nada que mostrar en esta vista.",
+      "invoicesTitle": "Facturas",
+      "certificationHelp": "Lo facturado por concepto en el rango, con las devoluciones restadas.",
+      "breakdownTitle": "Desglose",
+      "today": "Hoy",
+      "clinic": "Centro",
       "loading": "Cargando…",
       "noCitas": "Sin citas.",
       "historialReagendamientos": "Historial de reagendamientos",
@@ -921,6 +1291,7 @@
       "technician": "Técnico / Enfermera",
       "doctor": "Médico",
       "session": "Sesión",
+      "formats": "Formatos",
       "invoice": "Factura",
       "concept": "Concepto",
       "net": "Neto",
@@ -929,7 +1300,17 @@
       "pending": "Pendiente",
       "refunded": "Devuelto",
       "lastVisit": "Última visita",
-      "noLastVisit": "Sin visitas registradas."
+      "noLastVisit": "Sin visitas registradas.",
+      "invoiceHistoryCount": "{n, plural, one {# factura} other {# facturas}} en el historial",
+      "department": "Departamento",
+      "origin": "Origen",
+      "legacy": "Legado · {origin}",
+      "newSystem": "Sistema nuevo",
+      "prevPage": "Anterior",
+      "nextPage": "Siguiente",
+      "pageOf": "Página {page} de {pages}",
+      "printInvoice": "Imprimir",
+      "openInvoice": "Abrir factura"
     },
     "centerFilter": {
       "label": "Centros",
@@ -947,6 +1328,11 @@
     "errorBody": "Ocurrió un error en esta pantalla. El resto del sistema sigue funcionando. Puedes reintentar.",
     "save": "Guardar",
     "saving": "Guardando…",
+    "form": {
+      "missingPrefix": "Para continuar, completa:",
+      "required": "obligatorio",
+      "requiredLegend": "Campos obligatorios"
+    },
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "delete": "Eliminar",
@@ -975,7 +1361,9 @@
     "close": "Cerrar",
     "add": "Agregar",
     "forbidden": "No tienes acceso a esta pantalla.",
-    "saved": "Guardado."
+    "saved": "Guardado.",
+    "deleteConfirmTitle": "¿Eliminar este elemento?",
+    "deleteConfirmBody": "Esta acción no se puede deshacer."
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -1084,6 +1472,12 @@
     "expand": "Expandir"
   },
   "nav": {
+    "agendaRules": "Qué bloquea al agendar",
+    "cashCountMode": "Cómo se cuenta el efectivo",
+    "estadisticasVentas": "Ventas (analítica)",
+    "estadisticasAsistencia": "Asistencia (analítica)",
+    "estadisticasPacientes": "Pacientes (analítica)",
+    "tasaRetorno": "Tasa de retorno",
     "home": "Inicio",
     "appointments": "Citas",
     "signIn": "Iniciar sesión",
@@ -1121,7 +1515,7 @@
       "patients": "Pacientes",
       "services": "Servicios",
       "billing": "Facturación",
-      "reports": "Reportes",
+      "reports": "Analítica",
       "inventory": "Inventario",
       "communications": "Comunicaciones",
       "admin": "Administración",
@@ -1198,7 +1592,17 @@
     "expandNav": "Desplegar menú",
     "patientDesk": "Centro de Pacientes",
     "paquetesVenta": "Paquetes de venta",
-    "inventory_live_stock": "Stock live (balanzas)"
+    "inventory_live_stock": "Stock live (balanzas)",
+    "ahora_mismo": "Ahora mismo",
+    "productosExonerados": "Productos exonerados (IVU)",
+    "bothCenters": "AMBOS",
+    "bodyMeasurementsUnlinked": "Medidas sin vincular",
+    "changeLog": "Historial de cambios",
+    "confirmationPolicies": "Confirmaciones",
+    "calendarAbsenceReview": "Ausencias por revisar",
+    "paymentMethods": "Formas de pago",
+    "inventory_daily_kardex": "Kardex diario",
+    "inventory_adjustments": "Ajustes"
   },
   "admin": {
     "title": "Administración",
@@ -1209,7 +1613,6 @@
     "tabs": {
       "personal": "Personal",
       "pending": "Pendientes",
-      "users": "Usuarios",
       "centers": "Centros",
       "theme": "Tema",
       "roles": "Roles",
@@ -1219,16 +1622,14 @@
     },
     "editorRol": {
       "title": "Editor de Rol unificado (beta)",
-      "help": "Elige un rol y ajusta qué ve y qué puede hacer, todo en una pantalla. No reemplaza Roles/Permisos/Menú todavía.",
+      "help": "Elige un rol y ajusta qué puede hacer. El menú de cada persona sale de sus permisos.",
       "selectRole": "Elige un rol",
       "loading": "Cargando…",
       "empty": "Elige un rol para empezar.",
       "retry": "Reintentar",
       "save": "Guardar",
       "saving": "Guardando…",
-      "saved": "Editor de rol guardado.",
-      "savedMenuOnly": "Se guardó el menú, pero fallaron los permisos: {error}",
-      "savedPermisosOnly": "Se guardaron los permisos, pero falló el menú: {error}"
+      "saved": "Editor de rol guardado."
     },
     "rbac": {
       "title": "Roles y permisos",
@@ -1263,14 +1664,10 @@
       "edit": "Editar",
       "editTitle": "Editar rol",
       "updated": "Rol actualizado.",
-      "menuRol": "Menú",
-      "menuRolTitle": "Menú del rol {role}",
-      "menuRolHelp": "Marca las opciones del menú que verá este rol. Se traduce a permisos; los permisos que no son de menú no se tocan.",
-      "menuRolSaved": "Menú del rol actualizado",
-      "menuRolSinPermiso": "visible para todos",
       "confirmDelete": "¿Eliminar el rol {role}? Los usuarios que lo tengan lo perderán.",
       "todosLosCentros": "Opera en todos los centros",
-      "todosLosCentrosAyuda": "Quien reciba este rol lo hereda; el rol se asigna global (no a un centro)."
+      "todosLosCentrosAyuda": "Quien reciba este rol lo hereda; el rol se asigna global (no a un centro).",
+      "adminRoleFixed": "El rol Administrador tiene acceso total y no se edita."
     },
     "access": {
       "title": "Accesos del usuario",
@@ -1336,7 +1733,9 @@
       "permisoClave": "Permiso requerido",
       "permisoClaveHint": "Vacío = visible para todos",
       "permisoClavePlaceholder": "Elige un permiso",
-      "permisoSinPermiso": "Sin permiso (visible para todos)"
+      "permisoSinPermiso": "Sin permiso (visible para todos)",
+      "deleteTitle": "¿Eliminar este ítem?",
+      "deleteBody": "Se eliminará «{name}» del menú. Esta acción no se puede deshacer."
     },
     "theme": {
       "systemTitle": "Color de marca del sistema",
@@ -1374,12 +1773,13 @@
       "createHelp": "Mientras esté activo, este tema prevalece sobre todos.",
       "creating": "Creando…",
       "createSubmit": "Crear",
-      "created": "Override creado."
+      "created": "Override creado.",
+      "removeTitle": "¿Quitar este override?",
+      "removeBody": "Se quitará «{name}». El tema normal vuelve a aplicarse. Esta acción no se puede deshacer."
     },
     "columns": {
       "email": "Email",
       "name": "Nombre",
-      "accessMode": "Modo de acceso",
       "status": "Estado",
       "actions": "Acciones",
       "roles": "Rol(es)",
@@ -1393,12 +1793,11 @@
     "rejectTitle": "Rechazar perfil",
     "rejectDescription": "Indica el motivo del rechazo de {email}.",
     "motivoPlaceholder": "Motivo del rechazo",
+    "rejectReason": "Motivo del rechazo",
     "confirmReject": "Rechazar",
     "cancel": "Cancelar",
     "users": {
       "invite": "Invitar usuario",
-      "empty": "Aún no hay usuarios.",
-      "assign": "Asignar centro",
       "access": "Accesos",
       "centros": "Centros",
       "editar": "Editar usuario",
@@ -1406,12 +1805,10 @@
       "reactivar": "Reactivar",
       "suspendido": "Usuario suspendido",
       "reactivado": "Usuario reactivado",
-      "buscar": "Buscar por email, nombre, rol o centro…",
       "sinRol": "Sin rol",
       "sinCentro": "Sin centro",
       "hasta": "hasta {fecha}",
       "masAcciones": "Más acciones",
-      "sinResultados": "Ningún usuario coincide con la búsqueda.",
       "generarCodigo": "Generar código de acceso",
       "codigo": {
         "titulo": "Código de acceso",
@@ -1434,23 +1831,32 @@
         "cancelar": "Cancelar",
         "guardar": "Cambiar email",
         "guardando": "Cambiando…",
-        "ok": "Email de acceso actualizado"
+        "ok": "Email de acceso actualizado",
+        "unchanged": "Es el mismo email que ya tiene"
+      },
+      "adminBadge": "Administrador",
+      "allCenters": "Todos los centros",
+      "status": {
+        "aprobado": "Aprobado",
+        "pendiente": "Pendiente",
+        "suspendido": "Suspendido",
+        "rechazado": "Rechazado"
       }
     },
     "invite": {
       "title": "Invitar usuario",
       "description": "Crea el usuario y su perfil aprobado en un paso.",
-      "persona": "¿Es alguien que ya está dado de alta?",
-      "personaHint": "Opcional. Engancha la cuenta a esa persona y conserva su historial.",
+      "persona": "¿Ya tiene ficha de personal (médico, técnico…)?",
+      "personaHint": "Si ya trabaja aquí, elígelo para no duplicarlo. Su historial queda con la cuenta.",
       "personaPlaceholder": "Elige la persona (o déjalo vacío)",
-      "personaNadie": "Nadie — cuenta nueva sin ficha",
+      "personaNadie": "No — persona nueva",
       "personaEnlazando": "Se enlazará a: {nombre} (conserva su historial)",
+      "suggestion": "{nombre} ya tiene ficha de personal en {centro}. ¿Es esta persona?",
+      "suggestionNoCenter": "{nombre} ya tiene ficha de personal. ¿Es esta persona?",
+      "suggestionLink": "Sí, enlazar",
       "email": "Email",
       "name": "Nombre",
       "lastName": "Apellido",
-      "accessMode": "Modo de acceso",
-      "operativo": "Operativo",
-      "gerencial": "Gerencial",
       "submit": "Invitar",
       "submitting": "Invitando…",
       "success": "{email} invitado.",
@@ -1466,12 +1872,16 @@
       "done": "Listo",
       "centro": "Centro",
       "centroPlaceholder": "Elige un centro",
+      "centroTodos": "Todos los centros ({n})",
       "centroHint": "Opcional; sin centro el usuario no podrá entrar hasta que se le asigne uno.",
       "temporal": "Acceso temporal a este centro",
       "vigenteHasta": "Vigente hasta",
       "rol": "Rol",
       "rolPlaceholder": "Elige un rol",
       "rolHint": "Opcional. Si eliges rol SIN centro, el rol aplica en TODOS los centros.",
+      "rolAdminHint": "Para hacerlo administrador, dale el rol Administrador desde sus accesos una vez creado.",
+      "centerFailed": "El usuario se creó, pero no se pudo darle acceso a {centro}. Añádelo desde sus centros.",
+      "roleFailed": "El usuario se creó, pero no se pudo asignarle el rol. Asígnalo desde sus accesos.",
       "clone": {
         "label": "Clonar de (opcional)",
         "hint": "Copia su acceso ahora mismo. Después, cada usuario se administra por separado.",
@@ -1483,7 +1893,6 @@
         "roles": "{n} roles ({ya} ya tenía)",
         "permisos": "{n} excepciones ({ya} ya tenía)",
         "centros": "{n} centros ({ya} ya tenía)",
-        "modo": "El usuario pasa a modo {modo} (solo lectura), como el original.",
         "ok": "Acceso copiado de {origen}.",
         "falloAviso": "El usuario se creó, pero no se pudo copiar el acceso. Reintenta desde su ficha de accesos."
       }
@@ -1555,13 +1964,9 @@
     },
     "editarPerfil": {
       "title": "Editar {email}",
-      "help": "Datos básicos y modo de acceso del usuario.",
+      "help": "Datos básicos del usuario.",
       "nombre": "Nombre",
       "apellido": "Apellido",
-      "accessMode": "Modo de acceso",
-      "operativo": "Operativo (un centro a la vez)",
-      "gerencial": "Gerencial (ve todos sus centros, solo lectura)",
-      "accessModeHelp": "Gerencial ve varios centros a la vez pero no puede escribir.",
       "guardado": "Perfil actualizado"
     },
     "permisos": {
@@ -1590,7 +1995,9 @@
         "accion": "Acción",
         "descripcion": "Descripción"
       }
-    }
+    },
+    "approveTitle": "¿Aprobar este perfil?",
+    "approveBody": "{email} podrá entrar al sistema."
   },
   "login": {
     "title": "Iniciar sesión",
@@ -1690,7 +2097,8 @@
     "stepPresent": "Presente",
     "stepConsult": "En consulta",
     "stepAttended": "Atendido",
-    "now": "ahora"
+    "now": "ahora",
+    "noPatient": "Esta fila no tiene paciente; no se puede agendar la cita."
   },
   "settingsModulos": {
     "title": "Módulos del modal",
@@ -1722,7 +2130,19 @@
     "sin_grupo": "Sin grupo",
     "pago": {
       "excede_total": "El pago no puede pasar del total de la factura.",
-      "requiere_permiso_anular": "No tienes permiso para anular pagos."
+      "requiere_permiso_anular": "No tienes permiso para anular pagos.",
+      "forma_sin_dinero": "{formaPago} no lleva dinero: una consulta exonerada es un descuento del 100%, no un pago."
+    },
+    "kit": {
+      "multiplicadoresInvalidos": "Las terapias (áreas × días) no se reparten exacto entre los kits de la línea.",
+      "componente": {
+        "motivoRequerido": "Escribe el motivo (de 3 a 500 caracteres).",
+        "soloEmitida": "Solo se agrega un componente a una factura emitida.",
+        "noEsKit": "Esa línea no es un kit.",
+        "noEsOpcional": "Ese componente no es un opcional de este kit.",
+        "yaIncluido": "Ese componente ya está incluido en el kit.",
+        "kitPersonalizado": "El kit de esta línea fue personalizado; corrígelo desde «Personalizar kit»."
+      }
     }
   },
   "zona": {
@@ -1734,7 +2154,20 @@
   "personal": {
     "ya_tiene_cuenta": "Esa persona ya tiene una cuenta. Desvincúlala antes de crear otra.",
     "de_otro_centro": "Esa persona pertenece a otro centro.",
-    "no_existe": "Esa persona ya no está en la lista; actualiza y vuelve a intentar."
+    "no_existe": "Esa persona ya no está en la lista; actualiza y vuelve a intentar.",
+    "cargo": {
+      "medico": "Médico",
+      "enfermera": "Enfermera",
+      "tecnico": "Técnico",
+      "recepcion": "Recepción",
+      "operadora": "Operadora",
+      "cajero": "Cajero",
+      "facturacion": "Facturación",
+      "contabilidad": "Contabilidad",
+      "inventario": "Inventario",
+      "gerente": "Gerente",
+      "otro": "Otro"
+    }
   },
   "estadisticasDiarias": {
     "title": "Estadísticas diarias",
@@ -1746,6 +2179,11 @@
     "correo": "Correo",
     "copiar": "Copiar",
     "copiado": "Reporte copiado",
+    "snapshot": "Snapshot",
+    "snapshotTip": "Copia la tarjeta como imagen, para pegarla directo en WhatsApp Web.",
+    "snapshotCopiado": "Imagen copiada — pégala con Ctrl+V (o Cmd+V)",
+    "snapshotDescargado": "Tu navegador no deja copiar imágenes; se descargó el PNG",
+    "snapshotError": "No se pudo generar la imagen",
     "atencionMedica": "Atención médica",
     "total": "Total",
     "servicios": "Servicios especializados",
@@ -1754,14 +2192,23 @@
     "col": {
       "servicio": "Servicio",
       "aplicados": "Aplicados",
-      "vendidos": "Vendidos"
+      "aplicadosUnidades": "{visits} pac. / {therapies} u.",
+      "vendidos": "Vendidos",
+      "devueltos": "Devueltos"
     },
     "tip": {
       "nuevas": "Citas atendidas por primera vez (lo que pasó, no lo agendado).",
       "seguimientos": "Citas de seguimiento atendidas.",
       "aplicados": "Sesiones entregadas hoy en el frontdesk (el trabajo hecho).",
-      "vendidos": "Sesiones que prometieron las facturas del día (lo cobrado). No tiene que coincidir con aplicados."
-    }
+      "aplicadosUnidades": "Pacientes atendidos / unidades aplicadas (áreas en láser, viales o dosis donde el servicio las declara).",
+      "vendidos": "Sesiones que prometieron las facturas del día (lo cobrado). No tiene que coincidir con aplicados.",
+      "devueltos": "Sesiones devueltas por las devoluciones del día"
+    },
+    "devoluciones": "Devoluciones",
+    "ingresoNeto": "Ingreso neto",
+    "nuevos": "Nuevos",
+    "seguimiento": "Seguimiento",
+    "verDevueltos": "Mostrar devueltos por servicio"
   },
   "estadisticasServicios": {
     "title": "Estadísticas de Servicios",
@@ -1789,7 +2236,14 @@
       "enfermera": "Enfermería",
       "tecnico": "Técnico",
       "medico": "Médico"
-    }
+    },
+    "vitales": "Vitales",
+    "colVisitas": "Visitas",
+    "colPacientesDistintos": "Pacientes distintos",
+    "colTerapias": "Terapias",
+    "colTomas": "Tomas",
+    "tipVisitas": "Veces que la persona atendió una sesión (el legado lo llamaba «Pacientes #»)",
+    "tipTerapias": "Unidades aplicadas: áreas en láser, dosis en Vit C"
   },
   "frontdesk": {
     "title": "Centro de Pacientes",
@@ -1813,7 +2267,8 @@
     "saldoError": "No se pudo cargar la disponibilidad",
     "sinPaquetes": "Sin paquetes pendientes",
     "pendienteTotal": "Pendiente total",
-    "sesionXdeN": "Sesión {x} de {n}",
+    "sesionXdeN": "Próxima: {x} de {n}",
+    "aplicadasPropuesto": "Sugerido desde la disponibilidad — confirma o edita",
     "mult": {
       "dias": "días",
       "areas": "áreas",
@@ -1826,6 +2281,8 @@
     "corregirSesiones": "Sesiones totales",
     "corregirGuardar": "Guardar corrección",
     "corregirMenorConsumido": "No puede ser menor a lo ya entregado ({n}).",
+    "fixAvailabilityMultiplierPositive": "Cada valor debe ser mayor que 0.",
+    "fixAvailabilityNoPackageId": "Este paquete no tiene identificador; recarga la página.",
     "corregirOk": "Disponibilidad actualizada",
     "corregirError": "No se pudo actualizar la disponibilidad",
     "fijarSinPaquete": "Fijar sesiones",
@@ -1834,7 +2291,7 @@
     "fijarSinPaqueteCampoSesiones": "Sesiones totales",
     "fijarSinPaqueteCampoProducto": "Producto (el servicio usa un grupo de facturación)",
     "fijarSinPaqueteElegirProducto": "Elegir producto…",
-    "fijarSinPaqueteProductoRequerido": "Elige a qué producto del grupo anclar el paquete nuevo.",
+    "fixSessionsNegative": "Debe ser 0 o más.",
     "fijarSinPaqueteGuardar": "Fijar sesiones",
     "fijarSinPaqueteOk": "Sesiones fijadas",
     "acciones": "Acciones",
@@ -1847,6 +2304,18 @@
     "nurseTitle": "Enfermería",
     "nurseEmpty": "Sin estatus registrados hoy",
     "nurseSinStatus": "Sin estatus",
+    "nurseElegirDuracion": "¿Por cuánto tiempo? · {tipo}",
+    "nurseMinutos": "{n} min",
+    "nurseSinLimite": "Sin límite",
+    "nurseHasta": "hasta {hora}",
+    "tecnicosTitle": "Técnicos",
+    "tecnicosLibres": "Libres",
+    "tecnicosEnTerapia": "En terapia",
+    "tecnicosEmpty": "Nadie en turno ahora",
+    "tecnicosDescanso": "Descanso",
+    "tecnicosElegir": "Elegir técnico",
+    "tecnicosMinutos": "{n} min",
+    "tecnicosHasta": "hasta {hora}",
     "historial": "Historial de terapias",
     "programarCitas": "Programar citas",
     "histTitle": "Historial de terapias",
@@ -1868,6 +2337,7 @@
     "rangoHint": "Rango de fechas (gerencia): deja vacío para ver un solo día.",
     "elegir": "Elegir…",
     "sinOpciones": "Sin opciones",
+    "sinAsignar": "Sin asignar",
     "faltanCampos": "Falta completar: {campos}",
     "calDiaTitle": "Calendario del día",
     "calPacienteTitle": "Calendario del paciente",
@@ -1876,7 +2346,9 @@
     "calSinCitas": "Sin citas próximas",
     "calVacios": "{vacios}/{cupo} libres",
     "deshacerPregunta": "¿Deshacer «{paso}»?",
+    "deshacerAviso": "Esta acción borra la hora sellada y no se puede recuperar automáticamente.",
     "deshacer": "Deshacer",
+    "enTerapiaSinAsistir": "{nombre} dejó {n, plural, one {# paciente} other {# pacientes}} sin asistir de días anteriores.",
     "aviso": {
       "cupo_excedido": "Se superó el cupo del día (agendadas {agendadas} / cupo {cupo}).",
       "sin_cupo_configurado": "No hay cupos configurados para esta fecha."
@@ -1885,6 +2357,7 @@
     "formatosTitle": "Formatos de {servicio}",
     "generarFormato": "Generar formato",
     "sinFormatos": "Este servicio no tiene formatos configurados.",
+    "disponibilidadActualizada": "Disponibilidad actualizada {number}/{total}",
     "enviarTecnico": "Incluir en el formato el nombre del técnico ({nombre})",
     "colSesion": "Sesión",
     "colAreas": "Áreas",
@@ -1914,7 +2387,8 @@
         "tecnico": "TÉCNICO(A)"
       },
       "mia_glp1_order": "Orden Mía · GLP-1 (Semaglutide / Tirzepatide)",
-      "mia_peptides_order": "Orden Mía · Péptidos"
+      "mia_peptides_order": "Orden Mía · Péptidos",
+      "sessionNumber": "SESIÓN # :"
     },
     "recordLabel": "Récord",
     "triggerPoint": "Trigger point",
@@ -1995,6 +2469,7 @@
       "sesiones": "Sesiones a transferir",
       "sesionesAyuda": "Vacío = todas ({n}). O escribe cuántas para una transferencia parcial.",
       "sesionesInvalida": "Debe ser entre 1 y {n}.",
+      "nothingPending": "Este paquete no tiene sesiones pendientes para transferir.",
       "modo": "Modo",
       "virtual": "Virtual",
       "virtualAyuda": "Solo el tratamiento; el otro centro usa su propio inventario.",
@@ -2039,8 +2514,78 @@
       "enServicioEsperando": "{servicio} — esperando",
       "enServicio": "En {servicio}"
     },
+    "medicosLibres": {
+      "titulo": "Médicos libres",
+      "vacio": "Ningún médico libre ahora mismo."
+    },
     "patientNotFound": "Ese paciente no existe en este centro.",
-    "serviceNotFound": "Algún servicio elegido no existe en este centro."
+    "serviceNotFound": "Algún servicio elegido no existe en este centro.",
+    "removeStep": "Quitar {step}",
+    "formatoTherapyCount": "Terapias a imprimir",
+    "reopen": "Reabrir",
+    "reopenAll": "Reabrir todas",
+    "cancelAll": "Cancelar todas",
+    "cancelAllTitle": "Cancelar todas las sesiones del día",
+    "cancelAllHint": "Se cancelan las pendientes, presentes y en terapia de este paciente hoy. Las asistidas no se tocan. Un solo motivo para todas.",
+    "reopened": "Sesión reabierta",
+    "reopenedMany": "{n, plural, one {# sesión reabierta} other {# sesiones reabiertas}}",
+    "cancelledMany": "{n, plural, one {# sesión cancelada} other {# sesiones canceladas}}",
+    "reopenSkipped": "Reabiertas: {n}. No volvieron: {reasons}",
+    "error": {
+      "reopenOnlyToday": "Solo se puede reabrir el mismo día",
+      "reopenPackageClosed": "El paquete ya no está activo: factura anulada, devuelta o protocolo cambiado",
+      "reopenNotCancelled": "La sesión no está cancelada",
+      "sessionSameDay": "Ya tiene otra sesión de este servicio hoy",
+      "sheetSlotTaken": "La hoja no tiene hueco a esa hora"
+    },
+    "evento": {
+      "reopened": "Reabierta"
+    },
+    "mls": {
+      "title": "MLS",
+      "paciente": "Paciente :",
+      "fecha": "Fecha :",
+      "record": "Record #",
+      "patologia": "Patología",
+      "frec": "Frec",
+      "tiempo": "Tiempo",
+      "int": "Int.",
+      "comentarios": "Comentarios:",
+      "tecnico": "Nombre Técnico:",
+      "proxima": "Próxima Cita:",
+      "nTerapias": "Número de Terapias # :",
+      "horaEntrada": "Hora Entrada :",
+      "horaSalida": "Hora Salida :",
+      "ctd": "CTD :",
+      "firma": "Firma del Paciente"
+    },
+    "hilt": {
+      "title": "HILT",
+      "paciente": "Paciente :",
+      "fecha": "Fecha :",
+      "record": "Record #",
+      "patologia": "Patología",
+      "step": "{n} Step",
+      "mjcm": "mj/cm",
+      "hz": "Hz",
+      "totEnergy": "Tot. Energy",
+      "comentarios": "Comentarios:",
+      "triggerPoint": "Trigger Point:",
+      "si": "Si:",
+      "no": "No:",
+      "tecnico": "Nombre Técnico:",
+      "proxima": "Próxima Cita:",
+      "nTerapias": "Número de Terapias # :",
+      "horaEntrada": "Hora Entrada:",
+      "horaSalida": "Hora Salida:",
+      "firma": "Firma del Paciente"
+    },
+    "formatoPage": "Pág. {page}",
+    "formatoFirmas": "Firmas:",
+    "legacyLabel": {
+      "invalid": "La sesión va de 1 al total.",
+      "notMigrated": "Esta sesión la numera su paquete; corrígela desde el paquete."
+    }
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -2119,7 +2664,11 @@
     "exceedsTotal": "No puede exceder el total (máx {max})",
     "splitHint": "Para dividir en varias formas, agrega un pago por cada una (máx {max})",
     "settled": "Saldado",
-    "overpaid": "Sobre-abonado"
+    "overpaid": "Sobre-abonado",
+    "viaRefundTitle": "Ese reembolso pertenece a una devolución",
+    "viaRefundLink": "Ir a la devolución",
+    "amountNotPositive": "El monto debe ser mayor que 0.",
+    "noChanges": "Sin cambios."
   },
   "formasPago": {
     "efectivo": "Efectivo",
@@ -2221,15 +2770,20 @@
       "cienDescuento": "100% descuento",
       "cobradas": "cobradas",
       "pagina": "Página",
-      "rango": "Rango"
+      "rango": "Rango",
+      "centros": "Total ({n} centros)"
     },
-    "live": "En vivo"
+    "live": "En vivo",
+    "nuevaVentaEn": "Nueva venta en {centro}",
+    "colCentro": "Centro",
+    "searchAllDates": "Buscando en todas las fechas"
   },
   "facturacionTabs": {
     "facturas": "Facturas",
     "devoluciones": "Devoluciones",
     "caja": "Cuadre de caja",
-    "estadisticas": "Estadísticas"
+    "estadisticas": "Estadísticas",
+    "cuadreTotal": "Cuadre total"
   },
   "inventario": {
     "prov": {
@@ -2630,6 +3184,14 @@
         "liveStock": {
           "title": "Stock live (balanzas)",
           "desc": "Lo que cuentan las balanzas en cada plato del almacén, junto al contable."
+        },
+        "adjustments": {
+          "title": "Ajustes",
+          "desc": "Uno o varios productos en un solo ajuste, con su número; y los ajustes hechos."
+        },
+        "dailyKardex": {
+          "title": "Kardex diario",
+          "desc": "Entradas, aplicadas y ajustes de un producto, día por día, y el resumen gerencial."
         }
       }
     },
@@ -2714,11 +3276,19 @@
     },
     "recepcion_sin_lineas": "La recepción no tiene líneas.",
     "recepcion_demasiadas_lineas": "Demasiadas líneas (máximo 200).",
-    "recepcion_cantidad_invalida": "Hay una cantidad inválida en alguna línea."
+    "recepcion_cantidad_invalida": "Hay una cantidad inválida en alguna línea.",
+    "ajuste": {
+      "sin_lineas": "El ajuste necesita al menos un producto.",
+      "cantidad_invalida": "Hay una cantidad que no es válida en el ajuste.",
+      "signo_invalido": "Hay una línea sin «Sale» o «Entra».",
+      "producto_inexistente": "Hay un producto que ya no existe en el ajuste; su línea está marcada en rojo."
+    }
   },
   "receipt": {
     "print": "Imprimir recibo",
     "previewTitle": "Vista previa del recibo",
+    "preview": "Vista previa",
+    "previewDescription": "Así se verá el recibo impreso.",
     "loadFailed": "No se pudo cargar el recibo",
     "preparing": "Preparando recibo…",
     "void": "ANULADA",
@@ -2744,7 +3314,13 @@
     "regularPrice": "Precio regular",
     "savings": "Ahorro",
     "packagePrice": "Precio del paquete",
-    "youSaved": "Usted ahorró"
+    "youSaved": "Usted ahorró",
+    "originInvoice": "Factura de origen #{number}",
+    "refundOption": "Devolución #{number} · ${amount}",
+    "invoiceOption": "Factura (original)",
+    "voided": "anulada",
+    "refunded": "Reembolsado",
+    "refund": "Reembolso"
   },
   "facturacion": {
     "title": "Facturar consulta",
@@ -2811,8 +3387,8 @@
       "recordLabel": "Record",
       "cambiarPaciente": "Cambiar",
       "lista": "Lista de precios",
-      "pickCentroTitle": "Selecciona el centro",
-      "pickCentroGo": "Facturar aquí",
+      "pickCentroTitle": "¿En qué centro trabajas?",
+      "pickCentroHelp": "Esta pantalla muestra un centro a la vez. Elige con cuál trabajar.",
       "centroLabel": "Centro:",
       "cambiarCentro": "Cambiar centro",
       "medico": "Médico tratante",
@@ -2875,7 +3451,16 @@
       "agregado": "agregado",
       "agregarComponente": "Agregar componente",
       "buscarProducto": "Buscar producto…",
-      "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto."
+      "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto.",
+      "terapias": "Terapias",
+      "addComponentIssued": "Agregar componente (sin cambiar el monto)",
+      "addComponentIssuedHint": "Para un opcional que quedó fuera por error. La factura sigue emitida, el total no cambia y se crean sus sesiones.",
+      "addComponentConfirm": "Agregar componente",
+      "componentAdded": "Componente agregado al kit",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué se agrega (obligatorio)",
+      "component": "Componente",
+      "reasonTooShort": "El motivo necesita al menos 3 caracteres."
     },
     "imprimirNoEmitida": "La factura no se emitió al imprimir.",
     "corregirImpuesto": {
@@ -2895,7 +3480,7 @@
       "exportCsv": "Exportar CSV",
       "div": {
         "todas": "Todas",
-        "general": "General",
+        "general": "Servicios & Productos",
         "consulta": "Consultas"
       },
       "atajo": {
@@ -2931,7 +3516,7 @@
       "exportCsv": "Exportar CSV",
       "div": {
         "todas": "Todas",
-        "general": "General",
+        "general": "Servicios & Productos",
         "consulta": "Consultas"
       },
       "atajo": {
@@ -2967,8 +3552,6 @@
       "backupHubRetry": "Reintentar",
       "backupHubOpen": "Abrir hub",
       "backupHubCertHint": "Ábrelo y acepta el aviso de seguridad si es la primera vez en este equipo; luego Reintentar.",
-      "backupHubFallbackNote": "Usando el hub de respaldo: el principal ({hub}) no responde desde este equipo o falta aceptar su certificado. El respaldo puede no detectar si la impresora está apagada.",
-      "backupHubOpenMain": "Abrir hub principal",
       "backupPrinter": {
         "disabled": "Impresora en pausa en su equipo.",
         "disconnected": "Impresora apagada o desconectada.",
@@ -2983,13 +3566,29 @@
     "descuentoPasaBase": "El descuento (${valor}) es mayor que el subtotal (${base}).",
     "descuentoUsarBase": "Regalar el total: ${base}",
     "removeDiscount": "Quitar descuento",
-    "descuentoActual": "Descuento aplicado: ${monto}"
+    "descuentoActual": "Descuento aplicado: ${monto}",
+    "unitsAreasDays": "Cantidad (áreas × días)",
+    "unitsAreasDaysHint": "Se calcula sola: áreas × días. No se escribe.",
+    "packages": "Paquetes",
+    "packagesHint": "Cuántos paquetes se venden (normalmente 1).",
+    "returnedBadge": "Devuelta",
+    "error": {
+      "pago_supera_total": "Lo cobrado pasa del total de la factura (sobran {sobrante}). Anula el pago sobrante antes de emitir.",
+      "multiplicador_invalido": "{field}: debe ser un número entero de 1 o más.",
+      "meta_solo_borrador": "Las áreas y los días solo se corrigen en una factura en borrador."
+    },
+    "multipliersEditHint": "Corrige áreas o días aquí: se guarda al salir del campo.",
+    "lineProduct": "Producto/servicio",
+    "priceLoading": "Buscando el precio…"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
+    "eyebrowScheduled": "Cita",
     "title": "Agregar cita",
     "subline": "Registra un paciente en el tablero de hoy (queda confirmada).",
+    "sublineScheduled": "Agenda una cita para otro día.",
     "today": "Hoy",
+    "scheduledFor": "Para",
     "patient": "Paciente",
     "type": "Tipo",
     "doctor": "Médico",
@@ -2999,9 +3598,16 @@
     "firstTime": "Primera vez",
     "notes": "Observación",
     "notesPlaceholder": "Motivo / notas…",
+    "hasAppointment": "Ya tiene cita el {date} con {doctor}",
+    "hasAppointmentNoDoctor": "Ya tiene cita el {date}",
+    "reasonRequired": "Motivo del cambio",
+    "reasonRequiredPh": "Motivo del cambio (obligatorio)",
+    "moveTo": "Mover a {date}",
     "cancel": "Cancelar",
     "save": "Agregar al tablero",
-    "retired": "De baja"
+    "saveScheduled": "Agendar cita",
+    "retired": "De baja",
+    "noAppointmentType": "No hay tipos de cita cargados; no se puede agendar."
   },
   "precios": {
     "title": "Precios",
@@ -3147,8 +3753,15 @@
       "badge": "Mostrar contador",
       "allowSessionFixWithoutPackage": "Permitir fijar sesiones sin paquete",
       "allowSessionFixWithoutPackageHint": "En Frontdesk, deja corregir el número de sesión de un paciente en este servicio aunque no tenga ningún paquete comprado todavía.",
-      "activo": "Activo"
+      "primaryPackageRule": "Número de sesión cuando consume varios paquetes",
+      "primaryPackageRuleHint": "Cuál paquete numera la visita cuando el servicio usa más de uno a la vez (p. ej. láser: MLS + HILT juntos).",
+      "activo": "Activo",
+      "startStep": "Minutos entre horas de inicio",
+      "startStepHint": "60 = solo en punto, como la hoja del call center. Vacío = cualquier hora del día. No cambia la duración.",
+      "startStepAny": "Cualquier hora"
     },
+    "primaryPackageRuleRow": "Por renglón (cada paquete cuenta su propia sesión)",
+    "primaryPackageRuleMostDelivered": "El que tiene más entregas (p. ej. MLS sobre el ancla HILT)",
     "centro": {
       "todos": "Todos los centros"
     },
@@ -3164,7 +3777,8 @@
     "multiAplicado": "Aplicado en {n} centro(s)",
     "multiSinCambios": "Sin cambios (todos los centros ya estaban iguales)",
     "cargaParcial": "No se pudieron cargar los servicios de: {centros}. La vista puede estar incompleta.",
-    "ordenArrastrar": "Arrastra para reordenar las pestañas"
+    "ordenArrastrar": "Arrastra para reordenar las pestañas",
+    "sortOrderInvalid": "El orden debe ser un número."
   },
   "transferencias": {
     "title": "Transferencias",
@@ -3193,6 +3807,7 @@
     "confirmAprobarBody": "Se registrará lo recibido y el remanente se procesará como: {politica}.",
     "rechazarTitle": "Rechazar transferencia",
     "rechazarBody": "Todo el stock vuelve al origen. Indica el motivo.",
+    "lineQuantityInvalid": "Pon una cantidad mayor que cero en el producto elegido.",
     "motivoPlaceholder": "Motivo del rechazo…",
     "estado": {
       "pendiente": "Pendiente",
@@ -3245,7 +3860,18 @@
   "errores": {
     "TENANT_NOT_FOUND": "El centro indicado no existe.",
     "VIGENCIA_INVALIDA": "La fecha de fin no puede ser anterior a la de inicio.",
-    "TENANT_REQUIRED": "Elige un centro: esta vista trabaja con un centro a la vez."
+    "TENANT_REQUIRED": "Elige un centro: esta vista trabaja con un centro a la vez.",
+    "REFERENCE_NOT_FOUND": "No se pudo completar la operación: falta un dato que el servidor necesita. Intenta de nuevo; si persiste, avisa a soporte.",
+    "AJUSTE_SIN_LINEAS": "El ajuste necesita al menos un producto.",
+    "AJUSTE_CANTIDAD_INVALIDA": "Hay una cantidad que no es válida en el ajuste.",
+    "AJUSTE_SIGNO_INVALIDO": "Hay una línea sin «Sale» o «Entra».",
+    "AJUSTE_PRODUCTO_INEXISTENTE": "Hay un producto que ya no existe en el ajuste."
+  },
+  "transferencia": {
+    "sesionesExcedenDisponible": "Pediste más sesiones de las que quedan pendientes en ese paquete.",
+    "pacienteDestinoNoExiste": "El paciente destino no existe en ese centro.",
+    "nadaCambia": "Elige otra persona, otro centro, o ambos: así no hay nada que transferir.",
+    "motivoObligatorio": "Si va a otra persona, el motivo es obligatorio."
   },
   "configAlta": {
     "title": "Datos obligatorios del paciente",
@@ -3355,7 +3981,8 @@
       "metodo": "Método",
       "resultado": "Resultado",
       "duracion": "Duración",
-      "centro": "Centro"
+      "centro": "Centro",
+      "via": "Vía"
     },
     "verbo": {
       "creo": "Creó",
@@ -3373,7 +4000,14 @@
       "frontdesk": "Frontdesk",
       "tablero": "Tablero",
       "auth": "Autenticación"
-    }
+    },
+    "via": {
+      "app": "App",
+      "claude": "Claude"
+    },
+    "tool": "Herramienta",
+    "filtroEntidad": "Entidad {id}",
+    "filtrarPorEntidad": "Filtrar por esta entidad"
   },
   "comunicaciones": {
     "title": "Alertas",
@@ -3405,7 +4039,8 @@
       "estado": "Estado",
       "destino": "Destino",
       "fecha": "Fecha",
-      "cuerpo": "Cuerpo"
+      "cuerpo": "Cuerpo",
+      "centro": "Centro"
     },
     "estadoNotif": {
       "pendiente": "Pendiente",
@@ -3419,7 +4054,8 @@
       "clinico": "Clínico",
       "agenda": "Agenda",
       "otras": "Otras"
-    }
+    },
+    "noClinicToCreate": "No tienes un centro donde crear plantillas."
   },
   "fac": {
     "col": {
@@ -3439,12 +4075,21 @@
       "numero": "Nº Factura",
       "fecha": "Fecha",
       "paciente": "Cliente",
+      "record": "Récord",
       "medico": "Médico",
       "estado": "Estado",
       "total": "Total",
       "medio": "Referido",
       "usuario": "Usuario",
-      "acciones": "Acciones"
+      "acciones": "Acciones",
+      "metodoPago": "Pago"
+    },
+    "grupo": {
+      "producto": "Producto"
+    },
+    "breakdown": {
+      "sessions": "Sesiones",
+      "therapies": "Terapias"
     }
   },
   "configFactura": {
@@ -3505,6 +4150,43 @@
     "anularBody": "La devolución quedará anulada. Se registra con tu usuario.",
     "anularReason": "Motivo de la anulación",
     "anuladaOk": "Devolución anulada",
+    "verDevolucion": "Ver devolución",
+    "sectionTitle": "Devoluciones ({count})",
+    "fromInvoiceLabel": "Factura de origen",
+    "atendidoPor": "Atendido por",
+    "colCantidad": "Cantidad",
+    "colPrecio": "Precio",
+    "colMonto": "Monto",
+    "formaReembolso": "Forma de reembolso",
+    "sinReembolso": "Sin reembolso registrado",
+    "notas": "Notas",
+    "colMetodo": "Forma",
+    "agregarLinea": "Agregar línea",
+    "anuladaInfo": "Anulada el {fecha} por {quien}.",
+    "anuladaPor": "Anulado por {quien} el {fecha}",
+    "editor": {
+      "tabEditor": "Editor",
+      "tabHistory": "Historial",
+      "headerTitle": "Cabecera",
+      "linesTitle": "Líneas",
+      "colConcepto": "Concepto",
+      "colVendidas": "Vendidas",
+      "colEntregadas": "Entregadas",
+      "colDevueltasOtras": "Devueltas en otras",
+      "colDevolvible": "Devolvible",
+      "colCantidad": "Cantidad",
+      "colMonto": "Monto",
+      "savedOk": "Devolución actualizada",
+      "previewTitle": "Vista previa",
+      "previewCalculating": "calculando…",
+      "invoiceStatus": "Estado de la factura",
+      "packageEffect": "{sessions} sesión(es) vuelven al paquete · {status}",
+      "inventoryEffect": "Movimiento de inventario: {delta}",
+      "changeReason": "Motivo del cambio",
+      "changeReasonPlaceholder": "Por qué se edita esta devolución",
+      "historyLoading": "Cargando historial…",
+      "historyEmpty": "Sin cambios registrados."
+    },
     "estado": {
       "activa": "Activa",
       "anulada": "Anulada"
@@ -3521,18 +4203,54 @@
       "monto": "Monto",
       "estado": "Estado",
       "motivo": "Motivo",
-      "acciones": "Acciones"
+      "acciones": "Acciones",
+      "centro": "Centro"
+    }
+  },
+  "refund": {
+    "reimbursementSumMismatch": "Los reembolsos deben sumar {expected}; sumaron {received}",
+    "notActive": "La devolución está anulada; no se puede reparar",
+    "reimbursementViaRefund": "Ese pago es el reembolso de una devolución activa — anúlalo desde la devolución, no desde aquí",
+    "edit": {
+      "exceedsRefundable": "Pide {requested}, pero solo quedan {available} por devolver",
+      "exceedsPaid": "Las devoluciones ({refunds}) superan lo pagado ({paid})",
+      "cashDayClosed": "El cuadre del {date} ya está cerrado",
+      "packageReplaced": "El paquete se cerró por un cambio de protocolo",
+      "packageVoided": "El paquete está anulado",
+      "amountAboveLine": "Devuelve más de lo que costó la línea",
+      "componentNeedsAmount": "Escribe el monto del componente",
+      "reimbursementMismatch": "Los reembolsos no suman el monto devuelto",
+      "blocked": "El centro no permite guardar este cambio"
+    }
+  },
+  "patientMerge": {
+    "same": "No se puede fusionar una ficha consigo misma",
+    "conflict": "Hay algo sin resolver antes de fusionar",
+    "changesPastReports": "Esto cambia conteos de periodos pasados — hay que aceptarlo antes de fusionar"
+  },
+  "cash": {
+    "pastDay": {
+      "locked": "El cuadre del {day} ya está cerrado. Pídele a un gerente que lo corrija.",
+      "reasonRequired": "Hace falta un motivo para cambiar el cuadre del {day}",
+      "changed": "Cambiaste el cuadre del {day}; los firmantes tendrán que acusar la corrección",
+      "dateAndCenterRequired": "Hace falta la fecha y el centro",
+      "dialogTitle": "Vas a cambiar el cuadre del {day}",
+      "alreadySigned": "Ya lo firmaron:",
+      "deltaTotal": "Total",
+      "reasonLabel": "Motivo del cambio",
+      "confirmButton": "Sí, cambiar el cuadre del {day}",
+      "canModifyWarning": "Esta factura es del {day}, que ya tiene cuadre: cualquier cambio altera ese cuadre"
     }
   },
   "caja": {
     "title": "Cuadre de caja",
-    "help": "Cuenta el efectivo y cuadra la caja del día, separando consulta de general.",
+    "help": "Cuenta el efectivo y cuadra la caja del día, separando Consulta de Servicios & Productos.",
     "date": "Fecha",
     "loading": "Cargando…",
     "sinCentro": "No tienes centros asignados.",
     "division": {
       "consulta": "Consulta",
-      "general": "General"
+      "general": "Servicios & Productos"
     },
     "scope": {
       "label": "Cajero",
@@ -3563,7 +4281,18 @@
       "saved": "Conteo guardado",
       "hint": "Selecciona un cajero para habilitar el conteo.",
       "pastLocked": "Editar fechas anteriores requiere permiso (caja.retroactivo).",
-      "consolidatedHint": "Conteo consolidado (solo lectura): suma de todos los cajeros."
+      "consolidatedHint": "Conteo consolidado (solo lectura): suma de todos los cajeros.",
+      "saveError": "No se pudo guardar el conteo; se reintentará al cambiar algo.",
+      "managerCount": "Conteo del gerente",
+      "managerCountHint": "Este conteo único manda sobre la suma de los cajeros.",
+      "cashiersSum": "Suma de los cajeros",
+      "cashiersSumHint": "Solo lectura: suma de los conteos de cada cajero.",
+      "countMyself": "Hacer un solo conteo",
+      "backToSum": "Volver a la suma de los cajeros",
+      "backToSumConfirm": "Se borrará el conteo del gerente y se usará la suma de los cajeros.",
+      "openingFloat": "Fondo inicial",
+      "cashToDeposit": "Ventas en efectivo (a depositar)",
+      "titleFor": "Conteo de efectivo {division}"
     },
     "petty": "Caja chica (petty)",
     "summary": {
@@ -3618,7 +4347,9 @@
         "ok": "cuadra",
         "short": "falta",
         "over": "sobra"
-      }
+      },
+      "cardSales": "Ventas en tarjetas (sin devoluciones)",
+      "chargedRefunded": "Cobrado {charged} · Devuelto −{refunded}"
     },
     "processClose": "Procesar cierre",
     "print": "Imprimir",
@@ -3654,6 +4385,11 @@
       "colLineas": "Líneas",
       "documentos": "Documentos del día",
       "sinDocumentos": "No hubo documentos este día.",
+      "ventaGeneral": "Venta general",
+      "consultas": "Consultas",
+      "totalVentaGeneral": "Total venta general",
+      "totalConsultas": "Total consultas",
+      "totalGeneralDocumentos": "Total general",
       "colNumero": "Nº",
       "colRecord": "Récord",
       "colPaciente": "Paciente",
@@ -3675,14 +4411,49 @@
         "total": "Total del día",
         "col": "Facturador"
       },
-      "colFacturo": "Facturó"
+      "colFacturo": "Facturó",
+      "colAntesDescuento": "Antes del descuento",
+      "colBaseNeta": "Neto (base)",
+      "colFacturaOrigen": "Factura de origen",
+      "colFormaReembolso": "Forma de reembolso"
+    },
+    "cuadre_total": {
+      "titulo": "Cuadre total",
+      "tituloImpreso": "Cuadre total del día",
+      "help": "Las dos divisiones, todos los cajeros, un solo conteo — se comprueba contra la suma de los dos cuadres individuales. Es la hoja para tesorería; el cuadre por cajero y por división no cambia.",
+      "sinAbrir": "Aún no se ha abierto el cuadre total de este día.",
+      "comprobacion": {
+        "titulo": "Comprobación",
+        "consulta": "Consulta",
+        "general": "Servicios & Productos",
+        "suma": "Suma",
+        "dia": "Día",
+        "esperado": "Esperado",
+        "contado": "Contado",
+        "fondo": "Fondo",
+        "diferencia": "Diferencia"
+      },
+      "suma_cajeros": "Se usa la suma de los cajeros",
+      "conteo_unico": "Hacer un conteo único",
+      "descuadre": "El conteo del día difiere en {monto}",
+      "divisionConsulta": "Consulta",
+      "divisionGeneral": "Servicios & Productos",
+      "sinContarAviso": "Sin contar todavía"
+    },
+    "countMode": {
+      "divisionNotCounted": "Falta el conteo de {division}",
+      "singleCountNotUsed": "Hay un conteo único guardado que este centro no usa (cuenta por división)",
+      "dayNotCounted": "Falta el conteo único del día",
+      "flexible": "Flexible (lo de hoy)",
+      "split": "Dos conteos (Consulta y Servicios & Productos)",
+      "single": "Un solo conteo"
     },
     "cuadreGeneral": {
       "title": "Cuadre general",
-      "help": "Ventas del día por división y forma de pago. General reúne productos, suero y láser; Consulta va aparte. El total general suma las dos.",
+      "help": "Ventas del día por división y forma de pago. Servicios & Productos reúne productos, suero y láser; Consulta va aparte. El total general suma las dos.",
       "fecha": "Fecha",
       "buscar": "Buscar",
-      "general": "Facturación general",
+      "general": "Servicios & Productos",
       "consulta": "Facturación consulta",
       "totalGeneral": "Total general",
       "efectivo": "Efectivo",
@@ -3697,6 +4468,157 @@
         "volver": "Ver todos",
         "descuadre": "La suma por facturador no cuadra con el total del día ({total}). Repórtalo — es un defecto del backend."
       }
+    },
+    "productSales": {
+      "title": "Venta de productos (IVU)",
+      "taxable": "Tributable",
+      "exempt": "Exento",
+      "exonerated": "Exonerado",
+      "taxCollected": "IVU cobrado",
+      "taxWouldBe": "IVU que tocaba",
+      "refunds": "Devoluciones",
+      "refundDocs": "{n} documentos",
+      "net": "Neto de productos",
+      "amount": "Monto",
+      "base": "Base",
+      "discount": "Descuento",
+      "taxShort": "IVU",
+      "lines": "Líneas",
+      "colNumber": "Factura",
+      "colRecord": "Récord",
+      "colPatient": "Paciente",
+      "colBase": "Base",
+      "colDiscount": "Descuento",
+      "colTotal": "Total",
+      "colExonerated": "Exonerada",
+      "colRefunded": "Devuelto",
+      "colPayment": "Forma de pago",
+      "totals": "Totales ({n})",
+      "none": "No hubo ventas de productos.",
+      "yes": "Sí",
+      "no": "No",
+      "check": "Conciliación",
+      "products": "Productos",
+      "services": "Servicios",
+      "dayNet": "Neto del día",
+      "squares": "Cuadra",
+      "gap": "Descuadre de {amount}"
+    },
+    "emailPanel": {
+      "recipients": "Destinatarios",
+      "placeholder": "contabilidad@centrodemedicinaregenerativa.com, otro@…",
+      "hint": "Separa varios correos con comas. Vacío = la lista del centro.",
+      "invalid": "No son correos válidos: {list}",
+      "send": "Enviar",
+      "sending": "Enviando…",
+      "saveDefault": "Guardar como lista del centro",
+      "defaultSaved": "Lista del centro guardada",
+      "sentTo": "Enviado a {to}",
+      "attachmentsCount": "con {n, plural, one {# adjunto} other {# adjuntos}}",
+      "attachmentsSkipped": "{n, plural, one {# adjunto no se pudo incluir} other {# adjuntos no se pudieron incluir}}",
+      "notSent": "El servidor de correo no aceptó el mensaje. No se envió.",
+      "notConfigured": "El servidor no tiene correo configurado. No se envió.",
+      "noRecipients": "Indica a quién enviarlo: no hay destinatarios ni lista del centro."
+    },
+    "signOff": {
+      "title": "Firmas de la hoja",
+      "signCashier": "Firmar y aceptar",
+      "signSupervisor": "Firmar como gerente",
+      "signAgain": "Volver a firmar",
+      "accept": "Acepto",
+      "signing": "Firmando…",
+      "cancel": "Cancelar",
+      "dialogTitle": "Aceptar la hoja",
+      "dialogHint": "Se guardan tu nombre, la fecha y la hora, y estas cifras. La hoja no se cierra: si luego entra una venta, se verá que firmaste con otras cifras.",
+      "defaultStatement": "Confirmo que el conteo y los totales de esta hoja son correctos.",
+      "acceptedBy": "Aceptado por {name} · {when}",
+      "otherFigures": "Firmado con {signed} · hoy {now} · cambio {delta}",
+      "signedDifference": "diferencia de caja al firmar {difference}",
+      "unsigned": "Sin firmar",
+      "cashier": "Cajero",
+      "cashierNamed": "Cajero — {name}",
+      "supervisor": "Gerente",
+      "signed": "Hoja firmada",
+      "alreadySigned": "Otra persona ya firmó la hoja en ese papel.",
+      "alreadySignedBy": "Ya firmó {name} ({when}).",
+      "loadError": "No se pudieron leer las firmas de la hoja.",
+      "dayTotal": "Total del día",
+      "salesCash": "Efectivo de ventas",
+      "countedCash": "Efectivo en caja",
+      "difference": "Diferencia",
+      "signMine": "Firmar mi hoja",
+      "acknowledge": "Acusar corrección",
+      "acknowledgeHint": "La hoja cambió después de esta firma. Confirma que las cifras corregidas son las buenas; queda el motivo, quién y cuándo.",
+      "acknowledgeReason": "Motivo: qué se corrigió y por qué",
+      "acknowledged": "Corrección acusada",
+      "acknowledgedNote": "Cifras corregidas · confirmado por {name} · {when}",
+      "acknowledgeReasonLabel": "Motivo",
+      "reasonTooShort": "El motivo necesita al menos 3 caracteres."
+    },
+    "attachments": {
+      "title": "Settlements escaneado",
+      "add": "Adjuntar settlements",
+      "uploading": "Subiendo…",
+      "uploaded": "Adjunto guardado",
+      "empty": "Sin adjuntos todavía",
+      "unavailable": "Archivo no disponible",
+      "uploadedBy": "Subido por {name}",
+      "uploadedByUnknown": "—",
+      "loadError": "No se pudieron cargar los adjuntos",
+      "typeNotAllowed": "Solo se aceptan fotos (JPG, PNG, WEBP) o PDF.",
+      "tooLarge": "El archivo pesa más de 20 MB.",
+      "pickCashier": "Elige un cajero para adjuntar su settlements",
+      "count": "{n, plural, one {# adjunto} other {# adjuntos}}",
+      "scan": "Escanear",
+      "scanDialogTitle": "Escanear settlements",
+      "scanScanner": "Escáner",
+      "scanOptions": "Opciones",
+      "scanSource": "Origen",
+      "scanSourceAdf": "Bandeja",
+      "scanSourcePlaten": "Cristal",
+      "scanDuplex": "Doble cara",
+      "scanColorMode": "Color",
+      "scanColorBw": "Blanco y negro",
+      "scanColorGray": "Gris",
+      "scanColorRgb": "Color",
+      "scanResolution": "Resolución",
+      "scanStart": "Escanear",
+      "scanRetry": "Reintentar",
+      "scanCancel": "Cancelar",
+      "scanWaiting": "Esperando al escáner…",
+      "scanning": "Escaneando…",
+      "scanDone": "Escaneado",
+      "scanFailed": "No se pudo escanear",
+      "scanExpired": "El escaneo caducó: nadie lo tomó a tiempo",
+      "cropToggle": "Recortar antes de escanear",
+      "cropPreviewStart": "Ver vista previa",
+      "cropHelp": "Arrastra sobre la imagen el área a conservar, o elige «Escanear todo».",
+      "cropRetake": "Repetir vista previa",
+      "cropFullPage": "Escanear todo",
+      "cropUseSelection": "Escanear esta área",
+      "cropRegionDebug": "Área: x={x}, y={y}, ancho={width}, alto={height} (1/300″)",
+      "delete": "Eliminar",
+      "deleteConfirmTitle": "Eliminar este adjunto",
+      "deleteConfirmDesc": "Se quita de la lista del cuadre; no se puede deshacer desde aquí.",
+      "deleteReasonLabel": "Motivo",
+      "deleteReasonPlaceholder": "Por qué se elimina…",
+      "deleteCancel": "Cancelar",
+      "deleteConfirm": "Eliminar adjunto",
+      "deleted": "Adjunto eliminado",
+      "deleteReasonTooShort": "El motivo necesita al menos 3 caracteres."
+    },
+    "attachment": {
+      "notFound": "Ese adjunto ya no existe en este cuadre.",
+      "reasonRequired": "Escribe el motivo antes de eliminar."
+    },
+    "otherDivision": {
+      "inConsulta": "Hoy cobraste en Consulta: tu hoja y tu firma están en el cuadre de Consulta, no en este.",
+      "inGeneral": "Hoy cobraste en Servicios & Productos: tu hoja y tu firma están en ese cuadre, no en este.",
+      "goConsulta": "Ir al cuadre de Consulta",
+      "goGeneral": "Ir al cuadre de Servicios & Productos"
+    },
+    "error": {
+      "closeDisabled": "El cierre de caja está desactivado en este centro."
     }
   },
   "gruposFacturacion": {
@@ -3750,7 +4672,14 @@
     "copyFrom": "Copiar la configuración de otro grupo",
     "copyFromPlaceholder": "Copiar de…",
     "copyDone": "Se copiaron {n} campos de «{origen}».",
-    "copyNone": "«{origen}» no tiene campos extra para copiar."
+    "copyNone": "«{origen}» no tiene campos extra para copiar.",
+    "productSale": "Venta de producto (IVU)",
+    "productSaleHint": "Sus líneas cuentan como venta de producto en el cuadre: tributable, exento, exonerado e IVU estatal y municipal. Vale también para los productos que se agreguen después.",
+    "productSaleBadge": "Producto",
+    "quantityDisplay": "Cantidad en documentos",
+    "quantityDisplayHint": "Cómo se lee la cantidad en recibo, factura impresa y vista de la factura.",
+    "quantityDisplayTotal": "Total",
+    "quantityDisplayBreakdown": "Sesiones × Áreas = Terapias"
   },
   "tb": {
     "acc": {
@@ -3767,7 +4696,6 @@
       "vitales": "Vitales",
       "intravenoso": "Intravenoso"
     },
-    "activarSonido": "Activar sonido",
     "cancelarAviso": "Cancelar aviso",
     "tema": "Tema",
     "sinSecciones": "Sin secciones configuradas.",
@@ -3775,12 +4703,18 @@
     "record": "Récord",
     "soloEnfermeria": "Solo Enfermería puede tomar el aviso.",
     "sinPermiso": "No tienes acceso a este panel (panel.read).",
+    "sinCentro": "No tienes ningún centro asignado.",
     "estatus": {
       "titulo": "Enviar estatus de enfermera",
       "elegirEnfermera": "Elegir enfermera(o)",
       "reset": "Reset (disponible)",
       "actuales": "Estatus actuales",
       "sin": "Sin estatus ahora"
+    },
+    "staffOrder": {
+      "notEligible": "{n, plural, one {# persona ya no está en el panel y se quitó del orden} other {# personas ya no están en el panel y se quitaron del orden}}",
+      "up": "Subir",
+      "down": "Bajar"
     }
   },
   "requeridos": {
@@ -3926,15 +4860,18 @@
       "historialTitulo": "Cambios anteriores",
       "sinHistorial": "Sin cambios de protocolo.",
       "cargando": "Cargando…",
+      "enCentro": "En {centro}",
       "cambioResumen": "{cerrados} cerrado(s) · {creados} nuevo(s)",
-      "nuevoTitulo": "Nuevo cambio"
+      "nuevoTitulo": "Nuevo cambio",
+      "sessionsAtLeastOne": "Las sesiones deben ser 1 o más."
     }
   },
   "perfiles": {
     "vigencia_invalida": "La fecha final de vigencia es anterior a la inicial"
   },
   "tenant": {
-    "no_encontrado": "El centro seleccionado no existe"
+    "no_encontrado": "El centro seleccionado no existe",
+    "oneCenterOnly": "Esta operación es de un solo centro"
   },
   "persistencia": {
     "guardado": "Guardado",
@@ -4042,7 +4979,25 @@
     "printerDiscard": "Descartar",
     "printerSaved": "Impresora «{name}» guardada.",
     "printerRemoved": "Impresora «{name}» quitada.",
-    "printerRemoveConfirm": "¿Quitar la impresora «{name}»? Los equipos que la usaban pasarán a la primera de la lista."
+    "printerRemoveConfirm": "¿Quitar la impresora «{name}»? Los equipos que la usaban pasarán a la primera de la lista.",
+    "scannersTitle": "Escáneres de este centro",
+    "scannersHelp": "El botón «Escanear» del cuadre los ofrece a elegir. Necesita la URL eSCL del escáner (p. ej. https://192.130.80.164/eSCL).",
+    "scannersEmpty": "Todavía no hay escáneres. Añade el primero.",
+    "scannerAdd": "Añadir escáner",
+    "scannerName": "Nombre",
+    "scannerNamePlaceholder": "Recepción Caguas…",
+    "scannerUrl": "URL eSCL",
+    "scannerUrlPlaceholder": "https://192.130.80.164/eSCL",
+    "scannerDefaultSource": "Origen por defecto",
+    "scannerSourceAdf": "Bandeja",
+    "scannerSourcePlaten": "Cristal",
+    "scannerActive": "Activo",
+    "scannerSave": "Guardar escáner",
+    "scannerCreate": "Crear escáner",
+    "scannerRemove": "Quitar escáner",
+    "scannerSaved": "Escáner «{name}» guardado.",
+    "scannerRemoved": "Escáner «{name}» quitado.",
+    "scannerRemoveConfirm": "¿Quitar el escáner «{name}»? Ya no se podrá elegir desde el cuadre."
   },
   "numeracion": {
     "title": "Numeración de documentos",
@@ -4112,7 +5067,9 @@
     "vialesCerrados": "Viales cerrados de {presentacion}",
     "vialesAbiertos": "Abiertos ({unidad})",
     "vialesSinVista": "El contenido de algún vial está en otra medida: el total se calcula al guardar.",
-    "vialesAjustado": "Contado {contado}, el sistema tenía {sistema}: quedó ajustado."
+    "vialesAjustado": "Contado {contado}, el sistema tenía {sistema}: quedó ajustado.",
+    "vialCount": "Lo que contaste",
+    "quantityInvalid": "La cantidad tiene que ser mayor que cero."
   },
   "inventarioViales": {
     "titulo": "Viales",
@@ -4223,7 +5180,8 @@
       "categoria": "Categoría",
       "selCategoria": "Elige categoría",
       "descripcion": "Descripción",
-      "global": "Evento global (todos los centros)"
+      "global": "Evento global (todos los centros)",
+      "centro": "Centro"
     },
     "proximos": "Próximos eventos",
     "anterior": "Anterior",
@@ -4412,7 +5370,11 @@
       "workEnd": "Hora de fin",
       "externalCode": "Código de centro externo",
       "selectCode": "Elige un código",
-      "none": "Ninguno"
+      "none": "Ninguno",
+      "sheetDownPolicy": "Si la hoja del call center no responde",
+      "sheetDownPolicyHelp": "Con la reserva en la hoja encendida: qué hacer al agendar si la hoja no contesta.",
+      "sheetDownPolicyAllow": "Avisar y agendar",
+      "sheetDownPolicyBlock": "Bloquear"
     },
     "doctorMappings": {
       "title": "Mapeo de médicos",
@@ -4453,7 +5415,6 @@
     "buscar": "Buscar por nombre o cargo…",
     "cargando": "Cargando…",
     "vacio": "Sin personal.",
-    "elegirCentro": "Elige un centro para ver su personal.",
     "elegirPersona": "Elige una persona de la lista.",
     "sinCargo": "Sin cargo",
     "sinCuenta": "sin cuenta de acceso",
@@ -4463,28 +5424,20 @@
     "nombre": "Nombre",
     "apellido": "Apellido",
     "email": "Correo",
-    "telefono": "Teléfono",
     "especialidad": "Especialidad",
-    "sexo": "Sexo",
-    "sexoF": "Femenino",
-    "sexoM": "Masculino",
-    "color": "Color",
     "reactivar": "Reactivar",
     "darDeBaja": "Dar de baja",
     "reactivado": "Persona reactivada",
     "dadoDeBaja": "Persona dada de baja",
     "nuevo": "Nuevo",
-    "nuevoAyuda": "Crea la persona con su nombre; el resto (color, cargo, centros) se completa en la ficha.",
+    "nuevoAyuda": "Crea la persona con su nombre; el resto (cargo, responsabilidades, centros) se completa en la ficha.",
     "crear": "Crear",
     "creado": "Persona creada",
     "verInactivos": "Ver inactivos",
-    "capacidades": "Hace",
     "guardarCambios": "Guardar",
     "guardando": "Guardando…",
     "guardado": "Guardado",
     "acceso": "Acceso al sistema",
-    "aprobado": "aprobado",
-    "verUsuario": "Ver usuario",
     "sinCuentaAyuda": "Sin cuenta de acceso.",
     "darAcceso": "Dar acceso al sistema",
     "darAccesoTitulo": "Dar acceso a {nombre}",
@@ -4496,15 +5449,11 @@
     "accesoDado": "Acceso creado para {nombre}.",
     "centros": "Centros de servicio",
     "centrosAyuda": "Marca dónde debe salir en los desplegables. Si un día cubre en otro centro, lo marcas; al volver, lo desmarcas.",
-    "guardarCentros": "Guardar centros",
-    "centrosGuardados": "Centros guardados",
     "frontdeskConsultaLabel": "Entrar directo a Consulta en Frontdesk",
     "frontdeskConsultaAyuda": "Al entrar a Frontdesk, aterriza en la pestaña Consulta en vez de la primera de servicio.",
-    "frontdeskConsultaGuardado": "Preferencia guardada",
     "consultaInicialLabel": "Al abrir Consulta, mostrar",
     "consultaInicialAyuda": "Con qué pestaña abre el tablero de Consulta. El orden de las pestañas no cambia; solo cuál viene seleccionada.",
     "consultaInicialAsIs": "Como está configurado",
-    "consultaInicialGuardado": "Preferencia guardada",
     "verHub": "Ficha completa",
     "ehrLabel": "Cuenta del EHR",
     "ehrSinVinculo": "Todavía no tiene cuenta vinculada en el EHR.",
@@ -4520,7 +5469,28 @@
     "ehrGuardando": "Guardando…",
     "ehrGuardar": "Guardar",
     "ehrVinculado": "Vinculado con el EHR.",
-    "ehrActualizado": "Rol del EHR actualizado."
+    "ehrActualizado": "Rol del EHR actualizado.",
+    "centroOrigen": "Centro de origen: {nombre}",
+    "centrosColumna": "Centro(s)",
+    "extension": "Extensión (central telefónica)",
+    "extensionesTitulo": "Telefonía",
+    "extensionesVacio": "Sin extensiones.",
+    "extensionesCentral": "Central (p. ej. ucm-bayamon, 3cx)",
+    "extensionesAgregar": "Añadir central",
+    "extensionesQuitar": "Quitar",
+    "extensionesCentralDuplicada": "Cada central solo puede aparecer una vez.",
+    "responsibilities": "Responsabilidades",
+    "responsibilitiesHelp": "Deciden en qué listas aparece la persona (médicos, enfermeras, técnicos, operadoras…). «Médico» además muestra sus pestañas de agenda, pacientes y producción.",
+    "nameRequired": "El nombre es obligatorio.",
+    "unsavedChanges": "Cambios sin guardar",
+    "accessFilter": "Acceso al sistema",
+    "access": {
+      "all": "Todos",
+      "withAccess": "Con acceso",
+      "noAccess": "Sin acceso",
+      "suspended": "Suspendidos"
+    },
+    "suspendida": "acceso suspendido"
   },
   "acciones": {
     "subtitle": "Todo su historial, sin salir de aquí.",
@@ -4560,6 +5530,7 @@
     "issuedOn": "Expedido el {fecha}."
   },
   "medicoHub": {
+    "clinic": "Centro",
     "back": "Personal",
     "loading": "Cargando…",
     "active": "Activo",
@@ -4624,11 +5595,15 @@
     "dateOk": "Esa fecha sirve.",
     "suggested": "Sugerida",
     "noSlot": "sin hueco en 60 días",
-    "holidaysNote": "Los feriados son compartidos (globales o del centro); se configuran en Agenda/Configuración."
+    "holidaysNote": "Los feriados son compartidos (globales o del centro); se configuran en Agenda/Configuración.",
+    "fromTime": "Desde la hora",
+    "toTime": "Hasta la hora",
+    "hoursInvalid": "La hora de fin debe ser posterior a la de inicio"
   },
   "disponibilidad": {
     "ausencia": {
-      "rango_invalido": "El rango de la ausencia es inválido (fin antes del inicio)."
+      "rango_invalido": "El rango de la ausencia es inválido (fin antes del inicio).",
+      "horas_invalidas": "La hora de fin debe ser posterior a la de inicio"
     }
   },
   "printHub": {
@@ -4639,14 +5614,33 @@
     "notFound": "Este centro no tiene configurado un hub de impresión de respaldo.",
     "printerNameRequired": "Ponle un nombre a la impresora.",
     "duplicatePrinterName": "Ya hay una impresora con ese nombre en este centro.",
-    "printerNotFound": "Esa impresora ya no existe."
+    "printerNotFound": "Esa impresora ya no existe.",
+    "invalidCommandSet": "El lenguaje de la impresora debe ser Epson (ESC/POS) o Star (Star Line Mode).",
+    "model": "Modelo",
+    "modelPlaceholder": "p. ej. Epson TM-T20II",
+    "font": "Fuente",
+    "fontNone": "Sin cambio",
+    "fontA": "Normal (A)",
+    "fontB": "Pequeña (B)",
+    "scannerInvalid": "El campo {field} del escáner no es válido.",
+    "scannerNotFound": "Ese escáner ya no existe."
+  },
+  "cashScan": {
+    "scannerNotFound": "Ese escáner no existe o no está activo en este centro.",
+    "invalidSettings": "La opción {field} del escaneo no es válida."
+  },
+  "cashReconciliation": {
+    "error": {
+      "attachmentTypeNotAllowed": "Ese tipo de archivo no se acepta: solo fotos (JPG, PNG, WEBP) o PDF.",
+      "attachmentPathInvalid": "No se pudo registrar el adjunto; vuelve a adjuntarlo."
+    }
   },
   "invoiceReopen": {
     "action": "Reabrir",
     "hint": "Vuelve a borrador con su mismo número para corregirla",
     "title": "Reabrir la factura",
     "description": "Vuelve a borrador con su mismo número. Se repone el inventario y se conservan los pagos; al terminar la corriges y la vuelves a emitir.",
-    "reasonLabel": "Motivo (obligatorio)",
+    "reasonLabel": "Motivo",
     "reasonPlaceholder": "Ej.: se exoneró por error y el paciente paga 10 dólares",
     "confirm": "Reabrir",
     "done": "Factura reabierta: corrígela y vuelve a emitirla.",
@@ -4672,6 +5666,21 @@
     "dateOutOfRangeFrom": "Esa fecha no cabe en la secuencia de números: tiene que ser desde el {from} en adelante.",
     "dateOutOfRangeTo": "Esa fecha no cabe en la secuencia de números: tiene que ser hasta el {to}."
   },
+  "invoiceChangePatient": {
+    "action": "Cambiar paciente",
+    "hint": "Para cuando se facturó al paciente equivocado",
+    "title": "Cambiar el paciente de la factura",
+    "description": "La factura conserva su número y su total; solo cambia a quién está facturada.",
+    "currentPatient": "Paciente actual",
+    "changeSelection": "Cambiar",
+    "searchPlaceholder": "Buscar paciente: nombre, record o ID…",
+    "searchHint": "Escribe al menos 2 letras para buscar.",
+    "reasonLabel": "Motivo",
+    "reasonPlaceholder": "Ej.: se facturó por error al paciente 16034 en vez del 680",
+    "confirm": "Cambiar paciente",
+    "done": "Paciente de la factura actualizado.",
+    "patient": "Paciente nuevo"
+  },
   "invoice": {
     "notFound": "La factura no existe.",
     "reopen": {
@@ -4682,6 +5691,23 @@
       "cashClosed": "El cuadre de caja de ese día ya está cerrado: corregirla lo altera.",
       "reasonRequired": "Escribe el motivo para reabrir.",
       "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente."
+    },
+    "changePatient": {
+      "INVOICE_CHANGE_PATIENT_SAME": "Ya es el paciente de esta factura.",
+      "INVOICE_CHANGE_PATIENT_UNKNOWN": "Ese paciente no existe en este centro.",
+      "INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT": "Es una consulta ligada a una cita: cambia primero el paciente de la cita."
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "tax": "Impuesto",
+      "shipping": "Envío",
+      "total": "Total",
+      "paid": "Pagado",
+      "refunded": "Reembolsado",
+      "balance": "Saldo",
+      "payment": "Pago",
+      "refund": "Reembolso"
     }
   },
   "picker": {
@@ -4691,7 +5717,12 @@
     "clear": "Borrar",
     "hour": "Hora",
     "minute": "Min",
-    "period": "AM/PM"
+    "period": "AM/PM",
+    "typedFormat": "Escribe la fecha como MM/DD/AAAA (p. ej. 03/15/1958).",
+    "typedInvalid": "Esa no es una fecha real.",
+    "typedFuture": "La fecha no puede ser futura.",
+    "typedAge": "Verifica el año — la edad no parece correcta.",
+    "typedRange": "Esa fecha está fuera del rango permitido."
   },
   "patientDesk": {
     "title": "Centro de Pacientes",
@@ -4707,7 +5738,7 @@
     "pickPatient": "Elige un paciente de la lista para ver sus servicios.",
     "record": "Record",
     "firstAt": "primera cita {time}",
-    "markPresent": "Presente",
+    "markPresent": "No presente",
     "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
     "vitalsBy": "Vitales: {name}",
@@ -4717,8 +5748,12 @@
     "filterByType": "Filtrar por tipo",
     "allServices": "Todos los servicios",
     "allTypes": "Todos los tipos",
-    "filteringBy": "filtrando: {name}",
+    "filteringBy": "{name}",
+    "filteringByPending": "sin asistir: {name}",
+    "serviceArrivedPendingHint": "Ver a quién le falta asistir en este servicio",
     "clearSearch": "Limpiar búsqueda",
+    "enSala": "En sala",
+    "enSalaTotal": "Total",
     "kind": {
       "all": "Todos",
       "services": "Servicios",
@@ -4727,6 +5762,7 @@
     "queue": {
       "pillLabel": "{waiting} en sala · {inTherapy} en terapia",
       "panelTitle": "Cola de {service}",
+      "openViewer": "Ver el visor general de {service}",
       "panelDescription": "Orden de llegada, quién está en terapia ahora y quién está libre para tomarla.",
       "empty": "Nadie esperando ni en terapia ahora.",
       "sectionWaiting": "Esperando",
@@ -4740,6 +5776,7 @@
       "uncall": "Deshacer",
       "pickTechnician": "Elegir técnico",
       "busyLoad": "ocupado · {n}",
+      "notYetToday": "sin pacientes hoy",
       "calledLabel": "Llamado · {technician} · {time}",
       "busyIn": "Ocupado en {service}",
       "free": "Libres: {names}",
@@ -4750,7 +5787,88 @@
     "bookService": "Citar servicio",
     "bookConsultation": "Citar consulta",
     "cancelled": "Cancelada",
-    "presentAt": "Presente {time}"
+    "presentAt": "Presente {time}",
+    "markPendingPresent": "Marcar presente (pendientes: {n})",
+    "markPresentHint": "Clic para marcar presente",
+    "filteredSections": {
+      "showingOnly": "Mostrando solo: {service}",
+      "showingAll": "Mostrando todas las terapias",
+      "seeAll": "ver todas ({n} más)",
+      "onlyFiltered": "solo {service}"
+    },
+    "serviceDone": "Atendido",
+    "subtypeShort": {
+      "nueva": "Nuevo",
+      "seguimiento": "Seguimiento"
+    },
+    "daySummary": {
+      "open": "Ver el resumen del día",
+      "title": "Resumen del día · {service}",
+      "file": "resumen-del-dia",
+      "columns": "Columnas",
+      "columnsHint": "Columnas que ves",
+      "loadError": "No se pudo cargar el resumen.",
+      "retry": "Reintentar",
+      "empty": "No hay sesiones asistidas este día.",
+      "notComplete": "Ojo: el servicio no está completo ({attended}/{total}).",
+      "totals": "Totales",
+      "col": {
+        "record": "Récord",
+        "patient": "Paciente",
+        "quantity": "Cantidad",
+        "dose": "Dosis",
+        "nurse": "Enfermera",
+        "attendedBy": "Asistido por",
+        "time": "Hora",
+        "sealedVials": "Viales",
+        "content": "Contenido"
+      },
+      "stat": {
+        "patients": "Pacientes",
+        "sessions": "{n, plural, one {# sesión} other {# sesiones}}",
+        "vials": "Viales aplicados",
+        "content": "Contenido",
+        "proportion": "Proporción"
+      },
+      "byNurse": "Por enfermera",
+      "byUser": "Por usuario (asistido por)",
+      "group": {
+        "sessions": "Sesiones",
+        "unknown": "Sin indicar"
+      },
+      "filter": {
+        "contains": "Contiene…",
+        "by": "Filtrar por {col}",
+        "all": "Todos",
+        "showing": "Mostrando {n} de {total}",
+        "clear": "Quitar filtros",
+        "none": "Ningún registro cumple los filtros."
+      }
+    },
+    "doctorSummary": {
+      "title": "Pacientes por médico",
+      "titleDoctor": "Pacientes por médico · {doctor}",
+      "file": "resumen-por-medico",
+      "loadError": "No se pudo cargar el resumen.",
+      "empty": "No hay consultas hoy.",
+      "noDoctor": "Aún sin médico",
+      "attendedN": "{n} atendidos",
+      "attended": "Atendidos",
+      "count": "Cantidad",
+      "byDoctor": "Por médico",
+      "byType": "Por tipo",
+      "col": {
+        "record": "Récord",
+        "patient": "Paciente",
+        "doctor": "Médico",
+        "nurse": "Enfermera",
+        "type": "Tipo",
+        "time": "Hora",
+        "frontDesk": "Recepción",
+        "amount": "Monto",
+        "paymentMethod": "Método de pago"
+      }
+    }
   },
   "salesPackages": {
     "title": "Paquetes de venta",
@@ -4860,6 +5978,634 @@
     "notMovable": "Esta cita ya no está abierta y no se puede mover desde aquí.",
     "noneThatDay": "No queda cupo de seguimiento ese día.",
     "freeDay": "Hay cupo de seguimiento ese día ({n} libres)."
+  },
+  "createClinic": {
+    "label": "Centro",
+    "placeholder": "Elegir centro…",
+    "help": "Se crea en este centro."
+  },
+  "rightNow": {
+    "title": "Ahora mismo",
+    "description": "Lo que pasa en cada oficina, en vivo.",
+    "updatedAt": "Actualizado {time}",
+    "live": "En vivo",
+    "offline": "Sin conexión en vivo",
+    "combined": "Todos los centros",
+    "kpi": {
+      "netSales": "Ventas netas",
+      "invoices": "Facturas",
+      "refunds": "Devoluciones",
+      "present": "Pacientes presentes",
+      "attended": "Atendidos",
+      "pending": "Pendientes",
+      "calls": "Llamadas",
+      "alerts": "Alertas"
+    },
+    "sales": {
+      "title": "Ventas",
+      "net": "Neto del día",
+      "refunds": "Devoluciones: {n}",
+      "topSellers": "Mejores vendedores",
+      "noSellers": "Aún no hay ventas.",
+      "unknownSeller": "Sin nombre"
+    },
+    "patients": {
+      "title": "Pacientes (consultas)",
+      "present": "Presentes",
+      "firstVisit": "Primera vez",
+      "followUp": "Seguimiento",
+      "attended": "Atendidos",
+      "pending": "Pendientes"
+    },
+    "doctors": {
+      "title": "Médicos",
+      "colDoctor": "Médico",
+      "colTotal": "Citas",
+      "colAttended": "Atendidos",
+      "colFirst": "1ª vez",
+      "colFollow": "Seg.",
+      "colNet": "Facturado",
+      "empty": "Sin consultas hoy.",
+      "noDoctor": "Sin médico",
+      "pendingDoctor": "Pacientes nuevos en espera de que se les asigne médico",
+      "pendingDoctorEmpty": "Ninguna factura sin médico ahora mismo.",
+      "pendingDoctorLoading": "Buscando…",
+      "byAmount": "Por monto",
+      "byAttended": "Por atendidos"
+    },
+    "prescriptions": {
+      "title": "Recetas",
+      "empty": "Las recetas llegarán desde el expediente (EHR); todavía no hay datos."
+    },
+    "services": {
+      "title": "Servicios",
+      "colService": "Servicio",
+      "colWaiting": "En espera",
+      "colInCare": "En atención",
+      "colCompleted": "Completados",
+      "colStaff": "Atiende",
+      "empty": "Sin servicios hoy.",
+      "waitingList": "En espera · {service}",
+      "completedList": "Completados · {service}",
+      "minutes": "{n} min",
+      "attendedBy": "Atendió {name}",
+      "none": "Nadie."
+    },
+    "calls": {
+      "title": "Llamadas",
+      "total": "Total",
+      "inbound": "Entrantes",
+      "outbound": "Salientes",
+      "missed": "Perdidas",
+      "answerRate": "Contestadas",
+      "byPbx": "Por central",
+      "ranking": "Operadoras",
+      "colExtension": "Ext.",
+      "colName": "Operadora",
+      "colAnswered": "Contestadas",
+      "colOutbound": "Salientes",
+      "empty": "Sin llamadas registradas todavía.",
+      "unassigned": "Ext {extension} (sin asignar)"
+    },
+    "externalSource": {
+      "legacy": "Datos del legado · {time}",
+      "stale": "Sin datos nuevos del legado desde {time}"
+    },
+    "externalSourceConfig": {
+      "title": "Enchufe del legado",
+      "description": "Por centro: cuando está encendido, Ahora mismo muestra ventas, médicos, pacientes y servicios calculados por el sistema legado en vez de los nuestros.",
+      "lastReceived": "Último recibido: {time}",
+      "neverReceived": "Todavía no ha recibido nada.",
+      "enabled": "Enchufe del legado encendido para {center}.",
+      "disabled": "Enchufe del legado apagado para {center}."
+    },
+    "noCenters": "No tienes centros para ver.",
+    "error": "No se pudo cargar «Ahora mismo»."
+  },
+  "exoneratedProducts": {
+    "title": "Productos exonerados de IVU",
+    "help": "Facturas de productos que debían llevar IVU y salieron sin él, con el IVU que tocaba por componente. Para el cierre de mes de Contabilidad.",
+    "from": "Desde",
+    "to": "Hasta",
+    "search": "Buscar",
+    "thisMonth": "Este mes",
+    "lastMonth": "Mes pasado",
+    "export": "Exportar CSV",
+    "range": "Del {from} al {to}",
+    "empty": "No hay facturas de productos exoneradas en el rango.",
+    "totals": "Totales ({n} facturas)",
+    "kpi": {
+      "invoices": "Facturas",
+      "exoneratedBase": "Base exonerada",
+      "taxWouldBe": "IVU que tocaba",
+      "total": "Total facturado"
+    },
+    "col": {
+      "number": "Factura",
+      "date": "Fecha",
+      "record": "Récord",
+      "patient": "Paciente",
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "shipping": "Envío",
+      "total": "Total",
+      "exoneratedBase": "Base exonerada",
+      "status": "Estatus",
+      "payment": "Forma de pago"
+    }
+  },
+  "emailInput": {
+    "suggestions": "Dominios sugeridos",
+    "tabHint": "Tab ↹"
+  },
+  "bodyMeasurements": {
+    "title": "Medidas sin vincular",
+    "description": "Lecturas de báscula y cinta que no encontraron su visita GLP-1: un récord equivocado o un paciente que no se metió al frontdesk. Al vincularla, la medida toma el paciente y el día de esa visita.",
+    "count": "{n, plural, one {# medida} other {# medidas}}",
+    "from": "Desde",
+    "empty": "No hay medidas sueltas",
+    "emptyHint": "Todas las lecturas de este rango ya están en su visita.",
+    "loadError": "No se pudieron cargar las medidas",
+    "retry": "Reintentar",
+    "noPermission": "No tienes permiso para ver las medidas corporales.",
+    "noPatient": "Sin paciente",
+    "link": "Vincular",
+    "linking": "Vinculando…",
+    "linked": "Medida vinculada a la visita",
+    "cancel": "Cancelar",
+    "linkTitle": "Vincular a una visita",
+    "linkHint": "Visitas del frontdesk del {date} en {center}. Primero las del mismo paciente.",
+    "glp1Only": "Solo se puede vincular a una visita GLP-1.",
+    "searchVisit": "Buscar por nombre, récord o servicio",
+    "visitsError": "No se pudieron cargar las visitas de ese día",
+    "noVisits": "No hay visitas ese día que coincidan",
+    "visit": "La visita",
+    "samePatient": "Mismo paciente",
+    "kind": {
+      "scale": "Báscula",
+      "tape": "Cinta"
+    },
+    "col": {
+      "date": "Fecha",
+      "center": "Centro",
+      "kind": "Tipo",
+      "patient": "Paciente",
+      "values": "Valores",
+      "source": "Origen"
+    },
+    "field": {
+      "weightKg": "Peso (kg)",
+      "bodyFatPct": "Grasa %",
+      "bmi": "IMC",
+      "skeletalMusclePct": "Músculo esq. %",
+      "muscleMassKg": "Masa muscular (kg)",
+      "proteinPct": "Proteína %",
+      "bmrKcal": "Metabolismo basal (kcal)",
+      "visceralFat": "Grasa visceral",
+      "hydrationPct": "Hidratación %",
+      "boneMassKg": "Masa ósea (kg)",
+      "metabolicAge": "Edad metabólica",
+      "neck": "Cuello",
+      "shoulder": "Hombro",
+      "leftBiceps": "Bíceps izq.",
+      "rightBiceps": "Bíceps der.",
+      "chest": "Pecho",
+      "waist": "Cintura",
+      "abdomen": "Abdomen",
+      "hip": "Cadera",
+      "leftThigh": "Muslo izq.",
+      "rightThigh": "Muslo der.",
+      "leftCalf": "Pantorrilla izq.",
+      "rightCalf": "Pantorrilla der.",
+      "waistHipRatio": "Cintura/cadera"
+    },
+    "error": {
+      "alreadyLinked": "Esa visita ya tiene su medida de este tipo",
+      "visionNotConfigured": "La lectura por imagen aún no está configurada en el servidor",
+      "visionUnreadable": "No se pudo leer la imagen de la báscula",
+      "visitTakesNoReadings": "Solo se puede vincular a una visita GLP-1"
+    }
+  },
+  "sheet": {
+    "slotTaken": "Esa hora ya no tiene asiento en la hoja del call center",
+    "unavailable": "La hoja del call center no responde; no se agendó",
+    "unavailableWarn": "La hoja del call center no respondió; la cita se guardó aquí pero no en la hoja",
+    "noOwnerCode": "El paciente no tiene dueño de cartera con código en la hoja",
+    "ownerNoteFailed": "No se pudo anotar el dueño de cartera en la hoja",
+    "down": "La hoja del call center no responde: la disponibilidad puede no estar al día",
+    "noSeatDays": "Sin asiento en la hoja: {days}"
+  },
+  "oauthConsent": {
+    "loading": "Cargando…",
+    "invalidLink": "Enlace de autorización inválido",
+    "genericError": "No se pudo completar la autorización. Vuelve a intentarlo desde Claude.",
+    "backToCmr": "Volver a CMR",
+    "unknownClient": "Una aplicación",
+    "title": "{client} quiere acceder a CMR",
+    "signedInAs": "Como:",
+    "notYou": "¿No eres tú? Cerrar sesión",
+    "whatItCanDo": "{client} podrá hacer todo lo que tú puedes hacer en CMR, con tus mismos permisos y en tus centros.",
+    "auditNote": "Cada acción queda registrada en la auditoría como hecha a través de {client}.",
+    "returnTo": "Volverás a:",
+    "approve": "Aprobar",
+    "deny": "Cancelar",
+    "working": "Un momento…",
+    "disconnectHint": "Puedes desconectar {client} cuando quieras desde sus ajustes de conectores."
+  },
+  "confirmation": {
+    "required": "Esta acción necesita tu confirmación antes de guardarse.",
+    "unknownAction": "Confirmar: {action}",
+    "cancel": "Cancelar",
+    "accept": "Aceptar",
+    "action": {
+      "unattend": "Desasistir la sesión",
+      "deleteSession": "Eliminar la sesión",
+      "cancelDay": "Cancelar todas las sesiones del día",
+      "repair": "Reparar la sesión",
+      "cancelSession": "Cancelar la sesión",
+      "undoPresent": "Deshacer presente",
+      "undoChange": "Deshacer el cambio",
+      "voidInvoice": "Anular la factura",
+      "voidRefund": "Anular la devolución",
+      "addKitComponent": "Agregar un componente al kit de una factura emitida",
+      "adminGrant": "Dar acceso total (rol Administrador)",
+      "adminRevoke": "Quitar el acceso total (rol Administrador)",
+      "modifyPastCashDay": "Vas a cambiar el cuadre del {day}"
+    },
+    "effect": {
+      "returnsPackageSession": "Devuelve la sesión al paquete",
+      "returnsStock": "Devuelve al inventario lo descontado",
+      "clearsAttendedTime": "Borra la hora de asistido",
+      "sessionDeleted": "La sesión desaparece del tablero",
+      "cancelsOpenSessionsOfTheDay": "Cancela las sesiones abiertas del día",
+      "redoesDischarge": "Rehace el descuento de inventario",
+      "sessionCancelled": "La sesión queda cancelada",
+      "backToPending": "La sesión vuelve a pendiente",
+      "invoiceVoided": "La factura queda anulada",
+      "refundVoided": "La devolución queda anulada",
+      "kitComponentAdded": "El componente se agrega al kit y se crean sus sesiones; el monto de la factura no cambia.",
+      "fullAccessEveryCenter": "Esta persona podrá hacer todo, en todos los centros",
+      "loosesFullAccess": "Esta persona pierde el acceso total",
+      "pastCashDayChanges": "Las firmas de ese día pedirán acusar la corrección"
+    },
+    "policies": {
+      "title": "Confirmaciones",
+      "hint": "Qué acciones delicadas piden «¿Aceptar o no?» antes de guardarse, por centro.",
+      "action": "Acción",
+      "default": "por defecto",
+      "saved": "Guardado",
+      "noPermission": "No tienes permiso para configurar las confirmaciones."
+    }
+  },
+  "changeLog": {
+    "title": "Historial de cambios",
+    "dayTitle": "Historial del día",
+    "screenHint": "Quién cambió qué, con el antes y el después, y deshacer donde se permite.",
+    "noPermission": "No tienes permiso para ver el historial de cambios.",
+    "loadError": "No se pudo cargar el historial",
+    "empty": "Sin cambios registrados",
+    "system": "Sistema",
+    "undo": "Deshacer",
+    "undoing": "Deshaciendo…",
+    "undone": "Cambio deshecho",
+    "undoneBy": "Deshecho por {name}",
+    "more": "Ver {n} más",
+    "changedId": "(cambiado)",
+    "filter": {
+      "from": "Desde",
+      "to": "Hasta",
+      "user": "Usuario",
+      "allUsers": "Todos",
+      "patient": "Paciente",
+      "patientHint": "Nombre o récord"
+    },
+    "action": {
+      "create": "Creada",
+      "present": "Presente",
+      "undo_present": "Deshacer presente",
+      "start_therapy": "En terapia",
+      "back_to_present": "Vuelve a presente",
+      "back_to_pending": "Vuelve a pendiente",
+      "attend": "Asistida",
+      "unattend": "Desasistida",
+      "cancel": "Cancelada",
+      "reopen": "Reabierta",
+      "reschedule": "Reagendada",
+      "edit": "Editada",
+      "delete": "Eliminada",
+      "status": "Cambio de estado",
+      "absence_create": "Ausencia creada",
+      "absence_link": "Ausencia ligada",
+      "absence_cancel": "Ausencia cancelada",
+      "absence_restore": "Ausencia restaurada",
+      "absence_edit": "Ausencia editada",
+      "absence_delete": "Ausencia borrada",
+      "invoice_line_add": "Línea agregada",
+      "invoice_line_edit": "Línea editada",
+      "invoice_line_multipliers": "Áreas / días cambiados",
+      "invoice_line_remove": "Línea quitada",
+      "invoice_line_component_added": "Componente agregado al kit"
+    },
+    "field": {
+      "estado": "Estado",
+      "presenteEn": "Presente",
+      "terapiaInEn": "En terapia",
+      "asistidoEn": "Asistido",
+      "productoAplicadoId": "Dosis",
+      "cantidad": "Cantidad",
+      "enfermeraId": "Enfermera",
+      "tecnicoId": "Técnico",
+      "medicoId": "Médico",
+      "datos": "Datos",
+      "fecha": "Fecha",
+      "hora": "Hora",
+      "paqueteId": "Paquete",
+      "vialAbiertoId": "Vial abierto"
+    },
+    "status": {
+      "pendiente": "Pendiente",
+      "presente": "Presente",
+      "en_terapia": "En terapia",
+      "asistido": "Asistido",
+      "cancelada": "Cancelada"
+    },
+    "error": {
+      "superseded": "Alguien cambió esos campos después: deshaz primero el cambio posterior",
+      "alreadyUndone": "Ese cambio ya se deshizo",
+      "notUndoable": "Ese cambio no se puede deshacer"
+    }
+  },
+  "calendar": {
+    "absence": {
+      "linked": "Ausencia",
+      "remove": "Quitar la ausencia",
+      "removed": "Ausencia quitada",
+      "vacation": "Vacaciones",
+      "leave": "Permiso",
+      "until": "llega {time}",
+      "from": "se va {time}",
+      "between": "ausente {from}–{until}",
+      "wholeDay": "Todo el día",
+      "question": "¿Ausencia de {name} · {when}?",
+      "questionNoName": "¿Ausencia · {when}?",
+      "pick": "Elegir persona",
+      "accept": "Aceptar",
+      "notAbsence": "No es ausencia",
+      "accepted": "Ausencia registrada",
+      "dismissed": "Marcado como no ausencia",
+      "afterSave": "Se podrá aceptar al guardar",
+      "noPermission": "No tienes permiso para revisar ausencias.",
+      "reviewHint": "Eventos del calendario que parecen vacaciones o permisos. Al aceptarlos, la persona sale del personal disponible.",
+      "count": "{n, plural, one {# por revisar} other {# por revisar}}",
+      "since": "Desde",
+      "acceptAllHigh": "Aceptar las de confianza alta ({n})",
+      "acceptedMany": "{n, plural, one {# ausencia registrada} other {# ausencias registradas}}",
+      "reviewEmpty": "Nada por revisar",
+      "high": "Alta",
+      "low": "Baja",
+      "col": {
+        "date": "Fecha",
+        "title": "Evento",
+        "person": "Persona",
+        "kind": "Tipo",
+        "hours": "Horas",
+        "confidence": "Confianza"
+      },
+      "ambiguousStaff": "Hay varias personas con ese nombre",
+      "noStaff": "No encontré a esa persona en el centro",
+      "unclear": "Es un cambio de día o falta confirmar",
+      "unclearHours": "Falta la hora",
+      "staffNotInCenter": "Esa persona no trabaja en el centro del evento",
+      "globalEvent": "Un evento de toda la empresa no es la ausencia de una persona"
+    }
+  },
+  "paymentMethods": {
+    "title": "Formas de pago",
+    "hint": "Las formas que la caja puede elegir. «Efectivo» cuenta en el cuadre; sin «Lleva dinero» (p. ej. Exonerada) nunca se ofrece como pago ni se suma a la caja.",
+    "saved": "Guardado",
+    "created": "Forma de pago creada",
+    "deactivateConfirm": "¿Desactivar «{name}»? Los pagos anteriores la conservan.",
+    "noMoney": "sin dinero",
+    "newName": "Nueva forma de pago",
+    "newSlug": "clave (opcional)",
+    "add": "Agregar",
+    "col": {
+      "name": "Forma",
+      "slug": "Clave",
+      "isCash": "Efectivo",
+      "carriesMoney": "Lleva dinero",
+      "active": "Activa"
+    },
+    "tip": {
+      "isCash": "Se cuenta como efectivo en el cuadre de caja",
+      "carriesMoney": "Apagado: no se puede cobrar con ella y el cuadre no la suma (Exonerada = descuento del 100%, no un pago)"
+    }
+  },
+  "cashCloseSetting": {
+    "help": "Apagado, el botón no aparece en el cuadre del cajero ni en el cuadre total, y el sistema no deja cerrar. Lo ya cerrado y «Reabrir» no cambian.",
+    "saved": "Guardado"
+  },
+  "auth": {
+    "full_access_required": "Gestionar usuarios, roles, permisos y API keys requiere acceso total (un administrador)."
+  },
+  "rbac": {
+    "lastAdmin": "Es el último administrador: da el rol a otra persona antes.",
+    "adminIsGlobal": "El rol Administrador se asigna para todos los centros, nunca para uno solo.",
+    "adminPersonRequired": "Solo un administrador, entrando como persona (no con una API key), puede dar o quitar el rol Administrador.",
+    "adminTargetNeedsAdmin": "Solo un administrador puede cambiar la cuenta de otro administrador.",
+    "adminRoleFixed": "El rol Administrador tiene acceso total y no se edita.",
+    "fullAccessOnlyAdmin": "El acceso total («*») es solo del rol Administrador."
+  },
+  "apiKeys": {
+    "clinicKeyTooBroad": "Una API key de un centro no puede llevar acceso total ni permisos de gestión de accesos.",
+    "beyondCreator": "Una API key no puede tener permisos que su creador no tiene."
+  },
+  "inventoryKardex": {
+    "title": "Kardex diario",
+    "subtitle": "Entradas, aplicadas y ajustes de un producto, día por día, en viales cerrados.",
+    "center": "Centro",
+    "product": "Producto",
+    "pickProduct": "Elige un producto",
+    "from": "Desde",
+    "to": "Hasta",
+    "badRange": "La fecha «Desde» debe ser anterior o igual a «Hasta».",
+    "loading": "Cargando…",
+    "tabDaily": "Por día",
+    "tabSummary": "Detalle de movimientos",
+    "viewDay": "Ver día",
+    "periodTotal": "Total del período",
+    "noMovements": "Ese día no tiene movimientos.",
+    "dayTitle": "Detalle del {date}",
+    "col": {
+      "date": "Fecha",
+      "opening": "Inicio",
+      "inbound": "Entradas",
+      "applied": "Aplicadas",
+      "proportion": "Apl. en proporción",
+      "adjustments": "Ajustes",
+      "closing": "Total",
+      "actions": "Acciones"
+    },
+    "summary": {
+      "opening": "Inventario inicial al {date}",
+      "inbound": "Entrada",
+      "adjustment": "Ajuste",
+      "applied": "Aplicadas hasta el {date}",
+      "closing": "Inventario final al {date}",
+      "kind": "Tipo"
+    },
+    "day": {
+      "patient": "Paciente",
+      "record": "Récord",
+      "reason": "Motivo",
+      "quantity": "Cantidad",
+      "session": "Sesión",
+      "notes": "Nota",
+      "content": "(contenido)",
+      "vials": "Viales",
+      "contentAmount": "Contenido"
+    },
+    "reason": {
+      "apertura": "Apertura",
+      "apertura_vial": "Apertura de vial",
+      "aplicacion": "Aplicación",
+      "compra": "Compra",
+      "consumo_interno": "Consumo interno",
+      "conteo_fisico": "Conteo físico",
+      "correccion": "Corrección",
+      "dano_rotura": "Daño / rotura",
+      "devolucion": "Devolución",
+      "merma": "Merma",
+      "perdida": "Pérdida",
+      "transferencia": "Transferencia",
+      "vencimiento": "Vencimiento",
+      "venta": "Venta"
+    },
+    "owner": {
+      "concept": "Concepto",
+      "quantity": "Cant.",
+      "opening": "Inventario inicial",
+      "inbound": "Entrada al almacén el {date}",
+      "noSupplier": "Sin proveedor",
+      "transfer": "Transferencia",
+      "adjustment": "Ajuste",
+      "corrections": "Correcciones de carga",
+      "applied": "Aplicadas al {date}",
+      "closing": "Inventario final al {date}",
+      "observations": "Observaciones:",
+      "units": "{n} unidades",
+      "mismatch": "La cuenta no cierra: da {computed} y el sistema dice {closing}. Avísale a soporte."
+    },
+    "tabOwner": "Resumen gerencial"
+  },
+  "inventoryReceipts": {
+    "tabReceive": "Recibir",
+    "tabReceipts": "Recepciones",
+    "title": "Recepciones de compra",
+    "subtitle": "Cada recepción tal como se cargó: cuándo, dónde, de quién y quién la cargó.",
+    "count": "{n, plural, one {# recepción} other {# recepciones}}",
+    "center": "Centro",
+    "allCenters": "Todos mis centros",
+    "from": "Desde",
+    "to": "Hasta",
+    "loading": "Cargando…",
+    "empty": "No hay recepciones en esas fechas.",
+    "effective": "Con fecha {date}",
+    "view": "Ver",
+    "total": "Total",
+    "detailTitle": "Recepción",
+    "by": "cargada por {name}",
+    "col": {
+      "date": "Fecha",
+      "center": "Centro · Almacén",
+      "supplier": "Proveedor",
+      "invoice": "Factura / PO",
+      "lines": "Líneas",
+      "units": "Unidades",
+      "cost": "Costo total",
+      "registeredBy": "Cargado por",
+      "actions": "Acciones"
+    },
+    "line": {
+      "product": "Producto",
+      "quantity": "Cantidad",
+      "unitCost": "Costo unitario",
+      "total": "Total",
+      "lot": "Lote",
+      "expires": "Vence",
+      "notes": "Nota"
+    }
+  },
+  "inventoryAdjustments": {
+    "title": "Ajustes de inventario",
+    "subtitle": "Uno o varios productos en un solo ajuste, con un número.",
+    "tabNew": "Nuevo ajuste",
+    "tabList": "Ajustes hechos",
+    "warehouse": "Almacén",
+    "pickWarehouse": "Elige el almacén",
+    "reason": "Motivo",
+    "pickReason": "Elige el motivo",
+    "date": "Fecha (si no es hoy)",
+    "patient": "Paciente (opcional)",
+    "notes": "Nota",
+    "notesPlaceholder": "Por qué se hace el ajuste",
+    "product": "Producto",
+    "pickProduct": "Buscar producto…",
+    "direction": "Sale / Entra",
+    "out": "Sale",
+    "in": "Entra",
+    "quantity": "Cantidad",
+    "lineNote": "Nota de la línea",
+    "removeLine": "Quitar línea",
+    "summary": "{n, plural, one {# producto} other {# productos}} · neto {net}",
+    "save": "Guardar ajuste",
+    "saved": "Ajuste {number} guardado ({n, plural, one {# producto} other {# productos}})",
+    "problem": {
+      "noWarehouse": "Falta el almacén",
+      "noReason": "Falta el motivo",
+      "noNotes": "Falta la nota",
+      "noLines": "Agrega al menos un producto"
+    },
+    "from": "Desde",
+    "to": "Hasta",
+    "loading": "Cargando…",
+    "empty": "No hay ajustes en esas fechas.",
+    "listTitle": "Ajustes de inventario",
+    "view": "Ver",
+    "by": "cargado por {name}",
+    "detailTitle": "Ajuste {number}",
+    "lot": "Lote",
+    "col": {
+      "number": "Número",
+      "date": "Fecha",
+      "lines": "Productos",
+      "net": "Neto",
+      "registeredBy": "Cargado por",
+      "actions": "Acciones"
+    },
+    "quantityPositive": "La cantidad va en positivo; para restar usa Sale."
+  },
+  "legacyLabel": {
+    "correct": "Corregir numeración",
+    "renumber": "Renumerar serie",
+    "session": "Sesión",
+    "of": "de",
+    "total": "Total de sesiones",
+    "startAt": "Empieza en",
+    "from": "Desde",
+    "to": "Hasta",
+    "reason": "Motivo",
+    "reasonHint": "Mínimo 3 caracteres. Queda registrado.",
+    "before": "Antes",
+    "after": "Después",
+    "date": "Fecha",
+    "apply": "Aplicar ({n, plural, one {# cambio} other {# cambios}})",
+    "corrected": "Sesión corregida: {before} → {after}",
+    "renumbered": "{n, plural, one {# sesión renumerada} other {# sesiones renumeradas}}",
+    "rangeHint": "La sesión va de 1 al total.",
+    "rangeDates": "«Desde» no puede ser después de «Hasta».",
+    "previewing": "Calculando la vista previa…",
+    "nothingToChange": "Con estos datos no cambia ninguna sesión."
   },
   "appointmentsBooking": {
     "title": "Citas",

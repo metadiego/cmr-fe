@@ -2,10 +2,12 @@ import type { Recibo } from "../factura/build-recibo.ts";
 import {
   hasMultipliers,
   multipliersText,
+  quantityBreakdownText,
   receiptDateParts,
   receiptFooter,
   receiptMoney as money,
   receiptTitleKey,
+  type QuantityBreakdown,
 } from "../factura/receipt-format.ts";
 import { EscPosWriter } from "./escpos.ts";
 
@@ -13,6 +15,7 @@ import { EscPosWriter } from "./escpos.ts";
 export interface ReceiptText {
   t: (key: string, values?: Record<string, string | number>) => string; // namespace `receipt`
   multiplierLabel: (key: string) => string; // fac.col.<key>, fallback the key
+  rootLabel: (key: string) => string; // a FULL i18n key (quantityBreakdown's labelKey), fallback the key
   paymentLabel: (p: Recibo["pagos"][number]) => string; // formasPago.<clave>, fallback the name
 }
 
@@ -26,6 +29,13 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
   const w = new EscPosWriter().init();
   const { fecha, hora } = receiptDateParts(r.fecha);
   const multText = (m: Record<string, number>) => multipliersText(m, text.multiplierLabel);
+  // Same substitution as <ReciboTermico>: quantityBreakdown (BE #619) replaces multiplicadores, never both.
+  const legend = (it: { multiplicadores?: Record<string, number>; quantityBreakdown?: QuantityBreakdown | null }) =>
+    it.quantityBreakdown
+      ? quantityBreakdownText(it.quantityBreakdown, text.rootLabel)
+      : hasMultipliers(it)
+        ? multText(it.multiplicadores!)
+        : null;
   const emp = r.empresa;
 
   w.feedMm(6); // air on top, like the 6mm spacer of the screen receipt
@@ -53,6 +63,8 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
   const pad = w.columns - title.length - fecha.length;
   if (pad >= 1) w.bold(true).text(title).bold(false).line(" ".repeat(pad) + fecha);
   else w.bold(true).wrapped(title).bold(false).line(" ".repeat(Math.max(0, w.columns - fecha.length)) + fecha);
+  // A refund's receipt names the invoice it comes from (same as the on-screen paper).
+  if (r.facturaOrigen) w.wrapped(t("originInvoice", { number: r.facturaOrigen }));
   w.dashed();
 
   // Patient — bilingual caption by legal requirement (same as the legacy receipt).
@@ -66,9 +78,10 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
   // Lines.
   for (const it of r.items) {
     w.wrapped(it.descripcion.toUpperCase());
+    const itLegend = legend(it);
     const left =
       `${it.cantidad}` +
-      (hasMultipliers(it) ? ` (${multText(it.multiplicadores!)})` : "") +
+      (itLegend ? ` (${itLegend})` : "") +
       ` x ${money(it.precioUnitario)}` +
       (it.descuento > 0 ? ` −\u00a0${money(it.descuento)}` : ""); // the minus stays with its amount
     w.columnsRow(left, money(it.total));
@@ -83,9 +96,12 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
       const head = `${t("includes")}:` + (it.protocoloVisitas ? ` ${t("protocolVisits", { n: it.protocoloVisitas })}` : "");
       w.wrapped(head, 3);
       for (const c of it.componentes) {
-        const label = `${c.cantidad} · ${c.descripcion}`;
+        // El número suelto se sustituye por el desglose cuando el componente está en modo "breakdown".
+        const cQty = c.quantityBreakdown ? quantityBreakdownText(c.quantityBreakdown, text.rootLabel) : c.cantidad;
+        const label = `${cQty} · ${c.descripcion}`;
         if (c.precio != null) w.columnsRow(label, money(c.precio), 3);
         else w.wrapped(label, 3);
+        if (!c.quantityBreakdown && c.multiplicadores && Object.keys(c.multiplicadores).length > 0) w.wrapped(`(${multText(c.multiplicadores)})`, 6);
         if (c.nota) w.wrapped(c.nota, 6);
       }
     }
@@ -108,21 +124,22 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
   w.bold(true).columnsRow(t("total"), money(r.total)).bold(false);
   if ((r.ahorroPaquetes ?? 0) > 0) w.bold(true).columnsRow(t("youSaved"), money(r.ahorroPaquetes ?? 0)).bold(false);
   if (r.montoAbonado > 0) w.columnsRow(t("paid"), money(r.montoAbonado));
+  if ((r.reembolsado ?? 0) !== 0) w.columnsRow(t("refunded"), money(r.reembolsado ?? 0));
   if (r.saldo > 0) w.bold(true).columnsRow(t("balance"), money(r.saldo)).bold(false);
 
   // Payments.
   if (r.pagos.length > 0) {
     w.dashed();
-    for (const p of r.pagos) w.columnsRow(text.paymentLabel(p) + (p.referencia ? ` ${p.referencia}` : ""), money(p.monto));
+    for (const p of r.pagos) w.columnsRow((p.reembolso ? `${t("refund")} ` : "") + text.paymentLabel(p) + (p.referencia ? ` ${p.referencia}` : ""), money(p.monto));
   }
 
   if (r.atendidoPor) w.dashed().wrapped(`${t("attendedBy")}: ${r.atendidoPor}`);
 
-  // Legend of therapies with multipliers (laser: days × areas), one per therapy.
-  const withMultipliers = r.items.filter(hasMultipliers);
+  // Legend of therapies with multipliers or breakdown (laser: days × areas), one per therapy.
+  const withMultipliers = r.items.filter((it) => hasMultipliers(it) || !!it.quantityBreakdown);
   if (withMultipliers.length > 0) {
     w.dashed();
-    for (const it of withMultipliers) w.wrapped(`* ${it.descripcion} — ${multText(it.multiplicadores!)}`);
+    for (const it of withMultipliers) w.wrapped(`* ${it.descripcion} — ${legend(it)}`);
   }
 
   // Footer.

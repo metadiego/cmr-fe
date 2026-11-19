@@ -1,4 +1,5 @@
 import type { Me } from "@/lib/api/auth";
+import { isAdmin } from "@/lib/access/role-keys";
 
 /**
  * ¿Este usuario puede ver VARIOS centros a la vez (vista combinada)?
@@ -10,6 +11,5 @@ import type { Me } from "@/lib/api/auth";
  * Ver cmr-be docs/specs/usuarios-roles-accesos.md.
  */
 export function puedeVerTodosLosCentros(me: Me | null | undefined): boolean {
-  if (!me) return false;
-  return me.isMaster === true || me.accessMode === "admin";
+  return isAdmin(me);
 }

@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { emitirFactura, type FacturaConItems } from "@/lib/api/facturas";
 import { ApiError } from "@/lib/api/types";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,7 @@ interface Props {
   centro?: string;
   disabled: boolean;
   label: string;
-  run: (fn: () => Promise<unknown>) => Promise<void>;
+  run: (fn: () => Promise<unknown>) => Promise<boolean>;
 }
 
 // Local calendar day, YYYY-MM-DD: the latest date an invoice may be issued on (backwards only).
@@ -32,15 +32,12 @@ function today(): string {
 export function IssueButton({ invoice, invoiceId, centro, disabled, label, run }: Props) {
   const t = useTranslations("invoiceReopen");
   const tRoot = useTranslations();
-  const format = useFormatter();
   const reopened = invoice.number != null && invoice.number !== "";
   const ownDate = String(invoice.date ?? "").slice(0, 10);
   const [date, setDate] = React.useState(ownDate);
 
-  const day = (v: unknown) => {
-    const d = parseDayUTC(v);
-    return d ? format.dateTime(d, "dayShort") : String(v ?? "—");
-  };
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const day = (v: unknown) => formatFechaSolo(v) || String(v ?? "—");
 
   function issue() {
     return run(async () => {

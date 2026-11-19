@@ -2,16 +2,19 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { VolumeHighIcon } from "@hugeicons/core-free-icons";
+import { ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 import {
   getPanelDefinicion,
   getPanelNotificaciones,
   aceptarNotificacion,
   cancelarNotificacion,
+  guardarOrdenPersonal,
   type PanelDefinicion,
   type PanelNotificacion,
+  type PanelPersonal,
 } from "@/lib/api/paneles";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -19,22 +22,20 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { colorForName } from "@/lib/frontdesk/color";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingRegion } from "@/components/kit/skeletons";
+import { createNursingAlarm, type AlarmTone, type NursingAlarm } from "@/lib/panel/nursing-alarm";
 
 const CLAVE = "enfermeria";
 
-// Tono por SECCIÓN: el nombre lógico (`panel_secciones.audio`) decide cómo suena, para que la enfermera
-// sepa cuál sonó sin mirar la pantalla. Se distinguen de verdad (una quinta + otro timbre, no 880 vs 900).
-// Un nombre desconocido NUNCA queda mudo: cae al tono por defecto. El BE nombra, el FE resuelve el sonido.
-type Tono = { hz: number; tipo: OscillatorType };
-const TONO_DEFAULT: Tono = { hz: 880, tipo: "sine" };
-const TONOS: Record<string, Tono> = {
+// Tone per SECTION: the logical name (`panel_secciones.audio`) decides how it sounds, so the nurse
+// knows which one rang without looking. An unknown name is NEVER silent: it falls back to the default.
+const TONO_DEFAULT: AlarmTone = { hz: 880, tipo: "sine" };
+const TONOS: Record<string, AlarmTone> = {
   vitales: { hz: 880, tipo: "sine" },
-  intravenoso: { hz: 587, tipo: "triangle" }, // más grave y con otro timbre
+  intravenoso: { hz: 587, tipo: "triangle" }, // lower and with another timbre
 };
-function tonoDe(audio?: string | null): Tono {
+function tonoDe(audio?: string | null): AlarmTone {
   return (audio && TONOS[audio]) || TONO_DEFAULT;
 }
 
@@ -43,31 +44,27 @@ function tinteHex(color?: string | null): string | undefined {
   return color && /^#[0-9a-f]{6}$/i.test(color) ? `${color}1f` : undefined;
 }
 
-// Alarma sin assets: beep en loop con WebAudio (requiere un primer gesto por autoplay del navegador).
+// Alarm ON by default (lib/panel/nursing-alarm.ts). If the browser keeps the sound blocked until a
+// gesture, the FIRST touch/click/key anywhere on the page unlocks it. There is no sound button at all.
 function useAlarma() {
-  const ctxRef = React.useRef<AudioContext | null>(null);
-  const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
-  const tonoRef = React.useRef<Tono>(TONO_DEFAULT);
-  const armado = React.useRef(false);
-  const armar = () => {
-    if (armado.current) return;
-    try { ctxRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)(); armado.current = true; } catch { /* noop */ }
-  };
-  const beep = () => {
-    const ctx = ctxRef.current; if (!ctx) return;
-    const o = ctx.createOscillator(); const g = ctx.createGain();
-    // Tono de la sección del aviso actual (se actualiza en cada start; el loop lo lee en cada beep).
-    o.frequency.value = tonoRef.current.hz; o.type = tonoRef.current.tipo; o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-    o.start(); o.stop(ctx.currentTime + 0.42);
-  };
-  // `tono` se aplica SIEMPRE (aunque el loop ya esté sonando, para que un cambio de sección se oiga).
-  const start = (tono?: Tono) => { tonoRef.current = tono ?? TONO_DEFAULT; if (timerRef.current || !armado.current) return; beep(); timerRef.current = setInterval(beep, 1200); };
-  const stop = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
-  React.useEffect(() => () => stop(), []);
-  return { armar, armado, start, stop };
+  const ref = React.useRef<NursingAlarm | null>(null);
+  React.useEffect(() => {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const alarm = createNursingAlarm({ createContext: () => new AC() });
+    ref.current = alarm;
+    const desbloquear = () => {
+      void alarm.unlock().then(() => {
+        if (!alarm.needsGesture()) quitar();
+      });
+    };
+    const eventos = ["pointerdown", "keydown", "touchstart"] as const;
+    const quitar = () => eventos.forEach((e) => document.removeEventListener(e, desbloquear, true));
+    eventos.forEach((e) => document.addEventListener(e, desbloquear, true));
+    return () => { quitar(); alarm.stop(); ref.current = null; };
+  }, []);
+  const start = React.useCallback((tono: AlarmTone) => ref.current?.start(tono), []);
+  const stop = React.useCallback(() => ref.current?.stop(), []);
+  return { start, stop };
 }
 
 export function PanelEnfermeria({ centro }: { centro?: string }) {
@@ -76,18 +73,23 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const { can } = useCan();
   const puedeAceptar = can("panel.aceptar");
   const puedeCancelar = can("panel.notificar");
+  const puedeOrdenar = can("panel.config");
 
   const defRes = useResource<PanelDefinicion>(() => getPanelDefinicion(CLAVE, centro), [centro]);
   const [notifs, setNotifs] = React.useState<PanelNotificacion[]>([]);
   const alarma = useAlarma();
+  const { start: sonar, stop: callar } = alarma;
 
   // Los contadores del día YA vienen en la definición → sin llamada aparte (dedup). En cada evento
   // SSE se recarga la definición (trae contadores frescos) + las notificaciones pendientes.
   // Silent refresh: a live event must not drop the wall back to its skeleton.
+  // Depends on the STABLE `refresh`, not on `defRes` (a new object every render): with `defRes` the
+  // 30 s safety-net interval below was torn down and re-armed on every render and could never fire.
+  const { refresh: refrescarDef } = defRes;
   const refetch = React.useCallback(() => {
-    defRes.refresh();
+    refrescarDef();
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
-  }, [defRes, centro]);
+  }, [refrescarDef, centro]);
   // Carga inicial (una vez montado, patrón sin setState-en-render).
   React.useEffect(() => {
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
@@ -103,6 +105,16 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     onInvalidate: refetch,
   });
 
+  // Red de seguridad (owner, 14-nov-2026): el SSE solo avisa de "panel_notificacion" (aceptar/cancelar
+  // una notificación) — un cambio de secciones o de orden del personal (configuración, otra pantalla)
+  // no emite evento ninguno, así que un kiosco YA conectado se quedaba viejo hasta recargar a mano.
+  // Mientras el BE no mande esos eventos también, se refresca sola cada 30s, sin tocar el esqueleto.
+  React.useEffect(() => {
+    if (!centro) return;
+    const id = setInterval(refetch, 30_000);
+    return () => clearInterval(id);
+  }, [centro, refetch]);
+
   // Cola: la más antigua primero. La alarma suena mientras haya avisos pendientes.
   const pendientes = notifs;
   const actual = pendientes[0] ?? null;
@@ -116,12 +128,67 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     (secciones.find((s) => s.id === actual?.sectionId) ?? secciones.find((s) => s.clave === actual?.seccion))?.audio ??
     null;
   React.useEffect(() => {
-    if (actual && alarma.armado.current) alarma.start(tonoDe(audioActual)); else alarma.stop();
-  }, [actual, audioActual, alarma]);
+    if (actual) sonar(tonoDe(audioActual)); else callar();
+  }, [actual, audioActual, sonar, callar]);
 
-  const personal = def?.staff ?? [];
+  // Orden de las tarjetas (cmr-be#549): optimista, con vuelta atrás si falla. Mientras `ordenLocal`
+  // exista manda sobre `def.staff`; se descarta en cuanto llega una definición fresca (ya trae el
+  // orden del BE, confirmado o el de un evento SSE concurrente).
+  const [ordenLocal, setOrdenLocal] = React.useState<PanelPersonal[] | null>(null);
+  // Ajuste en render (no efecto: evita el cascading-render que marca react-hooks/set-state-in-effect),
+  // mismo patrón que `prevHoraKey` en cita-modal.tsx: una `def` nueva (fresca del BE o de un SSE) manda
+  // sobre cualquier orden optimista a medio confirmar.
+  const [prevDef, setPrevDef] = React.useState(def);
+  if (def !== prevDef) { setPrevDef(def); setOrdenLocal(null); }
+  const personal = ordenLocal ?? def?.staff ?? [];
   const estatusById = new Map((def?.statuses ?? []).map((e) => [e.staffId, e]));
   const contByPersona = new Map((def?.counters ?? []).map((c) => [c.staffId, c]));
+
+  async function guardarOrden(arr: PanelPersonal[], antes: PanelPersonal[]) {
+    setOrdenLocal(arr);
+    try {
+      const { staff, advertencias } = await guardarOrdenPersonal(
+        CLAVE,
+        arr.map((p, i) => ({ staffId: p.id, sortOrder: i })),
+        centro,
+      );
+      setOrdenLocal(staff);
+      const omitidos = advertencias.find((a) => a.code === "PANEL_STAFF_NOT_ELIGIBLE");
+      if (omitidos) {
+        const n = Array.isArray(omitidos.staffIds) ? omitidos.staffIds.length : 1;
+        toast.warning(t("staffOrder.notEligible", { n }));
+      }
+    } catch (e) {
+      setOrdenLocal(antes);
+      toastError(e, tRoot);
+    }
+  }
+  const [dragId, setDragId] = React.useState<string | null>(null);
+  const [overId, setOverId] = React.useState<string | null>(null);
+  function soltarEn(targetId: string) {
+    setOverId(null);
+    if (!dragId || dragId === targetId) return setDragId(null);
+    const antes = personal;
+    const arr = [...antes];
+    const from = arr.findIndex((p) => p.id === dragId);
+    const to = arr.findIndex((p) => p.id === targetId);
+    setDragId(null);
+    if (from < 0 || to < 0) return;
+    const [moved] = arr.splice(from, 1);
+    arr.splice(to, 0, moved);
+    void guardarOrden(arr, antes);
+  }
+  // Teclado/tablet: el DnD nativo no funciona en táctil — mueve una posición y guarda igual.
+  function moverA(id: string, delta: -1 | 1) {
+    const antes = personal;
+    const arr = [...antes];
+    const from = arr.findIndex((p) => p.id === id);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= arr.length) return;
+    const [moved] = arr.splice(from, 1);
+    arr.splice(to, 0, moved);
+    void guardarOrden(arr, antes);
+  }
 
   async function aceptar(notifId: string, personalId: string) {
     try { await aceptarNotificacion(notifId, personalId, centro); refetch(); }
@@ -137,21 +204,17 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     <PageContainer>
       <PageHeader title={tRoot(def?.panel.labelKey ?? "panel.enfermeria")} />
 
-      {/* Toolbar: no filters on this kiosk; live status + the sound activation sit on the right. */}
+      {/* Toolbar: no filters on this kiosk; only the live status on the right. The sound has NO button: it is
+          always on, and if the browser holds it until a gesture, the first touch anywhere unlocks it (owner, 14-nov). */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
-          {!alarma.armado.current && (
-            <Button variant="outline" onClick={alarma.armar} title={t("activarSonido")}>
-              <HugeiconsIcon icon={VolumeHighIcon} data-icon="inline-start" />
-              {t("activarSonido")}
-            </Button>
-          )}
         </div>
       </div>
 
       {/* Secciones + muro de tarjetas por enfermera */}
       {defRes.state.kind === "loading" && <PanelSkeleton />}
+      {defRes.state.kind === "fail" && <p className="text-sm text-destructive">{defRes.state.message}</p>}
       {def && secciones.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
       <div className="space-y-5">
         {secciones.map((s) => (
@@ -162,7 +225,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
             </div>
             {s.visible ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {personal.map((p) => {
+                {personal.map((p, i) => {
                   const cont = contByPersona.get(p.id);
                   const nSec = cont?.bySection?.[s.clave] ?? 0;
                   const est = estatusById.get(p.id);
@@ -172,7 +235,17 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                   return (
                     <div
                       key={p.id}
-                      className="flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
+                      draggable={puedeOrdenar}
+                      onDragStart={() => setDragId(p.id)}
+                      onDragEnd={() => { setDragId(null); setOverId(null); }}
+                      onDragOver={(e) => { if (puedeOrdenar && dragId) { e.preventDefault(); setOverId(p.id); } }}
+                      onDrop={() => soltarEn(p.id)}
+                      className={
+                        "flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 " +
+                        (puedeOrdenar ? "cursor-grab " : "") +
+                        (overId === p.id && dragId ? "ring-2 ring-primary " : "") +
+                        (dragId === p.id ? "opacity-50" : "")
+                      }
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-2.5">
@@ -204,6 +277,28 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                         <span className="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
                           {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
                         </span>
+                      )}
+                      {puedeOrdenar && (
+                        <div className="flex justify-end gap-1 border-t border-foreground/5 pt-1.5">
+                          <button
+                            type="button"
+                            aria-label={t("staffOrder.up")}
+                            disabled={i === 0}
+                            onClick={() => moverA(p.id, -1)}
+                            className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                          >
+                            <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={t("staffOrder.down")}
+                            disabled={i === personal.length - 1}
+                            onClick={() => moverA(p.id, 1)}
+                            className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                          >
+                            <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   );

@@ -22,7 +22,7 @@ export default function ConfigFormatosPage() {
       {ready && !can("formatos.config") ? (
         <p className="text-sm text-muted-foreground">{t("sinPermiso")}</p>
       ) : necesitaPicker ? (
-        <div className="max-w-xl"><CentroPicker centros={centros} onPick={pick} /></div>
+        <CentroPicker centros={centros} onPick={pick} />
       ) : (
         <FormatosAdmin centro={centro ?? centros[0]?.id} />
       )}

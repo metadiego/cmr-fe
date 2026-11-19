@@ -49,11 +49,19 @@ export const formats = {
     // in lib/format/fecha.ts. So every day-only format pins UTC and is fed a date
     // built with `parseDayUTC`, which anchors the day at UTC noon. The pair is what
     // makes the output exact in every timezone.
-    dayShort: { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" },
+    //
+    // No plain numeric "day/month/year" format lives here on purpose: its digit ORDER is a fixed
+    // business convention (Puerto Rico MM/DD/YYYY, see docs/specs/fe-facturas-lista-contexto-handoff.md),
+    // not a translation — the same "carries no language" reasoning that already keeps 24h clocks and
+    // USD money out of the language picker's reach. It used to be a named format here ("dayShort")
+    // until it was found rendering "18/11/2026" under Spanish instead of "11/18/2026" (owner,
+    // 18-nov-2026). Use `formatFechaSolo` from lib/format/fecha.ts for a plain MM/DD/YYYY string.
     // "4 de septiembre de 2026" / "September 4, 2026"
     dayLong: { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" },
     // Calendar headers: "septiembre de 2026" / "September 2026"
     monthYear: { month: "long", year: "numeric", timeZone: "UTC" },
+    // Narrow chart/bar labels, month only: "sept" / "Sep"
+    monthShort: { month: "short", timeZone: "UTC" },
     // Day-view heading: "jueves, 4 de septiembre de 2026" / "Thursday, September 4, 2026"
     dayWeekdayLong: {
       weekday: "long",

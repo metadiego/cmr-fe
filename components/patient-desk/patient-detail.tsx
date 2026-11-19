@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { PatientDayChangesButton } from "@/components/change-log/patient-day-changes-button"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -13,12 +14,15 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import {
+  pendingArrivals,
   patientSections,
+  visibleSections,
   serviceCancelledOnly,
   serviceConcluded,
   type PatientDay,
   type PatientKind,
 } from "@/lib/frontdesk/patient-day"
+import { FilteredSectionsHint } from "@/components/patient-desk/filtered-sections-hint"
 import type { PatientDayData } from "@/hooks/use-patient-day"
 import { presentPatient, undoPresentPatient } from "@/lib/api/frontdesk-queue"
 import { ejecutarAccion } from "@/lib/api/tablero"
@@ -40,6 +44,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
 
 export type ScheduleRequest = {
   pacienteId: string
@@ -80,7 +85,7 @@ export function PatientChips({
       ? tRoot(data.consultationTab.labelKey)
       : data.consultationTab.name
     : t("consultation")
-  // A concluded service (every session attended) is painted gray.
+  // A concluded service (every session attended) keeps its color and gets a green check.
   const chip = (
     key: string,
     color: string | null,
@@ -93,18 +98,22 @@ export function PatientChips({
       key={key}
       className={
         "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
-        (concluded ? "bg-muted text-muted-foreground" : "bg-background")
+        (concluded ? "border-success/50 bg-success/10" : "bg-background")
       }
     >
       <span
         className="size-2 rounded-full"
         style={{
-          backgroundColor:
-            concluded || !color ? "var(--muted-foreground)" : color,
+          backgroundColor: color || "var(--muted-foreground)",
         }}
         aria-hidden
       />
       <span className="uppercase">{name}</span>
+      {concluded && (
+        <span className="text-success-foreground" aria-label={t("serviceDone")}>
+          ✓
+        </span>
+      )}
       {!compact && status && (
         <span
           className="rounded-full px-1.5 text-[10px]"
@@ -148,6 +157,7 @@ export function PatientDetail({
   patient,
   data,
   kind = "all",
+  serviceFilter = null,
   date,
   centerId,
   onSchedule,
@@ -157,6 +167,7 @@ export function PatientDetail({
   patient: PatientDay
   data: PatientDayData
   kind?: PatientKind
+  serviceFilter?: string | null
   date: string
   centerId: string | undefined
   onSchedule: (r: ScheduleRequest) => void
@@ -171,6 +182,10 @@ export function PatientDetail({
       : data.consultationTab.name
     : t("consultation")
   const [presenceBusy, setPresenceBusy] = React.useState(false)
+  // Board's service filter → only that therapy, «ver todas» opens the rest (resets per patient: keyed by parent).
+  const [showAll, setShowAll] = React.useState(false)
+  const shown = visibleSections(patientSections(patient), kind === "services" ? serviceFilter : null, showAll)
+  const filteredName = patient.services.find((x) => x.serviceId === serviceFilter)?.name ?? ""
   // The consultation refused Presente for missing patient data: the same modal as the consultation
   // board asks for them, then retries. Services are never held by this (owner, 14-oct-2026).
   const [dataGate, setDataGate] = React.useState<{
@@ -229,7 +244,11 @@ export function PatientDetail({
   async function handlePresent() {
     setPresenceBusy(true)
     try {
-      const res = await presentPatient(patient.patientId, date, centerId)
+      // Consulta view: the button speaks only of the consultation — never marks the therapies.
+      const res =
+        kind === "consultation"
+          ? { failed: [] as { reason: string }[] }
+          : await presentPatient(patient.patientId, date, centerId)
       const warnings = res.failed.map((f) => f.reason)
       const pendingConsultIds = patient.consultationIds.filter((_, i) =>
         CONSULT_PENDING_STATUSES.has(patient.consultationStatuses[i])
@@ -238,7 +257,7 @@ export function PatientDetail({
         const results = await Promise.allSettled(
           pendingConsultIds.map((id) =>
             ejecutarAccion(
-              { boardSlug: "atencion", entityId: id, action: "presente" },
+              { boardSlug: CONSULTATION_BOARD, entityId: id, action: "presente" },
               centerId
             )
           )
@@ -278,7 +297,7 @@ export function PatientDetail({
     try {
       for (const id of consultIds)
         await ejecutarAccion(
-          { boardSlug: "atencion", entityId: id, action: "presente" },
+          { boardSlug: CONSULTATION_BOARD, entityId: id, action: "presente" },
           centerId
         )
     } catch (err) {
@@ -292,7 +311,9 @@ export function PatientDetail({
   async function handleUndoPresent() {
     setPresenceBusy(true)
     try {
-      await undoPresentPatient(patient.patientId, centerId)
+      // Consulta view: undo only the consultation's arrival; the therapies keep theirs.
+      if (kind !== "consultation")
+        await undoPresentPatient(patient.patientId, centerId)
       // Simétrico: solo la consulta que el present de arriba pudo haber marcado (sigue en "presente"
       // exacto) — nunca una que ya avanzó a triage/en_consulta/atendida por su cuenta.
       const presentConsultIds = patient.consultationIds.filter(
@@ -303,7 +324,7 @@ export function PatientDetail({
           presentConsultIds.map((id) =>
             ejecutarAccion(
               {
-                boardSlug: "atencion",
+                boardSlug: CONSULTATION_BOARD,
                 entityId: id,
                 action: "volver_confirmada",
               },
@@ -401,13 +422,34 @@ export function PatientDetail({
                 >
                   {t("undoPresent")}
                 </Button>
+                {/* Already present, but a therapy/consultation is still waiting: mark those too. */}
+                {kind !== "consultation" && pendingArrivals(patient) > 0 && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-6 bg-amber-400 px-2 text-xs text-black hover:bg-amber-300"
+                    disabled={presenceBusy}
+                    onClick={handlePresent}
+                  >
+                    {t("markPendingPresent", { n: pendingArrivals(patient) })}
+                  </Button>
+                )}
               </div>
             ) : (
-              <Button size="sm" disabled={presenceBusy} onClick={handlePresent}>
-                <HugeiconsIcon icon={Tick02Icon} className="size-4" />
+              // NOT present yet: an action, so it must not look like the green «Presente 10:47» state
+              // (owner, 04-nov-2026: "no sé si dice marcar como presente o es que ya está presente").
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-dashed border-muted-foreground text-muted-foreground hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                title={t("markPresentHint")}
+                disabled={presenceBusy}
+                onClick={handlePresent}
+              >
                 {t("markPresent")}
               </Button>
             ))}
+          <PatientDayChangesButton patientId={patient.patientId} date={date} centerId={centerId} patientName={patient.name} onUndone={data.refresh} />
           {/* «Citar» aquí sigue al mismo paciente, no al toggle de arriba (10-13-oct-2026): si SOLO
               tiene servicio va directo al cupo del servicio, si SOLO tiene consulta a agregar
               consulta, y si tiene AMBOS se pregunta — igual que el «Citar» del toolbar, pero
@@ -472,8 +514,9 @@ export function PatientDetail({
         </div>
       </div>
 
-      {/* Sections in one order (lib: patientSections) — pending first unless a service filter rules. */}
-      {patientSections(patient).map((x) =>
+      {/* Sections in one order (lib: patientSections), narrowed to the board's service filter (visibleSections). */}
+      {shown.hidden > 0 || showAll ? <FilteredSectionsHint serviceName={filteredName} hidden={shown.hidden} showAll={showAll} onToggle={() => setShowAll((v) => !v)} /> : null}
+      {shown.sections.map((x) =>
         x.kind === "service"
           ? kind !== "consultation" && (
               <ServiceSessionsTable
@@ -488,7 +531,6 @@ export function PatientDetail({
                 definition={data.serviceDefinition}
                 sessionsById={data.sessionsById}
                 sessionIds={x.service.sessionIds}
-                patientId={patient.patientId}
                 date={date}
                 centerId={centerId}
                 onChanged={data.refresh}

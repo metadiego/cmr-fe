@@ -23,12 +23,12 @@ const BILLING_LEGACY = { facturas: "invoices", devoluciones: "returns", caja: "c
 
 export const PATIENT_TABS = {
   pattern: "/patients/[id]",
-  tabs: ["summary", "appointments", "therapies", "billing", "documents", "protocol-change"],
+  tabs: ["summary", "appointments", "therapies", "attendance", "billing", "documents", "protocol-change", "transfer-treatment"],
 } as const satisfies TabRoute;
 
 export const BILLING_GENERAL_TABS = {
   pattern: "/billing/invoices",
-  tabs: ["invoices", "returns", "cash", "stats"],
+  tabs: ["invoices", "returns", "cash", "stats", "total"],
   legacy: BILLING_LEGACY,
 } as const satisfies TabRoute;
 
@@ -40,8 +40,9 @@ export const BILLING_CONSULTATION_TABS = {
 
 export const ADMIN_TABS = {
   pattern: "/admin",
-  tabs: ["staff", "users", "roles", "permissions", "role-editor", "pending", "centers", "theme", "menu"],
-  legacy: { personal: "staff", permisos: "permissions", editorRol: "role-editor" },
+  tabs: ["staff", "roles", "permissions", "role-editor", "pending", "centers", "theme", "menu"],
+  // "users" merged into "staff" (14-nov-2026): every login has a staff record.
+  legacy: { personal: "staff", permisos: "permissions", editorRol: "role-editor", users: "staff" },
 } as const satisfies TabRoute;
 
 export const TAB_ROUTES: readonly TabRoute[] = [

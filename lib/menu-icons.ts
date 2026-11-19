@@ -21,6 +21,10 @@ import {
   Notification01Icon,
   File01Icon,
   Folder01Icon,
+  Radar01Icon,
+  BinocularsIcon,
+  BubbleChatIcon,
+  InternetAntenna04Icon,
 } from "@hugeicons/core-free-icons";
 
 export type MenuIconObj = typeof Home01Icon;
@@ -47,6 +51,10 @@ export const MENU_ICONS: { name: string; icon: MenuIconObj }[] = [
   { name: "bell", icon: Notification01Icon },
   { name: "file", icon: File01Icon },
   { name: "folder", icon: Folder01Icon },
+  { name: "radar", icon: Radar01Icon },
+  { name: "binoculars", icon: BinocularsIcon },
+  { name: "chat", icon: BubbleChatIcon },
+  { name: "tower", icon: InternetAntenna04Icon },
 ];
 
 const MAP: Record<string, MenuIconObj> = Object.fromEntries(

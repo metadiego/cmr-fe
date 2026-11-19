@@ -2,21 +2,24 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
-import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
+import type { LaserTipo } from "@/lib/api/laser";
 import { getDisponibilidadServicio, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
+import { setLegacySessionNumber } from "@/lib/api/frontdesk-legacy-number";
+import { getSessionSheet, type SessionSheet } from "@/lib/api/frontdesk-sheet";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
-import { formatFechaSolo } from "@/lib/format/fecha";
+import { parseLegacySessionNumber } from "@/lib/frontdesk/legacy-session-number";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TimePicker } from "@/components/ui/time-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { SignaturePad } from "@/components/frontdesk/signature-pad";
-import { Campo, HORA_CLS, LogoFormato, imprimirFormato, PieFormato } from "@/components/frontdesk/formato-parts";
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
+import { MlsSheet } from "@/components/frontdesk/mls-sheet";
+import { HiltSheet } from "@/components/frontdesk/hilt-sheet";
 
 // Modal ESTÁNDAR de acciones/formatos por servicio (data-driven desde servicio.formAcciones).
 // Lista los `reports` (HILT/MLS…) y `additional_actions` (Historial). Al elegir un report:
@@ -38,6 +41,7 @@ export function FormatosModal({
   initialReport,
   centro,
   onHistorial,
+  onApplied,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -60,14 +64,20 @@ export function FormatosModal({
   initialReport?: ReportAccion; // report elegido desde el menú de Acciones → se preselecciona (salta la lista)
   centro?: string;
   onHistorial?: () => void;
+  // El paciente del legado quedó con disponibilidad al día (legacy-session-number aplicó): refresca
+  // la fila para que su columna SESIÓN deje de mostrar "—". Handoff numero-sesion-formato-legado.
+  onApplied?: () => void;
 }) {
   const t = useTranslations("frontdesk");
   // Report labelKeys come from the BE fully qualified ("frontdesk.formato.<slug>"): look them up from the root.
   const tRoot = useTranslations();
+  const { can } = useCan();
   const cfg = React.useMemo(() => parseAcciones(formAcciones), [formAcciones]);
   const [report, setReport] = React.useState<ReportAccion | null>(null);
   const [generado, setGenerado] = React.useState(false);
-  const [sesion, setSesion] = React.useState<string>("");
+  // Sesión: null = usar el "n/n" AUTOMÁTICO (hoja de la visita → el paquete que corresponde al
+  // formato, HILT/MLS; si no casa, el `display` de la hoja). Editable por si acaso (override).
+  const [sesionOverride, setSesionOverride] = React.useState<string | null>(null);
   const [areasOverride, setAreasOverride] = React.useState<string | null>(null); // null = usar el de la disponibilidad
   // Enviar el técnico (ya conocido) al impreso, o dejarlo en blanco para llenar a mano como el papel.
   const [enviarTecnico, setEnviarTecnico] = React.useState(true);
@@ -76,13 +86,22 @@ export function FormatosModal({
   // factura NO es la fuente — un cambio de protocolo no la genera, solo mueve la disponibilidad. El paquete
   // se cruza por nombre/sku del producto (contiene "mls"/"hilt").
   const dispRes = useResource<PaqueteDisponibilidad[]>(
-    () => (open && servicioId && pacienteId ? getDisponibilidadServicio(servicioId, pacienteId, centro).then((d) => d.paquetes) : Promise.resolve([])),
+    () => (open && servicioId && pacienteId ? getDisponibilidadServicio(servicioId, pacienteId, centro).then((d) => d.paquetes ?? []) : Promise.resolve([])),
     [open, servicioId, pacienteId, centro],
   );
   const paquetes = dispRes.state.kind === "ok" ? dispRes.state.data : [];
 
+  // Hoja de la visita (BE #598, handoff laser-sesion-del-dia-y-areas): de aquí sale la SESIÓN del
+  // paquete correcto (MLS vs HILT, no el ancla "1/12" de la fila cuando la visita de hoy es la otra) y
+  // el respaldo de ÁREAS cuando la disponibilidad no las trae.
+  const sheetRes = useResource<SessionSheet | null>(
+    () => (open && sesionId ? getSessionSheet(sesionId, centro) : Promise.resolve(null)),
+    [open, sesionId, centro],
+  );
+  const sheet = sheetRes.state.kind === "ok" ? sheetRes.state.data : null;
+
   function elegir(r: ReportAccion) {
-    setSesion(String(sesionNN ?? "")); // n/n de la fila
+    setSesionOverride(null); // nace automática (hoja de la visita)
     setAreasOverride(null); // nacen del dato de la disponibilidad
     setReport(r);
     setGenerado(false);
@@ -98,11 +117,37 @@ export function FormatosModal({
   const tipo = ((report?.id || report?.function || report?.action || "") as string).toLowerCase() as LaserTipo;
   const esFormato = tipo === "hilt" || tipo === "mls";
   const pkg = tipo ? paquetes.find((p) => `${p.productoNombre ?? ""} ${p.sku ?? ""}`.toLowerCase().includes(tipo)) : undefined;
-  const areasAuto = pkg?.multiplicadores?.areas;
-  // Áreas DERIVADAS de la disponibilidad (editable: override manual tiene precedencia). Si el paquete NO trae
-  // áreas (p. ej. tras un cambio de protocolo a una terapia sin áreas), se deja VACÍO — nunca un 1 inventado
-  // (regla del BE: la respuesta del handoff).
+  // Áreas DERIVADAS, en orden: multiplicadores del paquete (disponibilidad) y, si no hay, `sheet.areas`
+  // (hoja de la visita). Editable: override manual tiene precedencia. Si ninguna trae áreas (p. ej. tras
+  // un cambio de protocolo a una terapia sin áreas), se deja VACÍO — nunca un 1 inventado (regla del BE).
+  const areasAuto = pkg?.multiplicadores?.areas ?? sheet?.areas ?? undefined;
   const areas = areasOverride ?? (areasAuto != null ? String(areasAuto) : "");
+  // Sesión DERIVADA: el "n/n" del paquete de la hoja que corresponde a este formato (HILT → el renglón
+  // cuyo sku/productName contiene "hilt"; MLS → el otro); si no casa, el `display` de la hoja; si la
+  // hoja todavía no llegó, el "n/n" de la fila (mismo orden que pedía el handoff).
+  const sheetPkg = tipo ? sheet?.packages.find((p) => `${p.productName ?? ""} ${p.sku ?? ""}`.toLowerCase().includes(tipo)) : undefined;
+  const sesionAuto = sheetPkg?.xy ?? sheet?.display ?? String(sesionNN ?? "");
+  const sesion = sesionOverride ?? sesionAuto;
+
+  // «Generar»: si la Sesión escrita es un "n/m" válido, se la pasa al BE ANTES de mostrar el
+  // formato (que recién entonces habilita su botón de imprimir). Nunca bloquea: cualquier reason
+  // ("not applied") o error de red/5xx se traga en silencio y el formato sigue igual. Handoff
+  // numero-sesion-formato-legado.
+  async function generar() {
+    const parsed = parseLegacySessionNumber(sesion);
+    if (parsed && sesionId && can("frontdesk.update")) {
+      try {
+        const result = await setLegacySessionNumber(sesionId, { ...parsed, reportId: tipo || undefined }, centro);
+        if (result.applied) {
+          toast.success(t("disponibilidadActualizada", { number: parsed.number, total: parsed.total }));
+          onApplied?.();
+        }
+      } catch {
+        /* nunca bloquea: ver comentario arriba */
+      }
+    }
+    setGenerado(true);
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,7 +206,7 @@ export function FormatosModal({
               <div className="space-y-1">
                 {/* Sesión como "n/n" (p. ej. 1/12): texto, nace puesta desde la fila, editable por si acaso. */}
                 <Label htmlFor="fmt-sesion">{t("colSesion")}</Label>
-                <Input id="fmt-sesion" inputMode="numeric" placeholder="n/n" value={sesion} onChange={(e) => setSesion(e.target.value)} />
+                <Input id="fmt-sesion" inputMode="numeric" placeholder="n/n" value={sesion} onChange={(e) => setSesionOverride(e.target.value)} />
               </div>
               <div className="space-y-1">
                 {/* Áreas por formato desde la DISPONIBILIDAD (MLS 4, HILT 2), editable. */}
@@ -177,24 +222,38 @@ export function FormatosModal({
             )}
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setReport(null)}>{t("volver")}</Button>
-              <Button onClick={() => setGenerado(true)}>{t("generar")}</Button>
+              <Button onClick={generar}>{t("generar")}</Button>
             </div>
           </div>
         )}
 
         {/* 3) Render del formato médico de LÁSER (HILT/MLS, ruta propia con parámetros) */}
-        {report && generado && esFormato && (
-          <FormatoRender
-            tipo={tipo}
+        {report && generado && tipo === "mls" && (
+          <MlsSheet
             centro={centro}
             header={{
               paciente: pacienteNombre,
               record: record ?? "",
               sesion: sesion || (sesionNN ?? ""),
-              areas: Number(areas) || 0,
               tecnico: enviarTecnico ? (tecnicoNombre ?? "") : "",
               proximaCita: proximaCita ?? "",
               fecha: fecha ?? "",
+              areas: areas ? Number(areas) : null,
+            }}
+            onVolver={() => setGenerado(false)}
+          />
+        )}
+        {report && generado && tipo === "hilt" && (
+          <HiltSheet
+            centro={centro}
+            header={{
+              paciente: pacienteNombre,
+              record: record ?? "",
+              sesion: sesion || (sesionNN ?? ""),
+              tecnico: enviarTecnico ? (tecnicoNombre ?? "") : "",
+              proximaCita: proximaCita ?? "",
+              fecha: fecha ?? "",
+              areas: areas ? Number(areas) : null,
             }}
             onVolver={() => setGenerado(false)}
           />
@@ -206,178 +265,5 @@ export function FormatosModal({
         )}
       </DialogContent>
     </Dialog>
-  );
-}
-
-type Header = { paciente: string; record: string; sesion: string; areas: number; tecnico: string; proximaCita: string; fecha: string };
-
-function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; centro?: string; header: Header; onVolver: () => void }) {
-  const t = useTranslations("frontdesk");
-  const res = useResource<Formato>(() => getFormato(tipo, centro), [tipo, centro]);
-  const [triggerSi, setTriggerSi] = React.useState("");
-  const [triggerNo, setTriggerNo] = React.useState("");
-  const [ctd, setCtd] = React.useState("");
-  const [horaIn, setHoraIn] = React.useState("");
-  const [horaOut, setHoraOut] = React.useState("");
-  const printRef = React.useRef<HTMLDivElement>(null);
-
-  if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
-  // Say WHY (e.g. FORBIDDEN: the user's role lacks the permission), not just that it failed.
-  if (res.state.kind === "fail") return <p className="text-sm text-destructive">{t("formatoError")} — {res.state.message}</p>;
-  if (res.state.kind !== "ok") return null;
-  const data = res.state.data;
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between no-print">
-        <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
-        <Button size="sm" onClick={() => imprimirFormato(printRef.current, t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle"))}>{t("imprimirPdf")}</Button>
-      </div>
-
-      <div ref={printRef} className="formato-print space-y-4 rounded-lg border bg-white p-5 text-black">
-        {/* Encabezado: membrete (logo pequeño + centro) + título; a la derecha fecha/sesión/áreas */}
-        <div className="flex items-start justify-between border-b pb-3">
-          <div className="flex items-center gap-3">
-            <LogoFormato logoUrl={data.letterhead?.logoUrl} />
-            <div>
-              {data.letterhead?.center && <div className="text-xs font-semibold uppercase tracking-wide">{data.letterhead.center}</div>}
-              <h2 className="text-lg font-bold uppercase">{t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle")}</h2>
-              <p className="text-sm">{header.paciente}{header.record ? ` · ${t("recordLabel")} ${header.record}` : ""}</p>
-            </div>
-          </div>
-          <div className="text-right text-xs">
-            {/* header.fecha = fecha de la cita, no la de hoy; sin ella (caller viejo), hoy es el fallback. */}
-            <div>{formatFechaSolo(header.fecha || new Date().toISOString().slice(0, 10))}</div>
-            <div>{t("colSesion")}: {header.sesion} · {t("colAreas")}: {header.areas}</div>
-          </div>
-        </div>
-
-        {tipo === "hilt" && data.type === "hilt" && <HiltTabla secciones={data.sections} t={t} />}
-        {tipo === "mls" && data.type === "mls" && <MlsTabla izquierda={data.izquierda} derecha={data.derecha} t={t} />}
-
-        {/* Footer clínico: Trigger Point (Sí/No) solo HILT, CTD solo MLS — formato homologado. */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 border-t pt-3 text-xs">
-          {tipo === "hilt" ? (
-            <Campo label={t("triggerPoint")}>
-              <span className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  {t("triggerPointSi")}:
-                  <input className="w-16 border-b border-dashed bg-transparent outline-none" value={triggerSi} onChange={(e) => setTriggerSi(e.target.value)} />
-                </span>
-                <span className="flex items-center gap-1">
-                  {t("triggerPointNo")}:
-                  <input className="w-16 border-b border-dashed bg-transparent outline-none" value={triggerNo} onChange={(e) => setTriggerNo(e.target.value)} />
-                </span>
-              </span>
-            </Campo>
-          ) : (
-            <Campo label={t("ctd")}><input className="w-full border-b border-dashed bg-transparent outline-none" value={ctd} onChange={(e) => setCtd(e.target.value)} /></Campo>
-          )}
-          {/* Nº terapias = la "sesión/total" del tablero (p. ej. "4/12"), no días × áreas. */}
-          <Campo label={t("nTerapias")}><span className="font-semibold tabular-nums">{header.sesion || "—"}</span></Campo>
-          <Campo label={t("tecnico")}><span>{header.tecnico || "—"}</span></Campo>
-          <Campo label={t("proximaCita")}><span>{header.proximaCita || "—"}</span></Campo>
-          <Campo label={t("horaEntrada")}><TimePicker step={1} className={HORA_CLS} value={horaIn} onChange={setHoraIn} /></Campo>
-          <Campo label={t("horaSalida")}><TimePicker step={1} className={HORA_CLS} value={horaOut} onChange={setHoraOut} /></Campo>
-        </div>
-
-        {/* Firma del paciente */}
-        <div className="pt-2">
-          <SignaturePad height={110} />
-        </div>
-
-        {/* Escala de dolor: la misma gráfica del formato homologado, no un campo numérico aparte. El
-            `img` global de PRINT_CSS la limita a 38px (pensado para el logo); el inline style la anula. */}
-        <div className="pt-2 text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element -- clonado a una ventana de impresión aparte (ver imprimirFormato); next/image no sobrevive ese clon. */}
-          <img src="/img/pain_measurement_scale.png" alt={t("escalaDolorAlt")} style={{ maxHeight: 140, maxWidth: "100%", margin: "0 auto" }} />
-        </div>
-
-        {/* Pie del legacy (BE PR #201): mismo componente que el genérico. */}
-        <PieFormato pie={data.footer} />
-      </div>
-    </div>
-  );
-}
-
-type TFn = (k: string, v?: Record<string, string | number>) => string;
-
-function HiltTabla({ secciones, t }: { secciones: { region: string; filas: LaserParametro[] }[]; t: TFn }) {
-  return (
-    <div className="space-y-3">
-      {secciones.map((s) => (
-        <div key={s.region} className="region">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide">{s.region}</div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-[11px]">
-              <thead>
-                <tr className="border-b bg-neutral-100 text-left">
-                  <th className="px-2 py-1 font-medium">{t("colPatologia")}</th>
-                  <th className="px-2 py-1 text-center font-medium" colSpan={2}>Step 1</th>
-                  <th className="px-2 py-1 text-center font-medium" colSpan={2}>Step 2</th>
-                  <th className="px-2 py-1 text-center font-medium" colSpan={2}>Step 3</th>
-                  <th className="px-2 py-1 text-right font-medium">{t("colEnergy")}</th>
-                </tr>
-                <tr className="border-b text-[10px] text-neutral-500">
-                  <th />
-                  <th className="px-2 py-0.5 text-center">mJ/cm²</th><th className="px-2 py-0.5 text-center">Hz</th>
-                  <th className="px-2 py-0.5 text-center">mJ/cm²</th><th className="px-2 py-0.5 text-center">Hz</th>
-                  <th className="px-2 py-0.5 text-center">mJ/cm²</th><th className="px-2 py-0.5 text-center">Hz</th>
-                  <th className="px-2 py-0.5 text-right">J</th>
-                </tr>
-              </thead>
-              <tbody>
-                {s.filas.map((f) => (
-                  <tr key={f.id} className="border-b border-neutral-200">
-                    <td className="px-2 py-1">{f.pathology ?? f.patologia}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp1Mjcm ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp1Hz ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp2Mjcm ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp2Hz ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp3Mjcm ?? "—"}</td>
-                    <td className="px-2 py-1 text-center tabular-nums">{f.stp3Hz ?? "—"}</td>
-                    <td className="px-2 py-1 text-right font-medium tabular-nums">{f.energy ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; derecha: LaserParametro[]; t: TFn }) {
-  const col = (filas: LaserParametro[], titulo: string) => (
-    <div>
-      <div className="mb-1 text-xs font-semibold uppercase tracking-wide">{titulo}</div>
-      <table className="w-full border-collapse text-[11px]">
-        <thead>
-          <tr className="border-b bg-neutral-100 text-left">
-            <th className="px-2 py-1 font-medium">{t("colPatologia")}</th>
-            <th className="px-2 py-1 font-medium">{t("colFrecuencia")}</th>
-            <th className="px-2 py-1 font-medium">{t("colTiempo")}</th>
-            <th className="px-2 py-1 font-medium">{t("colIntensidad")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filas.map((f) => (
-            <tr key={f.id} className="border-b border-neutral-200">
-              <td className="px-2 py-1">{f.pathology ?? f.patologia}</td>
-              <td className="px-2 py-1 tabular-nums">{f.frequency ?? "—"}</td>
-              <td className="px-2 py-1 tabular-nums">{f.duration ?? "—"}</td>
-              <td className="px-2 py-1 tabular-nums">{f.intensity ?? "—"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {col(izquierda, t("ladoIzquierdo"))}
-      {col(derecha, t("ladoDerecho"))}
-    </div>
   );
 }

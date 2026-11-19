@@ -7,10 +7,10 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import { anularFactura, emailFactura } from "@/lib/api/facturas";
-import { toastError } from "@/lib/api/errors";
-import { toast } from "sonner";
+import { voidReasonMissing } from "@/lib/facturacion/void-reason-missing";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
+import { EmailInput } from "@/components/email-input";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -20,16 +20,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 
 // Acciones por factura (handoff fe-devoluciones-lista-y-acciones, slices A–D):
 //  Ver/Imprimir → detalle · Editar → detalle (borrador) · Email → POST /facturas/:id/email ·
@@ -47,14 +40,13 @@ export function FacturaRowActions({
   onChanged?: () => void;
 }) {
   const t = useTranslations("facturacionList.actions");
-  const tRoot = useTranslations();
   const router = useRouter();
   const { can } = useCan();
 
   const [anularOpen, setAnularOpen] = React.useState(false);
   const [emailOpen, setEmailOpen] = React.useState(false);
-  const [motivo, setMotivo] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
+  const [{ motivo }, setForm] = useDialogForm(() => ({ motivo: "" }), anularOpen);
+  const missing = voidReasonMissing({ reason: motivo }).map(() => t("voidReason"));
 
   const esBorrador = estado === "borrador";
   const esEmitida = estado === "emitida";
@@ -65,20 +57,12 @@ export function FacturaRowActions({
   const href = centroId ? `/billing/invoices/${facturaId}?centro=${centroId}` : `/billing/invoices/${facturaId}`;
   const devolverHref = centroId ? `/billing/invoices/${facturaId}/return?centro=${centroId}` : `/billing/invoices/${facturaId}/return`;
 
-  async function anular() {
-    if (!motivo.trim() || busy) return;
-    setBusy(true);
-    try {
-      await anularFactura(facturaId, motivo.trim(), centroId);
+  const { submitting, submit } = useSubmit(() => anularFactura(facturaId, motivo.trim(), centroId), {
+    onSuccess: () => {
       setAnularOpen(false);
-      setMotivo("");
       onChanged?.();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+    },
+  });
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
@@ -110,65 +94,86 @@ export function FacturaRowActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={anularOpen} onOpenChange={setAnularOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("voidTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("voidBody")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("voidReason")} aria-label={t("voidReason")} autoFocus />
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tRoot("common.cancel")}</AlertDialogCancel>
-            <Button variant="destructive" disabled={!motivo.trim() || busy} onClick={anular}>{t("void")}</Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <FormDialog
+        open={anularOpen}
+        onOpenChange={setAnularOpen}
+        size="md"
+        title={t("voidTitle")}
+        description={t("voidBody")}
+        onSubmit={() => submit()}
+        actions={[{ label: t("void"), variant: "destructive", onClick: () => submit() }]}
+        submitting={submitting}
+        missing={missing}
+      >
+        <Field label={t("voidReason")} htmlFor={`void-invoice-reason-${facturaId}`} required>
+          <Input
+            id={`void-invoice-reason-${facturaId}`}
+            value={motivo}
+            onChange={(e) => setForm({ motivo: e.target.value })}
+            // Voiding is irreversible: a habitual Enter after typing the reason must not fire it.
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.preventDefault();
+            }}
+            placeholder={t("voidReason")}
+            autoFocus
+          />
+        </Field>
+      </FormDialog>
 
       {emailOpen && <EmailDialog facturaId={facturaId} centroId={centroId} onClose={() => setEmailOpen(false)} />}
     </div>
   );
 }
 
-// Enviar la factura por email (BE PR #106). Sin email → usa el del paciente (el BE 400 si no hay).
+// Send the invoice by email (BE PR #106). No address → the patient's is used (the BE answers 400 if there is none).
+// Every field is optional, so nothing is ever missing.
 function EmailDialog({ facturaId, centroId, onClose }: { facturaId: string; centroId?: string; onClose: () => void }) {
   const t = useTranslations("facturacionList.actions");
-  const tc = useTranslations("common");
-  const tRoot = useTranslations();
+  // Mounted only while open (the parent renders it conditionally), so plain state starts clean every time.
   const [email, setEmail] = React.useState("");
   const [cuerpo, setCuerpo] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
 
-  async function enviar() {
-    setBusy(true);
-    try {
-      await emailFactura(facturaId, { ...(email.trim() ? { email: email.trim() } : {}), ...(cuerpo.trim() ? { cuerpo: cuerpo.trim() } : {}) }, centroId);
-      toast.success(t("emailSent"));
-      onClose();
-    } catch (err) {
-      toastError(err, tRoot);
-      setBusy(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    () =>
+      emailFactura(
+        facturaId,
+        { ...(email.trim() ? { email: email.trim() } : {}), ...(cuerpo.trim() ? { cuerpo: cuerpo.trim() } : {}) },
+        centroId,
+      ),
+    { successMessage: t("emailSent"), onSuccess: () => onClose() },
+  );
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>{t("emailTitle")}</DialogTitle></DialogHeader>
-        <div className="space-y-3">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("emailTo")}</span>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("emailPatientDefault")} />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("emailBody")}</span>
-            <Textarea rows={3} value={cuerpo} onChange={(e) => setCuerpo(e.target.value)} placeholder={t("emailBodyPlaceholder")} />
-          </label>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={onClose} disabled={busy}>{tc("cancel")}</Button>
-            <Button size="sm" onClick={enviar} disabled={busy}>{t("emailSend")}</Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      size="md"
+      title={t("emailTitle")}
+      onSubmit={() => submit()}
+      submitLabel={t("emailSend")}
+      submitting={submitting}
+    >
+      <Field label={t("emailTo")} htmlFor={`invoice-email-to-${facturaId}`}>
+        <EmailInput
+          id={`invoice-email-to-${facturaId}`}
+          value={email}
+          onValueChange={setEmail}
+          placeholder={t("emailPatientDefault")}
+          // Sending is irreversible: Enter only completes the address, never sends to a half-typed one.
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
+        />
+      </Field>
+      <Field label={t("emailBody")} htmlFor={`invoice-email-body-${facturaId}`}>
+        <Textarea
+          id={`invoice-email-body-${facturaId}`}
+          rows={3}
+          value={cuerpo}
+          onChange={(e) => setCuerpo(e.target.value)}
+          placeholder={t("emailBodyPlaceholder")}
+        />
+      </Field>
+    </FormDialog>
   );
 }

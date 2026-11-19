@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
-import { toast } from "sonner"
 
 import {
   getRolePermisos,
@@ -11,19 +10,14 @@ import {
   type Permiso,
 } from "@/lib/api/rbac"
 import { apiErrorMessage } from "@/lib/api/errors"
-import { Button } from "@/components/ui/button"
+import { isAdminRole } from "@/lib/access/role-keys"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { FormDialog } from "@/components/kit/form-dialog"
+import { useSubmit } from "@/components/kit/use-submit"
+import { useDialogForm } from "@/components/kit/use-dialog-form"
 
-// Editor de permisos de UN rol (diálogo), agrupado por módulo. Precarga las claves actuales antes de
-// guardar porque el PUT es un REPLACE completo. Extraído de rbac-settings.tsx (techo de líneas).
+// Permission editor for ONE role (dialog), grouped by module. Preloads the current keys before
+// saving because the PUT is a full REPLACE. Extracted from rbac-settings.tsx (line ceiling).
 export function PermisosDialog({
   role,
   permisos,
@@ -35,26 +29,32 @@ export function PermisosDialog({
 }) {
   const t = useTranslations("admin.rbac")
   const tc = useTranslations("admin")
-  const [selected, setSelected] = React.useState<Set<string>>(new Set())
-  const [loaded, setLoaded] = React.useState(false)
-  const [submitting, setSubmitting] = React.useState(false)
+  const open = role !== null
+  // The admin role holds full access and cannot be edited (the backend answers 400 rbac.adminRoleFixed).
+  const fixed = isAdminRole(role)
+  // Reset per role: another role must never show (and save) the previous role's keys.
+  const [form, update] = useDialogForm(
+    () => ({ selected: new Set<string>(), loaded: false, loadError: null as string | null }),
+    open,
+    role?.id,
+  )
 
-  // PRECARGA las claves actuales del rol: sin esto, guardar con el set vacío
-  // BORRABA los permisos del rol (el PUT es un replace completo).
+  // PRELOAD the role's current keys: without this, saving with the empty set
+  // ERASED the role's permissions (the PUT is a full replace).
   React.useEffect(() => {
     if (!role) return
     let active = true
     getRolePermisos(role.id)
       .then((claves) => {
-        if (!active) return
-        setSelected(new Set(claves))
-        setLoaded(true)
+        if (active) update({ selected: new Set(claves), loaded: true, loadError: null })
       })
-      .catch((err) => active && toast.error(apiErrorMessage(err)))
+      .catch((err) => {
+        if (active) update({ loadError: apiErrorMessage(err) })
+      })
     return () => {
       active = false
     }
-  }, [role])
+  }, [role, update])
 
   const byModulo = React.useMemo(() => {
     const acc: Record<string, Permiso[]> = {}
@@ -63,66 +63,66 @@ export function PermisosDialog({
   }, [permisos])
 
   function toggle(clave: string, on: boolean) {
-    setSelected((prev) => {
-      const next = new Set(prev)
+    update((s) => {
+      const next = new Set(s.selected)
       if (on) next.add(clave)
       else next.delete(clave)
-      return next
+      return { ...s, selected: next }
     })
   }
 
-  async function onSubmit() {
-    if (!role) return
-    setSubmitting(true)
-    try {
-      await setRolePermisos(role.id, [...selected])
-      toast.success(t("permisosSaved"))
-      onOpenChange(false)
-    } catch (err) {
-      toast.error(apiErrorMessage(err))
-    } finally {
-      setSubmitting(false)
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    async () => {
+      if (!role) throw new Error("no role") // unreachable: the dialog is open only with a role
+      await setRolePermisos(role.id, [...form.selected])
+    },
+    { successMessage: t("permisosSaved"), onSuccess: () => onOpenChange(false) },
+  )
+
+  // Saving was already disabled while loading and for the fixed admin role; now each says why.
+  const reason = fixed
+    ? t("adminRoleFixed")
+    : !form.loaded
+      ? (form.loadError ?? t("loading"))
+      : null
 
   return (
-    <Dialog open={role !== null} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("permisosTitle", { role: role?.name ?? "" })}</DialogTitle>
-          <DialogDescription>{t("permisosHelp")}</DialogDescription>
-        </DialogHeader>
-
-        {!loaded && <p className="text-sm text-muted-foreground">{t("loading")}</p>}
-        <div className="space-y-4">
-          {loaded &&
-            Object.entries(byModulo).map(([modulo, list]) => (
-              <div key={modulo} className="space-y-2">
-                <p className="text-sm font-semibold capitalize">{modulo}</p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {list.map((p) => (
-                    <label key={p.slug} className="flex items-center gap-2 text-sm">
-                      <Checkbox
-                        checked={selected.has(p.slug)}
-                        onCheckedChange={(v) => toggle(p.slug, v === true)}
-                      />
-                      <span className="font-mono text-xs">{p.action}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={submitting || !loaded}>
-            {submitting ? t("saving") : t("save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      title={t("permisosTitle", { role: role?.name ?? "" })}
+      description={fixed ? t("adminRoleFixed") : t("permisosHelp")}
+      // Saving REPLACES (and may remove) the role's permissions: Enter never fires it, only the button.
+      onSubmit={() => {}}
+      actions={[{ label: t("save"), onClick: () => submit() }]}
+      submitting={submitting}
+      submittingLabel={t("saving")}
+      cancelLabel={tc("cancel")}
+      blocked={fixed || !form.loaded}
+      reason={reason}
+    >
+      {!form.loaded && !form.loadError && (
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
+      )}
+      {form.loaded &&
+        Object.entries(byModulo).map(([modulo, list]) => (
+          <div key={modulo} className="space-y-2">
+            <p className="text-sm font-semibold capitalize">{modulo}</p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {list.map((p) => (
+                <label key={p.slug} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={form.selected.has(p.slug)}
+                    disabled={fixed}
+                    onCheckedChange={(v) => toggle(p.slug, v === true)}
+                  />
+                  <span className="font-mono text-xs">{p.action}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+    </FormDialog>
   )
 }

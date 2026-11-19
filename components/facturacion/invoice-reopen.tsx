@@ -10,14 +10,17 @@ import { getReopenCheck, listReopenings, reopenInvoice, type InvoiceReopening, t
 import type { FacturaConItems } from "@/lib/api/facturas";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { reopeningChanges, type DiffInvoice, type InvoiceChange } from "@/lib/factura/reopen-diff";
+import { reopenMissing } from "@/lib/facturacion/reopen-missing";
 import { money } from "@/lib/caja/totales";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { FormError } from "@/components/kit/field";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
 
 interface ButtonProps {
   invoiceId: string;
@@ -33,9 +36,7 @@ export function ReopenInvoiceButton({ invoiceId, centerId, onReopened }: ButtonP
   const tRoot = useTranslations();
   const [check, setCheck] = React.useState<ReopenCheck | null>(null);
   const [open, setOpen] = React.useState(false);
-  const [reason, setReason] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [{ reason, error }, setForm] = useDialogForm(() => ({ reason: "", error: null as string | null }), open);
 
   React.useEffect(() => {
     let active = true;
@@ -51,22 +52,27 @@ export function ReopenInvoiceButton({ invoiceId, centerId, onReopened }: ButtonP
   const warnings = check?.warnings ?? [];
   const blocked = !!check && !check.canReopen;
   const why = reasons.map((r) => tRoot(r.labelKey)).join(" · ");
+  const missing = reopenMissing({ reason }).map(() => t("reasonLabel"));
 
-  async function confirm() {
-    setBusy(true);
-    setError(null);
-    try {
-      const r = await reopenInvoice(invoiceId, reason.trim(), centerId);
-      r.warnings.forEach((w) => toast.warning(w.labelKey ? tRoot(w.labelKey) : (w.message ?? w.code)));
-      toast.success(t("done"));
-      setOpen(false);
-      onReopened(r.invoice);
-    } catch (err) {
-      setError(apiErrorLabel(err, tRoot));
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    () => {
+      setForm({ error: null });
+      return reopenInvoice(invoiceId, reason.trim(), centerId);
+    },
+    {
+      onSuccess: (r) => {
+        r.warnings.forEach((w) => toast.warning(w.labelKey ? tRoot(w.labelKey) : (w.message ?? w.code)));
+        toast.success(t("done"));
+        setOpen(false);
+        onReopened(r.invoice);
+      },
+      // The BE's refusal is shown inside the dialog, not as a toast.
+      onError: (err) => {
+        setForm({ error: apiErrorLabel(err, tRoot) });
+        return true;
+      },
+    },
+  );
 
   return (
     <>
@@ -76,52 +82,45 @@ export function ReopenInvoiceButton({ invoiceId, centerId, onReopened }: ButtonP
         className="no-print"
         disabled={!check || blocked}
         title={blocked ? why : t("hint")}
-        onClick={() => {
-          setReason("");
-          setError(null);
-          setOpen(true);
-        }}
+        onClick={() => setOpen(true)}
       >
         <HugeiconsIcon icon={ArrowTurnBackwardIcon} className="size-4" />
         {t("action")}
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
-          </DialogHeader>
-          {warnings.length > 0 && (
-            <Alert variant="warning">
-              <AlertDescription>
-                {warnings.map((w) => (
-                  <p key={w.labelKey}>{tRoot(w.labelKey)}</p>
-                ))}
-              </AlertDescription>
-            </Alert>
-          )}
-          <div className="space-y-1.5">
-            <Label htmlFor="reopen-reason">{t("reasonLabel")}</Label>
-            <Textarea
-              id="reopen-reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder={t("reasonPlaceholder")}
-              rows={3}
-              autoFocus
-            />
-          </div>
-          {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>
-              {tRoot("common.cancel")}
-            </Button>
-            <Button onClick={confirm} disabled={busy || !reason.trim()}>
-              {busy ? tRoot("common.loading") : t("confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={open}
+        onOpenChange={setOpen}
+        size="lg"
+        title={t("title")}
+        description={t("description")}
+        onSubmit={() => submit()}
+        submitLabel={t("confirm")}
+        submittingLabel={tRoot("common.loading")}
+        submitting={submitting}
+        missing={missing}
+      >
+        {warnings.length > 0 && (
+          <Alert variant="warning">
+            <AlertDescription>
+              {warnings.map((w) => (
+                <p key={w.labelKey}>{tRoot(w.labelKey)}</p>
+              ))}
+            </AlertDescription>
+          </Alert>
+        )}
+        {/* A textarea: Enter adds a line and never submits, so reopening needs the button. */}
+        <Field label={t("reasonLabel")} htmlFor="reopen-reason" required>
+          <Textarea
+            id="reopen-reason"
+            value={reason}
+            onChange={(e) => setForm({ reason: e.target.value })}
+            placeholder={t("reasonPlaceholder")}
+            rows={3}
+            autoFocus
+          />
+        </Field>
+        <FormError message={error} />
+      </FormDialog>
     </>
   );
 }
@@ -156,10 +155,8 @@ export function InvoiceReopenings({ invoiceId, centerId, invoice }: HistoryProps
     rows.map((r) => r.snapshot as DiffInvoice),
     invoice as unknown as DiffInvoice,
   );
-  const day = (v: unknown) => {
-    const d = parseDayUTC(v);
-    return d ? format.dateTime(d, "dayShort") : "—";
-  };
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const day = (v: unknown) => formatFechaSolo(v) || "—";
 
   function describe(c: InvoiceChange): string {
     switch (c.kind) {

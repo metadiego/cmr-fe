@@ -16,7 +16,7 @@ import { getOpciones, ejecutarAccion, type Opcion } from "@/lib/api/tablero";
 import { pickDoctor } from "@/lib/tablero/pick-doctor";
 import { patientDoctorOption } from "@/lib/medicos/patient-doctor-option";
 import { asignarRecord } from "@/lib/api/pacientes";
-import { toastError } from "@/lib/api/errors";
+import { nextAppointmentMissing } from "@/lib/board/next-appointment-missing";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
 import {
@@ -36,8 +36,13 @@ import { ReturnDatePicker } from "@/components/citas/return-date-picker";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { FormFooter } from "@/components/kit/form-footer";
+import { RequiredMark } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
 
 const NO_MEDICO = "__none__";
+
+type BusyKind = "save" | "open" | "exit" | "record";
 
 function plusDaysISO(days: number): string {
   const d = new Date();
@@ -66,9 +71,9 @@ function fmtFechaCorta(iso: string, format: ReturnType<typeof useFormatter>): st
   return d ? format.dateTime(d, "dayMonth") : iso;
 }
 
-// Modal de AGENDAMIENTO tras marcar ASISTIDO (por `render.postAccion`, no hardcode).
-// UI "ficha de atención": héroe con avatar + línea de tiempo de la visita recién
-// completada + agenda rápida de la próxima. Ver docs/specs/ap-board — handoff PR #35.
+// SCHEDULING dialog after marking ATTENDED (through `render.postAccion`, not hardcoded).
+// "Visit card" UI: hero with avatar + timeline of the visit just completed + quick booking of the
+// next one. See docs/specs/ap-board — handoff PR #35.
 export function NuevaCitaModal({
   tablero,
   fila,
@@ -85,7 +90,6 @@ export function NuevaCitaModal({
   onSaved?: () => void;
 }) {
   const t = useTranslations("nuevaCita");
-  const tRoot = useTranslations();
   const format = useFormatter();
   const { can } = useCan();
 
@@ -109,9 +113,18 @@ export function NuevaCitaModal({
   const [doctorExtra, setDoctorExtra] = React.useState<{ id: string; name: string } | null>(null);
   const [fecha, setFecha] = React.useState<string>("");
   const [notas, setNotas] = React.useState<string>("");
-  const [busy, setBusy] = React.useState<null | "save" | "open" | "exit" | "record">(null);
+  // Which footer/header action is running: one guard for all of them, so only one runs at a time.
+  const [busyKind, setBusyKind] = React.useState<BusyKind | null>(null);
+  const { submitting, submit } = useSubmit(async (kind: BusyKind, fn: () => Promise<void>) => {
+    setBusyKind(kind);
+    try {
+      await fn();
+    } finally {
+      setBusyKind(null);
+    }
+  });
 
-  // Catálogos data-driven (tipos + médicos por centro + historial). Cero hardcode.
+  // Data-driven catalogues (types + doctors per center + history). Nothing hardcoded.
   React.useEffect(() => {
     let active = true;
     getTiposCita()
@@ -173,7 +186,7 @@ export function NuevaCitaModal({
     [tipos],
   );
 
-  // Visitas anteriores a hoy, más recientes primero (máx 4). Contexto clínico.
+  // Visits before today, most recent first (max 4). Clinical context.
   const historial = React.useMemo(() => {
     const hoy = todayISO();
     return [...recientes]
@@ -182,7 +195,7 @@ export function NuevaCitaModal({
       .slice(0, 4);
   }, [recientes]);
 
-  // Línea de tiempo de la visita recién completada (dato: timestamps de la fila).
+  // Timeline of the visit just completed (data: the row's timestamps).
   const pasos: Array<{ key: "stepPresent" | "stepConsult" | "stepAttended"; at: unknown; current?: boolean }> = [
     { key: "stepPresent", at: fila.presente },
     { key: "stepConsult", at: fila.en_consulta },
@@ -190,7 +203,8 @@ export function NuevaCitaModal({
   ];
 
   async function crear(tId: string, f: string) {
-    if (!pacienteId || !tId || !f) return;
+    // Never report a booking that did not happen: a row without a patient cannot be booked.
+    if (!pacienteId) throw new Error(t("noPatient"));
     await createCita(
       {
         patientId: pacienteId,
@@ -198,9 +212,9 @@ export function NuevaCitaModal({
         date: f,
         ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
         ...(notas.trim() ? { notes: notas.trim() } : {}),
-        // Una cita dada en ATENCIÓN es directa con la persona presente en la clínica (no interviene el
-        // call-center), así que nace CONFIRMADA para cualquier fecha —no `programada`, que es lo del
-        // call-center— y por eso aparece en el tablero de Atención de su día. Ver POST /citas.
+        // An appointment given in ATENCIÓN is made directly with the person present at the clinic (no
+        // call-center), so it is born CONFIRMED for any date — not `programada`, which is the call-center's —
+        // and that is why it shows on its day's Atención board. See POST /citas.
         status: "confirmada",
       } as Parameters<typeof createCita>[0],
       centroId,
@@ -209,70 +223,53 @@ export function NuevaCitaModal({
     onClose();
   }
 
-  async function onGuardar() {
-    setBusy("save");
-    try {
-      await crear(tipoId, fecha);
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(null);
-    }
-  }
+  const onGuardar = () => submit("save", () => crear(tipoId, fecha));
 
-  // "Abierto" (seguimiento): próxima a +30 días, sin exigir fecha manual.
-  async function onAbierto() {
+  // "Open" (follow-up): next one at +30 days, no manual date needed.
+  function onAbierto() {
     const seg = tipos.find((x) => x.slug === "seguimiento") ?? tipos.find((x) => x.id === tipoId);
     if (!seg) return;
-    setBusy("open");
-    try {
-      await crear(seg.id, plusDaysISO(30));
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(null);
-    }
+    void submit("open", () => crear(seg.id, plusDaysISO(30)));
   }
 
-  // "ALTA": no agenda próxima cita, solo cierra (paciente atendido).
+  // "DISCHARGE": books no next appointment, only closes (patient attended).
   function onAlta() {
     onSaved?.();
     onClose();
   }
 
-  // "Salir": revierte ASISTIDO (vuelve a en_consulta) y cierra.
-  async function onSalir() {
-    setBusy("exit");
-    try {
-      await ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: "volver_en_consulta" }, centroId);
-      onSaved?.();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(null);
-      onClose();
-    }
-  }
+  // "Exit": reverts ATTENDED (back to en_consulta) and closes, also when the revert fails.
+  const onSalir = () =>
+    submit("exit", async () => {
+      try {
+        await ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: "volver_en_consulta" }, centroId);
+        onSaved?.();
+      } finally {
+        onClose();
+      }
+    });
 
-  async function onGenerarRecord() {
-    if (!pacienteId) return;
-    setBusy("record");
-    try {
+  const onGenerarRecord = () =>
+    submit("record", async () => {
+      if (!pacienteId) throw new Error(t("noPatient"));
       const p = await asignarRecord(pacienteId, centroId);
       setRecord(p.medicalRecordNumber ?? "");
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(null);
-    }
-  }
+    });
 
-  const anyBusy = busy !== null;
+  const canSave = canWrite && agendarEnabled;
+  const missing = canSave
+    ? nextAppointmentMissing({ typeId: tipoId, date: fecha }).map((f) => (f === "date" ? t("whenBack") : t("type")))
+    : [];
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
-        {/* Héroe */}
+    <Dialog open onOpenChange={(o) => !o && !submitting && onClose()}>
+      <DialogContent
+        className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl"
+        showCloseButton={!submitting}
+        onEscapeKeyDown={(e) => submitting && e.preventDefault()}
+        onInteractOutside={(e) => submitting && e.preventDefault()}
+      >
+        {/* Hero */}
         <div className="relative shrink-0 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent px-6 pt-6 pb-5">
           <div className="flex items-start gap-4 pr-8">
             <div className="grid size-12 shrink-0 place-items-center rounded-full bg-primary/15 text-base font-bold text-primary ring-2 ring-primary/25 ring-offset-2 ring-offset-background">
@@ -293,14 +290,14 @@ export function NuevaCitaModal({
                   #{record}
                 </span>
               ) : (
-                <Button type="button" variant="outline" size="sm" onClick={onGenerarRecord} disabled={anyBusy || !pacienteId}>
+                <Button type="button" variant="outline" size="sm" onClick={() => onGenerarRecord()} disabled={submitting || !pacienteId}>
                   {t("generateRecord")}
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Línea de tiempo de la visita */}
+          {/* Visit timeline */}
           <div className="mt-5 flex items-center">
             {pasos.map((p, i) => {
               const hora = fmtHora(p.at, format);
@@ -330,7 +327,7 @@ export function NuevaCitaModal({
           </div>
         </div>
 
-        {/* Cuerpo (scrollable) */}
+        {/* Body (scrollable) */}
         <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
           {historial.length > 0 && (
             <div className="space-y-1.5">
@@ -347,15 +344,15 @@ export function NuevaCitaModal({
             </div>
           )}
 
-          {/* Agenda rápida (módulo agendar_cita, plugged por config) */}
+          {/* Quick booking (agendar_cita module, switched on by config) */}
           {agendarEnabled && (
           <>
           <div className="space-y-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("whenBack")}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("whenBack")}{canSave && <RequiredMark />}</span>
             <ReturnDatePicker value={fecha} onChange={setFecha} />
           </div>
 
-          {/* Aviso de disponibilidad: si el médico no está ese día, explica y ofrece la próxima fecha. */}
+          {/* Availability notice: if the doctor is not in that day, explains and offers the next date. */}
           <AvisoDisponibilidad
             doctorId={medicoId !== NO_MEDICO ? medicoId : undefined}
             date={fecha}
@@ -383,7 +380,7 @@ export function NuevaCitaModal({
             </label>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("type")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("type")}{canSave && <RequiredMark />}</span>
               <div className="flex flex-wrap gap-1.5">
                 {tipos.map((tp) => {
                   const active = tp.id === tipoId;
@@ -416,35 +413,36 @@ export function NuevaCitaModal({
           )}
         </div>
 
-        {/* Pie */}
-        <div className="shrink-0 flex flex-col gap-2 border-t bg-muted/30 px-6 py-4">
-          <div className="flex items-center gap-2">
-          <Button type="button" variant="ghost" onClick={onSalir} disabled={anyBusy}>
-            {t("exit")}
-          </Button>
-          <div className="ml-auto flex items-center gap-2">
-            {canWrite && agendarEnabled && (
-              <Button type="button" variant="outline" onClick={onAbierto} disabled={anyBusy || tipos.length === 0}>
-                {t("open")}
+        {/* Footer: "Save appointment" is the form's submit; the others are standalone actions. */}
+        <FormFooter
+          className="shrink-0 border-t bg-muted/30 px-6 py-4"
+          primary={canSave ? { label: t("save"), onClick: () => onGuardar(), busy: busyKind === "save" } : []}
+          missing={missing}
+          submitting={submitting}
+          // Another action running keeps "Save appointment" disabled but does not relabel it.
+          submittingLabel={busyKind === "save" ? undefined : t("save")}
+          extra={
+            <>
+              <Button type="button" variant="ghost" className="sm:mr-auto" onClick={() => onSalir()} disabled={submitting}>
+                {t("exit")}
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              className="border-success/40 text-success-foreground hover:bg-success/10"
-              onClick={onAlta}
-              disabled={anyBusy}
-            >
-              {t("discharge")}
-            </Button>
-            {canWrite && agendarEnabled && (
-              <Button type="button" onClick={onGuardar} disabled={anyBusy || !tipoId || !fecha}>
-                {t("save")}
+              {canSave && (
+                <Button type="button" variant="outline" onClick={onAbierto} disabled={submitting || tipos.length === 0}>
+                  {t("open")}
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                className="border-success/40 text-success-foreground hover:bg-success/10"
+                onClick={onAlta}
+                disabled={submitting}
+              >
+                {t("discharge")}
               </Button>
-            )}
-          </div>
-          </div>
-        </div>
+            </>
+          }
+        />
       </DialogContent>
     </Dialog>
   );

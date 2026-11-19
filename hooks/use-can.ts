@@ -1,7 +1,7 @@
 "use client";
 
 import { useMe } from "@/hooks/use-me";
-import { normalizarPermiso } from "@/lib/rbac/normalizar-permiso";
+import { holdsPermission } from "@/lib/rbac/permission-aliases";
 
 // Cosmetic permission check (#6, RBAC fino F1). Reads the real `permissions` the
 // BE resolves into /auth/me (master → ['*']). Use ONLY to show/hide/disable UI;
@@ -19,10 +19,9 @@ export function useCan() {
   const state = useMe();
   const permissions = state.kind === "ok" ? state.me.permissions : [];
 
+  // Also by a key's other names (old Spanish ↔ English, merged keys): lib/rbac/permission-aliases.ts.
   function can(permiso: string): boolean {
-    if (permissions.includes("*")) return true;
-    const objetivo = normalizarPermiso(permiso);
-    return permissions.some((p) => normalizarPermiso(p) === objetivo);
+    return holdsPermission(permissions, permiso);
   }
 
   return { can, ready: state.kind === "ok" };

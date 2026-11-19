@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
 
 // A service tab (Láser, Vit C, …) with its color/icon. Drives the Servicios
 // calendar tabs/filter and event colors.
@@ -13,6 +13,15 @@ import { apiFetch } from "./client";
 export type Servicio = components["schemas"]["ServicioEntity"] & {
   allowSessionFixWithoutPackage: boolean;
   pushesToEhrOnPresente: boolean;
+  // Dónde guarda sus unidades esta sesión (áreas, dosis…) — null la mayoría (1 por visita). BE #563,
+  // «Estadísticas Diarias» muestra «pac. / u.» SOLO en el servicio que lo declara (hoy: Sueroterapia
+  // Vit C, `statisticsUnitKey: "cantidad"`), nunca por nombre. Ver lib/estadisticas/services.ts.
+  statisticsUnitKey: string | null;
+  // Cómo numerar la SESIÓN cuando la visita consume más de un paquete a la vez (BE #598): "row" (cada
+  // paquete cuenta su propio renglón, el default histórico) o "most_delivered" (el paquete con más
+  // entregas numera la visita, p. ej. láser: MLS sobre el ancla HILT). Handoff
+  // laser-sesion-del-dia-y-areas-handoff-be.md.
+  primaryPackageRule: "row" | "most_delivered";
 };
 
 function asArray<T>(res: unknown): T[] {
@@ -21,12 +30,14 @@ function asArray<T>(res: unknown): T[] {
   return Array.isArray(items) ? (items as T[]) : [];
 }
 
-// `allowSessionFixWithoutPackage` hand-added for the same reason as `Servicio` above.
+// `allowSessionFixWithoutPackage`/`primaryPackageRule` hand-added for the same reason as `Servicio` above.
 export type CreateServicioPayload = components["schemas"]["CreateServicioDto"] & {
   allowSessionFixWithoutPackage?: boolean;
+  primaryPackageRule?: "row" | "most_delivered";
 };
 export type UpdateServicioPayload = components["schemas"]["UpdateServicioDto"] & {
   allowSessionFixWithoutPackage?: boolean;
+  primaryPackageRule?: "row" | "most_delivered";
 };
 export type UpdateServicioPorClavePayload = components["schemas"]["UpdateServicioPorClaveDto"];
 
@@ -105,6 +116,12 @@ export async function getServicios(
 ): Promise<Servicio[]> {
   const qs = opts.includeInactive ? `?includeInactive=true` : "";
   return asArray<Servicio>(await apiFetch(`/services${qs}`, {}, centroId));
+}
+
+// The catalogs of several clinics in one read (GET /services?centerIds, servicios.read in each), each
+// service with its `clinicName` — for a screen that spans clinics (the services month calendar).
+export async function getServiciosDe(clinicIds: readonly string[]): Promise<Servicio[]> {
+  return asArray<Servicio>(await apiFetch(await oneCenterPath(`/services`, clinicIds), {}, tenantOf(clinicIds)));
 }
 
 // Crear un servicio = crear una PESTAÑA. El BE le pone las columnas por defecto → nace

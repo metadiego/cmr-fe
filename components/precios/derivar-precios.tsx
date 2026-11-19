@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Field } from "@/components/kit/field";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -155,9 +156,9 @@ export function DerivarPrecios({
         {/* Origen */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold">{t("origen")}</h3>
-          <Field label={t("lista")}>
+          <Field label={t("lista")} htmlFor="derive-origin-list">
             <Select value={origenTipo} onValueChange={(v) => { setOrigenTipo(v); setPreview(null); }}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id="derive-origin-list" className="w-full">
                 <SelectValue placeholder={t("selectLista")} />
               </SelectTrigger>
               <SelectContent>
@@ -174,9 +175,9 @@ export function DerivarPrecios({
         {/* Destino */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold">{t("destino")}</h3>
-          <Field label={t("lista")}>
+          <Field label={t("lista")} htmlFor="derive-dest-list">
             <Select value={destinoTipo} onValueChange={(v) => { setDestinoTipo(v); setPreview(null); }}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id="derive-dest-list" className="w-full">
                 <SelectValue placeholder={t("selectLista")} />
               </SelectTrigger>
               <SelectContent>
@@ -190,8 +191,8 @@ export function DerivarPrecios({
             </Select>
           </Field>
           {destinoTipo === NEW_LIST && (
-            <Field label={t("newListName")}>
-              <Input
+            <Field label={t("newListName")} htmlFor="derive-dest-new-name">
+              <Input id="derive-dest-new-name"
                 value={newListName}
                 onChange={(e) => setNewListName(e.target.value)}
                 placeholder={t("newListPlaceholder")}
@@ -203,9 +204,9 @@ export function DerivarPrecios({
         {/* Ámbito */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold">{t("ambito")}</h3>
-          <Field label={t("ambito")}>
+          <Field label={t("ambito")} htmlFor="derive-scope">
             <Select value={ambito} onValueChange={(v) => { setAmbito(v as Ambito); setPreview(null); }}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id="derive-scope" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -215,9 +216,9 @@ export function DerivarPrecios({
             </Select>
           </Field>
           {ambito === "centro" && (
-            <Field label={t("centro")}>
+            <Field label={t("centro")} htmlFor="derive-center">
               <Select value={clinicId} onValueChange={(v) => { setClinicId(v); setPreview(null); }}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="derive-center" className="w-full">
                   <SelectValue placeholder={t("selectCentro")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -236,21 +237,21 @@ export function DerivarPrecios({
         <div className="space-y-3">
           <h3 className="text-sm font-semibold">{t("ajuste")}</h3>
           <div className="grid grid-cols-3 gap-2">
-            <Field label={t("direccion")}>
+            <Field label={t("direccion")} htmlFor="derive-direction">
               <Select value={direccion} onValueChange={(v) => { setDireccion(v as "aumentar" | "disminuir"); setPreview(null); }}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectTrigger id="derive-direction" className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="aumentar">{t("aumentar")}</SelectItem>
                   <SelectItem value="disminuir">{t("disminuir")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
-            <Field label={t("valor")}>
-              <Input inputMode="decimal" value={valor} onChange={(e) => { setValor(e.target.value); setPreview(null); }} placeholder="10" />
+            <Field label={t("valor")} htmlFor="derive-amount">
+              <Input id="derive-amount" inputMode="decimal" value={valor} onChange={(e) => { setValor(e.target.value); setPreview(null); }} placeholder="10" />
             </Field>
-            <Field label={t("modo")}>
+            <Field label={t("modo")} htmlFor="derive-mode">
               <Select value={modo} onValueChange={(v) => { setModo(v as "porcentaje" | "monto"); setPreview(null); }}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectTrigger id="derive-mode" className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="porcentaje">%</SelectItem>
                   <SelectItem value="monto">$</SelectItem>
@@ -259,9 +260,9 @@ export function DerivarPrecios({
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <Field label={t("redondeo")}>
+            <Field label={t("redondeo")} htmlFor="derive-rounding">
               <Select value={redondeo} onValueChange={(v) => { setRedondeo(v as typeof redondeo); setPreview(null); }}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectTrigger id="derive-rounding" className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ninguno">{t("redNinguno")}</SelectItem>
                   <SelectItem value="entero">{t("redEntero")}</SelectItem>
@@ -271,8 +272,8 @@ export function DerivarPrecios({
               </Select>
             </Field>
             {(redondeo === "multiplo" || redondeo === "terminacion") && (
-              <Field label={t("redValor")}>
-                <Input inputMode="decimal" value={redondeoValor} onChange={(e) => setRedondeoValor(e.target.value)} placeholder={redondeo === "terminacion" ? "0.99" : "5"} />
+              <Field label={t("redValor")} htmlFor="derive-rounding-value">
+                <Input id="derive-rounding-value" inputMode="decimal" value={redondeoValor} onChange={(e) => setRedondeoValor(e.target.value)} placeholder={redondeo === "terminacion" ? "0.99" : "5"} />
               </Field>
             )}
           </div>
@@ -334,14 +335,5 @@ export function DerivarPrecios({
         </div>
       )}
     </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-    </label>
   );
 }

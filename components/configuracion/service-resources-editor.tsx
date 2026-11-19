@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import {
   listResources,
@@ -12,12 +11,12 @@ import {
   type ServiceResourceLine,
 } from "@/lib/api/resources";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Field } from "@/components/kit/form-dialog";
+import { useSubmit } from "@/components/kit/use-submit";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // «Qué consume un servicio»: por cada servicio, qué recursos ocupa y cuánto. Es lo que hace que la agenda
@@ -32,7 +31,6 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
 
   const [serviceId, setServiceId] = React.useState<string>("");
   const [lines, setLines] = React.useState<ServiceResourceLine[]>([]);
-  const [busy, setBusy] = React.useState(false);
   // Líneas del servicio elegido (useResource, no effect manual → sin setState síncrono en effect).
   const linesRes = useResource<ServiceResourceLine[]>(
     () => (serviceId ? getServiceResources(serviceId, centroId) : Promise.resolve([])),
@@ -47,8 +45,15 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
   }
 
   const recName = (id: string) => recursos.find((r) => r.id === id)?.name ?? id;
+  // Un recurso `staff` (pozo de un cargo, BE PR #518) no es un sitio: marcarlo en el selector para que
+  // no se confunda con un cuarto o silla.
+  const recLabel = (r: Resource) => (r.kind === "staff" ? `${r.name} ${t("staffSuffix")}` : r.name);
+  // Una línea por recurso (UQ_service_resources_pair en el BE): repetirlo da 400
+  // resources.lineRepeated y no reemplaza nada. No ofrecerlo ya evita el error en vez de solo mostrarlo.
+  const usedElsewhere = (i: number) => new Set(lines.filter((_, idx) => idx !== i).map((l) => l.resourceId));
   function addLine() {
-    const first = recursos[0]?.id ?? "";
+    const used = new Set(lines.map((l) => l.resourceId));
+    const first = recursos.find((r) => !used.has(r.id))?.id ?? recursos[0]?.id ?? "";
     setLines((ls) => [...ls, { resourceId: first, minutes: 10, per: "session", blocking: true, staffRole: null, patientsPerStaff: 1 }]);
   }
   // Cargo efectivo de la línea: el de la terapia, o el que hereda del recurso.
@@ -60,18 +65,10 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
   function remove(i: number) {
     setLines((ls) => ls.filter((_, idx) => idx !== i));
   }
-  async function guardar() {
-    if (busy || !serviceId) return;
-    setBusy(true);
-    try {
-      await setServiceResources(serviceId, lines, centroId);
-      toast.success(t("saved"));
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
+  // The save button is only shown once a service is picked (see the render below).
+  const { submitting, submit } = useSubmit(() => setServiceResources(serviceId, lines, centroId), {
+    successMessage: t("saved"),
+  });
 
   return (
     <section className="space-y-4">
@@ -110,7 +107,9 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
                       <Select value={l.resourceId || undefined} onValueChange={(v) => patch(i, { resourceId: v })} disabled={!puedeEscribir}>
                         <SelectTrigger className="w-full"><SelectValue placeholder={recName(l.resourceId)} /></SelectTrigger>
                         <SelectContent>
-                          {recursos.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+                          {recursos
+                            .filter((r) => r.id === l.resourceId || !usedElsewhere(i).has(r.id))
+                            .map((r) => <SelectItem key={r.id} value={r.id}>{recLabel(r)}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </Field>
@@ -176,11 +175,12 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
               ))}
             </ul>
           )}
+          <p className="text-xs text-muted-foreground">{t("everyLineHelp")}</p>
           <p className="text-xs text-muted-foreground">{t("perHelp")} · {t("blockingHelp")} · {t("patientsPerStaffHelp")}</p>
           {puedeEscribir && (
             <div className="flex items-center justify-between">
               <Button variant="outline" size="sm" onClick={addLine} disabled={recursos.length === 0}>{t("addLine")}</Button>
-              <Button size="sm" onClick={guardar} disabled={busy}>{busy ? tRoot("common.saving") : tRoot("common.save")}</Button>
+              <Button size="sm" onClick={() => submit()} disabled={submitting}>{submitting ? tRoot("common.saving") : tRoot("common.save")}</Button>
             </div>
           )}
         </div>

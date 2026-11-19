@@ -22,6 +22,7 @@ import {
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { getActiveCentro } from "@/lib/tenant";
 import { classifyStreamFailure } from "@/lib/api/stream-retry";
 import { cn } from "@/lib/utils";
@@ -57,7 +58,10 @@ export function AlertasBell() {
   const router = useRouter();
   const { can } = useCan();
   const puedeResolver = can("alertas.resolver"); // el BE es la autoridad; esto solo evita el click a error
+  // Every clinic where the person reads alerts (no filter in a bell); each card names its clinic when
+  // that is more than one (clinic-read-scope).
   const { state, refresh, reload } = useResource<AlertasResponse>(() => listAlertas());
+  const clinics = useClinicFilter("alertas.read");
   const alertas = state.kind === "ok" ? state.data.data : [];
   const noLeidas = state.kind === "ok" ? state.data.unread : 0;
   // Catálogo de tipos → color/dominio por clave de alerta (la alerta trae `clave`, = la del tipo).
@@ -211,6 +215,11 @@ export function AlertasBell() {
                           >
                             <p className="truncate text-sm font-medium">{a.title}</p>
                             {a.body && <p className="line-clamp-2 text-xs text-muted-foreground">{a.body}</p>}
+                            {clinics.showColumn && (a.clinicName || clinics.nameOf(a.clinicId)) && (
+                              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                                {a.clinicName || clinics.nameOf(a.clinicId)}
+                              </p>
+                            )}
                           </button>
                           {puedeResolver && (
                             <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">

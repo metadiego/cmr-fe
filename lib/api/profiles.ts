@@ -37,6 +37,8 @@ export interface Perfil {
   status: PerfilEstado;
   accessMode: AccessMode;
   isMaster?: boolean;
+  // Full access (cmr-be #557): the only admin signal; isMaster/accessMode are derived from it.
+  isAdmin?: boolean;
   createdAt?: string;
   // GET /profiles enriquecido (usuarios-roles-accesos): roles y centros del perfil.
   roles?: PerfilRolResumen[];
@@ -59,8 +61,6 @@ export interface InvitePayload {
   email: string;
   name: string;
   lastName?: string;
-  // BE accepts operativo|gerencial here (admin/master is reserved for the master).
-  accessMode?: Extract<AccessMode, "operativo" | "gerencial">;
   password?: string;
   // Where the Supabase invite magic link should land (the FE set-password page).
   // Sent per-request so it works in any environment (dev :8080 / prod Vercel).
@@ -141,10 +141,9 @@ export function inviteUser(payload: InvitePayload): Promise<InviteResponse> {
 export interface UpdatePerfilPayload {
   name?: string;
   lastName?: string | null;
-  accessMode?: Extract<AccessMode, "operativo" | "gerencial">;
 }
 
-// PUT /profiles/:id — name/lastName/accessMode (D5).
+// PUT /profiles/:id — name/lastName (D5). The backend ignores accessMode since cmr-be #557.
 export function updateProfile(
   id: string,
   payload: UpdatePerfilPayload,

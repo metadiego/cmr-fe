@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath } from "./client";
 
 // Config de facturación para el POS: columnas de captura por producto, medios (referencia)
 // y médicos. Todo verificado en prod (handoff fe-facturacion-general-pos-handoff, def.).
@@ -33,6 +33,6 @@ export interface MedicoOpcion {
   id: string;
   name: string;
 }
-export function listMedicos(centro?: string): Promise<MedicoOpcion[]> {
-  return apiFetch<MedicoOpcion[]>(`/staff/capacity-by/medico`, {}, centro);
+export async function listMedicos(centro?: string): Promise<MedicoOpcion[]> {
+  return apiFetch<MedicoOpcion[]>(await oneCenterPath(`/staff/capacity-by/medico`, centro), {}, centro);
 }

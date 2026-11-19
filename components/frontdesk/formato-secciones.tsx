@@ -28,6 +28,9 @@ function lineaText(linea: FormatoFirmaLinea, label: LabelFn): string {
   if (typeof linea === "string") return label(linea);
   return linea.label ?? label(linea.labelKey);
 }
+function lineaValor(linea: FormatoFirmaLinea): string {
+  return typeof linea === "string" ? "" : (linea.valor ?? "");
+}
 // Etiqueta de columna: se prefiere el `label` ya listo del BE; si no, se traduce el labelKey (o cae a la clave).
 function colLabel(col: FormatoColumna, label: LabelFn): string {
   return col.label ?? label(col.labelKey, col.clave);
@@ -85,11 +88,15 @@ export function SeccionInner({
         return (
           <>
             <Titulo>{titulo}</Titulo>
-            <div>
-              {Array.from({ length: n }).map((_, i) => (
-                <div key={i} style={{ borderBottom: BORDER, height: 24 }} />
-              ))}
-            </div>
+            {/* Ruled lines that GROW: at least `n`, and the sheet's leftover height becomes more lines to
+                write on — never a blank gap above the table (APEX, 04-nov-2026). */}
+            <div
+              style={{
+                flex: "1 1 auto",
+                minHeight: n * 24,
+                backgroundImage: "repeating-linear-gradient(to bottom, transparent 0 23px, #000 23px 24px)",
+              }}
+            />
           </>
         );
       }
@@ -102,6 +109,23 @@ export function SeccionInner({
     }
 
     case "firmas":
+      if (s.estilo === "en_linea") {
+        // Legacy «LABEL: ________»: the label, then the line filling the rest of its cell; `columnas` per row.
+        const cols = Math.max(1, s.columnas ?? 2);
+        return (
+          <>
+            <Titulo>{label(s.labelKey)}</Titulo>
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, columnGap: 40, rowGap: 22, marginTop: 28, fontSize: 12 }}>
+              {(s.lineas ?? []).map((linea, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-end", gap: 6 }}>
+                  <span style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{lineaText(linea, label)}</span>
+                  <span style={{ flex: 1, borderBottom: BORDER, minHeight: 18, paddingLeft: 4 }}>{lineaValor(linea)}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        );
+      }
       // Una línea horizontal por entrada, con su etiqueta debajo (con aire arriba).
       return (
         <>
@@ -354,10 +378,16 @@ export function SeccionInner({
   }
 }
 
-// Láser a color POR SESIÓN (layout "sessions"): un bloque por sesión = SESIÓN #, tabla de columnas con la
-// fecha de la sesión + 1 fila en blanco, las 2 cajas de notas VACÍAS (para escribir a mano) y las firmas.
-// `porPagina` sesiones por página física (salto de página impreso). Si el BE no manda sesiones (impresión en
-// blanco), se pinta UN bloque vacío para que la hoja sea usable. Idéntico al legacy (nano_laser*, sueroterapia).
+// One block per SESSION (layout "sesiones"), drawn like the legacy sheet
+// (.personal/formatos-legacy/Sueroterapia Vit C con Laser Intravenoso-intra2.pdf, sueroterapia_form.php):
+// «SESIÓN # : n/m» on a light rule, the colour table with a tall blank row, two stacked grey note bands,
+// and the signatures in two columns (ENFERMERO + HORA on the left, FIRMA DEL PACIENTE on the right), each
+// label OVER its line. `porPagina` blocks per physical page; every page after the first repeats `repeat`
+// (letterhead + patient line), as the legacy prints a full header on each sheet. Each block is sized so two
+// of them fill a letter page with air. Inline styles only: the print window has no Tailwind.
+// Two blocks + the header must leave room for the f-b/ foot on the same sheet (4.3in pushed it onto an
+// empty second page).
+const SESSION_BLOCK_MIN_HEIGHT = "4.1in";
 export function SesionesFormato({
   columns,
   sessions,
@@ -365,56 +395,97 @@ export function SesionesFormato({
   porPagina = 2,
   firmas,
   label,
+  repeat,
+  variant = "franjas",
 }: {
+  /**
+   * The two legacy families (render.estiloSesion): «franjas» = Vit C / Láser IV (grey bands, the
+   * patient's signature low at the right); «caja» = Nano Aer Plus (bordered boxes, «SESION #» at the
+   * right, Enfermero | Firma on one row, a rule closing each block).
+   */
+  variant?: "franjas" | "caja";
   columns: FormatoColumna[];
   sessions: FormatoSesion[];
   notas: string[];
   porPagina?: number;
   firmas?: Extract<FormatoSeccion, { tipo: "firmas" }>;
   label: LabelFn;
+  /** Header repeated at the top of every page after the first. */
+  repeat?: React.ReactNode;
 }) {
-  const bloques = sessions.length > 0 ? sessions : [{ session: null, date: null }];
+  const caja = variant === "caja";
+  const bloques: FormatoSesion[] = sessions.length > 0 ? sessions : [{ session: null, date: null }];
+  const per = Math.max(1, porPagina);
+  const pages: FormatoSesion[][] = [];
+  for (let i = 0; i < bloques.length; i += per) pages.push(bloques.slice(i, i + per));
+  const lineas = firmas?.lineas ?? [];
+  const left = lineas.filter((_, i) => i % 2 === 0);
+  const right = lineas.filter((_, i) => i % 2 === 1);
+  const signLine = (l: FormatoFirmaLinea, k: React.Key, first: boolean) => (
+    <div key={k} style={{ marginTop: first ? 0 : 18 }}>
+      <div style={{ fontSize: 12 }}>{lineaText(l, label)}</div>
+      <div style={{ borderBottom: BORDER, marginTop: 26, minHeight: 2, fontSize: 11, paddingLeft: 4 }}>{lineaValor(l)}</div>
+    </div>
+  );
   return (
-    <div className="mt-4">
-      {bloques.map((s, i) => {
-        const saltar = (i + 1) % porPagina === 0 && i + 1 < bloques.length;
-        return (
-          <div key={i} style={{ breakInside: "avoid", pageBreakAfter: saltar ? "always" : "auto", marginBottom: 24 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-              SESIÓN{s.session ? ` ${s.session}` : ""}
-            </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-              <thead>
-                <tr style={{ background: "#f5f5f5" }}>
-                  {columns.map((c) => (
-                    <th key={c.clave} style={{ border: BORDER, padding: "5px 8px", textAlign: "left" }}>{colLabel(c, label)}</th>
+    <div style={{ marginTop: 18 }}>
+      {pages.map((page, pi) => (
+        <div key={pi} style={{ pageBreakAfter: pi + 1 < pages.length ? "always" : "auto" }}>
+          {pi > 0 && <div style={{ marginBottom: 18 }}>{repeat}</div>}
+          {page.map((s, i) => (
+            <div key={i} style={{ breakInside: "avoid", minHeight: SESSION_BLOCK_MIN_HEIGHT, display: "flex", flexDirection: "column" }}>
+              <div style={caja ? { display: "flex", justifyContent: "space-between", paddingBottom: 6, marginBottom: 8, fontSize: 12 } : { display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #ccc", paddingBottom: 8, marginBottom: 14, fontSize: 12 }}>
+                <span>
+                  {(s.fields ?? []).map((f, fi) => (
+                    <span key={f.clave ?? fi} style={{ marginRight: 16 }}>
+                      <b>{f.label ?? label(f.labelKey)}</b> {f.valor ?? ""}
+                    </span>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ height: 34 }}>
-                  {columns.map((c) => (
-                    <td key={c.clave} style={{ border: BORDER, padding: "6px 8px", verticalAlign: "top" }}>
-                      {c.clave === "fecha" ? (s.date ?? "") : ""}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-            {/* Dos cajas de notas VACÍAS (para escribir a mano) — legacy. */}
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-              {(notas.length ? notas : ["", ""]).map((_, ni) => (
-                <div key={ni} style={{ flex: 1, border: "1px solid #999", minHeight: 44 }} />
-              ))}
-            </div>
-            {firmas && (
-              <div className="region" style={{ marginTop: 12 }}>
-                <SeccionInner s={firmas} label={label} />
+                </span>
+                <span>
+                  <b>{label("formato.sessionNumber", "SESIÓN # :")}</b> {s.session ?? ""}
+                </span>
               </div>
-            )}
-          </div>
-        );
-      })}
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                <thead>
+                  <tr>
+                    {columns.map((c) => (
+                      <th key={c.clave} style={{ border: BORDER, background: "#f0f0f0", padding: "6px 6px", textAlign: "center", fontWeight: 700 }}>
+                        {colLabel(c, label)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {columns.map((c) => (
+                      <td key={c.clave} style={{ border: BORDER, height: 44, padding: "6px 6px", textAlign: "center", verticalAlign: "middle" }}>
+                        {c.clave === "fecha" ? (s.date ?? "") : ""}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+              {/* Two areas to write by hand, full width: grey bands, or bordered boxes («caja»). */}
+              {(notas.length ? notas : ["", ""]).map((_, ni) => (
+                <div
+                  key={ni}
+                  style={caja ? { height: 46, border: BORDER, marginTop: ni === 0 ? 12 : 10 } : { height: 34, background: "#f0f0f0", marginTop: ni === 0 ? 20 : 10 }}
+                />
+              ))}
+              {lineas.length > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: caja ? 14 : 30 }}>
+                  <div style={{ width: "45%" }}>{left.map((l, k) => signLine(l, k, k === 0))}</div>
+                  <div style={{ width: "45%", display: "flex", flexDirection: "column", justifyContent: caja ? "flex-start" : "flex-end" }}>
+                    {right.map((l, k) => signLine(l, k, k === 0))}
+                  </div>
+                </div>
+              )}
+              {caja && <div style={{ borderBottom: BORDER, marginTop: 14 }} />}
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Field } from "@/components/kit/field";
 import {
   Select,
   SelectContent,
@@ -154,32 +155,32 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
         {/* Encabezado */}
         <section className="space-y-4 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-5">
           <h2 className="text-sm font-semibold">{t("headerTitle")}</h2>
-          <Field label={t("f.logoUrl")} hint={t("f.logoUrlHint")}>
-            <Input value={form.logoUrl} onChange={(e) => set("logoUrl", e.target.value)} placeholder="https://…" />
+          <Field label={t("f.logoUrl")} htmlFor="invoice-logoUrl" hint={t("f.logoUrlHint")}>
+            <Input id="invoice-logoUrl" value={form.logoUrl} onChange={(e) => set("logoUrl", e.target.value)} placeholder="https://…" />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("f.nombreLegal")}><Input value={form.nombreLegal} onChange={(e) => set("nombreLegal", e.target.value)} /></Field>
-            <Field label={t("f.nombreComercial")}><Input value={form.nombreComercial} onChange={(e) => set("nombreComercial", e.target.value)} /></Field>
+            <Field label={t("f.nombreLegal")} htmlFor="invoice-nombreLegal"><Input id="invoice-nombreLegal" value={form.nombreLegal} onChange={(e) => set("nombreLegal", e.target.value)} /></Field>
+            <Field label={t("f.nombreComercial")} htmlFor="invoice-nombreComercial"><Input id="invoice-nombreComercial" value={form.nombreComercial} onChange={(e) => set("nombreComercial", e.target.value)} /></Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-[1fr_7rem]">
-            <Field label={t("f.registroFiscal")}><Input value={form.registroFiscal} onChange={(e) => set("registroFiscal", e.target.value)} /></Field>
-            <Field label={t("f.registroFiscalLabel")}><Input value={form.registroFiscalLabel} onChange={(e) => set("registroFiscalLabel", e.target.value)} placeholder="MN" /></Field>
+            <Field label={t("f.registroFiscal")} htmlFor="invoice-registroFiscal"><Input id="invoice-registroFiscal" value={form.registroFiscal} onChange={(e) => set("registroFiscal", e.target.value)} /></Field>
+            <Field label={t("f.registroFiscalLabel")} htmlFor="invoice-registroFiscalLabel"><Input id="invoice-registroFiscalLabel" value={form.registroFiscalLabel} onChange={(e) => set("registroFiscalLabel", e.target.value)} placeholder="MN" /></Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("f.telefono")}><Input value={form.telefono} onChange={(e) => set("telefono", e.target.value)} /></Field>
-            <Field label={t("f.web")}><Input value={form.web} onChange={(e) => set("web", e.target.value)} /></Field>
+            <Field label={t("f.telefono")} htmlFor="invoice-telefono"><Input id="invoice-telefono" value={form.telefono} onChange={(e) => set("telefono", e.target.value)} /></Field>
+            <Field label={t("f.web")} htmlFor="invoice-web"><Input id="invoice-web" value={form.web} onChange={(e) => set("web", e.target.value)} /></Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-[1fr_7rem]">
-            <Field label={t("f.direccionFiscal")}><Input value={form.direccionFiscal} onChange={(e) => set("direccionFiscal", e.target.value)} /></Field>
-            <Field label={t("f.zip")}><Input value={form.zip} onChange={(e) => set("zip", e.target.value)} /></Field>
+            <Field label={t("f.direccionFiscal")} htmlFor="invoice-direccionFiscal"><Input id="invoice-direccionFiscal" value={form.direccionFiscal} onChange={(e) => set("direccionFiscal", e.target.value)} /></Field>
+            <Field label={t("f.zip")} htmlFor="invoice-zip"><Input id="invoice-zip" value={form.zip} onChange={(e) => set("zip", e.target.value)} /></Field>
           </div>
         </section>
 
         {/* Pie */}
         <section className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-5">
           <h2 className="text-sm font-semibold">{t("footerTitle")}</h2>
-          <Field label={t("f.pieFactura")} hint={t("f.pieFacturaHint")}>
-            <Textarea rows={4} value={form.pieFactura} onChange={(e) => set("pieFactura", e.target.value)} />
+          <Field label={t("f.pieFactura")} htmlFor="invoice-pieFactura" hint={t("f.pieFacturaHint")}>
+            <Textarea id="invoice-pieFactura" rows={4} value={form.pieFactura} onChange={(e) => set("pieFactura", e.target.value)} />
           </Field>
         </section>
 
@@ -227,8 +228,8 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
             />
           </div>
           {form.frontdeskMuestraConsulta && (
-            <Field label={t("consultaTabOrden")} hint={t("consultaTabOrdenHint")}>
-              <Input
+            <Field label={t("consultaTabOrden")} htmlFor="invoice-consultaTabOrden" hint={t("consultaTabOrdenHint")}>
+              <Input id="invoice-consultaTabOrden"
                 type="number"
                 inputMode="numeric"
                 value={form.frontdeskOrdenConsulta}
@@ -256,8 +257,8 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
             />
           </div>
           {form.reopenEnabled && (
-            <Field label={t("reopenWindow")} hint={t("reopenWindowHint")}>
-              <Input
+            <Field label={t("reopenWindow")} htmlFor="invoice-reopenWindow" hint={t("reopenWindowHint")}>
+              <Input id="invoice-reopenWindow"
                 type="number"
                 inputMode="numeric"
                 min={0}
@@ -298,15 +299,5 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
         </div>
       </aside>
     </div>
-  );
-}
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-      {hint && <span className="text-[11px] text-muted-foreground/80">{hint}</span>}
-    </label>
   );
 }

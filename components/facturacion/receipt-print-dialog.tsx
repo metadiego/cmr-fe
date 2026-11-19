@@ -9,6 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackupPrintButton } from "@/components/facturacion/backup-print-button";
 import { RECEIPT_STATUS_MESSAGE, type ReceiptStatusMessage } from "@/lib/print/receipt-status-message";
+import { defaultReceipt, receiptUrl, refundsNewestFirst } from "@/lib/print/receipt-choice";
+import { listDevolucionesDeFactura, type Devolucion } from "@/lib/api/facturas";
+import { loadRefundRecibo } from "@/lib/api/refund-receipt";
+import { loadLogoRaster } from "@/lib/print/load-logo";
+import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
+import { buildReceiptText } from "@/lib/print/receipt-labels";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Status = { kind: "loading" } | { kind: "ready" } | { kind: "error"; message: string };
 
@@ -52,10 +59,33 @@ type BodyProps = {
 function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, onClose }: BodyProps) {
   const t = useTranslations("receipt");
   const tc = useTranslations("common");
+  const tRoot = useTranslations();
+  async function refundBytes(refundId: string): Promise<Uint8Array> {
+    const recibo = await loadRefundRecibo(invoiceId, refundId, centerId);
+    const logo = await loadLogoRaster(recibo.logoUrl ?? "/img/logo_cmr.png", RECEIPT_LOGO_MAX_HEIGHT_MM);
+    return receiptToEscPos(recibo, buildReceiptText(t, tRoot), logo);
+  }
   const [status, setStatus] = React.useState<Status>({ kind: "loading" });
   // Bumped by "Retry": remounts the iframe, which loads the page (and asks the server) again.
   const [attempt, setAttempt] = React.useState(0);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  // The invoice's refunds: each one prints its OWN receipt («DEVOLUCIÓN #D-…»); the latest is the default.
+  const [refunds, setRefunds] = React.useState<Devolucion[] | null>(null);
+  const [doc, setDoc] = React.useState<string | null>(null); // "" = the invoice, else a refund id
+  React.useEffect(() => {
+    let alive = true;
+    listDevolucionesDeFactura(invoiceId, centerId)
+      .then((rows) => {
+        if (!alive) return;
+        const sorted = refundsNewestFirst(Array.isArray(rows) ? rows : []);
+        setRefunds(sorted);
+        setDoc((d) => d ?? defaultReceipt(sorted));
+      })
+      .catch(() => alive && (setRefunds([]), setDoc((d) => d ?? "")));
+    return () => {
+      alive = false;
+    };
+  }, [invoiceId, centerId]);
 
   React.useEffect(() => {
     function onMessage(e: MessageEvent) {
@@ -75,7 +105,7 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
   }
 
   const query = new URLSearchParams(centerId ? { centro: centerId } : {});
-  const pageUrl = `/print/invoice/${invoiceId}`;
+  const pageUrl = receiptUrl(invoiceId, doc ?? "");
   const print = () => window.open(`${pageUrl}${query.size ? `?${query}` : ""}`, "_blank", "noopener");
   query.set("embed", "1");
 
@@ -85,14 +115,34 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
         <DialogTitle className="text-base">{t("print")}</DialogTitle>
       </DialogHeader>
 
-      <div className="relative min-h-0 flex-1 bg-muted/40">
+      {refunds && refunds.length > 0 && (
+        <div className="border-b px-4 py-2">
+          <Select value={doc ?? ""} onValueChange={(v) => { setDoc(v === "__invoice__" ? "" : v); setStatus({ kind: "loading" }); }}>
+            <SelectTrigger size="sm" className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {refunds.map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {t("refundOption", { number: r.displayNumber ?? String(r.number ?? "—"), amount: (r.refundedAmount ?? 0).toFixed(2) })}
+                  {r.status === "anulada" ? ` · ${t("voided")}` : ""}
+                </SelectItem>
+              ))}
+              <SelectItem value="__invoice__">{t("invoiceOption")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+      {/* The preview takes what is left and SHRINKS: a fixed-height iframe overflowed it and covered the hub
+          row below (its printer selector was hidden — owner, 10-nov «no veo la impresora a elegir»). */}
+      <div className="relative min-h-[12rem] flex-1 basis-[min(70svh,40rem)] bg-muted/40">
+        {doc === null ? null : (
         <iframe
-          key={attempt}
+          key={`${attempt}|${doc}`}
           ref={iframeRef}
           src={`${pageUrl}?${query}`}
           title={t("previewTitle")}
-          className={"block h-[min(70svh,40rem)] w-full bg-white " + (status.kind === "error" ? "invisible" : "")}
+          className={"absolute inset-0 block h-full w-full bg-white " + (status.kind === "error" ? "invisible" : "")}
         />
+        )}
         {status.kind === "error" && (
           <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
             <HugeiconsIcon icon={Alert02Icon} className="size-8 text-destructive" />
@@ -107,9 +157,13 @@ function ReceiptPrintBody({ invoiceId, centerId, printLabel, buildBackupBytes, o
 
       <div className="flex flex-col gap-3 border-t px-4 py-3">
         {/* Backup path, apart from the normal Print: raw ESC/POS through the print hub. */}
-        <div className="rounded-md bg-muted/50 py-2">
-          <BackupPrintButton centerId={centerId} buildBytes={buildBackupBytes} />
-        </div>
+        {/* Backup path through the center's print hub (raw ESC/POS) for the chosen document: the invoice's
+            bytes come from the screen; a refund's are built here from the same Recibo the paper draws. */}
+        {doc !== null && (
+          <div className="rounded-md bg-muted/50 py-2">
+            <BackupPrintButton key={doc} centerId={centerId} buildBytes={doc === "" ? buildBackupBytes : () => refundBytes(doc)} />
+          </div>
+        )}
         <div className="flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onClose}>{tc("cancel")}</Button>
           <Button size="sm" onClick={print} disabled={status.kind !== "ready"}>

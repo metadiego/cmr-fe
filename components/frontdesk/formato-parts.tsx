@@ -83,12 +83,13 @@ function iniciales(nombre: string): string {
 // al final de la hoja. Formato `{prefijo}{iniciales(usuario)||login} - {fechaHora}`. Se PREFIERE `usuario`
 // porque el BE resuelve el nombre real del perfil; `login` (authUserId, un uuid) es el respaldo y NO se le
 // sacan iniciales (no tendría sentido).
-export function PieFormato({ pie }: { pie?: FormatoPie }) {
+// `align`: the legacy MLS sheet prints it at the right; every other sheet, at the left.
+export function PieFormato({ pie, align = "left" }: { pie?: FormatoPie; align?: "left" | "right" }) {
   if (!pie) return null;
   const quien = pie.user ? iniciales(pie.user) : (pie.login || "");
   const txt = `${pie.prefix ?? ""}${quien}${pie.fechaHora ? ` - ${pie.fechaHora}` : ""}`;
   if (!txt.trim()) return null;
-  return <div className="mt-4 text-left text-[10px] text-neutral-500">{txt}</div>;
+  return <div className={`mt-4 ${align === "right" ? "text-right" : "text-left"} text-[10px] text-neutral-500`}>{txt}</div>;
 }
 
 // Logo del membrete, compartido por los tres formatos (campos, rejilla, láser HILT/MLS). Data-driven:

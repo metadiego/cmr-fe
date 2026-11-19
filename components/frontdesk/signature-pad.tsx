@@ -9,10 +9,13 @@ export function SignaturePad({
   onChange,
   height = 120,
   className = "",
+  bare = false,
 }: {
   onChange?: (dataUrl: string) => void;
   height?: number;
   className?: string;
+  /** No box and no caption: the sheet draws its own label and line (the legacy MLS sheet). */
+  bare?: boolean;
 }) {
   const t = useTranslations("frontdesk");
   const ref = React.useRef<HTMLCanvasElement | null>(null);
@@ -64,15 +67,15 @@ export function SignaturePad({
         ref={ref}
         height={height}
         width={520}
-        className="w-full touch-none rounded-md border bg-white"
+        className={"w-full touch-none bg-white" + (bare ? "" : " rounded-md border")}
         style={{ height }}
         onPointerDown={start}
         onPointerMove={move}
         onPointerUp={end}
         onPointerLeave={end}
       />
-      <div className="mt-1 flex items-center justify-between">
-        <span className="text-[11px] text-muted-foreground">{t("firmaPaciente")}</span>
+      <div className={"mt-1 flex items-center justify-between" + (bare ? " no-print" : "")}>
+        <span className="text-[11px] text-muted-foreground">{bare ? "" : t("firmaPaciente")}</span>
         {!vacio && (
           <button type="button" onClick={limpiar} className="text-[11px] text-muted-foreground underline hover:text-foreground print:hidden">
             {t("firmaLimpiar")}

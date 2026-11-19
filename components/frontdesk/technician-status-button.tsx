@@ -1,0 +1,154 @@
+"use client";
+
+import * as React from "react";
+import { useTranslations } from "next-intl";
+import { UserSquareIcon } from "@hugeicons/core-free-icons";
+
+import { getFrontdeskQueue, type FrontdeskQueue } from "@/lib/api/frontdesk-queue";
+import { breakMinutes, techniciansNow } from "@/lib/frontdesk/technicians-today";
+import {
+  getNurseStatusTipos,
+  getNurseStatusActuales,
+  setNurseStatus,
+  type NurseStatusTipo,
+  type NurseStatusActual,
+} from "@/lib/api/frontdesk";
+import { useSubmit } from "@/components/kit/use-submit";
+import { StatusCountButton } from "@/components/frontdesk/status-count-button"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip } from "@/components/ui/tooltip";
+
+const horaDe = (iso: string) => new Date(iso).toLocaleTimeString("es-PR", { hour: "2-digit", minute: "2-digit" });
+
+// «Técnicos» icon: free / in therapy NOW. Who counts is decided in lib/frontdesk/technicians-today.ts:
+// `techniciansToday` from GET /frontdesk/queue (BE #499) — everyone with a live session today, so a
+// technician who already finished their patient shows as free — with a fallback to inTherapy +
+// called waiting until that field is deployed. `onShift` (the capability roster) is deliberately
+// NOT used: it carries catalogue filler and staff who are not working today (owner, 06-nov-2026).
+// «Descanso» (BE #498): a break hides someone from Libres until it expires.
+export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fecha: string }) {
+  const t = useTranslations("frontdesk");
+  const [open, setOpen] = React.useState(false);
+  const [queue, setQueue] = React.useState<FrontdeskQueue | null>(null);
+  const [tipos, setTipos] = React.useState<NurseStatusTipo[]>([]);
+  const [actuales, setActuales] = React.useState<NurseStatusActual[]>([]);
+  const [sel, setSel] = React.useState("");
+  const [gen, setGen] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!centro) return;
+    let active = true;
+    getFrontdeskQueue(fecha, undefined, centro).then((q) => active && setQueue(q)).catch(() => active && setQueue(null));
+    return () => { active = false; };
+  }, [centro, fecha, open]);
+
+  React.useEffect(() => {
+    if (!open || !centro) return;
+    getNurseStatusTipos(centro).then(setTipos).catch(() => setTipos([]));
+    getNurseStatusActuales(fecha, centro).then(setActuales).catch(() => setActuales([]));
+  }, [open, centro, fecha, gen]);
+
+  const { libres, ocupados, activosHoy } = React.useMemo(() => techniciansNow(queue), [queue]);
+
+  // "Descanso" (BE PR #498, 06-nov-2026, desplegado): un estatus más del mismo catálogo de
+  // nurse-status, ahora con caducidad — el tipo `break` ya cuenta como "no disponible". Se ofrece
+  // solo a quien está activo hoy (mismo roster que libres/ocupados), nunca a todo el personal.
+  const breakTipo = tipos.find((x) => x.slug === "break");
+  const minutosDescanso = breakMinutes(breakTipo);
+  const enDescanso = breakTipo ? actuales.filter((a) => a.statusTypeId === breakTipo.id) : [];
+  const nombreDe = (id: string) => activosHoy.get(id) ?? id.slice(0, 8);
+
+  // Put on / take off a break: both act at once (no form submit) and share one guard.
+  const { submitting: busy, submit: setBreak } = useSubmit(
+    async (staffId: string, minutos: number | null) => {
+      if (minutos == null) {
+        await setNurseStatus({ staffId, statusTypeId: null }, centro);
+      } else {
+        if (!staffId || !breakTipo) return;
+        await setNurseStatus({ staffId, statusTypeId: breakTipo.id, durationMinutes: minutos }, centro);
+        setSel("");
+      }
+      setGen((g) => g + 1);
+    },
+  );
+  const ponerDescanso = (minutos: number) => setBreak(sel, minutos);
+  const quitarDescanso = (staffId: string) => setBreak(staffId, null);
+
+  const descansoIds = new Set(enDescanso.map((a) => a.staffId));
+  const libresDisponibles = libres.filter((p) => !descansoIds.has(p.id));
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <Tooltip content={t("tecnicosTitle")}>
+        <SheetTrigger asChild>
+          <StatusCountButton icon={UserSquareIcon} count={libresDisponibles.length} label={t("tecnicosTitle")} />
+        </SheetTrigger>
+      </Tooltip>
+      <SheetContent side="right" className="w-96 p-4">
+        <SheetHeader className="p-0">
+          <SheetTitle>{t("tecnicosTitle")}</SheetTitle>
+        </SheetHeader>
+        <div className="mt-4 space-y-4">
+          {breakTipo && (
+            <div className="space-y-2 rounded-md border p-2.5">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("tecnicosDescanso")}</p>
+              <select value={sel} onChange={(e) => setSel(e.target.value)} className="w-full rounded-md border bg-background px-2 py-1.5 text-sm">
+                <option value="">{t("tecnicosElegir")}</option>
+                {[...activosHoy.entries()].filter(([id]) => !descansoIds.has(id)).map(([id, name]) => (
+                  <option key={id} value={id}>{name}</option>
+                ))}
+              </select>
+              <div className="flex flex-wrap gap-1.5">
+                {minutosDescanso.map((m) => (
+                  <button key={m} type="button" disabled={!sel || busy} onClick={() => ponerDescanso(m)} className="min-w-12 flex-1 rounded-md border px-2 py-1 text-xs font-medium disabled:opacity-40">
+                    {t("tecnicosMinutos", { n: m })}
+                  </button>
+                ))}
+              </div>
+              {enDescanso.length > 0 && (
+                <ul className="space-y-1 pt-1">
+                  {enDescanso.map((a) => (
+                    <li key={a.staffId} className="flex items-center justify-between gap-2 rounded-md bg-card px-2 py-1 text-sm ring-1 ring-foreground/10">
+                      <span className="truncate">{a.personalNombre ?? nombreDe(a.staffId)}</span>
+                      <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+                        {a.expiresAt ? t("tecnicosHasta", { hora: horaDe(a.expiresAt) }) : ""}
+                        <button type="button" disabled={busy} onClick={() => quitarDescanso(a.staffId)} className="text-muted-foreground hover:text-foreground">✕</button>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+          <div>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("tecnicosLibres")}</p>
+            {libresDisponibles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("tecnicosEmpty")}</p>
+            ) : (
+              <ul className="space-y-1">
+                {libresDisponibles.map((p) => (
+                  <li key={p.id} className="rounded-md bg-card px-2 py-1.5 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">{p.name}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("tecnicosEnTerapia")}</p>
+            {ocupados.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("tecnicosEmpty")}</p>
+            ) : (
+              <ul className="space-y-1">
+                {ocupados.map((p) => (
+                  <li key={p.id} className="flex items-center justify-between gap-2 rounded-md bg-card px-2 py-1.5 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+                    <span>{p.name}</span>
+                    <span className="text-xs text-muted-foreground">{p.servicio}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

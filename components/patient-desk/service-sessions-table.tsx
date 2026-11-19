@@ -16,6 +16,7 @@ import {
   type TableroDefinicion as BoardDefinition,
 } from "@/lib/api/tablero"
 import { flowColumns, renderColumns } from "@/lib/frontdesk/board-columns"
+import { doseBalanceForRow, patientsNeedingDoseBalance } from "@/lib/frontdesk/dose-balance"
 import {
   blockColumns,
   hideServiceStatus,
@@ -30,6 +31,8 @@ import type {
 } from "@/lib/api/agenda-dia"
 import { NotificarCell as NotifyBell } from "@/components/agenda/tablero-dinamico"
 import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers"
+import { isSessionToday } from "@/lib/frontdesk/reopen"
+import { todayISO } from "@/lib/agenda/calendar"
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion"
 import type { EhrGateCtx } from "@/components/tablero/flujo-atencion"
 import { useCan } from "@/hooks/use-can"
@@ -43,14 +46,14 @@ interface Props {
   color: string | null
   // Every session attended: the service is painted gray (still editable — nothing is locked).
   concluded?: boolean
-  // Every session that day was cancelled: a discreet mark instead of operative rows.
+  // Every session that day was cancelled: a discreet mark instead of operative rows — except TODAY,
+  // when the rows stay (dimmed) so they can be reopened (BE #508).
   cancelledOnly?: boolean
   service: Service | undefined
   board: ServiceBoard | undefined
   definition: BoardDefinition | null
   sessionsById: Map<string, Session>
   sessionIds: string[]
-  patientId: string
   date: string
   centerId: string | undefined
   onChanged: () => void
@@ -75,7 +78,6 @@ export function ServiceSessionsTable({
   definition,
   sessionsById,
   sessionIds,
-  patientId,
   date,
   centerId,
   onChanged,
@@ -124,70 +126,93 @@ export function ServiceSessionsTable({
   )
 
   // Options of the editable selects / datalists of THIS service (e.g. the dose products).
+  // Keyed by the column KEYS, not the board object: every refresh brings a new board, and refetching
+  // each select's options on every refresh helped burst the BE quota (RATE_LIMITED, 04-nov-2026).
   const [options, setOptions] = React.useState<Record<string, Option[]>>({})
-  React.useEffect(() => {
-    const cols = columns.filter(
+  const optionKeys = columns
+    .filter(
       (c) =>
         c.editable &&
         (c.tipo === "select" ||
           !!(c.render as { optionsSource?: string } | null)?.optionsSource)
     )
-    if (!cols.length || !centerId) return
+    .map((c) => c.clave)
+    .join(",")
+  React.useEffect(() => {
+    if (!optionKeys || !centerId) return
     let active = true
     Promise.all(
-      cols.map((c) =>
-        getColumnOptions(slug, c.clave, centerId)
-          .then((o) => [c.clave, o] as const)
-          .catch(() => [c.clave, [] as Option[]] as const)
+      optionKeys.split(",").map((clave) =>
+        getColumnOptions(slug, clave, centerId)
+          .then((o) => [clave, o] as const)
+          .catch(() => [clave, [] as Option[]] as const)
       )
     ).then((pairs) => active && setOptions(Object.fromEntries(pairs)))
     return () => {
       active = false
     }
-  }, [columns, slug, centerId])
+  }, [optionKeys, slug, centerId])
 
-  // Dose balance of this patient, only when the service has a dose column.
+  // Dose balance, only when the service has a dose column — ONE fetch per DISTINCT patient on this
+  // board (never per row), and every row reads ONLY its own patient's entry (doseBalanceForRow),
+  // never another patient's. patient-desk's `rows` are already filtered to one patient, so this is
+  // exactly the old single-fetch behavior there; the general service viewer (all patients of one
+  // service) gets the same correctness for free. cmr-fe #139, lib/frontdesk/dose-balance.ts.
   const hasDose = columns.some(
     (c) =>
       (c.render as { optionsSource?: string } | null)?.optionsSource ===
       "productos_grupo"
   )
-  const [pending, setPending] = React.useState<PendingDelivery[]>([])
+  const patientIdOf = React.useCallback(
+    (rowId: string) => sessionsById.get(rowId)?.patientId,
+    [sessionsById]
+  )
+  const patientsToFetch = React.useMemo(
+    () => patientsNeedingDoseBalance(rows.map((r) => r.id), patientIdOf, hasDose),
+    [rows, patientIdOf, hasDose]
+  )
+  const [pendingByPatient, setPendingByPatient] = React.useState<Record<string, PendingDelivery[]>>({})
   React.useEffect(() => {
-    if (!hasDose || !centerId) return
+    if (!patientsToFetch.length || !centerId) return
     let active = true
-    getPendingDeliveries(patientId, centerId)
-      .then((r) => active && setPending(r))
-      .catch(() => {})
+    Promise.all(
+      patientsToFetch.map((id) =>
+        getPendingDeliveries(id, centerId)
+          .then((r) => [id, r] as const)
+          .catch(() => [id, [] as PendingDelivery[]] as const)
+      )
+    ).then((pairs) => active && setPendingByPatient(Object.fromEntries(pairs)))
     return () => {
       active = false
     }
-  }, [hasDose, patientId, centerId, board])
+  }, [patientsToFetch, centerId])
 
   return (
     <section
       className={cn(
         "overflow-hidden rounded-lg ring-1 ring-foreground/10",
-        (concluded || cancelledOnly) && "bg-muted/50 grayscale"
+        // Concluded keeps its own colors (owner, 12-nov: gray read as disabled or cancelled); a green
+        // ring and the «Atendido» badge say it is done. Only a cancelled-only service goes gray.
+        cancelledOnly && "bg-muted/50 grayscale",
+        concluded && !cancelledOnly && "ring-2 ring-success/60"
       )}
     >
       <header className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
         <span
           className="size-2.5 rounded-full"
           style={{
-            backgroundColor:
-              concluded || !color ? "var(--muted-foreground)" : color,
+            backgroundColor: color || "var(--muted-foreground)",
           }}
           aria-hidden
         />
-        <h3
-          className={cn(
-            "text-sm font-semibold tracking-wide uppercase",
-            concluded && "text-muted-foreground"
-          )}
-        >
+        <h3 className="text-sm font-semibold tracking-wide uppercase">
           {name}
         </h3>
+        {concluded && !cancelledOnly && (
+          <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success-foreground">
+            ✓ {t("serviceDone")}
+          </span>
+        )}
         {board || cancelledOnly ? (
           <span className="text-xs text-muted-foreground">
             {cancelledOnly
@@ -213,7 +238,7 @@ export function ServiceSessionsTable({
           </span>
         )}
       </header>
-      {cancelledOnly ? null : !board ? (
+      {cancelledOnly && !isSessionToday(date, todayISO()) ? null : !board ? (
         <ServiceTableSkeleton rows={Math.max(1, sessionIds.length)} />
       ) : (
         <div className="overflow-x-auto">
@@ -268,7 +293,7 @@ export function ServiceSessionsTable({
                   tablero={slug}
                   fecha={date}
                   optionsByCol={options}
-                  saldoDosis={pending}
+                  saldoDosis={doseBalanceForRow(pendingByPatient, sessionsById.get(row.id)?.patientId)}
                   centro={centerId}
                   sinSaldo={false}
                   canReparar={can("frontdesk.reparar")}

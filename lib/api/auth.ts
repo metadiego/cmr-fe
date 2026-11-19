@@ -23,6 +23,8 @@ export interface Me {
   status: PerfilEstado | null;
   roles: string[];
   permissions: string[];
+  // Full access (cmr-be #557 on). Absent before that release: use isAdmin() from lib/access/role-keys.
+  isAdmin?: boolean;
   isMaster: boolean;
   accessMode: AccessMode;
   allowedClinicIds: string[];

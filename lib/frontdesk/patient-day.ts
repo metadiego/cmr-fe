@@ -26,6 +26,7 @@ export interface DayConsultation {
   estado?: unknown
   presente?: unknown
   subtipo?: unknown // board's subtype catalog (e.g. nueva/seguimiento) — data-driven, see SubTipo
+  medico?: unknown // the "atencion" board's doctor column (display name) — verified live 06-nov-2026
 }
 
 export interface DayService {
@@ -67,18 +68,29 @@ export interface PatientDay {
   consultationIds: string[]
   consultationStatuses: string[]
   consultationSubtypes: string[] // parallel to consultationIds/consultationStatuses
+  doctorName: string // the consultation's attending doctor (board's "medico" column), "" if none yet
   // The order the patient's sections (services + consultation) are drawn in, set by orderSections.
   // Absent = the configured order (services, then the consultation).
   sections?: PatientSection[]
   earliestTime: string | null // HH:MM of the first booking of the day
   presentAt: string | null // first arrival stamp (any service or the consultation)
+  consultationPresentAt: string | null // the consultation's own arrival (Consulta view: services do not count)
   allCancelled: boolean
 }
 
-const text = (v: unknown) =>
+export const text = (v: unknown) =>
   typeof v === "string" ? v : v == null ? "" : String(v)
 const minIso = (a: string | null, b: string | null | undefined) =>
   !b ? a : !a || b < a ? b : a
+
+// Consultation statuses still waiting for the patient to arrive.
+const CONSULTATION_AWAITING = new Set(["programada", "confirmada"])
+
+// The Consulta view speaks only of the consultation: arrival is the consultation's own, and a
+// patient who came for therapies but not the doctor reads «No presente» there (owner, 04-nov-2026).
+export function asConsultationView(p: PatientDay): PatientDay {
+  return { ...p, presentAt: p.consultationPresentAt }
+}
 
 export function groupByPatient(
   sessions: DaySession[],
@@ -99,8 +111,10 @@ export function groupByPatient(
         consultationIds: [],
         consultationStatuses: [],
         consultationSubtypes: [],
+        doctorName: "",
         earliestTime: null,
         presentAt: null,
+        consultationPresentAt: null,
         allCancelled: true,
       }
       map.set(id, p)
@@ -150,9 +164,14 @@ export function groupByPatient(
     const status = text(c.estado)
     p.consultationStatuses.push(status)
     p.consultationSubtypes.push(text(c.subtipo))
+    const doctor = text(c.medico)
+    if (doctor) p.doctorName = doctor
     const cancelled = status === "cancelada"
     if (!cancelled) p.allCancelled = false
     if (!cancelled) p.presentAt = minIso(p.presentAt, text(c.presente) || null)
+    // Only a consultation that actually reached «presente» (or beyond) counts as arrived to see the doctor.
+    if (!cancelled && !CONSULTATION_AWAITING.has(status))
+      p.consultationPresentAt = minIso(p.consultationPresentAt, text(c.presente) || null)
   }
 
   // A cancelled session is not a session (handoff patient-desk-cancelada-no-es-sesion, 14-oct-2026):
@@ -240,6 +259,39 @@ export function sortPatients(
   })
 }
 
+// Present patient with something still waiting to be marked present: a service session still
+// 'pendiente' (added after arrival, or created by the scheduling bridge the day before) or a
+// consultation still programada/confirmada. Per-row «presente» is hidden on purpose (one arrival per
+// patient), so the header must offer it again or those rows stay locked (BE, 04-nov-2026: records
+// 14497, 11643, 4604).
+export function pendingArrivals(p: PatientDay): number {
+  const sessions = p.services
+    .flatMap((s) => s.statuses)
+    .filter((x) => x === "pendiente").length
+  const consults = p.consultationStatuses.filter((x) =>
+    CONSULTATION_AWAITING.has(x)
+  ).length
+  return sessions + consults
+}
+
+// Consultation view: everyone PRESENT together, in arrival order — finished or not (owner 04-nov-2026:
+// the presents were split, some on top, the rest sunk below the not-yet-arrived). Then whoever has
+// not arrived, by booking time; fully cancelled days last.
+export function sortByArrival(list: PatientDay[]): PatientDay[] {
+  const rankOf = (p: PatientDay) => (p.allCancelled ? 2 : p.presentAt ? 0 : 1)
+  return list.slice().sort((a, b) => {
+    const ra = rankOf(a)
+    const rb = rankOf(b)
+    if (ra !== rb) return ra - rb
+    if (a.presentAt && b.presentAt && a.presentAt !== b.presentAt)
+      return a.presentAt.localeCompare(b.presentAt)
+    if (a.earliestTime && b.earliestTime && a.earliestTime !== b.earliestTime)
+      return a.earliestTime.localeCompare(b.earliestTime)
+    if (a.earliestTime !== b.earliestTime) return a.earliestTime ? -1 : 1
+    return a.name.localeCompare(b.name)
+  })
+}
+
 // Accent- and case-insensitive search over name, record and the names of the patient's services.
 export function filterPatients(
   list: PatientDay[],
@@ -303,20 +355,54 @@ export function filterByConsultationSubtype(
 }
 
 // The services actually present today, in first-seen order, for the "Servicios" sub-filter — never
-// a static catalog: a service nobody has today does not clutter the dropdown.
-export function servicesOfTheDay(
-  list: PatientDay[]
-): { serviceId: string; name: string; color: string | null }[] {
-  const out: { serviceId: string; name: string; color: string | null }[] = []
-  const seen = new Set<string>()
+// a static catalog: a service nobody has today does not clutter the dropdown. `arrived`/`attended`
+// (owner, 06-nov-2026): sessions that showed up (status not 'pendiente'/'cancelada') vs. sessions
+// closed ('asistido') — by end of day they should match; the gap is exactly what's left to close.
+export function servicesOfTheDay(list: PatientDay[]): {
+  serviceId: string
+  name: string
+  color: string | null
+  arrived: number
+  attended: number
+}[] {
+  const order: string[] = []
+  const meta = new Map<string, { name: string; color: string | null }>()
+  const counts = new Map<string, { arrived: number; attended: number }>()
   for (const p of list) {
     for (const s of p.services) {
-      if (seen.has(s.serviceId)) continue
-      seen.add(s.serviceId)
-      out.push({ serviceId: s.serviceId, name: s.name, color: s.color })
+      if (!meta.has(s.serviceId)) {
+        order.push(s.serviceId)
+        meta.set(s.serviceId, { name: s.name, color: s.color })
+        counts.set(s.serviceId, { arrived: 0, attended: 0 })
+      }
+      const c = counts.get(s.serviceId)!
+      for (const status of s.statuses) {
+        if (status === "cancelada") continue
+        if (status !== "pendiente") c.arrived++
+        if (status === "asistido") c.attended++
+      }
     }
   }
-  return out
+  return order.map((serviceId) => ({
+    serviceId,
+    ...meta.get(serviceId)!,
+    ...counts.get(serviceId)!,
+  }))
+}
+
+// Patients still owed a close for this service TODAY: arrived (presente/en_terapia) but not yet
+// 'asistido' — the gap between servicesOfTheDay's `arrived` and `attended` counts, made clickable.
+export function filterByServiceArrivedPending(
+  list: PatientDay[],
+  serviceId: string
+): PatientDay[] {
+  return filterByService(list, serviceId).filter((p) =>
+    p.services.some(
+      (s) =>
+        s.serviceId === serviceId &&
+        s.statuses.some((x) => x === "presente" || x === "en_terapia")
+    )
+  )
 }
 
 // ─── Section order: what is still pending goes first (owner, 14-oct-2026) ──────────────────────────
@@ -373,4 +459,19 @@ export function orderSections(
       sections: [...base.filter(pending), ...base.filter((x) => !pending(x))],
     }
   })
+}
+
+// With a SERVICE filter on the board, the selected patient's therapies show only the filtered one
+// (owner, 11-nov: «lo mejor es mostrar lo que se filtra»); `showAll` opens the rest without clearing the
+// filter. No filter (or the patient has none of it) → every section, unchanged. `hidden` = how many
+// sections the filter is holding back, for the «ver todas» hint.
+export function visibleSections(
+  sections: PatientSection[],
+  serviceFilter: string | null | undefined,
+  showAll: boolean
+): { sections: PatientSection[]; hidden: number } {
+  if (!serviceFilter || showAll) return { sections, hidden: 0 }
+  const only = sections.filter((x) => x.kind === "service" && x.service.serviceId === serviceFilter)
+  if (only.length === 0) return { sections, hidden: 0 }
+  return { sections: only, hidden: sections.length - only.length }
 }

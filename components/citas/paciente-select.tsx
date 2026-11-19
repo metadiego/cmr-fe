@@ -12,10 +12,12 @@ import { Input } from "@/components/ui/input";
 // select. Once selected, shows the patient with a "change" affordance.
 // `centerIds`: search in those centers instead of only the session's (X-Tenant-ID).
 export function PacienteSelect({
+  id,
   value,
   onChange,
   centerIds,
 }: {
+  id?: string;
   value: Paciente | null;
   onChange: (p: Paciente | null) => void;
   centerIds?: string[];
@@ -71,6 +73,7 @@ export function PacienteSelect({
   return (
     <div className="relative">
       <Input
+        id={id}
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);

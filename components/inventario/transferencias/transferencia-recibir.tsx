@@ -14,11 +14,11 @@ import {
   type DestinoTransferencia,
 } from "@/lib/api/transferencias";
 import { listProductos, type Producto } from "@/lib/api/inventario";
-import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { getCentrosDondePuedo, getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useMe, isAdmin } from "@/hooks/use-me";
-import { getActiveCentro } from "@/lib/tenant";
+import { canReceiveTransfer, transferClinicName } from "@/lib/inventario/transfer-clinics";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -30,16 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const num = (v: number | string | null | undefined) => Number(v ?? 0) || 0;
@@ -69,6 +63,10 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   // destino, pero sí en el endpoint de destinos. Unión → origen y destino resuelven. Handoff transferencia-boton-recibir.
   const destinosRes = useResource<DestinoTransferencia[]>(() => getDestinosTransferencia());
   const me = useMe();
+  // Clinics where the person can receive (inventario.recibir): the BE receives in the transfer's
+  // DESTINATION clinic whatever the active one is (clinic-read-scope).
+  const receivableRes = useResource<Centro[]>(() => getCentrosDondePuedo("inventario.recibir"));
+  const receivable = receivableRes.state.kind === "ok" ? receivableRes.state.data.map((c) => c.id) : [];
 
   const prodName = React.useMemo(() => {
     const m = new Map<string, string>();
@@ -81,7 +79,8 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     if (destinosRes.state.kind === "ok") destinosRes.state.data.forEach((d) => m.set(d.clinicId, d.name));
     return m;
   }, [centrosRes.state, destinosRes.state]);
-  const centroName = (cid: string) => centroNames.get(cid) ?? cid;
+  const centroName = (resolved: string | null | undefined, cid: string) =>
+    transferClinicName(resolved, cid, (id) => centroNames.get(id)) ?? "—";
 
   const detalle = state.kind === "ok" ? state.data : null;
   const transfer = detalle?.transfer ?? null;
@@ -101,17 +100,21 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     setRecibido(init);
   }
 
-  const [busy, setBusy] = React.useState(false);
-  const [confirmAprobar, setConfirmAprobar] = React.useState(false);
+  const confirm = useConfirm();
   const [rechazando, setRechazando] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
+  // Set once a receive/reject succeeded: the page is navigating away, so nothing may be sent twice.
+  const [done, setDone] = React.useState(false);
+  // Same flag as a ref, readable after an await (the state value in that closure is stale).
+  const doneRef = React.useRef(false);
+  // `asking` stops a second click / Enter auto-repeat from queueing a second confirm prompt.
+  const asking = React.useRef(false);
 
-  const activeCentro = getActiveCentro();
-  const esDestino = !!transfer && activeCentro === transfer.destinationClinicId;
+  const esDestino = !!transfer && receivable.includes(transfer.destinationClinicId);
   const puedeRecibir =
     !!transfer &&
-    transfer.status === "pendiente" &&
-    (esDestino || (me.kind === "ok" && isAdmin(me.me)));
+    (canReceiveTransfer(transfer, receivable) ||
+      (transfer.status === "pendiente" && me.kind === "ok" && isAdmin(me.me)));
 
   // Validación por línea: 0 ≤ recibida ≤ enviada.
   const lineError = (it: (typeof items)[number]) => {
@@ -123,35 +126,58 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   };
   const hayErrores = items.some((it) => lineError(it) !== null);
 
-  async function aprobar() {
-    if (!transfer || hayErrores || busy) return;
-    setBusy(true);
-    try {
+  const leave = (msg: string) => {
+    doneRef.current = true;
+    setDone(true);
+    toast.success(msg);
+    router.push("/inventory/transfers");
+  };
+  const onError = (err: unknown) => {
+    toast.error(apiErrorMessage(err));
+    return true;
+  };
+
+  const aprobar = useSubmit(
+    async () => {
+      // Backstop only: the button is disabled while a line is invalid.
+      if (!transfer || hayErrores) throw new Error(tc("errorTitle"));
       await recibirTransferencia(id, {
         items: items.map((it) => ({ itemId: it.id, receivedQuantity: Number(recibido[it.id]) })),
         politicaRemanente: politica,
       });
-      toast.success(t("recibidaOk"));
-      setConfirmAprobar(false);
-      router.push("/inventory/transfers");
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-      setBusy(false);
-    }
-  }
+    },
+    { onSuccess: () => leave(t("recibidaOk")), onError },
+  );
 
-  async function rechazar() {
-    if (!transfer || !motivo.trim() || busy) return;
-    setBusy(true);
-    try {
+  const rechazar = useSubmit(
+    async () => {
+      // Backstop only: the button is disabled until the reason is filled.
+      if (!transfer || !motivo.trim()) throw new Error(tc("errorTitle"));
       await rechazarTransferencia(id, { reason: motivo.trim() });
-      toast.success(t("rechazadaOk"));
-      setRechazando(false);
-      router.push("/inventory/transfers");
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-      setBusy(false);
-    }
+    },
+    {
+      onSuccess: () => {
+        setRechazando(false);
+        leave(t("rechazadaOk"));
+      },
+      onError,
+    },
+  );
+  const motivoMissing = missingFields([[t("field.motivo"), motivo.trim().length > 0]]);
+
+  const busy = aprobar.submitting || rechazar.submitting || done;
+
+  // Receiving moves stock between clinics: it always goes through the confirm (which focuses Cancel).
+  async function onAprobar() {
+    if (asking.current || doneRef.current) return;
+    asking.current = true;
+    const ok = await confirm({
+      title: t("confirmAprobarTitle"),
+      description: t("confirmAprobarBody", { politica: politica === "merma" ? t("pol.merma") : t("pol.devolver") }),
+      confirmLabel: t("aprobar"),
+    }).finally(() => (asking.current = false));
+    if (!ok || doneRef.current) return;
+    await aprobar.submit();
   }
 
   if (state.kind === "loading") {
@@ -175,13 +201,13 @@ export function TransferenciaRecibir({ id }: { id: string }) {
       {/* Cabecera */}
       <div className="mb-6 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <PageHeader
-          title={`${centroName(transfer.sourceClinicId)} → ${centroName(transfer.destinationClinicId)}`}
+          title={`${centroName(transfer.originName, transfer.sourceClinicId)} → ${centroName(transfer.destinationName, transfer.destinationClinicId)}`}
           description={transfer.reason}
           actions={<Badge variant={ESTADO_VARIANT[transfer.status] ?? "outline"}>{t(`estado.${transfer.status}`)}</Badge>}
         />
         {!esDestino && transfer.status === "pendiente" && (
           <p className="mt-3 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
-            {t("soloDestino", { centro: centroName(transfer.destinationClinicId) })}
+            {t("soloDestino", { centro: centroName(transfer.destinationName, transfer.destinationClinicId) })}
           </p>
         )}
       </div>
@@ -242,7 +268,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
             <Button variant="outline" disabled={busy} onClick={() => setRechazando(true)}>
               {t("rechazar")}
             </Button>
-            <Button disabled={busy || hayErrores} onClick={() => setConfirmAprobar(true)}>
+            <Button disabled={busy || hayErrores} onClick={() => void onAprobar()}>
               {t("aprobar")}
             </Button>
           </div>
@@ -253,36 +279,28 @@ export function TransferenciaRecibir({ id }: { id: string }) {
         )
       )}
 
-      {/* Confirmar aprobación */}
-      <AlertDialog open={confirmAprobar} onOpenChange={(o) => !busy && setConfirmAprobar(o)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirmAprobarTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("confirmAprobarBody", { politica: politica === "merma" ? t("pol.merma") : t("pol.devolver") })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tc("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={aprobar} disabled={busy}>{t("aprobar")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Rechazar (motivo) */}
-      <AlertDialog open={rechazando} onOpenChange={(o) => !busy && setRechazando(o)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("rechazarTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("rechazarBody")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivoPlaceholder")} rows={3} />
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tc("cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={rechazar} disabled={busy || !motivo.trim()}>{t("rechazar")}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Reject (reason). Enter never sends it: only the button does (an outward, irreversible action). */}
+      <FormDialog
+        open={rechazando}
+        onOpenChange={setRechazando}
+        size="md"
+        title={t("rechazarTitle")}
+        description={t("rechazarBody")}
+        onSubmit={() => {}}
+        actions={[{ label: t("rechazar"), onClick: () => rechazar.submit() }]}
+        submitting={rechazar.submitting}
+        missing={motivoMissing}
+      >
+        <Field label={t("field.motivo")} htmlFor="transfer-reject-reason" required>
+          <Textarea
+            id="transfer-reject-reason"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            placeholder={t("motivoPlaceholder")}
+            rows={3}
+          />
+        </Field>
+      </FormDialog>
     </PageContainer>
   );
 }

@@ -10,7 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ProductOptionsSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
-import { Lbl } from "@/components/facturacion/field-label";
+import { Field } from "@/components/kit/field";
+import { MissingHint } from "@/components/kit/missing-hint";
+import { isPackageLine, packageUnits } from "@/lib/facturacion/package-units";
+import { addLineMissing } from "@/lib/facturacion/add-line-missing";
+import { footerState } from "@/lib/forms/missing";
 
 // Extracted from app/(app)/billing/invoices/[id]/page.tsx (its line ceiling only goes down).
 
@@ -19,8 +23,9 @@ import { Lbl } from "@/components/facturacion/field-label";
 // Vacío = «lo más usado» (la carga inicial); al teclear (250 ms) busca en /precios/catalogo. Autocontenido
 // (sin cmdk/popover), como ProductoPicker. Handoff selector-de-linea-sin-buscador.
 function CatalogoCombobox({
-  catalogoInicial, selected, tipoPrecioId, tenant, disabled, onPick,
+  id, catalogoInicial, selected, tipoPrecioId, tenant, disabled, onPick,
 }: {
+  id?: string;
   catalogoInicial: Producto[];
   selected: Producto | null;
   tipoPrecioId?: string | null;
@@ -93,6 +98,7 @@ function CatalogoCombobox({
   return (
     <div ref={rootRef} className="relative">
       <Input
+        id={id}
         value={open ? query : etiqueta}
         onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
         onFocus={() => setOpen(true)}
@@ -102,7 +108,7 @@ function CatalogoCombobox({
       />
       {open && (
         <div
-          className={"absolute z-50 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md " + (placement.up ? "bottom-full mb-1" : "top-full mt-1")}
+          className={"absolute left-0 z-50 w-max min-w-full max-w-[min(40rem,85vw)] overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md " + (placement.up ? "bottom-full mb-1" : "top-full mt-1")}
           style={{ maxHeight: placement.maxHeight }}
         >
           {buscando && <ProductOptionsSkeleton />}
@@ -114,10 +120,11 @@ function CatalogoCombobox({
               key={p.id}
               type="button"
               onClick={() => { onPick(p); setOpen(false); setQuery(""); setDebounced(""); }}
-              className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+              title={p.sku ? `${p.sku} — ${p.name}` : p.name}
+              className="grid w-full grid-cols-[minmax(5rem,9rem)_1fr] items-baseline gap-3 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
             >
-              {p.sku && <span className="shrink-0 font-mono text-xs text-muted-foreground">{p.sku}</span>}
-              <span className="min-w-0">{p.name}</span>
+              <span className="truncate font-mono text-xs text-muted-foreground">{p.sku}</span>
+              <span className="min-w-0 truncate">{p.name}</span>
             </button>
           ))}
         </div>
@@ -126,7 +133,7 @@ function CatalogoCombobox({
   );
 }
 
-export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productId: string; description: string; quantity: number; unitPrice?: number; taxable?: boolean; meta?: Record<string, number | string> }) => void }) {
+export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productId: string; description: string; quantity: number; unitPrice?: number; taxable?: boolean; meta?: Record<string, number | string> }) => Promise<boolean> }) {
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
   const [prodId, setProdId] = React.useState("");
@@ -168,14 +175,25 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
   const dosisClave = capturables.find((c) => /dosis/i.test(c.slug))?.slug ?? null;
   const sugeridoClave = capturables.find((c) => /sugerid/i.test(c.slug))?.slug ?? null;
 
+  // Package lines (laser, PEMF…): the group has a multiplier column that COUNTS VISITS. There the units
+  // are areas × days and Cantidad is read-only; what is sent is the number of PACKAGES (usually 1). The
+  // desk used to type the expected total into Cantidad as well and the BE (quantity × areas × days ×
+  // price) multiplied it again — 2 × 6 × 12 (owner, 05-nov-2026). Data-driven, never product names.
+  const multipliers = capturables.filter((c) => c.role === "multiplicador" && !esSelectCaptura(c));
+  const packageMode = isPackageLine(multipliers);
+  const [paquetes, setPaquetes] = React.useState("1");
+
   // Defaults por columna (modelo del dueño): áreas = 1; días = cantidad (mismas visitas); resto vacío.
   // El valor mostrado = override del usuario (metaVals) ?? default → sin efectos ni setState en render.
   const isArea = (c: string) => /[aá]rea/i.test(c);
   const isDias = (c: string) => /d[ií]a/i.test(c) && !/dosis/i.test(c);
   // áreas = preset del producto (areasDefault ?? 1); días = cantidad (mismas visitas). Data-driven (PR #158).
   const areasDefault = (prod as { defaultAreas?: number | null } | undefined)?.defaultAreas ?? 1;
-  const defMeta = (c: string) => (isArea(c) ? String(areasDefault) : isDias(c) ? cant : "");
+  // In package mode days start at the product's treatment days (TD12 → 12), never at a typed quantity.
+  const diasPaquete = prod?.treatmentDays != null ? String(prod.treatmentDays) : "";
+  const defMeta = (c: string) => (isArea(c) ? String(areasDefault) : isDias(c) ? (packageMode ? diasPaquete : cant) : "");
   const metaShown = (c: string) => metaVals[c] ?? defMeta(c);
+  const unidades = packageMode ? packageUnits(multipliers, metaShown) : 0;
 
   // Flujo con Enter: cantidad → columnas (áreas, días…) → Enter en la última confirma la línea. La
   // navegación se resuelve por DOM DENTRO del handler (marca `data-flow`), sin refs leídos en render.
@@ -183,14 +201,16 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
   const onFlowKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
+    if (e.repeat) return; // a held Enter must not add the same line twice
     const cont = e.currentTarget.closest("[data-addline]");
     const inputs = cont ? Array.from(cont.querySelectorAll<HTMLInputElement>("[data-flow]")) : [];
     const next = inputs[inputs.indexOf(e.currentTarget) + 1];
     if (next) {
       next.focus();
       next.select();
-    } else {
-      add();
+    } else if (!addDisabled) {
+      // Same rule as the button: nothing missing, the price resolved, the page not busy.
+      void add();
     }
   };
 
@@ -229,9 +249,20 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
   const buscando = precioRes.state.kind === "loading" && !!prodId;
   const precioLista = precioRes.state.kind === "ok" ? precioRes.state.data : null;
   const precioMostrado = precio !== "" ? precio : precioLista != null ? String(precioLista) : "";
-  // Requeridos SIN llenar (p. ej. zona): bloquean agregar la línea → el aviso se ve ANTES de guardar.
-  const faltanRequeridos = capturables.filter((c) => c.required && String(metaShown(c.slug)).trim() === "");
-  const canAdd = !!prodId && !disabled && !buscando && faltanRequeridos.length === 0;
+  // Required and EMPTY (product, zone…) block adding the line and are listed under the row. While the
+  // price is still being looked up the line waits too (sending it without a price would fall back to the
+  // base price). `disabled` = the page is busy saving. One value drives the button and Enter.
+  const missing = addLineMissing({
+    productId: prod ? prodId : "",
+    columns: capturables.map((c) => ({ slug: c.slug, required: c.required, value: metaShown(c.slug) })),
+  }).map((f) => {
+    if (f === "product") return t("lineProduct");
+    const col = capturables.find((c) => `column.${c.slug}` === f);
+    return col ? tRoot(col.labelKey) : f;
+  });
+  const lineState = { missing, reason: buscando ? t("priceLoading") : null, blocked: buscando, submitting: !!disabled };
+  const { disabled: addDisabled, hint } = footerState(lineState);
+  const hintId = React.useId() + "-hint";
 
   function pick(p: Producto) {
     // Recordar el producto si vino de la búsqueda (no está en los 100 iniciales) → resolve() lo encuentra.
@@ -242,13 +273,14 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
     setGravadoOverride(null); // vuelve al default del nuevo producto
     setMetaVals({});
     setPrecio("");
+    setPaquetes("1");
     // Cantidad = diasTratamiento del pack (TD12→12…). Si el producto no lo trae → campo VACÍO (no 1).
     const dt = (p as { treatmentDays?: number | null }).treatmentDays;
     setCant(dt != null ? String(dt) : "");
   }
 
-  function add() {
-    if (!prod) return;
+  async function add() {
+    if (!prod) return; // narrowing only: `missing` lists the product while it does not resolve
     // Solo mandamos `gravado` cuando lo SABEMOS (el producto lo trae) o el cajero lo tocó; si un producto
     // de búsqueda no trae el dato, se OMITE y el BE aplica el default del producto (no forzar «exento»).
     const prodGravado = (prod as { taxable?: boolean | null }).taxable;
@@ -267,24 +299,26 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
       if (esSelectCaptura(c)) { meta[c.slug] = raw; return; } // valor de opción (string)
       if (!Number.isNaN(Number(raw))) meta[c.slug] = Number(raw);
     });
-    onAdd({
+    // Cleared only when the line was added: on failure what was typed stays, to retry without retyping.
+    const added = await onAdd({
       productId: prod.id,
       description: prod.name,
-      quantity: Math.max(1, Math.floor(Number(cant) || 1)),
+      quantity: Math.max(1, Math.floor(Number(packageMode ? paquetes : cant) || 1)),
       ...(precioUnitarioEff !== undefined ? { unitPrice: precioUnitarioEff } : {}),
       // Solo el flag gravado (cuando se conoce): NO se manda impuestoId — el servidor resuelve el impuesto
       // por la cascada del precio (desglose Estatal+Municipal completo). Handoff IVU compuesto.
       ...(gravadoKnown ? { taxable: g } : {}),
       ...(Object.keys(meta).length ? { meta } : {}),
     });
-    setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({});
+    if (!added) return;
+    setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({}); setPaquetes("1");
   }
 
   return (
     <div data-addline className="grid grid-cols-2 items-end gap-3 md:flex md:flex-wrap">
-      <label className="col-span-2 flex min-w-48 flex-1 flex-col gap-1">
-        <Lbl>{t("addItem")}</Lbl>
+      <Field label={t("addItem")} htmlFor="add-line-product" required className="col-span-2 min-w-48 flex-1 space-y-1">
         <CatalogoCombobox
+          id="add-line-product"
           catalogoInicial={catalogo}
           selected={prod ?? null}
           tipoPrecioId={tipoPrecioId}
@@ -292,7 +326,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
           disabled={disabled}
           onPick={pick}
         />
-      </label>
+      </Field>
       {/* Columnas dinámicas del producto (áreas/días/sesiones/dosis) + selects declarados (p. ej. ZONA).
           Van ANTES de Cantidad: primero áreas y días (así se lee «áreas × días»), Cantidad después. El
           Enter fluye producto → áreas → días → Cantidad → Agregar. Handoff descuento-… (posición). */}
@@ -300,10 +334,9 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
         const requeridoVacio = c.required && String(metaShown(c.slug)).trim() === "";
         if (esSelectCaptura(c)) {
           return (
-            <label key={c.slug} className="flex w-32 flex-col gap-1">
-              <Lbl>{tRoot(c.labelKey)}{c.required && <span className="text-destructive"> *</span>}</Lbl>
+            <Field key={c.slug} label={tRoot(c.labelKey)} htmlFor={`add-line-${c.slug}`} required={!!c.required} className="w-32 space-y-1">
               <Select value={metaShown(c.slug) || undefined} onValueChange={(v) => setMetaVals((m) => ({ ...m, [c.slug]: v }))}>
-                <SelectTrigger className={"h-9 w-full " + (requeridoVacio ? "border-destructive" : "")}>
+                <SelectTrigger id={`add-line-${c.slug}`} className={"h-9 w-full " + (requeridoVacio ? "border-destructive" : "")}>
                   <SelectValue placeholder={t("selectPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -312,13 +345,13 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
                   ))}
                 </SelectContent>
               </Select>
-            </label>
+            </Field>
           );
         }
         return (
-          <label key={c.slug} className="flex w-24 flex-col gap-1">
-            <Lbl>{tRoot(c.labelKey)}</Lbl>
+          <Field key={c.slug} label={tRoot(c.labelKey)} htmlFor={`add-line-${c.slug}`} required={!!c.required} className="w-24 space-y-1">
             <Input
+              id={`add-line-${c.slug}`}
               data-flow={c.slug === sugeridoClave ? undefined : true}
               value={metaShown(c.slug)}
               onChange={(e) => onMetaChange(c.slug, e.target.value)}
@@ -329,13 +362,24 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
               inputMode="decimal"
               placeholder={c.role === "multiplicador" ? "×" : ""}
             />
-          </label>
+          </Field>
         );
       })}
-      {/* Cantidad DESPUÉS de áreas/días. Con dosis, ya viene pre-calculada; queda editable. */}
-      <label className="flex w-20 flex-col gap-1">
-        <Lbl>{t("qty")}</Lbl>
+      {/* Package lines: Units (areas × days) shown LOCKED, and the packages as their own explicit field. */}
+      {packageMode ? (
+        <>
+          <Field label={t("unitsAreasDays")} htmlFor="add-line-units" className="w-32 space-y-1">
+            <Input id="add-line-units" value={unidades ? String(unidades) : ""} readOnly tabIndex={-1} className="h-9 bg-muted text-right font-semibold tabular-nums" title={t("unitsAreasDaysHint")} />
+          </Field>
+          <Field label={t("packages")} htmlFor="add-line-packages" className="w-20 space-y-1">
+            <Input id="add-line-packages" data-flow value={paquetes} onChange={(e) => setPaquetes(e.target.value)} onFocus={selectOnFocus} onKeyDown={onFlowKey} className="h-9 text-right tabular-nums" inputMode="numeric" title={t("packagesHint")} />
+          </Field>
+        </>
+      ) : (
+      /* Cantidad DESPUÉS de áreas/días. Con dosis, ya viene pre-calculada; queda editable. */
+      <Field label={t("qty")} htmlFor="add-line-qty" className="w-20 space-y-1">
         <Input
+          id="add-line-qty"
           data-flow
           value={cant}
           onChange={(e) => setCant(e.target.value)}
@@ -344,15 +388,15 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
           className="h-9 text-right tabular-nums"
           inputMode="numeric"
         />
-      </label>
-      <label className="flex w-28 flex-col gap-1">
-        <Lbl>{t("price")}</Lbl>
-        <Input value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
-      </label>
+      </Field>
+      )}
+      <Field label={t("price")} htmlFor="add-line-price" className="w-28 space-y-1">
+        <Input id="add-line-price" value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
+      </Field>
       {showIvu && (
-        <label className="flex flex-col gap-1">
-          <Lbl>{t("ivu")}</Lbl>
+        <Field label={t("ivu")} htmlFor="add-line-ivu" className="space-y-1">
           <button
+            id="add-line-ivu"
             type="button"
             onClick={() => setGravadoOverride(!gravadoEff)}
             className={"h-9 rounded-md border px-3 text-[11px] font-medium " + (gravadoEff ? "bg-info/15 text-info-foreground" : "text-muted-foreground")}
@@ -360,11 +404,23 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
           >
             {gravadoEff ? t("ivuGravado") : t("ivuExento")}
           </button>
-        </label>
+        </Field>
       )}
-      <Button type="button" size="sm" className="col-span-2 h-9 md:col-span-1" disabled={!canAdd} onClick={add}>
+      <Button
+        type="button"
+        size="sm"
+        className="col-span-2 h-9 md:col-span-1"
+        disabled={addDisabled}
+        aria-describedby={hint ? hintId : undefined}
+        onClick={() => void add()}
+      >
         {t("add")}
       </Button>
+      {hint && (
+        <div className="col-span-2 md:basis-full">
+          <MissingHint id={hintId} missing={lineState.missing} reason={lineState.reason} blocked={lineState.blocked} />
+        </div>
+      )}
     </div>
   );
 }

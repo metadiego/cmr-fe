@@ -4,39 +4,30 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Cancel01Icon, DragDropIcon } from "@hugeicons/core-free-icons";
+import { DragDropIcon } from "@hugeicons/core-free-icons";
 
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import {
-  agendarVariosServicios,
-  getServiciosConSaldo,
-  listSesionesRango,
-  type ServicioConSaldo,
-  type Sesion,
-} from "@/lib/api/frontdesk";
-import {
-  getAvailability,
-  planPatientDay,
-  type Availability,
-  type PatientDayResult,
-} from "@/lib/api/resources";
+import { getServiciosConSaldo, listSesionesRango, type ServicioConSaldo, type Sesion } from "@/lib/api/frontdesk";
+import { bookTrain, listResources, planPatientTrain, type PatientTrain, type Resource } from "@/lib/api/resources";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { todayPR, inDaysPR } from "@/lib/format/fecha";
-import { toastError } from "@/lib/api/errors";
+import { ApiError } from "@/lib/api/types";
 import { getMyPreferences } from "@/lib/api/preferences";
 import { type Paciente } from "@/lib/api/pacientes";
+import { SheetNotice } from "@/components/agenda/sheet-notice";
+import { isSheetSlotTaken } from "@/lib/agenda/sheet";
 import { useResource } from "@/hooks/use-resource";
-import { cn } from "@/lib/utils";
-import { PacienteSelect } from "@/components/citas/paciente-select";
-import { ExistingSessionsBadge } from "@/components/agenda/existing-sessions-badge";
 import { RecurringBookingModal } from "@/components/agenda/recurring-booking-modal";
-import { AddTherapySelect } from "@/components/agenda/add-therapy-select";
-import { Input } from "@/components/ui/input";
+import { TrainSeriesModal } from "@/components/agenda/train-series-modal";
+import { TherapyTrainGrid } from "@/components/agenda/therapy-train-grid";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PlanSummarySkeleton, SlotGridSkeleton } from "@/components/agenda/therapy-day-skeleton";
+import { RequiredMark } from "@/components/kit/required-mark";
+import { useSubmit } from "@/components/kit/use-submit";
+import { therapyDayMissing, type TherapyDayField } from "@/lib/agenda/therapy-day-missing";
+import { TherapyDayCards } from "@/components/agenda/therapy-day-cards";
+import { TherapyDaySummary } from "@/components/agenda/therapy-day-summary";
 
 // COCKPIT PARTIDO — la pieza que ve el mostrador al citar terapias (aprobado por el dueño 26-sep, sobre su
 // visión del 24). IZQUIERDA: paciente + récord (héroe) y las terapias del día como mini-tarjetas de color con
@@ -47,11 +38,6 @@ import { PlanSummarySkeleton, SlotGridSkeleton } from "@/components/agenda/thera
 // Reserva por el MISMO endpoint del frontdesk (book-multiple). Handoff HANDOFF-FE-agenda-de-terapias.
 
 export type PatientLite = { id: string; name: string; record?: string | null; phone?: string | null };
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "·";
-}
 
 export function TherapyDayScheduler({
   defaultDate,
@@ -95,17 +81,33 @@ export function TherapyDayScheduler({
   const [selId, setSelId] = React.useState<string>(defaultServiceId ?? "");
   const [date, setDate] = React.useState(defaultDate ?? todayPR());
   const [time, setTime] = React.useState("");
-  const [dragOver, setDragOver] = React.useState<string | null>(null);
-  const [submitting, setSubmitting] = React.useState(false);
+  // Apagado por defecto: el motor pone primero lo más pesado (trainWeight) y reordena lo ligero.
+  const [keepOrder, setKeepOrder] = React.useState(false);
   // Which card's "schedule a series" modal is open (its serviceId), or null — additive-only feature,
   // fully independent from the single-date flow above.
   const [recurringFor, setRecurringFor] = React.useState<string | null>(null);
+  // «Programar una serie del tren»: el tren ENTERO, no una tarjeta suelta — handoff tren-en-serie.
+  const [seriesOpen, setSeriesOpen] = React.useState(false);
 
   const areasOf = (id: string) => areas[id] ?? 1;
 
   const servRes = useResource<Servicio[]>(() => getServicios(centro), [centro]);
   const servicios = servRes.state.kind === "ok" ? servRes.state.data : [];
   const servById = React.useMemo(() => new Map(servicios.map((s) => [s.id, s])), [servicios]);
+
+  // Para nombrar el recurso que bloquea en un servicio de varias líneas (BE PR #518, NPT: técnico Y
+  // enfermera): «Sin personal — Enfermería», no solo el id crudo.
+  const recRes = useResource<Resource[]>(() => listResources(centro), [centro]);
+  const recursos = recRes.state.kind === "ok" ? recRes.state.data : [];
+  const recursosById = React.useMemo(() => new Map(recursos.map((r) => [r.id, r])), [recursos]);
+  // «Areas» solo tiene sentido en una terapia que de verdad cobra por área (el Láser): antes salía en
+  // TODAS las tarjetas, Vit C y NPT incluidos, donde no significa nada. Un servicio es «por área» si
+  // CUALQUIERA de sus líneas lo es (`ServiceResourceLine.per`), visto desde `Resource.services[]`.
+  const areaServiceIds = React.useMemo(() => {
+    const ids = new Set<string>();
+    for (const r of recursos) for (const svc of r.services) if (svc.per === "area") ids.add(svc.serviceId);
+    return ids;
+  }, [recursos]);
 
   // Whether the free-slot indicators pulse — a layered preference (system→center→user→override),
   // not a code decision: this exact behavior was flipped by hand twice in one week (removed as a
@@ -146,23 +148,25 @@ export function TherapyDayScheduler({
   }, [upcomingRes.state]);
 
   const chosen = servicios.filter((s) => sel.has(s.id));
-  // Tarjeta activa (sus horas se muestran). Si la seleccionada ya no está, cae en la primera elegida.
+  // Tarjeta activa — solo para el resalte visual de la izquierda. Si la seleccionada ya no está, cae
+  // en la primera elegida.
   const selEff = sel.has(selId) ? selId : chosen[0]?.id ?? "";
   const serviceIds = React.useMemo(() => [...sel], [sel]);
+  const areasPayload: Record<string, number> = {};
+  for (const id of serviceIds) areasPayload[id] = areasOf(id);
 
-  // Huecos del servicio activo — parpadean los que caben (puesto + técnico). Cambia con fecha/servicio/áreas.
-  const availRes = useResource<Availability | null>(
-    () => (selEff ? getAvailability({ date, serviceId: selEff, areas: areasOf(selEff) }, centro) : Promise.resolve(null)),
-    [selEff, date, areas[selEff], centro],
+  // El TREN entero: horas de ENTRADA donde cabe todo lo marcado (una sola terapia también vale, mismo
+  // endpoint). Reemplaza `getAvailability` + `planPatientDay`: una llamada, el BE arma el orden y los
+  // tramos — nunca se calculan horas en el cliente. Handoff .personal/handoff-tren-de-terapias.md.
+  const trainRes = useResource<PatientTrain | null>(
+    () =>
+      serviceIds.length
+        ? planPatientTrain({ date, serviceIds, areas: areasPayload, patientId: paciente?.id, keepOrder }, centro)
+        : Promise.resolve(null),
+    [serviceIds.join(","), date, JSON.stringify(areasPayload), paciente?.id, keepOrder, centro],
   );
-  const avail = availRes.state.kind === "ok" ? availRes.state.data : null;
-
-  // El día completo a la hora elegida: minutos REALES en la clínica + avisos (bloqueo de la doctora).
-  const planRes = useResource<PatientDayResult | null>(
-    () => (time && serviceIds.length ? planPatientDay({ serviceIds, date, time }, centro) : Promise.resolve(null)),
-    [time, date, serviceIds.join(","), centro],
-  );
-  const plan = planRes.state.kind === "ok" ? planRes.state.data : null;
+  const train = trainRes.state.kind === "ok" ? trainRes.state.data : null;
+  const selectedSlot = train?.slots.find((s) => s.time === time) ?? null;
 
   function toggle(id: string) {
     setSel((prev) => {
@@ -186,27 +190,50 @@ export function TherapyDayScheduler({
     setDate(d);
     setTime("");
   }
-  function reason(sl: { fits: boolean; freeStations?: number; reasonKey?: string | null }) {
-    if (sl.fits) return sl.freeStations != null ? t("freeStations", { n: sl.freeStations }) : "";
-    if (sl.reasonKey && tRoot.has(sl.reasonKey)) return tRoot(sl.reasonKey);
-    return sl.reasonKey ?? "";
+  // BE #547: `reasonKeys` trae TODOS los motivos (antes solo el primero en `reasonKey`).
+  function reason(sl: { fits: boolean; reasonKey?: string | null; reasonKeys?: string[]; serviceId?: string | null; resourceId?: string | null }) {
+    const keys = sl.reasonKeys?.length ? sl.reasonKeys : sl.reasonKey ? [sl.reasonKey] : [];
+    const base = keys.map((k) => (tRoot.has(k) ? tRoot(k) : k)).join(" · ");
+    const service = sl.serviceId ? servById.get(sl.serviceId)?.name : null;
+    const resource = sl.resourceId ? recursosById.get(sl.resourceId)?.name : null;
+    if (service && resource) return `${t("trainBlockedBy", { reason: base, service })} (${resource})`;
+    if (service) return t("trainBlockedBy", { reason: base, service });
+    if (resource) return t("blockedByResource", { reason: base, resource });
+    return base;
   }
 
-  const canBook = !!paciente && sel.size > 0 && !!date && !submitting;
+  // What booking still needs, in on-screen order: this list alone disables «Agendar» and is shown
+  // above the buttons (a Bayamón receptionist was stuck on a grey button that never said «hora»).
+  const fieldLabel: Record<TherapyDayField, string> = {
+    patient: t("pickPatient"),
+    therapies: t("pickServices"),
+    date: t("date"),
+    hour: tRoot("agenda.time"),
+  };
+  // Once the catalogue has loaded, count only therapies actually shown (a preselected id missing from the
+  // centre's catalogue renders no card, so it must not hide «therapies» from the hint).
+  const missingServiceIds = servRes.state.kind === "ok" ? chosen.map((s) => s.id) : serviceIds;
+  const missing = therapyDayMissing({ patientId: paciente?.id, serviceIds: missingServiceIds, date, time }).map(
+    (f) => fieldLabel[f],
+  );
 
+  // The buttons are disabled while anything is missing, so this throw is only a backstop.
   async function book(close: boolean) {
-    if (!paciente || sel.size === 0) return;
-    setSubmitting(true);
-    try {
-      const { data, warnings } = await agendarVariosServicios(
-        { patientId: paciente.id, serviceIds: [...sel], dates: [date], time: time || undefined },
-        centro,
-      );
-      const creadas = Array.isArray(data.creadas) ? data.creadas.length : 0;
-      const omitidas = Number(data.omitidas ?? 0);
-      toast.success(tp("resumen", { creadas, omitidas }));
+    if (!paciente || sel.size === 0 || !time) throw new Error(missing.join(" · "));
+    const res = await bookTrain(
+      { patientId: paciente.id, date, time, serviceIds: [...sel], areas: areasPayload, keepOrder },
+      centro,
+    );
+    return { ...res, close };
+  }
+
+  // useSubmit: one booking at a time (double click / Enter never books twice); a failed booking keeps
+  // the selection and toasts why.
+  const { submitting, submit } = useSubmit(book, {
+    onSuccess: ({ data, warnings, advertencias, close }) => {
+      toast.success(tp("resumen", { creadas: data.sessions.length, omitidas: 0 }));
       mostrarAvisos(warnings, tRoot);
-      if (data.aviso) toast.warning(tp("avisoDisponibilidad"));
+      mostrarAvisos(advertencias, tRoot); // BE #547: la reserva avisó alguna regla no bloqueante, ya se guardó
       // «Agendar y seguir»: limpia selección/hora/áreas para el próximo grupo de terapias del MISMO
       // paciente/día, sin cerrar. El paciente se conserva a propósito. `areas` también se limpia: si
       // no, re-agregar el mismo servicio en la próxima ronda heredaba en silencio el número de áreas
@@ -218,14 +245,35 @@ export function TherapyDayScheduler({
       }
       upcomingRes.refresh();
       onBooked?.({ close });
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setSubmitting(false);
-    }
-  }
+    },
+    onError: (err) => {
+      if (err instanceof ApiError && err.code === "THERAPY_TRAIN_DOES_NOT_FIT") {
+        const reasonKey = typeof err.data?.reasonKey === "string" ? err.data.reasonKey : undefined;
+        const reasonKeys = Array.isArray(err.data?.reasonKeys) ? (err.data.reasonKeys as string[]) : undefined;
+        const blockedId = typeof err.data?.serviceId === "string" ? err.data.serviceId : undefined;
+        const blockedResourceId = typeof err.data?.resourceId === "string" ? err.data.resourceId : undefined;
+        toast.error(
+          reason({ fits: false, reasonKey, reasonKeys, serviceId: blockedId, resourceId: blockedResourceId }) || tRoot("therapies.trainDoesNotFit"),
+        );
+        trainRes.refresh();
+        return true;
+      }
+      if (err instanceof ApiError && err.code === "THERAPY_TRAIN_ROLLBACK_INCOMPLETE") {
+        const left = Array.isArray(err.data?.left) ? (err.data.left as Array<{ serviceId?: string }>) : [];
+        const names = left.map((l) => (l.serviceId ? (servById.get(l.serviceId)?.name ?? l.serviceId) : "")).filter(Boolean);
+        toast.error(
+          names.length ? `${tRoot("therapies.trainRollbackIncomplete")}: ${names.join(", ")}` : tRoot("therapies.trainRollbackIncomplete"),
+          { duration: Infinity },
+        );
+        upcomingRes.refresh();
+        return true;
+      }
+      // Generic toast from useSubmit; someone took the seat after the grid was drawn → redraw it.
+      if (isSheetSlotTaken(err)) trainRes.refresh();
+      return false;
+    },
+  });
 
-  const cap = avail?.resource?.capacity ?? 0;
   const dragHint = (
     <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
       <HugeiconsIcon icon={DragDropIcon} className="size-3.5" />
@@ -238,330 +286,138 @@ export function TherapyDayScheduler({
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[24rem_1fr]">
         {/* ————— IZQUIERDA: paciente + terapias del día ————— */}
         <aside className="space-y-4">
-          {/* Héroe del paciente */}
-          {paciente ? (
-            <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-4 ring-1 ring-primary/20">
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-sm">
-                {initials(paciente.name)}
-              </div>
-              <div className="min-w-0">
-                <div className="truncate text-lg font-semibold leading-tight">{paciente.name}</div>
-                <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-muted-foreground">
-                  {paciente.record && <span>{tRoot("patients.hub.record")} #{paciente.record}</span>}
-                  {paciente.phone && <span>· {paciente.phone}</span>}
-                </div>
-                {!lockedPatient && (
-                  <button
-                    type="button"
-                    className="mt-1 text-xs text-primary hover:underline"
-                    onClick={() => {
-                      setPaciente(null);
-                      setSel(new Set());
-                      setTime("");
-                    }}
-                  >
-                    {t("change")}
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">{t("pickPatient")}</label>
-              <PacienteSelect value={null} onChange={(p) => p && setPaciente(asLite(p))} />
-              <p className="text-xs text-muted-foreground">{t("choosePatientFirst")}</p>
-            </div>
-          )}
-
-          {/* Comprados con saldo — agregar de un toque */}
-          {paciente && saldo.length > 0 && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("bought")}</label>
-              <div className="flex flex-wrap gap-1.5">
-                {saldo.map((s) => {
-                  const on = sel.has(s.serviceId);
-                  return (
-                    <button
-                      key={s.serviceId}
-                      type="button"
-                      onClick={() => toggle(s.serviceId)}
-                      className={cn(
-                        "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
-                        on ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent",
-                      )}
-                    >
-                      {s.name}
-                      <span className="ml-1 opacity-70">· {t("remaining", { n: s.pending })}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Terapias del día (mini-tarjetas) + agregar */}
-          {paciente && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">{t("pickServices")}</label>
-                <AddTherapySelect
-                  servicios={servicios.filter((s) => !sel.has(s.id))}
-                  onAdd={(id) => toggle(id)}
-                  label={t("addTherapy")}
-                />
-              </div>
-              {chosen.length === 0 ? (
-                <p className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
-                  {t("noServices")}
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {chosen.map((s) => {
-                    const active = selEff === s.id;
-                    const existentes = upcomingByService.get(s.id) ?? [];
-                    const color = s.color ?? "#4a90d9";
-                    return (
-                      <div
-                        key={s.id}
-                        draggable
-                        onDragStart={(e) => {
-                          setSelId(s.id);
-                          e.dataTransfer.setData("text/plain", s.id);
-                          e.dataTransfer.effectAllowed = "move";
-                        }}
-                        onClick={() => {
-                          setSelId(s.id);
-                          setTime("");
-                        }}
-                        className={cn(
-                          "group cursor-grab rounded-lg border-l-4 bg-card p-2.5 pl-3 ring-1 transition-all active:cursor-grabbing",
-                          active ? "shadow-md" : "ring-foreground/10 hover:ring-foreground/20",
-                        )}
-                        style={{
-                          borderLeftColor: color,
-                          // Activa = mismo color de la tarjeta, no un azul genérico: es el vínculo visual
-                          // con el borde/punto del panel de horas a la derecha (mismo color en los dos lados).
-                          ...(active ? { boxShadow: `0 0 0 2px ${color}66`, backgroundColor: `${color}0f` } : {}),
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          {active ? (
-                            <span aria-hidden className="size-2.5 shrink-0 animate-pulse rounded-full" style={{ backgroundColor: color }} />
-                          ) : (
-                            <HugeiconsIcon icon={DragDropIcon} className="size-4 shrink-0 text-muted-foreground/50" />
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-sm font-medium">{s.name}</div>
-                            <label
-                              className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {t("areas")}
-                              <Input
-                                type="number"
-                                min={1}
-                                value={areasOf(s.id)}
-                                onChange={(e) => {
-                                  setAreas((a) => ({ ...a, [s.id]: Math.max(1, Number(e.target.value) || 1) }));
-                                  if (s.id === selEff) setTime("");
-                                }}
-                                className="h-6 w-14 px-1 py-0 text-xs"
-                              />
-                            </label>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeService(s.id);
-                            }}
-                            className="shrink-0 rounded p-1 text-muted-foreground/50 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                            aria-label={tRoot("common.delete")}
-                          >
-                            <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
-                          </button>
-                        </div>
-                        <ExistingSessionsBadge
-                          sesiones={existentes}
-                          centro={centro}
-                          onChanged={() => {
-                            // Reagendar puede liberar o consumir un puesto en la fecha/hora que la
-                            // tarjeta activa está mostrando ahora mismo — sin esto quedaban obsoletos.
-                            upcomingRes.refresh();
-                            availRes.refresh();
-                            planRes.refresh();
-                          }}
-                        />
-                        {/* Additive-only entry point: opens the pattern-based bulk scheduler for THIS
-                            service, never touches the single-date flow above. */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setRecurringFor(s.id);
-                          }}
-                          className="mt-1 text-[11px] text-primary hover:underline"
-                        >
-                          {t("recurringButton")}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+          <TherapyDayCards
+            patient={paciente}
+            lockedPatient={lockedPatient}
+            centro={centro}
+            balance={saldo}
+            services={servicios}
+            selectedIds={sel}
+            chosen={chosen}
+            activeId={selEff}
+            upcomingByService={upcomingByService}
+            areaServiceIds={areaServiceIds}
+            areasOf={areasOf}
+            onPickPatient={(p) => setPaciente(asLite(p))}
+            onChangePatient={() => {
+              setPaciente(null);
+              setSel(new Set());
+              setTime("");
+            }}
+            onToggle={toggle}
+            onActivate={setSelId}
+            onSelectCard={(id) => {
+              setSelId(id);
+              setTime("");
+            }}
+            onAreasChange={(id, n) => {
+              setAreas((a) => ({ ...a, [id]: n }));
+              if (id === selEff) setTime("");
+            }}
+            onRemove={removeService}
+            onOpenRecurring={setRecurringFor}
+            onSessionsChanged={() => {
+              upcomingRes.refresh();
+              trainRes.refresh();
+            }}
+          />
         </aside>
 
-        {/* ————— DERECHA: horas del servicio activo ————— */}
-        {/* Borde izquierdo del MISMO color que la tarjeta activa (izquierda): antes solo el texto "Hours ·
-            X" decía cuál era, y con 2+ tarjetas de peso visual parecido no quedaba claro cuál correspondía
-            a este panel. El color es el vínculo visual entre ambos lados. */}
+        {/* ————— DERECHA: horas de ENTRADA del tren completo ————— */}
+        {/* Borde izquierdo del color de la primera tarjeta marcada: el vínculo visual con la izquierda.
+            Con 2+ terapias el panel ya no es de UNA tarjeta — es el tren entero (handoff tren-de-terapias). */}
         <section
           className="rounded-xl border-l-4 bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
-          style={{ borderLeftColor: selEff ? (servById.get(selEff)?.color ?? "#4a90d9") : "transparent" }}
+          style={{ borderLeftColor: chosen[0] ? (chosen[0].color ?? "#4a90d9") : "transparent" }}
         >
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-1.5 text-sm font-semibold">
-                {selEff && (
+                {chosen.map((s) => (
                   <span
+                    key={s.id}
                     aria-hidden
                     className="size-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: servById.get(selEff)?.color ?? "#4a90d9" }}
+                    style={{ backgroundColor: s.color ?? "#4a90d9" }}
                   />
-                )}
-                {selEff ? t("hoursFor", { service: servById.get(selEff)?.name ?? "" }) : t("pickCard")}
+                ))}
+                {chosen.length ? t("entryHours") : t("pickCard")}
+                <RequiredMark />
               </div>
-              {selEff && availRes.state.kind === "loading" && <Skeleton aria-hidden className="mt-0.5 h-4 w-40" />}
-              {avail?.configured && (
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  {t("minutes", { n: avail.minutes })}
-                  {avail.resource ? ` · ${t("capacity", { n: avail.resource.capacity })}` : ""}
-                </div>
+              {chosen.length > 0 && trainRes.state.kind === "loading" && <Skeleton aria-hidden className="mt-0.5 h-4 w-40" />}
+              {train && train.patientMinutes > 0 && (
+                <div className="mt-0.5 text-xs text-muted-foreground">{t("minutes", { n: train.patientMinutes })}</div>
               )}
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">{t("date")}</span>
-              <DatePicker value={date} onChange={changeDate} className="w-auto" />
-            </label>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-sm">
+                <Switch checked={keepOrder} onCheckedChange={setKeepOrder} aria-label={t("keepOrder")} />
+                <span className="text-muted-foreground">{t("keepOrder")}</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">{t("date")}</span>
+                <DatePicker value={date} onChange={changeDate} className="w-auto" />
+              </label>
+            </div>
           </div>
 
-          {!selEff ? (
+          <SheetNotice sheet={train?.sheet} className="mb-2" />
+          {!chosen.length ? (
             <p className="py-10 text-center text-sm text-muted-foreground">{t("pickCard")}</p>
-          ) : availRes.state.kind === "loading" ? (
-            <SlotGridSkeleton hint={dragHint} />
-          ) : availRes.state.kind === "fail" ? (
-            <p className="text-sm text-destructive">{availRes.state.message}</p>
-          ) : avail && !avail.configured ? (
-            <p className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-foreground">
-              {t("notConfigured")}
-            </p>
-          ) : avail ? (
-            <>
-              {dragHint}
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
-                {avail.slots.map((sl) => {
-                  const active = time === sl.time;
-                  const free = sl.freeStations ?? (sl.fits ? 1 : 0);
-                  const over = dragOver === sl.time;
-                  return (
-                    <button
-                      key={sl.time}
-                      type="button"
-                      disabled={!sl.fits}
-                      title={reason(sl)}
-                      onClick={() => sl.fits && setTime(sl.time)}
-                      onDragOver={(e) => {
-                        if (sl.fits) {
-                          e.preventDefault();
-                          setDragOver(sl.time);
-                        }
-                      }}
-                      onDragLeave={() => setDragOver((d) => (d === sl.time ? null : d))}
-                      onDrop={(e) => {
-                        if (!sl.fits) return;
-                        e.preventDefault();
-                        const id = e.dataTransfer.getData("text/plain");
-                        if (id) setSelId(id);
-                        setTime(sl.time);
-                        setDragOver(null);
-                      }}
-                      className={cn(
-                        "flex flex-col items-start rounded-lg border p-2 text-left transition-all",
-                        active
-                          ? "border-primary bg-primary text-primary-foreground shadow-md"
-                          : sl.fits
-                            ? cn("border-success/40 bg-success/10 hover:bg-success/20", blinkEnabled && "animate-pulse hover:animate-none")
-                            : "cursor-not-allowed border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground/40",
-                        over && "scale-105 ring-2 ring-success",
-                      )}
-                    >
-                      <span className="font-mono text-sm font-semibold tabular-nums">{sl.time}</span>
-                      {/* Barra de puestos: llenos vs libres */}
-                      {cap > 0 && sl.fits && (
-                        <span className="mt-1 flex gap-0.5">
-                          {Array.from({ length: cap }).map((_, i) => (
-                            <span
-                              key={i}
-                              className={cn(
-                                "h-1.5 w-2 rounded-sm",
-                                i < cap - free ? "bg-current opacity-30" : "bg-success",
-                              )}
-                            />
-                          ))}
-                        </span>
-                      )}
-                      <span className={cn("mt-1 text-[10px]", active ? "opacity-90" : "opacity-70")}>
-                        {sl.fits ? t("freeStations", { n: free }) : reason(sl)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          ) : null}
+          ) : (
+            <TherapyTrainGrid
+              train={train}
+              loading={trainRes.state.kind === "loading"}
+              error={trainRes.state.kind === "fail" ? trainRes.state.message : null}
+              time={time}
+              onPick={setTime}
+              onDrop={(id, t2) => {
+                if (id) setSelId(id);
+                setTime(t2);
+              }}
+              blinkEnabled={blinkEnabled}
+              servById={servById}
+              recursosById={recursosById}
+              dragHint={dragHint}
+            />
+          )}
         </section>
       </div>
 
       {/* ————— ABAJO: resumen vivo + agendar ————— */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
-        <div className="min-w-0 space-y-1 text-sm">
-          {!time ? (
-            <p className="text-muted-foreground">{t("noHour")}</p>
-          ) : planRes.state.kind === "loading" ? (
-            <PlanSummarySkeleton />
-          ) : plan ? (
-            <>
-              <div className="flex flex-wrap items-center gap-2">
-                {plan.ok ? <Badge variant="success">{t("fits")}</Badge> : <Badge variant="destructive">{t("noFits")}</Badge>}
-                <span className="font-medium">{t("startAt", { time })}</span>
-                <span className="text-muted-foreground">· {t("patientMinutes", { n: plan.minutosDelPaciente })}</span>
-              </div>
-              {!plan.ok && plan.reasonKey && (
-                <p className="text-destructive">{tRoot.has(plan.reasonKey) ? tRoot(plan.reasonKey) : plan.reasonKey}</p>
-              )}
-              {plan.sinRecurso.length > 0 && (
-                <p className="text-warning-foreground">{t("sinRecurso", { list: plan.sinRecurso.join(", ") })}</p>
-              )}
-              {plan.staffBlocks.map((b, i) => (
-                <p key={i} className="text-warning-foreground">{t("staffBlock", { from: b.from, to: b.to })}</p>
-              ))}
-            </>
-          ) : null}
-        </div>
-        {/* Dos botones en vez de un cierre automático: el mostrador suele citar varias terapias del
-            MISMO paciente en una sola visita — cerrar tras la primera obligaba a reabrir. «Seguir»
-            limpia la selección y se queda en el mismo paciente/día; «Cerrar» hace lo de antes. */}
-        <div className="flex items-center gap-2">
-          <Button size="lg" variant="outline" onClick={() => book(false)} disabled={!canBook}>
-            {submitting ? tRoot("common.saving") : t("bookAndContinue")}
-          </Button>
-          <Button size="lg" onClick={() => book(true)} disabled={!canBook}>
-            {submitting ? tRoot("common.saving") : t("bookAndClose")}
-          </Button>
-        </div>
-      </div>
+      <TherapyDaySummary
+        time={time}
+        trainLoading={trainRes.state.kind === "loading"}
+        train={train}
+        selectedSlot={selectedSlot}
+        servById={servById}
+        slotReason={reason}
+        missing={missing}
+        submitting={submitting}
+        hasSelection={!!paciente && sel.size > 0}
+        onOpenSeries={() => setSeriesOpen(true)}
+        onBook={(close) => submit(close)}
+      />
+
+      {paciente && sel.size > 0 && (
+        <TrainSeriesModal
+          open={seriesOpen}
+          patientId={paciente.id}
+          patientName={paciente.name}
+          serviceIds={serviceIds}
+          servById={servById}
+          areas={areasPayload}
+          keepOrder={keepOrder}
+          centro={centro}
+          defaultDate={date}
+          defaultTime={time || undefined}
+          onOpenChange={setSeriesOpen}
+          onBooked={() => {
+            upcomingRes.refresh();
+            trainRes.refresh();
+          }}
+        />
+      )}
 
       {recurringFor && paciente && (
         <RecurringBookingModal
@@ -578,8 +434,7 @@ export function TherapyDayScheduler({
           onOpenChange={(o) => !o && setRecurringFor(null)}
           onBooked={() => {
             upcomingRes.refresh();
-            availRes.refresh();
-            planRes.refresh();
+            trainRes.refresh();
           }}
         />
       )}

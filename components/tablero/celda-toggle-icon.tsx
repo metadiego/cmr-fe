@@ -7,18 +7,9 @@ import { Tv01Icon } from "@hugeicons/core-free-icons";
 
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
 import { updatePaciente } from "@/lib/api/pacientes";
-import { toastError } from "@/lib/api/errors";
 import { useCan } from "@/hooks/use-can";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
+import { useSubmit } from "@/components/kit/use-submit";
 
 // Map the BE's FE-agnostic render.icon hint → this app's icon set. Legacy used a
 // TV icon (bi-tv) for "posible testimonio"; "desktop_windows" is the Material hint.
@@ -46,8 +37,7 @@ export function CeldaToggleIcon({
 }) {
   const tRoot = useTranslations();
   const { can } = useCan();
-  const [busy, setBusy] = React.useState(false);
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const confirm = useConfirm();
 
   const render = (col.render as Record<string, unknown> | null) ?? {};
   const active = !!fila[col.clave]; // usarValorComoActivo: el binding = estado activo
@@ -72,68 +62,42 @@ export function CeldaToggleIcon({
 
   const nombre = fila.paciente == null ? "" : String(fila.paciente);
 
-  async function toggle() {
-    if (!canWrite || busy) return;
-    setBusy(true);
-    try {
-      await updatePaciente(pacienteId, { [field]: !active } as never, centroId);
-      onSaved?.();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-      setConfirmOpen(false);
-    }
-  }
+  const { submitting, submit } = useSubmit(
+    () => updatePaciente(pacienteId, { [field]: !active } as never, centroId),
+    { onSuccess: () => onSaved?.() },
+  );
 
-  function onClick() {
-    if (!canWrite || busy) return;
-    if (needsConfirm) setConfirmOpen(true);
-    else toggle();
+  async function onClick() {
+    if (!canWrite || submitting) return;
+    if (needsConfirm) {
+      const ok = await confirm({
+        title: tooltip,
+        description: tRoot(
+          active ? "tableroBoard.testimonioConfirmOff" : "tableroBoard.testimonioConfirmOn",
+          { name: nombre || "—" },
+        ),
+      });
+      if (!ok) return;
+    }
+    await submit();
   }
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={onClick}
-        disabled={!canWrite || busy}
-        title={tooltip}
-        aria-label={tooltip}
-        aria-pressed={active}
-        className={
-          "grid size-8 place-items-center rounded-md border transition-colors disabled:opacity-40 " +
-          (active
-            ? "border-primary bg-primary/15 text-primary"
-            : "border-border text-muted-foreground hover:bg-muted hover:text-foreground")
-        }
-      >
-        <HugeiconsIcon icon={icon} className="size-4" />
-      </button>
-
-      {needsConfirm && (
-        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{tooltip}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {tRoot(
-                  active
-                    ? "tableroBoard.testimonioConfirmOff"
-                    : "tableroBoard.testimonioConfirmOn",
-                  { name: nombre || "—" },
-                )}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{tRoot("common.cancel")}</AlertDialogCancel>
-              <AlertDialogAction onClick={toggle} disabled={busy}>
-                {tRoot("common.confirm")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-    </>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!canWrite || submitting}
+      title={tooltip}
+      aria-label={tooltip}
+      aria-pressed={active}
+      className={
+        "grid size-8 place-items-center rounded-md border transition-colors disabled:opacity-40 " +
+        (active
+          ? "border-primary bg-primary/15 text-primary"
+          : "border-border text-muted-foreground hover:bg-muted hover:text-foreground")
+      }
+    >
+      <HugeiconsIcon icon={icon} className="size-4" />
+    </button>
   );
 }

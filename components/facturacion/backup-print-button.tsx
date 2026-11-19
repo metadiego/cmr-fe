@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { getPrintHubForPrinting, type PrintHubForPrinting } from "@/lib/api/print-hub";
 import { buildHubRequestUrls, hubOrigin, hubStatusUrl } from "@/lib/print/hub-target";
 import { pickPrinter, readPrinterChoice, savePrinterChoice } from "@/lib/print/printer-choice";
-import { checkHubs, sendToHubs, type HubHealth } from "@/lib/print/hub";
+import { bytesForPrinter, checkHubs, sendToHubs, type HubHealth } from "@/lib/print/hub";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 
@@ -85,7 +85,7 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
   async function print() {
     setBusy(true);
     try {
-      const i = await sendToHubs(requestUrls, await buildBytes());
+      const i = await sendToHubs(requestUrls, bytesForPrinter(await buildBytes(), printer?.escposFont));
       toast.success(i === 0 ? t("backupHubDone") : t("backupHubDoneFallback", { hub: new URL(requestUrls[i]).host }));
     } catch (err) {
       toastError(err, tRoot);
@@ -102,13 +102,18 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
       : health.kind === "printerDown"
         ? t(`backupPrinter.${health.state}`)
         : null;
+  // The «Usando el hub de respaldo…» note was removed (owner, 10-nov: «quitar eso»): it also fired when
+  // the main hub DID answer but saw the printer differently, and then said something false.
   const origin = hubOrigin(requestUrls[0]);
-  // Answered by a fallback hub: the main one (usually the printer's own PC) is down or its certificate
-  // is not accepted in THIS browser. Said out loud, because a fallback may not see the printer's power.
-  const viaFallback = (health.kind === "ready" || health.kind === "printerDown") && health.hub > 0;
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-0.5">
+      {/* Always say WHERE it prints (owner, 10-nov: «no veo la impresora a elegir»); a list only when there is a choice. */}
+      {printers.length === 1 && printer && (
+        <span className="px-3 text-[11px] text-muted-foreground">
+          {t("backupPrinterOn")} <b className="text-foreground">{printer.name}</b>
+        </span>
+      )}
       {printers.length > 1 && printer && (
         <label className="flex items-center gap-1.5 px-3 text-[11px] text-muted-foreground">
           {t("backupPrinterOn")}
@@ -147,17 +152,6 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
               {t("backupHubOpen")}
             </a>
           )}
-        </p>
-      )}
-      {viaFallback && origin && (
-        <p className="flex flex-wrap items-center gap-x-2 px-3 text-[11px] text-warning-foreground" role="status">
-          <span>{t("backupHubFallbackNote", { hub: new URL(origin).host })}</span>
-          <a href={origin} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2" title={t("backupHubCertHint")}>
-            {t("backupHubOpenMain")}
-          </a>
-          <button type="button" onClick={retry} className="underline underline-offset-2">
-            {t("backupHubRetry")}
-          </button>
         </p>
       )}
     </div>

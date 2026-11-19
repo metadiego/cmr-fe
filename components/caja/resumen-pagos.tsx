@@ -1,25 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { refundSplit } from "@/lib/caja/refunds-by-method";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { CajaDivision, ReporteDia } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/kit/confirm-host";
 
 // Panel derecho "Resumen de pagos" (UI 2026, sticky): tarjetas / otros medios / resumen general
 // (modelo CMA: inicio, efectivo de ventas, electrónicas, total tarjetas, total del día, fact.
@@ -43,10 +32,10 @@ export function ResumenPagos({
   onProcesar,
   onExport,
   canEmail,
-  emailing,
-  onEmail,
+  emailPanel,
 }: {
-  division: CajaDivision;
+  // Ausente en el cuadre TOTAL del día (handoff cuadre-unico-del-dia): no es de una sola división.
+  division?: CajaDivision;
   detalle: ReporteDia["detalle"];
   subtotalesTarjeta: Array<{ clave: string; labelKey: string; nombre: string; monto: number }>;
   ventas: ReporteDia["sales"];
@@ -65,15 +54,21 @@ export function ResumenPagos({
   onProcesar: () => void;
   onExport: () => void;
   canEmail: boolean;
-  emailing: boolean;
-  onEmail: (email: string) => void;
+  // The «Enviar por email» panel (components/caja/cash-email-panel.tsx), built by the screen that
+  // knows which sheet and which center it sends.
+  emailPanel?: React.ReactNode;
 }) {
   const t = useTranslations("caja");
   const format = useFormatter();
   const tp = useTranslations("caja.payments");
   const tRoot = useTranslations();
   const [emailOpen, setEmailOpen] = React.useState(false);
-  const [email, setEmail] = React.useState("");
+  const confirm = useConfirm();
+
+  async function askProcesar() {
+    const ok = await confirm({ title: t("closeConfirmTitle"), description: t("closeConfirmBody"), confirmLabel: t("closeConfirmOk") });
+    if (ok) onProcesar();
+  }
 
   // Estado del cuadre (etiqueta legacy): 0 = cuadra, < 0 = falta, > 0 = sobra. `sinContar` manda
   // sobre todo lo demás: nadie ha guardado un conteo real, nunca se pinta "cuadra" aunque la cifra
@@ -101,7 +96,14 @@ export function ResumenPagos({
                   {row.name}
                   <span className="ml-1 text-xs text-muted-foreground">×{row.quantity}</span>
                 </span>
-                <span className="tabular-nums">{money(row.amount)}</span>
+                <span className="text-right">
+                  <span className="tabular-nums">{money(row.amount)}</span>
+                  {refundSplit(row) && (
+                    <span className="block text-[11px] text-muted-foreground">
+                      {tp("chargedRefunded", { charged: money(refundSplit(row)!.sales), refunded: money(refundSplit(row)!.refunds) })}
+                    </span>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
@@ -135,7 +137,14 @@ export function ResumenPagos({
                   {row.name}
                   <span className="ml-1 text-xs text-muted-foreground">×{row.quantity}</span>
                 </span>
-                <span className="tabular-nums">{money(row.amount)}</span>
+                <span className="text-right">
+                  <span className="tabular-nums">{money(row.amount)}</span>
+                  {refundSplit(row) && (
+                    <span className="block text-[11px] text-muted-foreground">
+                      {tp("chargedRefunded", { charged: money(refundSplit(row)!.sales), refunded: money(refundSplit(row)!.refunds) })}
+                    </span>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
@@ -149,10 +158,15 @@ export function ResumenPagos({
         <Row label={tp("salesCash")} value={money(salesCash)} />
         <Row label={tp("electronic")} value={money(detalle.totalElectronicas)} />
         <Row label={tp("totalCards")} value={money(detalle.totalTarjetas)} />
+        {/* Cards WITHOUT the day's refunds: what the settlements should show (BE #560). */}
+        {detalle.cardSalesTotal != null && <Row label={tp("cardSales")} value={money(detalle.cardSalesTotal)} />}
         <Row label={tp("totalCMA")} value={money(detalle.total)} strong />
         <div className="my-1 border-t" />
         <Row label={tp("grossBilling")} value={money(ventas.bruto)} />
         <Row label={tp("returns")} value={money(devoluciones.total)} />
+        {(detalle.refundsByMethod ?? []).map((m) => (
+          <Row key={m.slug} label={`· ${m.name}`} value={`−${money(m.amount)}`} />
+        ))}
         <Row label={tp("netBilling")} value={money(ventas.neto)} strong />
         <div className="my-1 border-t" />
         <Row label={tp("cashInDrawer")} value={money(contado)} />
@@ -189,23 +203,9 @@ export function ResumenPagos({
           </p>
         )}
         {canProcesar && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button className="w-full" disabled={procesando}>
-                {t("processClose")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("closeConfirmTitle")}</AlertDialogTitle>
-                <AlertDialogDescription>{t("closeConfirmBody")}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{tRoot("common.cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={onProcesar}>{t("closeConfirmOk")}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button className="w-full" disabled={procesando} onClick={() => void askProcesar()}>
+            {t("processClose")}
+          </Button>
         )}
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={onExport}>
@@ -217,31 +217,14 @@ export function ResumenPagos({
             </Button>
           )}
         </div>
-        {emailOpen && canEmail && (
-          <div className="flex items-end gap-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="caja-email" className="text-xs">
-                {t("emailPrompt")}
-              </Label>
-              <Input
-                id="caja-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-9"
-                placeholder="correo@ejemplo.com"
-              />
-            </div>
-            <Button size="sm" disabled={emailing || !email} onClick={() => onEmail(email)}>
-              {t("email")}
-            </Button>
-          </div>
-        )}
+        {emailOpen && canEmail && emailPanel}
       </div>
 
-      <p className="text-right text-[11px] uppercase tracking-wide text-muted-foreground">
-        {t(`division.${division}`)}
-      </p>
+      {division && (
+        <p className="text-right text-[11px] uppercase tracking-wide text-muted-foreground">
+          {t(`division.${division}`)}
+        </p>
+      )}
     </div>
   );
 }

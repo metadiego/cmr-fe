@@ -1,10 +1,12 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 
 // Doctor working hours (per-doctor, or global when medicoId is null) and
 // holidays — used to compute bookable slots and grey out unavailable days.
 export type HorarioMedico = components["schemas"]["StaffScheduleResponseDto"];
-export type Festivo = components["schemas"]["FestivoEntity"];
+// `clinicName`: the BE names each row's clinic (clinic-read-scope); a holiday of no clinic has none.
+export type Festivo = components["schemas"]["FestivoEntity"] & { clinicName?: string | null };
 
 function asArray<T>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];
@@ -18,13 +20,18 @@ export async function getHorariosMedico(
   medicoId?: string,
 ): Promise<HorarioMedico[]> {
   const q = medicoId ? `?doctorId=${encodeURIComponent(medicoId)}` : "";
-  return asArray<HorarioMedico>(await apiFetch(`/doctors/schedules${q}`));
+  return asArray<HorarioMedico>(await apiFetch(await oneCenterPath(`/doctors/schedules${q}`)));
 }
 
-// GET /holidays?anio= — holidays for the year (recurring ones resolved to it).
-// `anio` NO está en el mapa api-ingles (campos.ts) → el DTO del BE espera `anio`: se manda tal cual.
-export async function getFestivos(anio: number): Promise<Festivo[]> {
-  return asArray<Festivo>(await apiFetch(`/holidays?anio=${anio}`));
+// GET /holidays?anio=&includeGlobal=true — holidays for the year (recurring ones resolved to it), the
+// clinic(s) in scope PLUS the company-wide ones in a single call (BE handoff booking-availability-fixes
+// §F, 2026-11-10: `includeGlobal` already existed on the BE, confirmed in schema.d.ts — replaces the two
+// merged reads this used to do). `anio` NO está en el mapa api-ingles (campos.ts) → el DTO del BE espera
+// `anio`: se manda tal cual. `centers`: the clinics a month calendar shows (`null` = every one with
+// citas.read); omitted = the active one, as before. Each row says its clinic (company-wide = null).
+export async function getFestivos(anio: number, centers?: CenterChoice): Promise<Festivo[]> {
+  const path = await oneCenterPath(`/holidays?anio=${anio}&includeGlobal=true`, centers);
+  return asArray<Festivo>(await apiFetch(path, {}, tenantOf(centers)));
 }
 
 // ── Schedules WRITE (RBAC citas.config). Campos ya en inglés en el schema (dayOfWeek/startTime/endTime).
@@ -48,6 +55,9 @@ export interface DoctorAbsence {
   kind: "vacation" | "leave";
   startDate: string;
   endDate: string;
+  // BE #558: part of the day — away FROM startTime (leaves at 16:00) and/or UNTIL endTime (arrives 11:00).
+  startTime?: string | null;
+  endTime?: string | null;
   reason?: string | null;
   active: boolean;
 }
@@ -56,6 +66,8 @@ export interface DoctorAbsencePayload {
   kind: "vacation" | "leave";
   startDate: string;
   endDate: string;
+  startTime?: string;
+  endTime?: string;
   reason?: string;
   active?: boolean;
 }
@@ -63,6 +75,13 @@ export async function listDoctorAbsences(doctorId: string, from?: string, to?: s
   const sp = new URLSearchParams({ doctorId });
   if (from) sp.set("from", from);
   if (to) sp.set("to", to);
+  return asArray<DoctorAbsence>(await apiFetch(await oneCenterPath(`/doctors/absences?${sp.toString()}`, centroId), {}, centroId));
+}
+// Todos los médicos de vacaciones/permiso que SOLAPAN una fecha (sin filtrar por médico) — el BE ya
+// acepta `staffId` opcional (verificado en schema.d.ts, DoctorAbsencesController_list v2). Para "quién
+// está libre hoy" (médicos-libres-widget).
+export async function listActiveDoctorAbsences(date: string, centroId?: string): Promise<DoctorAbsence[]> {
+  const sp = new URLSearchParams({ from: date, to: date });
   return asArray<DoctorAbsence>(await apiFetch(`/doctors/absences?${sp.toString()}`, {}, centroId));
 }
 export function createDoctorAbsence(payload: DoctorAbsencePayload, centroId?: string): Promise<DoctorAbsence> {

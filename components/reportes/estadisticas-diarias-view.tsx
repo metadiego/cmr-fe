@@ -1,12 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { revenueLines, showReturned } from "@/lib/estadisticas/daily-revenue";
+import { dailyRowShowsUnits } from "@/lib/estadisticas/services";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PrinterIcon, WhatsappIcon, Mail01Icon, Copy01Icon } from "@hugeicons/core-free-icons";
+import { PrinterIcon, WhatsappIcon, Mail01Icon, Copy01Icon, Camera01Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
+import { toBlob } from "html-to-image";
 
 import { getEstadisticasDiarias, type EstadisticasDiarias } from "@/lib/api/estadisticas";
+import { getServicios } from "@/lib/api/servicios";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { Button } from "@/components/ui/button";
@@ -14,6 +18,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const REVENUE_LABEL = { gross: "ingresoBruto", refunds: "devoluciones", net: "ingresoNeto" } as const;
 const nf = new Intl.NumberFormat("en-US");
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -65,6 +70,23 @@ export function EstadisticasDiariasView() {
   const [desde, setDesde] = React.useState(hoy);
   const [hasta, setHasta] = React.useState(hoy);
   const [query, setQuery] = React.useState({ desde: hoy, hasta: hoy });
+  // «Devueltos» per service: hidden by default (owner, 11-nov: it can confuse), kept as a view option —
+  // remembered in this browser only. The money block (bruto / devoluciones / neto) always shows.
+  const [verDevueltos, setVerDevueltos] = React.useState(() => {
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem("cmr.dailyStats.showReturned") === "1";
+    } catch {
+      return false;
+    }
+  });
+  function toggleDevueltos(v: boolean) {
+    setVerDevueltos(v);
+    try {
+      window.localStorage.setItem("cmr.dailyStats.showReturned", v ? "1" : "0");
+    } catch {
+      /* storage blocked: the choice lasts this visit */
+    }
+  }
 
   const res = useResource<EstadisticasDiarias | null>(
     () => (gate.centro ? getEstadisticasDiarias(query.desde, query.hasta || undefined, gate.centro) : Promise.resolve(null)),
@@ -73,23 +95,40 @@ export function EstadisticasDiariasView() {
   const data = res.state.kind === "ok" ? res.state.data : null;
   const cargando = res.state.kind === "loading";
 
+  // Qué servicios declaran su propia unidad (owner's call, 11-nov: por configuración, NUNCA por
+  // nombre — ver lib/estadisticas/services.ts). Catálogo del centro activo, no del rango elegido.
+  const serviciosRes = useResource<ReadonlySet<string>>(
+    () =>
+      gate.centro
+        ? getServicios(gate.centro).then((ss) => new Set(ss.filter((s) => s.statisticsUnitKey).map((s) => s.slug)))
+        : Promise.resolve(new Set<string>()),
+    [gate.centro],
+  );
+  const serviciosData = serviciosRes.state.kind === "ok" ? serviciosRes.state.data : null;
+  const slugsConUnidad = React.useMemo(() => serviciosData ?? new Set<string>(), [serviciosData]);
+
   const rangoLabel = query.hasta && query.hasta !== query.desde ? `${fmtFecha(query.desde)} – ${fmtFecha(query.hasta)}` : fmtFecha(query.desde);
 
   // Reporte en TEXTO PLANO (para WhatsApp/Correo/Copiar): se lee en el móvil sin abrir nada.
   const texto = React.useMemo(() => {
     if (!data) return "";
-    const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue;
+    const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue && !data.refunds;
     const lineas = [`C.M.R. — ${gate.centroNombre}    ${rangoLabel}`, ""];
     if (vacio) { lineas.push(t("sinActividad")); return lineas.join("\n"); }
-    lineas.push(`${t("atencionMedica")}   N: ${data.medicalCare.newCount}   S: ${data.medicalCare.followUpCount}   ${t("total")} ${data.medicalCare.total}`, "");
+    lineas.push(`${t("atencionMedica")}   ${t("nuevos")}: ${data.medicalCare.newCount}   ${t("seguimiento")}: ${data.medicalCare.followUpCount}   ${t("total")} ${data.medicalCare.total}`, "");
     if (data.services.length) {
       lineas.push(`${t("servicios")}   (${t("col.aplicados")} / ${t("col.vendidos")})`);
-      data.services.forEach((s) => lineas.push(`  ${s.name}: ${s.applied} / ${s.sold}`));
+      data.services.forEach((s) => {
+        const aplicado = dailyRowShowsUnits(s.slug, slugsConUnidad)
+          ? t("col.aplicadosUnidades", { visits: s.visits, therapies: s.therapies })
+          : String(s.therapies);
+        lineas.push(`  ${s.name}: ${aplicado} / ${s.sold}`);
+      });
       lineas.push("");
     }
-    lineas.push(`${t("ingresoBruto")}   ${money.format(data.grossRevenue ?? 0)}`);
+    revenueLines(data).forEach((l) => lineas.push(`${t(REVENUE_LABEL[l.key])}   ${money.format(l.amount)}`));
     return lineas.join("\n");
-  }, [data, gate.centroNombre, rangoLabel, t]);
+  }, [data, gate.centroNombre, rangoLabel, t, slugsConUnidad]);
 
   function imprimir() {
     const el = printRef.current;
@@ -115,6 +154,51 @@ export function EstadisticasDiariasView() {
     try { await navigator.clipboard.writeText(texto); toast.success(t("copiado")); } catch { /* portapapeles bloqueado */ }
   }
 
+  const [snapshotBusy, setSnapshotBusy] = React.useState(false);
+  // Imagen de la tarjeta (no texto) para pegar directo en WhatsApp Web — pedido del dueño, 11-nov.
+  // NO se captura el nodo en pantalla: sus colores de Tailwind v4 resuelven a oklch()/lab() (verificado:
+  // getComputedStyle da "lab(100 0 0)"), que el rasterizador SVG de html-to-image devuelve en blanco,
+  // sin lanzar ningún error (bug real, encontrado por el dueño pegando una imagen en blanco). Se arma el
+  // MISMO HTML que ya usa Imprimir (el.innerHTML + PRINT_CSS, colores planos, cero oklch) en un iframe
+  // aislado, y se fotografía ESO — ya probado por años en Imprimir, no un camino nuevo.
+  async function snapshot() {
+    const el = printRef.current;
+    if (!el || snapshotBusy) return;
+    setSnapshotBusy(true);
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.style.cssText = "position:fixed;left:-9999px;top:0;width:820px;height:1400px;border:0;";
+    document.body.appendChild(iframe);
+    try {
+      const doc = iframe.contentDocument;
+      if (!doc) throw new Error("no iframe document");
+      doc.open();
+      doc.write(`<!doctype html><html><head><meta charset="utf-8"><style>${PRINT_CSS}</style></head><body>${el.innerHTML}</body></html>`);
+      doc.close();
+      await new Promise((resolve) => setTimeout(resolve, 50)); // deja pintar el iframe antes de fotografiarlo
+      const target = doc.querySelector(".card") ?? doc.body;
+      const blob = await toBlob(target as HTMLElement, { backgroundColor: "#ffffff", pixelRatio: 2 });
+      if (!blob) throw new Error("no blob");
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        toast.success(t("snapshotCopiado"));
+      } catch {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `estadisticas-diarias-${query.desde}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(t("snapshotDescargado"));
+      }
+    } catch {
+      toast.error(t("snapshotError"));
+    } finally {
+      document.body.removeChild(iframe);
+      setSnapshotBusy(false);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
@@ -124,6 +208,9 @@ export function EstadisticasDiariasView() {
           <Button variant="outline" size="sm" onClick={whatsapp} disabled={!texto}><HugeiconsIcon icon={WhatsappIcon} className="size-4" /> {t("whatsapp")}</Button>
           <Button variant="outline" size="sm" onClick={correo} disabled={!texto}><HugeiconsIcon icon={Mail01Icon} className="size-4" /> {t("correo")}</Button>
           <Button variant="outline" size="sm" onClick={copiar} disabled={!texto}><HugeiconsIcon icon={Copy01Icon} className="size-4" /> {t("copiar")}</Button>
+          <Button variant="outline" size="sm" onClick={snapshot} disabled={!data || snapshotBusy} title={t("snapshotTip")}>
+            <HugeiconsIcon icon={Camera01Icon} className="size-4" /> {t("snapshot")}
+          </Button>
         </div>
       </div>
 
@@ -138,6 +225,10 @@ export function EstadisticasDiariasView() {
           <DatePicker value={hasta} min={desde} onChange={setHasta} className="h-9 w-[160px]" clearable />
         </label>
         <Button className="h-9" onClick={() => setQuery({ desde, hasta })}>{t("generar")}</Button>
+        <label className="ml-auto flex h-9 items-center gap-2 text-xs text-muted-foreground">
+          <input type="checkbox" checked={verDevueltos} onChange={(e) => toggleDevueltos(e.target.checked)} className="size-4" />
+          {t("verDevueltos")}
+        </label>
       </div>
 
       {gate.cargando ? (
@@ -145,7 +236,7 @@ export function EstadisticasDiariasView() {
       ) : gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
-        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
+        <CentroPicker centros={gate.centros} onPick={gate.pick} />
       ) : (
         <>
           {cargando && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
@@ -155,7 +246,14 @@ export function EstadisticasDiariasView() {
           {/* Región imprimible: una sola tarjeta, la del centro activo. */}
           {data && (
             <div ref={printRef} className="mx-auto max-w-3xl">
-              <DiariaCard centro={gate.centroNombre} fecha={rangoLabel} data={data} t={t} />
+              <DiariaCard
+                centro={gate.centroNombre}
+                fecha={rangoLabel}
+                data={data}
+                t={t}
+                verDevueltos={verDevueltos}
+                slugsConUnidad={slugsConUnidad}
+              />
             </div>
           )}
         </>
@@ -164,8 +262,23 @@ export function EstadisticasDiariasView() {
   );
 }
 
-function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string; data: EstadisticasDiarias; t: (k: string) => string }) {
-  const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue;
+function DiariaCard({
+  centro,
+  fecha,
+  data,
+  t,
+  verDevueltos,
+  slugsConUnidad,
+}: {
+  centro: string;
+  fecha: string;
+  data: EstadisticasDiarias;
+  t: (k: string, values?: Record<string, string | number>) => string;
+  verDevueltos: boolean;
+  slugsConUnidad: ReadonlySet<string>;
+}) {
+  const devueltos = verDevueltos && showReturned(data);
+  const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue && !data.refunds;
   return (
     <div className="card rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       <div className="text-center">
@@ -181,8 +294,8 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
           <div className="blk">
             <h3 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("atencionMedica")}</h3>
             <div className="am flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
-              <span title={t("tip.nuevas")}><span className="font-semibold">N:</span> {nf.format(data.medicalCare.newCount)}</span>
-              <span title={t("tip.seguimientos")}><span className="font-semibold">S:</span> {nf.format(data.medicalCare.followUpCount)}</span>
+              <span title={t("tip.nuevas")}><span className="font-semibold">{t("nuevos")}:</span> {nf.format(data.medicalCare.newCount)}</span>
+              <span title={t("tip.seguimientos")}><span className="font-semibold">{t("seguimiento")}:</span> {nf.format(data.medicalCare.followUpCount)}</span>
               <span className="ml-auto font-semibold">{t("total")} {nf.format(data.medicalCare.total)}</span>
             </div>
           </div>
@@ -197,14 +310,23 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
                     <th className="py-1 pr-3 font-semibold">{t("col.servicio")}</th>
                     <th className="r px-3 py-1 text-right font-semibold" title={t("tip.aplicados")}>{t("col.aplicados")}</th>
                     <th className="r px-3 py-1 text-right font-semibold" title={t("tip.vendidos")}>{t("col.vendidos")}</th>
+                    {devueltos && <th className="r px-3 py-1 text-right font-semibold" title={t("tip.devueltos")}>{t("col.devueltos")}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {data.services.map((s) => (
                     <tr key={s.slug}>
                       <td className="py-1.5 pr-3 font-medium">{s.name}</td>
-                      <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.applied)}</td>
+                      <td
+                        className="r px-3 py-1.5 text-right tabular-nums"
+                        title={dailyRowShowsUnits(s.slug, slugsConUnidad) ? t("tip.aplicadosUnidades") : undefined}
+                      >
+                        {dailyRowShowsUnits(s.slug, slugsConUnidad)
+                          ? t("col.aplicadosUnidades", { visits: s.visits, therapies: s.therapies })
+                          : nf.format(s.therapies)}
+                      </td>
                       <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.sold)}</td>
+                      {devueltos && <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.returned ?? 0)}</td>}
                     </tr>
                   ))}
                 </tbody>
@@ -212,10 +334,14 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
             </div>
           )}
 
-          {/* Ingreso bruto */}
-          <div className="ingreso flex items-center justify-between border-t-2 border-foreground pt-3 text-base font-bold">
-            <span>{t("ingresoBruto")}</span>
-            <span className="tabular-nums">{money.format(data.grossRevenue ?? 0)}</span>
+          {/* Ingreso bruto · Devoluciones (−) · Ingreso NETO, the headline (BE #541; = the day's cash count). */}
+          <div className="ingreso space-y-1 border-t-2 border-foreground pt-3">
+            {revenueLines(data).map((l) => (
+              <div key={l.key} className={"flex items-center justify-between " + (l.headline ? "text-base font-bold" : "text-sm")}>
+                <span>{t(REVENUE_LABEL[l.key])}</span>
+                <span className={"tabular-nums " + (l.amount < 0 ? "text-destructive" : "")}>{money.format(l.amount)}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
