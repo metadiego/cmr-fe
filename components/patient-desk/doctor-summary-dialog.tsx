@@ -115,6 +115,11 @@ export function DoctorSummaryDialog({
         return r.invoiceAmount == null ? "—" : money(r.invoiceAmount)
       case "record":
         return rowRecord(r) ?? "—"
+      // The BE's field is plural (paymentMethods); the generic fallback below reads properties by
+      // the column's own name, so without this case it always read undefined and the filter/dropdown
+      // for this column could never match what the cell actually shows.
+      case "paymentMethod":
+        return r.paymentMethods ?? "—"
       default:
         return String((r as unknown as Record<string, unknown>)[c] ?? "—")
     }
