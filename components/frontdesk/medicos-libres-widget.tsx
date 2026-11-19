@@ -70,10 +70,9 @@ export function MedicosLibresWidget({
   const carried = summaryRes.state.kind === "ok" && summaryRes.state.data ? totalCarried(summaryRes.state.data.totals.byDoctor) : 0
 
   const ocupadoRow = (d: DoctorSummaryByDoctor) => {
-    // Two different questions, each on its own line, on purpose (owner, 18-nov-2026: these are for
-    // staff who must never have to add numbers up to trust the screen) — "today's visit types" and
-    // "where they are right now" are different counts (today's types include ones not arrived yet),
-    // so a doctor's type tally never equals "lleva": on one run-on line that reads as a mismatch.
+    // The BE answers only attended appointments (cmr-be #638, owner 18-nov-2026: this screen is
+    // "patients already seen", never scheduled ones) — the type tally now always sums to the same
+    // number on the badge, so there is only one question here, not two competing ones.
     const types = d.byType.map((ty) => `${ty.name} ${ty.count}`).join(" · ")
     return (
       <button
@@ -89,13 +88,10 @@ export function MedicosLibresWidget({
         <span className="flex items-center justify-between font-medium">
           <span>{d.doctor ?? tDoctor("noDoctor")}</span>
           <Badge variant="secondary" className="tabular-nums">
-            {tDoctor("carriedN", { n: d.carried })}
+            {tDoctor("attendedN", { n: d.attended })}
           </Badge>
         </span>
-        <span className="text-xs text-muted-foreground">
-          {tDoctor("rightNow", { attended: d.attended, inConsultation: d.inConsultation, waiting: d.waiting })}
-        </span>
-        {types && <span className="text-xs text-muted-foreground">{tDoctor("typeBreakdown", { types })}</span>}
+        {types && <span className="text-xs text-muted-foreground">{types}</span>}
       </button>
     )
   }

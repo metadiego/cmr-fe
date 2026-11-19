@@ -4,15 +4,16 @@
 // handoff docs/specs/resumen-por-medico-handoff-be.md).
 
 import { toggleColumn, visibleColumns } from "./report-columns.ts";
-import type { DoctorSummaryByDoctor, DoctorSummaryStage } from "@/lib/api/doctor-summary";
+import type { DoctorSummaryByDoctor } from "@/lib/api/doctor-summary";
 
+// No "stage" column (cmr-be #638): the BE now answers only attended appointments, so it would always
+// read "Atendida" — a column that never varies is noise, not information.
 export const DOCTOR_SUMMARY_COLUMNS = [
   "record",
   "patient",
   "doctor",
   "nurse",
   "type",
-  "stage",
   "time",
   "frontDesk",
   "amount",
@@ -56,6 +57,3 @@ export function sortedByDoctor(byDoctor: readonly DoctorSummaryByDoctor[]): Doct
     a.doctorId == null ? 1 : b.doctorId == null ? -1 : b.carried - a.carried || (a.doctor ?? "").localeCompare(b.doctor ?? "")
   );
 }
-
-/** A closed enum (the BE sends no display string for it), unlike `type.name` which is already data. */
-export const DOCTOR_SUMMARY_STAGES: readonly DoctorSummaryStage[] = ["scheduled", "arrived", "in_consultation", "attended"];

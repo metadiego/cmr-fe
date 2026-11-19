@@ -81,7 +81,6 @@ export function DoctorSummaryDialog({
   const dayText = day ? format.dateTime(day, "dayLong") : date
   const title = doctorName ? t("titleDoctor", { doctor: doctorName }) : t("title")
   const subtitle = `${dayText} · ${centerName}`
-  const stageLabel = (s: DoctorSummaryRow["stage"]) => t(`stage.${s}`)
 
   const cell = (r: DoctorSummaryRow, c: DoctorSummaryColumn): React.ReactNode => {
     switch (c) {
@@ -95,8 +94,6 @@ export function DoctorSummaryDialog({
         return r.nurse ?? "—"
       case "type":
         return r.type?.name ?? "—"
-      case "stage":
-        return stageLabel(r.stage)
       case "time":
         return r.time ?? "—"
       case "frontDesk":
@@ -111,8 +108,6 @@ export function DoctorSummaryDialog({
     switch (c) {
       case "type":
         return r.type?.name ?? "—"
-      case "stage":
-        return stageLabel(r.stage)
       case "amount":
         return r.invoiceAmount == null ? "—" : money(r.invoiceAmount)
       case "record":
@@ -177,8 +172,11 @@ export function DoctorSummaryDialog({
   )
 }
 
-// Straight from the BE's totals.byDoctor (cmr-be #637) — not recomputed from what is on screen, per
-// the handoff: the breakdown blocks always speak for the whole day, filtered or not.
+// Straight from the BE's totals.byDoctor (cmr-be #637/#638) — not recomputed from what is on screen,
+// per the handoff: the breakdown blocks always speak for the whole day, filtered or not. One column:
+// the BE returns only attended appointments (cmr-be #638), so "carried"/waiting/in-consultation would
+// only ever read the same number or zero — showing them invited staff to add them up against the type
+// breakdown below and expect a different sum (owner, 18-nov-2026).
 function ByDoctor({ title, rows }: { title: string; rows: DoctorSummary["totals"]["byDoctor"] }) {
   const t = useTranslations("patientDesk.doctorSummary")
   return (
@@ -187,18 +185,14 @@ function ByDoctor({ title, rows }: { title: string; rows: DoctorSummary["totals"
         <TableHeader>
           <TableRow>
             <TableHead>{title}</TableHead>
-            <TableHead className="w-20 text-right">{t("carried")}</TableHead>
-            <TableHead className="w-20 text-right">{t("stage.attended")}</TableHead>
-            <TableHead className="w-20 text-right">{t("waiting")}</TableHead>
+            <TableHead className="w-24 text-right">{t("attendedN")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((d) => (
             <TableRow key={d.doctorId ?? "—"}>
               <TableCell>{d.doctor ?? t("noDoctor")}</TableCell>
-              <TableCell className="text-right tabular-nums font-semibold">{d.carried}</TableCell>
-              <TableCell className="text-right tabular-nums">{d.attended}</TableCell>
-              <TableCell className="text-right tabular-nums">{d.waiting}</TableCell>
+              <TableCell className="text-right tabular-nums font-semibold">{d.attended}</TableCell>
             </TableRow>
           ))}
         </TableBody>

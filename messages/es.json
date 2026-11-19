@@ -5818,12 +5818,9 @@
       "loadError": "No se pudo cargar el resumen.",
       "empty": "No hay consultas hoy.",
       "noDoctor": "Aún sin médico",
-      "carriedN": "lleva {n}",
-      "carried": "Lleva",
-      "waiting": "Esperando",
+      "attendedN": "{n} atendidos",
+      "attended": "Atendidos",
       "count": "Cantidad",
-      "rightNow": "Ahora: {attended} atendidas, {inConsultation} en consulta, {waiting} esperando",
-      "typeBreakdown": "Hoy: {types}",
       "byDoctor": "Por médico",
       "byType": "Por tipo",
       "col": {
@@ -5832,17 +5829,10 @@
         "doctor": "Médico",
         "nurse": "Enfermera",
         "type": "Tipo",
-        "stage": "Etapa",
         "time": "Hora",
         "frontDesk": "Recepción",
         "amount": "Monto",
         "paymentMethod": "Método de pago"
-      },
-      "stage": {
-        "scheduled": "Agendada",
-        "arrived": "Llegó",
-        "in_consultation": "En consulta",
-        "attended": "Atendida"
       }
     }
   },
