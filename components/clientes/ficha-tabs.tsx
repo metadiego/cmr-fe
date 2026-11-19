@@ -226,7 +226,9 @@ export function FichaTerapias({
     .sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")))
     .filter((s) => !filter || serviceKey(s) === filter);
 
-  const filteredService = filter ? hist.find((s) => s.serviceId === filter) : undefined;
+  // With ONE service there is no filter to pick, so that service is the series.
+  const seriesKey = filter || (services.length === 1 ? services[0][0] : "");
+  const filteredService = seriesKey ? hist.find((s) => s.serviceId === seriesKey) : undefined;
   const canRenumber = canFix && !!filteredService && rows.some((s) => s.migrated);
 
   if (res.state.kind === "loading") return <LoadingPanel />;
