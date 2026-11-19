@@ -12,6 +12,7 @@ test("reassignOptions keeps active staff, sorted by full name", () => {
   ]);
   assert.deepEqual(out.map((s) => s.id), ["3", "4", "1"]);
   assert.equal(staffName({ name: "Ana", lastName: null }), "Ana");
+  assert.deepEqual(reassignOptions([{ id: "2", name: "Ana", active: false }], "2").map((s) => s.id), ["2"]);
 });
 
 test("reassignCheck: nothing picked is missing; the same person is not a change", () => {

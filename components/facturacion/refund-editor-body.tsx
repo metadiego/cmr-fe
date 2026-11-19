@@ -16,7 +16,7 @@ import {
   type RefundEditWarning,
 } from "@/lib/api/refund-detail";
 import type { FormaPago } from "@/lib/api/facturas";
-import type { Perfil } from "@/lib/api/profiles";
+import { reassignOptions, staffName, type StaffOption } from "@/lib/facturacion/reassign-user-missing";
 import { getCashPastDayCheck, type CashPastDayCheck } from "@/lib/api/caja";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 export function RefundEditorBody({
   detail,
   formas,
-  perfiles,
+  staff,
   invoiceId,
   devId,
   centro,
@@ -49,7 +49,8 @@ export function RefundEditorBody({
 }: {
   detail: RefundDetail;
   formas: FormaPago[];
-  perfiles: Perfil[];
+  /** Staff of the center: refunds.user_id is a FK to staff(id), never a profile id (cmr-be, 19-nov). */
+  staff: StaffOption[];
   invoiceId: string;
   devId: string;
   centro?: string;
@@ -197,7 +198,7 @@ export function RefundEditorBody({
             <Select value={userId} onValueChange={setUserId}>
               <SelectTrigger size="sm" className="w-full"><SelectValue placeholder={t("atendidoPor")} /></SelectTrigger>
               <SelectContent>
-                {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{[p.name, p.lastName].filter(Boolean).join(" ") || p.email || p.id}</SelectItem>)}
+                {reassignOptions(staff, detail.userId).map((p) => <SelectItem key={p.id} value={p.id}>{staffName(p) || p.id}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

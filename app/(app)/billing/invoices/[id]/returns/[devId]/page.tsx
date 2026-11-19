@@ -9,7 +9,7 @@ import { PrinterIcon, ArrowLeft01Icon, Cancel01Icon, InvoiceIcon, Edit02Icon } f
 
 import { anularDevolucion, getFormasPago, type FormaPago } from "@/lib/api/facturas";
 import { getRefundDetail, type RefundDetail } from "@/lib/api/refund-detail";
-import { getProfiles, type Perfil } from "@/lib/api/profiles";
+import { listPersonalAll } from "@/lib/api/personal";
 import { reassignRefundUser } from "@/lib/api/reassign-user";
 import { ReassignUserDialog } from "@/components/facturacion/reassign-user-dialog";
 import { invoiceDetailHref } from "@/lib/facturacion/invoice-clinics";
@@ -49,8 +49,9 @@ export default function DevolucionDetallePage() {
   const { state, refresh } = useResource<RefundDetail>(() => getRefundDetail(id, devId, centro), [id, devId, centro]);
   const formasRes = useResource<FormaPago[]>(() => getFormasPago(centro), [centro]);
   const formas = formasRes.state.kind === "ok" ? formasRes.state.data : [];
-  const perfilesRes = useResource<Perfil[]>(() => getProfiles(), []);
-  const perfiles = perfilesRes.state.kind === "ok" ? perfilesRes.state.data : [];
+  // «Atendido por» picks STAFF (refunds.user_id → staff.id); inactive ones are fetched so the current one shows.
+  const staffRes = useResource(() => listPersonalAll({ includeInactive: true }, centro), [centro]);
+  const staff = staffRes.state.kind === "ok" ? staffRes.state.data : [];
 
   // Bumped on every save: part of the editor body's `key`, so it remounts and re-seeds every field
   // from the freshly refetched detail instead of keeping stale typed-over state.
@@ -161,12 +162,12 @@ export default function DevolucionDetallePage() {
               <TabsTrigger value="history">{t("editor.tabHistory")}</TabsTrigger>
             </TabsList>
             <TabsContent value="editor">
-              {formasRes.state.kind !== "loading" && perfilesRes.state.kind !== "loading" && (
+              {formasRes.state.kind !== "loading" && staffRes.state.kind !== "loading" && (
                 <RefundEditorBody
                   key={`${refund.id}|${saveCount}`}
                   detail={refund}
                   formas={formas}
-                  perfiles={perfiles}
+                  staff={staff}
                   invoiceId={id}
                   devId={devId}
                   centro={centro}

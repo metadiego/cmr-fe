@@ -4,9 +4,11 @@ export type StaffOption = { id: string; name?: string | null; lastName?: string 
 
 export const staffName = (s: Pick<StaffOption, "name" | "lastName">): string => [s.name, s.lastName].filter(Boolean).join(" ").trim();
 
-/** Active staff only, by name; the current one stays listed so the picker shows who it is now. */
-export function reassignOptions(staff: StaffOption[]): StaffOption[] {
-  return staff.filter((s) => s.active !== false).sort((a, b) => staffName(a).localeCompare(staffName(b), "es"));
+/** Active staff, by name. `keepId` (who it is now) stays listed even if inactive, so the picker shows it. */
+export function reassignOptions(staff: StaffOption[], keepId?: string | null): StaffOption[] {
+  return staff
+    .filter((s) => s.active !== false || (!!keepId && s.id === keepId))
+    .sort((a, b) => staffName(a).localeCompare(staffName(b), "es"));
 }
 
 /** `filled`: someone is picked. `same`: it is already theirs (nothing to change — a reason, not missing). */
