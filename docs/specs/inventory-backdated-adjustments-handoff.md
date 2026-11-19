@@ -73,7 +73,7 @@ Respuesta real (201, `data`), recortada:
   "products": [{
     "productId": "e9eed314-…", "sku": "vitacintra", "name": "VITAMINA C INTRAVENOSA (…)",
     "delta": 2,
-    "laterCounts": [{ "date": "2026-10-31", "quantity": 133 }, { "date": "2026-11-01", "quantity": 133 }],
+    "laterCounts": [{ "date": "2026-11-15", "netChange": 8050 }, { "date": "2026-11-16", "netChange": -7728 }],  // netChange = lo que el conteo movió ese día (puede ser negativo), NO la cantidad contada
     "effectiveDayBefore": 133, "effectiveDayAfter": 135,
     "todayBefore": 189, "todayAfter": 191, "minAfter": 50,
     "newlyNegativeDays": [], "alreadyNegativeDays": [],

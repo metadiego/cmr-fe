@@ -6634,7 +6634,7 @@
       "today": "Hoy",
       "opening": "Inicial de {month}",
       "negativeDays": "Quedan en negativo: {days}",
-      "laterCounts": "Hay conteos físicos posteriores: {days}",
+      "laterCounts": "Hay conteos físicos posteriores; lo que movió cada uno: {days}",
       "closings": "Cierres posteriores: {n, plural, one {#} other {#}}.",
       "showDays": "Ver día a día ({n})",
       "hideDays": "Ocultar día a día",

@@ -14,7 +14,9 @@ export type BackdateProductImpact = {
   sku: string | null;
   name: string | null;
   delta: number;
-  laterCounts: Array<{ date: string; quantity: number }>;
+  /** What each later physical count MOVED that day (a delta, can be negative), not the counted quantity.
+   *  cmr-be #647 renames `quantity` → `netChange`; read via countMoved. */
+  laterCounts: Array<{ date: string; netChange?: number; quantity?: number }>;
   effectiveDayBefore: number;
   effectiveDayAfter: number;
   todayBefore: number;

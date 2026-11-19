@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { backdateBlock, datesDiffer, dayPR, isFutureDay, isPastDay, maxDaysCheck } from "./backdate.ts";
+import { backdateBlock, countMoved, datesDiffer, dayPR, isFutureDay, isPastDay, maxDaysCheck } from "./backdate.ts";
 
 test("isPastDay / isFutureDay compare calendar days; empty is today", () => {
   assert.equal(isPastDay("2026-10-31", "2026-11-19"), true);
@@ -36,4 +36,10 @@ test("maxDaysCheck: whole numbers 0–366", () => {
   assert.deepEqual(maxDaysCheck("0"), { filled: true, value: 0, invalid: false });
   assert.equal(maxDaysCheck("367").invalid, true);
   assert.equal(maxDaysCheck("4.5").invalid, true);
+});
+
+test("countMoved reads netChange (cmr-be #647) and falls back to quantity; deltas can be negative", () => {
+  assert.equal(countMoved({ netChange: -7728 }), -7728);
+  assert.equal(countMoved({ quantity: 8050 }), 8050);
+  assert.equal(countMoved({ netChange: 5, quantity: 9 }), 5);
 });
