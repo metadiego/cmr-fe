@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/inventory-kardex"
 import {
   defaultKardexRange,
+  groupKardexDayMovements,
   readableDocument,
   sessionLabel,
   validRange,
@@ -103,6 +104,10 @@ export default function DailyKardexPage() {
   const summary = summaryRes.state.kind === "ok" ? summaryRes.state.data : null
   const movements = dayRes.state.kind === "ok" ? dayRes.state.data : null
   const withProportion = daily?.product.capacity != null
+  // One row per delivery, not per raw ledger line (owner, 18-nov-2026: opening a vial and applying
+  // its content are two separate stock movements, but staff reading this screen see one clinical
+  // event — repeating the same patient 2-4 times over was "a complete disaster" to read).
+  const dayGroups = React.useMemo(() => (movements ? groupKardexDayMovements(movements) : []), [movements])
 
   const num = (v: number | null | undefined, decimals = 0) =>
     v == null
@@ -466,41 +471,21 @@ export default function DailyKardexPage() {
                   <TableRow>
                     <TableHead>{t("day.patient")}</TableHead>
                     <TableHead>{t("day.record")}</TableHead>
-                    <TableHead>{t("day.reason")}</TableHead>
-                    <TableHead className="text-right">
-                      {t("day.quantity")}
-                    </TableHead>
                     <TableHead>{t("day.session")}</TableHead>
-                    <TableHead>{t("day.notes")}</TableHead>
+                    <TableHead className="text-right">{t("day.vials")}</TableHead>
+                    <TableHead className="text-right">{t("day.contentAmount")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {movements.map((m) => (
-                    <TableRow key={m.id}>
-                      <TableCell>{m.patient?.name || "—"}</TableCell>
+                  {dayGroups.map((g) => (
+                    <TableRow key={g.key}>
+                      <TableCell>{g.patientName || "—"}</TableCell>
+                      <TableCell className="tabular-nums">{g.medicalRecordNumber ?? "—"}</TableCell>
                       <TableCell className="tabular-nums">
-                        {m.medicalRecordNumber ??
-                          m.patient?.medicalRecordNumber ??
-                          "—"}
+                        {sessionLabel(g.sessionNumber, g.sessionsTotal) ?? "—"}
                       </TableCell>
-                      <TableCell>{reasonText(m.reason)}</TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {num(m.signedQuantity, 0)}
-                        {m.openVial && (
-                          <span className="ml-1 text-xs text-muted-foreground">
-                            {t("day.content")}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="tabular-nums">
-                        {sessionLabel(m.sessionNumber, m.sessionsTotal) ?? "—"}
-                      </TableCell>
-                      <TableCell
-                        className="max-w-xs truncate text-xs text-muted-foreground"
-                        title={m.notes ?? ""}
-                      >
-                        {m.notes ?? ""}
-                      </TableCell>
+                      <TableCell className="text-right tabular-nums">{g.vials === 0 ? "—" : num(g.vials, 0)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{g.content === 0 ? "—" : num(g.content, 0)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

@@ -6427,7 +6427,9 @@
       "quantity": "Quantity",
       "session": "Session",
       "notes": "Note",
-      "content": "(content)"
+      "content": "(content)",
+      "vials": "Vials",
+      "contentAmount": "Content"
     },
     "reason": {
       "apertura": "Opening",
