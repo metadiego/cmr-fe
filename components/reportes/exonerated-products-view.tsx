@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, Download04Icon } from "@hugeicons/core-free-icons";
 
@@ -11,7 +11,7 @@ import { componentAmount } from "@/lib/caja/product-sales";
 import { dueTaxColumns, exoneratedCsvRows } from "@/lib/caja/exonerated-report";
 import { toCsv } from "@/lib/caja/export";
 import { money } from "@/lib/caja/totales";
-import { parseDayUTC, todayPR } from "@/lib/format/fecha";
+import { formatFechaSolo, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -24,7 +24,6 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 export function ExoneratedProductsView() {
   const t = useTranslations("exoneratedProducts");
   const tc = useTranslations("common");
-  const format = useFormatter();
   const centro = useSearchParams().get("centro") ?? undefined;
 
   const today = todayPR();
@@ -40,10 +39,8 @@ export function ExoneratedProductsView() {
   const data = state.kind === "ok" ? state.data : null;
   const invoices = React.useMemo(() => data?.invoices ?? [], [data]);
   const cols = React.useMemo(() => dueTaxColumns(data?.totals.taxWouldBe, invoices), [data, invoices]);
-  const day = (iso?: string) => {
-    const d = parseDayUTC(iso);
-    return d ? format.dateTime(d, "dayShort") : "—";
-  };
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const day = (iso?: string) => (iso ? formatFechaSolo(iso) || "—" : "—");
 
   function previousMonth() {
     const [y, m] = today.split("-").map(Number);

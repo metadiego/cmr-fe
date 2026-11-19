@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl"
 
 import type { KardexOwnerFormat } from "@/lib/api/inventory-kardex"
 import { ownerClosing } from "@/lib/inventory/kardex"
-import { parseDayUTC } from "@/lib/format/fecha"
+import { formatFechaSolo } from "@/lib/format/fecha"
 import {
   Table,
   TableBody,
@@ -35,10 +35,8 @@ export function KardexOwnerSummary({
     v == null
       ? "—"
       : format.number(v, { minimumFractionDigits: d, maximumFractionDigits: 2 })
-  const dayText = (d: string) => {
-    const date = parseDayUTC(d.slice(0, 10))
-    return date ? format.dateTime(date, "dayShort") : d
-  }
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const dayText = (d: string) => formatFechaSolo(d.slice(0, 10)) || d
   const reasonText = (r: string | null) =>
     !r ? "" : tk.has(`reason.${r}`) ? tk(`reason.${r}`) : r
   // A mismatch would mean the BE and the sheet disagree: show it instead of hiding it.

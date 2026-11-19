@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 
 import { getReceipt, listReceipts, type Receipt, type ReceiptRow } from "@/lib/api/inventory-receipts";
 import { last30Days, lineTotal, receiptTotals } from "@/lib/inventory/receipts";
-import { parseDayUTC, todayPR } from "@/lib/format/fecha";
+import { formatFechaSolo, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { Button } from "@/components/ui/button";
@@ -41,10 +41,8 @@ export function ReceiptsList() {
   const rows = listRes.state.kind === "ok" ? listRes.state.data : [];
   const totals = receiptTotals(rows);
   const centerName = (id: string, fallback?: string | null) => fallback || gate.centros.find((c) => c.id === id)?.name || "—";
-  const dayText = (d: string | null) => {
-    const date = d ? parseDayUTC(d.slice(0, 10)) : null;
-    return date ? format.dateTime(date, "dayShort") : "—";
-  };
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const dayText = (d: string | null) => (d ? formatFechaSolo(d.slice(0, 10)) || "—" : "—");
 
   return (
     <PageContainer className="w-full">
@@ -162,10 +160,8 @@ function ReceiptDialog({ row, onClose, centerLabel }: { row: ReceiptRow | null; 
   const printRef = React.useRef<HTMLDivElement>(null);
   const receipt = res.state.kind === "ok" ? res.state.data : null;
 
-  const dayText = (d: string | null) => {
-    const date = d ? parseDayUTC(d.slice(0, 10)) : null;
-    return date ? format.dateTime(date, "dayShort") : "—";
-  };
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const dayText = (d: string | null) => (d ? formatFechaSolo(d.slice(0, 10)) || "—" : "—");
 
   return (
     <Dialog open={!!row} onOpenChange={(o) => !o && onClose()}>

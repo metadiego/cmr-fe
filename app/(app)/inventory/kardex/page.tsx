@@ -17,7 +17,7 @@ import {
   sessionLabel,
   validRange,
 } from "@/lib/inventory/kardex"
-import { parseDayUTC, todayPR } from "@/lib/format/fecha"
+import { formatFechaSolo, todayPR } from "@/lib/format/fecha"
 import { useResource } from "@/hooks/use-resource"
 import { useCentroGate } from "@/hooks/use-centro-gate"
 import { ProductoPicker } from "@/components/inventario/producto-picker"
@@ -111,10 +111,9 @@ export default function DailyKardexPage() {
           minimumFractionDigits: decimals,
           maximumFractionDigits: 2,
         })
-  const dayText = (d: string) => {
-    const date = parseDayUTC(d)
-    return date ? format.dateTime(date, "dayShort") : d
-  }
+  // MM/DD/YYYY always (business standard, independent of the language picker — same reasoning as
+  // the 24h clock / USD money in i18n/formats.ts: a numeral order, not a translation).
+  const dayText = (d: string) => formatFechaSolo(d) || d
   // reason = movement_reasons.slug; a new reason is a DB row, so an unknown slug shows as-is.
   const reasonText = (r: string | null | undefined) =>
     !r ? "—" : t.has(`reason.${r}`) ? t(`reason.${r}`) : r

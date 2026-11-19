@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 
 import { getAdjustment, listAdjustments, patientName, type AdjustmentDetail, type AdjustmentRow } from "@/lib/api/inventory-adjustments";
 import { last30Days } from "@/lib/inventory/receipts";
-import { parseDayUTC, todayPR } from "@/lib/format/fecha";
+import { formatFechaSolo, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -29,10 +29,8 @@ export function AdjustmentsList({ centerId, centerName, reloadKey }: { centerId:
   const res = useResource<AdjustmentRow[]>(() => listAdjustments({ from, to, centerId }), [from, to, centerId, reloadKey]);
   const rows = res.state.kind === "ok" ? res.state.data : [];
   const reasonText = (r: string | null) => (!r ? "—" : tk.has(`reason.${r}`) ? tk(`reason.${r}`) : r);
-  const dayText = (d: string) => {
-    const date = parseDayUTC(d.slice(0, 10));
-    return date ? format.dateTime(date, "dayShort") : d;
-  };
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const dayText = (d: string) => formatFechaSolo(d.slice(0, 10)) || d;
   const signed = (n: number) => `${n > 0 ? "+" : ""}${format.number(n)}`;
 
   return (

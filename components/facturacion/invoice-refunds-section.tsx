@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { listDevolucionesDeFactura, getReciboDevolucion, type Devolucion, type ReciboDevolucion } from "@/lib/api/facturas";
 import { cantidadDevuelta } from "@/lib/factura/build-recibo";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -22,7 +23,6 @@ interface Props {
 export function InvoiceRefundsSection({ invoiceId, centerId }: Props) {
   const t = useTranslations("devoluciones");
   const tEstado = useTranslations("devoluciones.estado");
-  const format = useFormatter();
   const [rows, setRows] = React.useState<Array<Devolucion & { recibo: ReciboDevolucion | null }>>([]);
 
   React.useEffect(() => {
@@ -62,7 +62,7 @@ export function InvoiceRefundsSection({ invoiceId, centerId }: Props) {
                 {d.displayNumber ?? "—"}
               </Link>
               <span className="ml-2 text-sm text-muted-foreground tabular-nums">
-                {d.date ? format.dateTime(new Date(d.date), "dayShort") : "—"}
+                {d.date ? formatFechaSolo(d.date) || "—" : "—"}
               </span>
               <Badge variant={d.status === "anulada" ? "destructive" : "success"} className="ml-2">
                 {tEstado.has(String(d.status)) ? tEstado(String(d.status)) : String(d.status ?? "—")}

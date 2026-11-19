@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, ArrowLeft01Icon, Cancel01Icon, InvoiceIcon } from "@hugeicons/core-free-icons";
 
@@ -14,6 +14,7 @@ import { invoiceDetailHref } from "@/lib/facturacion/invoice-clinics";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { voidReasonMissing } from "@/lib/facturacion/void-reason-missing";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +42,6 @@ export default function DevolucionDetallePage() {
   const t = useTranslations("devoluciones");
   const tEstado = useTranslations("devoluciones.estado");
   const tRoot = useTranslations();
-  const format = useFormatter();
   const { can } = useCan();
 
   const { state, refresh } = useResource<RefundDetail>(() => getRefundDetail(id, devId, centro), [id, devId, centro]);
@@ -128,7 +128,7 @@ export default function DevolucionDetallePage() {
 
           {refund.status === "anulada" && (
             <p className="text-sm text-destructive">
-              {t("anuladaInfo", { fecha: refund.cancelledAt ? format.dateTime(new Date(refund.cancelledAt), "dayShort") : "—", quien: refund.cancelledByName || "—" })}
+              {t("anuladaInfo", { fecha: refund.cancelledAt ? formatFechaSolo(refund.cancelledAt) : "—", quien: refund.cancelledByName || "—" })}
               {refund.cancellationReason && <span className="block">{refund.cancellationReason}</span>}
             </p>
           )}

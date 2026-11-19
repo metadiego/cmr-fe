@@ -6,7 +6,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { listUnlinkedMeasurements } from "@/lib/api/body-measurements";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { valueEntries, type UnlinkedReading } from "@/lib/body-measurements/unlinked";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,10 +30,8 @@ export function UnlinkedMeasurements() {
   const { state, reload } = useResource(() => listUnlinkedMeasurements({ from }), [from]);
   const canWrite = can("body_measurements.write");
 
-  const dayOf = (iso: string) => {
-    const d = parseDayUTC(iso);
-    return d ? format.dateTime(d, "dayShort") : iso;
-  };
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const dayOf = (iso: string) => formatFechaSolo(iso) || iso;
   const label = (k: string) => (t.has(`field.${k}`) ? t(`field.${k}`) : k);
   const rows = state.kind === "ok" ? state.data : [];
 

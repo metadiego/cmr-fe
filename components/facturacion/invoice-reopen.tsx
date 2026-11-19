@@ -12,7 +12,7 @@ import { apiErrorLabel } from "@/lib/api/errors";
 import { reopeningChanges, type DiffInvoice, type InvoiceChange } from "@/lib/factura/reopen-diff";
 import { reopenMissing } from "@/lib/facturacion/reopen-missing";
 import { money } from "@/lib/caja/totales";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -155,10 +155,8 @@ export function InvoiceReopenings({ invoiceId, centerId, invoice }: HistoryProps
     rows.map((r) => r.snapshot as DiffInvoice),
     invoice as unknown as DiffInvoice,
   );
-  const day = (v: unknown) => {
-    const d = parseDayUTC(v);
-    return d ? format.dateTime(d, "dayShort") : "—";
-  };
+  // MM/DD/YYYY always (business standard, independent of the language picker).
+  const day = (v: unknown) => formatFechaSolo(v) || "—";
 
   function describe(c: InvoiceChange): string {
     switch (c.kind) {
