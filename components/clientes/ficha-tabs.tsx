@@ -6,7 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Clock01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 
 import { listCitasEveryCenter, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
-import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
+import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/patient-therapy-history";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { parseAcciones } from "@/lib/frontdesk/acciones";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";

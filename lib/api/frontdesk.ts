@@ -519,34 +519,6 @@ export function getNurseStatusTipos(centroId?: string): Promise<NurseStatusTipo[
 export function getNurseStatusActuales(fecha: string, centroId?: string): Promise<NurseStatusActual[]> {
   return apiFetch<NurseStatusActual[]>(`/frontdesk/nurse-status?date=${fecha}`, {}, centroId);
 }
-// Historial de terapias del paciente por servicio (PR #148) — alimenta el modal "Historial de terapias".
-// Todo proyectado por el BE (X/Y, áreas, staff); el FE solo pinta. Migradas viejas → sesionNumero/staff null.
-// El nombre del servicio viaja en INGLÉS bajo v2 (`serviceName`); `sesionNumero`/`areas`/`staffNombre` NO
-// están en el mapa y quedan en español. Handoff HANDOFF-terapias-del-paciente-sin-guiones.
-export type HistorialSesion = {
-  id: string;
-  date: string;
-  status: string;
-  serviceId: string;
-  serviceName: string | null;
-  sesionNumero: number | null;
-  totalSessions: number | null;
-  areas: number | null;
-  staffNombre: string | null;
-  /** Came from the legacy system: its «n/m» is its own text, fixed with legacy-label (cmr-be #641). */
-  migrated?: boolean;
-};
-export function getHistorialPaciente(
-  pacienteId: string,
-  servicioId?: string,
-  centroId?: string,
-): Promise<HistorialSesion[]> {
-  const qs = servicioId ? `?serviceId=${encodeURIComponent(servicioId)}` : "";
-  return apiFetch<unknown>(`/frontdesk/pacientes/${pacienteId}/historial${qs}`, {}, centroId).then((r) =>
-    Array.isArray(r) ? (r as HistorialSesion[]) : (((r as { items?: HistorialSesion[] })?.items) ?? []),
-  );
-}
-
 // Carrito de compras de la fila (columna fd_compras). Una línea de compra (paquete de sesiones facturado);
 // `entregadas`/`pendientes` = cuánto le queda al paciente (clave en frontdesk). Contrato:
 // HANDOFF-columna-carrito-compras / cmr-be/docs/specs/frontdesk-columna-compras.md.
