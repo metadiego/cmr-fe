@@ -2740,7 +2740,9 @@
       "byDelivery": "on delivery",
       "compNoReturnable": "not individually returnable",
       "returnOnlyIssued": "Only issued invoices can be returned. This invoice is not issued.",
-      "netExceeds": "The refund cannot exceed the invoice total ({total})."
+      "netExceeds": "The refund cannot exceed the invoice total ({total}).",
+      "legacyRoundingAdjustment": "Legacy rounding adjustment: −{amount}",
+      "returnDoneRounded": "Return recorded (rounding adjustment {amount})"
     },
     "columns": {
       "numero": "No.",
