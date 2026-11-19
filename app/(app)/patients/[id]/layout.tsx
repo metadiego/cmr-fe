@@ -42,6 +42,7 @@ import { CertificacionGastos } from "@/components/clientes/certificacion-gastos"
 import { FichaCitas, FichaTerapias, FichaFacturacion, FichaUltimaVisita } from "@/components/clientes/ficha-tabs";
 import { FichaAsistencia } from "@/components/clientes/ficha-asistencia";
 import { FichaCambioProtocolo } from "@/components/clientes/ficha-cambio-protocolo";
+import { FichaTransferirTratamiento } from "@/components/clientes/ficha-transferir-tratamiento";
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import { OldRecordSuggestionBanner } from "@/components/clientes/old-record-suggestion-banner";
 import { Panel } from "@/components/kit/panel";
@@ -146,6 +147,7 @@ function PacienteDetail({
   const puedeFrontdesk = can("frontdesk.read");
   const puedeProtocolo = can("tratamiento.cambio_protocolo");
   const puedeAsistencia = can("estadisticas.read");
+  const puedeTransferir = can("invoice.transfer");
   const [requestedTab, selectTab] = useTabRoute(PATIENT_TABS);
   // A tab this person may not see (e.g. a shared link to /billing) opens the summary instead.
   const allowed: Record<(typeof PATIENT_TABS.tabs)[number], boolean> = {
@@ -156,6 +158,7 @@ function PacienteDetail({
     billing: puedeFactura,
     documents: puedeFactura,
     "protocol-change": puedeProtocolo,
+    "transfer-treatment": puedeTransferir,
   };
   const tab = allowed[requestedTab] ? requestedTab : "summary";
   const age = ageFrom(p.dateOfBirth);
@@ -277,6 +280,7 @@ function PacienteDetail({
           {puedeFactura && <TabsTrigger value="billing">{t("tabs.billing")}</TabsTrigger>}
           {puedeFactura && <TabsTrigger value="documents">{t("tabs.documents")}</TabsTrigger>}
           {puedeProtocolo && <TabsTrigger value="protocol-change">{t("tabs.protocolChange")}</TabsTrigger>}
+          {puedeTransferir && <TabsTrigger value="transfer-treatment">{t("tabs.transferTreatment")}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="summary">
@@ -346,6 +350,11 @@ function PacienteDetail({
         {puedeProtocolo && (
           <TabsContent value="protocol-change">
             <FichaCambioProtocolo pacienteId={p.id} centro={centroId} />
+          </TabsContent>
+        )}
+        {puedeTransferir && (
+          <TabsContent value="transfer-treatment">
+            <FichaTransferirTratamiento pacienteId={p.id} pacienteNombre={fullName(p)} centro={centroId} />
           </TabsContent>
         )}
       </Tabs>

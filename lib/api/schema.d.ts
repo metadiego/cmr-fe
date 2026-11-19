@@ -25767,6 +25767,170 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventario/ajustes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Los ajustes de un periodo, uno por documento (por defecto, los últimos 30 días).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AjustesController_listar[0]_v1"];
+        put?: never;
+        /**
+         * Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["AjustesController_crear[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/adjustments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Los ajustes de un periodo, uno por documento (por defecto, los últimos 30 días).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AjustesController_listar[1]_v1"];
+        put?: never;
+        /**
+         * Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["AjustesController_crear[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/ajustes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Los ajustes de un periodo, uno por documento (por defecto, los últimos 30 días). */
+        get: operations["AjustesController_listar[2]_v2"];
+        put?: never;
+        /** Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí. */
+        post: operations["AjustesController_crear[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/adjustments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Los ajustes de un periodo, uno por documento (por defecto, los últimos 30 días). */
+        get: operations["AjustesController_listar[3]_v2"];
+        put?: never;
+        /** Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí. */
+        post: operations["AjustesController_crear[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/ajustes/{documentoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Un ajuste como se cargó: cabecera y cada línea con su producto (nombre, sku).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes/{documentoId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AjustesController_detalle[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/adjustments/{documentoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Un ajuste como se cargó: cabecera y cada línea con su producto (nombre, sku).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments/{documentoId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AjustesController_detalle[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/ajustes/{documentoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Un ajuste como se cargó: cabecera y cada línea con su producto (nombre, sku). */
+        get: operations["AjustesController_detalle[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/adjustments/{documentoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Un ajuste como se cargó: cabecera y cada línea con su producto (nombre, sku). */
+        get: operations["AjustesController_detalle[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventario/recepciones/emparejar": {
         parameters: {
             query?: never;
@@ -37594,6 +37758,82 @@ export interface paths {
         put: operations["NotasDiaController_update[3]_v2"];
         post?: never;
         delete: operations["NotasDiaController_remove[3]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/resumen-por-medico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with factura.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/resumen-por-medico`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DoctorDaySummaryController_get[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/summary-by-doctor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with factura.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/summary-by-doctor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DoctorDaySummaryController_get[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/resumen-por-medico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with factura.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary. */
+        get: operations["DoctorDaySummaryController_get[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/summary-by-doctor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with factura.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary. */
+        get: operations["DoctorDaySummaryController_get[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -49933,6 +50173,82 @@ export interface paths {
         };
         /** The export log of every center where the caller holds export.read (`centerIds` narrows). */
         get: operations["ExportController_listJobs_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/resumen-del-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resumen del día de UN servicio: cada sesión asistida (récord, paciente, cantidad, dosis, enfermera, quién la asistió, hora) y los totales, con los viales abiertos. `complete` = todas las sesiones del día asistidas (x/x). Para imprimir/CSV/email: POST /export con recurso frontdesk-day-summary.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/resumen-del-dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ServiceDaySummaryController_get[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/summary-of-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resumen del día de UN servicio: cada sesión asistida (récord, paciente, cantidad, dosis, enfermera, quién la asistió, hora) y los totales, con los viales abiertos. `complete` = todas las sesiones del día asistidas (x/x). Para imprimir/CSV/email: POST /export con recurso frontdesk-day-summary.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/summary-of-day`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ServiceDaySummaryController_get[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/resumen-del-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resumen del día de UN servicio: cada sesión asistida (récord, paciente, cantidad, dosis, enfermera, quién la asistió, hora) y los totales, con los viales abiertos. `complete` = todas las sesiones del día asistidas (x/x). Para imprimir/CSV/email: POST /export con recurso frontdesk-day-summary. */
+        get: operations["ServiceDaySummaryController_get[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/summary-of-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resumen del día de UN servicio: cada sesión asistida (récord, paciente, cantidad, dosis, enfermera, quién la asistió, hora) y los totales, con los viales abiertos. `complete` = todas las sesiones del día asistidas (x/x). Para imprimir/CSV/email: POST /export con recurso frontdesk-day-summary. */
+        get: operations["ServiceDaySummaryController_get[3]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -64134,8 +64450,16 @@ export interface components {
             updatedAt: string;
         };
         TransferirTratamientoDto: {
-            /** Format: uuid */
-            destinationClinicId: string;
+            /**
+             * Format: uuid
+             * @description Omitted = the same center.
+             */
+            destinationClinicId?: string;
+            /**
+             * Format: uuid
+             * @description Another patient receives the sessions (v2 destinationPatientId). Omitted = the same patient.
+             */
+            destinationPatientId?: string;
             sessions?: number;
             /** @enum {string} */
             mode?: "virtual" | "fisica";
@@ -64158,6 +64482,8 @@ export interface components {
             clinicDestinoIdRef?: Record<string, never>;
             patientId: string;
             pacienteIdRef?: Record<string, never>;
+            destinationPatientId: string | null;
+            pacienteDestinoIdRef?: Record<string, never>;
             productId: string;
             productoIdRef?: Record<string, never>;
             sessions: number;
@@ -66984,6 +67310,45 @@ export interface components {
             /** Format: uuid */
             centerId?: string | null;
         };
+        LineaDeAjusteDto: {
+            /** Format: uuid */
+            productId: string;
+            /**
+             * @description Unidades cerradas (viales/unidades), > 0.
+             * @example 1
+             */
+            quantity: number;
+            /**
+             * @description positivo = entra; negativo = sale.
+             * @enum {string}
+             */
+            sign: "positivo" | "negativo";
+            /** Format: uuid */
+            lotId?: string;
+            /** @description Motivo de esta línea (catálogo); si falta, el de la cabecera. */
+            reason?: string;
+            /** @description Nota de esta línea; si falta, la de la cabecera. */
+            notes?: string;
+        };
+        AjustarLoteDto: {
+            /**
+             * Format: uuid
+             * @description Almacén del ajuste; su centro es el del ajuste.
+             */
+            warehouseId: string;
+            /** @description Clave del motivo (catálogo movement_reasons: merma, perdida, vencimiento, correccion…); por defecto correccion. */
+            reason?: string;
+            /** @description Fecha efectiva (ISO); por defecto, ahora. */
+            effectiveDate?: string;
+            /** @description Por qué se ajusta (queda en cada línea sin nota propia). */
+            notes: string;
+            /**
+             * Format: uuid
+             * @description Paciente al que se le dio, si aplica.
+             */
+            patientId?: string;
+            lines: components["schemas"]["LineaDeAjusteDto"][];
+        };
         LineaLeidaDto: {
             texto: string;
             quantity?: number;
@@ -67606,7 +67971,7 @@ export interface components {
             name: string;
             active: boolean;
             /** @enum {string|null} */
-            kardexColumn: "entradas" | "aplicadas" | "ajustes" | null;
+            kardexColumn: "entradas" | "aplicadas" | "salidas" | "ajustes" | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -67621,10 +67986,10 @@ export interface components {
             name?: string;
             active?: boolean;
             /**
-             * @description Daily-kardex column this reason counts in ('entradas' | 'aplicadas' | 'ajustes'); null = ajustes.
+             * @description Daily-kardex column this reason counts in ('entradas' | 'aplicadas' | 'salidas' | 'ajustes'); null = ajustes.
              * @enum {string|null}
              */
-            kardexColumn?: "entradas" | "aplicadas" | "ajustes" | null;
+            kardexColumn?: "entradas" | "aplicadas" | "salidas" | "ajustes" | null;
         };
         CreateMovimientoInventarioDto: {
             /** Format: uuid */
@@ -69459,6 +69824,7 @@ export interface components {
             channel: string;
             destination: string | null;
             configSlug: string | null;
+            filters: Record<string, never> | null;
             rows: number;
             /** @enum {string} */
             status: "generado" | "enviado" | "fallido";
@@ -109643,6 +110009,258 @@ export interface operations {
             };
         };
     };
+    "AjustesController_listar[0]_v1": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_crear[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AjustarLoteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_listar[1]_v1": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_crear[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AjustarLoteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_listar[2]_v2": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_crear[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AjustarLoteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_listar[3]_v2": {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_crear[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AjustarLoteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_detalle[0]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_detalle[1]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_detalle[2]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_detalle[3]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "LecturaDeFacturaController_emparejar[0]_v1": {
         parameters: {
             query?: never;
@@ -126996,6 +127614,110 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DoctorDaySummaryController_get[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Day, YYYY-MM-DD. */
+                date: string;
+                /** @description Only these doctors (staff ids), comma-separated or repeated. */
+                doctorIds?: string[];
+                /** @description true = the whole day (arrived, in consultation, scheduled). Default: only ATTENDED appointments, the patients each doctor already saw. */
+                includePending?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DoctorDaySummaryController_get[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Day, YYYY-MM-DD. */
+                date: string;
+                /** @description Only these doctors (staff ids), comma-separated or repeated. */
+                doctorIds?: string[];
+                /** @description true = the whole day (arrived, in consultation, scheduled). Default: only ATTENDED appointments, the patients each doctor already saw. */
+                includePending?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DoctorDaySummaryController_get[2]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Day, YYYY-MM-DD. */
+                date: string;
+                /** @description Only these doctors (staff ids), comma-separated or repeated. */
+                doctorIds?: string[];
+                /** @description true = the whole day (arrived, in consultation, scheduled). Default: only ATTENDED appointments, the patients each doctor already saw. */
+                includePending?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DoctorDaySummaryController_get[3]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Day, YYYY-MM-DD. */
+                date: string;
+                /** @description Only these doctors (staff ids), comma-separated or repeated. */
+                doctorIds?: string[];
+                /** @description true = the whole day (arrived, in consultation, scheduled). Default: only ATTENDED appointments, the patients each doctor already saw. */
+                includePending?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -145269,6 +145991,102 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExportJobEntity"][];
                 };
+            };
+        };
+    };
+    "ServiceDaySummaryController_get[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Slug (p. ej. vitc) o id del servicio. */
+                service: string;
+                /** @description Día, YYYY-MM-DD. */
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ServiceDaySummaryController_get[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Slug (p. ej. vitc) o id del servicio. */
+                service: string;
+                /** @description Día, YYYY-MM-DD. */
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ServiceDaySummaryController_get[2]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Slug (p. ej. vitc) o id del servicio. */
+                service: string;
+                /** @description Día, YYYY-MM-DD. */
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ServiceDaySummaryController_get[3]_v2": {
+        parameters: {
+            query: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Slug (p. ej. vitc) o id del servicio. */
+                service: string;
+                /** @description Día, YYYY-MM-DD. */
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

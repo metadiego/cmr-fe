@@ -1211,7 +1211,55 @@
       "therapies": "Terapias",
       "billing": "Facturación",
       "protocolChange": "Cambio de protocolo",
-      "attendance": "Asistencia"
+      "attendance": "Asistencia",
+      "transferTreatment": "Transferir tratamiento"
+    },
+    "transferTreatment": {
+      "title": "Transferir tratamiento",
+      "help": "Mueve las sesiones pendientes de un paquete de este paciente a otra persona, a otro centro, o ambos.",
+      "step1": "Qué se transfiere",
+      "noPending": "Este paciente no tiene sesiones pendientes de ningún paquete.",
+      "pendingN": "Pendientes: {n} de {total}",
+      "step2": "A dónde",
+      "scope": {
+        "otherPatient": "A otra persona",
+        "otherClinic": "A otro centro",
+        "both": "A otra persona, en otro centro"
+      },
+      "destinationPatient": "Paciente destino",
+      "searchPatientPlaceholder": "Buscar por nombre o récord…",
+      "searchHint": "Escribe al menos 2 letras.",
+      "changeSelection": "Cambiar",
+      "destinationClinic": "Centro destino",
+      "chooseClinic": "Elige un centro",
+      "sessions": "Sesiones a transferir",
+      "sessionsHint": "Vacío = las {n} pendientes.",
+      "sessionsOutOfRange": "Pon un número entre 1 y {n}.",
+      "nothingPending": "Este paquete no tiene sesiones pendientes.",
+      "mode": "Cómo",
+      "virtual": "Solo el tratamiento",
+      "virtualHelp": "El destino descuenta su propio stock al aplicar.",
+      "fisica": "Tratamiento + inventario",
+      "fisicaHelp": "También mueve el material físico entre almacenes.",
+      "sourceWarehouse": "Almacén origen",
+      "destinationWarehouse": "Almacén destino",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué se transfiere a otra persona…",
+      "confirm": "Transferir",
+      "done": "Transferencia aplicada",
+      "resultTitle": "Quedó así",
+      "resultSource": "En este paciente",
+      "resultDestination": "En el destino",
+      "historyTitle": "Historial de transferencias",
+      "historyEmpty": "Sin transferencias todavía.",
+      "void": "Deshacer",
+      "voidConfirmTitle": "Deshacer la transferencia",
+      "voidConfirmBody": "Las sesiones y, si aplica, el inventario, vuelven al origen.",
+      "voidOk": "Transferencia deshecha",
+      "status": {
+        "aplicada": "Aplicada",
+        "anulada": "Deshecha"
+      }
     },
     "hub": {
       "appointmentsUpcoming": "Próximas",
@@ -3811,6 +3859,12 @@
     "AJUSTE_CANTIDAD_INVALIDA": "Hay una cantidad que no es válida en el ajuste.",
     "AJUSTE_SIGNO_INVALIDO": "Hay una línea sin «Sale» o «Entra».",
     "AJUSTE_PRODUCTO_INEXISTENTE": "Hay un producto que ya no existe en el ajuste."
+  },
+  "transferencia": {
+    "sesionesExcedenDisponible": "Pediste más sesiones de las que quedan pendientes en ese paquete.",
+    "pacienteDestinoNoExiste": "El paciente destino no existe en ese centro.",
+    "nadaCambia": "Elige otra persona, otro centro, o ambos: así no hay nada que transferir.",
+    "motivoObligatorio": "Si va a otra persona, el motivo es obligatorio."
   },
   "configAlta": {
     "title": "Datos obligatorios del paciente",
