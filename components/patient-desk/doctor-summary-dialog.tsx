@@ -185,7 +185,7 @@ function ByDoctor({ title, rows }: { title: string; rows: DoctorSummary["totals"
         <TableHeader>
           <TableRow>
             <TableHead>{title}</TableHead>
-            <TableHead className="w-24 text-right">{t("attendedN")}</TableHead>
+            <TableHead className="w-24 text-right">{t("attended")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
