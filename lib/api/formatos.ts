@@ -52,6 +52,7 @@ export type FormatoCampo = {
   valor?: string | null;
   origen?: string;
   ancho?: number | null; // px of the fill-in line (layout "paginas": Name ____ Date ____ …)
+  unit?: string | null; // printed after the value or blank: «Peso: ____ lb» (GLP-1, cmr-be #660)
 };
 // Sección del documento (dentro de `secciones`, bolsa OPACA → claves en español). El `tipo` discrimina.
 // Ampliado para salir IDÉNTICO al legacy (modelos médicos): además de texto_libre/firmas, se añaden
@@ -143,6 +144,11 @@ export type FormatoRenderMeta = {
   estiloSesion?: "caja" | "franjas";
   camposEnLinea?: string[];
   camposEnPares?: boolean;
+  // Header rows: each row lists `fields[].clave` in order, spread on one line; fields in no row go below,
+  // one per line. Never sent together with camposEnLinea (cmr-be #660, GLP-1 «like the paper»).
+  fieldRows?: string[][];
+  // "compact": one Letter sheet — title on one line, smaller type, lower checklist rows. Absent = normal.
+  density?: "compact" | "normal";
   // Values of the "campos" header written ON a line («NOMBRE DEL PACIENTE: ̲M̲I̲G̲E̲N̲E̲S̲…», legacy `.fill`).
   subrayarValores?: boolean;
   numerarFilas?: string;

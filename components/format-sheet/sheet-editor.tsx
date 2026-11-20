@@ -172,13 +172,20 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
         <div className="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-5">
           {editable.map((f) => (
             <Field key={f.clave} label={fieldLabel(f, tr)} htmlFor={`f-${f.clave}`}>
-              <Input
-                id={`f-${f.clave}`}
-                value={state.fields[f.clave] ?? ""}
-                onChange={(e) => setField(f.clave, e.target.value)}
-                className="h-12 text-base tabular-nums"
-                autoComplete="off"
-              />
+              {/* `unit` (Peso → lb) sits inside the box: the nurse types only the number. */}
+              <div className="relative">
+                <Input
+                  id={`f-${f.clave}`}
+                  value={state.fields[f.clave] ?? ""}
+                  onChange={(e) => setField(f.clave, e.target.value)}
+                  inputMode={f.unit ? "decimal" : undefined}
+                  className={"h-12 text-base tabular-nums" + (f.unit ? " pr-10" : "")}
+                  autoComplete="off"
+                />
+                {f.unit && (
+                  <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">{f.unit}</span>
+                )}
+              </div>
             </Field>
           ))}
         </div>

@@ -13,10 +13,19 @@ import { BodyCompositionSheet } from "@/components/frontdesk/body-composition-sh
 import { ProcedureSheet } from "@/components/frontdesk/procedure-sheet";
 import { RecordSheet } from "@/components/frontdesk/record-sheet";
 import { isRecordSheet } from "@/lib/formatos/record-sheet";
-import { splitInlineFields, chunkPairs } from "@/lib/formatos/inline-fields";
+import { splitInlineFields, chunkPairs, splitFieldRows } from "@/lib/formatos/inline-fields";
 import { rowsForPrint } from "@/lib/formatos/print-rows";
 import { controlHeaderLayout, splitControlTitle } from "@/lib/formatos/control-sheet";
 import { Input } from "@/components/ui/input";
+
+// render.density "compact" (GLP-1 like the paper): everything on ONE Letter sheet.
+const COMPACT_CSS = `
+.formato-compact h2{font-size:13px!important;margin-top:2px!important;white-space:nowrap}
+.formato-compact .formato-campos{gap:8px!important;margin-top:10px!important;font-size:11.5px!important}
+.formato-compact table{font-size:10px!important}
+.formato-compact th,.formato-compact td{padding:2.5px 6px!important;line-height:1.25!important}
+.formato-compact .region{margin-top:10px!important}
+`;
 
 // Documento GENÉRICO imprimible (tabla con filas en blanco para llenar a mano). Data-driven: todo viene
 // del BE armado (membrete/título/paciente/columnas/filas). Papel A4/Letter, tinta negra, @media print
@@ -45,6 +54,8 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   const render = d.render ?? {};
   const ocultarEmpresa = d.letterhead?.ocultarEmpresa || render.ocultarEmpresa;
   const camposEnLinea = splitInlineFields(campos, render.camposEnLinea);
+  const fieldRows = splitFieldRows(campos, render.fieldRows);
+  const compact = render.density === "compact";
   // Legacy «control de sesiones» sheet (tabla + ocultarEmpresa: EMTT, Cámaras, PEMF, AVACEN…): logo
   // CENTRED over the title, title split on « · », header fields per lib/formatos/control-sheet.ts, and the
   // grid drawn like the legacy (centred grey headers, black borders, centred numbers).
@@ -109,12 +120,15 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
       style={{ display: "block", width: "62%", maxWidth: 480, maxHeight: "none", margin: "20px auto 4px", objectFit: "contain" }}
     />
   ) : null;
-  const campoValor = (c: { valor?: string | null; origen?: string }) =>
+  const campoValorBase = (c: { valor?: string | null; origen?: string }) =>
     !c.valor && c.origen === "" ? <span className="ml-1 inline-block min-w-[90px] border-b border-black" style={{ display: "inline-block", minWidth: 90, borderBottom: "1px solid #000" }}>&nbsp;</span> : (c.valor ?? "");
+  // `unit` goes after the value or the blank: «Peso: ____ lb».
+  const campoValor = (c: { valor?: string | null; origen?: string; unit?: string | null }) =>
+    c.unit ? <>{campoValorBase(c)}{` ${c.unit}`}</> : campoValorBase(c);
   // "campos" header: with render.subrayarValores every value is written ON a line (legacy `.fill`).
-  const valorCampo = (c: { valor?: string | null; origen?: string }) =>
+  const valorCampo = (c: { valor?: string | null; origen?: string; unit?: string | null }) =>
     render.subrayarValores ? (
-      <span style={{ display: "inline-block", minWidth: c.origen === "" ? 140 : 180, borderBottom: "1px solid #000", padding: "0 4px" }}>{c.valor || "\u00a0"}</span>
+      <span style={{ display: "inline-block", minWidth: c.origen === "" ? 140 : 180, borderBottom: "1px solid #000", padding: "0 4px" }}>{c.valor || "\u00a0"}{c.unit ? ` ${c.unit}` : ""}</span>
     ) : (
       <span>{campoValor(c)}</span>
     );
@@ -202,7 +216,10 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
       {/* .formato-doc = columna flex que LLENA la hoja (min-height:100vh en impresión): la zona de
           OBSERVACIONES (o un espaciador si no hay) crece y empuja firmas/pie al fondo → nada amontonado
           arriba. Norma repetida del dueño: los reportes ocupan toda la página con aire. */}
-      <div ref={printRef} className="formato-print rounded-lg border bg-white p-6 text-black">
+      <div ref={printRef} className={"formato-print rounded-lg border bg-white p-6 text-black" + (compact ? " formato-compact" : "")}>
+        {/* render.density "compact": the <style> travels inside the cloned sheet, so the preview and the
+            print window both get it (!important beats the sections' inline paddings). */}
+        {compact && <style>{COMPACT_CSS}</style>}
         <div className="formato-doc flex min-h-[70vh] flex-col">
           {membrete}
 
@@ -252,7 +269,31 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             <div className="formato-campos mt-6 flex flex-col gap-4 text-sm">
               {/* render.camposEnPares: the legacy 2-column grid — one row per PAIR of fields, in order
                   (APEX RF: Fecha|Paciente, Hora entrada|Hora salida, Sesión|Record). */}
-              {render.camposEnPares ? (
+              {fieldRows.rows.length > 0 ? (
+                /* render.fieldRows: each row spread edge to edge on one line (GLP-1 like the paper); the rest
+                   below, one per line. Inline styles: the print window has no Tailwind. */
+                <>
+                  {fieldRows.rows.map((row) => (
+                    <div
+                      key={row.map((f) => f.clave).join("-")}
+                      className="campo"
+                      style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", columnGap: 18, rowGap: 4 }}
+                    >
+                      {row.map((f) => (
+                        <span key={f.clave} style={{ display: "flex", gap: 6, alignItems: "flex-end", whiteSpace: "nowrap" }}>
+                          <span className="font-bold">{f.label ?? `${label(f.labelKey)} :`}</span> {valorCampo(f)}
+                        </span>
+                      ))}
+                    </div>
+                  ))}
+                  {fieldRows.rest.map((c) => (
+                    <div key={c.clave} className="campo flex gap-2">
+                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span>
+                      {valorCampo(c)}
+                    </div>
+                  ))}
+                </>
+              ) : render.camposEnPares ? (
                 chunkPairs(campos).map((par, i) => (
                   <div
                     key={par.map((f) => f.clave).join("-") || i}

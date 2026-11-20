@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { splitInlineFields, chunkPairs } from "./inline-fields.ts";
+import { splitInlineFields, chunkPairs, splitFieldRows } from "./inline-fields.ts";
 
 const f = (clave: string) => ({ clave });
 const fields = ["fecha", "paciente", "hora_entrada", "hora_salida", "sesion", "record"].map(f);
@@ -35,4 +35,30 @@ test("chunkPairs: an odd count leaves a single-field last row, not dropped", () 
   const rows = chunkPairs(odd);
   assert.equal(rows.length, 3);
   assert.deepEqual(rows[2].map((x) => x.clave), ["sesion"]);
+});
+
+// GLP-1 «like the paper» (cmr-be #660): render.fieldRows.
+const glp = ["paciente", "fecha", "peso", "ta", "record", "medicamento", "dosis", "semana", "extra"].map((clave) => ({ clave }));
+const keys = (r: { clave: string }[]) => r.map((f) => f.clave);
+
+test("fieldRows: each row in its order; fields in no row stay below", () => {
+  const { rows, rest } = splitFieldRows(glp, [
+    ["paciente", "fecha", "peso", "ta", "record"],
+    ["medicamento", "dosis", "semana"],
+  ]);
+  assert.deepEqual(rows.map(keys), [
+    ["paciente", "fecha", "peso", "ta", "record"],
+    ["medicamento", "dosis", "semana"],
+  ]);
+  assert.deepEqual(keys(rest), ["extra"]);
+});
+
+test("fieldRows: unknown keys skipped, empty rows dropped, a field never printed twice", () => {
+  const { rows, rest } = splitFieldRows(glp, [["nope"], ["fecha", "paciente", "fecha"], []]);
+  assert.deepEqual(rows.map(keys), [["fecha", "paciente"]]);
+  assert.equal(rest.length, glp.length - 2);
+});
+
+test("fieldRows absent: header unchanged", () => {
+  assert.deepEqual(splitFieldRows(glp, undefined), { rows: [], rest: glp });
 });

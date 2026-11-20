@@ -112,6 +112,9 @@ Errores: `404` visita fuera de los centros con `formats.read` (o formato inexist
 
 - Todo opcional. Lo que no se manda se conserva; un array que se manda **reemplaza** al guardado
   (mandar siempre la hoja entera desde el iPad).
+- **Un campo que la enfermera BORRA se manda como `{ "key": "…", "value": null }`, nunca se omite.**
+  El impreso pone la sugerencia donde no hay nada guardado: un campo omitido vuelve a salir con la
+  sugerencia (p. ej. el peso de la báscula); `null` guardado sale en blanco.
 - `value`: `"yes" | "no" | null`. `note` ≤ 1000, `additionalNotes` ≤ 4000, `value` de campo ≤ 500.
 - `recordedAt` ISO 8601 con offset. `updatedBy` lo pone el BE con el token.
 - Respuesta: la misma forma del GET (con `saved: true`).
@@ -131,6 +134,26 @@ Errores:
 - `403` sin `formats.fill` en el centro de la visita. La visita se busca donde se tiene
   `formats.read` O `formats.fill`: quien solo llena (sin leer) también la encuentra. `404` solo si
   la visita no está en ninguno de esos centros.
+
+### El peso de la hoja corrige la báscula (decisión del dueño, 20-nov)
+
+El PUT que manda `peso` con un valor legible en libras (`"212.4"`, `"212,4 lb"`, `"180lbs"`)
+**corrige también la medida de báscula de la visita**, o la crea si no había. Va en la misma
+transacción que la hoja: si falla, no se guarda nada. Vacío o ilegible: la hoja se guarda y la
+báscula no se toca. Mismas libras que ya decía la báscula: no se escribe nada. La medida creada o
+corregida queda como manual: **no** publica `body_measurement/linked`. Rango declarado en el formato
+(GLP-1: 50–700 lb): fuera de él el PUT responde **400** y no guarda nada:
+
+```json
+{ "error": { "code": "FORMAT_WRITE_BACK_OUT_OF_RANGE", "labelKey": "formats.error.writeBackOutOfRange",
+             "message": "'peso' = 21.2 is outside 50–700", "key": "peso", "value": 21.2, "min": 50, "max": 700 } }
+```
+
+El FE debe mostrarlo junto al campo `key` para que la enfermera lo corrija. Después de guardar, `GET /body-measurements/sessions/:id` ya trae el peso corregido
+(`source: "manual"`). Lo declara el formato
+(`fields[].writeBack: { "target": "scale.weightLbs", "min": 50, "max": 700 }` en el assembly); el FE
+puede usar `min`/`max` para validar antes de mandar. El peso se guarda con un decimal; guardar el
+mismo valor otra vez no cambia nada. Si la báscula vuelve a pesar después, gana la báscula.
 
 ## 3. Imprimir con lo guardado
 
@@ -240,7 +263,65 @@ se puede.
 - Pintar `fields[key] ?? suggested.fields[key]`; mandar la hoja entera en el PUT.
 - Filtrar el bus por `entity` (`format_sheet` con `toUserId === staffId`; `body_measurement`).
 - Patient-desk: mostrar el 409 `FRONTDESK_SESSION_DELETE_BLOCKED` al borrar una visita con hoja.
-- i18n: claves nuevas `formats.error.answersInvalid`, `formats.error.sendTargetInvalid`,
+- i18n: claves nuevas `formats.error.writeBackOutOfRange`, `formats.error.answersInvalid`, `formats.error.sendTargetInvalid`,
   `frontdesk.error.sessionDeleteBlocked` y, para el
   constructor de formatos, `formato.origen.session_last_dose`, `formato.origen.session_service_visit_number`,
   `formato.origen.package_product`.
+
+## Impresión igual al papel (escaneo del dueño, 20-nov)
+
+`GET /api/v2/formats/glp1_adherencia/assembly?sessionId=` trae ahora (claves de `render` y de
+`fields[]` opacas en v2: salen tal cual):
+
+```json
+{
+  "title": "Hoja de enfermería GLP-1 - toma de signos vitales y seguimiento",
+  "render": {
+    "fieldRows": [
+      ["paciente", "fecha", "peso", "ta", "record"],
+      ["medicamento", "dosis", "semana"]
+    ],
+    "density": "compact"
+  },
+  "fields": [
+    { "clave": "peso", "label": "Peso:", "unit": "lb", "valor": "211.6", "suggested": "211.6", "suggestFrom": "scale.weightLbs" }
+  ],
+  "footer": { "prefix": "f-b/", "user": "…", "login": "…", "fechaHora": "2026-11-20 15:55" }
+}
+```
+
+Lo que el FE tiene que DIBUJAR (nuevo):
+
+1. **`render.fieldRows`** (genérico, cualquier formato `campos`): cada elemento es una fila; cada
+   fila, las claves de `fields[].clave` en orden, repartidas en esa fila (`label` + valor sobre
+   línea). Los campos que no aparecen en ninguna fila van debajo, uno por línea, como hoy. Nunca
+   viene junto con `camposEnLinea`.
+2. **`fields[].unit`**: texto impreso DESPUÉS del valor/hueco: «Peso: ____ lb». **También en la
+   pantalla del iPad**: el campo muestra la unidad junto al input («212.4 lb») y la enfermera escribe
+   solo el número (si escribe «lb» también se acepta).
+3. **`render.density: "compact"`**: papel denso para que todo quepa en UNA hoja carta: título en una
+   línea, letra menor, filas del checklist más bajas, menos aire antes de las firmas. Ausente o
+   `"normal"` = como hoy.
+4. **Firmas**: la sección `firmas` ya trae dos líneas en una fila (izquierda «Firma de enfermería»,
+   derecha «Fecha y hora»). Con hoja guardada cada línea trae `valor` (nombre de la enfermera; fecha y
+   hora locales): pintarlo SOBRE la línea. Hoy el estilo por defecto no pinta `valor`.
+5. La leyenda centrada del pie ya existía (sección `leyenda`).
+
+Lo que ya hace el BE (nada que dibujar):
+
+- **Sin guardar se imprimen las sugerencias**: medicamento, dosis, semana, peso (si hay báscula),
+  paciente, fecha y récord salen llenos en `fields[].valor`; lo guardado gana.
+- **`footer.fechaHora` en la hora del centro** (zona del centro), para TODOS los formatos y el de
+  láser. Antes salía en UTC.
+
+Diferencia con el escaneo que NO se tocó (decide el dueño): el grupo 7 del escaneo tiene una
+pregunta; el formato tiene tres (las del legado).
+
+Después del despliegue hay que recargar el formato: `SOLO=glp1_adherencia`.
+
+### Una sola fuente por campo (revisión del #660)
+
+Un campo toma su valor de UN sitio: su `origen` o su `suggestFrom`, nunca los dos (el BE lo rechaza
+al crear/editar un formato). «Dosis actual» ahora es solo `suggestFrom: "session.lastDose"` (el
+producto aplicado en ESTA visita y, si no tiene, el último aplicado): el iPad y el impreso dicen lo
+mismo.

@@ -23,3 +23,26 @@ export function chunkPairs<T>(items: readonly T[]): T[][] {
   for (let i = 0; i < items.length; i += 2) out.push(items.slice(i, i + 2));
   return out;
 }
+
+// "campos" layout, `render.fieldRows`: each row is a list of field keys spread on one line, in that order
+// (GLP-1 sheet: Paciente | Fecha | Peso | T/A | Record, then Medicamento | Dosis | Semana). Unknown keys
+// are skipped, a row left empty is dropped, and fields in no row stay below (`rest`), one per line.
+export function splitFieldRows<T extends { clave: string }>(
+  fields: T[],
+  rows: readonly (readonly string[])[] | null | undefined,
+): { rows: T[][]; rest: T[] } {
+  if (!rows?.length) return { rows: [], rest: fields };
+  const used = new Set<T>();
+  const out: T[][] = [];
+  for (const keys of rows) {
+    const row: T[] = [];
+    for (const k of keys) {
+      const f = fields.find((x) => x.clave === k && !used.has(x));
+      if (!f) continue;
+      used.add(f);
+      row.push(f);
+    }
+    if (row.length > 0) out.push(row);
+  }
+  return { rows: out, rest: fields.filter((f) => !used.has(f)) };
+}
