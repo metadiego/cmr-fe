@@ -3942,6 +3942,10 @@
     "title": "Auditoría",
     "help": "Bitácora automática del sistema: quién hizo qué, cuándo, desde qué centro y si salió bien. Filtra por fecha, dominio, método y resultado; haz clic en una fila para ver el detalle.",
     "noPermission": "No tienes permiso para ver la auditoría.",
+    "tabs": {
+      "log": "Bitácora",
+      "sessions": "Sesiones"
+    },
     "todos": "Todos",
     "desde": "Desde",
     "hasta": "Hasta",
@@ -4014,6 +4018,25 @@
     "tool": "Herramienta",
     "filtroEntidad": "Entidad {id}",
     "filtrarPorEntidad": "Filtrar por esta entidad"
+  },
+  "auditSessions": {
+    "col": {
+      "user": "Usuario",
+      "clinic": "Centro",
+      "startedAt": "Entrada",
+      "endedAt": "Salida",
+      "status": "Estado",
+      "duration": "Duración",
+      "ip": "IP",
+      "browser": "Navegador"
+    },
+    "status": {
+      "open": "Abierta",
+      "closed": "Cerrada"
+    },
+    "noEndedAt": "Sin salida — última actividad {time}",
+    "emailPlaceholder": "Correo del usuario",
+    "empty": "Sin sesiones para estos filtros"
   },
   "comunicaciones": {
     "title": "Alertas",

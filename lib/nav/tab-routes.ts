@@ -45,10 +45,16 @@ export const ADMIN_TABS = {
   legacy: { personal: "staff", permisos: "permissions", editorRol: "role-editor", users: "staff" },
 } as const satisfies TabRoute;
 
+export const AUDIT_TABS = {
+  pattern: "/configuration/audit",
+  tabs: ["log", "sessions"],
+} as const satisfies TabRoute;
+
 export const TAB_ROUTES: readonly TabRoute[] = [
   PATIENT_TABS,
   BILLING_GENERAL_TABS,
   BILLING_CONSULTATION_TABS,
+  AUDIT_TABS,
   ADMIN_TABS,
 ];
 

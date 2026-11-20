@@ -3942,6 +3942,10 @@
     "title": "Audit log",
     "help": "Automatic system log: who did what, when, from which center and whether it succeeded. Filter by date, domain, method and result; click a row for details.",
     "noPermission": "You don't have permission to view the audit log.",
+    "tabs": {
+      "log": "Log",
+      "sessions": "Sessions"
+    },
     "todos": "All",
     "desde": "From",
     "hasta": "To",
@@ -4014,6 +4018,25 @@
     "tool": "Tool",
     "filtroEntidad": "Entity {id}",
     "filtrarPorEntidad": "Filter by this entity"
+  },
+  "auditSessions": {
+    "col": {
+      "user": "User",
+      "clinic": "Center",
+      "startedAt": "Signed in",
+      "endedAt": "Signed out",
+      "status": "Status",
+      "duration": "Duration",
+      "ip": "IP",
+      "browser": "Browser"
+    },
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "noEndedAt": "No sign-out — last seen {time}",
+    "emailPlaceholder": "User's email",
+    "empty": "No sessions for these filters"
   },
   "comunicaciones": {
     "title": "Alerts",

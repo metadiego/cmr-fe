@@ -32,12 +32,16 @@ const TONE: Record<string, Tone> = {
   anulada: "destructive",
   // treatment transfers
   aplicada: "success",
+  // login sessions
+  open: "info",
+  closed: "secondary",
 };
 const LABEL_NS = {
   appointment: "citas.estado",
   therapy: "servicios.estado",
   invoice: "facturacionList.estado",
   transfer: "patients.transferTreatment.status",
+  session: "auditSessions.status",
 } as const;
 
 export function StatusBadge({ kind, value }: { kind: keyof typeof LABEL_NS; value?: string | null }) {
