@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { canRefundInvoice, isIssuedInvoice, refundableOf } from "@/lib/factura/refund-status";
+import { canRefundInvoice, isIssuedInvoice, refundCapOf, refundableOf, unallocatedRefundOf } from "@/lib/factura/refund-status";
 import { toast } from "sonner";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 
@@ -301,9 +301,12 @@ function DevolverForm({
   }, 0);
   // A legacy invoice's own rounding (a cent or two) does not block: the BE trims it (cmr-be #643).
   const policy = useResource(() => getPoliticaDevolucion(id, centro), [id, centro]);
+  // The money cap is what is still refundable (total − active refunds), not the total (cmr-be #651).
+  const cap = refundCapOf(factura);
+  const unallocated = unallocatedRefundOf(factura);
   const redondeo = legacyRefundCheck({
     net: neto,
-    cap: n(factura.total),
+    cap,
     legacy: !!factura.legacyNumber,
     everyLineHasAmount: seleccion.every((it) => lineSel(it) && !!precio[it.id]?.trim() && compSelDe(it).length === 0),
     largestLine: Math.max(0, ...seleccion.map((it) => (lineSel(it) ? refundDe(it) : 0))),
@@ -462,7 +465,12 @@ function DevolverForm({
           </label>
         </div>
 
-        <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
+        <div className="rounded-xl border bg-card p-4 shadow-xs">
+          {unallocated > 0 && (
+            <p className="mb-3 rounded-md bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
+              {t("unallocatedRefund", { amount: money(unallocated), max: money(cap) })}
+            </p>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{neto >= 0 ? t("netRefund") : t("netOwed")}</span>
             <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-success-foreground" : "text-destructive")}>{money(Math.abs(redondeo.net))}</span>
@@ -471,7 +479,7 @@ function DevolverForm({
             <p className="mt-1 text-xs text-muted-foreground tabular-nums">{t("legacyRoundingAdjustment", { amount: money(redondeo.adjustment) })}</p>
           )}
           {excedeTotal && (
-            <p className="mt-2 text-xs text-destructive">{t("netExceeds", { total: money(n(factura.total)) })}</p>
+            <p className="mt-2 text-xs text-destructive">{t("netExceedsRefundable", { max: money(cap) })}</p>
           )}
           <Button className="mt-3 w-full" disabled={busy || !motivo.trim() || seleccion.length === 0 || excedeTotal} onClick={confirmar}>
             {t("return")} ({seleccion.length})

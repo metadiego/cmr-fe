@@ -2745,10 +2745,11 @@
       "byDelivery": "on delivery",
       "compNoReturnable": "not individually returnable",
       "returnOnlyIssued": "Only issued invoices can be returned. This invoice is not issued.",
-      "netExceeds": "The refund cannot exceed the invoice total ({total}).",
       "legacyRoundingAdjustment": "Legacy rounding adjustment: −{amount}",
       "returnDoneRounded": "Return recorded (rounding adjustment {amount})",
-      "returnAlreadyFull": "Everything on this invoice has already been returned: nothing is left to return."
+      "returnAlreadyFull": "Everything on this invoice has already been returned: nothing is left to return.",
+      "netExceedsRefundable": "The refund cannot exceed what is left to return ({max}).",
+      "unallocatedRefund": "This invoice has a return with no line detail for {amount}: the most that can be returned now is {max}."
     },
     "columns": {
       "numero": "No.",

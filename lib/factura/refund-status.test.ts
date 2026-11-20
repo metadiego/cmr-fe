@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { canRefundInvoice, canVoidInvoice, invoiceBadgeStatus, isIssuedInvoice, isUntouchedIssued, refundableOf, refundStateOf } from "./refund-status.ts";
+import { canRefundInvoice, canVoidInvoice, invoiceBadgeStatus, isIssuedInvoice, isUntouchedIssued, refundCapOf, refundableOf, refundStateOf, unallocatedRefundOf } from "./refund-status.ts";
 
 test("refundStateOf: the derived field wins; legacy statuses are the fallback", () => {
   // S243352 (Bayamón, 20-nov): legacy status, derived partial
@@ -46,4 +46,15 @@ test("refundableOf: the BE's refundable*, else total − refunded, never negativ
   assert.equal(refundableOf(line, "sessions"), 0);
   assert.equal(refundableOf({ quantity: 3, refundedQuantity: 1 }, "quantity"), 2);
   assert.equal(refundableOf({ quantity: 1, refundedQuantity: 4 }, "quantity"), 0);
+});
+
+test("refundCapOf / unallocatedRefundOf: L037266 caps at 1710, not the 2280 total", () => {
+  const l037266 = { total: 2280, refundableAmount: 1710, unallocatedRefundedAmount: 570 };
+  assert.equal(refundCapOf(l037266), 1710);
+  assert.equal(unallocatedRefundOf(l037266), 570);
+  // an older payload: the total
+  assert.equal(refundCapOf({ total: 2280 }), 2280);
+  assert.equal(refundCapOf({ total: 100, refundableAmount: 0 }), 0, "nothing left is a real 0");
+  assert.equal(unallocatedRefundOf({ unallocatedRefundedAmount: 0 }), 0);
+  assert.equal(unallocatedRefundOf({}), 0);
 });

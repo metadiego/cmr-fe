@@ -77,6 +77,10 @@ export type FacturaConItems = Omit<Factura, "createdBy" | "issuedBy"> & {
   refundStatus?: "none" | "partial" | "full";
   /** Σ of the active refunds. */
   refundedAmount?: number;
+  /** total − refunded, never negative: the money cap of a new refund (cmr-be #651). */
+  refundableAmount?: number;
+  /** Refunded money no line explains (a legacy refund without lines). */
+  unallocatedRefundedAmount?: number;
   patient?: {
     firstName?: string;
     lastName?: string | null;

@@ -56,3 +56,18 @@ export function refundableOf(
   const done = by === "quantity" ? line.refundedQuantity : line.refundedSessions;
   return Math.max(0, num(total) - num(done));
 }
+
+/** The money cap of a new refund: the BE's `refundableAmount` (total − what active refunds returned; it
+ *  rejects more with DEVOLUCION_EXCEDE_TOTAL, cmr-be #651); an older payload falls back to the total. */
+export function refundCapOf(inv: { total?: unknown; refundableAmount?: unknown }): number {
+  const r = Number(inv.refundableAmount);
+  if (inv.refundableAmount != null && Number.isFinite(r)) return Math.max(0, r);
+  return Number(inv.total ?? 0) || 0;
+}
+
+/** Money returned that no line explains (a legacy refund without lines, e.g. L037266's D-001096): the
+ *  lines still offer everything, so the screen warns and the cap is what holds. 0 = nothing to warn. */
+export function unallocatedRefundOf(inv: { unallocatedRefundedAmount?: unknown }): number {
+  const v = Number(inv.unallocatedRefundedAmount);
+  return Number.isFinite(v) && v > 0 ? v : 0;
+}

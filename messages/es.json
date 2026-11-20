@@ -2745,10 +2745,11 @@
       "byDelivery": "a la entrega",
       "compNoReturnable": "no devolvible individualmente",
       "returnOnlyIssued": "Solo se pueden devolver facturas emitidas. Esta factura no está emitida.",
-      "netExceeds": "El reembolso no puede superar el total de la factura ({total}).",
       "legacyRoundingAdjustment": "Ajuste de redondeo del legado: −{amount}",
       "returnDoneRounded": "Devolución registrada (ajuste de redondeo {amount})",
-      "returnAlreadyFull": "Ya se devolvió todo lo de esta factura: no queda nada por devolver."
+      "returnAlreadyFull": "Ya se devolvió todo lo de esta factura: no queda nada por devolver.",
+      "netExceedsRefundable": "El reembolso no puede superar lo que queda por devolver ({max}).",
+      "unallocatedRefund": "Esta factura tiene una devolución sin detalle de líneas por {amount}: lo máximo a devolver ahora es {max}."
     },
     "columns": {
       "numero": "N.º",
