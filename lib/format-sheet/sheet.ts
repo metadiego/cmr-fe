@@ -190,3 +190,49 @@ export function measurementLinked(e: BusEvent): { sessionId: string; patientName
     date: typeof s.date === "string" ? s.date : null,
   };
 }
+
+// --- Write-back range (GLP-1 peso corrects the scale reading, cmr-be #659). ---
+
+/** A number as the BE reads it: "212.4", "212,4 lb", "180lbs" → 212.4 / 180. Null when unreadable. */
+export function readNumber(v: string): number | null {
+  const m = v.trim().match(/^(\d+(?:[.,]\d+)?)\s*[a-zA-Z]*$/);
+  return m ? Number(m[1].replace(",", ".")) : null;
+}
+
+export interface RangeProblem {
+  key: string;
+  min: number | null;
+  max: number | null;
+}
+
+/** Filled, readable and outside the field's writeBack range (the BE would answer 400 and save nothing). */
+export function writeBackProblems(
+  fields: Pick<FormatoCampo, "clave" | "writeBack">[],
+  values: Record<string, string>,
+): RangeProblem[] {
+  const out: RangeProblem[] = [];
+  for (const f of fields) {
+    const wb = f.writeBack;
+    if (!wb) continue;
+    const n = readNumber(values[f.clave] ?? "");
+    if (n == null) continue;
+    const min = wb.min ?? null;
+    const max = wb.max ?? null;
+    if ((min != null && n < min) || (max != null && n > max)) out.push({ key: f.clave, min, max });
+  }
+  return out;
+}
+
+/** 400 FORMAT_WRITE_BACK_OUT_OF_RANGE → which field, to show it next to that input. */
+export function writeBackErrorOf(err: unknown): RangeProblem | null {
+  const e = err as { code?: unknown; data?: unknown } | null;
+  if (!e || e.code !== "FORMAT_WRITE_BACK_OUT_OF_RANGE") return null;
+  const body = (e.data ?? {}) as Record<string, unknown>;
+  const src = (body.error && typeof body.error === "object" ? body.error : body) as Record<string, unknown>;
+  if (typeof src.key !== "string") return null;
+  return {
+    key: src.key,
+    min: typeof src.min === "number" ? src.min : null,
+    max: typeof src.max === "number" ? src.max : null,
+  };
+}

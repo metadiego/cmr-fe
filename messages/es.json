@@ -7000,7 +7000,8 @@
       "printSavedOnly": "Se imprime lo guardado: guarda antes los cambios.",
       "questions": "Preguntas",
       "header": "Datos de la visita",
-      "signature": "Firma"
+      "signature": "Firma",
+      "outOfRange": "«{label}» debe estar entre {min} y {max} {unit}."
     },
     "send": {
       "fill": "Llenar en pantalla",
@@ -7024,7 +7025,8 @@
   "formats": {
     "error": {
       "answersInvalid": "La hoja tiene un dato que no corresponde a este formato.",
-      "sendTargetInvalid": "Esa persona no puede recibir la hoja en este centro (sin cuenta o inactiva)."
+      "sendTargetInvalid": "Esa persona no puede recibir la hoja en este centro (sin cuenta o inactiva).",
+      "writeBackOutOfRange": "El valor está fuera del rango permitido."
     }
   }
 }

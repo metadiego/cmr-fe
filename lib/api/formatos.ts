@@ -53,6 +53,8 @@ export type FormatoCampo = {
   origen?: string;
   ancho?: number | null; // px of the fill-in line (layout "paginas": Name ____ Date ____ …)
   unit?: string | null; // printed after the value or blank: «Peso: ____ lb» (GLP-1, cmr-be #660)
+  // Saving this field also corrects another record (GLP-1 peso → the visit's scale reading), within range.
+  writeBack?: { target: string; min?: number | null; max?: number | null } | null;
 };
 // Sección del documento (dentro de `secciones`, bolsa OPACA → claves en español). El `tipo` discrimina.
 // Ampliado para salir IDÉNTICO al legacy (modelos médicos): además de texto_libre/firmas, se añaden

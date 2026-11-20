@@ -33,6 +33,9 @@ import {
   sheetPayload,
   sheetProblems,
   sheetQuestions,
+  writeBackErrorOf,
+  writeBackProblems,
+  type RangeProblem,
   type SheetState,
 } from "@/lib/format-sheet/sheet";
 
@@ -118,8 +121,17 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
       ? [{ id: state.nurseId, name: data.answers.suggested.nurse.name }]
       : [];
 
+  // Weight that also corrects the scale: out of range is checked here, and the BE's 400 lands on the field.
+  const [serverRange, setServerRange] = React.useState<RangeProblem | null>(null);
+  const ranges = writeBackProblems(editable, state.fields);
+  const rangeOf = (key: string) => ranges.find((r) => r.key === key) ?? (serverRange?.key === key ? serverRange : null);
+  const rangeText = (r: RangeProblem) => {
+    const f = allFields.find((x) => x.clave === r.key);
+    return t("outOfRange", { label: f ? fieldLabel(f, tr) : r.key, min: r.min ?? "—", max: r.max ?? "—", unit: f?.unit ?? "" }).replace(/\s+\./, ".");
+  };
+
   const problems = sheetProblems(state);
-  const reason =
+  const reason = ranges.length > 0 ? rangeText(ranges[0]) :
     problems.length === 0
       ? null
       : problems[0].kind === "field"
@@ -137,9 +149,17 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
       setAnswers(saved);
       setSavedJson(JSON.stringify(payload));
     },
+    onError: (err) => {
+      const r = writeBackErrorOf(err);
+      setServerRange(r);
+      return false; // the toast still says what failed; the field shows where
+    },
   });
 
-  const setField = (key: string, value: string) => setState((s) => ({ ...s, fields: { ...s.fields, [key]: value } }));
+  const setField = (key: string, value: string) => {
+    if (serverRange?.key === key) setServerRange(null);
+    setState((s) => ({ ...s, fields: { ...s.fields, [key]: value } }));
+  };
 
   return (
     <PageContainer gap="lg" className="w-full px-4 py-4 md:px-6">
@@ -171,7 +191,7 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
       <Panel title={t("header")}>
         <div className="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-5">
           {editable.map((f) => (
-            <Field key={f.clave} label={fieldLabel(f, tr)} htmlFor={`f-${f.clave}`}>
+            <Field key={f.clave} label={fieldLabel(f, tr)} htmlFor={`f-${f.clave}`} error={(() => { const r = rangeOf(f.clave); return r ? rangeText(r) : null; })()}>
               {/* `unit` (Peso → lb) sits inside the box: the nurse types only the number. */}
               <div className="relative">
                 <Input

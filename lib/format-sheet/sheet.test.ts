@@ -15,6 +15,9 @@ import {
   measurementLinked,
   nowLocalPR,
   openRequestFor,
+  readNumber,
+  writeBackErrorOf,
+  writeBackProblems,
   sheetPath,
   sheetPayload,
   sheetProblems,
@@ -207,4 +210,28 @@ test("a newly linked measurement is offered with its visit", () => {
   assert.deepEqual(measurementLinked(e), { sessionId: "s1", patientName: "Ana Ruiz", date: "2026-11-20" });
   assert.equal(measurementLinked({ ...e, action: "updated" }), null);
   assert.equal(measurementLinked({ ...e, status: {} }), null);
+});
+
+test("weight is read like the BE reads it", () => {
+  assert.equal(readNumber("212.4"), 212.4);
+  assert.equal(readNumber("212,4 lb"), 212.4);
+  assert.equal(readNumber("180lbs"), 180);
+  assert.equal(readNumber(""), null);
+  assert.equal(readNumber("ciento"), null);
+});
+
+test("a weight outside the writeBack range is caught before saving; empty or unreadable is not", () => {
+  const fields = [{ clave: "peso", writeBack: { target: "scale.weightLbs", min: 50, max: 700 } }, { clave: "ta" }];
+  assert.deepEqual(writeBackProblems(fields, { peso: "21.2", ta: "9" }), [{ key: "peso", min: 50, max: 700 }]);
+  assert.deepEqual(writeBackProblems(fields, { peso: "212.4 lb" }), []);
+  assert.deepEqual(writeBackProblems(fields, { peso: "" }), []);
+  assert.deepEqual(writeBackProblems(fields, { peso: "n/a" }), []);
+});
+
+test("the BE's 400 out-of-range names the field (body or its error object)", () => {
+  const error = { code: "FORMAT_WRITE_BACK_OUT_OF_RANGE", key: "peso", value: 21.2, min: 50, max: 700 };
+  assert.deepEqual(writeBackErrorOf({ code: error.code, data: { error } }), { key: "peso", min: 50, max: 700 });
+  assert.deepEqual(writeBackErrorOf({ code: error.code, data: error }), { key: "peso", min: 50, max: 700 });
+  assert.equal(writeBackErrorOf({ code: "OTHER", data: { error } }), null);
+  assert.equal(writeBackErrorOf(null), null);
 });

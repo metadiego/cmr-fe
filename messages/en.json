@@ -7000,7 +7000,8 @@
       "printSavedOnly": "What is saved gets printed: save your changes first.",
       "questions": "Questions",
       "header": "Visit details",
-      "signature": "Signature"
+      "signature": "Signature",
+      "outOfRange": "“{label}” must be between {min} and {max} {unit}."
     },
     "send": {
       "fill": "Fill on screen",
@@ -7024,7 +7025,8 @@
   "formats": {
     "error": {
       "answersInvalid": "The sheet has a value that does not belong to this format.",
-      "sendTargetInvalid": "That person cannot receive the sheet in this center (no account or inactive)."
+      "sendTargetInvalid": "That person cannot receive the sheet in this center (no account or inactive).",
+      "writeBackOutOfRange": "The value is outside the allowed range."
     }
   }
 }

@@ -144,9 +144,11 @@ export function SeccionInner({
       return (
         <>
           <Titulo>{label(s.labelKey)}</Titulo>
-          <div style={{ display: "flex", gap: 24, marginTop: 48 }}>
+          <div style={{ display: "flex", gap: 24, marginTop: 32 }}>
             {(s.lineas ?? []).map((linea, i) => (
               <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                {/* A saved value (the nurse's name, the date and time) is written ON the line. */}
+                <div style={{ minHeight: 16, fontSize: 12, paddingBottom: 2 }}>{lineaValor(linea)}</div>
                 <div style={{ borderTop: BORDER, paddingTop: 4, fontSize: 10 }}>{lineaText(linea, label)}</div>
               </div>
             ))}
