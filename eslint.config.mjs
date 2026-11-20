@@ -70,7 +70,10 @@ const DEBT = {
   // 10-nov-2026: 618 → 567 — the detail panel moved to components/auditoria/audit-detail-sheet.tsx
   // (merge of the Claude connector "via" branch with main's entity filter).
   // 17-nov-2026: 567 → 554 — the purge AlertDialog became a useConfirm prompt (standard form kit).
-  "components/auditoria/auditoria-log.tsx": 554,
+  // 20-nov-2026: 554 → 480 — ResumenCards/Tile/PurgaButton moved to audit-summary-cards.tsx
+  // (also migrated off a hand-rolled card onto Panel/StatGrid/Stat, rule 10) to make room for the
+  // Sessions-tab "qué hizo" drill-down's initialUserId/initialSessionId/initialDesde/initialHasta props.
+  "components/auditoria/auditoria-log.tsx": 480,
   // 16-nov-2026: 550 → 480 — moved onto the standard FormSheet shell (kit Field, useSubmit, useDialogForm);
   // the required/blocked checks live in lib/pacientes/patient-form-missing.ts.
   "components/clientes/paciente-form-sheet.tsx": 480,

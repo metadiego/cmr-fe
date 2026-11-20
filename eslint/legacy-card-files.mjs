@@ -60,7 +60,6 @@ export const LEGACY_CARD_FILES = [
   "components/agenda/therapy-day-cards.tsx",
   "components/agenda/therapy-day-scheduler.tsx",
   "components/agenda/therapy-day-summary.tsx",
-  "components/auditoria/auditoria-log.tsx",
   "components/body-measurements/link-visit-dialog.tsx",
   "components/body-measurements/unlinked-measurements.tsx",
   "components/caja/cash-email-panel.tsx",

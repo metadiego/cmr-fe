@@ -32,6 +32,10 @@ export interface AuditRow {
   channel?: "rest" | "mcp";
   tool?: string | null;
   clientId?: string | null;
+  // Login session the request happened in (cmr-be #652) and the raw User-Agent header. null for
+  // system-generated rows (no real HTTP request behind them, e.g. userType "system").
+  sessionId?: string | null;
+  userAgent?: string | null;
 }
 
 // Todos opcionales. `userId` = authUserId. Filtros indexados (rápidos): createdAt(desde/hasta),
@@ -40,6 +44,7 @@ export interface AuditListParams {
   desde?: string;
   hasta?: string;
   userId?: string;
+  sessionId?: string; // one login session (cmr-be #652) — the "what did they do" drill-in from Sesiones
   entidadId?: string; // one entity (a session, an invoice…), BE #529
   dominio?: string;
   accion?: string;

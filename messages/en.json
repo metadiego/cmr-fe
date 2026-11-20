@@ -3956,6 +3956,7 @@
     "filtrarPorUsuario": "Filter by this user",
     "filtroUsuario": "User: {nombre}",
     "totalRegistros": "{total, number} records",
+    "resumenTitle": "Summary",
     "card": {
       "total": "Total",
       "ok": "OK",
@@ -3992,7 +3993,8 @@
       "resultado": "Result",
       "duracion": "Duration",
       "centro": "Center",
-      "via": "Via"
+      "via": "Via",
+      "browser": "Browser"
     },
     "verbo": {
       "creo": "Created",
@@ -4017,14 +4019,21 @@
     },
     "tool": "Tool",
     "filtroEntidad": "Entity {id}",
-    "filtrarPorEntidad": "Filter by this entity"
+    "filtrarPorEntidad": "Filter by this entity",
+    "filtroSesion": "Session {id}"
   },
   "auditSessions": {
+    "view": {
+      "now": "Now",
+      "days": "By day",
+      "detail": "Detail"
+    },
     "col": {
       "user": "User",
       "clinic": "Center",
       "startedAt": "Signed in",
       "endedAt": "Signed out",
+      "lastSeenAt": "Last seen",
       "status": "Status",
       "duration": "Duration",
       "ip": "IP",
@@ -4033,6 +4042,22 @@
     "status": {
       "open": "Open",
       "closed": "Closed"
+    },
+    "now": {
+      "help": "People active in the last 10 minutes. Refreshes on its own every minute.",
+      "empty": "Nobody online right now"
+    },
+    "days": {
+      "col": {
+        "firstSeenAt": "First seen",
+        "sessions": "Sessions",
+        "actions": "Actions",
+        "ips": "IPs"
+      },
+      "empty": "No activity for these filters"
+    },
+    "drillDown": {
+      "title": "What {name} did"
     },
     "noEndedAt": "No sign-out — last seen {time}",
     "emailPlaceholder": "User's email",

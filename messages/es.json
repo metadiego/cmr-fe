@@ -3956,6 +3956,7 @@
     "filtrarPorUsuario": "Filtrar por este usuario",
     "filtroUsuario": "Usuario: {nombre}",
     "totalRegistros": "{total, number} registros",
+    "resumenTitle": "Resumen",
     "card": {
       "total": "Total",
       "ok": "OK",
@@ -3992,7 +3993,8 @@
       "resultado": "Resultado",
       "duracion": "Duración",
       "centro": "Centro",
-      "via": "Vía"
+      "via": "Vía",
+      "browser": "Navegador"
     },
     "verbo": {
       "creo": "Creó",
@@ -4017,14 +4019,21 @@
     },
     "tool": "Herramienta",
     "filtroEntidad": "Entidad {id}",
-    "filtrarPorEntidad": "Filtrar por esta entidad"
+    "filtrarPorEntidad": "Filtrar por esta entidad",
+    "filtroSesion": "Sesión {id}"
   },
   "auditSessions": {
+    "view": {
+      "now": "Ahora",
+      "days": "Por día",
+      "detail": "Detalle"
+    },
     "col": {
       "user": "Usuario",
       "clinic": "Centro",
       "startedAt": "Entrada",
       "endedAt": "Salida",
+      "lastSeenAt": "Última actividad",
       "status": "Estado",
       "duration": "Duración",
       "ip": "IP",
@@ -4033,6 +4042,22 @@
     "status": {
       "open": "Abierta",
       "closed": "Cerrada"
+    },
+    "now": {
+      "help": "Personas con actividad en los últimos 10 minutos. Se actualiza solo cada minuto.",
+      "empty": "Nadie conectado en este momento"
+    },
+    "days": {
+      "col": {
+        "firstSeenAt": "Primera actividad",
+        "sessions": "Sesiones",
+        "actions": "Acciones",
+        "ips": "IPs"
+      },
+      "empty": "Sin actividad para estos filtros"
+    },
+    "drillDown": {
+      "title": "Qué hizo {name}"
     },
     "noEndedAt": "Sin salida — última actividad {time}",
     "emailPlaceholder": "Correo del usuario",
