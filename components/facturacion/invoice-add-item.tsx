@@ -13,6 +13,7 @@ import { ProductOptionsSkeleton } from "@/components/facturacion/invoice-detail-
 import { Field } from "@/components/kit/field";
 import { MissingHint } from "@/components/kit/missing-hint";
 import { isPackageLine, packageUnits } from "@/lib/facturacion/package-units";
+import { defaultSessionsForLine, sessionsToSend } from "@/lib/facturacion/sessions-per-unit";
 import { addLineMissing } from "@/lib/facturacion/add-line-missing";
 import { footerState } from "@/lib/forms/missing";
 
@@ -133,7 +134,7 @@ function CatalogoCombobox({
   );
 }
 
-export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productId: string; description: string; quantity: number; unitPrice?: number; taxable?: boolean; meta?: Record<string, number | string> }) => Promise<boolean> }) {
+export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productId: string; description: string; quantity: number; sessions?: number; unitPrice?: number; taxable?: boolean; meta?: Record<string, number | string> }) => Promise<boolean> }) {
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
   const [prodId, setProdId] = React.useState("");
@@ -182,6 +183,14 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
   const multipliers = capturables.filter((c) => c.role === "multiplicador" && !esSelectCaptura(c));
   const packageMode = isPackageLine(multipliers);
   const [paquetes, setPaquetes] = React.useState("1");
+
+  // Sesiones por unidad (cmr-be #657): sin tocar nada, GLP-1 nace con cantidad × sessionsPerUnit (el
+  // BE lo calcula si no se manda `sessions`). Mostrado editable; solo se manda si el cajero lo cambió.
+  const sessionsPerUnit = (prod as { sessionsPerUnit?: number | null } | undefined)?.sessionsPerUnit ?? null;
+  const cantNum = Math.max(1, Math.floor(Number(cant) || 1));
+  const sesionesDefault = defaultSessionsForLine(cantNum, sessionsPerUnit);
+  const [sesionesOverride, setSesionesOverride] = React.useState("");
+  const sesionesShown = sesionesOverride !== "" ? sesionesOverride : sesionesDefault != null ? String(sesionesDefault) : "";
 
   // Defaults por columna (modelo del dueño): áreas = 1; días = cantidad (mismas visitas); resto vacío.
   // El valor mostrado = override del usuario (metaVals) ?? default → sin efectos ni setState en render.
@@ -274,6 +283,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
     setMetaVals({});
     setPrecio("");
     setPaquetes("1");
+    setSesionesOverride("");
     // Cantidad = diasTratamiento del pack (TD12→12…). Si el producto no lo trae → campo VACÍO (no 1).
     const dt = (p as { treatmentDays?: number | null }).treatmentDays;
     setCant(dt != null ? String(dt) : "");
@@ -299,11 +309,15 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
       if (esSelectCaptura(c)) { meta[c.slug] = raw; return; } // valor de opción (string)
       if (!Number.isNaN(Number(raw))) meta[c.slug] = Number(raw);
     });
+    // sessions: solo se manda si el cajero la tocó — sin tocar nada, el BE calcula cantidad ×
+    // sessionsPerUnit solo (cmr-be #657, handoff-sesiones-por-unidad).
+    const sesionesNum = sessionsToSend(sesionesOverride);
     // Cleared only when the line was added: on failure what was typed stays, to retry without retyping.
     const added = await onAdd({
       productId: prod.id,
       description: prod.name,
       quantity: Math.max(1, Math.floor(Number(packageMode ? paquetes : cant) || 1)),
+      ...(sesionesNum !== undefined ? { sessions: sesionesNum } : {}),
       ...(precioUnitarioEff !== undefined ? { unitPrice: precioUnitarioEff } : {}),
       // Solo el flag gravado (cuando se conoce): NO se manda impuestoId — el servidor resuelve el impuesto
       // por la cascada del precio (desglose Estatal+Municipal completo). Handoff IVU compuesto.
@@ -311,7 +325,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
       ...(Object.keys(meta).length ? { meta } : {}),
     });
     if (!added) return;
-    setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({}); setPaquetes("1");
+    setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({}); setPaquetes("1"); setSesionesOverride("");
   }
 
   return (
@@ -389,6 +403,20 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
           inputMode="numeric"
         />
       </Field>
+      )}
+      {sessionsPerUnit != null && !packageMode && (
+        <Field label={t("sessionsFormula", { qty: cantNum, perUnit: sessionsPerUnit })} htmlFor="add-line-sessions" className="w-28 space-y-1">
+          <Input
+            id="add-line-sessions"
+            data-flow
+            value={sesionesShown}
+            onChange={(e) => setSesionesOverride(e.target.value)}
+            onFocus={selectOnFocus}
+            onKeyDown={onFlowKey}
+            className="h-9 text-right tabular-nums"
+            inputMode="numeric"
+          />
+        </Field>
       )}
       <Field label={t("price")} htmlFor="add-line-price" className="w-28 space-y-1">
         <Input id="add-line-price" value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />

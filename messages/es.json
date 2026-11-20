@@ -3022,6 +3022,8 @@
         "unidadContenido": "Unidad",
         "unidadesPorEnvase": "Unidades por envase",
         "envaseHelp": "Cuánto trae el frasco o caja (p. ej. 10 mg). Con esto la receta calcula cuántas aplicaciones rinde un vial.",
+        "sesionesPorUnidad": "Sesiones por unidad",
+        "sesionesPorUnidadHelp": "Sesiones que cubre cada unidad vendida; no cambia el precio.",
         "grupoNinguno": "Sin grupo (insumo)",
         "grupoFacturacionHelpSin": "Decide en qué columna del frontdesk aparece el paciente; sin grupo, el producto es un insumo que se consume (no abre columna).",
         "grupoFacturacionHelpCon": "El paciente aparecerá en la columna del servicio de este grupo ({division}) en el frontdesk."
@@ -3579,6 +3581,7 @@
     "unitsAreasDaysHint": "Se calcula sola: áreas × días. No se escribe.",
     "packages": "Paquetes",
     "packagesHint": "Cuántos paquetes se venden (normalmente 1).",
+    "sessionsFormula": "Sesiones: {qty} × {perUnit}",
     "returnedBadge": "Devuelta",
     "error": {
       "pago_supera_total": "Lo cobrado pasa del total de la factura (sobran {sobrante}). Anula el pago sobrante antes de emitir.",

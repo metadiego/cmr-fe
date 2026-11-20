@@ -3022,6 +3022,8 @@
         "unidadContenido": "Unit",
         "unidadesPorEnvase": "Units per package",
         "envaseHelp": "How much the vial or box holds (e.g. 10 mg). With this, the recipe computes how many applications a vial yields.",
+        "sesionesPorUnidad": "Sessions per unit",
+        "sesionesPorUnidadHelp": "Sessions each unit sold covers; does not change the price.",
         "grupoNinguno": "No group (supply)",
         "grupoFacturacionHelpSin": "Decides which frontdesk column the patient appears in; with no group, the product is a supply that gets consumed (opens no column).",
         "grupoFacturacionHelpCon": "The patient will appear in this group’s service column ({division}) at the front desk."
@@ -3579,6 +3581,7 @@
     "unitsAreasDaysHint": "Computed: areas × days. Not typed.",
     "packages": "Packages",
     "packagesHint": "How many packages are sold (usually 1).",
+    "sessionsFormula": "Sessions: {qty} × {perUnit}",
     "returnedBadge": "Returned",
     "error": {
       "pago_supera_total": "The money taken is above the invoice total ({sobrante} over). Void the extra payment before issuing.",

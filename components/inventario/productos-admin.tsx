@@ -42,7 +42,7 @@ import { DescargaSimuladaPanel } from "@/components/inventario/descarga-simulada
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { Toggle, CatalogSelect } from "@/components/inventario/producto-form-controls";
 import { Tooltip } from "@/components/ui/tooltip";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
@@ -487,6 +487,9 @@ type FormState = {
   contenido: string;
   unidadContenidoId: string;
   unidadesPorEnvase: string;
+  // Sesiones que cubre cada unidad vendida (BE #657, cmr-be "sesiones por unidad"): si la línea de
+  // factura no manda sesiones, nace con cantidad × este número. No cambia el precio.
+  sesionesPorUnidad: string;
   imprimeComponentes: boolean;
   aplicaPrecioBaseDevolucion: boolean;
   activo: boolean;
@@ -511,6 +514,7 @@ const EMPTY: FormState = {
   contenido: "",
   unidadContenidoId: "",
   unidadesPorEnvase: "",
+  sesionesPorUnidad: "",
   imprimeComponentes: true,
   aplicaPrecioBaseDevolucion: false,
   activo: true,
@@ -563,6 +567,7 @@ function ProductoForm({
             contenido: producto.content != null ? String(producto.content) : "",
             unidadContenidoId: producto.contentUnitId ?? "",
             unidadesPorEnvase: producto.unitsPerContainer != null ? String(producto.unitsPerContainer) : "",
+            sesionesPorUnidad: producto.sessionsPerUnit != null ? String(producto.sessionsPerUnit) : "",
             imprimeComponentes: (producto as { printComponents?: boolean }).printComponents ?? true,
             aplicaPrecioBaseDevolucion: (producto as { applyBasePriceOnRefund?: boolean }).applyBasePriceOnRefund ?? false,
             activo: producto.active ?? true,
@@ -661,6 +666,7 @@ function ProductoForm({
         ...(num(form.contenido) != null ? { content: num(form.contenido) } : {}),
         ...(id(form.unidadContenidoId) ? { contentUnitId: id(form.unidadContenidoId) } : {}),
         ...(num(form.unidadesPorEnvase) != null ? { unitsPerContainer: num(form.unidadesPorEnvase) } : {}),
+        ...(num(form.sesionesPorUnidad) != null ? { sessionsPerUnit: num(form.sesionesPorUnidad) } : {}),
         // Devolución a precio base (láser/vit C/GLP-1…): la política precio_base solo aplica a los marcados.
         applyBasePriceOnRefund: form.aplicaPrecioBaseDevolucion,
         // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
@@ -891,6 +897,18 @@ function ProductoForm({
         </div>
         <p className="mt-2 text-[11px] text-muted-foreground">{t("field.envaseHelp")}</p>
       </div>
+      <Field label={t("field.sesionesPorUnidad")} htmlFor="prod-sessions-per-unit" hint={t("field.sesionesPorUnidadHelp")}>
+        <Input
+          id="prod-sessions-per-unit"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          step="1"
+          value={form.sesionesPorUnidad}
+          onChange={(e) => set("sesionesPorUnidad", e.target.value)}
+          placeholder="4"
+        />
+      </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label={t("field.tipo")} htmlFor="prod-type">
           <Select
@@ -995,52 +1013,5 @@ function ProductoForm({
         </div>
       )}
     </FormSheet>
-  );
-}
-
-function Toggle({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-lg border px-3 py-2">
-      <span className="text-sm">{label}</span>
-      <Switch checked={checked} onCheckedChange={onChange} />
-    </div>
-  );
-}
-
-function CatalogSelect({
-  id,
-  value,
-  onChange,
-  options,
-  placeholder,
-}: {
-  id?: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: Clasificacion[];
-  placeholder: string;
-}) {
-  return (
-    <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
-      <SelectTrigger id={id} className="w-full">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={NONE}>{placeholder}</SelectItem>
-        {options.map((o) => (
-          <SelectItem key={o.id} value={o.id}>
-            {o.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }

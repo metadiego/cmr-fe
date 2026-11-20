@@ -55,7 +55,9 @@ const DEBT = {
   "app/(app)/billing/invoices/[id]/page.tsx": 1291,
   // 17-nov-2026: 1048 → 1046 — the product sheet moved onto the standard FormSheet shell (kit Field,
   // useDialogForm, useSubmit); the local Field and canSubmit went.
-  "components/inventario/productos-admin.tsx": 1046,
+  // 20-nov-2026: 1046 → 1020 — Toggle/CatalogSelect moved to producto-form-controls.tsx, making room
+  // for the sessionsPerUnit field (cmr-be #657, "sesiones por unidad").
+  "components/inventario/productos-admin.tsx": 1020,
   // 17-nov-2026: 700 → 681 — the delete AlertDialog became a useConfirm prompt (standard form kit);
   // the stray blank line after </aside> went, and the delete confirm gained `destructive: true` (net 0).
   "components/configuracion/menu-editor.tsx": 681,
