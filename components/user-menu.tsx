@@ -18,7 +18,7 @@ import { setLocale } from "@/i18n/locale-actions";
 import { locales, type Locale } from "@/i18n/config";
 import { setMyLanguage, setMyTheme } from "@/lib/api/preferences";
 import { toastError } from "@/lib/api/errors";
-import { createClient } from "@/lib/supabase/client";
+import { signOutAndLog } from "@/lib/auth/sign-out";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
 import { useMenu } from "@/hooks/use-menu";
@@ -57,7 +57,7 @@ export function UserMenu() {
   const [signingOut, setSigningOut] = React.useState(false);
   async function signOut() {
     setSigningOut(true);
-    await createClient().auth.signOut();
+    await signOutAndLog();
     // Navegación DURA (no router.replace): la suave dejaba el menú pegado en «Saliendo…» porque el header
     // no se remonta. Recargar en /login limpia del todo el estado de sesión.
     window.location.assign("/login");

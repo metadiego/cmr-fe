@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { createClient } from "@/lib/supabase/client";
+import { signOutAndLog } from "@/lib/auth/sign-out";
 import { useMe } from "@/hooks/use-me";
 import { Button } from "@/components/ui/button";
 
@@ -23,7 +23,7 @@ export default function PendingPage() {
         : t("waiting");
 
   async function signOut() {
-    await createClient().auth.signOut();
+    await signOutAndLog();
     router.replace("/login");
   }
 
