@@ -216,11 +216,11 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
       {/* .formato-doc = columna flex que LLENA la hoja (min-height:100vh en impresión): la zona de
           OBSERVACIONES (o un espaciador si no hay) crece y empuja firmas/pie al fondo → nada amontonado
           arriba. Norma repetida del dueño: los reportes ocupan toda la página con aire. */}
-      <div ref={printRef} className={"formato-print rounded-lg border bg-white p-6 text-black" + (compact ? " formato-compact" : "")}>
-        {/* render.density "compact": the <style> travels inside the cloned sheet, so the preview and the
-            print window both get it (!important beats the sections' inline paddings). */}
+      <div ref={printRef} className="formato-print rounded-lg border bg-white p-6 text-black">
+        {/* render.density "compact": the <style> and the class live INSIDE printRef — the print window only
+            gets its innerHTML — so preview and print match (!important beats the sections' inline paddings). */}
         {compact && <style>{COMPACT_CSS}</style>}
-        <div className="formato-doc flex min-h-[70vh] flex-col">
+        <div className={"formato-doc flex min-h-[70vh] flex-col" + (compact ? " formato-compact" : "")}>
           {membrete}
 
           {/* Selectores de tipo (p. ej. RADIAL/FOCAL en Ondas de Choque): una casilla en blanco por opción,
