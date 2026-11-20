@@ -85,6 +85,31 @@ El iPad busca al paciente de tres maneras:
 
 Si el BE tiene una forma mejor de pedir «las visitas GLP-1 de hoy», que lo diga.
 
+### 5. Más formas de cargar al paciente (pedido del dueño, 20-nov)
+
+El dueño eligió que **nadie escanee ni escriba** en el caso normal:
+
+1. **Lista de los GLP-1 de hoy** en el centro. Es la pantalla de inicio del iPad: se toca al
+   paciente y abre su hoja, con una marca de hoja guardada o pendiente.
+   - **Pedido:** un listado de las visitas GLP-1 del día con `sessionId`, paciente, hora, enfermera y
+     `sheetSaved: boolean`.
+   - Si ya sirve `GET /frontdesk/sesiones` filtrando por servicio, digan cuál es el filtro y cómo
+     sale `sheetSaved`.
+2. **«Enviar al iPad» desde patient-desk.** La recepción o la enfermera toca el botón en la fila GLP-1
+   y la hoja se abre sola en el iPad.
+   - **Pedido:** `POST /api/v2/formats/glp1_adherencia/sessions/:sessionId/send` con
+     `{ "toUserId": "<uuid>" }`, que es el usuario conectado en el iPad. Debe publicar un evento en el
+     bus SSE que ya usa el FE (`useCitaStream`, con la misma forma de mensaje), solo para ese usuario
+     o con `toUserId` en el evento.
+   - Si prefieren otro destino, como «todos los iPad del centro» o un puesto en lugar de un usuario,
+     propónganlo.
+   - Permiso: el de escribir la hoja, o uno de recepción.
+3. **Abrir al pesar.** Cuando la báscula del iPad (`scale-image`) o la medida se enlaza a una
+   visita GLP-1, se publica un evento en el bus con `sessionId` y paciente. El iPad muestra
+   «Fulano acaba de pesarse — abrir hoja».
+
+Siguen valiendo el QR del patient-desk (FE puro) y la búsqueda por nombre o récord.
+
 ## Lo que hará el FE (cuando esté el contrato)
 
 - Pantalla `/forms/glp1/[sessionId]`, pensada para el iPad: botones grandes Sí/No y observación
