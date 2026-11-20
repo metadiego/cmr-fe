@@ -41,3 +41,6 @@ export function maxDaysCheck(raw: string): { filled: boolean; value: number | nu
   const ok = Number.isInteger(n) && n >= 0 && n <= 366;
   return { filled: true, value: ok ? n : null, invalid: !ok };
 }
+
+/** A later count's delta, whichever name the deployed BE sends (cmr-be #647: netChange, before it quantity). */
+export const countMoved = (c: { netChange?: number; quantity?: number }): number => c.netChange ?? c.quantity ?? 0;

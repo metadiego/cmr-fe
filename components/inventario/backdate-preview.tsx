@@ -4,6 +4,7 @@ import * as React from "react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import type { BackdatePreview as Preview, BackdateProductImpact } from "@/lib/api/inventory-backdate";
+import { countMoved } from "@/lib/inventory/backdate";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { ErrorState, LoadingPanel, Panel, RecordTable, Td, Th } from "@/components/kit/panel";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ function ProductImpact({ x }: { x: BackdateProductImpact }) {
         <p className="text-sm text-destructive">{t("negativeDays", { days: x.newlyNegativeDays.map(day).join(", ") })}</p>
       )}
       {x.laterCounts.length > 0 && (
-        <p className="text-sm text-warning-foreground">{t("laterCounts", { days: x.laterCounts.map((c) => `${day(c.date)} (${n(c.quantity)})`).join(", ") })}</p>
+        <p className="text-sm text-warning-foreground">{t("laterCounts", { days: x.laterCounts.map((c) => `${day(c.date)} (${countMoved(c) > 0 ? "+" : ""}${n(countMoved(c))})`).join(", ") })}</p>
       )}
       {x.days.length > 0 && (
         <>

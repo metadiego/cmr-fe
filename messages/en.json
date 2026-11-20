@@ -6609,7 +6609,7 @@
       "today": "Today",
       "opening": "{month} opening",
       "negativeDays": "Go negative: {days}",
-      "laterCounts": "There are later physical counts: {days}",
+      "laterCounts": "There are later physical counts; what each one moved: {days}",
       "closings": "Later closings: {n, plural, one {#} other {#}}.",
       "showDays": "Show day by day ({n})",
       "hideDays": "Hide day by day",
