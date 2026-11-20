@@ -181,7 +181,7 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
                       setOpenServiceId(svc.serviceId)
                     }
                   }}
-                  className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground tabular-nums"
+                  className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-sm bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground tabular-nums"
                 >
                   {overdue}
                 </span>
