@@ -4227,7 +4227,8 @@
       "blocked": "This center does not allow saving this change"
     },
     "reassign": {
-      "staffNotActive": "That person is not active."
+      "staffNotActive": "That person is not active.",
+      "notVoided": "Only a voided refund can change who voided it."
     }
   },
   "patientMerge": {
@@ -6651,7 +6652,8 @@
     "hint": "Moves it to that person in one step, nothing voided; the cash sheet follows.",
     "same": "It is already under that person.",
     "loadingStaff": "Loading staff…",
-    "staffFailed": "Could not load the staff."
+    "staffFailed": "Could not load the staff.",
+    "voiderHint": "Moves the void (and the reimbursements it took down) to that person; the cash sheet follows."
   },
   "payment": {
     "reassign": {

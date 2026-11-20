@@ -10,7 +10,7 @@ import { PrinterIcon, ArrowLeft01Icon, Cancel01Icon, InvoiceIcon, Edit02Icon } f
 import { anularDevolucion, getFormasPago, type FormaPago } from "@/lib/api/facturas";
 import { getRefundDetail, type RefundDetail } from "@/lib/api/refund-detail";
 import { listPersonalAll } from "@/lib/api/personal";
-import { reassignRefundUser } from "@/lib/api/reassign-user";
+import { reassignRefundUser, reassignRefundVoider } from "@/lib/api/reassign-user";
 import { ReassignUserDialog } from "@/components/facturacion/reassign-user-dialog";
 import { invoiceDetailHref } from "@/lib/facturacion/invoice-clinics";
 import { useResource } from "@/hooks/use-resource";
@@ -57,6 +57,7 @@ export default function DevolucionDetallePage() {
   // from the freshly refetched detail instead of keeping stale typed-over state.
   const [saveCount, setSaveCount] = React.useState(0);
   const [reassign, setReassign] = React.useState(false);
+  const [reassignVoider, setReassignVoider] = React.useState(false);
   function onSaved() {
     setSaveCount((n) => n + 1);
     refresh();
@@ -151,9 +152,29 @@ export default function DevolucionDetallePage() {
 
           {refund.status === "anulada" && (
             <p className="text-sm text-destructive">
-              {t("anuladaInfo", { fecha: refund.cancelledAt ? formatFechaSolo(refund.cancelledAt) : "—", quien: refund.cancelledByName || "—" })}
+              <span className="inline-flex items-center gap-1">
+                {t("anuladaInfo", { fecha: refund.cancelledAt ? formatFechaSolo(refund.cancelledAt) : "—", quien: refund.cancelledByName || "—" })}
+                {can("factura.refund.repair") && (
+                  <Button variant="ghost" size="icon" className="size-6" aria-label={tRoot("reassignUser.title")} title={tRoot("reassignUser.title")} onClick={() => setReassignVoider(true)}>
+                    <HugeiconsIcon icon={Edit02Icon} className="size-3.5" />
+                  </Button>
+                )}
+              </span>
               {refund.cancellationReason && <span className="block">{refund.cancellationReason}</span>}
             </p>
+          )}
+          {refund.status === "anulada" && (
+            <ReassignUserDialog
+              open={reassignVoider}
+              onOpenChange={setReassignVoider}
+              recordId={`${refund.id}:voider`}
+              description={`${refund.displayNumber ?? ""} · ${refund.cancelledByName || "—"}`}
+              currentUserId={refund.cancelledBy}
+              centerId={centro}
+              hint={tRoot("reassignUser.voiderHint")}
+              save={(staffId) => reassignRefundVoider(id, devId, staffId, centro)}
+              onDone={onSaved}
+            />
           )}
 
           <Tabs defaultValue="editor" className="mt-2">

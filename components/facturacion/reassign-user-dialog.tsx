@@ -28,6 +28,7 @@ export function ReassignUserDialog({
   centerId,
   save,
   onDone,
+  hint,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -39,6 +40,8 @@ export function ReassignUserDialog({
   centerId?: string;
   save: (userId: string) => Promise<unknown>;
   onDone: () => void;
+  /** Replaces the default hint (the voider of a refund moves the void, not the charge). */
+  hint?: string;
 }) {
   const t = useTranslations("reassignUser");
   const [f, set] = useDialogForm(() => ({ userId: currentUserId ?? "" }), open, recordId);
@@ -71,7 +74,7 @@ export function ReassignUserDialog({
       reason={why}
       blocked={!!why}
     >
-      <Field label={t("user")} htmlFor="reassign-user" required hint={t("hint")}>
+      <Field label={t("user")} htmlFor="reassign-user" required hint={hint ?? t("hint")}>
         <Select value={f.userId} onValueChange={(v) => set({ userId: v })}>
           <SelectTrigger id="reassign-user" className="w-full">
             <SelectValue placeholder={t("pick")} />

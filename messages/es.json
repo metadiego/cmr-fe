@@ -4227,7 +4227,8 @@
       "blocked": "El centro no permite guardar este cambio"
     },
     "reassign": {
-      "staffNotActive": "Esa persona no está activa."
+      "staffNotActive": "Esa persona no está activa.",
+      "notVoided": "Solo se puede cambiar quién anuló una devolución anulada."
     }
   },
   "patientMerge": {
@@ -6651,7 +6652,8 @@
     "hint": "Pasa a esa persona en un paso, sin anular nada; el cuadre de caja lo refleja.",
     "same": "Ya está a nombre de esa persona.",
     "loadingStaff": "Cargando el personal…",
-    "staffFailed": "No se pudo cargar el personal."
+    "staffFailed": "No se pudo cargar el personal.",
+    "voiderHint": "Pasa la anulación (y los reembolsos que tumbó) a esa persona; el cuadre de caja lo refleja."
   },
   "payment": {
     "reassign": {
