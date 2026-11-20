@@ -5,8 +5,10 @@ import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CancelAppointmentDialog } from "@/components/appointments-booking/cancel-appointment-dialog";
 import { CitaModal } from "@/components/agenda/cita-modal";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { useCan } from "@/hooks/use-can";
@@ -202,11 +204,9 @@ function AppointmentCard({
             {t("stopMove")}
           </Button>
         </div>
-      ) : cancelling ? (
-        <CancelBox onKeep={onKeep} onCancel={onCancel} id={a.id} />
       ) : (
         (actions.move || actions.edit || actions.cancel) && (
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1">
             {actions.move && (
               <Button size="xs" variant="outline" onClick={onMove}>
                 {t("move")}
@@ -218,66 +218,31 @@ function AppointmentCard({
               </Button>
             )}
             {actions.cancel && (
-              <Button size="xs" variant="ghost" className="text-destructive" onClick={onAskCancel}>
-                {t("cancel")}
-              </Button>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon-xs" variant="ghost" className="ml-auto" aria-label={t("moreActions")}>
+                    <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem variant="destructive" onSelect={onAskCancel}>
+                    {t("cancel")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         )
       )}
-    </div>
-  );
-}
-
-function CancelBox({
-  id,
-  onKeep,
-  onCancel,
-}: {
-  id: string;
-  onKeep: () => void;
-  onCancel: (reason: string) => Promise<void>;
-}) {
-  const t = useTranslations("appointmentsBooking.patient");
-  const [reason, setReason] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-  const fieldId = `cancel-reason-${id}`;
-
-  // A ref, not only the state: two fast clicks land before the re-render that disables the button.
-  const inFlight = React.useRef(false);
-  const confirm = async () => {
-    if (inFlight.current) return;
-    inFlight.current = true;
-    setBusy(true);
-    try {
-      await onCancel(reason.trim());
-    } finally {
-      inFlight.current = false;
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-1.5 rounded-md border border-destructive/30 bg-destructive/5 p-2">
-      <Label htmlFor={fieldId} className="text-xs">
-        {t("cancelReasonLabel")}
-      </Label>
-      <Textarea
-        id={fieldId}
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-        placeholder={t("cancelReasonPlaceholder")}
-        rows={2}
-        autoFocus
-      />
-      <div className="flex gap-2">
-        <Button size="xs" variant="destructive" onClick={confirm} disabled={busy || reason.trim() === ""}>
-          {t("confirmCancel")}
-        </Button>
-        <Button size="xs" variant="ghost" onClick={onKeep} disabled={busy}>
-          {t("keep")}
-        </Button>
-      </div>
+      {actions.cancel && (
+        <CancelAppointmentDialog
+          open={cancelling}
+          appointmentId={a.id}
+          description={`${type?.name ?? kindLabel} · ${label(a.date, a.time)}`}
+          onKeep={onKeep}
+          onCancel={onCancel}
+        />
+      )}
     </div>
   );
 }

@@ -6723,7 +6723,9 @@
       "confirmCancel": "Cancel appointment",
       "keep": "Keep it",
       "loadFailedMedical": "Could not load the medical appointments.",
-      "loadFailedService": "Could not load the service sessions."
+      "loadFailedService": "Could not load the service sessions.",
+      "cancelTitle": "Cancel appointment",
+      "moreActions": "More actions"
     },
     "toolbar": {
       "booking": "Booking",

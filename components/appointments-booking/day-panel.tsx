@@ -8,9 +8,13 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip } from "@/components/ui/tooltip";
+import { Field } from "@/components/kit/field";
+import { FormFooter } from "@/components/kit/form-footer";
+import { useDialogForm } from "@/components/kit/use-dialog-form";
+import { useSubmit } from "@/components/kit/use-submit";
+import { missingFields } from "@/lib/forms/missing";
 import { inWindow, type BookingSlot, type TimeWindow } from "@/lib/agenda/booking/availability";
 import type { DayResult } from "@/hooks/use-booking-availability";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
@@ -249,23 +253,12 @@ function MoveBox({
   full: boolean;
 }) {
   const t = useTranslations("appointmentsBooking.move");
-  const [reason, setReason] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-  const missingReason = moving.needsReason && reason.trim() === "";
-
-  // A ref, not only the state: two fast clicks land before the re-render that disables the button.
-  const inFlight = React.useRef(false);
-  const confirm = async () => {
-    if (inFlight.current) return;
-    inFlight.current = true;
-    setBusy(true);
-    try {
-      await moving.onConfirm(moving.needsReason ? reason.trim() : undefined);
-    } finally {
-      inFlight.current = false;
-      setBusy(false);
-    }
-  };
+  // A fresh reason for every target hour (the box stays mounted while the hour changes).
+  const [f, set] = useDialogForm(() => ({ reason: "" }), true, toLabel);
+  const reason = f.reason.trim();
+  // `onConfirm` toasts its own failure and keeps the box (and the typed reason) on screen.
+  const { submitting, submit } = useSubmit(() => moving.onConfirm(moving.needsReason ? reason : undefined));
+  const missing = missingFields(moving.needsReason ? [[t("reasonLabel"), reason !== ""]] : []);
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-warning/50 bg-warning/10 p-3 text-sm">
@@ -273,25 +266,23 @@ function MoveBox({
       <p>{t("fromTo", { from: moving.fromLabel, to: toLabel })}</p>
       {full && <p className="text-warning-foreground">{t("fullWarning")}</p>}
       {moving.needsReason && (
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="booking-move-reason">{t("reasonLabel")}</Label>
+        <Field label={t("reasonLabel")} htmlFor="booking-move-reason" required>
           <Textarea
             id="booking-move-reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            value={f.reason}
+            onChange={(e) => set({ reason: e.target.value })}
             placeholder={t("reasonPlaceholder")}
             rows={2}
           />
-        </div>
+        </Field>
       )}
-      <div className="flex gap-2">
-        <Button size="sm" onClick={confirm} disabled={busy || missingReason}>
-          {t("confirm")}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={moving.onCancel} disabled={busy}>
-          {t("notThis")}
-        </Button>
-      </div>
+      <FormFooter
+        primary={{ label: t("confirm"), onClick: () => submit() }}
+        missing={missing}
+        submitting={submitting}
+        onCancel={moving.onCancel}
+        cancelLabel={t("notThis")}
+      />
     </div>
   );
 }

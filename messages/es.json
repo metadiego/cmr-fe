@@ -6723,7 +6723,9 @@
       "confirmCancel": "Cancelar cita",
       "keep": "Mantenerla",
       "loadFailedMedical": "No se pudieron cargar las citas médicas.",
-      "loadFailedService": "No se pudieron cargar las sesiones de servicio."
+      "loadFailedService": "No se pudieron cargar las sesiones de servicio.",
+      "cancelTitle": "Cancelar cita",
+      "moreActions": "Más acciones"
     },
     "toolbar": {
       "booking": "Agendando",
