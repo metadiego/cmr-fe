@@ -44,7 +44,7 @@ function PageHeader({
         {(count != null || actions) && (
           <div className="flex items-center justify-between gap-3">
             {count != null ? <span className="text-sm text-muted-foreground tabular-nums">{count}</span> : <span />}
-            {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+            {actions && <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">{actions}</div>}
           </div>
         )}
         {description && <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}
@@ -58,7 +58,7 @@ function PageHeader({
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           {count != null && <span className="text-xs text-muted-foreground tabular-nums">{count}</span>}
         </div>
-        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+        {actions && <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">{actions}</div>}
       </div>
       {description && <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}
     </div>

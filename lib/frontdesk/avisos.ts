@@ -17,12 +17,13 @@ const LABEL_KEY_OVERRIDE: Record<string, string> = {
 // Traduce por `labelKey` (con los datos del warning como params ICU: cupo/agendadas/...); si no hay
 // clave i18n, cae al `message` del BE o al `code`. Único punto → sin duplicar en cada modal.
 export function mostrarAvisos(warnings: ApiWarning[] | undefined, t: RootT): void {
-  for (const w of warnings ?? []) {
-    const labelKey = w.labelKey ? (LABEL_KEY_OVERRIDE[w.labelKey] ?? w.labelKey) : undefined;
-    const msg =
-      labelKey && t.has(labelKey)
-        ? t(labelKey, w as unknown as Record<string, string | number>)
-        : (w.message ?? w.code);
-    toast.warning(msg);
-  }
+  for (const w of warnings ?? []) toast.warning(warningText(w, t));
+}
+
+/** One BE warning as text (its i18n label, else the BE message, else the code). */
+export function warningText(w: ApiWarning, t: RootT): string {
+  const labelKey = w.labelKey ? (LABEL_KEY_OVERRIDE[w.labelKey] ?? w.labelKey) : undefined;
+  return labelKey && t.has(labelKey)
+    ? t(labelKey, w as unknown as Record<string, string | number>)
+    : (w.message ?? w.code);
 }

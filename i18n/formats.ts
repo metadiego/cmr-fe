@@ -76,6 +76,12 @@ export const formats = {
     dayMonthYear: { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" },
     // "jue, 4 sept" / "Thu, Sep 4"
     dayWeekdayShort: { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" },
+    // Week grid column headers and "next free" chips: "jue 5" / "Thu 5"
+    dayWeekdayNum: { weekday: "short", day: "numeric", timeZone: "UTC" },
+    // Month grid column headers: "dom" / "Sun"
+    dayWeekdayOnly: { weekday: "short", timeZone: "UTC" },
+    // Next to a typed date, so the day reads as said on the phone: "jueves" / "Thursday"
+    weekdayLong: { weekday: "long", timeZone: "UTC" },
   },
   number: {
     currency: { style: "currency", currency: "USD" },

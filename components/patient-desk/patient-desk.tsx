@@ -410,7 +410,7 @@ export function PatientDesk() {
                 </>
               )}
               <DropdownMenuItem asChild>
-                <Link href="/scheduling/appointments/services">{t("serviceAppointments")}</Link>
+                <Link href="/scheduling/appointments">{t("serviceAppointments")}</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

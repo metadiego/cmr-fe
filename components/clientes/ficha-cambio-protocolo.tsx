@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useFormatter, useTranslations } from "next-intl";
 
-import { getCambiosProtocolo, type CambioProtocoloHistorial } from "@/lib/api/frontdesk";
+import { getCambiosProtocolo, type CambioProtocoloHistorial } from "@/lib/api/protocol-change";
 import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
