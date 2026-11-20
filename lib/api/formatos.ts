@@ -59,7 +59,7 @@ export type FormatoCampo = {
 // exactas en docs/specs/formatos-legacy-handoff-be.md. El FE dibuja lo que el BE emita; nada hardcodeado.
 export type FormatoSeccion =
   // OBSERVACIONES: caja (por defecto) o N líneas regladas (`estilo:"lineas"`, `lineas` = nº de renglones).
-  | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number }
+  | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number; text?: string | null }
   // Firmas simples: línea horizontal + label debajo. `lineas` son objetos { label, labelKey } (o string).
   // `estilo:"en_linea"` = the legacy «LABEL: ________» (label first, the line after it), `columnas` per row
   // (default 2: «TÉCNICO | FIRMA DEL PACIENTE», then «HORA»). A line's `valor` is printed on it (e.g. the
@@ -95,7 +95,8 @@ export type FormatoSeccion =
       labelKey?: string | null;
       tipo: "checklist";
       columnas?: { pregunta?: string; si?: string; no?: string; obs?: string };
-      grupos: { titulo?: string | null; preguntas: { texto: string }[] }[];
+      // `value`/`note`: what was saved on screen (format answers, cmr-be #658); absent = blank to fill by hand.
+      grupos: { titulo?: string | null; preguntas: { texto: string; value?: "yes" | "no" | null; note?: string | null }[] }[];
     }
   // Tabla temática (procedimiento): cabecera de color, columna de descripción de color, filas pre-puestas.
   // `cabecera` admite 1 o 2 filas (morpheus8 = 2). `filas` = descripciones ya puestas; `filasEnBlanco` añade

@@ -1,0 +1,192 @@
+// Pure logic of a format sheet filled on screen (the GLP-1 nursing sheet on the iPad). The structure
+// (header fields, checklist questions) comes from the format's assembly; the values from
+// GET …/answers (saved wins over suggested). Contract: docs/specs/glp1-hoja-enfermeria-ipad-contrato-be.md.
+
+import type { FormatoArmado, FormatoCampo } from "../api/formatos.ts";
+import type { AnswerValue, SheetAnswers, SheetAnswersInput, SheetSession } from "../api/format-answers.ts";
+import { coincide } from "../frontdesk/search.ts";
+
+/** Formats that can be filled on screen. Adding one here is all the FE needs (the screen is generic). */
+export const FILLABLE_SHEETS: readonly string[] = ["glp1_adherencia"];
+
+export function isFillableSheet(slug: string | null | undefined): boolean {
+  return !!slug && FILLABLE_SHEETS.includes(slug);
+}
+
+export function sheetPath(slug: string, sessionId: string): string {
+  return `/forms/${encodeURIComponent(slug)}/${encodeURIComponent(sessionId)}`;
+}
+
+export function sheetHomePath(slug: string): string {
+  return `/forms/${encodeURIComponent(slug)}`;
+}
+
+/** Limits of the PUT body (BE validation). */
+export const LIMITS = { field: 500, note: 1000, additionalNotes: 4000 } as const;
+
+/** Patient identity (name, record) and the visit's date come from the visit, never typed on the sheet. */
+export function isReadOnlyField(f: Pick<FormatoCampo, "origen">): boolean {
+  return !!f.origen && (f.origen.startsWith("paciente.") || f.origen === "sesion.fecha");
+}
+
+export interface SheetQuestion {
+  section: number;
+  group: number;
+  question: number;
+  text: string;
+  /** Set on the first question of each group: the group band to draw above it. */
+  groupTitle: string | null;
+}
+
+/** Every checklist question of the assembly, in on-paper order, by position. */
+export function sheetQuestions(assembly: Pick<FormatoArmado, "sections">): SheetQuestion[] {
+  const out: SheetQuestion[] = [];
+  (assembly.sections ?? []).forEach((s, section) => {
+    if (s.tipo !== "checklist") return;
+    s.grupos.forEach((g, group) => {
+      g.preguntas.forEach((p, question) => {
+        out.push({ section, group, question, text: p.texto, groupTitle: question === 0 ? (g.titulo ?? null) : null });
+      });
+    });
+  });
+  return out;
+}
+
+export function answerKey(q: { section?: number; group: number; question: number }, firstSection = 0): string {
+  return `${q.section ?? firstSection}:${q.group}:${q.question}`;
+}
+
+export interface AnswerState {
+  value: AnswerValue;
+  note: string;
+}
+
+export interface SheetState {
+  fields: Record<string, string>;
+  answers: Record<string, AnswerState>;
+  additionalNotes: string;
+  nurseId: string;
+  /** "YYYY-MM-DDTHH:mm", Puerto Rico wall clock (a datetime-local value). */
+  recordedAt: string;
+}
+
+const PR_OFFSET = "-04:00"; // Puerto Rico has no daylight saving time.
+
+/** Now as a datetime-local value in the clinic's timezone. */
+export function nowLocalPR(now: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Puerto_Rico",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const v = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  return `${v("year")}-${v("month")}-${v("day")}T${v("hour")}:${v("minute")}`;
+}
+
+/** An ISO instant (any offset) → datetime-local value in Puerto Rico. */
+export function isoToLocalPR(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : nowLocalPR(d);
+}
+
+/** datetime-local value in Puerto Rico → ISO 8601 with the clinic's offset. */
+export function localPRToIso(local: string): string | null {
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(local) ? `${local}:00${PR_OFFSET}` : null;
+}
+
+/** The screen's starting state: saved values win; otherwise the suggestion; otherwise empty. */
+export function initialSheetState(data: SheetAnswers, firstSection: number, now: Date = new Date()): SheetState {
+  const fields: Record<string, string> = {};
+  for (const f of data.suggested?.fields ?? []) fields[f.key] = f.value ?? "";
+  if (data.saved) for (const f of data.fields ?? []) fields[f.key] = f.value ?? "";
+  const answers: Record<string, AnswerState> = {};
+  for (const a of data.answers ?? []) answers[answerKey(a, firstSection)] = { value: a.value ?? null, note: a.note ?? "" };
+  return {
+    fields,
+    answers,
+    additionalNotes: data.additionalNotes ?? "",
+    nurseId: data.nurseId ?? data.suggested?.nurse?.id ?? "",
+    recordedAt: isoToLocalPR(data.recordedAt) ?? nowLocalPR(now),
+  };
+}
+
+/** The PUT body: the WHOLE sheet (an array sent replaces the saved one). Read-only fields are not sent. */
+export function sheetPayload(
+  state: SheetState,
+  editableKeys: string[],
+  questions: SheetQuestion[],
+): SheetAnswersInput {
+  return {
+    fields: editableKeys.map((key) => ({ key, value: state.fields[key]?.trim() || null })),
+    answers: questions.map((q) => {
+      const a = state.answers[answerKey(q)];
+      const note = a?.note.trim();
+      return { section: q.section, group: q.group, question: q.question, value: a?.value ?? null, ...(note ? { note } : {}) };
+    }),
+    additionalNotes: state.additionalNotes.trim() || null,
+    nurseId: state.nurseId || null,
+    recordedAt: localPRToIso(state.recordedAt),
+  };
+}
+
+/** How many questions have a Yes/No. */
+export function answeredCount(state: SheetState, questions: SheetQuestion[]): number {
+  return questions.filter((q) => state.answers[answerKey(q)]?.value != null).length;
+}
+
+export type SheetProblem = { kind: "field"; key: string } | { kind: "note"; key: string } | { kind: "additionalNotes" };
+
+/** Filled but too long (a `reason`, never "missing"). */
+export function sheetProblems(state: SheetState): SheetProblem[] {
+  const out: SheetProblem[] = [];
+  for (const [key, v] of Object.entries(state.fields)) if (v.trim().length > LIMITS.field) out.push({ kind: "field", key });
+  for (const [key, a] of Object.entries(state.answers)) if (a.note.trim().length > LIMITS.note) out.push({ kind: "note", key });
+  if (state.additionalNotes.trim().length > LIMITS.additionalNotes) out.push({ kind: "additionalNotes" });
+  return out;
+}
+
+/** The day list filtered by patient name or record (accent- and case-insensitive). */
+export function filterSheetSessions(list: SheetSession[], query: string): SheetSession[] {
+  const q = query.trim();
+  if (!q) return list;
+  return list.filter((s) => coincide([s.patient?.name, s.patient?.medicalRecordNumber], q));
+}
+
+// --- Live bus (/api/v2/tablero/stream): which events the sheet screens react to. ---
+
+interface BusEvent {
+  entity: string;
+  action: string;
+  status?: unknown;
+}
+
+function obj(v: unknown): Record<string, unknown> | null {
+  return v && typeof v === "object" ? (v as Record<string, unknown>) : null;
+}
+
+/** «Enviar al iPad»: the sheet to open when the request is for THIS person (the bus is per center). */
+export function openRequestFor(e: BusEvent, staffId: string | null | undefined): { slug: string; sessionId: string; patientName: string | null } | null {
+  if (!staffId || e.entity !== "format_sheet" || e.action !== "open_requested") return null;
+  const s = obj(e.status);
+  if (!s || s.toUserId !== staffId || typeof s.sessionId !== "string" || typeof s.formatSlug !== "string") return null;
+  const name = obj(s.patient)?.name;
+  return { slug: s.formatSlug, sessionId: s.sessionId, patientName: typeof name === "string" ? name : null };
+}
+
+/** A measurement newly linked to a visit: offered as «X just got weighed — open sheet». */
+export function measurementLinked(e: BusEvent): { sessionId: string; patientName: string | null; date: string | null } | null {
+  if (e.entity !== "body_measurement" || e.action !== "linked") return null;
+  const s = obj(e.status);
+  if (!s || typeof s.sessionId !== "string") return null;
+  const name = obj(s.patient)?.name;
+  return {
+    sessionId: s.sessionId,
+    patientName: typeof name === "string" ? name : null,
+    date: typeof s.date === "string" ? s.date : null,
+  };
+}

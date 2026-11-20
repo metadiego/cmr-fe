@@ -38,6 +38,12 @@ function colLabel(col: FormatoColumna, label: LabelFn): string {
 
 // Casilla vacía para marcar a mano (☐). Compartida por checklist y las órdenes Rx (casillasEnFilas).
 const Casilla = <span style={{ display: "inline-block", width: 12, height: 12, border: BORDER }} aria-hidden />;
+// The same box, ticked: a checklist answer saved on screen (format answers) prints marked.
+const CasillaMarcada = (
+  <span style={{ display: "inline-flex", width: 12, height: 12, border: BORDER, alignItems: "center", justifyContent: "center", fontSize: 10, lineHeight: 1, fontWeight: 700 }} aria-hidden>
+    ✓
+  </span>
+);
 
 // Un grupo de opciones con su propia casilla c/u, dentro de una celda de tabla_tematica (Peptide Rx: varios
 // grupos independientes en la misma celda, p. ej. "Subcutaneously/Near Injury Site" y "Daily/Twice Daily").
@@ -95,15 +101,23 @@ export function SeccionInner({
                 flex: "1 1 auto",
                 minHeight: n * 24,
                 backgroundImage: "repeating-linear-gradient(to bottom, transparent 0 23px, #000 23px 24px)",
+                // Text saved on screen is written ON the rules.
+                fontSize: 12,
+                lineHeight: "24px",
+                whiteSpace: "pre-line",
               }}
-            />
+            >
+              {s.text ?? null}
+            </div>
           </>
         );
       }
       return (
         <>
           <Titulo>{titulo}</Titulo>
-          <div style={{ border: "1px solid #999", flex: "1 1 auto", minHeight: `${Math.max(3, s.alto ?? 3) * 30}px` }} />
+          <div style={{ border: "1px solid #999", flex: "1 1 auto", minHeight: `${Math.max(3, s.alto ?? 3) * 30}px`, padding: s.text ? 6 : 0, fontSize: 12, whiteSpace: "pre-line" }}>
+            {s.text ?? null}
+          </div>
         </>
       );
     }
@@ -236,9 +250,9 @@ export function SeccionInner({
                   {g.preguntas.map((p, pi) => (
                     <tr key={pi}>
                       <td style={{ border: BORDER, padding: "6px 8px" }}>{p.texto}</td>
-                      <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{box}</td>
-                      <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{box}</td>
-                      <td style={{ border: BORDER, padding: "6px 8px" }} />
+                      <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{p.value === "yes" ? CasillaMarcada : box}</td>
+                      <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{p.value === "no" ? CasillaMarcada : box}</td>
+                      <td style={{ border: BORDER, padding: "6px 8px" }}>{p.note ?? null}</td>
                     </tr>
                   ))}
                 </React.Fragment>

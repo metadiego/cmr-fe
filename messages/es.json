@@ -2540,7 +2540,8 @@
       "reopenPackageClosed": "El paquete ya no está activo: factura anulada, devuelta o protocolo cambiado",
       "reopenNotCancelled": "La sesión no está cancelada",
       "sessionSameDay": "Ya tiene otra sesión de este servicio hoy",
-      "sheetSlotTaken": "La hoja no tiene hueco a esa hora"
+      "sheetSlotTaken": "La hoja no tiene hueco a esa hora",
+      "sessionDeleteBlocked": "No se puede borrar esta visita: ya tiene una hoja clínica guardada. Puedes cancelarla."
     },
     "evento": {
       "reopened": "Reabierta"
@@ -6954,5 +6955,74 @@
     "noChanges": "No hay cambios.",
     "readOnly": "Solo lectura: cambiarla requiere el permiso inventory.backdate_settings.",
     "daysShort": "{n} días"
+  },
+  "formSheet": {
+    "home": {
+      "title": "Hojas del día",
+      "search": "Buscar por nombre o récord",
+      "date": "Fecha",
+      "empty": "No hay visitas de este servicio ese día.",
+      "noMatch": "Nadie coincide con «{q}».",
+      "saved": "Guardada",
+      "pending": "Pendiente",
+      "live": "En vivo: se abre sola cuando la envían desde recepción",
+      "offline": "Sin conexión en vivo",
+      "qrHint": "¿Tienes el QR? Ábrelo con la cámara del iPad.",
+      "nurse": "Enfermera",
+      "loadError": "No se pudo cargar la lista"
+    },
+    "sheet": {
+      "patient": "Paciente",
+      "record": "Récord",
+      "date": "Fecha",
+      "answered": "{n} de {total} respondidas",
+      "yes": "Sí",
+      "no": "No",
+      "note": "Observación",
+      "additionalNotes": "Observaciones adicionales",
+      "nurse": "Enfermera",
+      "recordedAt": "Fecha y hora",
+      "nursePlaceholder": "Elegir enfermera",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "saved": "Hoja guardada",
+      "print": "Imprimir",
+      "back": "Lista del día",
+      "savedAt": "Guardada {when}",
+      "notSaved": "Aún sin guardar",
+      "tooLongField": "«{label}» pasa de {max} caracteres.",
+      "tooLongNote": "Una observación pasa de {max} caracteres.",
+      "tooLongNotes": "Las observaciones adicionales pasan de {max} caracteres.",
+      "loadError": "No se pudo cargar la hoja",
+      "printTitle": "Hoja para imprimir",
+      "printSavedOnly": "Se imprime lo guardado: guarda antes los cambios.",
+      "questions": "Preguntas",
+      "header": "Datos de la visita",
+      "signature": "Firma"
+    },
+    "send": {
+      "fill": "Llenar en pantalla",
+      "qr": "QR",
+      "qrTitle": "Abrir esta hoja en el iPad",
+      "qrHint": "Apunta la cámara del iPad al código y toca el enlace.",
+      "toIpad": "Enviar al iPad",
+      "sendTitle": "Enviar la hoja al iPad",
+      "to": "Enviar a",
+      "toHint": "La persona que tiene la sesión abierta en el iPad.",
+      "send": "Enviar",
+      "sent": "Enviada al iPad de {name}",
+      "noStaff": "No hay personal con cuenta en este centro."
+    },
+    "live": {
+      "opened": "Abriendo la hoja de {name}",
+      "weighed": "{name} acaba de pesarse",
+      "openSheet": "Abrir hoja"
+    }
+  },
+  "formats": {
+    "error": {
+      "answersInvalid": "La hoja tiene un dato que no corresponde a este formato.",
+      "sendTargetInvalid": "Esa persona no puede recibir la hoja en este centro (sin cuenta o inactiva)."
+    }
   }
 }

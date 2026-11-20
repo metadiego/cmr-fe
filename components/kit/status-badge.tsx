@@ -35,6 +35,9 @@ const TONE: Record<string, Tone> = {
   // login sessions
   open: "info",
   closed: "secondary",
+  // format sheets filled on screen (GLP-1 nursing sheet)
+  saved: "success",
+  pending: "warning",
 };
 const LABEL_NS = {
   appointment: "citas.estado",
@@ -42,6 +45,7 @@ const LABEL_NS = {
   invoice: "facturacionList.estado",
   transfer: "patients.transferTreatment.status",
   session: "auditSessions.status",
+  sheet: "formSheet.home",
 } as const;
 
 export function StatusBadge({ kind, value }: { kind: keyof typeof LABEL_NS; value?: string | null }) {

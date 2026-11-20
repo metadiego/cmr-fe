@@ -20,6 +20,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
 import { MlsSheet } from "@/components/frontdesk/mls-sheet";
 import { HiltSheet } from "@/components/frontdesk/hilt-sheet";
+import { SheetSendBar } from "@/components/format-sheet/sheet-send-bar";
+import { isFillableSheet } from "@/lib/format-sheet/sheet";
 
 // Modal ESTÁNDAR de acciones/formatos por servicio (data-driven desde servicio.formAcciones).
 // Lista los `reports` (HILT/MLS…) y `additional_actions` (Historial). Al elegir un report:
@@ -261,7 +263,11 @@ export function FormatosModal({
 
         {/* 3b) Formato GENÉRICO (data-driven): documento imprimible armado por el BE. Sin subform. */}
         {report && !esFormato && (
-          <GenericFormatoRender clave={report.id} sesionId={sesionId} centro={centro} onVolver={() => setReport(null)} />
+          <>
+            {/* A sheet that is filled on screen (GLP-1): open it here, its QR, or «Enviar al iPad». */}
+            {sesionId && isFillableSheet(report.id) && <SheetSendBar slug={report.id} sessionId={sesionId} center={centro} />}
+            <GenericFormatoRender clave={report.id} sesionId={sesionId} centro={centro} onVolver={() => setReport(null)} />
+          </>
         )}
       </DialogContent>
     </Dialog>
