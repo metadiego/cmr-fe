@@ -144,7 +144,7 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
   return (
     <PageContainer gap="lg" className="w-full px-4 py-4 md:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
           <BackLink slug={slug} />
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-semibold tracking-tight">{patient?.name ?? "—"}</h1>
