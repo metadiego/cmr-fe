@@ -5,6 +5,8 @@ import { pickableMethods } from "@/lib/factura/payment-methods";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+import { canRefundInvoice, isIssuedInvoice, refundableOf } from "@/lib/factura/refund-status";
 import { toast } from "sonner";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 
@@ -44,8 +46,10 @@ type CompRow = { invoiceItemComponentId?: string | null; name?: string; quantity
 // a_la_entrega se devuelve por SESIONES no entregadas; el resto por cantidad. Si a_la_entrega no trae
 // sesiones (>0), cae a cantidad para no mostrar la línea "en cero".
 const esEntrega = (it: FacturaItem) => String(it.deductionMode) === "a_la_entrega" && n(it.sessions) > 0;
-const dispCant = (it: FacturaItem) => n(it.quantity) - n((it as { refundedQuantity?: number }).refundedQuantity);
-const dispSes = (it: FacturaItem) => n(it.sessions) - n((it as { refundedSessions?: number }).refundedSessions);
+// What a line can still return: the BE's derived refundableQuantity / refundableSessions (cmr-be #650,
+// already net of delivered, returned and transferred), via lib/factura/refund-status.ts.
+const dispCant = (it: FacturaItem) => refundableOf(it as Parameters<typeof refundableOf>[0], "quantity");
+const dispSes = (it: FacturaItem) => refundableOf(it as Parameters<typeof refundableOf>[0], "sessions");
 const dispDe = (it: FacturaItem) => (esEntrega(it) ? dispSes(it) : dispCant(it));
 const billedQty = (it: FacturaItem) => (esEntrega(it) ? n(it.sessions) : n(it.quantity)) || 0;
 const lineBilledTotal = (it: FacturaItem) => n(it.total) || n(it.quantity) * n(it.unitPrice);
@@ -121,9 +125,11 @@ export default function DevolverFacturaPage() {
         </div>
       ) : items.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tf("noItems")}</p>
-      ) : !["emitida", "devuelta_parcial"].includes(String(factura?.status)) ? (
+      ) : !canRefundInvoice(factura ?? {}) ? (
         <div className="flex flex-col items-start gap-3">
-          <p className="text-sm text-muted-foreground">{t("returnOnlyIssued")}</p>
+          <p className="text-sm text-muted-foreground">
+            {isIssuedInvoice(factura?.status) ? t("returnAlreadyFull") : t("returnOnlyIssued")}
+          </p>
           <Button variant="outline" size="sm" asChild><Link href={backHref}>{tf("back")}</Link></Button>
         </div>
       ) : (

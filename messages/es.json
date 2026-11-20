@@ -2747,7 +2747,8 @@
       "returnOnlyIssued": "Solo se pueden devolver facturas emitidas. Esta factura no está emitida.",
       "netExceeds": "El reembolso no puede superar el total de la factura ({total}).",
       "legacyRoundingAdjustment": "Ajuste de redondeo del legado: −{amount}",
-      "returnDoneRounded": "Devolución registrada (ajuste de redondeo {amount})"
+      "returnDoneRounded": "Devolución registrada (ajuste de redondeo {amount})",
+      "returnAlreadyFull": "Ya se devolvió todo lo de esta factura: no queda nada por devolver."
     },
     "columns": {
       "numero": "N.º",
@@ -5698,7 +5699,8 @@
       "sessionsUsed": "Ya se entregó alguna sesión de sus paquetes.",
       "cashClosed": "El cuadre de caja de ese día ya está cerrado: corregirla lo altera.",
       "reasonRequired": "Escribe el motivo para reabrir.",
-      "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente."
+      "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente.",
+      "refunded": "Ya tiene devoluciones: no se puede reabrir."
     },
     "changePatient": {
       "INVOICE_CHANGE_PATIENT_SAME": "Ya es el paciente de esta factura.",

@@ -2747,7 +2747,8 @@
       "returnOnlyIssued": "Only issued invoices can be returned. This invoice is not issued.",
       "netExceeds": "The refund cannot exceed the invoice total ({total}).",
       "legacyRoundingAdjustment": "Legacy rounding adjustment: −{amount}",
-      "returnDoneRounded": "Return recorded (rounding adjustment {amount})"
+      "returnDoneRounded": "Return recorded (rounding adjustment {amount})",
+      "returnAlreadyFull": "Everything on this invoice has already been returned: nothing is left to return."
     },
     "columns": {
       "numero": "No.",
@@ -5698,7 +5699,8 @@
       "sessionsUsed": "A session of its packages has already been delivered.",
       "cashClosed": "That day's cash count is already closed: correcting it changes it.",
       "reasonRequired": "Write the reason to reopen.",
-      "dateOutOfSequence": "That date does not fit between the previous and the next invoice."
+      "dateOutOfSequence": "That date does not fit between the previous and the next invoice.",
+      "refunded": "It already has returns: it cannot be reopened."
     },
     "changePatient": {
       "INVOICE_CHANGE_PATIENT_SAME": "That is already this invoice's patient.",

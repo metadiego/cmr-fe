@@ -4,6 +4,8 @@ import * as React from "react";
 import { line, readTotals } from "@/lib/factura/totals";
 import { InvoiceTotalsTail } from "@/components/facturacion/invoice-totals-tail";
 import { invoiceBalance } from "@/lib/factura/balance";
+import { invoiceBadgeStatus, refundStateOf } from "@/lib/factura/refund-status";
+import { StatusBadge } from "@/components/kit/status-badge";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -304,7 +306,7 @@ export default function FacturacionPage() {
               <span className="rounded-lg bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">#{record}</span>
             )}
             {numeroFactura && <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">{numeroFactura}</span>}
-            <EstadoBadge estado={estado} />
+            <StatusBadge kind="invoice" value={invoiceBadgeStatus(factura)} />
             {/* Nº de presupuesto (tras imprimir un borrador con saldo): el mostrador lo cita por teléfono. */}
             {presupuestoNum && (
               <Badge variant="warning" className="font-mono tabular-nums">
@@ -632,7 +634,8 @@ function Editor({
                           {t("opcionales")}
                         </button>
                       )}
-                      {!esBorrador && esKit(it) && can("factura.kit_agregar") && (
+                      {/* Closed once anything was refunded (cmr-be #650: the BE refuses it too). */}
+                      {!esBorrador && esKit(it) && can("factura.kit_agregar") && refundStateOf(factura) === "none" && (
                         <AddKitComponent invoiceId={id} itemId={it.id} centerId={centro} disabled={busy} onDone={() => run(async () => {})} />
                       )}
                       {esBorrador && esKit(it) && (
@@ -851,15 +854,6 @@ function Editor({
       )}
     </div>
   );
-}
-
-function EstadoBadge({ estado }: { estado: string }) {
-  const variant =
-    estado === "borrador" ? "warning"
-    : estado === "anulada" ? "destructive"
-    : "success";
-  const label = estado ? estado.charAt(0).toUpperCase() + estado.slice(1) : "—";
-  return <Badge variant={variant}>{label}</Badge>;
 }
 
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {

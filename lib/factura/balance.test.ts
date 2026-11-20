@@ -3,9 +3,11 @@ import assert from "node:assert/strict";
 
 import { invoiceBalance } from "./balance.ts";
 
-test("a refunded invoice owes nothing (L006875: total 6360, paid back 6360)", () => {
-  assert.equal(invoiceBalance("devuelta_total", 6360, 0), 0);
-  assert.equal(invoiceBalance("devuelta_parcial", 600, 300), 0);
+// cmr-be #650: the status no longer zeroes the balance. The callers take `totals`' balance line first
+// (L007119, devuelta_total: total 3720, paid 3720, refunded −3720, balance 0); this fallback is plain math.
+test("a refund status no longer zeroes the fallback balance (totals' balance line is the source)", () => {
+  assert.equal(invoiceBalance("devuelta_total", 3720, 3720), 0);
+  assert.equal(invoiceBalance("devuelta_parcial", 600, 300), 300);
 });
 
 test("otherwise total − paid, to the cent", () => {
