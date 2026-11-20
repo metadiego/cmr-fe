@@ -33,11 +33,22 @@ visibles para cualquiera autenticado.
 **`GET /api/v1/permisos`** — el catálogo de los 161 permisos, por si hay que pintar una pantalla de
 administración.
 
-## `/me/menu` sigue existiendo
+## `/me/menu` sigue existiendo — y pasó a ser la fuente (20-nov-2026)
 
-Devuelve el menú ya filtrado por el backend. **No se retira**: hoy funciona y nada se rompe. A
-partir de ahora es una comodidad, no la fuente de la verdad — si el frontend prefiere decidir con
-`/menu` + `permissions`, adelante, y las dos vías dan lo mismo.
+Devuelve el menú ya filtrado por el backend. Esta sección decía que era "una comodidad, no la
+fuente de la verdad", con `/menu` + `permissions` como la vía preferida. Eso dejó de ser cierto:
+en algún momento después de escrito esto, `GET /menu` (el catálogo completo) pasó a exigir el
+permiso `menu.read` (`@AnyPermission`, BE `MenuController`) — algo que casi nadie tiene. El hook
+compartido (`components/menu-provider.tsx`, `useMenuFetch`) lo pedía igual en CADA navegación y
+caía al 403, generando ~680 de los ~1,360 403/día que llenaban la auditoría
+(`.personal/handoff-ruido-403-auditoria.md`, 20-nov-2026).
+
+El fix: `useMenuFetch` pide `/me/menu` directo, nunca `/menu`. El catálogo completo sigue siendo
+real y sigue vivo — solo lo piden las pantallas de administración del menú (`menu-admin.tsx`,
+`menu-editor.tsx`, `tablero-editor-admin.tsx`), que ya lo llaman por su cuenta y ahora comprueban
+`menu.read` antes de pedirlo. El resto del documento (el frontend decide qué se ve filtrando por
+`permissions`, nunca por nombre de rol) sigue valiendo tal cual — solo cambió DE DÓNDE sale el
+catálogo para la navegación normal.
 
 ## Lo que NO debe hacer el frontend
 

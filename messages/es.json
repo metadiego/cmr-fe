@@ -462,6 +462,7 @@
     "trainSeriesOverbooked": "Sobrecupo",
     "recurringPreviewFirst": "Primero pulsa «Vista previa»",
     "recurringNothingBookable": "Ninguna fecha de la vista previa tiene hueco",
+    "recurringNoPermission": "No tienes permiso para consultar disponibilidad",
     "trainSeriesCalculateFirst": "Primero pulsa «Calcular»",
     "trainSeriesNothingPlanned": "Ningún día del cálculo se puede agendar"
   },
@@ -1223,6 +1224,7 @@
       "help": "Mueve las sesiones pendientes de un paquete de este paciente a otra persona, a otro centro, o ambos.",
       "step1": "Qué se transfiere",
       "noPending": "Este paciente no tiene sesiones pendientes de ningún paquete.",
+      "noPermissionPending": "No tienes permiso para ver las sesiones pendientes de este paciente.",
       "pendingN": "Pendientes: {n} de {total}",
       "step2": "A dónde",
       "scope": {

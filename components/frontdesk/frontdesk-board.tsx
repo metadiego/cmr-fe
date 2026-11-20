@@ -359,6 +359,7 @@ export function FrontdeskBoard() {
   React.useEffect(() => {
     const centro = gate.centro;
     if (!centro) return;
+    if (!can("invoice.read")) return; // sin él el BE 403 cada llamada (handoff-ruido-403-auditoria.md)
     // Sin columna de dosis → ids vacío → el .then limpia el mapa (async, nunca setState síncrono en efecto).
     const ids = hayDosis
       ? Array.from(
@@ -379,9 +380,8 @@ export function FrontdeskBoard() {
     ).then((pairs) => {
       if (active) setSaldoByPaciente(Object.fromEntries(pairs));
     });
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `can` is a fresh closure every render
   }, [hayDosis, gate.centro, board, sesiones]);
 
   // Estado de una fila: PREFERIR el `estado` top-level que ahora manda el BE en cada fila (PR #195, la

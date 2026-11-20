@@ -12,6 +12,7 @@ import { formatFechaSolo, todayPR, nowTimePR } from "@/lib/format/fecha";
 import { noSeatDays } from "@/lib/agenda/sheet";
 import { toastError } from "@/lib/api/errors";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
+import { useCan } from "@/hooks/use-can";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,6 +91,11 @@ export function RecurringBookingModal({
 }) {
   const t = useTranslations("therapyPlanner");
   const tRoot = useTranslations();
+  // The resource-aware preview needs resources.read (cmr-be ResourcesController). Without it, every
+  // preview 403'd and fell through; blocking with a real reason instead of calling an endpoint the
+  // role can't use (handoff-ruido-403-auditoria.md).
+  const { can } = useCan();
+  const puedeVerDisponibilidad = can("resources.read");
   // Never before today — the date input's own `min` blocks the picker, this is the belt-and-suspenders
   // floor for whatever value arrives via `defaultDate`. Owner's rule (2026-09-27): no appointment before
   // right now, ever.
@@ -155,6 +161,7 @@ export function RecurringBookingModal({
   const bookableCount = plan?.filter((i) => i.status !== "unresolved").length ?? 0;
 
   async function preview() {
+    if (!puedeVerDisponibilidad) return; // belt-and-suspenders: the button below is already disabled
     setPreviewing(true);
     setPlan(null);
     try {
@@ -250,8 +257,8 @@ export function RecurringBookingModal({
       title={t("recurringTitle", { service: serviceName })}
       description={t("recurringHelp")}
       missing={missing}
-      blocked={block !== null}
-      reason={block ? blockReason[block] : null}
+      blocked={!puedeVerDisponibilidad || block !== null}
+      reason={!puedeVerDisponibilidad ? t("recurringNoPermission") : block ? blockReason[block] : null}
       submitting={submitting}
       submittingLabel={t("recurringConfirming")}
       onSubmit={() => {}}
@@ -331,7 +338,7 @@ export function RecurringBookingModal({
         />
       </div>
 
-      <Button variant="outline" onClick={preview} disabled={previewing || missing.length > 0}>
+      <Button variant="outline" onClick={preview} disabled={previewing || missing.length > 0 || !puedeVerDisponibilidad}>
         {previewing ? t("recurringPreviewing") : t("recurringPreview")}
       </Button>
 

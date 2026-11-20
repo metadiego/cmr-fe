@@ -12,7 +12,10 @@ import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { transferPackage, voidTransfer, listTransfers, type TreatmentTransfer } from "@/lib/api/treatment-transfers";
 import { treatmentTransferInvalid, treatmentTransferMissing, type TreatmentTransferField } from "@/lib/facturacion/treatment-transfer-missing";
 import { apiErrorLabel, toastError } from "@/lib/api/errors";
+import { callIfPermitted } from "@/lib/rbac/call-if-permitted";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
+import { useMe } from "@/hooks/use-me";
 import { useConfirm } from "@/components/kit/confirm-host";
 import { useSubmit } from "@/components/kit/use-submit";
 import { Panel, EmptyState, LoadingPanel } from "@/components/kit/panel";
@@ -49,8 +52,17 @@ export function FichaTransferirTratamiento({
   const t = useTranslations("patients.transferTreatment");
   const tRoot = useTranslations();
   const confirm = useConfirm();
-
-  const pendRes = useResource<PendienteEntrega[]>(() => getPendientesEntrega(pacienteId, centro), [pacienteId, centro]);
+  const { can } = useCan();
+  const me = useMe();
+  const permissions = me.kind === "ok" ? me.me.permissions : [];
+  // invoice.read: sin él, el BE 403 cada llamada (handoff-ruido-403-auditoria.md). Distinto de "sin
+  // pendientes" (rule 10: una ausencia nunca se confunde con un hecho) — este tab exige
+  // invoice.transfer, que no implica tener también invoice.read.
+  const puedeVerPendientes = can("invoice.read");
+  const pendRes = useResource<PendienteEntrega[]>(
+    () => callIfPermitted(permissions, "invoice.read", () => getPendientesEntrega(pacienteId, centro), []),
+    [pacienteId, centro, permissions.join(",")],
+  );
   const pendientes = (pendRes.state.kind === "ok" ? pendRes.state.data : []).filter((p) => (p.pendiente ?? 0) > 0);
 
   const historyRes = useResource<TreatmentTransfer[]>(() => listTransfers(pacienteId, centro), [pacienteId, centro]);
@@ -175,7 +187,11 @@ export function FichaTransferirTratamiento({
           <section className="space-y-2">
             <h3 className="text-sm font-semibold">{t("step1")}</h3>
             {pendRes.state.kind === "loading" && <LoadingPanel rows={3} />}
-            {pendRes.state.kind === "ok" && pendientes.length === 0 && <EmptyState>{t("noPending")}</EmptyState>}
+            {!puedeVerPendientes && pendRes.state.kind === "ok" ? (
+              <EmptyState>{t("noPermissionPending")}</EmptyState>
+            ) : (
+              pendRes.state.kind === "ok" && pendientes.length === 0 && <EmptyState>{t("noPending")}</EmptyState>
+            )}
             <ul className="space-y-2">
               {pendientes.map((p) => {
                 const picked = p.id === packageId;
@@ -369,9 +385,14 @@ function TransferResult({
   pacienteNombre?: string;
 }) {
   const t = useTranslations("patients.transferTreatment");
+  const me = useMe();
+  const permissions = me.kind === "ok" ? me.me.permissions : [];
   const destPatientId = result.destinationPatientId ?? pacienteId;
   const destCentro = result.destinationClinicId;
-  const destRes = useResource<PendienteEntrega[]>(() => getPendientesEntrega(destPatientId, destCentro), [destPatientId, destCentro]);
+  const destRes = useResource<PendienteEntrega[]>(
+    () => callIfPermitted(permissions, "invoice.read", () => getPendientesEntrega(destPatientId, destCentro), []),
+    [destPatientId, destCentro, permissions.join(",")],
+  );
   const destPkg = (destRes.state.kind === "ok" ? destRes.state.data : []).find((p) => p.id === result.destinationPackageId);
 
   return (

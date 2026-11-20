@@ -4,8 +4,10 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { useResource } from "@/hooks/use-resource";
+import { useMe } from "@/hooks/use-me";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { getPendientesEntregaDe, type PendienteEntregaEnCentro } from "@/lib/api/delivery-pending";
+import { callIfPermitted } from "@/lib/rbac/call-if-permitted";
 import { protocolChangeClinics } from "@/lib/pacientes/protocol-change-clinic";
 import { CambioProtocoloForm } from "@/components/clientes/cambio-protocolo-form";
 
@@ -22,13 +24,20 @@ export function CambioProtocoloPorCentro({
   onApplied?: () => void;
 }) {
   const t = useTranslations("pacientes.cambioProtocolo");
+  const me = useMe();
+  const permissions = me.kind === "ok" ? me.me.permissions : [];
   const centersRes = useResource<Centro[]>(() => getCentrosDondePuedo("tratamiento.cambio_protocolo"), []);
   const centers = React.useMemo(() => (centersRes.state.kind === "ok" ? centersRes.state.data : []), [centersRes.state]);
   const allowed = React.useMemo(() => centers.map((c) => c.id), [centers]);
   const [version, setVersion] = React.useState(0);
   const pendingRes = useResource<PendienteEntregaEnCentro[]>(
-    () => (allowed.length > 1 ? getPendientesEntregaDe(pacienteId, allowed) : Promise.resolve([])),
-    [pacienteId, allowed.join(","), version],
+    () =>
+      allowed.length > 1
+        // invoice.read: sin él, el BE 403 cada llamada — no pedirlo es la forma eficiente de no
+        // generar ese ruido (handoff-ruido-403-auditoria.md).
+        ? callIfPermitted(permissions, "invoice.read", () => getPendientesEntregaDe(pacienteId, allowed), [])
+        : Promise.resolve([]),
+    [pacienteId, allowed.join(","), version, permissions.join(",")],
   );
   const pending = pendingRes.state.kind === "ok" ? pendingRes.state.data : [];
   const clinics = protocolChangeClinics(

@@ -13,7 +13,9 @@ import {
   type MenuItemPayload,
 } from "@/lib/api/menu";
 import { toastError } from "@/lib/api/errors";
+import { callIfPermitted } from "@/lib/rbac/call-if-permitted";
 import { useResource } from "@/hooks/use-resource";
+import { useMe } from "@/hooks/use-me";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -50,7 +52,14 @@ const EMPTY: MenuItemPayload = {
 // Admin CRUD for the dynamic menu registry (GET/POST/PUT/DELETE /menu).
 export function MenuAdmin() {
   const t = useTranslations("admin.menu");
-  const { state, reload } = useResource<MenuItem[]>(() => getAllMenu());
+  const me = useMe();
+  const permissions = me.kind === "ok" ? me.me.permissions : [];
+  // menu.read: sin él, el BE 403 cada llamada (handoff-ruido-403-auditoria.md). Esta pantalla ya
+  // vive detrás del tab de admin, pero el permiso real es menu.read, no el rol — se comprueba aquí.
+  const { state, reload } = useResource<MenuItem[]>(
+    () => callIfPermitted(permissions, "menu.read", () => getAllMenu(), []),
+    [permissions.join(",")],
+  );
   const [editing, setEditing] = React.useState<MenuItem | null>(null);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [busyId, setBusyId] = React.useState<string | null>(null);

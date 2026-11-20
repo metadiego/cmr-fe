@@ -462,6 +462,7 @@
     "trainSeriesOverbooked": "Overbooked",
     "recurringPreviewFirst": "Run the preview first",
     "recurringNothingBookable": "No date in the preview has an open slot",
+    "recurringNoPermission": "You don't have permission to check availability",
     "trainSeriesCalculateFirst": "Press «Calculate» first",
     "trainSeriesNothingPlanned": "No day in the calculation can be booked"
   },
@@ -1223,6 +1224,7 @@
       "help": "Move a package's pending sessions from this patient to another person, another center, or both.",
       "step1": "What gets transferred",
       "noPending": "This patient has no pending sessions in any package.",
+      "noPermissionPending": "You don't have permission to see this patient's pending sessions.",
       "pendingN": "Pending: {n} of {total}",
       "step2": "Where to",
       "scope": {
