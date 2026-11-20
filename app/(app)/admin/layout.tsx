@@ -10,6 +10,7 @@ import { ThemeSettings } from "@/components/admin/theme-settings";
 import { RbacSettings } from "@/components/admin/rbac-settings";
 import { PermisosCatalogo } from "@/components/admin/permisos-catalogo";
 import { MenuAdmin } from "@/components/admin/menu-admin";
+import { ApiKeysAdmin } from "@/components/admin/api-keys-admin";
 import { EditorRolUnificado } from "@/components/admin/editor-rol";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -18,7 +19,7 @@ import { ADMIN_TABS } from "@/lib/nav/tab-routes";
 
 // ADMINISTRATION tabs (users/roles/permissions/menu…): only an admin sees them. Staff is seen with the
 // staff permission (the menu already gates the entry), so a manager reaches their record the same way.
-const TABS_ADMIN = new Set<string>(["roles", "permissions", "role-editor", "pending", "centers", "theme", "menu"]);
+const TABS_ADMIN = new Set<string>(["roles", "permissions", "role-editor", "pending", "centers", "theme", "menu", "api-keys"]);
 
 // "Staff and access": one page instead of Administration + Staff behind two doors (handoff
 // personal-y-accesos-una-sola-pagina). Staff comes FIRST (the person exists before their access) and
@@ -57,6 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {admin && <TabsTrigger value="centers">{t("tabs.centers")}</TabsTrigger>}
           {admin && <TabsTrigger value="theme">{t("tabs.theme")}</TabsTrigger>}
           {admin && <TabsTrigger value="menu">{t("tabs.menu")}</TabsTrigger>}
+          {admin && <TabsTrigger value="api-keys">{t("tabs.apiKeys")}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="staff" className="mt-4">
@@ -72,6 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <TabsContent value="centers" className="mt-4"><CentersList /></TabsContent>
             <TabsContent value="theme" className="mt-4"><ThemeSettings /></TabsContent>
             <TabsContent value="menu" className="mt-4"><MenuAdmin /></TabsContent>
+            <TabsContent value="api-keys" className="mt-4"><ApiKeysAdmin /></TabsContent>
           </>
         )}
       </Tabs>

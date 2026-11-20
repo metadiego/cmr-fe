@@ -1618,7 +1618,8 @@
       "roles": "Roles",
       "menu": "Menu",
       "permisos": "Permissions",
-      "editorRol": "Role editor (beta)"
+      "editorRol": "Role editor (beta)",
+      "apiKeys": "API keys"
     },
     "editorRol": {
       "title": "Unified role editor (beta)",
@@ -1997,7 +1998,70 @@
       }
     },
     "approveTitle": "Approve this profile?",
-    "approveBody": "{email} will be able to sign in."
+    "approveBody": "{email} will be able to sign in.",
+    "apiKeys": {
+      "title": "API keys",
+      "help": "Passwords for machines and scripts: scales, print hubs, the phone bridge, integrations. The never-used ones with full access come first: if nobody knows what they are for, revoke them.",
+      "search": "Search by name or permission",
+      "showDead": "Show revoked and expired",
+      "new": "New API key",
+      "empty": "No API keys to show.",
+      "allCenters": "All centers",
+      "fullAccess": "Full access",
+      "noPermissions": "No permissions",
+      "never": "Never",
+      "revokedOn": "Revoked on",
+      "revoke": "Revoke",
+      "revokeConfirm": "Revoke “{name}”?",
+      "revokeHelp": "Whatever uses this key stops working at once, for good. The row and its history are kept.",
+      "revoked": "“{name}” revoked",
+      "actions": "Actions for {name}",
+      "sum": {
+        "live": "Live",
+        "fullAccess": "Full access",
+        "neverUsed": "Never used",
+        "neverUsedHint": "{n} with full access"
+      },
+      "col": {
+        "name": "Name",
+        "status": "Status",
+        "access": "Can do",
+        "center": "Center",
+        "lastUsed": "Last used",
+        "expires": "Expires",
+        "created": "Created"
+      },
+      "status": {
+        "active": "In use",
+        "neverUsed": "Never used",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      },
+      "create": {
+        "title": "New API key",
+        "description": "For a machine or a script. Give it only the permissions it needs.",
+        "submit": "Create the key",
+        "name": "Name",
+        "nameHint": "What uses it and where, e.g. “Pasti scale Caguas”.",
+        "center": "Center",
+        "allCenters": "All centers (admin key)",
+        "expires": "Expires on",
+        "expiresHint": "Optional. Empty = never expires.",
+        "fullAccess": "Full access",
+        "fullAccessHint": "Can do EVERYTHING in every center. Only for trusted integrations.",
+        "permissions": "Permissions",
+        "permissionsHint": "{n} selected",
+        "searchPermissions": "Search permission"
+      },
+      "created": {
+        "title": "“{name}” created",
+        "description": "Copy the key now: it is not shown again. If it gets lost, revoke it and create another.",
+        "done": "I copied it",
+        "copy": "Copy",
+        "copied": "Copied",
+        "warning": "Store it in the machine's settings or a password manager, never in a chat or an email."
+      }
+    }
   },
   "login": {
     "title": "Sign in",
@@ -6263,7 +6327,8 @@
       "adminGrant": "Give full access (Administrator role)",
       "adminRevoke": "Take away full access (Administrator role)",
       "modifyPastCashDay": "You're about to change the {day} cash sheet",
-      "backdatedInventoryAdjustment": "Backdated inventory adjustment"
+      "backdatedInventoryAdjustment": "Backdated inventory adjustment",
+      "apiKeyRevoke": "Revoke the API key “{name}”"
     },
     "effect": {
       "returnsPackageSession": "Returns the session to the package",
@@ -6455,7 +6520,8 @@
   },
   "apiKeys": {
     "clinicKeyTooBroad": "A center API key cannot carry full access or access-management permissions.",
-    "beyondCreator": "An API key cannot have permissions its creator does not have."
+    "beyondCreator": "An API key cannot have permissions its creator does not have.",
+    "cannotRevokeSelf": "An API key cannot revoke itself: revoke it with another key or from a session."
   },
   "inventoryKardex": {
     "title": "Daily kardex",

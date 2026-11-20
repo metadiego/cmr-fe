@@ -1618,7 +1618,8 @@
       "roles": "Roles",
       "menu": "Menú",
       "permisos": "Permisos",
-      "editorRol": "Editor de Rol (beta)"
+      "editorRol": "Editor de Rol (beta)",
+      "apiKeys": "API keys"
     },
     "editorRol": {
       "title": "Editor de Rol unificado (beta)",
@@ -1997,7 +1998,70 @@
       }
     },
     "approveTitle": "¿Aprobar este perfil?",
-    "approveBody": "{email} podrá entrar al sistema."
+    "approveBody": "{email} podrá entrar al sistema.",
+    "apiKeys": {
+      "title": "API keys",
+      "help": "Contraseñas de máquinas y scripts: básculas, print hubs, el puente telefónico, integraciones. Primero salen las que nunca se usaron con acceso total: si nadie sabe para qué son, revócalas.",
+      "search": "Buscar por nombre o permiso",
+      "showDead": "Mostrar revocadas y caducadas",
+      "new": "Nueva API key",
+      "empty": "No hay API keys que mostrar.",
+      "allCenters": "Todos los centros",
+      "fullAccess": "Acceso total",
+      "noPermissions": "Sin permisos",
+      "never": "Nunca",
+      "revokedOn": "Revocada el",
+      "revoke": "Revocar",
+      "revokeConfirm": "¿Revocar «{name}»?",
+      "revokeHelp": "Lo que use esta key deja de funcionar al momento y para siempre. La fila y su historial se conservan.",
+      "revoked": "«{name}» revocada",
+      "actions": "Acciones de {name}",
+      "sum": {
+        "live": "Activas",
+        "fullAccess": "Con acceso total",
+        "neverUsed": "Nunca usadas",
+        "neverUsedHint": "{n} con acceso total"
+      },
+      "col": {
+        "name": "Nombre",
+        "status": "Estado",
+        "access": "Puede hacer",
+        "center": "Centro",
+        "lastUsed": "Último uso",
+        "expires": "Caduca",
+        "created": "Creada"
+      },
+      "status": {
+        "active": "En uso",
+        "neverUsed": "Nunca usada",
+        "expired": "Caducada",
+        "revoked": "Revocada"
+      },
+      "create": {
+        "title": "Nueva API key",
+        "description": "Para una máquina o un script. Dale solo los permisos que necesita.",
+        "submit": "Crear la key",
+        "name": "Nombre",
+        "nameHint": "Qué la usa y dónde, p. ej. «báscula Pasti Caguas».",
+        "center": "Centro",
+        "allCenters": "Todos los centros (key de administración)",
+        "expires": "Caduca el",
+        "expiresHint": "Opcional. Vacío = no caduca.",
+        "fullAccess": "Acceso total",
+        "fullAccessHint": "Puede hacer TODO en todos los centros. Solo para integraciones de confianza.",
+        "permissions": "Permisos",
+        "permissionsHint": "{n} elegidos",
+        "searchPermissions": "Buscar permiso"
+      },
+      "created": {
+        "title": "«{name}» creada",
+        "description": "Copia la key ahora: no se vuelve a mostrar. Si se pierde, revócala y crea otra.",
+        "done": "Ya la copié",
+        "copy": "Copiar",
+        "copied": "Copiada",
+        "warning": "Guárdala en la configuración de la máquina o en un gestor de contraseñas, nunca en un chat ni en un correo."
+      }
+    }
   },
   "login": {
     "title": "Iniciar sesión",
@@ -6263,7 +6327,8 @@
       "adminGrant": "Dar acceso total (rol Administrador)",
       "adminRevoke": "Quitar el acceso total (rol Administrador)",
       "modifyPastCashDay": "Vas a cambiar el cuadre del {day}",
-      "backdatedInventoryAdjustment": "Ajuste de inventario con fecha pasada"
+      "backdatedInventoryAdjustment": "Ajuste de inventario con fecha pasada",
+      "apiKeyRevoke": "Revocar la API key «{name}»"
     },
     "effect": {
       "returnsPackageSession": "Devuelve la sesión al paquete",
@@ -6455,7 +6520,8 @@
   },
   "apiKeys": {
     "clinicKeyTooBroad": "Una API key de un centro no puede llevar acceso total ni permisos de gestión de accesos.",
-    "beyondCreator": "Una API key no puede tener permisos que su creador no tiene."
+    "beyondCreator": "Una API key no puede tener permisos que su creador no tiene.",
+    "cannotRevokeSelf": "Una API key no puede revocarse a sí misma: revócala con otra key o desde una sesión."
   },
   "inventoryKardex": {
     "title": "Kardex diario",

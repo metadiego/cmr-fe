@@ -32,12 +32,18 @@ const TONE: Record<string, Tone> = {
   anulada: "destructive",
   // treatment transfers
   aplicada: "success",
+  // API keys (lib/api-keys/key-status.ts): never used = needs attention (the cleanup target)
+  active: "success",
+  neverUsed: "warning",
+  expired: "secondary",
+  revoked: "destructive",
 };
 const LABEL_NS = {
   appointment: "citas.estado",
   therapy: "servicios.estado",
   invoice: "facturacionList.estado",
   transfer: "patients.transferTreatment.status",
+  apiKey: "admin.apiKeys.status",
 } as const;
 
 export function StatusBadge({ kind, value }: { kind: keyof typeof LABEL_NS; value?: string | null }) {
