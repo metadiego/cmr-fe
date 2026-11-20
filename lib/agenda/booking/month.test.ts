@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { bookableDays, dayKind, monthOf, monthWeeks, shiftMonth } from "./month.ts";
+import { bookableDays, dayKind, monthOf, monthRowsTemplate, monthWeeks, shiftMonth } from "./month.ts";
 
 test("monthWeeks: only as many Sunday-first weeks as needed", () => {
   assert.equal(monthWeeks(2026, 10).length, 5); // Nov 2026
@@ -42,4 +42,16 @@ test("shiftMonth: forward, back and across years", () => {
   assert.deepEqual(shiftMonth({ year: 2027, month0: 0 }, -1), { year: 2026, month0: 11 });
   assert.deepEqual(shiftMonth({ year: 2026, month0: 5 }, -18), { year: 2024, month0: 11 });
   assert.deepEqual(shiftMonth({ year: 2026, month0: 5 }, 0), { year: 2026, month0: 5 });
+});
+
+test("monthRowsTemplate: weeks wholly past fold to one line, the rest keep a floor", () => {
+  const nov = monthWeeks(2026, 10); // 5 weeks, Sunday-first from Nov 1
+  assert.equal(
+    monthRowsTemplate(nov, "2026-11-20"),
+    "1.75rem 1.75rem minmax(4.5rem, 1fr) minmax(4.5rem, 1fr) minmax(4.5rem, 1fr)",
+  );
+  // today's own week never folds, even on its last day
+  assert.equal(monthRowsTemplate(nov, "2026-11-21").split(" ").filter((r) => r === "1.75rem").length, 2);
+  // a month seen before it starts: nothing folds
+  assert.ok(!monthRowsTemplate(nov, "2026-10-01").includes("1.75rem"));
 });

@@ -31,7 +31,7 @@ export function PatientCard({
   const center = patient?.clinicId ? centers.find((c) => c.id === patient.clinicId)?.name : undefined;
 
   return (
-    <Panel className="flex items-start gap-3 p-4">
+    <Panel className="flex shrink-0 items-start gap-3 p-4">
       <div className="min-w-0 flex-1">
         {patient ? (
           <>

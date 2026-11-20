@@ -102,7 +102,7 @@ export function BookingCalendar({
   appointmentTypes: TipoCita[];
   /** Set while an appointment from the patient rail is being moved. */
   moving?: CalendarMoving;
-  /** The moving appointment's current day (orange ring in the month). */
+  /** The moving appointment's current day (warning-tone ring in the month). */
   ringDate?: string;
   /** Task 9: the service booking form for the picked time; `clear` un-picks it (e.g. after booking). */
   serviceForm?: (pick: { date: string; time: string; clear: () => void }) => React.ReactNode;

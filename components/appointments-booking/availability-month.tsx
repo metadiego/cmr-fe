@@ -10,7 +10,7 @@ import {
   type DaySlots,
   type TimeWindow,
 } from "@/lib/agenda/booking/availability";
-import { dayKind } from "@/lib/agenda/booking/month";
+import { dayKind, monthRowsTemplate } from "@/lib/agenda/booking/month";
 import type { DayResult } from "@/hooks/use-booking-availability";
 import type { BookingView } from "@/components/appointments-booking/booking-toolbar";
 import { parseDayUTC } from "@/lib/format/fecha";
@@ -65,7 +65,7 @@ export function AvailabilityMonth({
   view: BookingView;
   window: TimeWindow;
   selected?: string;
-  /** Moving: the appointment's current day, ringed in orange. */
+  /** Moving: the appointment's current day, ringed in the warning tone. */
   ringDate?: string;
   onSelect: (date: string) => void;
   onRetry: (date: string) => void;
@@ -119,8 +119,9 @@ export function AvailabilityMonth({
       </div>
 
       <div
-        className="grid min-h-0 flex-1 grid-cols-7 gap-1"
-        style={{ gridAutoRows: "minmax(0, 1fr)" }}
+        className="grid min-h-0 flex-1 grid-cols-7 gap-1 overflow-y-auto"
+        // Past weeks fold to a line; the rest never shrink below a cell's content (scrolls if cramped).
+        style={{ gridTemplateRows: monthRowsTemplate(weeks, todayIso) }}
       >
         {weeks.flat().map((date) => {
           const cell = cellOf(date);
@@ -128,9 +129,9 @@ export function AvailabilityMonth({
           const isSelected = date === selected;
           const isRing = date === ringDate;
           const base = cn(
-            "relative flex min-h-0 flex-col rounded-md p-1.5 text-left text-xs transition-colors",
+            "relative flex min-h-0 flex-col overflow-hidden rounded-md p-1.5 text-left text-xs transition-colors",
             isSelected && "outline-2 outline-offset-1 outline-primary",
-            isRing && "ring-2 ring-orange-500",
+            isRing && "ring-2 ring-warning",
           );
 
           if (cell.kind === "outside") {

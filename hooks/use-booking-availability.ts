@@ -42,10 +42,15 @@ function cached(key: string): DaySlots | null | undefined {
 // share one request.
 const inflight = new Map<string, Promise<DaySlots | null>>()
 
+// Bumped by every forget(): a request that started under an older generation answers from before the
+// change the refresh reacts to, so it is neither cached nor painted (see fetchDay).
+const generations = new Map<string, number>()
+
 /** A refresh must not join a request that started before the change it reacts to. */
 function forget(key: string): void {
   cache.delete(key)
   inflight.delete(key)
+  generations.set(key, (generations.get(key) ?? 0) + 1)
 }
 
 /** null = the service has no resource configured. Throws on a failed request (never cached). */
@@ -65,9 +70,22 @@ function fetchDay(
   )
   const running = inflight.get(key)
   if (running) return running
-  const p = requestDay(center, kind, typeId, date, patientId).finally(() => {
-    if (inflight.get(key) === p) inflight.delete(key)
-  })
+  const gen = generations.get(key) ?? 0
+  const p: Promise<DaySlots | null> = requestDay(center, kind, typeId, date, patientId)
+    .then((value) => {
+      if ((generations.get(key) ?? 0) === gen) {
+        cache.set(key, { at: Date.now(), value })
+        return value
+      }
+      // Superseded: a refresh forgot this request while it ran (a booking, a live event). Its answer
+      // may predate that change, and painting it could show a just-booked hour as free; answer with
+      // the newer one instead (cached if it already landed, else joined or asked again).
+      const hit = cached(key)
+      return hit !== undefined ? hit : fetchDay(center, kind, typeId, date, patientId)
+    })
+    .finally(() => {
+      if (inflight.get(key) === p) inflight.delete(key)
+    })
   inflight.set(key, p)
   return p
 }
@@ -79,13 +97,6 @@ async function requestDay(
   date: string,
   patientId?: string
 ): Promise<DaySlots | null> {
-  const key = dayKey(
-    center,
-    kind,
-    typeId,
-    date,
-    kind === "service" ? patientId : undefined
-  )
   let value: DaySlots | null
   if (kind === "medical") {
     const r = await getCuposLibres(date, typeId, center)
@@ -107,7 +118,6 @@ async function requestDay(
     )
     value = fromServiceAvailability(date, a)
   }
-  cache.set(key, { at: Date.now(), value })
   return value
 }
 

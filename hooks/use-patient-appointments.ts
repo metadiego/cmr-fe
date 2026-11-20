@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { useResource } from "@/hooks/use-resource";
-import { listCitas, type Cita } from "@/lib/api/citas";
+import { listCitasEveryCenter, type Cita } from "@/lib/api/citas";
 import { listSesionesRango, type Sesion } from "@/lib/api/frontdesk";
 import { inDaysPR, todayPR } from "@/lib/format/fecha";
 import {
@@ -16,10 +16,9 @@ import {
 // The patient rail's list: the selected patient's medical appointments and service sessions from
 // today−90 to today+365, merged and split into Upcoming / Past (lib/agenda/booking/patient-appointments).
 //
-// - Medical: GET /appointments?patientId&from&to with NO centerIds and no tenant override: without
-//   centerIds the BE lists every center where the user holds citas.read (cmr-be
-//   citas.clinic-scope.integration.spec.ts, "without centerIds: every center the user can read"), which
-//   is exactly the set we want; `listCitas` has no centerIds parameter anyway.
+// - Medical: GET /appointments?patientId&from&to with centerIds = every center where the user holds
+//   citas.read (listCitasEveryCenter). Sending none is NOT enough: the client then fills in the top
+//   bar's center (lib/clinic-read-scope.ts oneCenterIds) unless it is on «Ambos».
 // - Service: GET /frontdesk/sesiones?patientId&from&to in the screen's center (X-Tenant-ID): the BE
 //   scopes sessions to the active center.
 // One side failing does not hide the other: each is loaded on its own and `failed` names the kinds that
@@ -47,7 +46,7 @@ export function usePatientAppointments(
   // own center instead, see calendarCenter.)
   const medicalRes = useResource<Cita[]>(
     async () =>
-      patientId ? (await listCitas({ patientId, from: inDaysPR(-90), to: inDaysPR(365), limit: 100 })).items : [],
+      patientId ? (await listCitasEveryCenter({ patientId, from: inDaysPR(-90), to: inDaysPR(365), limit: 100 })).items : [],
     [patientId],
   );
   const serviceRes = useResource<Sesion[]>(

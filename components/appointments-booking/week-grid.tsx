@@ -89,7 +89,7 @@ export function WeekGrid({
               className={cn(
                 "flex flex-col rounded-md py-1",
                 date === todayIso && "text-primary",
-                date === ringDate && "ring-2 ring-orange-500",
+                date === ringDate && "ring-2 ring-warning",
               )}
             >
               <span className="first-letter:uppercase">{d ? format.dateTime(d, "dayWeekdayNum") : date}</span>

@@ -268,7 +268,7 @@ function MoveBox({
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-orange-300 bg-orange-50 p-3 text-sm dark:border-orange-800 dark:bg-orange-950/40">
+    <div className="flex flex-col gap-2 rounded-lg border border-warning/50 bg-warning/10 p-3 text-sm">
       <p className="font-semibold">{t("title")}</p>
       <p>{t("fromTo", { from: moving.fromLabel, to: toLabel })}</p>
       {full && <p className="text-warning-foreground">{t("fullWarning")}</p>}

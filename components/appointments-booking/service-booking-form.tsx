@@ -188,8 +188,9 @@ export function ServiceBookingForm({
   // What keeps «Agendar» grey, said above it (forms kit): the patient is a missing field; no permission
   // or a series that cannot go yet is a reason.
   const missing = patient ? [] : [t("series.patient")];
-  const reason =
-    permsReady && !canBook
+  const reason = !permsReady
+    ? tRoot("common.loading")
+    : !canBook
       ? t("series.noPermission")
       : repeat && patient && !seriesOk
         ? anyFailed
@@ -232,7 +233,8 @@ export function ServiceBookingForm({
         if (Number(res.data.omitidas ?? 0) > 0 && made.length === list.length) {
           skipped.push(...notCreated(g.dates, made));
         }
-        warnings.push(...res.warnings);
+        // `advertencias` carries BOOKING_DAY_SKIPPED (a day a blocking rule skipped, BE #547): said, never dropped.
+        warnings.push(...res.warnings, ...res.advertencias);
       } catch (err) {
         failures++;
         toast.error(t("toasts.bookFailed", { message: apiErrorLabel(err, tRoot) }));

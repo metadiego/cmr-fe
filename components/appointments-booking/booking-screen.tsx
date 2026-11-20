@@ -46,6 +46,7 @@ import {
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { reagendarCita, type Cita } from "@/lib/api/citas";
 import { reagendarSesion } from "@/lib/api/frontdesk";
+import { getServiciosDe, type Servicio } from "@/lib/api/servicios";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { todayPR } from "@/lib/format/fecha";
@@ -107,7 +108,8 @@ export function BookingScreen() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const centro = useCentroPantalla("citas.read", "citas.create");
+  // `?centro=`: a link that names the clinic (the old services day sheet's redirect) opens there.
+  const centro = useCentroPantalla("citas.read", "citas.create", searchParams.get("centro"));
   const center = centro.centroActivo || undefined;
 
   const [state, setState] = React.useState<BookingScreenState>(() =>
@@ -225,9 +227,25 @@ export function BookingScreen() {
 
   // ---- Patient rail: the patient's upcoming/past appointments of both kinds.
   const rail = usePatientAppointments(state.patientId, center);
+  // Each clinic has its own service catalogue, so a session booked in another clinic carries an id the
+  // screen's catalogue does not have (it showed as a bare «Servicio»): its name comes from its clinic's.
+  const otherCenters = [
+    ...new Set(
+      [...rail.upcoming, ...rail.past]
+        .filter((a) => a.kind === "service" && a.centerId && a.centerId !== center)
+        .map((a) => a.centerId as string),
+    ),
+  ]
+    .sort()
+    .join(",");
+  const otherServicesRes = useResource<Servicio[]>(
+    () => (otherCenters ? getServiciosDe(otherCenters.split(",")) : Promise.resolve([])),
+    [otherCenters],
+  );
+  const otherServices = otherServicesRes.state.kind === "ok" ? otherServicesRes.state.data : [];
   const reloadRail = rail.reload;
 
-  // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, orange
+  // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, warning-tone
   // ring on its day). A move never changes the appointment's center, so while it moves the calendar
   // reads availability from the appointment's OWN center (calendarCenter), whatever the picker or the
   // top bar shows, with a note saying so. The day panel's "Move here?" box commits. Stop, Esc, a change
@@ -439,7 +457,9 @@ export function BookingScreen() {
             <PatientRail
               center={center}
               data={rail}
-              typeLookup={(kind, id) => types.find(kind, id)}
+              typeLookup={(kind, id) =>
+                types.find(kind, id) ?? (kind === "service" ? otherServices.find((x) => x.id === id) : undefined)
+              }
               movingId={movingItem ? movingItem.id : null}
               onMove={startMove}
               onStopMove={stopMove}
@@ -503,6 +523,7 @@ export function BookingScreen() {
         <EditAppointmentModal
           key={editing.id}
           cita={editing}
+          patient={patient}
           center={center}
           appointmentTypes={types.appointmentTypes}
           onClose={() => setEditing(null)}

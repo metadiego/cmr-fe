@@ -29,3 +29,8 @@ test("normalizeBookMultipleResult: null/undefined response — safe defaults, ne
   assert.deepEqual(normalizeBookMultipleResult(undefined), { creadas: [], omitidas: 0, aviso: null });
   assert.deepEqual(normalizeBookMultipleResult({}), { creadas: [], omitidas: 0, aviso: null });
 });
+
+// Carried over from the duplicate lib/frontdesk/book-multiple.test.ts (removed with its unused module).
+test("normalizeBookMultipleResult: zero skipped is kept, not replaced by the Spanish key", () => {
+  assert.equal(normalizeBookMultipleResult({ skipped: 0, omitidas: 5 }).omitidas, 0);
+});

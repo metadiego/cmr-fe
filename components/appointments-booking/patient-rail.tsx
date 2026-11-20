@@ -18,6 +18,7 @@ import { cancelarCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { cancelarSesion } from "@/lib/api/frontdesk";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { getMedicos, type Personal } from "@/lib/api/personal";
+import type { Paciente } from "@/lib/api/pacientes";
 import { nowTimePR, parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
@@ -287,12 +288,15 @@ function CancelBox({
  */
 export function EditAppointmentModal({
   cita,
+  patient,
   center,
   appointmentTypes,
   onClose,
   onSaved,
 }: {
   cita: Cita;
+  /** The patient on screen: the dialog needs it to save (edit mode locks the patient field). */
+  patient: Paciente | null;
   center: string | undefined;
   appointmentTypes: TipoCita[];
   onClose: () => void;
@@ -306,6 +310,7 @@ export function EditAppointmentModal({
       open
       fecha={cita.date}
       cita={cita}
+      pacienteInicial={patient}
       centroId={doctorsCenter ?? undefined}
       tipos={appointmentTypes}
       medicos={medicos}
