@@ -5847,7 +5847,9 @@
       "free": "Libres: {names}",
       "noneFree": "Nadie libre ahora",
       "skillsNotConfigured": "Nadie tiene esta terapia configurada — ve a Personal → capacidades",
-      "chipFull": "{service} {turn} · {min} min"
+      "chipFull": "{service} {turn} · {min} min",
+      "overdueBadge": "{n} en terapia atrasados — ya pasó el tiempo estimado sin marcarse asistido",
+      "overdueFilterToggle": "Atrasados ({n})"
     },
     "bookService": "Citar servicio",
     "bookConsultation": "Citar consulta",

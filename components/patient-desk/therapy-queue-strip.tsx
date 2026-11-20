@@ -13,6 +13,7 @@ import {
   queueEntryDisplayName,
   queueEntryRecord,
 } from "@/lib/frontdesk/therapy-queue"
+import { isOverdueInTherapy, countOverdueInTherapy } from "@/lib/frontdesk/queue-overdue"
 import { onShiftState } from "@/lib/frontdesk/technicians-today"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 import { toastError } from "@/lib/api/errors"
@@ -71,6 +72,15 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
   // sessionId → técnico elegido en el desplegable (vacío: usar el sugerido del BE).
   const [picked, setPicked] = React.useState<Record<string, string>>({})
   const [busy, setBusy] = React.useState<string | null>(null)
+  // Pedido del dueño 20-nov-2026: la burbuja roja del sistema viejo, para ver de un vistazo quién
+  // lleva más del tiempo estimado en terapia sin cerrarse a "asistido" (daña estadísticas y deja
+  // dosis/sesiones sin descontar). Se recalcula cada minuto, no solo cuando algo cambia por SSE.
+  const [nowIso, setNowIso] = React.useState(() => new Date().toISOString())
+  React.useEffect(() => {
+    const id = window.setInterval(() => setNowIso(new Date().toISOString()), 60000)
+    return () => window.clearInterval(id)
+  }, [])
+  const [overdueOnly, setOverdueOnly] = React.useState(false)
 
   async function handleCall(sessionId: string, technicianId?: string) {
     setBusy(sessionId)
@@ -107,48 +117,78 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
   return (
     <>
       <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
-        {visible.map((svc) => (
-          // `role="button"` en un `div` (no un `<button>` anidado) a propósito: el NOMBRE lleva su
-          // PROPIO click target (abre el visor general) aparte del resto de la pastilla (abre la cola
-          // de siempre) — un botón real no admite otro botón adentro.
-          <div
-            key={svc.serviceId}
-            role="button"
-            tabIndex={0}
-            onClick={() => setOpenServiceId(svc.serviceId)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault()
+        {visible.map((svc) => {
+          const overdue = countOverdueInTherapy(svc.inTherapy, nowIso)
+          return (
+            // `role="button"` en un `div` (no un `<button>` anidado) a propósito: el NOMBRE y la
+            // burbuja de atrasados llevan su PROPIO click target aparte del resto de la pastilla —
+            // un botón real no admite otro botón adentro.
+            <div
+              key={svc.serviceId}
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                setOverdueOnly(false)
                 setOpenServiceId(svc.serviceId)
-              }
-            }}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition hover:bg-muted/60"
-            style={{ borderColor: svc.color ?? undefined }}
-          >
-            <span
-              className="h-2 w-2 shrink-0 rounded-full"
-              style={{
-                backgroundColor: svc.color ?? "var(--muted-foreground)",
               }}
-            />
-            <span
-              className="max-w-[120px] truncate underline decoration-dotted underline-offset-2"
-              title={t("openViewer", { service: svc.name })}
-              onClick={(e) => {
-                e.stopPropagation()
-                setViewerServiceId(svc.serviceId)
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  setOverdueOnly(false)
+                  setOpenServiceId(svc.serviceId)
+                }
               }}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition hover:bg-muted/60"
+              style={{ borderColor: svc.color ?? undefined }}
             >
-              {svc.name}
-            </span>
-            <span className="text-muted-foreground">
-              {t("pillLabel", {
-                waiting: svc.waiting.length,
-                inTherapy: svc.inTherapy.length,
-              })}
-            </span>
-          </div>
-        ))}
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{
+                  backgroundColor: svc.color ?? "var(--muted-foreground)",
+                }}
+              />
+              <span
+                className="max-w-[120px] truncate underline decoration-dotted underline-offset-2"
+                title={t("openViewer", { service: svc.name })}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setViewerServiceId(svc.serviceId)
+                }}
+              >
+                {svc.name}
+              </span>
+              <span className="text-muted-foreground">
+                {t("pillLabel", {
+                  waiting: svc.waiting.length,
+                  inTherapy: svc.inTherapy.length,
+                })}
+              </span>
+              {overdue > 0 ? (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  title={t("overdueBadge", { n: overdue })}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setOverdueOnly(true)
+                    setOpenServiceId(svc.serviceId)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setOverdueOnly(true)
+                      setOpenServiceId(svc.serviceId)
+                    }
+                  }}
+                  className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground tabular-nums"
+                >
+                  {overdue}
+                </span>
+              ) : null}
+            </div>
+          )
+        })}
       </div>
       <Sheet open={!!active} onOpenChange={(o) => !o && setOpenServiceId(null)}>
         <SheetContent className="flex w-full flex-col gap-4 overflow-y-auto sm:max-w-md">
@@ -165,51 +205,84 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
               ) : null}
               {active.inTherapy.length > 0 ? (
                 <div>
-                  <h3 className="mb-2 text-xs font-semibold text-muted-foreground uppercase">
-                    {t("sectionInTherapy")}
-                  </h3>
-                  <ul className="space-y-1.5">
-                    {active.inTherapy.map((e) => (
-                      <li
-                        key={e.sessionId}
-                        className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm"
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase">
+                      {t("sectionInTherapy")}
+                    </h3>
+                    {countOverdueInTherapy(active.inTherapy, nowIso) > 0 ? (
+                      <Button
+                        type="button"
+                        variant={overdueOnly ? "destructive" : "outline"}
+                        size="sm"
+                        className="h-6 px-2 text-[11px]"
+                        onClick={() => setOverdueOnly((v) => !v)}
                       >
-                        <div className="min-w-0">
-                          <div className="truncate font-medium">
-                            {queueEntryDisplayName(e)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {queueEntryRecord(e)
-                              ? `#${queueEntryRecord(e)} · `
-                              : ""}
-                            {e.technicianName ?? "—"}
-                          </div>
-                        </div>
-                        <div className="flex shrink-0 flex-col items-end gap-0.5">
-                          <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                            {t("minutesSince", { n: e.minutes })}
-                          </span>
-                          {e.estimatedEnd ? (
-                            <span
-                              className="text-[11px] text-muted-foreground"
-                              title={
-                                e.estimateSource === "history"
-                                  ? t("estimatedEndHistoryTooltip")
-                                  : undefined
-                              }
-                            >
-                              {t("estimatedEnd", {
-                                time: fmtHora(e.estimatedEnd),
-                              })}
-                            </span>
-                          ) : null}
-                        </div>
-                      </li>
-                    ))}
+                        {t("overdueFilterToggle", {
+                          n: countOverdueInTherapy(active.inTherapy, nowIso),
+                        })}
+                      </Button>
+                    ) : null}
+                  </div>
+                  <ul className="space-y-1.5">
+                    {active.inTherapy
+                      .filter((e) => !overdueOnly || isOverdueInTherapy(e, nowIso))
+                      .map((e) => {
+                        const overdueRow = isOverdueInTherapy(e, nowIso)
+                        return (
+                          <li
+                            key={e.sessionId}
+                            className={cn(
+                              "flex items-center justify-between rounded-md px-3 py-2 text-sm",
+                              overdueRow ? "bg-destructive/10" : "bg-muted/40",
+                            )}
+                          >
+                            <div className="min-w-0">
+                              <div className="truncate font-medium">
+                                {queueEntryDisplayName(e)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {queueEntryRecord(e)
+                                  ? `#${queueEntryRecord(e)} · `
+                                  : ""}
+                                {e.technicianName ?? "—"}
+                              </div>
+                            </div>
+                            <div className="flex shrink-0 flex-col items-end gap-0.5">
+                              <span
+                                className={cn(
+                                  "font-mono text-xs tabular-nums",
+                                  overdueRow
+                                    ? "font-semibold text-destructive"
+                                    : "text-muted-foreground",
+                                )}
+                              >
+                                {t("minutesSince", { n: e.minutes })}
+                              </span>
+                              {e.estimatedEnd ? (
+                                <span
+                                  className={cn(
+                                    "text-[11px]",
+                                    overdueRow ? "text-destructive" : "text-muted-foreground",
+                                  )}
+                                  title={
+                                    e.estimateSource === "history"
+                                      ? t("estimatedEndHistoryTooltip")
+                                      : undefined
+                                  }
+                                >
+                                  {t("estimatedEnd", {
+                                    time: fmtHora(e.estimatedEnd),
+                                  })}
+                                </span>
+                              ) : null}
+                            </div>
+                          </li>
+                        )
+                      })}
                   </ul>
                 </div>
               ) : null}
-              {active.waiting.length > 0 ? (
+              {active.waiting.length > 0 && !overdueOnly ? (
                 <div>
                   <h3 className="mb-2 text-xs font-semibold text-muted-foreground uppercase">
                     {t("sectionWaiting")}

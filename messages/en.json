@@ -5847,7 +5847,9 @@
       "free": "Free: {names}",
       "noneFree": "No one free right now",
       "skillsNotConfigured": "No one is set up for this therapy — go to Staff → capabilities",
-      "chipFull": "{service} {turn} · {min} min"
+      "chipFull": "{service} {turn} · {min} min",
+      "overdueBadge": "{n} overdue in therapy — past the estimated time without being marked attended",
+      "overdueFilterToggle": "Overdue ({n})"
     },
     "bookService": "Book a service",
     "bookConsultation": "Book a consultation",
