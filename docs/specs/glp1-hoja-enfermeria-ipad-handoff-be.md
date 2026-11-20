@@ -96,6 +96,6 @@ Si el BE tiene una forma mejor de pedir «las visitas GLP-1 de hoy», que lo dig
 
 ## Preguntas abiertas para el dueño (no bloquean al BE)
 
-- Supuesto: «solo observaciones» lo interpretamos como tocar Sí/No y escribir la observación si
+- **Confirmado por el dueño (20-nov):** «solo observaciones» = tocar Sí/No y escribir la observación si
   hace falta. Una casilla se marca más rápido que escribir.
 - ¿«T/A» (presión arterial) se escribe en el iPad? En el papel está, así que lo incluimos.
