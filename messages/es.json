@@ -4761,6 +4761,7 @@
       "intravenoso": "Intravenoso"
     },
     "cancelarAviso": "Cancelar aviso",
+    "formatos": "Formatos",
     "tema": "Tema",
     "sinSecciones": "Sin secciones configuradas.",
     "enCola": "{n} en cola",
@@ -6959,20 +6960,6 @@
     "daysShort": "{n} días"
   },
   "formSheet": {
-    "home": {
-      "title": "Hojas del día",
-      "search": "Buscar por nombre o récord",
-      "date": "Fecha",
-      "empty": "No hay visitas de este servicio ese día.",
-      "noMatch": "Nadie coincide con «{q}».",
-      "saved": "Guardada",
-      "pending": "Pendiente",
-      "live": "En vivo: se abre sola cuando la envían desde recepción",
-      "offline": "Sin conexión en vivo",
-      "qrHint": "¿Tienes el QR? Ábrelo con la cámara del iPad.",
-      "nurse": "Enfermera",
-      "loadError": "No se pudo cargar la lista"
-    },
     "sheet": {
       "patient": "Paciente",
       "record": "Récord",
@@ -6989,7 +6976,7 @@
       "saving": "Guardando…",
       "saved": "Hoja guardada",
       "print": "Imprimir",
-      "back": "Lista del día",
+      "back": "Atrás",
       "savedAt": "Guardada {when}",
       "notSaved": "Aún sin guardar",
       "tooLongField": "«{label}» pasa de {max} caracteres.",
@@ -7007,19 +6994,7 @@
       "fill": "Llenar en pantalla",
       "qr": "QR",
       "qrTitle": "Abrir esta hoja en el iPad",
-      "qrHint": "Apunta la cámara del iPad al código y toca el enlace.",
-      "toIpad": "Enviar al iPad",
-      "sendTitle": "Enviar la hoja al iPad",
-      "to": "Enviar a",
-      "toHint": "La persona que tiene la sesión abierta en el iPad.",
-      "send": "Enviar",
-      "sent": "Enviada al iPad de {name}",
-      "noStaff": "No hay personal con cuenta en este centro."
-    },
-    "live": {
-      "opened": "Abriendo la hoja de {name}",
-      "weighed": "{name} acaba de pesarse",
-      "openSheet": "Abrir hoja"
+      "qrHint": "Apunta la cámara del iPad al código y toca el enlace."
     }
   },
   "formats": {

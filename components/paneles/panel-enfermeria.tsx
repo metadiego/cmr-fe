@@ -16,6 +16,8 @@ import {
   type PanelNotificacion,
   type PanelPersonal,
 } from "@/lib/api/paneles";
+import { getServicios, type Servicio } from "@/lib/api/servicios";
+import { parseAcciones } from "@/lib/frontdesk/acciones";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
@@ -24,6 +26,7 @@ import { colorForName } from "@/lib/frontdesk/color";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingRegion } from "@/components/kit/skeletons";
+import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { createNursingAlarm, type AlarmTone, type NursingAlarm } from "@/lib/panel/nursing-alarm";
 
 const CLAVE = "enfermeria";
@@ -77,6 +80,15 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
   const defRes = useResource<PanelDefinicion>(() => getPanelDefinicion(CLAVE, centro), [centro]);
   const [notifs, setNotifs] = React.useState<PanelNotificacion[]>([]);
+  // Formatos de la visita del aviso (fill/save/print), el MISMO modal de la fila del patient-desk — el
+  // panel no tiene servicioId, solo el nombre de display, así que se cruza por nombre contra /services.
+  const serviciosRes = useResource<Servicio[]>(() => getServicios(centro), [centro]);
+  const servicios = React.useMemo(() => (serviciosRes.state.kind === "ok" ? serviciosRes.state.data : []), [serviciosRes.state]);
+  const reportsFor = React.useCallback(
+    (nombre?: string | null) => parseAcciones(servicios.find((s) => s.name === nombre)?.formActions).reports ?? [],
+    [servicios],
+  );
+  const [formatosFor, setFormatosFor] = React.useState<PanelNotificacion | null>(null);
   const alarma = useAlarma();
   const { start: sonar, stop: callar } = alarma;
 
@@ -344,18 +356,42 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
             ))}
           </div>
           {!puedeAceptar && <p className="mt-4 text-sm text-white/80">{t("soloEnfermeria")}</p>}
-          {puedeCancelar && (
-            <button
-              type="button"
-              onClick={() => cancelar(actual.id)}
-              className="mt-6 rounded-lg border border-white/40 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
-            >
-              {t("cancelarAviso")}
-            </button>
-          )}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            {actual.sessionId && reportsFor(actual.servicioNombre).length > 0 && (
+              <button
+                type="button"
+                onClick={() => setFormatosFor(actual)}
+                className="rounded-lg bg-white/95 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-lg transition-colors hover:bg-white"
+              >
+                {t("formatos")}
+              </button>
+            )}
+            {puedeCancelar && (
+              <button
+                type="button"
+                onClick={() => cancelar(actual.id)}
+                className="rounded-lg border border-white/40 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
+              >
+                {t("cancelarAviso")}
+              </button>
+            )}
+          </div>
         </div>
         );
       })()}
+
+      {formatosFor && (
+        <FormatosModal
+          open
+          onOpenChange={(o) => !o && setFormatosFor(null)}
+          servicioNombre={formatosFor.servicioNombre ?? ""}
+          formAcciones={servicios.find((s) => s.name === formatosFor.servicioNombre)?.formActions}
+          pacienteNombre={formatosFor.pacienteNombre ?? ""}
+          record={formatosFor.medicalRecordNumber}
+          sesionId={formatosFor.sessionId ?? undefined}
+          centro={centro}
+        />
+      )}
     </PageContainer>
   );
 }

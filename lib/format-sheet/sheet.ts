@@ -3,8 +3,7 @@
 // GET …/answers (saved wins over suggested). Contract: docs/specs/glp1-hoja-enfermeria-ipad-contrato-be.md.
 
 import type { FormatoArmado, FormatoCampo } from "../api/formatos.ts";
-import type { AnswerValue, SheetAnswers, SheetAnswersInput, SheetSession } from "../api/format-answers.ts";
-import { coincide } from "../frontdesk/search.ts";
+import type { AnswerValue, SheetAnswers, SheetAnswersInput } from "../api/format-answers.ts";
 
 /** Formats that can be filled on screen. Adding one here is all the FE needs (the screen is generic). */
 export const FILLABLE_SHEETS: readonly string[] = ["glp1_adherencia"];
@@ -15,10 +14,6 @@ export function isFillableSheet(slug: string | null | undefined): boolean {
 
 export function sheetPath(slug: string, sessionId: string): string {
   return `/forms/${encodeURIComponent(slug)}/${encodeURIComponent(sessionId)}`;
-}
-
-export function sheetHomePath(slug: string): string {
-  return `/forms/${encodeURIComponent(slug)}`;
 }
 
 /** Limits of the PUT body (BE validation). */
@@ -148,47 +143,6 @@ export function sheetProblems(state: SheetState): SheetProblem[] {
   for (const [key, a] of Object.entries(state.answers)) if (a.note.trim().length > LIMITS.note) out.push({ kind: "note", key });
   if (state.additionalNotes.trim().length > LIMITS.additionalNotes) out.push({ kind: "additionalNotes" });
   return out;
-}
-
-/** The day list filtered by patient name or record (accent- and case-insensitive). */
-export function filterSheetSessions(list: SheetSession[], query: string): SheetSession[] {
-  const q = query.trim();
-  if (!q) return list;
-  return list.filter((s) => coincide([s.patient?.name, s.patient?.medicalRecordNumber], q));
-}
-
-// --- Live bus (/api/v2/tablero/stream): which events the sheet screens react to. ---
-
-interface BusEvent {
-  entity: string;
-  action: string;
-  status?: unknown;
-}
-
-function obj(v: unknown): Record<string, unknown> | null {
-  return v && typeof v === "object" ? (v as Record<string, unknown>) : null;
-}
-
-/** «Enviar al iPad»: the sheet to open when the request is for THIS person (the bus is per center). */
-export function openRequestFor(e: BusEvent, staffId: string | null | undefined): { slug: string; sessionId: string; patientName: string | null } | null {
-  if (!staffId || e.entity !== "format_sheet" || e.action !== "open_requested") return null;
-  const s = obj(e.status);
-  if (!s || s.toUserId !== staffId || typeof s.sessionId !== "string" || typeof s.formatSlug !== "string") return null;
-  const name = obj(s.patient)?.name;
-  return { slug: s.formatSlug, sessionId: s.sessionId, patientName: typeof name === "string" ? name : null };
-}
-
-/** A measurement newly linked to a visit: offered as «X just got weighed — open sheet». */
-export function measurementLinked(e: BusEvent): { sessionId: string; patientName: string | null; date: string | null } | null {
-  if (e.entity !== "body_measurement" || e.action !== "linked") return null;
-  const s = obj(e.status);
-  if (!s || typeof s.sessionId !== "string") return null;
-  const name = obj(s.patient)?.name;
-  return {
-    sessionId: s.sessionId,
-    patientName: typeof name === "string" ? name : null,
-    date: typeof s.date === "string" ? s.date : null,
-  };
 }
 
 // --- Write-back range (GLP-1 peso corrects the scale reading, cmr-be #659). ---

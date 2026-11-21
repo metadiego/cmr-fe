@@ -265,7 +265,7 @@ export function FormatosModal({
         {report && !esFormato && (
           <>
             {/* A sheet that is filled on screen (GLP-1): open it here, its QR, or «Enviar al iPad». */}
-            {sesionId && isFillableSheet(report.id) && <SheetSendBar slug={report.id} sessionId={sesionId} center={centro} />}
+            {sesionId && isFillableSheet(report.id) && <SheetSendBar slug={report.id} sessionId={sesionId} />}
             <GenericFormatoRender clave={report.id} sesionId={sesionId} centro={centro} onVolver={() => setReport(null)} />
           </>
         )}

@@ -4761,6 +4761,7 @@
       "intravenoso": "IV"
     },
     "cancelarAviso": "Cancel alert",
+    "formatos": "Formats",
     "tema": "Theme",
     "sinSecciones": "No sections configured.",
     "enCola": "{n} in queue",
@@ -6959,20 +6960,6 @@
     "daysShort": "{n} days"
   },
   "formSheet": {
-    "home": {
-      "title": "Today's sheets",
-      "search": "Search by name or record",
-      "date": "Date",
-      "empty": "No visits of this service that day.",
-      "noMatch": "Nobody matches “{q}”.",
-      "saved": "Saved",
-      "pending": "Pending",
-      "live": "Live: opens by itself when the front desk sends it",
-      "offline": "Not live",
-      "qrHint": "Got the QR? Open it with the iPad camera.",
-      "nurse": "Nurse",
-      "loadError": "Could not load the list"
-    },
     "sheet": {
       "patient": "Patient",
       "record": "Record",
@@ -6989,7 +6976,7 @@
       "saving": "Saving…",
       "saved": "Sheet saved",
       "print": "Print",
-      "back": "Today's list",
+      "back": "Back",
       "savedAt": "Saved {when}",
       "notSaved": "Not saved yet",
       "tooLongField": "“{label}” is over {max} characters.",
@@ -7007,19 +6994,7 @@
       "fill": "Fill on screen",
       "qr": "QR",
       "qrTitle": "Open this sheet on the iPad",
-      "qrHint": "Point the iPad camera at the code and tap the link.",
-      "toIpad": "Send to iPad",
-      "sendTitle": "Send the sheet to the iPad",
-      "to": "Send to",
-      "toHint": "The person signed in on the iPad.",
-      "send": "Send",
-      "sent": "Sent to {name}'s iPad",
-      "noStaff": "No staff with an account in this center."
-    },
-    "live": {
-      "opened": "Opening {name}'s sheet",
-      "weighed": "{name} just got weighed",
-      "openSheet": "Open sheet"
+      "qrHint": "Point the iPad camera at the code and tap the link."
     }
   },
   "formats": {

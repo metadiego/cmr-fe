@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, PrinterIcon } from "@hugeicons/core-free-icons";
@@ -20,7 +20,6 @@ import { useSubmit } from "@/components/kit/use-submit";
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
 import { SheetQuestions } from "@/components/format-sheet/sheet-questions";
 import { useResource } from "@/hooks/use-resource";
-import { useSheetLive } from "@/hooks/use-sheet-live";
 import { getFormatoArmado, type FormatoArmado, type FormatoCampo } from "@/lib/api/formatos";
 import { getSheetAnswers, saveSheetAnswers, type SheetAnswers } from "@/lib/api/format-answers";
 import { listPersonalAll, type PersonalEnAlcance } from "@/lib/api/personal";
@@ -29,7 +28,6 @@ import {
   initialSheetState,
   isReadOnlyField,
   LIMITS,
-  sheetHomePath,
   sheetPayload,
   sheetProblems,
   sheetQuestions,
@@ -56,7 +54,6 @@ export function SheetEditor({ slug, sessionId }: { slug: string; sessionId: stri
     ]);
     return { assembly, answers, staff: staff.filter((p) => p.active && p.profileId) };
   }, [slug, sessionId]);
-  useSheetLive(slug, { currentSessionId: sessionId });
 
   if (res.state.kind === "loading") {
     return (
@@ -69,7 +66,7 @@ export function SheetEditor({ slug, sessionId }: { slug: string; sessionId: stri
   if (res.state.kind === "fail") {
     return (
       <PageContainer gap="lg" className="w-full px-4 py-4 md:px-6">
-        <BackLink slug={slug} />
+        <BackLink />
         <ErrorState message={`${t("loadError")} — ${res.state.message}`} />
       </PageContainer>
     );
@@ -78,14 +75,15 @@ export function SheetEditor({ slug, sessionId }: { slug: string; sessionId: stri
   return <SheetForm key={sessionId} slug={slug} sessionId={sessionId} data={res.state.data} />;
 }
 
-function BackLink({ slug }: { slug: string }) {
+// No list page to link back to (removed with «Enviar al iPad», cmr-be #661 reverted): this is reached
+// only from the patient-desk formats modal's «Llenar en pantalla» or its QR, so browser-back returns there.
+function BackLink() {
   const t = useTranslations("formSheet.sheet");
+  const router = useRouter();
   return (
-    <Button asChild variant="ghost" size="sm" className="w-fit">
-      <Link href={sheetHomePath(slug)}>
-        <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-        {t("back")}
-      </Link>
+    <Button variant="ghost" size="sm" className="w-fit" onClick={() => router.back()}>
+      <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+      {t("back")}
     </Button>
   );
 }
@@ -165,7 +163,7 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
     <PageContainer gap="lg" className="w-full px-4 py-4 md:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
-          <BackLink slug={slug} />
+          <BackLink />
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-semibold tracking-tight">{patient?.name ?? "—"}</h1>
             <p className="text-sm text-muted-foreground tabular-nums">

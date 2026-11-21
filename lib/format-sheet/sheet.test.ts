@@ -2,19 +2,16 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import type { FormatoArmado } from "../api/formatos.ts";
-import type { SheetAnswers, SheetSession } from "../api/format-answers.ts";
+import type { SheetAnswers } from "../api/format-answers.ts";
 import {
   answeredCount,
   answerKey,
-  filterSheetSessions,
   initialSheetState,
   isFillableSheet,
   isoToLocalPR,
   isReadOnlyField,
   localPRToIso,
-  measurementLinked,
   nowLocalPR,
-  openRequestFor,
   readNumber,
   writeBackErrorOf,
   writeBackProblems,
@@ -168,48 +165,6 @@ test("too long is a reason, never a missing field", () => {
     { kind: "note", key: "0:0:0" },
     { kind: "additionalNotes" },
   ]);
-});
-
-test("the day list filters by name or record, accent-insensitive", () => {
-  const row = (name: string, rec: string): SheetSession => ({
-    sessionId: rec,
-    clinicId: "c1",
-    clinicName: null,
-    date: "2026-11-20",
-    time: null,
-    status: "presente",
-    patient: { id: rec, name, medicalRecordNumber: rec },
-    nurse: null,
-    sheetSaved: false,
-    savedAt: null,
-  });
-  const list = [row("José Pérez", "R15808"), row("Ana Ruiz", "77")];
-  assert.deepEqual(filterSheetSessions(list, "jose").map((s) => s.sessionId), ["R15808"]);
-  assert.deepEqual(filterSheetSessions(list, "77").map((s) => s.sessionId), ["77"]);
-  assert.equal(filterSheetSessions(list, " ").length, 2);
-});
-
-test("«Enviar al iPad» opens only on the iPad of the person it was sent to", () => {
-  const e = {
-    entity: "format_sheet",
-    action: "open_requested",
-    status: { formatSlug: "glp1_adherencia", sessionId: "s1", toUserId: "n1", patient: { name: "Ana Ruiz" } },
-  };
-  assert.deepEqual(openRequestFor(e, "n1"), { slug: "glp1_adherencia", sessionId: "s1", patientName: "Ana Ruiz" });
-  assert.equal(openRequestFor(e, "n2"), null);
-  assert.equal(openRequestFor(e, null), null);
-  assert.equal(openRequestFor({ ...e, entity: "sesion" }, "n1"), null);
-});
-
-test("a newly linked measurement is offered with its visit", () => {
-  const e = {
-    entity: "body_measurement",
-    action: "linked",
-    status: { kind: "scale", sessionId: "s1", date: "2026-11-20", patient: { name: "Ana Ruiz" } },
-  };
-  assert.deepEqual(measurementLinked(e), { sessionId: "s1", patientName: "Ana Ruiz", date: "2026-11-20" });
-  assert.equal(measurementLinked({ ...e, action: "updated" }), null);
-  assert.equal(measurementLinked({ ...e, status: {} }), null);
 });
 
 test("weight is read like the BE reads it", () => {

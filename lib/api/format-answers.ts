@@ -60,21 +60,6 @@ export interface SheetAnswersInput {
   recordedAt: string | null;
 }
 
-/** A visit of the day for the sheet's home list. */
-export interface SheetSession {
-  sessionId: string;
-  clinicId: string;
-  clinicName: string | null;
-  date: string;
-  time: string | null;
-  /** Frontdesk state, still Spanish values (pendiente|presente|en_terapia|asistido). */
-  status: string | null;
-  patient: SheetPatient | null;
-  nurse: SheetPerson | null;
-  sheetSaved: boolean;
-  savedAt: string | null;
-}
-
 const base = (slug: string) => `/formats/${encodeURIComponent(slug)}/sessions`;
 
 /** GET …/answers — always 200: `saved` says whether there is a sheet; `suggested` pre-fills it. */
@@ -92,20 +77,6 @@ export function saveSheetAnswers(
   return apiFetch<SheetAnswers>(
     `${base(slug)}/${encodeURIComponent(sessionId)}/answers`,
     { method: "PUT", body: JSON.stringify(input) },
-    centerId,
-  );
-}
-
-/** GET …/sessions?date= — the day's visits of the format's service, with whether the sheet is saved. */
-export function listSheetSessions(slug: string, date: string, centerId?: string): Promise<SheetSession[]> {
-  return apiFetch<SheetSession[]>(`${base(slug)}?date=${encodeURIComponent(date)}`, {}, centerId);
-}
-
-/** POST …/send — opens the sheet on the iPad where `toUserId` (a staff id) is signed in. */
-export function sendSheetToUser(slug: string, sessionId: string, toUserId: string, centerId?: string): Promise<unknown> {
-  return apiFetch<unknown>(
-    `${base(slug)}/${encodeURIComponent(sessionId)}/send`,
-    { method: "POST", body: JSON.stringify({ toUserId }) },
     centerId,
   );
 }
