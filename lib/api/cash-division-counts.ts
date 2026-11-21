@@ -5,7 +5,7 @@
 export interface DivisionCashierCount {
   /** null for a cashier who charged cash but has no sheet of their own. */
   reconciliationId: string | null;
-  usuarioId: string | null;
+  userId: string | null;
   name: string | null;
   counted: number;
   fund: number;
