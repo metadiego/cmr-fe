@@ -6574,7 +6574,7 @@
     },
     "tabOwner": "Management summary",
     "printOwner": "Include management summary",
-    "printOwnerHint": "Printed on a separate page, after the daily kardex."
+    "printOwnerHint": "Printed below the daily kardex; if it does not fit on the same sheet, it moves whole to the next one."
   },
   "inventoryReceipts": {
     "tabReceive": "Receive",

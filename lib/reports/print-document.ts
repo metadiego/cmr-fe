@@ -20,10 +20,11 @@ th{background:#f2f2f2}
 tfoot td{font-weight:700;background:#f7f7f7}
 .text-right{text-align:right}.font-bold,.font-semibold{font-weight:700}
 .text-xs{font-size:9px}.text-muted-foreground{color:#555}
-/* A section printed on its own page (e.g. the kardex «Resumen gerencial» on request): hidden on screen
-   with Tailwind's \`hidden\`, shown here, starting a new sheet. */
+/* A section added to the print on request (e.g. the kardex «Resumen gerencial»): hidden on screen with
+   Tailwind's \`hidden\`, shown here. print-keep keeps it in one piece: it stays on the same sheet when it
+   fits and the browser moves the whole block to the next sheet when it does not. */
 .print-only{display:block!important}
-.print-break{break-before:page;page-break-before:always}
+.print-keep{break-inside:avoid;page-break-inside:avoid;margin-top:18px}
 h2.print-section{font-size:14px;margin:0 0 8px;color:#0f3d5e}
 footer.report-foot{margin-top:14px;font-size:9px;color:#555;border-top:1px solid #ccc;padding-top:4px}
 `;

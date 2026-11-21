@@ -76,7 +76,8 @@ export default function DailyKardexPage() {
   const [to, setTo] = React.useState(initial.to)
   const [day, setDay] = React.useState<string | null>(null)
   const [tab, setTab] = React.useState<KardexTab>("daily")
-  // «Por día» prints alone unless asked: then the management summary follows on its own page.
+  // «Por día» prints alone unless asked: then the management summary follows, on the same sheet when it
+  // fits and on the next one when it does not (print-keep in lib/reports/print-document.ts).
   const [printOwner, setPrintOwner] = React.useState(false)
   const printRef = React.useRef<HTMLDivElement>(null)
 
@@ -467,7 +468,7 @@ export default function DailyKardexPage() {
             </TabsContent>
           </Tabs>
           {printOwner && tab === "daily" && summary?.ownerFormat && (
-            <div className="print-only print-break hidden">
+            <div className="print-only print-keep hidden">
               <h2 className="print-section">{t("tabOwner")}</h2>
               <KardexOwnerSummary
                 data={summary.ownerFormat}

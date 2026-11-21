@@ -6574,7 +6574,7 @@
     },
     "tabOwner": "Resumen gerencial",
     "printOwner": "Incluir resumen gerencial",
-    "printOwnerHint": "Se imprime en una página aparte, después del kárdex por día."
+    "printOwnerHint": "Se imprime debajo del kárdex por día; si no cabe en la misma hoja, pasa entero a la siguiente."
   },
   "inventoryReceipts": {
     "tabReceive": "Recibir",

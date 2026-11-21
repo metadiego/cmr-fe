@@ -27,7 +27,8 @@ test("buildReportHtml: the logo goes in the letterhead when given", () => {
   assert.doesNotMatch(buildReportHtml({ title: "t", bodyHtml: "" }), /<img/);
 });
 
-test("a print-only section is shown in print and starts a new page", () => {
+test("a print-only section is shown in print and kept whole (same page if it fits, else the next)", () => {
   assert.match(REPORT_PRINT_CSS, /\.print-only\{display:block!important\}/);
-  assert.match(REPORT_PRINT_CSS, /\.print-break\{break-before:page;page-break-before:always\}/);
+  assert.match(REPORT_PRINT_CSS, /\.print-keep\{break-inside:avoid;page-break-inside:avoid;/);
+  assert.doesNotMatch(REPORT_PRINT_CSS, /break-before:page/);
 });
