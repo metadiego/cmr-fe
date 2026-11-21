@@ -4,36 +4,42 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 import {
   getPanelDefinicion,
   getPanelNotificaciones,
   getPanelNotificacionesAceptadas,
+  getPanelTrabajo,
   aceptarNotificacion,
   cancelarNotificacion,
+  tomarTrabajoPanel,
   guardarOrdenPersonal,
   type PanelDefinicion,
   type PanelNotificacion,
   type PanelPersonal,
+  type PanelWorkRow,
 } from "@/lib/api/paneles";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getFormatos } from "@/lib/api/formatos";
 import { fillableReportsFor } from "@/lib/panel/panel-formatos";
+import { claimPayloadFor } from "@/lib/panel/panel-trabajo";
 import { fillableSlugsFrom, sheetPath } from "@/lib/format-sheet/sheet";
 import { todayPR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
-import { colorForName } from "@/lib/frontdesk/color";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingRegion } from "@/components/kit/skeletons";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { createNursingAlarm, type AlarmTone, type NursingAlarm } from "@/lib/panel/nursing-alarm";
+import { PanelSeccionTrabajo } from "./panel-seccion-trabajo";
+
+// A nurse's "fill the sheet" shortcut takes either the full-screen notice or a row from the work
+// queue — both carry these same three fields, nothing else in common needed.
+type HojaTarget = { sessionId?: string | null; serviceId?: string | null; serviceName?: string | null };
 
 const CLAVE = "enfermeria";
 
@@ -46,11 +52,6 @@ const TONOS: Record<string, AlarmTone> = {
 };
 function tonoDe(audio?: string | null): AlarmTone {
   return (audio && TONOS[audio]) || TONO_DEFAULT;
-}
-
-// Tinte suave (~12% alfa) a partir de un color hex del BE; si no es hex de 6 dígitos, sin tinte.
-function tinteHex(color?: string | null): string | undefined {
-  return color && /^#[0-9a-f]{6}$/i.test(color) ? `${color}1f` : undefined;
 }
 
 // Alarm ON by default (lib/panel/nursing-alarm.ts). If the browser keeps the sound blocked until a
@@ -109,9 +110,9 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
       .catch(() => {});
   }, [centro]);
   React.useEffect(() => { refetchAceptados(); }, [refetchAceptados]);
-  const [eligiendoReport, setEligiendoReport] = React.useState<PanelNotificacion | null>(null);
+  const [eligiendoReport, setEligiendoReport] = React.useState<HojaTarget | null>(null);
   const abrirHoja = React.useCallback(
-    (n: PanelNotificacion) => {
+    (n: HojaTarget) => {
       if (!n.sessionId) return;
       const reports = fillableReportsFor(n, servicios, fillableSlugs);
       if (reports.length === 1) router.push(sheetPath(reports[0].id, n.sessionId));
@@ -119,6 +120,15 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     },
     [servicios, fillableSlugs, router],
   );
+  // Panel de trabajo del día (cmr-be #666): una fila por visita de cada sección — null = por tomar.
+  // Se refresca junto con todo lo demás (SSE + 30s + al montar), y al tomar una fila abre su hoja
+  // igual que al aceptar un aviso con campana (mismo manejador BE, mismo abrirHoja aquí).
+  const [trabajo, setTrabajo] = React.useState<PanelWorkRow[]>([]);
+  const refetchTrabajo = React.useCallback(() => {
+    getPanelTrabajo(CLAVE, centro, todayPR()).then(setTrabajo).catch(() => {});
+  }, [centro]);
+  React.useEffect(() => { refetchTrabajo(); }, [refetchTrabajo]);
+  const [claimTarget, setClaimTarget] = React.useState<PanelWorkRow | null>(null);
   const alarma = useAlarma();
   const { start: sonar, stop: callar } = alarma;
 
@@ -132,7 +142,8 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     refrescarDef();
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
     refetchAceptados();
-  }, [refrescarDef, centro, refetchAceptados]);
+    refetchTrabajo();
+  }, [refrescarDef, centro, refetchAceptados, refetchTrabajo]);
   // Carga inicial (una vez montado, patrón sin setState-en-render).
   React.useEffect(() => {
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
@@ -164,7 +175,6 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
   const secciones = (def?.sections ?? []).slice().sort((a, b) => a.orden - b.orden);
-  const seccionesVisibles = secciones.filter((s) => s.visible);
   // El sonido depende de la SECCIÓN del aviso actual: su `audio` (lo enriquece el BE en la notificación;
   // respaldo a la sección por id/clave). Un audio desconocido cae al tono por defecto (nunca mudo).
   const audioActual =
@@ -186,7 +196,6 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   if (def !== prevDef) { setPrevDef(def); setOrdenLocal(null); }
   const personal = ordenLocal ?? def?.staff ?? [];
   const estatusById = new Map((def?.statuses ?? []).map((e) => [e.staffId, e]));
-  const contByPersona = new Map((def?.counters ?? []).map((c) => [c.staffId, c]));
 
   async function guardarOrden(arr: PanelPersonal[], antes: PanelPersonal[]) {
     setOrdenLocal(arr);
@@ -248,6 +257,22 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     catch (e) { toastError(e, tRoot); }
   }
 
+  // Tomar una fila «por tomar» sin esperar la campana (cmr-be #666). 409 PANEL_WORK_ALREADY_TAKEN
+  // (otra enfermera la tomó primero) es un toast, no una excepción muda — y de todos modos se
+  // refresca: la fila ya salió de «por tomar» en el servidor.
+  async function tomar(row: PanelWorkRow, staffId: string) {
+    try {
+      const aceptado = await tomarTrabajoPanel(CLAVE, claimPayloadFor(row, staffId), centro);
+      setClaimTarget(null);
+      refetch();
+      setAceptadosHoy((prev) => [aceptado, ...prev.filter((n) => n.id !== aceptado.id)]);
+      abrirHoja(aceptado);
+    } catch (e) {
+      toastError(e, tRoot);
+      refetch();
+    }
+  }
+
   return (
     <PageContainer>
       <PageHeader title={tRoot(def?.panel.labelKey ?? "panel.enfermeria")} />
@@ -260,98 +285,34 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
         </div>
       </div>
 
-      {/* Una sola tarjeta por enfermera (owner, 21-nov-2026): antes se repetía la misma tarjeta por
-          cada sección (Vitales, Intravenoso…), lo que inflaba la pantalla sin aportar nada — el aviso
-          en sí ya trae su `serviceName`/sección resueltos, así que la sección no necesitaba ser el
-          agrupador visual. Cada categoría visible es ahora un chip de color dentro de la misma tarjeta. */}
+      {/* Trabajo del día por sección (cmr-be #666): «Por tomar» arriba (sin esperar la campana) +
+          una tarjeta por enfermera con SU lista de pacientes ya tomados en esa sección. */}
       {defRes.state.kind === "loading" && <PanelSkeleton />}
       {defRes.state.kind === "fail" && <p className="text-sm text-destructive">{defRes.state.message}</p>}
-      {def && seccionesVisibles.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
-      {def && seccionesVisibles.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {personal.map((p, i) => {
-            const cont = contByPersona.get(p.id);
-            const total = cont?.total ?? 0;
-            const est = estatusById.get(p.id);
-            const pc = colorForName(p.name);
-            return (
-              <div
-                key={p.id}
-                draggable={puedeOrdenar}
-                onDragStart={() => setDragId(p.id)}
-                onDragEnd={() => { setDragId(null); setOverId(null); }}
-                onDragOver={(e) => { if (puedeOrdenar && dragId) { e.preventDefault(); setOverId(p.id); } }}
-                onDrop={() => soltarEn(p.id)}
-                className={
-                  "flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 " +
-                  (puedeOrdenar ? "cursor-grab " : "") +
-                  (overId === p.id && dragId ? "ring-2 ring-primary " : "") +
-                  (dragId === p.id ? "opacity-50" : "")
-                }
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    {/* Punto de color por enfermera: identidad estable, discreta. */}
-                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: pc }} aria-hidden />
-                    <span className="truncate text-[15px] font-semibold text-foreground">{p.name}</span>
-                  </div>
-                  <span
-                    className={
-                      "inline-grid h-7 min-w-[1.75rem] shrink-0 place-items-center rounded-full px-2 text-sm font-bold tabular-nums " +
-                      (total > 0 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
-                    }
-                  >
-                    {total}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 border-t border-foreground/5 pt-2">
-                  {seccionesVisibles.map((sx) => {
-                    const nSec = cont?.bySection?.[sx.clave] ?? 0;
-                    const tint = tinteHex(sx.color);
-                    return (
-                      <span
-                        key={sx.clave}
-                        className={
-                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums " +
-                          (nSec > 0 ? (tint ? "" : "bg-primary/10 text-primary") : "bg-muted text-muted-foreground")
-                        }
-                        style={nSec > 0 && tint ? { backgroundColor: tint, color: sx.color ?? undefined } : undefined}
-                      >
-                        {tRoot(sx.labelKey)} {nSec}
-                      </span>
-                    );
-                  })}
-                </div>
-                {est && (est.labelKey || est.label) && (
-                  <span className="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
-                    {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
-                  </span>
-                )}
-                {puedeOrdenar && (
-                  <div className="flex justify-end gap-1 border-t border-foreground/5 pt-1.5">
-                    <button
-                      type="button"
-                      aria-label={t("staffOrder.up")}
-                      disabled={i === 0}
-                      onClick={() => moverA(p.id, -1)}
-                      className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
-                    >
-                      <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={t("staffOrder.down")}
-                      disabled={i === personal.length - 1}
-                      onClick={() => moverA(p.id, 1)}
-                      className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
-                    >
-                      <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+      {def && secciones.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
+      {def && secciones.length > 0 && (
+        <div className="space-y-6">
+          {secciones.map((s) => (
+            <PanelSeccionTrabajo
+              key={s.id}
+              seccion={s}
+              rows={trabajo}
+              personal={personal}
+              estatusById={estatusById}
+              servicios={servicios}
+              fillableSlugs={fillableSlugs}
+              puedeOrdenar={puedeOrdenar}
+              dragId={dragId}
+              overId={overId}
+              onDragStart={setDragId}
+              onDragEnd={() => { setDragId(null); setOverId(null); }}
+              onDragOverStaff={setOverId}
+              onDrop={soltarEn}
+              onReordenar={moverA}
+              onAbrirHoja={abrirHoja}
+              onTomar={(row) => setClaimTarget(row)}
+            />
+          ))}
         </div>
       )}
 
@@ -460,29 +421,55 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* «Tomar» una fila «por tomar» (cmr-be #666): quién la toma. */}
+      <Dialog open={!!claimTarget} onOpenChange={(o) => !o && setClaimTarget(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("work.whoTakes", { name: claimTarget?.patientName ?? "" })}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            {claimTarget &&
+              personal.map((p) => (
+                <Button key={p.id} variant="outline" className="justify-start" onClick={() => tomar(claimTarget, p.id)}>
+                  {p.name}
+                </Button>
+              ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
 
-// Loading wall: the same single staff-card grid as the loaded panel (dot + name + total pill,
-// a row of section chips, a status chip).
+// Loading wall: two sections (colour square + title) with the same staff-card grid as the loaded
+// panel (dot + name + count pill, a one-line placeholder for the patient list).
 function PanelSkeleton() {
   return (
-    <LoadingRegion className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {Array.from({ length: 5 }, (_, i) => (
-        <div key={i} className="flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <Skeleton className="size-2.5 shrink-0 rounded-full" />
-              <Skeleton className={"h-4 " + ["w-24", "w-28", "w-20", "w-32", "w-24"][i]} />
+    <LoadingRegion className="space-y-6">
+      {[0, 1].map((sec) => (
+        <section key={sec}>
+          <div className="mb-3 flex items-center gap-2">
+            <Skeleton className="size-4 rounded" />
+            <div className="flex h-7 items-center">
+              <Skeleton className="h-5 w-32" />
             </div>
-            <Skeleton className="size-7 shrink-0 rounded-full" />
           </div>
-          <div className="flex gap-1.5 border-t border-foreground/5 pt-2">
-            <Skeleton className="h-5 w-16 rounded-full" />
-            <Skeleton className="h-5 w-20 rounded-full" />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <div key={i} className="flex flex-col gap-2 rounded-md bg-card px-3.5 py-3 shadow-xs ring-1 ring-foreground/10">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <Skeleton className="size-2.5 shrink-0 rounded-full" />
+                    <Skeleton className={"h-4 " + ["w-24", "w-28", "w-20", "w-32"][i]} />
+                  </div>
+                  <Skeleton className="size-6 shrink-0 rounded-full" />
+                </div>
+                <Skeleton className="h-3 w-16" />
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
       ))}
     </LoadingRegion>
   );

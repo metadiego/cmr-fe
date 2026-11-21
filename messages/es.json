@@ -4758,7 +4758,14 @@
     "enfermeria": "Panel de Enfermería",
     "seccion": {
       "vitales": "Vitales",
-      "intravenoso": "Intravenoso"
+      "intravenoso": "Intravenoso",
+      "glp1": "GLP-1"
+    },
+    "work": {
+      "toClaim": "Por tomar",
+      "claim": "Tomar",
+      "whoTakes": "¿Quién toma a {name}?",
+      "alreadyTaken": "Ya lo tomó otra persona"
     },
     "cancelarAviso": "Cancelar aviso",
     "formatos": "Formatos",
