@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -17,7 +18,8 @@ import {
   type PanelPersonal,
 } from "@/lib/api/paneles";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { parseAcciones } from "@/lib/frontdesk/acciones";
+import { fillableReportsFor } from "@/lib/panel/panel-formatos";
+import { sheetPath } from "@/lib/format-sheet/sheet";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
@@ -26,7 +28,8 @@ import { colorForName } from "@/lib/frontdesk/color";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingRegion } from "@/components/kit/skeletons";
-import { FormatosModal } from "@/components/frontdesk/formatos-modal";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { createNursingAlarm, type AlarmTone, type NursingAlarm } from "@/lib/panel/nursing-alarm";
 
 const CLAVE = "enfermeria";
@@ -73,6 +76,7 @@ function useAlarma() {
 export function PanelEnfermeria({ centro }: { centro?: string }) {
   const t = useTranslations("panel");
   const tRoot = useTranslations();
+  const router = useRouter();
   const { can } = useCan();
   const puedeAceptar = can("panel.aceptar");
   const puedeCancelar = can("panel.notificar");
@@ -80,15 +84,25 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
   const defRes = useResource<PanelDefinicion>(() => getPanelDefinicion(CLAVE, centro), [centro]);
   const [notifs, setNotifs] = React.useState<PanelNotificacion[]>([]);
-  // Formatos de la visita del aviso (fill/save/print), el MISMO modal de la fila del patient-desk — el
-  // panel no tiene servicioId, solo el nombre de display, así que se cruza por nombre contra /services.
+  // La hoja que la enfermera llena EN PANTALLA (Sí/No, notas, Guardar, Imprimir) es el mismo editor de
+  // /forms/[slug]/[sessionId] — se navega ahí, nunca se duplica. El panel no trae servicioId todavía en
+  // todos lados (BE #663 mergeando): fillableReportsFor cruza por id y cae al nombre de respaldo.
   const serviciosRes = useResource<Servicio[]>(() => getServicios(centro), [centro]);
   const servicios = React.useMemo(() => (serviciosRes.state.kind === "ok" ? serviciosRes.state.data : []), [serviciosRes.state]);
-  const reportsFor = React.useCallback(
-    (nombre?: string | null) => parseAcciones(servicios.find((s) => s.name === nombre)?.formActions).reports ?? [],
-    [servicios],
+  // Avisos aceptados hoy (en esta pantalla): no hay endpoint de "aceptados del día", así que se
+  // acumulan localmente desde que esta pantalla abrió — basta para que «Formatos» siga alcanzable tras
+  // cerrar el aviso a pantalla completa; el modal de la fila del patient-desk sigue siendo otra vía.
+  const [aceptadosHoy, setAceptadosHoy] = React.useState<PanelNotificacion[]>([]);
+  const [eligiendoReport, setEligiendoReport] = React.useState<PanelNotificacion | null>(null);
+  const abrirHoja = React.useCallback(
+    (n: PanelNotificacion) => {
+      if (!n.sessionId) return;
+      const reports = fillableReportsFor(n, servicios);
+      if (reports.length === 1) router.push(sheetPath(reports[0].id, n.sessionId));
+      else if (reports.length > 1) setEligiendoReport(n);
+    },
+    [servicios, router],
   );
-  const [formatosFor, setFormatosFor] = React.useState<PanelNotificacion | null>(null);
   const alarma = useAlarma();
   const { start: sonar, stop: callar } = alarma;
 
@@ -203,8 +217,12 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   }
 
   async function aceptar(notifId: string, personalId: string) {
-    try { await aceptarNotificacion(notifId, personalId, centro); refetch(); }
-    catch (e) { toastError(e, tRoot); }
+    try {
+      const aceptado = await aceptarNotificacion(notifId, personalId, centro);
+      refetch();
+      setAceptadosHoy((prev) => [aceptado, ...prev.filter((n) => n.id !== aceptado.id)]);
+      abrirHoja(aceptado);
+    } catch (e) { toastError(e, tRoot); }
   }
   // Retirar un aviso atascado (el paciente se fue). Idempotente: no tratar como error si ya lo tomaron.
   async function cancelar(notifId: string) {
@@ -357,10 +375,10 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
           </div>
           {!puedeAceptar && <p className="mt-4 text-sm text-white/80">{t("soloEnfermeria")}</p>}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            {actual.sessionId && reportsFor(actual.servicioNombre).length > 0 && (
+            {fillableReportsFor(actual, servicios).length > 0 && (
               <button
                 type="button"
-                onClick={() => setFormatosFor(actual)}
+                onClick={() => abrirHoja(actual)}
                 className="rounded-lg bg-white/95 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-lg transition-colors hover:bg-white"
               >
                 {t("formatos")}
@@ -380,18 +398,54 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
         );
       })()}
 
-      {formatosFor && (
-        <FormatosModal
-          open
-          onOpenChange={(o) => !o && setFormatosFor(null)}
-          servicioNombre={formatosFor.servicioNombre ?? ""}
-          formAcciones={servicios.find((s) => s.name === formatosFor.servicioNombre)?.formActions}
-          pacienteNombre={formatosFor.pacienteNombre ?? ""}
-          record={formatosFor.medicalRecordNumber}
-          sesionId={formatosFor.sessionId ?? undefined}
-          centro={centro}
-        />
+      {/* Visitas aceptadas hoy (en esta pantalla) con hoja llenable — para reabrirla sin ir al
+          patient-desk si la enfermera cerró el aviso antes de guardar o quiere revisarla. */}
+      {aceptadosHoy.filter((n) => fillableReportsFor(n, servicios).length > 0).length > 0 && (
+        <div className="mt-6 space-y-2">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("aceptadasHoy")}</h2>
+          <div className="flex flex-wrap gap-2">
+            {aceptadosHoy
+              .filter((n) => fillableReportsFor(n, servicios).length > 0)
+              .map((n) => (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => abrirHoja(n)}
+                  className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm shadow-xs hover:bg-muted"
+                >
+                  <span className="font-medium">{n.pacienteNombre ?? "—"}</span>
+                  <span className="text-muted-foreground">· {n.servicioNombre ?? "—"}</span>
+                  <span className="font-medium text-primary">{t("formatos")}</span>
+                </button>
+              ))}
+          </div>
+        </div>
       )}
+
+      {/* Más de una hoja llenable para el servicio: lista corta, luego se navega al editor elegido. */}
+      <Dialog open={!!eligiendoReport} onOpenChange={(o) => !o && setEligiendoReport(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("elegirFormato")}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            {eligiendoReport &&
+              fillableReportsFor(eligiendoReport, servicios).map((r) => (
+                <Button
+                  key={r.id}
+                  variant="outline"
+                  className="justify-start"
+                  onClick={() => {
+                    router.push(sheetPath(r.id, eligiendoReport.sessionId!));
+                    setEligiendoReport(null);
+                  }}
+                >
+                  {r.labelKey && tRoot.has(r.labelKey) ? tRoot(r.labelKey) : (r.name ?? r.id)}
+                </Button>
+              ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }

@@ -96,6 +96,9 @@ export type PanelNotificacion = {
   pacienteNombre?: string | null;
   medicalRecordNumber?: string | null;
   servicioNombre?: string | null;
+  // cmr-be #663 (mergeando): el id v2 del servicio, junto al nombre — matchear por id cuando venga,
+  // nombre de respaldo mientras un evento viejo o un BE sin el PR aún lo manden sin él.
+  serviceId?: string | null;
 };
 
 // `bySection` se traduce al inglés en /api/v2 (BE 1-oct); sus CLAVES internas vuelven a ser la `clave` de la

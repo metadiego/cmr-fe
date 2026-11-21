@@ -4762,6 +4762,8 @@
     },
     "cancelarAviso": "Cancelar aviso",
     "formatos": "Formatos",
+    "aceptadasHoy": "Aceptadas hoy",
+    "elegirFormato": "Elegir hoja",
     "tema": "Tema",
     "sinSecciones": "Sin secciones configuradas.",
     "enCola": "{n} en cola",
