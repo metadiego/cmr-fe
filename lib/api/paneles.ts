@@ -108,25 +108,6 @@ export type PanelNotificacion = {
 // sección (vitales, intravenoso) = datos, no se traducen → ya emparejan con `sections[].clave`.
 export type PanelContador = { staffId: string; total: number; bySection: Record<string, number> };
 
-// "Panel de trabajo del día" (cmr-be #666, handoff .personal/handoff-panel-trabajo-del-dia.md): una fila
-// por visita de la sección, `staffId` null = sin tomar (disponible). Mismo arreglo para una sesión
-// (frontdesk) o una cita (Atención) — `kind` dice cuál y por tanto cuál id usar al tomarla.
-export type PanelWorkRow = {
-  sectionKey: string;
-  kind: "session" | "appointment";
-  sessionId?: string | null;
-  appointmentId?: string | null;
-  patientId?: string | null;
-  patientName?: string | null;
-  medicalRecordNumber?: string | null;
-  serviceId?: string | null;
-  serviceName?: string | null;
-  status?: string | null;
-  time?: string | null;
-  staffId?: string | null;
-  pendingNoticeId?: string | null;
-};
-
 // GET /paneles/:clave/definicion — UNA llamada: panel + secciones + personal + estatus vivo.
 export function getPanelDefinicion(clave: string, centroId?: string): Promise<PanelDefinicion> {
   return apiFetch<PanelDefinicion>(`/panels/${clave}/definition`, {}, centroId);
@@ -199,36 +180,6 @@ export function cancelarNotificacion(
 export function getPanelContadores(clave: string, fecha: string, centroId?: string): Promise<PanelContador[]> {
   return apiFetch<unknown>(`/panels/${clave}/counters?date=${fecha}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelContador[]) : (((r as { items?: PanelContador[] })?.items) ?? []),
-  );
-}
-
-// GET /paneles/:clave/trabajo?centerIds=&fecha= — una fila por visita de cada sección, con quién la
-// tiene (null = por tomar). `centerIds` además del tenant (estatuto "permisos por centro").
-function workQuery(centroId?: string, date?: string): string {
-  const sp = new URLSearchParams();
-  if (centroId) sp.set("centerIds", centroId);
-  if (date) sp.set("date", date);
-  const qs = sp.toString();
-  return qs ? `?${qs}` : "";
-}
-export function getPanelTrabajo(clave: string, centroId?: string, date?: string): Promise<PanelWorkRow[]> {
-  return apiFetch<unknown>(`/panels/${clave}/work${workQuery(centroId, date)}`, {}, centroId).then((r) =>
-    Array.isArray(r) ? (r as PanelWorkRow[]) : (((r as { items?: PanelWorkRow[] })?.items) ?? []),
-  );
-}
-
-// POST /paneles/:clave/tomar — la enfermera se adjudica una fila «por tomar» (sin esperar la campana).
-// Responde el aviso aceptado (mismo formato que aceptarNotificacion: reutiliza ese manejador, abre la
-// hoja igual). 409 PANEL_WORK_ALREADY_TAKEN si otra ya la tomó (trae `staffId` en `err.data`).
-export function tomarTrabajoPanel(
-  clave: string,
-  payload: { sectionKey: string; staffId: string; sessionId?: string; appointmentId?: string },
-  centroId?: string,
-): Promise<PanelNotificacion> {
-  return apiFetch<PanelNotificacion>(
-    `/panels/${clave}/claim${workQuery(centroId)}`,
-    { method: "POST", body: JSON.stringify(payload) },
-    centroId,
   );
 }
 

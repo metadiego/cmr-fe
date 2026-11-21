@@ -4758,14 +4758,7 @@
     "enfermeria": "Nursing panel",
     "seccion": {
       "vitales": "Vitals",
-      "intravenoso": "IV",
-      "glp1": "GLP-1"
-    },
-    "work": {
-      "toClaim": "To claim",
-      "claim": "Claim",
-      "whoTakes": "Who takes {name}?",
-      "alreadyTaken": "Someone else already took it"
+      "intravenoso": "IV"
     },
     "cancelarAviso": "Cancel alert",
     "formatos": "Formats",
