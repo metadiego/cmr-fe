@@ -6,8 +6,8 @@ import type { SheetAnswers } from "../api/format-answers.ts";
 import {
   answeredCount,
   answerKey,
+  fillableSlugsFrom,
   initialSheetState,
-  isFillableSheet,
   isoToLocalPR,
   isReadOnlyField,
   localPRToIso,
@@ -64,10 +64,13 @@ const unsaved: SheetAnswers = {
 
 const NOW = new Date("2026-11-20T18:30:00Z"); // 14:30 in Puerto Rico
 
-test("only the declared formats are fillable on screen", () => {
-  assert.equal(isFillableSheet("glp1_adherencia"), true);
-  assert.equal(isFillableSheet("bpc157_enfermeria"), false);
-  assert.equal(isFillableSheet(undefined), false);
+test("fillable on screen is whatever GET /formats itself says, generic per format (cmr-be #665)", () => {
+  const slugs = fillableSlugsFrom([
+    { slug: "glp1_adherencia", fillable: true },
+    { slug: "bpc157_enfermeria", fillable: false },
+    { slug: "hilt", fillable: null },
+  ]);
+  assert.deepEqual([...slugs], ["glp1_adherencia"]);
   assert.equal(sheetPath("glp1_adherencia", "a b"), "/forms/glp1_adherencia/a%20b");
 });
 

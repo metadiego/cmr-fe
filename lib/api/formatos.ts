@@ -41,6 +41,10 @@ export type Formato = {
   letterhead?: boolean | { center?: string } | null;
   sortOrder?: number;
   active?: boolean;
+  // cmr-be #665: true when the format's own definition declares an answers.* origin (where saved
+  // answers print) — a screen-fillable sheet (GLP-1's checklist) vs. a printed-only format (HILT/MLS,
+  // a plain checklist like bpc157_enfermeria). Generic per format, no FE-side slug list.
+  fillable?: boolean | null;
 };
 
 // Par etiqueta/valor del encabezado (layout "campos"). Viaja dentro de `campos` (bolsa OPACA) → claves en español.

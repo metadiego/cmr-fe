@@ -21,7 +21,8 @@ import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
 import { MlsSheet } from "@/components/frontdesk/mls-sheet";
 import { HiltSheet } from "@/components/frontdesk/hilt-sheet";
 import { SheetSendBar } from "@/components/format-sheet/sheet-send-bar";
-import { isFillableSheet } from "@/lib/format-sheet/sheet";
+import { getFormatos } from "@/lib/api/formatos";
+import { fillableSlugsFrom } from "@/lib/format-sheet/sheet";
 
 // Modal ESTÁNDAR de acciones/formatos por servicio (data-driven desde servicio.formAcciones).
 // Lista los `reports` (HILT/MLS…) y `additional_actions` (Historial). Al elegir un report:
@@ -101,6 +102,14 @@ export function FormatosModal({
     [open, sesionId, centro],
   );
   const sheet = sheetRes.state.kind === "ok" ? sheetRes.state.data : null;
+
+  // Which reports can be filled on screen ("Llenar en pantalla" / QR, no printable-only one):
+  // generic per format, from GET /formats' own `fillable` (cmr-be #665), never a FE-side slug list.
+  const formatosRes = useResource(() => (open ? getFormatos(undefined, centro) : Promise.resolve([])), [open, centro]);
+  const fillableSlugs = React.useMemo(
+    () => fillableSlugsFrom(formatosRes.state.kind === "ok" ? formatosRes.state.data : []),
+    [formatosRes.state],
+  );
 
   function elegir(r: ReportAccion) {
     setSesionOverride(null); // nace automática (hoja de la visita)
@@ -265,7 +274,7 @@ export function FormatosModal({
         {report && !esFormato && (
           <>
             {/* A sheet that is filled on screen (GLP-1): open it here, its QR, or «Enviar al iPad». */}
-            {sesionId && isFillableSheet(report.id) && <SheetSendBar slug={report.id} sessionId={sesionId} />}
+            {sesionId && fillableSlugs.has(report.id) && <SheetSendBar slug={report.id} sessionId={sesionId} />}
             <GenericFormatoRender clave={report.id} sesionId={sesionId} centro={centro} onVolver={() => setReport(null)} />
           </>
         )}

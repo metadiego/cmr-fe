@@ -6985,6 +6985,7 @@
       "tooLongNote": "A note is over {max} characters.",
       "tooLongNotes": "The additional notes are over {max} characters.",
       "loadError": "Could not load the sheet",
+      "notFillable": "This format is not filled on screen.",
       "printTitle": "Sheet to print",
       "printSavedOnly": "What is saved gets printed: save your changes first.",
       "questions": "Questions",

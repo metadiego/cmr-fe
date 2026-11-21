@@ -6985,6 +6985,7 @@
       "tooLongNote": "Una observación pasa de {max} caracteres.",
       "tooLongNotes": "Las observaciones adicionales pasan de {max} caracteres.",
       "loadError": "No se pudo cargar la hoja",
+      "notFillable": "Este formato no se llena en pantalla.",
       "printTitle": "Hoja para imprimir",
       "printSavedOnly": "Se imprime lo guardado: guarda antes los cambios.",
       "questions": "Preguntas",

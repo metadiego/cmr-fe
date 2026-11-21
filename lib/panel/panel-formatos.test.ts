@@ -12,28 +12,34 @@ const servicios = [
   { id: "s2", name: "Láser", formActions: { reports: [{ id: "hilt", name: "HILT" }, { id: "mls", name: "MLS" }] } },
   { id: "s3", name: "Sin formatos", formActions: null },
 ];
+const fillable = new Set(["glp1_adherencia"]);
 
 test("matches by serviceId when present, keeping only screen-fillable sheets (not every report)", () => {
-  const reports = fillableReportsFor({ serviceId: "s1", serviceName: "otro nombre" }, servicios);
+  const reports = fillableReportsFor({ serviceId: "s1", serviceName: "otro nombre" }, servicios, fillable);
   assert.deepEqual(reports.map((r) => r.id), ["glp1_adherencia"]);
 });
 
 test("falls back to the display name while serviceId is missing (BE #663 not yet live, or an old event)", () => {
-  const reports = fillableReportsFor({ serviceId: null, serviceName: "GLP-1" }, servicios);
+  const reports = fillableReportsFor({ serviceId: null, serviceName: "GLP-1" }, servicios, fillable);
   assert.deepEqual(reports.map((r) => r.id), ["glp1_adherencia"]);
 });
 
 test("a service with only printable reports (HILT/MLS) offers nothing fillable on screen", () => {
-  assert.deepEqual(fillableReportsFor({ serviceId: "s2", serviceName: "Láser" }, servicios), []);
+  assert.deepEqual(fillableReportsFor({ serviceId: "s2", serviceName: "Láser" }, servicios, fillable), []);
 });
 
 test("no matching service, or one with no formAcciones at all, offers nothing", () => {
-  assert.deepEqual(fillableReportsFor({ serviceId: "s3", serviceName: "Sin formatos" }, servicios), []);
-  assert.deepEqual(fillableReportsFor({ serviceId: "nope", serviceName: "nope" }, servicios), []);
+  assert.deepEqual(fillableReportsFor({ serviceId: "s3", serviceName: "Sin formatos" }, servicios, fillable), []);
+  assert.deepEqual(fillableReportsFor({ serviceId: "nope", serviceName: "nope" }, servicios, fillable), []);
 });
 
 test("serviceId wins over the display name when both would resolve to a different service", () => {
   // The name "Láser" would match s2 (HILT/MLS only), but the id correctly points at s1 (GLP-1).
-  const reports = fillableReportsFor({ serviceId: "s1", serviceName: "Láser" }, servicios);
+  const reports = fillableReportsFor({ serviceId: "s1", serviceName: "Láser" }, servicios, fillable);
   assert.deepEqual(reports.map((r) => r.id), ["glp1_adherencia"]);
+});
+
+test("nothing is fillable until the caller's own fillable-slugs set says so (no FE-side list)", () => {
+  const reports = fillableReportsFor({ serviceId: "s1", serviceName: "GLP-1" }, servicios, new Set());
+  assert.deepEqual(reports, []);
 });

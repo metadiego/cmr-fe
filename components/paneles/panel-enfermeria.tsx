@@ -19,8 +19,9 @@ import {
   type PanelPersonal,
 } from "@/lib/api/paneles";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
+import { getFormatos } from "@/lib/api/formatos";
 import { fillableReportsFor } from "@/lib/panel/panel-formatos";
-import { sheetPath } from "@/lib/format-sheet/sheet";
+import { fillableSlugsFrom, sheetPath } from "@/lib/format-sheet/sheet";
 import { isTodayPR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -91,6 +92,13 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   // todos lados (BE #663 mergeando): fillableReportsFor cruza por id y cae al nombre de respaldo.
   const serviciosRes = useResource<Servicio[]>(() => getServicios(centro), [centro]);
   const servicios = React.useMemo(() => (serviciosRes.state.kind === "ok" ? serviciosRes.state.data : []), [serviciosRes.state]);
+  // Qué formatos son llenables en pantalla: lo dice GET /formats (cmr-be #665), nunca una lista fija
+  // del FE — hoy solo glp1_adherencia, mañana cualquiera que el BE marque.
+  const formatosRes = useResource(() => getFormatos(undefined, centro), [centro]);
+  const fillableSlugs = React.useMemo(
+    () => fillableSlugsFrom(formatosRes.state.kind === "ok" ? formatosRes.state.data : []),
+    [formatosRes.state],
+  );
   // Avisos aceptados HOY (cmr-be #664, sin filtro de fecha propio aún → se filtra aquí por
   // `acceptedAt`): así «Formatos» sigue alcanzable tras cerrar el aviso a pantalla completa, y
   // sobrevive a un recargo de esta pantalla, no solo mientras dura la pestaña.
@@ -105,11 +113,11 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const abrirHoja = React.useCallback(
     (n: PanelNotificacion) => {
       if (!n.sessionId) return;
-      const reports = fillableReportsFor(n, servicios);
+      const reports = fillableReportsFor(n, servicios, fillableSlugs);
       if (reports.length === 1) router.push(sheetPath(reports[0].id, n.sessionId));
       else if (reports.length > 1) setEligiendoReport(n);
     },
-    [servicios, router],
+    [servicios, fillableSlugs, router],
   );
   const alarma = useAlarma();
   const { start: sonar, stop: callar } = alarma;
@@ -384,7 +392,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
           </div>
           {!puedeAceptar && <p className="mt-4 text-sm text-white/80">{t("soloEnfermeria")}</p>}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            {fillableReportsFor(actual, servicios).length > 0 && (
+            {fillableReportsFor(actual, servicios, fillableSlugs).length > 0 && (
               <button
                 type="button"
                 onClick={() => abrirHoja(actual)}
@@ -409,12 +417,12 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
       {/* Visitas aceptadas hoy (en esta pantalla) con hoja llenable — para reabrirla sin ir al
           patient-desk si la enfermera cerró el aviso antes de guardar o quiere revisarla. */}
-      {aceptadosHoy.filter((n) => fillableReportsFor(n, servicios).length > 0).length > 0 && (
+      {aceptadosHoy.filter((n) => fillableReportsFor(n, servicios, fillableSlugs).length > 0).length > 0 && (
         <div className="mt-6 space-y-2">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("aceptadasHoy")}</h2>
           <div className="flex flex-wrap gap-2">
             {aceptadosHoy
-              .filter((n) => fillableReportsFor(n, servicios).length > 0)
+              .filter((n) => fillableReportsFor(n, servicios, fillableSlugs).length > 0)
               .map((n) => (
                 <button
                   key={n.id}
@@ -439,7 +447,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
           </DialogHeader>
           <div className="flex flex-col gap-2">
             {eligiendoReport &&
-              fillableReportsFor(eligiendoReport, servicios).map((r) => (
+              fillableReportsFor(eligiendoReport, servicios, fillableSlugs).map((r) => (
                 <Button
                   key={r.id}
                   variant="outline"

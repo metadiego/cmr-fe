@@ -2,14 +2,16 @@
 // (header fields, checklist questions) comes from the format's assembly; the values from
 // GET …/answers (saved wins over suggested). Contract: docs/specs/glp1-hoja-enfermeria-ipad-contrato-be.md.
 
-import type { FormatoArmado, FormatoCampo } from "../api/formatos.ts";
+import type { Formato, FormatoArmado, FormatoCampo } from "../api/formatos.ts";
 import type { AnswerValue, SheetAnswers, SheetAnswersInput } from "../api/format-answers.ts";
 
-/** Formats that can be filled on screen. Adding one here is all the FE needs (the screen is generic). */
-export const FILLABLE_SHEETS: readonly string[] = ["glp1_adherencia"];
-
-export function isFillableSheet(slug: string | null | undefined): boolean {
-  return !!slug && FILLABLE_SHEETS.includes(slug);
+/**
+ * Which format slugs are fillable on screen — generic, from GET /formats' own `fillable` flag
+ * (cmr-be #665): true when the format's definition declares an answers.* origin (where saved
+ * answers print). No FE-side list: callers fetch `getFormatos` once and build this set.
+ */
+export function fillableSlugsFrom(formatos: readonly Pick<Formato, "slug" | "fillable">[]): Set<string> {
+  return new Set(formatos.filter((f) => f.fillable).map((f) => f.slug));
 }
 
 export function sheetPath(slug: string, sessionId: string): string {

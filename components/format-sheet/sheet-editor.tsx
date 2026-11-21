@@ -20,11 +20,12 @@ import { useSubmit } from "@/components/kit/use-submit";
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
 import { SheetQuestions } from "@/components/format-sheet/sheet-questions";
 import { useResource } from "@/hooks/use-resource";
-import { getFormatoArmado, type FormatoArmado, type FormatoCampo } from "@/lib/api/formatos";
+import { getFormatoArmado, getFormatos, type FormatoArmado, type FormatoCampo } from "@/lib/api/formatos";
 import { getSheetAnswers, saveSheetAnswers, type SheetAnswers } from "@/lib/api/format-answers";
 import { listPersonalAll, type PersonalEnAlcance } from "@/lib/api/personal";
 import {
   answeredCount,
+  fillableSlugsFrom,
   initialSheetState,
   isReadOnlyField,
   LIMITS,
@@ -47,11 +48,16 @@ export function SheetEditor({ slug, sessionId }: { slug: string; sessionId: stri
   const t = useTranslations("formSheet.sheet");
   const res = useResource<Loaded>(async () => {
     const answers = await getSheetAnswers(slug, sessionId);
-    const [assembly, staff] = await Promise.all([
+    const [assembly, staff, formatos] = await Promise.all([
       getFormatoArmado(slug, sessionId, answers.clinicId),
       // Who can sign: active staff with an account in the visit's center (the BE validates nurseId).
       listPersonalAll({}, answers.clinicId).catch(() => [] as PersonalEnAlcance[]),
+      // Generic per format (cmr-be #665, no FE-side slug list): this screen only renders what GET
+      // /formats itself marks `fillable`. A server component can't call the API (no browser
+      // session), so this is the one place that check can actually run.
+      getFormatos(undefined, answers.clinicId),
     ]);
+    if (!fillableSlugsFrom(formatos).has(slug)) throw new Error(t("notFillable"));
     return { assembly, answers, staff: staff.filter((p) => p.active && p.profileId) };
   }, [slug, sessionId]);
 
