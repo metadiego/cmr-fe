@@ -15,12 +15,13 @@ export function fillableSlugsFrom(formatos: readonly Pick<Formato, "slug" | "fil
 }
 
 /**
- * Whether an autosave attempt should fire: something actually changed since the last save, and no
- * save — manual or a previous autosave — is already in flight (never two concurrent writes racing,
- * never a "saved" pretense for a no-op).
+ * Whether an autosave attempt should fire: something actually changed since the last save, no save
+ * is already in flight (never two concurrent writes racing), and nothing client-detectable is
+ * blocking it (a too-long field, a value already known to be out of range) — there is no separate
+ * Guardar button any more, so a blocked attempt would just retry the same rejected payload forever.
  */
-export function shouldAutosave(opts: { dirty: boolean; submitting: boolean; autosaving: boolean }): boolean {
-  return opts.dirty && !opts.submitting && !opts.autosaving;
+export function shouldAutosave(opts: { dirty: boolean; saving: boolean; blocked: boolean }): boolean {
+  return opts.dirty && !opts.saving && !opts.blocked;
 }
 
 export function sheetPath(slug: string, sessionId: string): string {

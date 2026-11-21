@@ -13,10 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field } from "@/components/kit/field";
-import { FormFooter } from "@/components/kit/form-footer";
 import { Panel, ErrorState, LoadingPanel } from "@/components/kit/panel";
 import { StatusBadge } from "@/components/kit/status-badge";
-import { useSubmit } from "@/components/kit/use-submit";
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
 import { SheetQuestions } from "@/components/format-sheet/sheet-questions";
 import { useResource } from "@/hooks/use-resource";
@@ -118,7 +116,11 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
   const [savedJson, setSavedJson] = React.useState(() => (data.answers.saved ? payloadJson : ""));
   const dirty = payloadJson !== savedJson;
   const [printing, setPrinting] = React.useState(false);
-  const [autosaving, setAutosaving] = React.useState(false);
+  // No separate Guardar any more (owner, 21-nov-2026): every change saves itself. "offline" covers any
+  // failed attempt (network, or an unexpected BE rejection) — it retries on its own; it is never shown
+  // for a problem this screen already knows about client-side (`reason` below), which blocks the
+  // attempt instead of wasting a call that would just fail the same way again.
+  const [status, setStatus] = React.useState<"idle" | "saving" | "saved" | "offline">(data.answers.saved ? "saved" : "idle");
 
   const patient = data.answers.suggested?.patient;
   const date = data.answers.suggested?.date;
@@ -150,50 +152,59 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
           ? t("tooLongNote", { max: LIMITS.note })
           : t("tooLongNotes", { max: LIMITS.additionalNotes });
 
-  const { submitting, submit } = useSubmit(() => saveSheetAnswers(slug, sessionId, payload, center), {
-    successMessage: t("saved"),
-    onSuccess: (saved) => {
-      setAnswers(saved);
-      setSavedJson(JSON.stringify(payload));
-    },
-    onError: (err) => {
-      const r = writeBackErrorOf(err);
-      setServerRange(r);
-      return false; // the toast still says what failed; the field shows where
-    },
-  });
-
   const setField = (key: string, value: string) => {
     if (serverRange?.key === key) setServerRange(null);
     setState((s) => ({ ...s, fields: { ...s.fields, [key]: value } }));
   };
 
-  // Autosave (debounced ~1s): never silently "succeeds" when nothing changed, never races the
-  // explicit Guardar, and never pops its own toast — the small indicator below is its only feedback.
-  // A ref carries the latest payload into the timeout so the effect's own deps stay cheap
-  // (payloadJson, a string) instead of resetting on every unrelated re-render.
+  // Autosave: debounced ~1s after a change, or retried every 5s while "offline". A ref carries the
+  // latest payload into the timeout so the scheduling effect's own deps stay cheap (payloadJson, a
+  // string) instead of resetting on every unrelated re-render; `timerRef` lets Imprimir flush a
+  // pending save instead of leaving a duplicate one to fire later on its own.
   const pendingSave = React.useRef({ slug, sessionId, payload, center });
   React.useEffect(() => {
     pendingSave.current = { slug, sessionId, payload, center };
   });
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const attemptSave = React.useCallback(async () => {
+    const { slug: s, sessionId: sid, payload: p, center: c } = pendingSave.current;
+    setStatus("saving");
+    try {
+      const saved = await saveSheetAnswers(s, sid, p, c);
+      setAnswers(saved);
+      setSavedJson(JSON.stringify(p));
+      setServerRange(null);
+      setStatus("saved");
+    } catch (err) {
+      setServerRange(writeBackErrorOf(err));
+      setStatus("offline");
+    }
+  }, []);
+
   React.useEffect(() => {
-    if (!shouldAutosave({ dirty, submitting, autosaving })) return;
-    const id = setTimeout(() => {
-      const { slug: s, sessionId: sid, payload: p, center: c } = pendingSave.current;
-      setAutosaving(true);
-      saveSheetAnswers(s, sid, p, c)
-        .then((saved) => {
-          setAnswers(saved);
-          setSavedJson(JSON.stringify(p));
-        })
-        .catch(() => {
-          // Quiet by design (e.g. a write-back value momentarily out of range while still typing);
-          // the explicit Guardar button is what surfaces an error toast.
-        })
-        .finally(() => setAutosaving(false));
-    }, 1000);
-    return () => clearTimeout(id);
-  }, [payloadJson, dirty, submitting, autosaving]);
+    if (!shouldAutosave({ dirty, saving: status === "saving", blocked: !!reason })) return;
+    timerRef.current = setTimeout(
+      () => {
+        timerRef.current = null;
+        void attemptSave();
+      },
+      status === "offline" ? 5000 : 1000,
+    );
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = null;
+    };
+  }, [payloadJson, dirty, reason, status, attemptSave]);
+
+  async function flushAndPrint() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (dirty && !reason) await attemptSave();
+    setPrinting(true);
+  }
 
   return (
     <PageContainer gap="lg" className="w-full px-4 py-4 md:px-6">
@@ -211,13 +222,17 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge kind="sheet" value={answers.saved ? "saved" : "pending"} />
           <span className="text-xs text-muted-foreground tabular-nums">
-            {autosaving
-              ? t("saving")
-              : answers.saved && answers.updatedAt
-                ? t("savedAt", { when: format.dateTime(new Date(answers.updatedAt), "time") })
-                : t("notSaved")}
+            {reason
+              ? reason
+              : status === "saving"
+                ? t("saving")
+                : status === "offline"
+                  ? t("offline")
+                  : answers.saved && answers.updatedAt
+                    ? t("savedAt", { when: format.dateTime(new Date(answers.updatedAt), "time") })
+                    : t("notSaved")}
           </span>
-          <Button variant="outline" onClick={() => setPrinting(true)}>
+          <Button variant="outline" onClick={() => void flushAndPrint()}>
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {t("print")}
           </Button>
@@ -293,16 +308,6 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
           </div>
         </div>
       </Panel>
-
-      <div className="sticky bottom-0 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
-        <FormFooter
-          primary={{ label: t("save"), onClick: () => submit() }}
-          reason={reason}
-          blocked={!!reason}
-          submitting={submitting}
-          submittingLabel={t("saving")}
-        />
-      </div>
 
       <Dialog open={printing} onOpenChange={setPrinting}>
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-4xl">

@@ -75,11 +75,11 @@ test("fillable on screen is whatever GET /formats itself says, generic per forma
   assert.equal(sheetPath("glp1_adherencia", "a b"), "/forms/glp1_adherencia/a%20b");
 });
 
-test("autosave only fires when something changed and nothing else is already saving", () => {
-  assert.equal(shouldAutosave({ dirty: true, submitting: false, autosaving: false }), true);
-  assert.equal(shouldAutosave({ dirty: false, submitting: false, autosaving: false }), false, "nothing changed");
-  assert.equal(shouldAutosave({ dirty: true, submitting: true, autosaving: false }), false, "a manual Guardar is in flight");
-  assert.equal(shouldAutosave({ dirty: true, submitting: false, autosaving: true }), false, "a previous autosave is still in flight");
+test("autosave only fires when something changed, nothing is already saving, and nothing blocks it", () => {
+  assert.equal(shouldAutosave({ dirty: true, saving: false, blocked: false }), true);
+  assert.equal(shouldAutosave({ dirty: false, saving: false, blocked: false }), false, "nothing changed");
+  assert.equal(shouldAutosave({ dirty: true, saving: true, blocked: false }), false, "a save is already in flight");
+  assert.equal(shouldAutosave({ dirty: true, saving: false, blocked: true }), false, "a known client-side problem (too long, out of range) would just be rejected again");
 });
 
 test("patient identity is read-only; what the nurse measures is editable", () => {
