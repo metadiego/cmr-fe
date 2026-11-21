@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildReportHtml, escapeHtml, reportFileName } from "./print-document.ts";
+import { buildReportHtml, escapeHtml, reportFileName, REPORT_PRINT_CSS } from "./print-document.ts";
 
 test("escapeHtml: the five specials", () => {
   assert.equal(escapeHtml(`<a href="x">Tom & 'Jerry'</a>`), "&lt;a href=&quot;x&quot;&gt;Tom &amp; &#39;Jerry&#39;&lt;/a&gt;");
@@ -25,4 +25,9 @@ test("reportFileName: accents, symbols and spaces out", () => {
 test("buildReportHtml: the logo goes in the letterhead when given", () => {
   assert.match(buildReportHtml({ title: "t", bodyHtml: "", logoUrl: "https://x/img/logo_cmr.png" }), /<header class="report-head"><img src="https:\/\/x\/img\/logo_cmr.png" alt="">/);
   assert.doesNotMatch(buildReportHtml({ title: "t", bodyHtml: "" }), /<img/);
+});
+
+test("a print-only section is shown in print and starts a new page", () => {
+  assert.match(REPORT_PRINT_CSS, /\.print-only\{display:block!important\}/);
+  assert.match(REPORT_PRINT_CSS, /\.print-break\{break-before:page;page-break-before:always\}/);
 });

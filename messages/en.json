@@ -6572,7 +6572,9 @@
       "units": "{n} units",
       "mismatch": "The math does not close: it gives {computed} and the system says {closing}. Tell support."
     },
-    "tabOwner": "Management summary"
+    "tabOwner": "Management summary",
+    "printOwner": "Include management summary",
+    "printOwnerHint": "Printed on a separate page, after the daily kardex."
   },
   "inventoryReceipts": {
     "tabReceive": "Receive",

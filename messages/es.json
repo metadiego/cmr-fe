@@ -6572,7 +6572,9 @@
       "units": "{n} unidades",
       "mismatch": "La cuenta no cierra: da {computed} y el sistema dice {closing}. Avísale a soporte."
     },
-    "tabOwner": "Resumen gerencial"
+    "tabOwner": "Resumen gerencial",
+    "printOwner": "Incluir resumen gerencial",
+    "printOwnerHint": "Se imprime en una página aparte, después del kárdex por día."
   },
   "inventoryReceipts": {
     "tabReceive": "Recibir",
