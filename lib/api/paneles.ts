@@ -120,11 +120,12 @@ export function getPanelNotificaciones(clave: string, centroId?: string): Promis
   );
 }
 
-// GET /paneles/:clave/notificaciones?status=aceptada — para reabrir «Formatos» tras cerrar el aviso a
-// pantalla completa. Sin filtro de fecha propio todavía (verificado en vivo 21-nov-2026: el BE rechaza
-// un parámetro de fecha aquí con VALIDATION_ERROR) — el FE filtra a "hoy" por `acceptedAt` (isTodayPR).
-export function getPanelNotificacionesAceptadas(clave: string, centroId?: string): Promise<PanelNotificacion[]> {
-  return apiFetch<unknown>(`/panels/${clave}/notifications?status=aceptada`, {}, centroId).then((r) =>
+// GET /paneles/:clave/notificaciones?status=aceptada&fecha= — para reabrir «Formatos» tras cerrar
+// el aviso a pantalla completa, o tras recargar la pantalla. `date` en YYYY-MM-DD, zona del centro
+// (cmr-be #664, confirmado en vivo 21-nov-2026 que ya filtra server-side — antes de eso devolvía
+// VALIDATION_ERROR con cualquier fecha).
+export function getPanelNotificacionesAceptadas(clave: string, date: string, centroId?: string): Promise<PanelNotificacion[]> {
+  return apiFetch<unknown>(`/panels/${clave}/notifications?status=aceptada&date=${encodeURIComponent(date)}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelNotificacion[]) : (((r as { items?: PanelNotificacion[] })?.items) ?? []),
   );
 }

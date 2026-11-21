@@ -6979,7 +6979,7 @@
       "saved": "Hoja guardada",
       "print": "Imprimir",
       "back": "Atrás",
-      "savedAt": "Guardada {when}",
+      "savedAt": "Guardado {when}",
       "notSaved": "Aún sin guardar",
       "tooLongField": "«{label}» pasa de {max} caracteres.",
       "tooLongNote": "Una observación pasa de {max} caracteres.",

@@ -22,7 +22,7 @@ import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getFormatos } from "@/lib/api/formatos";
 import { fillableReportsFor } from "@/lib/panel/panel-formatos";
 import { fillableSlugsFrom, sheetPath } from "@/lib/format-sheet/sheet";
-import { isTodayPR } from "@/lib/format/fecha";
+import { todayPR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
@@ -99,13 +99,13 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     () => fillableSlugsFrom(formatosRes.state.kind === "ok" ? formatosRes.state.data : []),
     [formatosRes.state],
   );
-  // Avisos aceptados HOY (cmr-be #664, sin filtro de fecha propio aún → se filtra aquí por
-  // `acceptedAt`): así «Formatos» sigue alcanzable tras cerrar el aviso a pantalla completa, y
-  // sobrevive a un recargo de esta pantalla, no solo mientras dura la pestaña.
+  // Avisos aceptados HOY (cmr-be #664, filtro de fecha propio del BE, confirmado en vivo): así
+  // «Formatos» sigue alcanzable tras cerrar el aviso a pantalla completa, y sobrevive a un recargo
+  // de esta pantalla, no solo mientras dura la pestaña.
   const [aceptadosHoy, setAceptadosHoy] = React.useState<PanelNotificacion[]>([]);
   const refetchAceptados = React.useCallback(() => {
-    getPanelNotificacionesAceptadas(CLAVE, centro)
-      .then((list) => setAceptadosHoy(list.filter((n) => isTodayPR(n.acceptedAt))))
+    getPanelNotificacionesAceptadas(CLAVE, todayPR(), centro)
+      .then(setAceptadosHoy)
       .catch(() => {});
   }, [centro]);
   React.useEffect(() => { refetchAceptados(); }, [refetchAceptados]);

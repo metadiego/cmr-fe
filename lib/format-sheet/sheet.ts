@@ -14,6 +14,15 @@ export function fillableSlugsFrom(formatos: readonly Pick<Formato, "slug" | "fil
   return new Set(formatos.filter((f) => f.fillable).map((f) => f.slug));
 }
 
+/**
+ * Whether an autosave attempt should fire: something actually changed since the last save, and no
+ * save — manual or a previous autosave — is already in flight (never two concurrent writes racing,
+ * never a "saved" pretense for a no-op).
+ */
+export function shouldAutosave(opts: { dirty: boolean; submitting: boolean; autosaving: boolean }): boolean {
+  return opts.dirty && !opts.submitting && !opts.autosaving;
+}
+
 export function sheetPath(slug: string, sessionId: string): string {
   return `/forms/${encodeURIComponent(slug)}/${encodeURIComponent(sessionId)}`;
 }

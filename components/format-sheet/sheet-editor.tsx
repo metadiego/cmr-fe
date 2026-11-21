@@ -32,6 +32,7 @@ import {
   sheetPayload,
   sheetProblems,
   sheetQuestions,
+  shouldAutosave,
   writeBackErrorOf,
   writeBackProblems,
   type RangeProblem,
@@ -113,9 +114,11 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
   const [answers, setAnswers] = React.useState<SheetAnswers>(data.answers);
   const [state, setState] = React.useState<SheetState>(() => initialSheetState(data.answers, firstSection));
   const payload = sheetPayload(state, editableKeys, questions);
-  const [savedJson, setSavedJson] = React.useState(() => (data.answers.saved ? JSON.stringify(payload) : ""));
-  const dirty = JSON.stringify(payload) !== savedJson;
+  const payloadJson = JSON.stringify(payload);
+  const [savedJson, setSavedJson] = React.useState(() => (data.answers.saved ? payloadJson : ""));
+  const dirty = payloadJson !== savedJson;
   const [printing, setPrinting] = React.useState(false);
+  const [autosaving, setAutosaving] = React.useState(false);
 
   const patient = data.answers.suggested?.patient;
   const date = data.answers.suggested?.date;
@@ -165,6 +168,33 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
     setState((s) => ({ ...s, fields: { ...s.fields, [key]: value } }));
   };
 
+  // Autosave (debounced ~1s): never silently "succeeds" when nothing changed, never races the
+  // explicit Guardar, and never pops its own toast — the small indicator below is its only feedback.
+  // A ref carries the latest payload into the timeout so the effect's own deps stay cheap
+  // (payloadJson, a string) instead of resetting on every unrelated re-render.
+  const pendingSave = React.useRef({ slug, sessionId, payload, center });
+  React.useEffect(() => {
+    pendingSave.current = { slug, sessionId, payload, center };
+  });
+  React.useEffect(() => {
+    if (!shouldAutosave({ dirty, submitting, autosaving })) return;
+    const id = setTimeout(() => {
+      const { slug: s, sessionId: sid, payload: p, center: c } = pendingSave.current;
+      setAutosaving(true);
+      saveSheetAnswers(s, sid, p, c)
+        .then((saved) => {
+          setAnswers(saved);
+          setSavedJson(JSON.stringify(p));
+        })
+        .catch(() => {
+          // Quiet by design (e.g. a write-back value momentarily out of range while still typing);
+          // the explicit Guardar button is what surfaces an error toast.
+        })
+        .finally(() => setAutosaving(false));
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [payloadJson, dirty, submitting, autosaving]);
+
   return (
     <PageContainer gap="lg" className="w-full px-4 py-4 md:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -181,9 +211,11 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge kind="sheet" value={answers.saved ? "saved" : "pending"} />
           <span className="text-xs text-muted-foreground tabular-nums">
-            {answers.saved && answers.updatedAt
-              ? t("savedAt", { when: format.dateTime(new Date(answers.updatedAt), "dateAndTime") })
-              : t("notSaved")}
+            {autosaving
+              ? t("saving")
+              : answers.saved && answers.updatedAt
+                ? t("savedAt", { when: format.dateTime(new Date(answers.updatedAt), "time") })
+                : t("notSaved")}
           </span>
           <Button variant="outline" onClick={() => setPrinting(true)}>
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />

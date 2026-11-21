@@ -13,6 +13,7 @@ import {
   localPRToIso,
   nowLocalPR,
   readNumber,
+  shouldAutosave,
   writeBackErrorOf,
   writeBackProblems,
   sheetPath,
@@ -72,6 +73,13 @@ test("fillable on screen is whatever GET /formats itself says, generic per forma
   ]);
   assert.deepEqual([...slugs], ["glp1_adherencia"]);
   assert.equal(sheetPath("glp1_adherencia", "a b"), "/forms/glp1_adherencia/a%20b");
+});
+
+test("autosave only fires when something changed and nothing else is already saving", () => {
+  assert.equal(shouldAutosave({ dirty: true, submitting: false, autosaving: false }), true);
+  assert.equal(shouldAutosave({ dirty: false, submitting: false, autosaving: false }), false, "nothing changed");
+  assert.equal(shouldAutosave({ dirty: true, submitting: true, autosaving: false }), false, "a manual Guardar is in flight");
+  assert.equal(shouldAutosave({ dirty: true, submitting: false, autosaving: true }), false, "a previous autosave is still in flight");
 });
 
 test("patient identity is read-only; what the nurse measures is editable", () => {
