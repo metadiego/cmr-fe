@@ -4762,7 +4762,7 @@
     },
     "cancelarAviso": "Cancel alert",
     "formatos": "Formats",
-    "aceptadasHoy": "Accepted today",
+    "sinPacientesHoy": "No patients today",
     "elegirFormato": "Choose sheet",
     "tema": "Theme",
     "sinSecciones": "No sections configured.",

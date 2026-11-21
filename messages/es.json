@@ -4762,7 +4762,7 @@
     },
     "cancelarAviso": "Cancelar aviso",
     "formatos": "Formatos",
-    "aceptadasHoy": "Aceptadas hoy",
+    "sinPacientesHoy": "Sin pacientes hoy",
     "elegirFormato": "Elegir hoja",
     "tema": "Tema",
     "sinSecciones": "Sin secciones configuradas.",
