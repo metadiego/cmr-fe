@@ -196,6 +196,8 @@ export interface CashCountModeWarning {
   code: string;
   labelKey: string;
   division?: CountDivisionKey;
+  /** Amounts for the message (e.g. counted / cashiersCounted / difference); only some warnings carry it. */
+  params?: Record<string, number | string | null>;
 }
 export interface CashCountModeStatus {
   mode: CashCountMode;

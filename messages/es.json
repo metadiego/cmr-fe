@@ -4510,7 +4510,8 @@
       "dayNotCounted": "Falta el conteo único del día",
       "flexible": "Flexible (lo de hoy)",
       "split": "Dos conteos (Consulta y Servicios & Productos)",
-      "single": "Un solo conteo"
+      "single": "Un solo conteo",
+      "consolidatedOverridesCashiers": "Caja {division}: se usó un conteo consolidado de {counted} en lugar de lo que contaron los cajeros ({cashiersCounted}). Diferencia {difference}. Revise cuál es el correcto; si el bueno es el de los cajeros, vuelva el consolidado a la suma."
     },
     "cuadreGeneral": {
       "title": "Cuadre general",
