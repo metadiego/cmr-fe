@@ -37,6 +37,7 @@ import { useCan } from "@/hooks/use-can";
 import { useCuadreTotalAutosave } from "@/hooks/use-cuadre-total-autosave";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
+import { DivisionCashiers } from "@/components/caja/division-cashiers";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
@@ -371,7 +372,7 @@ function Editor({
             }
           >
             {red && <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />}
-            <span className="tabular-nums">{tRoot(w.labelKey, warningValues(w, division))}</span>
+            <span className="tabular-nums">{tRoot(w.labelKey, warningValues(w, division, { countedBy: tCaja("descuadre.unregistered") }))}</span>
           </div>
         );
       })}
@@ -431,6 +432,13 @@ function Editor({
               saveState={contarHabilitado ? autosave.state : "idle"}
               onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
             />
+          )}
+
+          {reporte.divisionCounts && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <DivisionCashiers division={tCaja("division.consulta")} count={reporte.divisionCounts.consultation} />
+              <DivisionCashiers division={tCaja("division.general")} count={reporte.divisionCounts.general} />
+            </div>
           )}
 
           <DesgloseCajeros

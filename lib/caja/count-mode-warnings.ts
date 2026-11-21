@@ -26,10 +26,16 @@ export function sortWarnings<T extends { code: string }>(warnings: readonly T[])
 
 /**
  * Translation values of a warning: the division's label plus every `params` amount as money. Generic on
- * purpose: a future warning with amounts works without touching the screen. Missing params → nothing added.
+ * purpose: a future warning with amounts works without touching the screen. Text params (countedBy) pass
+ * as they come. Missing params → only the fallbacks.
  */
-export function warningValues(w: CashCountModeWarning, divisionLabel?: string): Record<string, string> {
-  const out: Record<string, string> = {};
+export function warningValues(
+  w: CashCountModeWarning,
+  divisionLabel?: string,
+  /** Text for a placeholder the BE may leave out (e.g. countedBy on old counts); never overrides params. */
+  fallbacks: Record<string, string> = {},
+): Record<string, string> {
+  const out: Record<string, string> = { ...fallbacks };
   if (divisionLabel) out.division = divisionLabel;
   for (const [k, v] of Object.entries(w.params ?? {})) {
     if (typeof v === "number" && Number.isFinite(v)) out[k] = money(v);

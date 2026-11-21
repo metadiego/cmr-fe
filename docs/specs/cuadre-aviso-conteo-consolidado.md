@@ -43,3 +43,32 @@ solo si los importes difieren.
   importes; tras «volver a la suma», el aviso desaparece y la diferencia queda en 0.
 - Mismo importe en los dos → sin aviso.
 - Pantalla viva: Caja → Cuadre total.
+
+## Segunda parte — recuadros por cajero y usuario responsable (dueño, 21-nov 15:08)
+
+«Señala con recuadros del color seleccionado los que no cuadran, y en el cuadre general haz lo mismo y
+señala al usuario responsable.» El color elegido es el **rojo** (`destructive`).
+
+El BE añade, en `GET /api/v2/cash/total-reconciliation`:
+
+- `divisionCounts.<consultation|general>.cashiers[]`:
+  `{ reconciliationId, usuarioId, name, counted, fund, expected, difference, balanced }`.
+  `expected` = efectivo que cobró ese cajero en esa división; `difference = counted − fund − expected`.
+- `divisionCounts.<d>.override`: `null` o `{ counted, cashiersCounted, difference, countedBy: { staffId, name } | null }`.
+- El aviso `CONSOLIDATED_COUNT_OVERRIDES_CASHIERS` trae `params.countedBy` (nombre, **texto**, no
+  número): pasarlo tal cual a la traducción (hoy solo pasáis los numéricos como moneda).
+
+Lo que se pide:
+
+1. **Cuadre total**: debajo de cada panel de división, una lista de sus cajeros (nombre, contado,
+   fondo, esperado, diferencia). Cada cajero con `balanced: false` va en un **recuadro rojo** con la
+   diferencia en rojo («falta $X» / «sobra $X»). El panel de la división también en rojo si su
+   `difference ≠ 0`.
+2. Si `override` no es null y `difference ≠ 0`: recuadro rojo sobre el panel de la división con el
+   texto «Conteo consolidado hecho por {countedBy.name}: {counted} en lugar de {cashiersCounted} que
+   contaron los cajeros». Sin nombre (conteos viejos): «por un usuario no registrado».
+3. Texto i18n del aviso, añadir el responsable: es `"Caja {division}: {countedBy} contó {counted} en el consolidado, en lugar de lo que contaron los cajeros ({cashiersCounted}). Diferencia {difference}. Revise cuál es el correcto; si el bueno es el de los cajeros, vuelva el consolidado a la suma."` (con fallback si falta `countedBy`).
+4. **Cuadre de cada cajero / consolidado de división** (`cuadre-caja.tsx`): la diferencia ≠ 0 en
+   recuadro rojo con el mismo componente (una pieza compartida «DescuadreBox», no estilos sueltos).
+
+Verificación con datos reales cuando avise del despliegue del BE.

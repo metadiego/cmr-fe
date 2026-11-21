@@ -1,3 +1,4 @@
+import type { DivisionCashierCount, DivisionCountOverride } from "./cash-division-counts";
 import type { components } from "./schema";
 import { apiFetch, oneCenterPath } from "./client";
 import type { CuadreReconciliacion } from "@/lib/caja/totales";
@@ -217,6 +218,10 @@ export interface DivisionCount {
   expected: number;
   difference: number;
   lines: DivisionCountLine[];
+  /** Each cashier's own count in this division (BE: second part of cuadre-aviso-conteo-consolidado). */
+  cashiers?: DivisionCashierCount[];
+  /** A consolidated count that replaced the cashiers' sum, with who made it; null when there is none. */
+  override?: DivisionCountOverride | null;
 }
 export interface DivisionCounts {
   consultation: DivisionCount;

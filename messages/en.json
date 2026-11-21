@@ -4511,7 +4511,7 @@
       "flexible": "Flexible (today's)",
       "split": "Two counts (Consultation and Services & Products)",
       "single": "One single count",
-      "consolidatedOverridesCashiers": "{division} drawer: a consolidated count of {counted} is used instead of the cashiers' counts ({cashiersCounted}). Difference {difference}. Check which one is right; if the cashiers' is, set the consolidated back to the sum."
+      "consolidatedOverridesCashiers": "{division} drawer: {countedBy} counted {counted} in the consolidated count instead of the cashiers' counts ({cashiersCounted}). Difference {difference}. Check which one is right; if the cashiers' is, set the consolidated back to the sum."
     },
     "cuadreGeneral": {
       "title": "General cash-up",
@@ -4684,6 +4684,20 @@
     },
     "error": {
       "closeDisabled": "Closing the cash count is turned off for this center."
+    },
+    "descuadre": {
+      "short": "Short {amount}",
+      "over": "Over {amount}",
+      "division": "{division} drawer",
+      "cashiers": "Cashiers · {division}",
+      "cashier": "Cashier",
+      "counted": "Counted",
+      "fund": "Float",
+      "expected": "Expected",
+      "difference": "Difference",
+      "balanced": "Balanced",
+      "overrideBy": "Consolidated count made by {name}: {counted} instead of the {cashiersCounted} the cashiers counted",
+      "unregistered": "an unregistered user"
     }
   },
   "gruposFacturacion": {

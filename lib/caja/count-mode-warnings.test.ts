@@ -34,3 +34,9 @@ test("no params: only the division, nothing breaks", () => {
   assert.deepEqual(warningValues({ code: "X", labelKey: "k", division: "general" }, "General"), { division: "General" });
   assert.deepEqual(warningValues({ code: "X", labelKey: "k" }), {});
 });
+
+test("text params pass as they come; a fallback fills only what is missing", () => {
+  const w = { ...override, params: { ...override.params, countedBy: "Waldemar" } };
+  assert.equal(warningValues(w, "General", { countedBy: "un usuario" }).countedBy, "Waldemar");
+  assert.equal(warningValues(override, "General", { countedBy: "un usuario" }).countedBy, "un usuario");
+});

@@ -4511,7 +4511,7 @@
       "flexible": "Flexible (lo de hoy)",
       "split": "Dos conteos (Consulta y Servicios & Productos)",
       "single": "Un solo conteo",
-      "consolidatedOverridesCashiers": "Caja {division}: se usó un conteo consolidado de {counted} en lugar de lo que contaron los cajeros ({cashiersCounted}). Diferencia {difference}. Revise cuál es el correcto; si el bueno es el de los cajeros, vuelva el consolidado a la suma."
+      "consolidatedOverridesCashiers": "Caja {division}: {countedBy} contó {counted} en el consolidado, en lugar de lo que contaron los cajeros ({cashiersCounted}). Diferencia {difference}. Revise cuál es el correcto; si el bueno es el de los cajeros, vuelva el consolidado a la suma."
     },
     "cuadreGeneral": {
       "title": "Cuadre general",
@@ -4684,6 +4684,20 @@
     },
     "error": {
       "closeDisabled": "El cierre de caja está desactivado en este centro."
+    },
+    "descuadre": {
+      "short": "Falta {amount}",
+      "over": "Sobra {amount}",
+      "division": "Caja {division}",
+      "cashiers": "Cajeros · {division}",
+      "cashier": "Cajero",
+      "counted": "Contado",
+      "fund": "Fondo",
+      "expected": "Esperado",
+      "difference": "Diferencia",
+      "balanced": "Cuadra",
+      "overrideBy": "Conteo consolidado hecho por {name}: {counted} en lugar de {cashiersCounted} que contaron los cajeros",
+      "unregistered": "un usuario no registrado"
     }
   },
   "gruposFacturacion": {
