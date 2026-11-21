@@ -435,7 +435,8 @@ function Editor({
           )}
 
           {reporte.divisionCounts && (
-            <div className="grid gap-4 sm:grid-cols-2">
+            // Stacked full width: five money columns do not fit beside the payments column until 2xl.
+            <div className="grid gap-4 2xl:grid-cols-2">
               <DivisionCashiers division={tCaja("division.consulta")} count={reporte.divisionCounts.consultation} />
               <DivisionCashiers division={tCaja("division.general")} count={reporte.divisionCounts.general} />
             </div>
