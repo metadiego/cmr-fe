@@ -3,7 +3,8 @@
 // Its own file because lib/api/caja.ts sits at the 600-line ceiling.
 
 export interface DivisionCashierCount {
-  reconciliationId: string;
+  /** null for a cashier who charged cash but has no sheet of their own. */
+  reconciliationId: string | null;
   usuarioId: string | null;
   name: string | null;
   counted: number;

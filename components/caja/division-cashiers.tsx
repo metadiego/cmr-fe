@@ -37,12 +37,12 @@ export function DivisionCashiers({ division, count }: { division: string; count:
               </>
             }
           >
-            {cashiers.map((c) => {
+            {cashiers.map((c, i) => {
               const bad = cashierUnbalanced(c);
               const d = descuadreOf(c.difference);
               return (
                 <tr
-                  key={c.reconciliationId}
+                  key={c.reconciliationId ?? c.usuarioId ?? `row-${i}`}
                   className={cn("tabular-nums", bad && "bg-destructive/10 text-destructive outline-1 -outline-offset-1 outline-destructive/50 outline")}
                 >
                   <Td className={cn("font-medium", bad && "font-semibold")}>{c.name || "—"}</Td>
