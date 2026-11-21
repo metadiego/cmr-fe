@@ -108,26 +108,6 @@ export type PanelNotificacion = {
 // sección (vitales, intravenoso) = datos, no se traducen → ya emparejan con `sections[].clave`.
 export type PanelContador = { staffId: string; total: number; bySection: Record<string, number> };
 
-// "Panel de trabajo del día" (cmr-be #666, handoff .personal/handoff-panel-trabajo-del-dia.md,
-// versión CORREGIDA 21-nov: sin cola «Por tomar» — los récords libres van DENTRO de cada tarjeta de
-// enfermera). Una fila por visita de la sección; `staffId` null = libre (disponible para tomar en
-// cualquier tarjeta). `kind` dice si es sesión (frontdesk) o cita (Atención) — y por tanto qué id usar.
-export type PanelWorkRow = {
-  sectionKey: string;
-  kind: "session" | "appointment";
-  sessionId?: string | null;
-  appointmentId?: string | null;
-  patientId?: string | null;
-  patientName?: string | null;
-  medicalRecordNumber?: string | null;
-  serviceId?: string | null;
-  serviceName?: string | null;
-  status?: string | null;
-  time?: string | null;
-  staffId?: string | null;
-  pendingNoticeId?: string | null;
-};
-
 // GET /paneles/:clave/definicion — UNA llamada: panel + secciones + personal + estatus vivo.
 export function getPanelDefinicion(clave: string, centroId?: string): Promise<PanelDefinicion> {
   return apiFetch<PanelDefinicion>(`/panels/${clave}/definition`, {}, centroId);
@@ -200,37 +180,6 @@ export function cancelarNotificacion(
 export function getPanelContadores(clave: string, fecha: string, centroId?: string): Promise<PanelContador[]> {
   return apiFetch<unknown>(`/panels/${clave}/counters?date=${fecha}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelContador[]) : (((r as { items?: PanelContador[] })?.items) ?? []),
-  );
-}
-
-// GET /paneles/:clave/trabajo?centerIds=&fecha= — una fila por visita de cada sección, con quién la
-// tiene (null = libre). `centerIds` además del tenant (estatuto "permisos por centro").
-function workQuery(centroId?: string, date?: string): string {
-  const sp = new URLSearchParams();
-  if (centroId) sp.set("centerIds", centroId);
-  if (date) sp.set("date", date);
-  const qs = sp.toString();
-  return qs ? `?${qs}` : "";
-}
-export function getPanelTrabajo(clave: string, centroId?: string, date?: string): Promise<PanelWorkRow[]> {
-  return apiFetch<unknown>(`/panels/${clave}/work${workQuery(centroId, date)}`, {}, centroId).then((r) =>
-    Array.isArray(r) ? (r as PanelWorkRow[]) : (((r as { items?: PanelWorkRow[] })?.items) ?? []),
-  );
-}
-
-// POST /paneles/:clave/tomar — la enfermera se adjudica un récord libre desde SU PROPIA tarjeta (sin
-// cola intermedia, sin diálogo "¿quién lo toma?" — tocar el récord en la tarjeta YA dice quién).
-// Responde el aviso aceptado (mismo formato que aceptarNotificacion). 409 PANEL_WORK_ALREADY_TAKEN si
-// otra ya lo tomó (trae `staffId` en `err.data`).
-export function tomarTrabajoPanel(
-  clave: string,
-  payload: { sectionKey: string; staffId: string; sessionId?: string; appointmentId?: string },
-  centroId?: string,
-): Promise<PanelNotificacion> {
-  return apiFetch<PanelNotificacion>(
-    `/panels/${clave}/claim${workQuery(centroId)}`,
-    { method: "POST", body: JSON.stringify(payload) },
-    centroId,
   );
 }
 
