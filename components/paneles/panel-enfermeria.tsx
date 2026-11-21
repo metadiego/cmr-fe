@@ -10,6 +10,7 @@ import { ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import {
   getPanelDefinicion,
   getPanelNotificaciones,
+  getPanelNotificacionesAceptadas,
   aceptarNotificacion,
   cancelarNotificacion,
   guardarOrdenPersonal,
@@ -20,6 +21,7 @@ import {
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { fillableReportsFor } from "@/lib/panel/panel-formatos";
 import { sheetPath } from "@/lib/format-sheet/sheet";
+import { isTodayPR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
@@ -89,10 +91,16 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   // todos lados (BE #663 mergeando): fillableReportsFor cruza por id y cae al nombre de respaldo.
   const serviciosRes = useResource<Servicio[]>(() => getServicios(centro), [centro]);
   const servicios = React.useMemo(() => (serviciosRes.state.kind === "ok" ? serviciosRes.state.data : []), [serviciosRes.state]);
-  // Avisos aceptados hoy (en esta pantalla): no hay endpoint de "aceptados del día", así que se
-  // acumulan localmente desde que esta pantalla abrió — basta para que «Formatos» siga alcanzable tras
-  // cerrar el aviso a pantalla completa; el modal de la fila del patient-desk sigue siendo otra vía.
+  // Avisos aceptados HOY (cmr-be #664, sin filtro de fecha propio aún → se filtra aquí por
+  // `acceptedAt`): así «Formatos» sigue alcanzable tras cerrar el aviso a pantalla completa, y
+  // sobrevive a un recargo de esta pantalla, no solo mientras dura la pestaña.
   const [aceptadosHoy, setAceptadosHoy] = React.useState<PanelNotificacion[]>([]);
+  const refetchAceptados = React.useCallback(() => {
+    getPanelNotificacionesAceptadas(CLAVE, centro)
+      .then((list) => setAceptadosHoy(list.filter((n) => isTodayPR(n.acceptedAt))))
+      .catch(() => {});
+  }, [centro]);
+  React.useEffect(() => { refetchAceptados(); }, [refetchAceptados]);
   const [eligiendoReport, setEligiendoReport] = React.useState<PanelNotificacion | null>(null);
   const abrirHoja = React.useCallback(
     (n: PanelNotificacion) => {
@@ -115,7 +123,8 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const refetch = React.useCallback(() => {
     refrescarDef();
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
-  }, [refrescarDef, centro]);
+    refetchAceptados();
+  }, [refrescarDef, centro, refetchAceptados]);
   // Carga inicial (una vez montado, patrón sin setState-en-render).
   React.useEffect(() => {
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
@@ -359,7 +368,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
           <p className="text-2xl font-semibold uppercase tracking-wide text-white/90">{secLabel}</p>
           <h2 className="mt-2 text-center text-5xl font-black text-white md:text-6xl">{actual.pacienteNombre ?? "—"}</h2>
           {actual.medicalRecordNumber && <p className="mt-1 text-2xl font-bold text-white/90">{t("record")} {actual.medicalRecordNumber}</p>}
-          {actual.servicioNombre && <p className="text-lg text-white/80">{actual.servicioNombre}</p>}
+          {actual.serviceName && <p className="text-lg text-white/80">{actual.serviceName}</p>}
           <div className="mt-8 grid w-full max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3">
             {personal.map((p) => (
               <button
@@ -414,7 +423,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                   className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm shadow-xs hover:bg-muted"
                 >
                   <span className="font-medium">{n.pacienteNombre ?? "—"}</span>
-                  <span className="text-muted-foreground">· {n.servicioNombre ?? "—"}</span>
+                  <span className="text-muted-foreground">· {n.serviceName ?? "—"}</span>
                   <span className="font-medium text-primary">{t("formatos")}</span>
                 </button>
               ))}

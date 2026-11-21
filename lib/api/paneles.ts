@@ -86,18 +86,21 @@ export type PanelNotificacion = {
   sessionId?: string | null;
   patientId?: string | null;
   acceptedById?: string | null;
+  acceptedAt?: string | null;
   status?: string;
   createdAt?: string;
-  // Campos de DISPLAY — el BE debería enriquecerlos (hoy no vienen); ver handoff panel-aviso-enriquecido.
-  // `seccion`, `pacienteNombre` y `servicioNombre` NO están en el mapa → quedan en español.
+  // Campos de DISPLAY — el BE debería enriquecerlos (hoy no vienen todos); ver handoff
+  // panel-aviso-enriquecido. `seccion` y `pacienteNombre` NO están en el mapa → quedan en español.
+  // `serviceName`/`serviceId` SÍ están en el mapa → van en inglés (verificado en vivo 21-nov-2026
+  // contra /api/v2, GET /panels/enfermeria/notifications?status=aceptada: NO es "servicioNombre").
   seccion?: string | null;
   color?: string | null; // se dice igual (CAMPOS_IGUALES)
   audio?: string | null; // se dice igual (CAMPOS_IGUALES)
   pacienteNombre?: string | null;
   medicalRecordNumber?: string | null;
-  servicioNombre?: string | null;
-  // cmr-be #663 (mergeando): el id v2 del servicio, junto al nombre — matchear por id cuando venga,
-  // nombre de respaldo mientras un evento viejo o un BE sin el PR aún lo manden sin él.
+  // cmr-be #663: id v2 del servicio, junto al nombre — matchear por id cuando venga, nombre de
+  // respaldo mientras un evento viejo o un BE sin el PR aún lo manden sin él.
+  serviceName?: string | null;
   serviceId?: string | null;
 };
 
@@ -113,6 +116,15 @@ export function getPanelDefinicion(clave: string, centroId?: string): Promise<Pa
 // GET /paneles/:clave/notificaciones — avisos pendientes al abrir la pantalla.
 export function getPanelNotificaciones(clave: string, centroId?: string): Promise<PanelNotificacion[]> {
   return apiFetch<unknown>(`/panels/${clave}/notifications`, {}, centroId).then((r) =>
+    Array.isArray(r) ? (r as PanelNotificacion[]) : (((r as { items?: PanelNotificacion[] })?.items) ?? []),
+  );
+}
+
+// GET /paneles/:clave/notificaciones?status=aceptada — para reabrir «Formatos» tras cerrar el aviso a
+// pantalla completa. Sin filtro de fecha propio todavía (verificado en vivo 21-nov-2026: el BE rechaza
+// un parámetro de fecha aquí con VALIDATION_ERROR) — el FE filtra a "hoy" por `acceptedAt` (isTodayPR).
+export function getPanelNotificacionesAceptadas(clave: string, centroId?: string): Promise<PanelNotificacion[]> {
+  return apiFetch<unknown>(`/panels/${clave}/notifications?status=aceptada`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelNotificacion[]) : (((r as { items?: PanelNotificacion[] })?.items) ?? []),
   );
 }

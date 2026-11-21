@@ -1,7 +1,7 @@
 // Lock del bug off-by-one: una fecha solo-día NUNCA debe retroceder por zona horaria. Correr: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatFechaSolo, parseDayUTC, parseFechaEscrita, validarFechaNacimiento } from "./fecha.ts";
+import { formatFechaSolo, isTodayPR, parseDayUTC, parseFechaEscrita, validarFechaNacimiento } from "./fecha.ts";
 
 test("fecha solo-día se formatea MM/DD/YYYY sin corrimiento", () => {
   assert.equal(formatFechaSolo("2026-07-21"), "07/21/2026");
@@ -109,4 +109,19 @@ test("validarFechaNacimiento: edad > 120 rechazada", () => {
 
 test("validarFechaNacimiento: una fecha de nacimiento razonable no tiene problema", () => {
   assert.equal(validarFechaNacimiento("1958-03-15"), null);
+});
+
+// --- isTodayPR: comparar en la zona del centro, no la del navegador/servidor -------
+
+test("isTodayPR: misma fecha en PR aunque el instante caiga del otro lado de medianoche UTC", () => {
+  const now = new Date("2026-11-21T02:00:00Z"); // 20-nov 22:00 en PR (AST, UTC-4) → "hoy" es 20-nov
+  assert.equal(isTodayPR("2026-11-21T01:00:00Z", now), true); // 20-nov 21:00 en PR — mismo día PR, otro día UTC
+  assert.equal(isTodayPR("2026-11-19T23:00:00Z", now), false); // 19-nov 19:00 en PR — un día antes de verdad
+});
+
+test("isTodayPR: null, vacío o un instante no parseable nunca cuentan como hoy", () => {
+  const now = new Date("2026-11-21T02:00:00Z");
+  assert.equal(isTodayPR(null, now), false);
+  assert.equal(isTodayPR(undefined, now), false);
+  assert.equal(isTodayPR("no-es-una-fecha", now), false);
 });

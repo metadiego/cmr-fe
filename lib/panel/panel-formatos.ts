@@ -7,11 +7,11 @@ import { isFillableSheet } from "../format-sheet/sheet.ts";
 // Only FILLABLE_SHEETS reports count (not every "report" on a service is a screen-fillable sheet —
 // HILT/MLS printable formats are not).
 export function fillableReportsFor(
-  notice: { serviceId?: string | null; servicioNombre?: string | null },
+  notice: { serviceId?: string | null; serviceName?: string | null },
   servicios: readonly { id: string; name: string; formActions?: unknown }[],
 ): ReportAccion[] {
   const serv =
     (notice.serviceId && servicios.find((s) => s.id === notice.serviceId)) ||
-    servicios.find((s) => s.name === notice.servicioNombre);
+    servicios.find((s) => s.name === notice.serviceName);
   return (parseAcciones(serv?.formActions).reports ?? []).filter((r) => isFillableSheet(r.id));
 }
