@@ -164,6 +164,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
   const secciones = (def?.sections ?? []).slice().sort((a, b) => a.orden - b.orden);
+  const seccionesVisibles = secciones.filter((s) => s.visible);
   // El sonido depende de la SECCIÓN del aviso actual: su `audio` (lo enriquece el BE en la notificación;
   // respaldo a la sección por id/clave). Un audio desconocido cae al tono por defecto (nunca mudo).
   const audioActual =
@@ -259,104 +260,100 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
         </div>
       </div>
 
-      {/* Secciones + muro de tarjetas por enfermera */}
+      {/* Una sola tarjeta por enfermera (owner, 21-nov-2026): antes se repetía la misma tarjeta por
+          cada sección (Vitales, Intravenoso…), lo que inflaba la pantalla sin aportar nada — el aviso
+          en sí ya trae su `serviceName`/sección resueltos, así que la sección no necesitaba ser el
+          agrupador visual. Cada categoría visible es ahora un chip de color dentro de la misma tarjeta. */}
       {defRes.state.kind === "loading" && <PanelSkeleton />}
       {defRes.state.kind === "fail" && <p className="text-sm text-destructive">{defRes.state.message}</p>}
-      {def && secciones.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
-      <div className="space-y-5">
-        {secciones.map((s) => (
-          <section key={s.id}>
-            <div className="mb-3 flex items-center gap-2">
-              <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
-              <h2 className="text-lg font-semibold">{tRoot(s.labelKey)}</h2>
-            </div>
-            {s.visible ? (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {personal.map((p, i) => {
-                  const cont = contByPersona.get(p.id);
-                  const nSec = cont?.bySection?.[s.clave] ?? 0;
-                  const est = estatusById.get(p.id);
-                  const pc = colorForName(p.name);
-                  const activo = nSec > 0;
-                  const tint = tinteHex(s.color);
-                  return (
-                    <div
-                      key={p.id}
-                      draggable={puedeOrdenar}
-                      onDragStart={() => setDragId(p.id)}
-                      onDragEnd={() => { setDragId(null); setOverId(null); }}
-                      onDragOver={(e) => { if (puedeOrdenar && dragId) { e.preventDefault(); setOverId(p.id); } }}
-                      onDrop={() => soltarEn(p.id)}
-                      className={
-                        "flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 " +
-                        (puedeOrdenar ? "cursor-grab " : "") +
-                        (overId === p.id && dragId ? "ring-2 ring-primary " : "") +
-                        (dragId === p.id ? "opacity-50" : "")
-                      }
+      {def && seccionesVisibles.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
+      {def && seccionesVisibles.length > 0 && (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {personal.map((p, i) => {
+            const cont = contByPersona.get(p.id);
+            const total = cont?.total ?? 0;
+            const est = estatusById.get(p.id);
+            const pc = colorForName(p.name);
+            return (
+              <div
+                key={p.id}
+                draggable={puedeOrdenar}
+                onDragStart={() => setDragId(p.id)}
+                onDragEnd={() => { setDragId(null); setOverId(null); }}
+                onDragOver={(e) => { if (puedeOrdenar && dragId) { e.preventDefault(); setOverId(p.id); } }}
+                onDrop={() => soltarEn(p.id)}
+                className={
+                  "flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 " +
+                  (puedeOrdenar ? "cursor-grab " : "") +
+                  (overId === p.id && dragId ? "ring-2 ring-primary " : "") +
+                  (dragId === p.id ? "opacity-50" : "")
+                }
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    {/* Punto de color por enfermera: identidad estable, discreta. */}
+                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: pc }} aria-hidden />
+                    <span className="truncate text-[15px] font-semibold text-foreground">{p.name}</span>
+                  </div>
+                  <span
+                    className={
+                      "inline-grid h-7 min-w-[1.75rem] shrink-0 place-items-center rounded-full px-2 text-sm font-bold tabular-nums " +
+                      (total > 0 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")
+                    }
+                  >
+                    {total}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 border-t border-foreground/5 pt-2">
+                  {seccionesVisibles.map((sx) => {
+                    const nSec = cont?.bySection?.[sx.clave] ?? 0;
+                    const tint = tinteHex(sx.color);
+                    return (
+                      <span
+                        key={sx.clave}
+                        className={
+                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums " +
+                          (nSec > 0 ? (tint ? "" : "bg-primary/10 text-primary") : "bg-muted text-muted-foreground")
+                        }
+                        style={nSec > 0 && tint ? { backgroundColor: tint, color: sx.color ?? undefined } : undefined}
+                      >
+                        {tRoot(sx.labelKey)} {nSec}
+                      </span>
+                    );
+                  })}
+                </div>
+                {est && (est.labelKey || est.label) && (
+                  <span className="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
+                    {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
+                  </span>
+                )}
+                {puedeOrdenar && (
+                  <div className="flex justify-end gap-1 border-t border-foreground/5 pt-1.5">
+                    <button
+                      type="button"
+                      aria-label={t("staffOrder.up")}
+                      disabled={i === 0}
+                      onClick={() => moverA(p.id, -1)}
+                      className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex min-w-0 items-center gap-2.5">
-                          {/* Punto de color por enfermera: identidad estable, discreta. */}
-                          <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: pc }} aria-hidden />
-                          <span className="truncate text-[15px] font-semibold text-foreground">{p.name}</span>
-                        </div>
-                        <span
-                          className={
-                            "inline-grid h-7 min-w-[1.75rem] shrink-0 place-items-center rounded-full px-2 text-sm font-bold tabular-nums " +
-                            (activo ? (tint ? "" : "bg-primary/10 text-primary") : "bg-muted text-muted-foreground")
-                          }
-                          style={activo && tint ? { backgroundColor: tint, color: s.color ?? undefined } : undefined}
-                        >
-                          {nSec}
-                        </span>
-                      </div>
-                      {cont && Object.keys(cont.bySection || {}).length > 1 && (
-                        <div className="flex flex-wrap gap-x-2.5 gap-y-1 border-t border-foreground/5 pt-2 text-[11px] text-muted-foreground">
-                          {secciones.map((sx) => (
-                            <span key={sx.clave} className="tabular-nums">
-                              {tRoot(sx.labelKey)}{" "}
-                              <span className="font-semibold text-foreground/70">{cont.bySection?.[sx.clave] ?? 0}</span>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {est && (est.labelKey || est.label) && (
-                        <span className="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
-                          {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
-                        </span>
-                      )}
-                      {puedeOrdenar && (
-                        <div className="flex justify-end gap-1 border-t border-foreground/5 pt-1.5">
-                          <button
-                            type="button"
-                            aria-label={t("staffOrder.up")}
-                            disabled={i === 0}
-                            onClick={() => moverA(p.id, -1)}
-                            className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
-                          >
-                            <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={t("staffOrder.down")}
-                            disabled={i === personal.length - 1}
-                            onClick={() => moverA(p.id, 1)}
-                            className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
-                          >
-                            <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={t("staffOrder.down")}
+                      disabled={i === personal.length - 1}
+                      onClick={() => moverA(p.id, 1)}
+                      className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                    >
+                      <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="h-3 w-full rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
-            )}
-          </section>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Cola */}
       {pendientes.length > 1 && (
@@ -467,34 +464,25 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   );
 }
 
-// Loading wall: two sections (colour square + title) with the same staff-card grid and card box as the
-// loaded panel (dot + name + count pill, status chip).
+// Loading wall: the same single staff-card grid as the loaded panel (dot + name + total pill,
+// a row of section chips, a status chip).
 function PanelSkeleton() {
   return (
-    <LoadingRegion className="space-y-5">
-      {[0, 1].map((sec) => (
-        <section key={sec}>
-          <div className="mb-3 flex items-center gap-2">
-            <Skeleton className="size-4 rounded" />
-            <div className="flex h-7 items-center">
-              <Skeleton className="h-5 w-40" />
+    <LoadingRegion className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {Array.from({ length: 5 }, (_, i) => (
+        <div key={i} className="flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <Skeleton className="size-2.5 shrink-0 rounded-full" />
+              <Skeleton className={"h-4 " + ["w-24", "w-28", "w-20", "w-32", "w-24"][i]} />
             </div>
+            <Skeleton className="size-7 shrink-0 rounded-full" />
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} className="flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <Skeleton className="size-2.5 shrink-0 rounded-full" />
-                    <Skeleton className={"h-4 " + ["w-24", "w-28", "w-20", "w-32", "w-24"][i]} />
-                  </div>
-                  <Skeleton className="size-7 shrink-0 rounded-full" />
-                </div>
-                <Skeleton className="h-5 w-16 rounded-full" />
-              </div>
-            ))}
+          <div className="flex gap-1.5 border-t border-foreground/5 pt-2">
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-20 rounded-full" />
           </div>
-        </section>
+        </div>
       ))}
     </LoadingRegion>
   );
