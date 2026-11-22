@@ -15,6 +15,7 @@ import { useActiveClinic } from "@/hooks/use-active-clinic";
 import { LiveBadge } from "@/components/live-badge";
 import { InvoiceLiveFeeds, useInvoiceLiveFeeds } from "@/components/facturacion/invoice-live-feeds";
 import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
+import { invoiceBadgeStatus } from "@/lib/factura/refund-status";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -58,6 +59,12 @@ const moneyBar = new Intl.NumberFormat("en-US", { style: "currency", currency: "
 // pantalla mostraría el día equivocado. getFullYear/Month/Date usan la zona del navegador.
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// The board row's derived refund state (cmr-be #650), when the BE sends it on the row.
+function rowRefundStatus(fila: Record<string, unknown>): string | null {
+  const r = fila.refundStatus ?? fila.fac_refund_status;
+  return typeof r === "string" ? r : null;
 }
 
 function EstadoBadge({ estado }: { estado: string }) {
@@ -167,6 +174,10 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
     if (col.tipo === "select" && col.editable) {
       const clinic = fila.clinicId ?? undefined;
       return <SelectCelda col={col} fila={fila} opciones={opciones[optionsKey(clinic, col.clave)] ?? []} centro={clinic} onSaved={refresh} />;
+    }
+    if (col.clave === "fac_estado") {
+      // cmr-be #650: a refund leaves the status `emitida`; the badge reads the row's derived refundStatus.
+      return <EstadoBadge estado={invoiceBadgeStatus({ status: String(fila.fac_estado ?? ""), refundStatus: rowRefundStatus(fila) })} />;
     }
     return cell(col.clave, fila[col.clave]);
   }
@@ -352,7 +363,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
                   )}
                   <TableCell className="text-right">
                     {/* Void, return, email, edit: in the invoice's OWN clinic. */}
-                    <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} centroId={f.clinicId ?? undefined} onChanged={refresh} />
+                    <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} refundStatus={rowRefundStatus(f)} centroId={f.clinicId ?? undefined} onChanged={refresh} />
                   </TableCell>
                 </TableRow>
               ))}

@@ -37,7 +37,7 @@ const DEBT = {
   // STATE itself lives one level up, in patient-detail.tsx (stable per patient; the row can unmount
   // mid-action on refetch). Keeping this prop is reuse of shared code, not new work on the deprecated
   // screen.
-  "components/frontdesk/fila-sesion.tsx": 723,
+  "components/frontdesk/fila-sesion.tsx": 714,
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
   // 08-oct-2026: lowered from 2050 to 1966 — the regenerate-availability dialog moved to
@@ -52,10 +52,12 @@ const DEBT = {
   // helpers moved to lib/facturacion/line-quantity.ts, tested there instead of living inline.
   // 18-nov-2026: 1305 → 1297 — the receipt preview left the editor grid for a header drawer
   // (components/facturacion/receipt-preview-sheet.tsx).
-  "app/(app)/billing/invoices/[id]/page.tsx": 1297,
+  "app/(app)/billing/invoices/[id]/page.tsx": 1291,
   // 17-nov-2026: 1048 → 1046 — the product sheet moved onto the standard FormSheet shell (kit Field,
   // useDialogForm, useSubmit); the local Field and canSubmit went.
-  "components/inventario/productos-admin.tsx": 1046,
+  // 20-nov-2026: 1046 → 1020 — Toggle/CatalogSelect moved to producto-form-controls.tsx, making room
+  // for the sessionsPerUnit field (cmr-be #657, "sesiones por unidad").
+  "components/inventario/productos-admin.tsx": 1020,
   // 17-nov-2026: 700 → 681 — the delete AlertDialog became a useConfirm prompt (standard form kit);
   // the stray blank line after </aside> went, and the delete confirm gained `destructive: true` (net 0).
   "components/configuracion/menu-editor.tsx": 681,
@@ -70,7 +72,10 @@ const DEBT = {
   // 10-nov-2026: 618 → 567 — the detail panel moved to components/auditoria/audit-detail-sheet.tsx
   // (merge of the Claude connector "via" branch with main's entity filter).
   // 17-nov-2026: 567 → 554 — the purge AlertDialog became a useConfirm prompt (standard form kit).
-  "components/auditoria/auditoria-log.tsx": 554,
+  // 20-nov-2026: 554 → 480 — ResumenCards/Tile/PurgaButton moved to audit-summary-cards.tsx
+  // (also migrated off a hand-rolled card onto Panel/StatGrid/Stat, rule 10) to make room for the
+  // Sessions-tab "qué hizo" drill-down's initialUserId/initialSessionId/initialDesde/initialHasta props.
+  "components/auditoria/auditoria-log.tsx": 480,
   // 16-nov-2026: 550 → 480 — moved onto the standard FormSheet shell (kit Field, useSubmit, useDialogForm);
   // the required/blocked checks live in lib/pacientes/patient-form-missing.ts.
   "components/clientes/paciente-form-sheet.tsx": 480,

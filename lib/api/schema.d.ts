@@ -384,6 +384,386 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auditoria/sesiones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Who signed in, when, from which IP and browser, last activity and sign-out: one row per session, newest first. Every center where you hold audit.read; centerIds narrows. Filters: from, to (overlap), authUserId, email, status (open|closed).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auditoria/sesiones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["UserSessionsController_list[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Who signed in, when, from which IP and browser, last activity and sign-out: one row per session, newest first. Every center where you hold audit.read; centerIds narrows. Filters: from, to (overlap), authUserId, email, status (open|closed).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/audit/sessions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["UserSessionsController_list[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auditoria/sesiones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who signed in, when, from which IP and browser, last activity and sign-out: one row per session, newest first. Every center where you hold audit.read; centerIds narrows. Filters: from, to (overlap), authUserId, email, status (open|closed). */
+        get: operations["UserSessionsController_list[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/audit/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who signed in, when, from which IP and browser, last activity and sign-out: one row per session, newest first. Every center where you hold audit.read; centerIds narrows. Filters: from, to (overlap), authUserId, email, status (open|closed). */
+        get: operations["UserSessionsController_list[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auditoria/sesiones/dias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Who worked each day and what they did: per person, center and day, first and last activity, sessions, IPs and actions (writes). An old session that was never closed still shows every day it worked. The detail of each action (what, when, IP, session, browser): GET /audit?userId=<authUserId>&desde&hasta, or ?sessionId=.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auditoria/sesiones/dias`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["UserSessionsController_days[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auditoria/sesiones/days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Who worked each day and what they did: per person, center and day, first and last activity, sessions, IPs and actions (writes). An old session that was never closed still shows every day it worked. The detail of each action (what, when, IP, session, browser): GET /audit?userId=<authUserId>&desde&hasta, or ?sessionId=.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auditoria/sesiones/days`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["UserSessionsController_days[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit/sessions/dias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Who worked each day and what they did: per person, center and day, first and last activity, sessions, IPs and actions (writes). An old session that was never closed still shows every day it worked. The detail of each action (what, when, IP, session, browser): GET /audit?userId=<authUserId>&desde&hasta, or ?sessionId=.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/audit/sessions/dias`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["UserSessionsController_days[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit/sessions/days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Who worked each day and what they did: per person, center and day, first and last activity, sessions, IPs and actions (writes). An old session that was never closed still shows every day it worked. The detail of each action (what, when, IP, session, browser): GET /audit?userId=<authUserId>&desde&hasta, or ?sessionId=.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/audit/sessions/days`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["UserSessionsController_days[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auditoria/sesiones/dias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who worked each day and what they did: per person, center and day, first and last activity, sessions, IPs and actions (writes). An old session that was never closed still shows every day it worked. The detail of each action (what, when, IP, session, browser): GET /audit?userId=<authUserId>&desde&hasta, or ?sessionId=. */
+        get: operations["UserSessionsController_days[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auditoria/sesiones/days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who worked each day and what they did: per person, center and day, first and last activity, sessions, IPs and actions (writes). An old session that was never closed still shows every day it worked. The detail of each action (what, when, IP, session, browser): GET /audit?userId=<authUserId>&desde&hasta, or ?sessionId=. */
+        get: operations["UserSessionsController_days[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/audit/sessions/dias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who worked each day and what they did: per person, center and day, first and last activity, sessions, IPs and actions (writes). An old session that was never closed still shows every day it worked. The detail of each action (what, when, IP, session, browser): GET /audit?userId=<authUserId>&desde&hasta, or ?sessionId=. */
+        get: operations["UserSessionsController_days[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/audit/sessions/days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Who worked each day and what they did: per person, center and day, first and last activity, sessions, IPs and actions (writes). An old session that was never closed still shows every day it worked. The detail of each action (what, when, IP, session, browser): GET /audit?userId=<authUserId>&desde&hasta, or ?sessionId=. */
+        get: operations["UserSessionsController_days[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auditoria/sesiones/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Records the sign-out of the session of THIS token (call it right before supabase.auth.signOut()). closed=false when it was already closed or never seen.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auditoria/sesiones/cerrar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["UserSessionsController_close[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auditoria/sesiones/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Records the sign-out of the session of THIS token (call it right before supabase.auth.signOut()). closed=false when it was already closed or never seen.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auditoria/sesiones/close`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["UserSessionsController_close[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit/sessions/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Records the sign-out of the session of THIS token (call it right before supabase.auth.signOut()). closed=false when it was already closed or never seen.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/audit/sessions/cerrar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["UserSessionsController_close[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit/sessions/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Records the sign-out of the session of THIS token (call it right before supabase.auth.signOut()). closed=false when it was already closed or never seen.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/audit/sessions/close`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["UserSessionsController_close[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auditoria/sesiones/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Records the sign-out of the session of THIS token (call it right before supabase.auth.signOut()). closed=false when it was already closed or never seen. */
+        post: operations["UserSessionsController_close[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auditoria/sesiones/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Records the sign-out of the session of THIS token (call it right before supabase.auth.signOut()). closed=false when it was already closed or never seen. */
+        post: operations["UserSessionsController_close[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/audit/sessions/cerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Records the sign-out of the session of THIS token (call it right before supabase.auth.signOut()). closed=false when it was already closed or never seen. */
+        post: operations["UserSessionsController_close[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/audit/sessions/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Records the sign-out of the session of THIS token (call it right before supabase.auth.signOut()). closed=false when it was already closed or never seen. */
+        post: operations["UserSessionsController_close[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -1089,7 +1469,7 @@ export interface paths {
         /**
          * Datos fiscales del centro para la impresión de factura (encabezado + pie).
          *
-         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centros.read` y pedirlo habría
+         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centers.read` y pedirlo habría
          *     tumbado la impresión de facturas. Lo que se comprueba es el CENTRO pedido — el de la sesión pasa
          *     sin preguntar, otro exige el permiso EN él. Antes no se comprobaba nada y cualquiera leía el
          *     nombre legal, el registro fiscal y el pie de factura del otro centro por su id.
@@ -1120,7 +1500,7 @@ export interface paths {
         /**
          * Datos fiscales del centro para la impresión de factura (encabezado + pie).
          *
-         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centros.read` y pedirlo habría
+         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centers.read` y pedirlo habría
          *     tumbado la impresión de facturas. Lo que se comprueba es el CENTRO pedido — el de la sesión pasa
          *     sin preguntar, otro exige el permiso EN él. Antes no se comprobaba nada y cualquiera leía el
          *     nombre legal, el registro fiscal y el pie de factura del otro centro por su id.
@@ -1151,7 +1531,7 @@ export interface paths {
         /**
          * Datos fiscales del centro para la impresión de factura (encabezado + pie).
          *
-         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centros.read` y pedirlo habría
+         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centers.read` y pedirlo habría
          *     tumbado la impresión de facturas. Lo que se comprueba es el CENTRO pedido — el de la sesión pasa
          *     sin preguntar, otro exige el permiso EN él. Antes no se comprobaba nada y cualquiera leía el
          *     nombre legal, el registro fiscal y el pie de factura del otro centro por su id.
@@ -1182,7 +1562,7 @@ export interface paths {
         /**
          * Datos fiscales del centro para la impresión de factura (encabezado + pie).
          *
-         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centros.read` y pedirlo habría
+         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centers.read` y pedirlo habría
          *     tumbado la impresión de facturas. Lo que se comprueba es el CENTRO pedido — el de la sesión pasa
          *     sin preguntar, otro exige el permiso EN él. Antes no se comprobaba nada y cualquiera leía el
          *     nombre legal, el registro fiscal y el pie de factura del otro centro por su id.
@@ -1213,7 +1593,7 @@ export interface paths {
         /**
          * Datos fiscales del centro para la impresión de factura (encabezado + pie).
          *
-         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centros.read` y pedirlo habría
+         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centers.read` y pedirlo habría
          *     tumbado la impresión de facturas. Lo que se comprueba es el CENTRO pedido — el de la sesión pasa
          *     sin preguntar, otro exige el permiso EN él. Antes no se comprobaba nada y cualquiera leía el
          *     nombre legal, el registro fiscal y el pie de factura del otro centro por su id.
@@ -1238,7 +1618,7 @@ export interface paths {
         /**
          * Datos fiscales del centro para la impresión de factura (encabezado + pie).
          *
-         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centros.read` y pedirlo habría
+         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centers.read` y pedirlo habría
          *     tumbado la impresión de facturas. Lo que se comprueba es el CENTRO pedido — el de la sesión pasa
          *     sin preguntar, otro exige el permiso EN él. Antes no se comprobaba nada y cualquiera leía el
          *     nombre legal, el registro fiscal y el pie de factura del otro centro por su id.
@@ -1263,7 +1643,7 @@ export interface paths {
         /**
          * Datos fiscales del centro para la impresión de factura (encabezado + pie).
          *
-         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centros.read` y pedirlo habría
+         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centers.read` y pedirlo habría
          *     tumbado la impresión de facturas. Lo que se comprueba es el CENTRO pedido — el de la sesión pasa
          *     sin preguntar, otro exige el permiso EN él. Antes no se comprobaba nada y cualquiera leía el
          *     nombre legal, el registro fiscal y el pie de factura del otro centro por su id.
@@ -1288,7 +1668,7 @@ export interface paths {
         /**
          * Datos fiscales del centro para la impresión de factura (encabezado + pie).
          *
-         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centros.read` y pedirlo habría
+         *     No exige un permiso nuevo a propósito: `facturacion` NO tiene `centers.read` y pedirlo habría
          *     tumbado la impresión de facturas. Lo que se comprueba es el CENTRO pedido — el de la sesión pasa
          *     sin preguntar, otro exige el permiso EN él. Antes no se comprobaba nada y cualquiera leía el
          *     nombre legal, el registro fiscal y el pie de factura del otro centro por su id.
@@ -1315,7 +1695,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/diarias`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `statistics.multi_center` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[0]_v1"];
         put?: never;
@@ -1338,7 +1718,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/estadisticas/daily`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `statistics.multi_center` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[1]_v1"];
         put?: never;
@@ -1361,7 +1741,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/diarias`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `statistics.multi_center` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[2]_v1"];
         put?: never;
@@ -1384,7 +1764,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/statistics/daily`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         *     Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `statistics.multi_center` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[3]_v1"];
         put?: never;
@@ -1404,7 +1784,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `statistics.multi_center` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[4]_v2"];
         put?: never;
@@ -1424,7 +1804,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `statistics.multi_center` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[5]_v2"];
         put?: never;
@@ -1444,7 +1824,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `statistics.multi_center` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[6]_v2"];
         put?: never;
@@ -1464,7 +1844,7 @@ export interface paths {
         };
         /**
          * Estadísticas diarias (cierre del gerente)
-         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `estadisticas.multicentro` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
+         * @description Atención médica ATENDIDA separada en nuevas (N) y seguimientos (S); por cada servicio, `aplicados` (sesiones entregadas ese día en el frontdesk: el trabajo hecho) y `vendidos` (sesiones que prometieron las facturas del día: lo cobrado) — no coinciden ni tienen por qué; `visits` (sesiones asistidas: los pacientes) y `therapies` (unidades: áreas del láser, viales/dosis donde el servicio declara `statisticsUnitKey`, si no 1 por visita; la misma cifra que `therapies` de /estadisticas/servicios). `aplicados` no cambia y coincide con `therapies` salvo en los servicios con `statisticsUnitKey`; y el ingreso (bruto, `devoluciones` e `ingresoNeto`), tomado del mismo sitio que el cuadre de caja: una devolución cuenta en SU fecha, sea cual sea la fecha de la factura, y `devueltos` da las sesiones devueltas por servicio. Solo aparecen los servicios con actividad. Centro: el de la sesión — cada centro tiene su propio cierre y no se comparte. Ver los centros COMBINADOS exige el permiso `statistics.multi_center` (dirección y desarrollo); sin él y sin centro fijado responde 400 pidiendo elegir centro.
          */
         get: operations["EstadisticasController_diarias[7]_v2"];
         put?: never;
@@ -7315,7 +7695,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/emitir`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`factura.retroactivo`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
+         *     `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`invoice.retroactive`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
          */
         post: operations["FacturacionController_emitir[0]_v1"];
         delete?: never;
@@ -7338,7 +7718,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/issue`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`factura.retroactivo`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
+         *     `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`invoice.retroactive`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
          */
         post: operations["FacturacionController_emitir[1]_v1"];
         delete?: never;
@@ -7361,7 +7741,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/emitir`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`factura.retroactivo`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
+         *     `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`invoice.retroactive`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
          */
         post: operations["FacturacionController_emitir[2]_v1"];
         delete?: never;
@@ -7384,7 +7764,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/issue`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`factura.retroactivo`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
+         *     `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`invoice.retroactive`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
          */
         post: operations["FacturacionController_emitir[3]_v1"];
         delete?: never;
@@ -7404,7 +7784,7 @@ export interface paths {
         put?: never;
         /**
          * Emitir la factura (sella número y fecha).
-         * @description `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`factura.retroactivo`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
+         * @description `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`invoice.retroactive`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
          */
         post: operations["FacturacionController_emitir[4]_v2"];
         delete?: never;
@@ -7424,7 +7804,7 @@ export interface paths {
         put?: never;
         /**
          * Emitir la factura (sella número y fecha).
-         * @description `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`factura.retroactivo`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
+         * @description `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`invoice.retroactive`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
          */
         post: operations["FacturacionController_emitir[5]_v2"];
         delete?: never;
@@ -7444,7 +7824,7 @@ export interface paths {
         put?: never;
         /**
          * Emitir la factura (sella número y fecha).
-         * @description `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`factura.retroactivo`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
+         * @description `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`invoice.retroactive`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
          */
         post: operations["FacturacionController_emitir[6]_v2"];
         delete?: never;
@@ -7464,7 +7844,7 @@ export interface paths {
         put?: never;
         /**
          * Emitir la factura (sella número y fecha).
-         * @description `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`factura.retroactivo`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
+         * @description `soloRegistro: true` emite el REGISTRO ECONÓMICO y nada más: sin descargar inventario y sin crear disponibilidad de sesiones. Es para ventas que ya ocurrieron EN EL LEGADO y se traen aquí —una factura vieja que hay que devolver, o la migración del histórico—: allá el producto ya salió del estante y el paciente ya recibió sus sesiones. Exige el permiso retroactivo (`invoice.retroactive`), el mismo que el sello del legado. Sin la bandera, emitir descarga como siempre.
          */
         post: operations["FacturacionController_emitir[7]_v2"];
         delete?: never;
@@ -8932,7 +9312,12 @@ export interface paths {
         delete: operations["FacturacionController_anularPago[0]_v1"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Cambia QUIÉN cobró un pago activo (mismo pago y monto, sin anular). Respeta el día de caja cerrado. / Changes who charged an active payment.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/pagos/{pagoId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["PaymentUserController_reassign[0]_v1"];
         trace?: never;
     };
     "/api/v1/facturas/{id}/payments/{pagoId}": {
@@ -8958,7 +9343,12 @@ export interface paths {
         delete: operations["FacturacionController_anularPago[1]_v1"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Cambia QUIÉN cobró un pago activo (mismo pago y monto, sin anular). Respeta el día de caja cerrado. / Changes who charged an active payment.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/payments/{pagoId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["PaymentUserController_reassign[1]_v1"];
         trace?: never;
     };
     "/api/v1/invoices/{id}/pagos/{pagoId}": {
@@ -8984,7 +9374,12 @@ export interface paths {
         delete: operations["FacturacionController_anularPago[2]_v1"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Cambia QUIÉN cobró un pago activo (mismo pago y monto, sin anular). Respeta el día de caja cerrado. / Changes who charged an active payment.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/pagos/{pagoId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["PaymentUserController_reassign[2]_v1"];
         trace?: never;
     };
     "/api/v1/invoices/{id}/payments/{pagoId}": {
@@ -9010,7 +9405,12 @@ export interface paths {
         delete: operations["FacturacionController_anularPago[3]_v1"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Cambia QUIÉN cobró un pago activo (mismo pago y monto, sin anular). Respeta el día de caja cerrado. / Changes who charged an active payment.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/payments/{pagoId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["PaymentUserController_reassign[3]_v1"];
         trace?: never;
     };
     "/api/v2/facturas/{id}/pagos/{pagoId}": {
@@ -9028,7 +9428,8 @@ export interface paths {
         delete: operations["FacturacionController_anularPago[4]_v2"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Cambia QUIÉN cobró un pago activo (mismo pago y monto, sin anular). Respeta el día de caja cerrado. / Changes who charged an active payment. */
+        patch: operations["PaymentUserController_reassign[4]_v2"];
         trace?: never;
     };
     "/api/v2/facturas/{id}/payments/{pagoId}": {
@@ -9046,7 +9447,8 @@ export interface paths {
         delete: operations["FacturacionController_anularPago[5]_v2"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Cambia QUIÉN cobró un pago activo (mismo pago y monto, sin anular). Respeta el día de caja cerrado. / Changes who charged an active payment. */
+        patch: operations["PaymentUserController_reassign[5]_v2"];
         trace?: never;
     };
     "/api/v2/invoices/{id}/pagos/{pagoId}": {
@@ -9064,7 +9466,8 @@ export interface paths {
         delete: operations["FacturacionController_anularPago[6]_v2"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Cambia QUIÉN cobró un pago activo (mismo pago y monto, sin anular). Respeta el día de caja cerrado. / Changes who charged an active payment. */
+        patch: operations["PaymentUserController_reassign[6]_v2"];
         trace?: never;
     };
     "/api/v2/invoices/{id}/payments/{pagoId}": {
@@ -9082,7 +9485,8 @@ export interface paths {
         delete: operations["FacturacionController_anularPago[7]_v2"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Cambia QUIÉN cobró un pago activo (mismo pago y monto, sin anular). Respeta el día de caja cerrado. / Changes who charged an active payment. */
+        patch: operations["PaymentUserController_reassign[7]_v2"];
         trace?: never;
     };
     "/api/v1/facturacion/reportes/resumen": {
@@ -11965,7 +12369,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes.
+         * Corrige el motivo, las notas, QUIÉN hizo la devolución (usuarioId; en v2 userId: la devolución y sus reembolsos activos pasan a ese cajero en un paso, sin anular nada) y/o QUIÉN la anuló (anuladaPor; en v2 cancelledBy; solo si está anulada). Queda en el registro de cambios. / Edits a refund reason, notes, who made it and/or who voided it.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/devoluciones/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -11996,7 +12400,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes.
+         * Corrige el motivo, las notas, QUIÉN hizo la devolución (usuarioId; en v2 userId: la devolución y sus reembolsos activos pasan a ese cajero en un paso, sin anular nada) y/o QUIÉN la anuló (anuladaPor; en v2 cancelledBy; solo si está anulada). Queda en el registro de cambios. / Edits a refund reason, notes, who made it and/or who voided it.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/refunds/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -12027,7 +12431,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes.
+         * Corrige el motivo, las notas, QUIÉN hizo la devolución (usuarioId; en v2 userId: la devolución y sus reembolsos activos pasan a ese cajero en un paso, sin anular nada) y/o QUIÉN la anuló (anuladaPor; en v2 cancelledBy; solo si está anulada). Queda en el registro de cambios. / Edits a refund reason, notes, who made it and/or who voided it.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/devoluciones/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -12058,7 +12462,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes.
+         * Corrige el motivo, las notas, QUIÉN hizo la devolución (usuarioId; en v2 userId: la devolución y sus reembolsos activos pasan a ese cajero en un paso, sin anular nada) y/o QUIÉN la anuló (anuladaPor; en v2 cancelledBy; solo si está anulada). Queda en el registro de cambios. / Edits a refund reason, notes, who made it and/or who voided it.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/refunds/{devolucionId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -12080,7 +12484,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes. */
+        /** Corrige el motivo, las notas, QUIÉN hizo la devolución (usuarioId; en v2 userId: la devolución y sus reembolsos activos pasan a ese cajero en un paso, sin anular nada) y/o QUIÉN la anuló (anuladaPor; en v2 cancelledBy; solo si está anulada). Queda en el registro de cambios. / Edits a refund reason, notes, who made it and/or who voided it. */
         patch: operations["RefundRepairController_update[4]_v2"];
         trace?: never;
     };
@@ -12099,7 +12503,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes. */
+        /** Corrige el motivo, las notas, QUIÉN hizo la devolución (usuarioId; en v2 userId: la devolución y sus reembolsos activos pasan a ese cajero en un paso, sin anular nada) y/o QUIÉN la anuló (anuladaPor; en v2 cancelledBy; solo si está anulada). Queda en el registro de cambios. / Edits a refund reason, notes, who made it and/or who voided it. */
         patch: operations["RefundRepairController_update[5]_v2"];
         trace?: never;
     };
@@ -12118,7 +12522,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes. */
+        /** Corrige el motivo, las notas, QUIÉN hizo la devolución (usuarioId; en v2 userId: la devolución y sus reembolsos activos pasan a ese cajero en un paso, sin anular nada) y/o QUIÉN la anuló (anuladaPor; en v2 cancelledBy; solo si está anulada). Queda en el registro de cambios. / Edits a refund reason, notes, who made it and/or who voided it. */
         patch: operations["RefundRepairController_update[6]_v2"];
         trace?: never;
     };
@@ -12137,7 +12541,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Corrige el motivo y las notas de una devolución (queda en el registro de cambios). / Edits a refund reason and notes. */
+        /** Corrige el motivo, las notas, QUIÉN hizo la devolución (usuarioId; en v2 userId: la devolución y sus reembolsos activos pasan a ese cajero en un paso, sin anular nada) y/o QUIÉN la anuló (anuladaPor; en v2 cancelledBy; solo si está anulada). Queda en el registro de cambios. / Edits a refund reason, notes, who made it and/or who voided it. */
         patch: operations["RefundRepairController_update[7]_v2"];
         trace?: never;
     };
@@ -12757,7 +13161,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Refunds of every center where the caller holds `factura.read` (admin: all), narrowed by
+         * Refunds of every center where the caller holds `invoice.read` (admin: all), narrowed by
          *     `centerIds`; each row with its center and numbered with ITS center's series.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturacion/devoluciones`, que devuelve lo mismo con los nombres en inglés.
@@ -12779,7 +13183,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Refunds of every center where the caller holds `factura.read` (admin: all), narrowed by
+         * Refunds of every center where the caller holds `invoice.read` (admin: all), narrowed by
          *     `centerIds`; each row with its center and numbered with ITS center's series.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/billing/refunds`, que devuelve lo mismo con los nombres en inglés.
@@ -12801,7 +13205,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Refunds of every center where the caller holds `factura.read` (admin: all), narrowed by
+         * Refunds of every center where the caller holds `invoice.read` (admin: all), narrowed by
          *     `centerIds`; each row with its center and numbered with ITS center's series.
          */
         get: operations["DevolucionesController_list[2]_v2"];
@@ -12821,7 +13225,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Refunds of every center where the caller holds `factura.read` (admin: all), narrowed by
+         * Refunds of every center where the caller holds `invoice.read` (admin: all), narrowed by
          *     `centerIds`; each row with its center and numbered with ITS center's series.
          */
         get: operations["DevolucionesController_list[3]_v2"];
@@ -14077,7 +14481,7 @@ export interface paths {
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
          *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
-         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         *     `prices.read` comprobado en él, si no 403), o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/catalogo`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -14100,7 +14504,7 @@ export interface paths {
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
          *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
-         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         *     `prices.read` comprobado en él, si no 403), o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/catalog`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -14123,7 +14527,7 @@ export interface paths {
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
          *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
-         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         *     `prices.read` comprobado en él, si no 403), o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/catalogo`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -14146,7 +14550,7 @@ export interface paths {
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
          *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
-         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         *     `prices.read` comprobado en él, si no 403), o el de la sesión.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/catalog`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -14169,7 +14573,7 @@ export interface paths {
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
          *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
-         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         *     `prices.read` comprobado en él, si no 403), o el de la sesión.
          */
         get: operations["PreciosController_catalogo[4]_v2"];
         put?: never;
@@ -14190,7 +14594,7 @@ export interface paths {
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
          *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
-         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         *     `prices.read` comprobado en él, si no 403), o el de la sesión.
          */
         get: operations["PreciosController_catalogo[5]_v2"];
         put?: never;
@@ -14211,7 +14615,7 @@ export interface paths {
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
          *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
-         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         *     `prices.read` comprobado en él, si no 403), o el de la sesión.
          */
         get: operations["PreciosController_catalogo[6]_v2"];
         put?: never;
@@ -14232,7 +14636,7 @@ export interface paths {
         /**
          * Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda.
          *     Es UNA lista de precios, resuelta para un centro: `centerIds[0]` o `clinicId` (los dos con
-         *     `precios.read` comprobado en él, si no 403), o el de la sesión.
+         *     `prices.read` comprobado en él, si no 403), o el de la sesión.
          */
         get: operations["PreciosController_catalogo[7]_v2"];
         put?: never;
@@ -19145,7 +19549,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tablero/definicion`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `tablero.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         *     Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
          */
         get: operations["TablerosController_definicion[0]_v1"];
         put?: never;
@@ -19168,7 +19572,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/board/definition`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `tablero.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         *     Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
          */
         get: operations["TablerosController_definicion[1]_v1"];
         put?: never;
@@ -19188,7 +19592,7 @@ export interface paths {
         };
         /**
          * Definición efectiva de un tablero
-         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `tablero.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
          */
         get: operations["TablerosController_definicion[2]_v2"];
         put?: never;
@@ -19208,7 +19612,7 @@ export interface paths {
         };
         /**
          * Definición efectiva de un tablero
-         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `tablero.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
          */
         get: operations["TablerosController_definicion[3]_v2"];
         put?: never;
@@ -25782,7 +26186,7 @@ export interface paths {
         get: operations["AjustesController_listar[0]_v1"];
         put?: never;
         /**
-         * Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí.
+         * Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí. Con fecha pasada: inventory.retroactive, ventana del centro, motivo y confirmación (428).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -25808,7 +26212,7 @@ export interface paths {
         get: operations["AjustesController_listar[1]_v1"];
         put?: never;
         /**
-         * Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí.
+         * Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí. Con fecha pasada: inventory.retroactive, ventana del centro, motivo y confirmación (428).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -25829,7 +26233,7 @@ export interface paths {
         /** Los ajustes de un periodo, uno por documento (por defecto, los últimos 30 días). */
         get: operations["AjustesController_listar[2]_v2"];
         put?: never;
-        /** Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí. */
+        /** Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí. Con fecha pasada: inventory.retroactive, ventana del centro, motivo y confirmación (428). */
         post: operations["AjustesController_crear[2]_v2"];
         delete?: never;
         options?: never;
@@ -25847,8 +26251,336 @@ export interface paths {
         /** Los ajustes de un periodo, uno por documento (por defecto, los últimos 30 días). */
         get: operations["AjustesController_listar[3]_v2"];
         put?: never;
-        /** Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí. */
+        /** Un ajuste con uno o varios productos: todo o nada, un documento y un número consecutivo por centro. El centro es el del almacén; hay que poder ajustar allí. Con fecha pasada: inventory.retroactive, ventana del centro, motivo y confirmación (428). */
         post: operations["AjustesController_crear[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/ajustes/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Qué haría el ajuste, sin escribir nada: saldo de cada día desde la fecha efectiva hasta hoy (antes/después), días que pasan a negativo, inicial de cada mes, conteos y cierres afectados, y lo que el POST rechazaría.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes/previa`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["AjustesController_previa[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/ajustes/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Qué haría el ajuste, sin escribir nada: saldo de cada día desde la fecha efectiva hasta hoy (antes/después), días que pasan a negativo, inicial de cada mes, conteos y cierres afectados, y lo que el POST rechazaría.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes/preview`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["AjustesController_previa[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/adjustments/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Qué haría el ajuste, sin escribir nada: saldo de cada día desde la fecha efectiva hasta hoy (antes/después), días que pasan a negativo, inicial de cada mes, conteos y cierres afectados, y lo que el POST rechazaría.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments/previa`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["AjustesController_previa[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/adjustments/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Qué haría el ajuste, sin escribir nada: saldo de cada día desde la fecha efectiva hasta hoy (antes/después), días que pasan a negativo, inicial de cada mes, conteos y cierres afectados, y lo que el POST rechazaría.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments/preview`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["AjustesController_previa[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/ajustes/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Qué haría el ajuste, sin escribir nada: saldo de cada día desde la fecha efectiva hasta hoy (antes/después), días que pasan a negativo, inicial de cada mes, conteos y cierres afectados, y lo que el POST rechazaría. */
+        post: operations["AjustesController_previa[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/ajustes/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Qué haría el ajuste, sin escribir nada: saldo de cada día desde la fecha efectiva hasta hoy (antes/después), días que pasan a negativo, inicial de cada mes, conteos y cierres afectados, y lo que el POST rechazaría. */
+        post: operations["AjustesController_previa[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/adjustments/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Qué haría el ajuste, sin escribir nada: saldo de cada día desde la fecha efectiva hasta hoy (antes/después), días que pasan a negativo, inicial de cada mes, conteos y cierres afectados, y lo que el POST rechazaría. */
+        post: operations["AjustesController_previa[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/adjustments/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Qué haría el ajuste, sin escribir nada: saldo de cada día desde la fecha efectiva hasta hoy (antes/después), días que pasan a negativo, inicial de cada mes, conteos y cierres afectados, y lo que el POST rechazaría. */
+        post: operations["AjustesController_previa[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/ajustes/retroactiva/configuracion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Las reglas de ajustes con fecha pasada de cada centro visible: maxDays y negativeBalance.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes/retroactiva/configuracion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AjustesController_configuracion[0]_v1"];
+        /**
+         * Cambia las reglas de ajustes con fecha pasada de UN centro (clinicId o el de la sesión), con inventory.backdate_settings allí. Devuelve { clinicId, previous, current }.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes/retroactiva/configuracion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["AjustesController_cambiarConfiguracion[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/ajustes/retroactive/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Las reglas de ajustes con fecha pasada de cada centro visible: maxDays y negativeBalance.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes/retroactive/settings`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AjustesController_configuracion[1]_v1"];
+        /**
+         * Cambia las reglas de ajustes con fecha pasada de UN centro (clinicId o el de la sesión), con inventory.backdate_settings allí. Devuelve { clinicId, previous, current }.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/ajustes/retroactive/settings`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["AjustesController_cambiarConfiguracion[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/adjustments/retroactiva/configuracion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Las reglas de ajustes con fecha pasada de cada centro visible: maxDays y negativeBalance.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments/retroactiva/configuracion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AjustesController_configuracion[2]_v1"];
+        /**
+         * Cambia las reglas de ajustes con fecha pasada de UN centro (clinicId o el de la sesión), con inventory.backdate_settings allí. Devuelve { clinicId, previous, current }.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments/retroactiva/configuracion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["AjustesController_cambiarConfiguracion[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/adjustments/retroactive/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Las reglas de ajustes con fecha pasada de cada centro visible: maxDays y negativeBalance.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments/retroactive/settings`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AjustesController_configuracion[3]_v1"];
+        /**
+         * Cambia las reglas de ajustes con fecha pasada de UN centro (clinicId o el de la sesión), con inventory.backdate_settings allí. Devuelve { clinicId, previous, current }.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/adjustments/retroactive/settings`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["AjustesController_cambiarConfiguracion[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/ajustes/retroactiva/configuracion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Las reglas de ajustes con fecha pasada de cada centro visible: maxDays y negativeBalance. */
+        get: operations["AjustesController_configuracion[4]_v2"];
+        /** Cambia las reglas de ajustes con fecha pasada de UN centro (clinicId o el de la sesión), con inventory.backdate_settings allí. Devuelve { clinicId, previous, current }. */
+        put: operations["AjustesController_cambiarConfiguracion[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/ajustes/retroactive/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Las reglas de ajustes con fecha pasada de cada centro visible: maxDays y negativeBalance. */
+        get: operations["AjustesController_configuracion[5]_v2"];
+        /** Cambia las reglas de ajustes con fecha pasada de UN centro (clinicId o el de la sesión), con inventory.backdate_settings allí. Devuelve { clinicId, previous, current }. */
+        put: operations["AjustesController_cambiarConfiguracion[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/adjustments/retroactiva/configuracion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Las reglas de ajustes con fecha pasada de cada centro visible: maxDays y negativeBalance. */
+        get: operations["AjustesController_configuracion[6]_v2"];
+        /** Cambia las reglas de ajustes con fecha pasada de UN centro (clinicId o el de la sesión), con inventory.backdate_settings allí. Devuelve { clinicId, previous, current }. */
+        put: operations["AjustesController_cambiarConfiguracion[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/adjustments/retroactive/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Las reglas de ajustes con fecha pasada de cada centro visible: maxDays y negativeBalance. */
+        get: operations["AjustesController_configuracion[7]_v2"];
+        /** Cambia las reglas de ajustes con fecha pasada de UN centro (clinicId o el de la sesión), con inventory.backdate_settings allí. Devuelve { clinicId, previous, current }. */
+        put: operations["AjustesController_cambiarConfiguracion[7]_v2"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -37771,7 +38503,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with factura.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary.
+         * The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with invoice.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/resumen-por-medico`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -37792,7 +38524,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with factura.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary.
+         * The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with invoice.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/summary-by-doctor`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -37812,7 +38544,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with factura.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary. */
+        /** The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with invoice.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary. */
         get: operations["DoctorDaySummaryController_get[2]_v2"];
         put?: never;
         post?: never;
@@ -37829,7 +38561,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with factura.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary. */
+        /** The day's consultations per doctor: carried (attended + in consultation + waiting), scheduled, counts per appointment type, and each appointment (record, patient, doctor, nurse, type, stage, time, front-desk user, invoice amount and payment methods). Money only with invoice.read. Print/CSV/email: POST /export with recurso appointments-doctor-summary. */
         get: operations["DoctorDaySummaryController_get[3]_v2"];
         put?: never;
         post?: never;
@@ -41129,7 +41861,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name).
+         * Retroactive repair of a past day: privileged, opened by `appointments.repair` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/{id}/reparar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -41150,7 +41882,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name).
+         * Retroactive repair of a past day: privileged, opened by `appointments.repair` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/{id}/repair`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -41171,7 +41903,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name).
+         * Retroactive repair of a past day: privileged, opened by `appointments.repair` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/{id}/reparar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -41192,7 +41924,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name).
+         * Retroactive repair of a past day: privileged, opened by `appointments.repair` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/{id}/repair`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -41212,7 +41944,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name). */
+        /** Retroactive repair of a past day: privileged, opened by `appointments.repair` alone (not a role name). */
         post: operations["CitasController_reparar[4]_v2"];
         delete?: never;
         options?: never;
@@ -41229,7 +41961,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name). */
+        /** Retroactive repair of a past day: privileged, opened by `appointments.repair` alone (not a role name). */
         post: operations["CitasController_reparar[5]_v2"];
         delete?: never;
         options?: never;
@@ -41246,7 +41978,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name). */
+        /** Retroactive repair of a past day: privileged, opened by `appointments.repair` alone (not a role name). */
         post: operations["CitasController_reparar[6]_v2"];
         delete?: never;
         options?: never;
@@ -41263,7 +41995,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Retroactive repair of a past day: privileged, opened by `citas.reparar` alone (not a role name). */
+        /** Retroactive repair of a past day: privileged, opened by `appointments.repair` alone (not a role name). */
         post: operations["CitasController_reparar[7]_v2"];
         delete?: never;
         options?: never;
@@ -51723,7 +52455,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/presentes`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Una fila por servicio activo del centro con cuánta gente está PRESENTE, más el total. Cuenta solo el estado `presente`: en terapia ya está siendo atendido y asistido ya terminó, igual que la burbuja del legado. Los servicios sin nadie salen con cero —esconderlos es una preferencia de quien mira—, y se devuelven el color, el icono y el orden del servicio para que la barra no los invente. Sin `fecha`, hoy en la zona del centro (`centros.zonaHoraria`). Se refresca por el SSE de /frontdesk/stream. Mismo acceso que el tablero: no declara un permiso propio a propósito — hacerlo cambiaría la puerta (`RolesGuard` se aparta cuando hay `@Permissions`) y el rol facturación, que hoy ve el tablero con `tablero.read`, recibiría 403 aquí.
+         *     Una fila por servicio activo del centro con cuánta gente está PRESENTE, más el total. Cuenta solo el estado `presente`: en terapia ya está siendo atendido y asistido ya terminó, igual que la burbuja del legado. Los servicios sin nadie salen con cero —esconderlos es una preferencia de quien mira—, y se devuelven el color, el icono y el orden del servicio para que la barra no los invente. Sin `fecha`, hoy en la zona del centro (`centros.zonaHoraria`). Se refresca por el SSE de /frontdesk/stream. Mismo acceso que el tablero: no declara un permiso propio a propósito — hacerlo cambiaría la puerta (`RolesGuard` se aparta cuando hay `@Permissions`) y el rol facturación, que hoy ve el tablero con `board.read`, recibiría 403 aquí.
          */
         get: operations["FrontdeskController_presentes[0]_v1"];
         put?: never;
@@ -51746,7 +52478,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/present`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Una fila por servicio activo del centro con cuánta gente está PRESENTE, más el total. Cuenta solo el estado `presente`: en terapia ya está siendo atendido y asistido ya terminó, igual que la burbuja del legado. Los servicios sin nadie salen con cero —esconderlos es una preferencia de quien mira—, y se devuelven el color, el icono y el orden del servicio para que la barra no los invente. Sin `fecha`, hoy en la zona del centro (`centros.zonaHoraria`). Se refresca por el SSE de /frontdesk/stream. Mismo acceso que el tablero: no declara un permiso propio a propósito — hacerlo cambiaría la puerta (`RolesGuard` se aparta cuando hay `@Permissions`) y el rol facturación, que hoy ve el tablero con `tablero.read`, recibiría 403 aquí.
+         *     Una fila por servicio activo del centro con cuánta gente está PRESENTE, más el total. Cuenta solo el estado `presente`: en terapia ya está siendo atendido y asistido ya terminó, igual que la burbuja del legado. Los servicios sin nadie salen con cero —esconderlos es una preferencia de quien mira—, y se devuelven el color, el icono y el orden del servicio para que la barra no los invente. Sin `fecha`, hoy en la zona del centro (`centros.zonaHoraria`). Se refresca por el SSE de /frontdesk/stream. Mismo acceso que el tablero: no declara un permiso propio a propósito — hacerlo cambiaría la puerta (`RolesGuard` se aparta cuando hay `@Permissions`) y el rol facturación, que hoy ve el tablero con `board.read`, recibiría 403 aquí.
          */
         get: operations["FrontdeskController_presentes[1]_v1"];
         put?: never;
@@ -51766,7 +52498,7 @@ export interface paths {
         };
         /**
          * Presentes ahora en cada servicio
-         * @description Una fila por servicio activo del centro con cuánta gente está PRESENTE, más el total. Cuenta solo el estado `presente`: en terapia ya está siendo atendido y asistido ya terminó, igual que la burbuja del legado. Los servicios sin nadie salen con cero —esconderlos es una preferencia de quien mira—, y se devuelven el color, el icono y el orden del servicio para que la barra no los invente. Sin `fecha`, hoy en la zona del centro (`centros.zonaHoraria`). Se refresca por el SSE de /frontdesk/stream. Mismo acceso que el tablero: no declara un permiso propio a propósito — hacerlo cambiaría la puerta (`RolesGuard` se aparta cuando hay `@Permissions`) y el rol facturación, que hoy ve el tablero con `tablero.read`, recibiría 403 aquí.
+         * @description Una fila por servicio activo del centro con cuánta gente está PRESENTE, más el total. Cuenta solo el estado `presente`: en terapia ya está siendo atendido y asistido ya terminó, igual que la burbuja del legado. Los servicios sin nadie salen con cero —esconderlos es una preferencia de quien mira—, y se devuelven el color, el icono y el orden del servicio para que la barra no los invente. Sin `fecha`, hoy en la zona del centro (`centros.zonaHoraria`). Se refresca por el SSE de /frontdesk/stream. Mismo acceso que el tablero: no declara un permiso propio a propósito — hacerlo cambiaría la puerta (`RolesGuard` se aparta cuando hay `@Permissions`) y el rol facturación, que hoy ve el tablero con `board.read`, recibiría 403 aquí.
          */
         get: operations["FrontdeskController_presentes[2]_v2"];
         put?: never;
@@ -51786,7 +52518,7 @@ export interface paths {
         };
         /**
          * Presentes ahora en cada servicio
-         * @description Una fila por servicio activo del centro con cuánta gente está PRESENTE, más el total. Cuenta solo el estado `presente`: en terapia ya está siendo atendido y asistido ya terminó, igual que la burbuja del legado. Los servicios sin nadie salen con cero —esconderlos es una preferencia de quien mira—, y se devuelven el color, el icono y el orden del servicio para que la barra no los invente. Sin `fecha`, hoy en la zona del centro (`centros.zonaHoraria`). Se refresca por el SSE de /frontdesk/stream. Mismo acceso que el tablero: no declara un permiso propio a propósito — hacerlo cambiaría la puerta (`RolesGuard` se aparta cuando hay `@Permissions`) y el rol facturación, que hoy ve el tablero con `tablero.read`, recibiría 403 aquí.
+         * @description Una fila por servicio activo del centro con cuánta gente está PRESENTE, más el total. Cuenta solo el estado `presente`: en terapia ya está siendo atendido y asistido ya terminó, igual que la burbuja del legado. Los servicios sin nadie salen con cero —esconderlos es una preferencia de quien mira—, y se devuelven el color, el icono y el orden del servicio para que la barra no los invente. Sin `fecha`, hoy en la zona del centro (`centros.zonaHoraria`). Se refresca por el SSE de /frontdesk/stream. Mismo acceso que el tablero: no declara un permiso propio a propósito — hacerlo cambiaría la puerta (`RolesGuard` se aparta cuando hay `@Permissions`) y el rol facturación, que hoy ve el tablero con `board.read`, recibiría 403 aquí.
          */
         get: operations["FrontdeskController_presentes[3]_v2"];
         put?: never;
@@ -53461,7 +54193,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Retroactive repair: privileged, opened by `frontdesk.reparar` alone (not a role name).
+         * Retroactive repair: privileged, opened by `frontdesk.repair` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/reparar`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -53482,7 +54214,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Retroactive repair: privileged, opened by `frontdesk.reparar` alone (not a role name).
+         * Retroactive repair: privileged, opened by `frontdesk.repair` alone (not a role name).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/repair`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -53502,7 +54234,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Retroactive repair: privileged, opened by `frontdesk.reparar` alone (not a role name). */
+        /** Retroactive repair: privileged, opened by `frontdesk.repair` alone (not a role name). */
         post: operations["FrontdeskController_reparar[2]_v2"];
         delete?: never;
         options?: never;
@@ -53519,7 +54251,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Retroactive repair: privileged, opened by `frontdesk.reparar` alone (not a role name). */
+        /** Retroactive repair: privileged, opened by `frontdesk.repair` alone (not a role name). */
         post: operations["FrontdeskController_reparar[3]_v2"];
         delete?: never;
         options?: never;
@@ -54211,6 +54943,158 @@ export interface paths {
         put?: never;
         /** For a patient with NO invoice of the new system (straight from the legacy): the session number typed on the printed format (n of total) creates or adjusts an invoice-less package of the format product (reports[].productSku, else the service product), with n−1 lived in the legacy plus this visit if attended. Only if the service allows fixing sessions without a package. Never blocks printing: 200 with applied=false and the reason otherwise. */
         post: operations["SessionSheetController_legacyNumber[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sesiones/{id}/etiqueta-legado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Corrects the «n/m» of ONE session migrated from the legacy (legacy_origin servicio). Ours are numbered by their package: 409.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/etiqueta-legado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["LegacySessionLabelController_correctOne[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sessions/{id}/legacy-label": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Corrects the «n/m» of ONE session migrated from the legacy (legacy_origin servicio). Ours are numbered by their package: 409.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/legacy-label`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["LegacySessionLabelController_correctOne[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sesiones/{id}/etiqueta-legado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Corrects the «n/m» of ONE session migrated from the legacy (legacy_origin servicio). Ours are numbered by their package: 409. */
+        post: operations["LegacySessionLabelController_correctOne[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sessions/{id}/legacy-label": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Corrects the «n/m» of ONE session migrated from the legacy (legacy_origin servicio). Ours are numbered by their package: 409. */
+        post: operations["LegacySessionLabelController_correctOne[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/pacientes/{patientId}/servicios/{serviceId}/renumerar-legado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renumbers a patient's migrated sessions of a service in date order (from startAt, default 1) with one total. preview=true returns the plan without writing; only rows that change are written.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/pacientes/{patientId}/servicios/{serviceId}/renumerar-legado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["LegacySessionLabelController_renumber[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/patients/{patientId}/services/{serviceId}/legacy-renumber": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renumbers a patient's migrated sessions of a service in date order (from startAt, default 1) with one total. preview=true returns the plan without writing; only rows that change are written.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/patients/{patientId}/services/{serviceId}/legacy-renumber`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["LegacySessionLabelController_renumber[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/pacientes/{patientId}/servicios/{serviceId}/renumerar-legado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Renumbers a patient's migrated sessions of a service in date order (from startAt, default 1) with one total. preview=true returns the plan without writing; only rows that change are written. */
+        post: operations["LegacySessionLabelController_renumber[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/patients/{patientId}/services/{serviceId}/legacy-renumber": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Renumbers a patient's migrated sessions of a service in date order (from startAt, default 1) with one total. preview=true returns the plan without writing; only rows that change are written. */
+        post: operations["LegacySessionLabelController_renumber[3]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -60639,8 +61523,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`caja.reabrir`), no
-         *     `caja.cerrar`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
+         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`billing.reopen`), no
+         *     `billing.close`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/cuadres/{id}/reabrir`, que devuelve lo mismo con los nombres en inglés.
@@ -60662,8 +61546,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`caja.reabrir`), no
-         *     `caja.cerrar`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
+         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`billing.reopen`), no
+         *     `billing.close`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/caja/reconciliations/{id}/reopen`, que devuelve lo mismo con los nombres en inglés.
@@ -60685,8 +61569,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`caja.reabrir`), no
-         *     `caja.cerrar`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
+         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`billing.reopen`), no
+         *     `billing.close`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/cuadres/{id}/reabrir`, que devuelve lo mismo con los nombres en inglés.
@@ -60708,8 +61592,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`caja.reabrir`), no
-         *     `caja.cerrar`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
+         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`billing.reopen`), no
+         *     `billing.close`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/cash/reconciliations/{id}/reopen`, que devuelve lo mismo con los nombres en inglés.
@@ -60731,8 +61615,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`caja.reabrir`), no
-         *     `caja.cerrar`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
+         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`billing.reopen`), no
+         *     `billing.close`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          */
         post: operations["CajaController_reabrir[4]_v2"];
@@ -60752,8 +61636,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`caja.reabrir`), no
-         *     `caja.cerrar`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
+         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`billing.reopen`), no
+         *     `billing.close`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          */
         post: operations["CajaController_reabrir[5]_v2"];
@@ -60773,8 +61657,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`caja.reabrir`), no
-         *     `caja.cerrar`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
+         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`billing.reopen`), no
+         *     `billing.close`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          */
         post: operations["CajaController_reabrir[6]_v2"];
@@ -60794,8 +61678,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`caja.reabrir`), no
-         *     `caja.cerrar`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
+         * Vuelve a abrir un cuadre cerrado para corregirlo. Permiso PROPIO (`billing.reopen`), no
+         *     `billing.close`: deshacer un cierre es supervisión, no la operación diaria de quien cuenta el
          *     dinero — y quién lo tiene es un dato de RBAC, no un nombre de rol en el código.
          */
         post: operations["CajaController_reabrir[7]_v2"];
@@ -64438,7 +65322,7 @@ export interface components {
             transferredFromPackageId: string | null;
             transferidoDePaqueteIdRef?: Record<string, never>;
             /** @enum {string} */
-            status: "activo" | "consumido" | "anulado" | "reemplazado" | "devuelto";
+            status: "activo" | "consumido" | "anulado" | "devuelto" | "reemplazado";
             meta: Record<string, never> | null;
             legacyOrigin: boolean;
             legacyReference: string | null;
@@ -64516,6 +65400,147 @@ export interface components {
              * @description Actor que hace el ajuste (auditoría).
              */
             actorId?: string;
+        };
+        InvoiceLineReadDto: {
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            clinicRef?: Record<string, never>;
+            invoiceId: string;
+            facturaIdRef?: Record<string, never>;
+            productId: string;
+            productoIdRef?: Record<string, never>;
+            presentationId: string | null;
+            presentacionIdRef?: Record<string, never>;
+            description: string;
+            quantity: number;
+            sessions: number;
+            unitPrice: number;
+            discountType: string;
+            discountValue: number;
+            discount: number;
+            taxable: boolean;
+            taxId: string | null;
+            impuestoIdRef?: Record<string, never>;
+            taxAmount: number;
+            total: number;
+            deductionMode: string;
+            pricePerSession: boolean;
+            customization: Record<string, never> | null;
+            meta: Record<string, never> | null;
+            optionalItemsIncluded: string[] | null;
+            salesPackageId: string | null;
+            salesPackageIdRef?: Record<string, never>;
+            billingGroupId: string | null;
+            grupoFacturacionIdRef?: Record<string, never>;
+            categoryId: string | null;
+            categoriaIdRef?: Record<string, never>;
+            /** @description Units of this line refunded by the ACTIVE refunds (derived from their lines; v2: refundedQuantity). */
+            refundedQuantity: number;
+            /** @description Sessions of this line refunded by the ACTIVE refunds (derived from their lines; v2: refundedSessions). */
+            refundedSessions: number;
+            /** @description Units this line can still give back (lines refunded by quantity). Refunds that carry no lines (legacy) cannot be attributed to a line: the money cap is the invoice refundableAmount. */
+            refundableQuantity: number;
+            /** @description Sessions this line can still give back (a_la_entrega): its package total − delivered − refunded − transferred. */
+            refundableSessions: number;
+        };
+        InvoiceReadDto: {
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            clinicRef?: Record<string, never>;
+            number: string | null;
+            series: string | null;
+            quoteNumber: string | null;
+            legacyNumber: string | null;
+            legacyOrigin: string | null;
+            patientId: string;
+            pacienteIdRef?: Record<string, never>;
+            billToName: string | null;
+            billToDocumentId: string | null;
+            billToType: string | null;
+            doctorId: string | null;
+            medicoIdRef?: Record<string, never>;
+            issuerId: string | null;
+            emisorIdRef?: Record<string, never>;
+            createdBy: string | null;
+            creadoPorRef?: Record<string, never>;
+            issuedBy: string | null;
+            emitidoPorRef?: Record<string, never>;
+            appointmentId: string | null;
+            citaIdRef?: Record<string, never>;
+            priceTypeId: string | null;
+            tipoPrecioIdRef?: Record<string, never>;
+            sourceId: string | null;
+            medioIdRef?: Record<string, never>;
+            /** @enum {string} */
+            status: "borrador" | "emitida" | "anulada" | "devuelta_parcial" | "devuelta_total";
+            subtotal: number;
+            globalDiscountType: string;
+            globalDiscountValue: number;
+            discount: number;
+            exempt: boolean;
+            exemptionReason: string | null;
+            tax: number;
+            total: number;
+            shipping: number;
+            warehouseId: string | null;
+            almacenIdRef?: Record<string, never>;
+            paidAmount: number;
+            cancelled: boolean;
+            date: string | null;
+            notes: string | null;
+            /** Format: date-time */
+            cancelledAt: string | null;
+            cancelledBy: string | null;
+            anuladaPorRef?: Record<string, never>;
+            cancellationReason: string | null;
+            /**
+             * @description Se declara aquí abajo, lejos de `citaId`, a propósito: TypeORM ha leído una columna nueva
+             *     vecina de otra como un RENAME (casi tiró `staff.active`), y esta convive con la que sustituye.
+             * @enum {string}
+             */
+            context: "general" | "consulta";
+            /**
+             * @description DERIVED from the active refunds: none = no active refund; full = nothing left to refund or the whole total given back; partial otherwise. The stored status is not written by refunds any more.
+             * @enum {string}
+             */
+            refundStatus: "none" | "partial" | "full";
+            /** @description Σ refunded_amount of the active refunds. */
+            refundedAmount: number;
+            /** @description What another refund may still give back in money: total − refundedAmount, never negative. The refund endpoint enforces it (DEVOLUCION_EXCEDE_TOTAL). */
+            refundableAmount: number;
+            /** @description Refunded money no invoice line accounts for (refunds with an amount and no lines, e.g. imported from the legacy). When > 0 the per-line refundable figures do not include it. */
+            unallocatedRefundedAmount: number;
+            items: components["schemas"]["InvoiceLineReadDto"][];
+        };
+        InvoiceBoardRowDto: {
+            /** @description Center of the row (the board may span several). */
+            clinicId: string;
+            /**
+             * @description DERIVED refund status (see InvoiceReadDto).
+             * @enum {string}
+             */
+            refundStatus: "none" | "partial" | "full";
+            /** @description Σ refunded_amount of the active refunds. */
+            refundedAmount: number;
+            /** @description total − refundedAmount, never negative. */
+            refundableAmount: number;
+        };
+        InvoiceBoardDto: {
+            /** @description Effective columns of the board (data, per center and user). */
+            columns: Record<string, never>[];
+            /** @description One row per invoice: the projected columns (keys from the column definitions) plus the fields declared here. */
+            rows: components["schemas"]["InvoiceBoardRowDto"][];
+            total: number;
+            page: number;
+            limit: number;
         };
         SecuenciaFacturaEntity: {
             clinicRef?: Record<string, never>;
@@ -64649,7 +65674,7 @@ export interface components {
              *     vecina de otra como un RENAME (casi tiró `staff.active`), y esta convive con la que sustituye.
              * @enum {string}
              */
-            context: "consulta" | "general";
+            context: "general" | "consulta";
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -65317,6 +66342,16 @@ export interface components {
             reason?: string;
             /** @description Notas libres de la devolución (null las borra). */
             notes?: string | null;
+            /**
+             * Format: uuid
+             * @description Who made the refund (staff id): reassigns the refund AND its active reimbursements, so the cashier sheet is right. In /api/v2: userId. See docs/specs/via-api-a-nombre-del-usuario.md.
+             */
+            userId?: string;
+            /**
+             * Format: uuid
+             * @description Who voided the refund (staff id), only for a voided refund (409 REFUND_NOT_VOIDED otherwise): reassigns the void AND the reimbursements that void took down. In /api/v2: cancelledBy.
+             */
+            cancelledBy?: string;
         };
         RefundEditLineDto: {
             /**
@@ -65402,6 +66437,10 @@ export interface components {
             reimbursements: components["schemas"]["ReimbursementLineDto"][];
             /** @description Por qué se corrige (queda en los reembolsos anulados). */
             reason: string;
+        };
+        ReassignPaymentUserDto: {
+            /** @description Staff id of who charged the payment. In /api/v2: userId. */
+            userId: string;
         };
         AddIssuedKitComponentDto: {
             /**
@@ -67338,7 +68377,7 @@ export interface components {
             warehouseId: string;
             /** @description Clave del motivo (catálogo movement_reasons: merma, perdida, vencimiento, correccion…); por defecto correccion. */
             reason?: string;
-            /** @description Fecha efectiva (ISO); por defecto, ahora. */
+            /** @description Fecha efectiva (YYYY-MM-DD o ISO); por defecto, ahora. Un día pasado (en la zona del centro) exige inventory.retroactive, cabe en la ventana del centro, lleva motivo y pide confirmación (428, X-Confirm-Action: inventory.adjustment.backdate). Un día futuro se rechaza. Ver POST /inventory/adjustments/preview. */
             effectiveDate?: string;
             /** @description Por qué se ajusta (queda en cada línea sin nota propia). */
             notes: string;
@@ -67348,6 +68387,42 @@ export interface components {
              */
             patientId?: string;
             lines: components["schemas"]["LineaDeAjusteDto"][];
+        };
+        PreviaDeAjusteDto: {
+            /**
+             * Format: uuid
+             * @description Almacén del ajuste; su centro es el del ajuste.
+             */
+            warehouseId: string;
+            /** @description Clave del motivo (catálogo movement_reasons: merma, perdida, vencimiento, correccion…); por defecto correccion. */
+            reason?: string;
+            /** @description Fecha efectiva (YYYY-MM-DD o ISO); por defecto, ahora. Un día pasado (en la zona del centro) exige inventory.retroactive, cabe en la ventana del centro, lleva motivo y pide confirmación (428, X-Confirm-Action: inventory.adjustment.backdate). Un día futuro se rechaza. Ver POST /inventory/adjustments/preview. */
+            effectiveDate?: string;
+            /**
+             * Format: uuid
+             * @description Paciente al que se le dio, si aplica.
+             */
+            patientId?: string;
+            lines: components["schemas"]["LineaDeAjusteDto"][];
+            /** @description Por qué se ajusta. Opcional en la vista previa; un ajuste con fecha pasada lo exige al guardar. */
+            notes?: string;
+        };
+        BackdateSettingsDto: {
+            /**
+             * Format: uuid
+             * @description Centro a configurar; por defecto, el de la sesión.
+             */
+            clinicId?: string;
+            /**
+             * @description Cuántos días atrás se puede fechar un ajuste (0 = ninguno). Por defecto 45.
+             * @example 45
+             */
+            maxDays?: number;
+            /**
+             * @description Si el ajuste deja un día intermedio en negativo: block (rechaza, por defecto), confirm (lo pide en la confirmación), allow (solo informa).
+             * @enum {string}
+             */
+            negativeBalance?: "block" | "confirm" | "allow";
         };
         LineaLeidaDto: {
             texto: string;
@@ -67475,6 +68550,7 @@ export interface components {
             soldBySession: boolean;
             minimumSessions: number | null;
             sessionOptions: number[] | null;
+            sessionsPerUnit: number | null;
             hasDefinedRule: boolean;
             inventoryUnitId: string | null;
             unidadInventarioIdRef?: Record<string, never>;
@@ -67539,6 +68615,11 @@ export interface components {
             minimumSessions?: number;
             /** @description Atajos del mostrador (p. ej. [6, 12]). Son sugerencias, no una lista cerrada. */
             sessionOptions?: number[];
+            /**
+             * @description Sessions each unit sold covers when the invoice line does not say (GLP-1: 4). Does not change
+             *     the price. null = 1 per unit. docs/specs/sesiones-por-unidad-del-producto.md.
+             */
+            sessionsPerUnit?: number | null;
             /** Format: uuid */
             inventoryUnitId?: string;
             content?: number;
@@ -67602,6 +68683,11 @@ export interface components {
             minimumSessions?: number;
             /** @description Atajos del mostrador (p. ej. [6, 12]). Son sugerencias, no una lista cerrada. */
             sessionOptions?: number[];
+            /**
+             * @description Sessions each unit sold covers when the invoice line does not say (GLP-1: 4). Does not change
+             *     the price. null = 1 per unit. docs/specs/sesiones-por-unidad-del-producto.md.
+             */
+            sessionsPerUnit?: number | null;
             /** Format: uuid */
             inventoryUnitId?: string;
             content?: number;
@@ -68820,7 +69906,7 @@ export interface components {
              *     vitales y quien atendió en la clínica. Es un dato que se puede equivocar —y del que salen las
              *     estadísticas—, así que tiene que poder arreglarse. `callcenterId` NO va aquí a propósito: el
              *     paciente es cartera de SU agente de call-center y esta vía general no puede reasignarla — ver
-             *     `reparar()` (permiso `citas.reparar`) para la corrección legítima.
+             *     `reparar()` (permiso `appointments.repair`) para la corrección legítima.
              */
             vitalsNurseId?: string;
             /** Format: uuid */
@@ -70275,6 +71361,32 @@ export interface components {
             /** @description Id of the printed format (form_actions.reports[].id, e.g. hilt, mls): its productSku anchors the package. */
             reportId?: string;
         };
+        CorrectLegacyLabelDto: {
+            /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+            centerIds?: string[];
+            /** @description Session number (n of «n/m»), 1..total. */
+            number: number;
+            /** @description Total sessions of the treatment (m of «n/m»). */
+            total: number;
+            /** @description Why it is corrected (kept on the row and in the change log). */
+            reason: string;
+        };
+        RenumberLegacySessionsDto: {
+            /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+            centerIds?: string[];
+            /** @description Total sessions of the treatment every row gets (m of «n/m»). */
+            total: number;
+            /** @description Number of the first row of the series (default 1). */
+            startAt?: number;
+            /** @description First day of the series (YYYY-MM-DD), inclusive. */
+            from?: string;
+            /** @description Last day of the series (YYYY-MM-DD), inclusive. */
+            to?: string;
+            /** @description Why it is renumbered (kept on each changed row and in the change log). */
+            reason: string;
+            /** @description true = return the plan (before → after) without writing. */
+            preview?: boolean;
+        };
         BookTrainDto: {
             /** Format: uuid */
             patientId: string;
@@ -70976,7 +72088,7 @@ export interface components {
             userId: string | null;
             usuarioIdRef?: Record<string, never>;
             /** @enum {string|null} */
-            division: "consulta" | "general" | "todas" | null;
+            division: "general" | "consulta" | "todas" | null;
             date: string;
             currencyId: string | null;
             monedaIdRef?: Record<string, never>;
@@ -71776,6 +72888,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -71828,6 +72942,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -71880,6 +72996,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -71932,6 +73050,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -71984,6 +73104,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72036,6 +73158,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72088,6 +73212,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72140,6 +73266,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72192,6 +73320,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72244,6 +73374,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72296,6 +73428,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72348,6 +73482,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72400,6 +73536,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72452,6 +73590,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72504,6 +73644,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72556,6 +73698,8 @@ export interface operations {
                 method?: string;
                 /** @description Door the action came through: rest | mcp (an AI agent such as Claude). */
                 channel?: "rest" | "mcp";
+                /** @description What one sign-in session did (user_sessions.session_id, see GET /audit/sessions). */
+                sessionId?: string;
                 /** @description MCP tool name (only MCP rows have one). */
                 tool?: string;
                 /** @description Sólo los métodos que escriben (POST/PUT/PATCH/DELETE): la vista "quién creó, editó o borró". */
@@ -72659,6 +73803,518 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "UserSessionsController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From (ISO-8601): sessions still active at or after it. */
+                from?: string;
+                /** @description To (ISO-8601): sessions started at or before it. */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                /** @description closed = the user signed out; open = no sign-out recorded. */
+                status?: "open" | "closed";
+                /** @description Only sessions with activity at or after this instant (ISO-8601): who is in the system now (e.g. now minus 10 minutes; activity is recorded at most every 5 minutes). */
+                activeSince?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From (ISO-8601): sessions still active at or after it. */
+                from?: string;
+                /** @description To (ISO-8601): sessions started at or before it. */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                /** @description closed = the user signed out; open = no sign-out recorded. */
+                status?: "open" | "closed";
+                /** @description Only sessions with activity at or after this instant (ISO-8601): who is in the system now (e.g. now minus 10 minutes; activity is recorded at most every 5 minutes). */
+                activeSince?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_list[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From (ISO-8601): sessions still active at or after it. */
+                from?: string;
+                /** @description To (ISO-8601): sessions started at or before it. */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                /** @description closed = the user signed out; open = no sign-out recorded. */
+                status?: "open" | "closed";
+                /** @description Only sessions with activity at or after this instant (ISO-8601): who is in the system now (e.g. now minus 10 minutes; activity is recorded at most every 5 minutes). */
+                activeSince?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_list[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From (ISO-8601): sessions still active at or after it. */
+                from?: string;
+                /** @description To (ISO-8601): sessions started at or before it. */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                /** @description closed = the user signed out; open = no sign-out recorded. */
+                status?: "open" | "closed";
+                /** @description Only sessions with activity at or after this instant (ISO-8601): who is in the system now (e.g. now minus 10 minutes; activity is recorded at most every 5 minutes). */
+                activeSince?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_days[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From day, YYYY-MM-DD (inclusive). */
+                from?: string;
+                /** @description To day, YYYY-MM-DD (inclusive). */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_days[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From day, YYYY-MM-DD (inclusive). */
+                from?: string;
+                /** @description To day, YYYY-MM-DD (inclusive). */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_days[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From day, YYYY-MM-DD (inclusive). */
+                from?: string;
+                /** @description To day, YYYY-MM-DD (inclusive). */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_days[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From day, YYYY-MM-DD (inclusive). */
+                from?: string;
+                /** @description To day, YYYY-MM-DD (inclusive). */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_days[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From day, YYYY-MM-DD (inclusive). */
+                from?: string;
+                /** @description To day, YYYY-MM-DD (inclusive). */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_days[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From day, YYYY-MM-DD (inclusive). */
+                from?: string;
+                /** @description To day, YYYY-MM-DD (inclusive). */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_days[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From day, YYYY-MM-DD (inclusive). */
+                from?: string;
+                /** @description To day, YYYY-MM-DD (inclusive). */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_days[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description From day, YYYY-MM-DD (inclusive). */
+                from?: string;
+                /** @description To day, YYYY-MM-DD (inclusive). */
+                to?: string;
+                /** @description One person (Supabase auth user id). */
+                authUserId?: string;
+                /** @description Email contains (case-insensitive). */
+                email?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_close[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_close[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_close[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_close[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_close[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_close[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_close[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "UserSessionsController_close[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -77269,7 +78925,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceReadDto"][];
+                };
             };
         };
     };
@@ -77312,7 +78970,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceReadDto"][];
+                };
             };
         };
     };
@@ -77355,7 +79015,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceReadDto"][];
+                };
             };
         };
     };
@@ -77398,7 +79060,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceReadDto"][];
+                };
             };
         };
     };
@@ -77753,7 +79417,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceBoardDto"];
+                };
             };
         };
     };
@@ -77773,7 +79439,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceBoardDto"];
+                };
             };
         };
     };
@@ -77793,7 +79461,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceBoardDto"];
+                };
             };
         };
     };
@@ -77813,7 +79483,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceBoardDto"];
+                };
             };
         };
     };
@@ -77833,7 +79505,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceBoardDto"];
+                };
             };
         };
     };
@@ -77853,7 +79527,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceBoardDto"];
+                };
             };
         };
     };
@@ -77873,7 +79549,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceBoardDto"];
+                };
             };
         };
     };
@@ -77893,7 +79571,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InvoiceBoardDto"];
+                };
             };
         };
     };
@@ -78720,7 +80400,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["InvoiceReadDto"];
                 };
             };
         };
@@ -78763,7 +80443,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["InvoiceReadDto"];
                 };
             };
         };
@@ -78806,7 +80486,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["InvoiceReadDto"];
                 };
             };
         };
@@ -78849,7 +80529,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["InvoiceReadDto"];
                 };
             };
         };
@@ -84037,6 +85717,42 @@ export interface operations {
             };
         };
     };
+    "PaymentUserController_reassign[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                pagoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignPaymentUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagoEntity"];
+                };
+            };
+            /** @description PAYMENT_NOT_ACTIVE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "FacturacionController_repararPago[1]_v1": {
         parameters: {
             query?: never;
@@ -84086,6 +85802,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FacturaEntity"];
                 };
+            };
+        };
+    };
+    "PaymentUserController_reassign[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                pagoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignPaymentUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagoEntity"];
+                };
+            };
+            /** @description PAYMENT_NOT_ACTIVE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -84141,6 +85893,42 @@ export interface operations {
             };
         };
     };
+    "PaymentUserController_reassign[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                pagoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignPaymentUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagoEntity"];
+                };
+            };
+            /** @description PAYMENT_NOT_ACTIVE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "FacturacionController_repararPago[3]_v1": {
         parameters: {
             query?: never;
@@ -84190,6 +85978,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FacturaEntity"];
                 };
+            };
+        };
+    };
+    "PaymentUserController_reassign[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                pagoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignPaymentUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagoEntity"];
+                };
+            };
+            /** @description PAYMENT_NOT_ACTIVE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -84245,6 +86069,42 @@ export interface operations {
             };
         };
     };
+    "PaymentUserController_reassign[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                pagoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignPaymentUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagoEntity"];
+                };
+            };
+            /** @description PAYMENT_NOT_ACTIVE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "FacturacionController_repararPago[5]_v2": {
         parameters: {
             query?: never;
@@ -84294,6 +86154,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FacturaEntity"];
                 };
+            };
+        };
+    };
+    "PaymentUserController_reassign[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                pagoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignPaymentUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagoEntity"];
+                };
+            };
+            /** @description PAYMENT_NOT_ACTIVE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -84349,6 +86245,42 @@ export interface operations {
             };
         };
     };
+    "PaymentUserController_reassign[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                pagoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignPaymentUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagoEntity"];
+                };
+            };
+            /** @description PAYMENT_NOT_ACTIVE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "FacturacionController_repararPago[7]_v2": {
         parameters: {
             query?: never;
@@ -84398,6 +86330,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FacturaEntity"];
                 };
+            };
+        };
+    };
+    "PaymentUserController_reassign[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                pagoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignPaymentUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagoEntity"];
+                };
+            };
+            /** @description PAYMENT_NOT_ACTIVE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -92206,7 +94174,7 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `prices.read` en él. */
                 clinicId?: string;
                 /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
                 centerIds?: string[];
@@ -92236,7 +94204,7 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `prices.read` en él. */
                 clinicId?: string;
                 /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
                 centerIds?: string[];
@@ -92266,7 +94234,7 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `prices.read` en él. */
                 clinicId?: string;
                 /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
                 centerIds?: string[];
@@ -92296,7 +94264,7 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `prices.read` en él. */
                 clinicId?: string;
                 /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
                 centerIds?: string[];
@@ -92326,7 +94294,7 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `prices.read` en él. */
                 clinicId?: string;
                 /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
                 centerIds?: string[];
@@ -92356,7 +94324,7 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `prices.read` en él. */
                 clinicId?: string;
                 /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
                 centerIds?: string[];
@@ -92386,7 +94354,7 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `prices.read` en él. */
                 clinicId?: string;
                 /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
                 centerIds?: string[];
@@ -92416,7 +94384,7 @@ export interface operations {
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
                 priceTypeId?: string;
-                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `precios.read` en él. */
+                /** @description Centro para el que resolver; sin él = scope del header. Se comprueba `prices.read` en él. */
                 clinicId?: string;
                 /** @description The catalog is ONE price list: resolved for `centerIds[0]` (checked), like `clinicId`. */
                 centerIds?: string[];
@@ -110170,6 +112138,510 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_previa[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaDeAjusteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AjustesController_previa[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaDeAjusteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AjustesController_previa[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaDeAjusteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AjustesController_previa[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaDeAjusteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AjustesController_previa[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaDeAjusteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AjustesController_previa[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaDeAjusteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AjustesController_previa[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaDeAjusteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AjustesController_previa[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaDeAjusteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "AjustesController_configuracion[0]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_cambiarConfiguracion[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_configuracion[1]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_cambiarConfiguracion[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_configuracion[2]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_cambiarConfiguracion[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_configuracion[3]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_cambiarConfiguracion[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_configuracion[4]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_cambiarConfiguracion[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_configuracion[5]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_cambiarConfiguracion[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_configuracion[6]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_cambiarConfiguracion[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_configuracion[7]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "AjustesController_cambiarConfiguracion[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BackdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -151849,6 +154321,230 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "LegacySessionLabelController_correctOne[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectLegacyLabelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FRONTDESK_LEGACY_LABEL_NOT_MIGRATED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "LegacySessionLabelController_correctOne[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectLegacyLabelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FRONTDESK_LEGACY_LABEL_NOT_MIGRATED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "LegacySessionLabelController_correctOne[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectLegacyLabelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FRONTDESK_LEGACY_LABEL_NOT_MIGRATED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "LegacySessionLabelController_correctOne[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectLegacyLabelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FRONTDESK_LEGACY_LABEL_NOT_MIGRATED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "LegacySessionLabelController_renumber[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+                serviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenumberLegacySessionsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "LegacySessionLabelController_renumber[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+                serviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenumberLegacySessionsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "LegacySessionLabelController_renumber[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+                serviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenumberLegacySessionsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "LegacySessionLabelController_renumber[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+                serviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenumberLegacySessionsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

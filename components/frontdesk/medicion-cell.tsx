@@ -21,6 +21,7 @@ export function MedicionCell({
   centroId,
   disabled,
   onSave,
+  onPending,
 }: {
   col: FrontdeskColumna;
   sesion?: Sesion;
@@ -28,6 +29,8 @@ export function MedicionCell({
   centroId?: string;
   disabled: boolean;
   onSave: (valor: number) => void;
+  /** The value SHOWN but not saved yet (proposal or typed), or null: a transition saves it first. */
+  onPending?: (dato: string, valor: number | null) => void;
 }) {
   const tRoot = useTranslations();
   const r = (col.render ?? {}) as { dato?: string; unidadKey?: string; min?: number; max?: number; paso?: number };
@@ -55,6 +58,11 @@ export function MedicionCell({
     setVal(fuente != null ? String(fuente) : "");
   }
   const esPropuesto = actual == null && propuesto != null && val === String(propuesto);
+
+  // Tell the row what is visible but unsaved, so «Asistido» counts it instead of blocking on a number the
+  // user can see (lib/frontdesk/transition-fields.ts). Once saved, `actual` is set and this reports null.
+  const pendiente = actual == null && val !== "" && !Number.isNaN(Number(val)) ? Number(val) : null;
+  React.useEffect(() => { onPending?.(dato, pendiente); }, [onPending, dato, pendiente]);
 
   const commit = () => {
     setFocused(false);

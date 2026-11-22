@@ -19,9 +19,9 @@ import { getMedicos, type Personal } from "@/lib/api/personal";
 import { parseDayUTC } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { SheetNotice } from "@/components/agenda/sheet-notice";
 import { cappedBySheet } from "@/lib/agenda/sheet";
-import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
+import type { Slot } from "@/components/agenda/slot-picker";
+import { AppointmentWhenFields } from "@/components/agenda/appointment-when-fields";
 import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
 import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
@@ -32,9 +32,12 @@ import { useResource } from "@/hooks/use-resource";
 import { useMe } from "@/hooks/use-me";
 import { useEstados } from "@/hooks/use-estados";
 import { Badge } from "@/components/ui/badge";
-import { addMinutes, todayISO } from "@/lib/agenda/calendar";
+import { addMinutes } from "@/lib/agenda/calendar";
 import { appointmentMissing, type AppointmentField } from "@/lib/agenda/appointment-missing";
-import { DatePicker } from "@/components/ui/date-picker";
+import { citaEditPayload } from "@/lib/agenda/cita-edit-payload";
+import { bookingSummary, clinicIsFixed, startsWithChoiceMade, timeRange } from "@/lib/agenda/appointment-form";
+import { SegmentedControl } from "@/components/kit/segmented-control";
+import { Button } from "@/components/ui/button";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Textarea } from "@/components/ui/textarea";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
@@ -76,13 +79,9 @@ export function CitaModal({
   tipoCitaIdInicial?: string; // prefill appointment type from the block
   tipos: TipoCita[];
   medicos: Personal[];
-  // Quién abre ESTE modal, para la regla de cartera del BE (duenoDeLaCartera: solo `callcenter`
-  // "estrena" al agente como dueño de un paciente sin cartera todavía). Antes viajaba
-  // "callcenter" fijo para CUALQUIER invocador de este modal compartido — incluida la ficha del
-  // paciente (acciones-paciente-sheet.tsx), que no es call-center y le atribuía la cartera a quien
-  // sea que creara la cita ahí. Cada pantalla declara la suya; sin declarar, no viaja nada y el BE
-  // cae a su propio default ('frontdesk'). Handoff bug-canal-callcenter-no-se-manda-handoff-fe.md
-  // (su diagnóstico original estaba al revés: el dato SÍ viajaba, pero desde donde no debía).
+  // Who opens THIS dialog, for the BE's portfolio rule (only `callcenter` makes the agent the owner of a
+  // patient with none yet). Each screen declares its own; undeclared sends nothing and the BE uses
+  // 'frontdesk'. Handoff bug-canal-callcenter-no-se-manda-handoff-fe.md.
   canal?: "frontdesk" | "callcenter";
   onOpenChange: (open: boolean) => void;
   // Gets the appointment just saved (create/edit) so the caller can show it at once.
@@ -103,7 +102,9 @@ export function CitaModal({
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
-  const needsCentro = !isEdit && centros.length > 1;
+  // An hour picked from one clinic's availability keeps that clinic (lib/agenda/appointment-form.ts).
+  const clinicFixed = clinicIsFixed({ isEdit, givenClinic: centroId, givenTime: horaInicial });
+  const needsCentro = !isEdit && !clinicFixed && centros.length > 1;
   const [centroSel, setCentroSel] = React.useState("");
   // The record's clinic on edit, else the one it was opened in, else the top bar's; on «Ambos» with no
   // clinic given it starts empty and asks (lib/create-clinic.ts).
@@ -143,20 +144,8 @@ export function CitaModal({
     return addMinutes(start, tp?.durationMinutes ?? 30);
   });
 
-  // UNA sola hora, de los CUPOS del TIPO ese día (endpoint dedicado available-slots, BE 2-oct): franjas en
-  // horas enteras con huecos libres/capacidad + la duración del tipo (para la hora de fin). NO bloqueante.
-  // Dos variantes (desplegable/chips) para comparar. Handoff citas-hora-por-cupo-handoff-be.
-  const [slotVar, setSlotVar] = React.useState<SlotVariant>("dropdown");
-  const [slotSeeded, setSlotSeeded] = React.useState(false);
-  if (!slotSeeded && typeof window !== "undefined") {
-    setSlotSeeded(true);
-    const sv = window.localStorage.getItem("cmr_slot_variant");
-    if (sv === "dropdown" || sv === "chips") setSlotVar(sv);
-  }
-  function pickSlotVar(v: SlotVariant) {
-    setSlotVar(v);
-    try { window.localStorage.setItem("cmr_slot_variant", v); } catch { /* storage bloqueado */ }
-  }
+  // One time, from the type's SLOTS that day (available-slots endpoint): whole-hour bands with free/capacity
+  // plus the type's duration (for the end time). Never blocking. Handoff citas-hora-por-cupo-handoff-be.
   const cuposRes = useResource<CuposLibres | null>(
     () => (effectiveCentro && fechaSel && tipoCitaId ? getCuposLibres(fechaSel, tipoCitaId, effectiveCentro) : Promise.resolve(null)),
     [effectiveCentro, fechaSel, tipoCitaId],
@@ -181,14 +170,9 @@ export function CitaModal({
   // defecto (como antes) apagaba ese chequeo siempre y el personal de call-center, que no tiene por
   // qué saber que hay que marcar la casilla a mano, terminaba citando pacientes nuevos como si
   // fueran de seguimiento. Handoff bug-primera-vez-fuerza-medico-handoff-fe.
-  // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Call Center
-  // reserva REMOTO, sin el paciente enfrente — nace del CATÁLOGO (`esInicial`, hoy "programada") y
-  // confirmar es una decisión aparte de esa persona, cuando confirme con el paciente. Cualquier OTRO
-  // canal — Atención y "sin canal" (el propio default del BE, ver arriba) — es alguien que tiene al
-  // paciente FÍSICAMENTE presente al reservar: nace "confirmada" directo, sin paso extra que confirmar.
-  // El dueño, 13-oct-2026, caso real: una cita de HOY creada desde Control de Citas con canal Atención
-  // se perdió del tablero del día entero por quedar "programada" — antes esto trataba a los dos
-  // canales igual. Sigue siendo editable a mano (el Select de abajo), esto solo cambia el valor inicial.
+  // The status a NEW appointment starts with (BE allowlist programada|confirmada). Call center books
+  // remotely, so it starts at the catalogue's initial status; any other channel has the patient present,
+  // so it starts "confirmada" (owner, 13-oct-2026). Still editable below; this is only the default.
   const claveInicial = (
     canal === "callcenter"
       ? (estados.find((e) => e.isInitial)?.slug ?? "programada")
@@ -201,6 +185,20 @@ export function CitaModal({
   const [motivo, setMotivo] = React.useState(cita?.reason ?? "");
   const [notas, setNotas] = React.useState(cita?.notes ?? "");
   const [warn, setWarn] = React.useState<CitaConflicto[] | null>(null);
+  // Another clinic has its own hours: the hour is picked again from that clinic's slots.
+  function pickClinic(id: string) {
+    setCentroSel(id);
+    setHora("");
+    setHoraFin("");
+    setWarn(null);
+    setShowChoice(true);
+  }
+  // Opened from the booking calendar with type and hour already chosen: shown as a summary with
+  // «Cambiar» rather than asked again. Notes stay behind «+ Añadir nota» until wanted.
+  const [showChoice, setShowChoice] = React.useState(
+    () => !startsWithChoiceMade({ isEdit, typeId: tipoCitaIdInicial, time: horaInicial }),
+  );
+  const [notesOpen, setNotesOpen] = React.useState(!!cita?.notes);
 
   const tipo = tipos.find((x) => x.id === tipoCitaId);
   // El TIPO y "primera vez" son un HECHO del historial, no una preferencia: asistido ALGUNA vez ⇒ Seguimiento;
@@ -212,7 +210,9 @@ export function CitaModal({
   );
   const esPrimeraVezEff = !yaSeguimiento;
   // El tipo se autoselecciona al elegir paciente (seguimiento/nueva), salvo que el usuario lo cambie a mano.
-  const [tipoTouched, setTipoTouched] = React.useState(false);
+  // A type passed in by the caller is an explicit choice (the booking screen's "What are we booking?"):
+  // it counts as touched, so the history-based auto-pick never overrides it.
+  const [tipoTouched, setTipoTouched] = React.useState(!!tipoCitaIdInicial);
   const tipoAutoId = React.useMemo(() => {
     if (!paciente) return "";
     const slug = yaSeguimiento ? "seguimiento" : "nueva";
@@ -273,6 +273,12 @@ export function CitaModal({
         ? centrosRes.state.message
         : tRoot("caja.sinCentro");
 
+  const pickedDay = fechaSel ? parseDayUTC(fechaSel.slice(0, 10)) : null;
+  const dayLabel = pickedDay ? format.dateTime(pickedDay, "dayWeekdayShort") : "";
+  const clinicName = centros.length > 1 ? centros.find((c) => c.id === effectiveCentro)?.name : undefined;
+  const choiceSummary = bookingSummary([tipo?.name, dayLabel, timeRange(hora, horaFin), clinicName]);
+  const footerSummary = bookingSummary([tipo?.name, dayLabel, timeRange(hora, horaFin), clinicName]);
+
   async function avisarReagendo(fromId: string) {
     const prev = await getCita(fromId).catch(() => null);
     const d = prev?.date ? parseDayUTC(String(prev.date).slice(0, 10)) : null;
@@ -302,6 +308,24 @@ export function CitaModal({
       if (res.conflictos.length > 0) return { kind: "conflicts", conflicts: res.conflictos };
     }
 
+    // Edit = PUT with only the fields the update accepts (lib/agenda/cita-edit-payload.ts); the
+    // date, type and patient are locked in edit mode (a new date or type is a reschedule).
+    let editPayload = null;
+    if (isEdit) {
+      const edit = citaEditPayload(cita!, {
+        patientId: paciente.id,
+        appointmentTypeId: tipoCitaId,
+        doctorId: medicoId,
+        date: fechaSel,
+        time: hora,
+        endTime: horaFin,
+        reason: motivo,
+        notes: notas,
+      });
+      if (edit.kind === "locked") throw new Error(t("editLockedError"));
+      editPayload = edit.payload;
+    }
+
     const payload = {
       patientId: paciente.id,
       appointmentTypeId: tipoCitaId,
@@ -315,7 +339,7 @@ export function CitaModal({
       notes: notas.trim() || undefined,
     };
     const { cita: saved, advertencias } = isEdit
-      ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
+      ? await actualizarCitaAgenda(cita!.id, editPayload ?? {}, effectiveCentro || undefined)
       : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
     return { kind: "saved", saved, advertencias };
   }
@@ -346,6 +370,51 @@ export function CitaModal({
     },
   });
 
+  // Never empty: with no doctor it reads "Sin médico" (blocks saving only when the TYPE requires one).
+  const doctorField = (
+    <Field label={t("doctor")} required={medicoRequired}>
+      <Select value={medicoId || NONE_MEDICO} onValueChange={(v) => { setMedicoId(v === NONE_MEDICO ? "" : v); setWarn(null); }}>
+        <SelectTrigger className="w-full" aria-label={t("doctor")}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NONE_MEDICO}>{t("noDoctor")}</SelectItem>
+          {medicos.map((m) => (
+            <SelectItem key={m.id} value={m.id}>
+              {[m.name, m.lastName].filter(Boolean).join(" ")}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </Field>
+  );
+  // On create, the state it is born with (BE allowlist): two options, so a toggle. Colours and labels
+  // come from the status catalogue. On edit, the current status as a badge.
+  const statusField = (
+    <Field label={t("status")}>
+      {isEdit ? (
+        <div className="flex h-9 items-center">
+          <Badge
+            variant="secondary"
+            style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
+          >
+            {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
+          </Badge>
+        </div>
+      ) : (
+        <SegmentedControl
+          ariaLabel={t("status")}
+          value={estadoCrear}
+          onChange={setEstadoElegido}
+          options={(["programada", "confirmada"] as const).map((key) => {
+            const d = estadosMap.get(key);
+            return { value: key, label: d ? tRoot(d.labelKey) : key, dot: d?.color };
+          })}
+        />
+      )}
+    </Field>
+  );
+
   return (
     <>
     <FormDialog
@@ -361,6 +430,7 @@ export function CitaModal({
       missing={missing}
       blocked={clinicPending}
       reason={clinicReason}
+      extra={footerSummary ? <p className="truncate text-sm text-muted-foreground tabular-nums sm:mr-auto">{footerSummary}</p> : undefined}
     >
       <div className="flex items-center justify-between gap-2">
         <RequiredLegend />
@@ -379,158 +449,123 @@ export function CitaModal({
 
       {needsCentro && (
         <Field label={t("centro")} required>
-          <Select value={effectiveCentro || undefined} onValueChange={setCentroSel}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("centroPlaceholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              {centros.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-      )}
-
-      {/* Fecha y Hora LADO A LADO (aprovecha el ancho; deja aire para Notas abajo). La hora es por CUPOS
-          del tipo ese día, horas enteras, fin automática, no bloqueante. Handoff citas-hora-por-cupo. */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label={t("date")} required>
-          <DatePicker value={fechaSel} onChange={(v) => v && setFechaSel(v)} />
-        </Field>
-        <Field label={t("time")} required>
-          <div className="mb-1.5 flex items-center justify-between gap-2">
-            <span className="text-xs text-muted-foreground">{t("endAuto", { time: horaFin })}</span>
-            <div className="inline-flex rounded-md border p-0.5 text-xs">
-              <button type="button" onClick={() => pickSlotVar("dropdown")}
-                className={"rounded px-2 py-0.5 " + (slotVar === "dropdown" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                {t("variantList")}
-              </button>
-              <button type="button" onClick={() => pickSlotVar("chips")}
-                className={"rounded px-2 py-0.5 " + (slotVar === "chips" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                {t("variantGrid")}
-              </button>
-            </div>
-          </div>
-          {festivoHoy && (
-            <p
-              role="status"
-              className={
-                "mb-2 rounded-md border px-3 py-2 text-xs " +
-                (festivoHoy.blocksSchedule
-                  ? "border-destructive/30 bg-destructive/10 text-destructive"
-                  : "border-warning/40 bg-warning/10 text-warning-foreground")
-              }
-            >
-              {festivoHoy.blocksSchedule
-                ? t("holidayClosed", { name: festivoHoy.name })
-                : t("holidayInfo", { name: festivoHoy.name })}
-            </p>
-          )}
-          <SheetNotice sheet={cuposRes.state.kind === "ok" ? cuposRes.state.data?.sheet : null} className="mb-2" />
-          <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
-          {/* Aviso NO bloqueante: la hora elegida ya no tiene cupo. El BE no bloquea ni avisa en citas, así
-              que el aviso lo da el FE. Handoff citas-hora-por-cupo-handoff-be. */}
-          {slotLleno && (
-            <p className="mt-1.5 rounded-md border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-xs text-warning-foreground">
-              {t("slotFullWarn")}
-            </p>
-          )}
-        </Field>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label={t("patient")} required>
-          <PacienteSelect
-            value={paciente}
-            onChange={(p) => {
-              setPaciente(p);
-              // Preseleccionar el médico del paciente si aún no se eligió uno (no pisa una elección manual).
-              if (!medicoId && medicoDelPaciente(p)) setMedicoId(medicoDelPaciente(p));
-            }}
-          />
-        </Field>
-        {/* El selector NUNCA sale vacío: si no hay médico, queda en "Sin médico" (no bloquea el
-            guardado salvo que el TIPO exija médico). Handoff citas-medico-y-confirmada. */}
-        <Field label={t("doctor")} required={medicoRequired}>
-          <Select value={medicoId || NONE_MEDICO} onValueChange={(v) => { setMedicoId(v === NONE_MEDICO ? "" : v); setWarn(null); }}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NONE_MEDICO}>{t("noDoctor")}</SelectItem>
-              {medicos.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {[m.name, m.lastName].filter(Boolean).join(" ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label={t("type")} required>
-          <Select value={tipoCitaId || undefined} onValueChange={onTipoChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("typePlaceholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              {tipos.map((x) => (
-                <SelectItem key={x.id} value={x.id}>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="size-2.5 rounded-full" style={{ backgroundColor: x.color }} />
-                    {x.name}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label={t("status")}>
-          {isEdit ? (
-            <div className="flex h-9 items-center">
-              <Badge
-                variant="secondary"
-                style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
-              >
-                {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
-              </Badge>
-            </div>
+          {centros.length <= 3 ? (
+            <SegmentedControl
+              ariaLabel={t("centro")}
+              options={centros.map((c) => ({ value: c.id, label: c.name }))}
+              value={effectiveCentro}
+              onChange={pickClinic}
+            />
           ) : (
-            // Al crear: elegir con qué estado nace (allowlist BE). Confirmada = entra al tablero de
-            // Atención de una vez. Colores/etiquetas del catálogo (data-driven).
-            <Select value={estadoCrear} onValueChange={(v) => {
-                setEstadoElegido(v as "programada" | "confirmada");
-              }}>
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+            <Select value={effectiveCentro || undefined} onValueChange={pickClinic}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("centroPlaceholder")} />
+              </SelectTrigger>
               <SelectContent>
-                {(["programada", "confirmada"] as const).map((clave) => {
-                  const d = estadosMap.get(clave);
-                  return (
-                    <SelectItem key={clave} value={clave}>
-                      <span className="inline-flex items-center gap-2">
-                        <span className="size-2.5 rounded-full" style={{ backgroundColor: d?.color ?? "#999" }} />
-                        {d ? tRoot(d.labelKey) : clave}
-                      </span>
-                    </SelectItem>
-                  );
-                })}
+                {centros.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           )}
         </Field>
-      </div>
+      )}
 
-      {/* Sin casilla "Primera vez" (regla del dueño): el tipo ya lo dice —Nueva/Seguimiento— y se decide
-          solo por si el paciente fue asistido alguna vez (`attendedBy`). */}
+      {isEdit && <p className="text-xs text-muted-foreground">{t("editLocked")}</p>}
+
+      {/* The patient comes first: choosing them picks the type (Nueva/Seguimiento, from their history)
+          and their doctor, and the type decides which hours are free. */}
+      <Field label={t("patient")} required>
+        {isEdit ? (
+          // Locked in edit mode: the update cannot move an appointment to another patient.
+          <div className="flex h-9 items-center truncate rounded-md border border-input bg-muted/40 px-3 text-sm font-medium">
+            {paciente ? paciente.displayName || [paciente.firstName, paciente.lastName].filter(Boolean).join(" ") : "—"}
+          </div>
+        ) : (
+          <PacienteSelect
+            value={paciente}
+            onChange={(p) => {
+              setPaciente(p);
+              // Preselect the patient's doctor unless one was already chosen (never overrides a manual pick).
+              if (!medicoId && medicoDelPaciente(p)) setMedicoId(medicoDelPaciente(p));
+            }}
+          />
+        )}
+      </Field>
+
+      {showChoice ? (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label={t("type")} required>
+              <Select value={tipoCitaId || undefined} onValueChange={onTipoChange} disabled={isEdit}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("typePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {tipos.map((x) => (
+                    <SelectItem key={x.id} value={x.id}>
+                      <span className="inline-flex items-center gap-2">
+                        <span className="size-2.5 rounded-full" style={{ backgroundColor: x.color }} />
+                        {x.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            {doctorField}
+          </div>
+          <AppointmentWhenFields
+            date={fechaSel}
+            onDateChange={setFechaSel}
+            dateLocked={isEdit}
+            slots={slots}
+            time={hora}
+            endTime={horaFin}
+            onTimeChange={onHoraChange}
+            holiday={festivoHoy}
+            sheet={cuposRes.state.kind === "ok" ? cuposRes.state.data?.sheet : null}
+          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{statusField}</div>
+        </>
+      ) : (
+        <>
+          <Field label={t("chosen")} required>
+            <div className="flex items-center gap-3 rounded-md border border-input bg-muted/40 px-3 py-2">
+              {tipo && <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: tipo.color }} />}
+              <span className="min-w-0 flex-1 truncate text-sm font-medium tabular-nums">{choiceSummary || "—"}</span>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowChoice(true)}>
+                {t("change")}
+              </Button>
+            </div>
+            {slotLleno && (
+              <p className="mt-1.5 rounded-md border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-xs text-warning-foreground">
+                {t("slotFullWarn")}
+              </p>
+            )}
+          </Field>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {doctorField}
+            {statusField}
+          </div>
+        </>
+      )}
+
+      {/* No "first visit" checkbox (owner's rule): the type says it (Nueva/Seguimiento), decided by
+          whether the patient was ever attended (`attendedBy`). */}
 
       <Field label={t("reason")}>
         <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} />
       </Field>
-      <Field label={t("notes")}>
-        <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} />
-      </Field>
+      {notesOpen ? (
+        <Field label={t("notes")}>
+          <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} autoFocus={!cita?.notes} />
+        </Field>
+      ) : (
+        <Button type="button" variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => setNotesOpen(true)}>
+          {t("addNote")}
+        </Button>
+      )}
 
       {/* Aviso de disponibilidad: si el médico no está ese día, lo advierte con el motivo (la fecha
           aquí viene del slot del día, así que solo informa; el usuario decide). */}

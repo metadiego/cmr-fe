@@ -14,6 +14,7 @@ import {
 import type { Servicio } from "@/lib/api/servicios";
 import { fmtHora, POSTACCION_PROGRAMAR, STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
 import { requiredStateMet } from "@/lib/frontdesk/required-state";
+import { planTransitionFields, type PendingCellValue, type TransitionField } from "@/lib/frontdesk/transition-fields";
 import { editarCelda, ejecutarAccion, type Opcion, type Transicion } from "@/lib/api/tablero";
 import { useCan } from "@/hooks/use-can";
 import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
@@ -101,6 +102,7 @@ export function FilaSesion({
   const { can } = useCan();
   const notifyPersistencia = usePersistenciaToast();
   const [busy, setBusy] = React.useState(false);
+  const [pendientes, setPendientes] = React.useState<Record<string, PendingCellValue | undefined>>({}); // visible, unsaved cell values
   const [historialOpen, setHistorialOpen] = React.useState(false);
   const [comprasOpen, setComprasOpen] = React.useState(false);
   const [notificarCfg, setNotificarCfg] = React.useState<{ panel: string; seccion: string } | null>(null);
@@ -358,6 +360,7 @@ export function FilaSesion({
           sessionId={sesion?.id} centroId={centro}
           disabled={busy || cancelada}
           onSave={(valor) => run(() => guardarCelda(c.clave, valor, etiquetaCol(c)))}
+          onPending={(dato, valor) => setPendientes((p) => (p[dato]?.value === (valor ?? undefined) ? p : { ...p, [dato]: valor == null ? undefined : { column: c.clave, value: valor, label: etiquetaCol(c) } }))}
         />
       );
     }
@@ -495,28 +498,12 @@ export function FilaSesion({
       confirmar: tr.requiresConfirmation, from: tr.fromStatuses,
     }));
 
-  // Campos requeridos por servicio (data-driven, servicio.formAcciones). Para un estado destino, los que
-  // faltan por llenar en la sesión (sesion.datos[clave]) → bloquean esa transición (p. ej. áreas para asistir).
-  const camposReq = ((servicio as { formActions?: { campos?: { clave: string; labelKey?: string; en?: string; requerido?: boolean }[] } } | undefined)?.formActions?.campos ?? []);
-  const faltantesPara = (estado: string): string[] => {
-    const datos = (sesion?.data as Record<string, unknown> | null | undefined) ?? {};
-    // Un campo requerido puede vivir en la MEDICIÓN (sesion.datos[clave], p. ej. aplicadas/cantidad) o
-    // en un SELECT sobre la sesión resuelto en la fila (fd_<clave>, p. ej. dosis→fd_dosis,
-    // enfermera→fd_enfermera, sesiones→fd_sesiones). Se considera lleno si CUALQUIERA tiene valor.
-    const lleno = (clave: string): boolean => {
-      // Un select editable persiste el id en `<col>__valor` (p. ej. fd_dosis__valor); el label
-      // (`fd_dosis`) puede venir null. Se considera lleno si CUALQUIER fuente tiene valor.
-      const fuentes = [
-        datos[clave], fila[clave], fila[`fd_${clave}`],
-        fila[`${clave}__valor`], fila[`fd_${clave}__valor`],
-      ];
-      return fuentes.some((v) => v != null && v !== "" && v !== "—");
-    };
-    return camposReq
-      .filter((c) => c.requerido && c.en === estado)
-      .filter((c) => !lleno(c.clave))
-      .map((c) => (c.labelKey && tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave));
-  };
+  // Required fields per service (data-driven, servicio.formActions), e.g. areas to attend. Filled = session
+  // data or a row select; a value visible but unsaved in its cell (pendientes) is saved before the
+  // transition instead of blocking it (lib/frontdesk/transition-fields.ts).
+  const camposReq = ((servicio as { formActions?: { campos?: TransitionField[] } } | undefined)?.formActions?.campos ?? []);
+  const planPara = (estado: string) => planTransitionFields(camposReq, estado, (sesion?.data as Record<string, unknown> | null | undefined) ?? {}, fila, pendientes);
+  const etiquetaCampo = (c: TransitionField) => (c.labelKey && tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave);
 
   // Flujo estilo AP-Board: por paso, un pill (hora si está sellado; acción si es el siguiente; punto si
   // futuro) coloreado por el estado, con la ETIQUETA del estado debajo, y conectores entre pasos.
@@ -541,7 +528,8 @@ export function FilaSesion({
       {pasos.map((paso, i) => {
         const hecho = !!paso.stamp;
         const siguiente = i === nextIdx; // accionable ahora, según el estado del BE (nunca si cancelada)
-        const faltan = siguiente ? faltantesPara(paso.estado) : [];
+        const plan = siguiente ? planPara(paso.estado) : null;
+        const faltan = plan ? plan.missing.map(etiquetaCampo) : [];
         const bloqueadoPorCampos = siguiente && faltan.length > 0;
         const esUltimoHecho = hecho && !(pasos[i + 1] && pasos[i + 1].stamp);
         const reversa = esUltimoHecho ? paso.revert : null;
@@ -549,7 +537,10 @@ export function FilaSesion({
         const col = paso.color ?? undefined;
         const avanzar = () => {
           if (bloqueadoPorCampos) { toast.warning(t("faltanCampos", { campos: faltan.join(", ") })); return; }
-          run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: paso.key }, centro)).then((ok) => {
+          run(async () => {
+            for (const v of plan?.toSave ?? []) await guardarCelda(v.column, v.value, v.label); // visible proposal first
+            return ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: paso.key }, centro);
+          }).then((ok) => {
             // Solo tras un avance EXITOSO se dispara el postAccion (p. ej. abrir "Programar citas"); si
             // falló, ya se mostró el toast de error y NO se simula que la acción ocurrió.
             if (ok && paso.postAccion === POSTACCION_PROGRAMAR && sesion?.patientId) {

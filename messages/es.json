@@ -371,7 +371,8 @@
     "notAStartTime": "Este servicio solo empieza en punto: elige una hora entera",
     "outsideHours": "Fuera del horario del centro",
     "pastClosing": "Termina después del cierre del centro",
-    "notConfigured": "Servicio sin recurso configurado"
+    "notConfigured": "Servicio sin recurso configurado",
+    "endsAfterClosing": "Termina después del cierre: la sesión no acabaría antes de que termine la última franja."
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -461,6 +462,7 @@
     "trainSeriesOverbooked": "Sobrecupo",
     "recurringPreviewFirst": "Primero pulsa «Vista previa»",
     "recurringNothingBookable": "Ninguna fecha de la vista previa tiene hueco",
+    "recurringNoPermission": "No tienes permiso para consultar disponibilidad",
     "trainSeriesCalculateFirst": "Primero pulsa «Calcular»",
     "trainSeriesNothingPlanned": "Ningún día del cálculo se puede agendar"
   },
@@ -918,22 +920,22 @@
       "6": "Sáb"
     },
     "modal": {
-      "title": "Nueva Cita",
-      "editTitle": "Editar Cita",
+      "title": "Nueva cita",
+      "editTitle": "Editar cita",
       "centro": "Centro",
       "centroPlaceholder": "Selecciona el centro…",
       "date": "Fecha",
       "start": "Hora Inicio",
       "end": "Hora Fin",
-      "patient": "Seleccionar Paciente",
-      "doctor": "Seleccionar Doctor",
+      "patient": "Paciente",
+      "doctor": "Médico",
       "doctorPlaceholder": "Seleccionar Doctor",
-      "type": "Tipo de Cita",
+      "type": "Tipo de cita",
       "typePlaceholder": "Seleccionar Tipo",
       "status": "Estado",
       "statusScheduled": "Agendada",
       "firstVisit": "Primera vez",
-      "reason": "Motivo de Consulta",
+      "reason": "Motivo de consulta",
       "notes": "Notas",
       "overlapWarn": "Este horario se solapa con otra cita del médico:",
       "save": "Guardar",
@@ -943,14 +945,18 @@
       "noDoctor": "Sin médico",
       "followUpPatient": "Paciente de seguimiento (ya fue atendido)",
       "time": "Hora",
-      "endAuto": "Fin automático {time}",
-      "variantList": "Lista",
-      "variantGrid": "Rejilla",
       "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea).",
       "rescheduledFrom": "El paciente ya tenía una cita el {date}: se movió a esta fecha (una cita viva por paciente).",
       "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha.",
       "holidayClosed": "{name} — día feriado, la agenda está cerrada ese día.",
-      "holidayInfo": "{name} — día feriado."
+      "holidayInfo": "{name} — día feriado.",
+      "editLocked": "Para cambiar la fecha, el tipo o el paciente, use Reagendar en el menú de acciones (⋯).",
+      "editLockedError": "Una edición no cambia la fecha, el tipo ni el paciente: use Reagendar.",
+      "chosen": "Cita",
+      "change": "Cambiar",
+      "addNote": "+ Añadir nota",
+      "previousDay": "Día anterior",
+      "nextDay": "Día siguiente"
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",
@@ -959,11 +965,8 @@
     "endAuto": "Termina {time} · automático",
     "slot": {
       "free": "{n} libres",
-      "freeShort": "{n} lib",
       "full": "lleno",
       "placeholder": "Elige una hora disponible",
-      "variantDropdown": "Lista",
-      "variantChips": "Rejilla",
       "fullInSheet": "Lleno en la hoja"
     },
     "rule": {
@@ -1221,6 +1224,7 @@
       "help": "Mueve las sesiones pendientes de un paquete de este paciente a otra persona, a otro centro, o ambos.",
       "step1": "Qué se transfiere",
       "noPending": "Este paciente no tiene sesiones pendientes de ningún paquete.",
+      "noPermissionPending": "No tienes permiso para ver las sesiones pendientes de este paciente.",
       "pendingN": "Pendientes: {n} de {total}",
       "step2": "A dónde",
       "scope": {
@@ -2600,7 +2604,8 @@
       "reopenPackageClosed": "El paquete ya no está activo: factura anulada, devuelta o protocolo cambiado",
       "reopenNotCancelled": "La sesión no está cancelada",
       "sessionSameDay": "Ya tiene otra sesión de este servicio hoy",
-      "sheetSlotTaken": "La hoja no tiene hueco a esa hora"
+      "sheetSlotTaken": "La hoja no tiene hueco a esa hora",
+      "sessionDeleteBlocked": "No se puede borrar esta visita: ya tiene una hoja clínica guardada. Puedes cancelarla."
     },
     "evento": {
       "reopened": "Reabierta"
@@ -2807,9 +2812,11 @@
       "byDelivery": "a la entrega",
       "compNoReturnable": "no devolvible individualmente",
       "returnOnlyIssued": "Solo se pueden devolver facturas emitidas. Esta factura no está emitida.",
-      "netExceeds": "El reembolso no puede superar el total de la factura ({total}).",
       "legacyRoundingAdjustment": "Ajuste de redondeo del legado: −{amount}",
-      "returnDoneRounded": "Devolución registrada (ajuste de redondeo {amount})"
+      "returnDoneRounded": "Devolución registrada (ajuste de redondeo {amount})",
+      "returnAlreadyFull": "Ya se devolvió todo lo de esta factura: no queda nada por devolver.",
+      "netExceedsRefundable": "El reembolso no puede superar lo que queda por devolver ({max}).",
+      "unallocatedRefund": "Esta factura tiene una devolución sin detalle de líneas por {amount}: lo máximo a devolver ahora es {max}."
     },
     "columns": {
       "numero": "N.º",
@@ -3080,6 +3087,8 @@
         "unidadContenido": "Unidad",
         "unidadesPorEnvase": "Unidades por envase",
         "envaseHelp": "Cuánto trae el frasco o caja (p. ej. 10 mg). Con esto la receta calcula cuántas aplicaciones rinde un vial.",
+        "sesionesPorUnidad": "Sesiones por unidad",
+        "sesionesPorUnidadHelp": "Sesiones que cubre cada unidad vendida; no cambia el precio.",
         "grupoNinguno": "Sin grupo (insumo)",
         "grupoFacturacionHelpSin": "Decide en qué columna del frontdesk aparece el paciente; sin grupo, el producto es un insumo que se consume (no abre columna).",
         "grupoFacturacionHelpCon": "El paciente aparecerá en la columna del servicio de este grupo ({division}) en el frontdesk."
@@ -3637,6 +3646,7 @@
     "unitsAreasDaysHint": "Se calcula sola: áreas × días. No se escribe.",
     "packages": "Paquetes",
     "packagesHint": "Cuántos paquetes se venden (normalmente 1).",
+    "sessionsFormula": "Sesiones: {qty} × {perUnit}",
     "returnedBadge": "Devuelta",
     "error": {
       "pago_supera_total": "Lo cobrado pasa del total de la factura (sobran {sobrante}). Anula el pago sobrante antes de emitir.",
@@ -4002,6 +4012,10 @@
     "title": "Auditoría",
     "help": "Bitácora automática del sistema: quién hizo qué, cuándo, desde qué centro y si salió bien. Filtra por fecha, dominio, método y resultado; haz clic en una fila para ver el detalle.",
     "noPermission": "No tienes permiso para ver la auditoría.",
+    "tabs": {
+      "log": "Bitácora",
+      "sessions": "Sesiones"
+    },
     "todos": "Todos",
     "desde": "Desde",
     "hasta": "Hasta",
@@ -4012,6 +4026,7 @@
     "filtrarPorUsuario": "Filtrar por este usuario",
     "filtroUsuario": "Usuario: {nombre}",
     "totalRegistros": "{total, number} registros",
+    "resumenTitle": "Resumen",
     "card": {
       "total": "Total",
       "ok": "OK",
@@ -4048,7 +4063,8 @@
       "resultado": "Resultado",
       "duracion": "Duración",
       "centro": "Centro",
-      "via": "Vía"
+      "via": "Vía",
+      "browser": "Navegador"
     },
     "verbo": {
       "creo": "Creó",
@@ -4073,7 +4089,49 @@
     },
     "tool": "Herramienta",
     "filtroEntidad": "Entidad {id}",
-    "filtrarPorEntidad": "Filtrar por esta entidad"
+    "filtrarPorEntidad": "Filtrar por esta entidad",
+    "filtroSesion": "Sesión {id}"
+  },
+  "auditSessions": {
+    "view": {
+      "now": "Ahora",
+      "days": "Por día",
+      "detail": "Detalle"
+    },
+    "col": {
+      "user": "Usuario",
+      "clinic": "Centro",
+      "startedAt": "Entrada",
+      "endedAt": "Salida",
+      "lastSeenAt": "Última actividad",
+      "status": "Estado",
+      "duration": "Duración",
+      "ip": "IP",
+      "browser": "Navegador"
+    },
+    "status": {
+      "open": "Abierta",
+      "closed": "Cerrada"
+    },
+    "now": {
+      "help": "Personas con actividad en los últimos 10 minutos. Se actualiza solo cada minuto.",
+      "empty": "Nadie conectado en este momento"
+    },
+    "days": {
+      "col": {
+        "firstSeenAt": "Primera actividad",
+        "sessions": "Sesiones",
+        "actions": "Acciones",
+        "ips": "IPs"
+      },
+      "empty": "Sin actividad para estos filtros"
+    },
+    "drillDown": {
+      "title": "Qué hizo {name}"
+    },
+    "noEndedAt": "Sin salida — última actividad {time}",
+    "emailPlaceholder": "Correo del usuario",
+    "empty": "Sin sesiones para estos filtros"
   },
   "comunicaciones": {
     "title": "Alertas",
@@ -4289,7 +4347,8 @@
       "blocked": "El centro no permite guardar este cambio"
     },
     "reassign": {
-      "staffNotActive": "Esa persona no está activa."
+      "staffNotActive": "Esa persona no está activa.",
+      "notVoided": "Solo se puede cambiar quién anuló una devolución anulada."
     }
   },
   "patientMerge": {
@@ -4515,7 +4574,8 @@
       "dayNotCounted": "Falta el conteo único del día",
       "flexible": "Flexible (lo de hoy)",
       "split": "Dos conteos (Consulta y Servicios & Productos)",
-      "single": "Un solo conteo"
+      "single": "Un solo conteo",
+      "consolidatedOverridesCashiers": "Caja {division}: {countedBy} contó {counted} en el consolidado, en lugar de lo que contaron los cajeros ({cashiersCounted}). Diferencia {difference}. Revise cuál es el correcto; si el bueno es el de los cajeros, vuelva el consolidado a la suma."
     },
     "cuadreGeneral": {
       "title": "Cuadre general",
@@ -4688,6 +4748,20 @@
     },
     "error": {
       "closeDisabled": "El cierre de caja está desactivado en este centro."
+    },
+    "descuadre": {
+      "short": "Falta {amount}",
+      "over": "Sobra {amount}",
+      "division": "Caja {division}",
+      "cashiers": "Cajeros · {division}",
+      "cashier": "Cajero",
+      "counted": "Contado",
+      "fund": "Fondo",
+      "expected": "Esperado",
+      "difference": "Diferencia",
+      "balanced": "Cuadra",
+      "overrideBy": "Conteo consolidado hecho por {name}: {counted} en lugar de {cashiersCounted} que contaron los cajeros",
+      "unregistered": "un usuario no registrado"
     }
   },
   "gruposFacturacion": {
@@ -4766,6 +4840,9 @@
       "intravenoso": "Intravenoso"
     },
     "cancelarAviso": "Cancelar aviso",
+    "formatos": "Formatos",
+    "sinPacientesHoy": "Sin pacientes hoy",
+    "elegirFormato": "Elegir hoja",
     "tema": "Tema",
     "sinSecciones": "Sin secciones configuradas.",
     "enCola": "{n} en cola",
@@ -5675,33 +5752,6 @@
       "horas_invalidas": "La hora de fin debe ser posterior a la de inicio"
     }
   },
-  "serviceDay": {
-    "kpi": {
-      "total": "Citas",
-      "present": "Presentes",
-      "attended": "Atendidos",
-      "pending": "Pendientes"
-    },
-    "all": "Todos",
-    "plan": "Planificar el día",
-    "occupancy": "Ocupación por hora · {service}",
-    "empty": "No hay citas de servicio para este día.",
-    "col": {
-      "time": "Hora",
-      "service": "Servicio",
-      "patient": "Paciente",
-      "qty": "Cant.",
-      "staff": "Atiende",
-      "status": "Estado"
-    },
-    "filterService": "Terapia",
-    "filterStatus": "Estado",
-    "searchPatient": "Buscar paciente por nombre o récord…",
-    "occupancyTitle": "Ocupación de recursos por hora",
-    "resource": "Recurso",
-    "usedOf": "{used}/{available} puestos-hora",
-    "cap": "cap {n}"
-  },
   "printHub": {
     "invalidQueue": "La cola o el recurso compartido tiene caracteres no permitidos (solo letras, números, espacio y _ . - $).",
     "invalidUrl": "Alguna URL de hub no es válida: debe ser completa, como https://host:puerto/print-raw.",
@@ -5786,7 +5836,8 @@
       "sessionsUsed": "Ya se entregó alguna sesión de sus paquetes.",
       "cashClosed": "El cuadre de caja de ese día ya está cerrado: corregirla lo altera.",
       "reasonRequired": "Escribe el motivo para reabrir.",
-      "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente."
+      "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente.",
+      "refunded": "Ya tiene devoluciones: no se puede reabrir."
     },
     "changePatient": {
       "INVOICE_CHANGE_PATIENT_SAME": "Ya es el paciente de esta factura.",
@@ -5878,7 +5929,9 @@
       "free": "Libres: {names}",
       "noneFree": "Nadie libre ahora",
       "skillsNotConfigured": "Nadie tiene esta terapia configurada — ve a Personal → capacidades",
-      "chipFull": "{service} {turn} · {min} min"
+      "chipFull": "{service} {turn} · {min} min",
+      "overdueBadge": "{n} en terapia atrasados — ya pasó el tiempo estimado sin marcarse asistido",
+      "overdueFilterToggle": "Atrasados ({n})"
     },
     "bookService": "Citar servicio",
     "bookConsultation": "Citar consulta",
@@ -6600,7 +6653,9 @@
       "units": "{n} unidades",
       "mismatch": "La cuenta no cierra: da {computed} y el sistema dice {closing}. Avísale a soporte."
     },
-    "tabOwner": "Resumen gerencial"
+    "tabOwner": "Resumen gerencial",
+    "printOwner": "Incluir resumen gerencial",
+    "printOwnerHint": "Se imprime debajo del kárdex por día; si no cabe en la misma hoja, pasa entero a la siguiente."
   },
   "inventoryReceipts": {
     "tabReceive": "Recibir",
@@ -6742,11 +6797,214 @@
     "hint": "Pasa a esa persona en un paso, sin anular nada; el cuadre de caja lo refleja.",
     "same": "Ya está a nombre de esa persona.",
     "loadingStaff": "Cargando el personal…",
-    "staffFailed": "No se pudo cargar el personal."
+    "staffFailed": "No se pudo cargar el personal.",
+    "voiderHint": "Pasa la anulación (y los reembolsos que tumbó) a esa persona; el cuadre de caja lo refleja."
   },
   "payment": {
     "reassign": {
       "notActive": "Un pago anulado conserva quién lo hizo."
+    }
+  },
+  "appointmentsBooking": {
+    "title": "Citas",
+    "settings": "Configuración",
+    "live": "En vivo",
+    "loading": "Cargando…",
+    "loadFailed": "No se pudo cargar: {message}",
+    "retry": "Reintentar",
+    "whosCalling": {
+      "title": "¿Quién llama?",
+      "searchLabel": "Buscar paciente",
+      "searchPlaceholder": "Nombre, récord o teléfono",
+      "hint": "Escribe un nombre, récord o teléfono para encontrar al paciente.",
+      "searching": "Buscando…",
+      "noResults": "Ningún paciente coincide con «{q}».",
+      "searchFailed": "La búsqueda falló: {message}",
+      "newPatient": "Paciente nuevo",
+      "record": "Récord {record}",
+      "noRecord": "Sin récord",
+      "noPhone": "Sin teléfono"
+    },
+    "typePicker": {
+      "title": "¿Qué vamos a agendar?",
+      "titleFor": "Agendar para {name}: ¿qué?",
+      "medicalGroup": "Cita médica",
+      "serviceGroup": "Servicio",
+      "sessionsLeft": "{n, plural, one {# sesión pendiente} other {# sesiones pendientes}}",
+      "noMedical": "No hay tipos de cita.",
+      "noServicesPermission": "No tiene permiso para ver los servicios (servicios.read).",
+      "noServices": "Este centro no tiene servicios.",
+      "searchLabel": "Buscar tipo de cita o servicio",
+      "searchPlaceholder": "Escribe para filtrar… (láser, suero, cámara…)",
+      "noMatches": "Nada coincide con «{q}».",
+      "packages": "Paquetes",
+      "packagesOf": "Paquetes de {name}",
+      "minutes": "{n} min",
+      "withDoctor": "con médico",
+      "nextFree": "próximo libre",
+      "today": "Hoy",
+      "checking": "Buscando la próxima hora libre…",
+      "noneSoon": "Sin horas libres en los próximos {days} días hábiles (sin domingos ni feriados)",
+      "noneBookable": "Sin horas para citar en los próximos {days} días hábiles: ¿está configurado?",
+      "nextFailed": "No se pudo buscar la próxima hora libre",
+      "notSetUp": "Sin configurar para agendar"
+    },
+    "patient": {
+      "clear": "Volver al inicio",
+      "openRecord": "Abrir expediente",
+      "notFound": "No se pudo cargar este paciente.",
+      "record": "Récord {record}",
+      "upcoming": "Próximas",
+      "past": "Pasadas",
+      "noUpcoming": "Sin citas próximas.",
+      "noPast": "Sin citas pasadas.",
+      "kindMedical": "Médica",
+      "kindService": "Servicio",
+      "move": "Mover",
+      "stopMove": "Dejar de mover",
+      "moving": "Moviendo: elige el nuevo día y hora",
+      "edit": "Editar",
+      "cancel": "Cancelar",
+      "cancelReasonLabel": "Motivo de la cancelación",
+      "cancelReasonPlaceholder": "¿Por qué se cancela?",
+      "confirmCancel": "Cancelar cita",
+      "keep": "Mantenerla",
+      "loadFailedMedical": "No se pudieron cargar las citas médicas.",
+      "loadFailedService": "No se pudieron cargar las sesiones de servicio.",
+      "cancelTitle": "Cancelar cita",
+      "moreActions": "Más acciones"
+    },
+    "toolbar": {
+      "booking": "Agendando",
+      "bookingFor": "Agendar para {name}",
+      "changeType": "Cambiar tipo",
+      "windowLabel": "Momento del día",
+      "windowAny": "Cualquier hora",
+      "windowMorning": "Mañana",
+      "windowAfternoon": "Tarde",
+      "viewLabel": "Mostrar",
+      "free": "Libres",
+      "booked": "Ocupados",
+      "nextFree": "Próximos libres",
+      "noNextFree": "No hay horas libres pronto.",
+      "today": "Hoy"
+    },
+    "month": {
+      "free": "libres",
+      "booked": "ocupados",
+      "full": "lleno",
+      "closed": "cerrado",
+      "noMoreToday": "no hay más hoy",
+      "holiday": "feriado",
+      "unavailable": "no disponible",
+      "errorRetry": "No se pudo cargar este día. Haz clic para reintentar.",
+      "notConfigured": "Este servicio no tiene capacidad configurada",
+      "notConfiguredHint": "Configura sus recursos en la configuración de agenda para agendarlo aquí."
+    },
+    "day": {
+      "morning": "Mañana",
+      "afternoon": "Tarde",
+      "left": "quedan {n}",
+      "full": "lleno",
+      "fullTooltip": "Lleno — aún puedes agendar (sobrecupo)",
+      "unavailable": "no disponible",
+      "openFullDay": "Abrir el día completo",
+      "pickDay": "Elige un día para ver sus horas.",
+      "noTimes": "No hay horas este día.",
+      "noMoreToday": "No quedan horas hoy.",
+      "closed": "Cerrado este día.",
+      "holiday": "Feriado: cerrado.",
+      "noPermissionMedical": "No tienes permiso para agendar citas."
+    },
+    "move": {
+      "title": "¿Mover aquí?",
+      "fromTo": "{from} → {to}",
+      "fullWarning": "Esta hora está llena: moverla aquí es un sobrecupo.",
+      "reasonLabel": "Motivo del cambio",
+      "reasonPlaceholder": "¿Por qué se mueve?",
+      "confirm": "Mover",
+      "notThis": "Esta no",
+      "showingCenter": "Mostrando {center}: el centro de la cita"
+    },
+    "series": {
+      "patient": "Paciente",
+      "pickPatient": "Elige primero al paciente.",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas opcionales",
+      "sessions": "Sesiones",
+      "dates": "Fechas",
+      "time": "Hora",
+      "statusFree": "libre",
+      "statusFull": "lleno · sobrecupo",
+      "statusClosed": "cerrado",
+      "statusHoliday": "feriado",
+      "statusDuplicate": "ya tiene este servicio ese día",
+      "statusCancelled": "sesión cancelada ese día: agéndala por separado",
+      "useTimeInstead": "Usar {time}",
+      "useDateInstead": "Usar {date}",
+      "fixRed": "Corrige o quita las fechas en rojo antes de agendar.",
+      "fullWarning": "Esta hora está llena: agendarla es un sobrecupo.",
+      "remove": "Quitar esta fecha",
+      "book": "Agendar",
+      "bookSeries": "Agendar {n, plural, one {# sesión} other {# sesiones}}",
+      "checking": "Comprobando…",
+      "checkFailed": "No se pudieron comprobar estas fechas.",
+      "noPermission": "No tienes permiso para agendar servicios.",
+      "changeDate": "Cambiar la fecha ({date})",
+      "datePast": "Ese día ya pasó.",
+      "dateSunday": "Los domingos está cerrado: elige otro día.",
+      "dateTaken": "Otra sesión de esta serie ya está ese día.",
+      "addDate": "+ Añadir fecha",
+      "maxDates": "Hasta {n} sesiones.",
+      "resetsEdits": "Cambiar esto deshace tus cambios.",
+      "frequency": "Frecuencia",
+      "once": "Una vez",
+      "weekly": "Cada semana",
+      "biweekly": "Cada 2 semanas",
+      "fewer": "Una sesión menos",
+      "more": "Una sesión más",
+      "span": "{n, plural, one {# sesión} other {# sesiones}} · del {from} al {to}",
+      "allFree": "Todas libres",
+      "healthFull": "{n, plural, one {# llena (sobrecupo)} other {# llenas (sobrecupo)}}",
+      "healthBlocked": "{n, plural, one {# por corregir} other {# por corregir}}",
+      "fullShort": "lleno"
+    },
+    "toasts": {
+      "booked": "{n, plural, one {# sesión agendada} other {# sesiones agendadas}}",
+      "appointmentSaved": "Cita guardada",
+      "moved": "Movida: {from} → {to}",
+      "cancelled": "Cita cancelada",
+      "skipped": "No agendadas: {dates}",
+      "warnings": "Revisar: {list}",
+      "bookFailed": "No se pudo agendar: {message}",
+      "moveFailed": "No se pudo mover: {message}",
+      "cancelFailed": "No se pudo cancelar: {message}",
+      "moveReasonRequired": "Para mover una cita médica hace falta un motivo."
+    },
+    "period": {
+      "menuLabel": "Vista del calendario: {view}",
+      "views": {
+        "day": "Día",
+        "week": "Semana",
+        "month": "Mes"
+      },
+      "prev": {
+        "day": "Día anterior",
+        "week": "Semana anterior",
+        "month": "Mes anterior"
+      },
+      "next": {
+        "day": "Día siguiente",
+        "week": "Semana siguiente",
+        "month": "Mes siguiente"
+      }
+    },
+    "week": {
+      "loading": "Cargando la semana…",
+      "noTimes": "No hay horas esta semana en este momento del día.",
+      "noTimeShort": "Sin horas",
+      "cellFree": "{day} · {time}: {n} libres",
+      "cellBooked": "{day} · {time}: {n} ocupados"
     }
   },
   "inventory": {
@@ -6785,5 +7043,50 @@
     "noChanges": "No hay cambios.",
     "readOnly": "Solo lectura: cambiarla requiere el permiso inventory.backdate_settings.",
     "daysShort": "{n} días"
+  },
+  "formSheet": {
+    "sheet": {
+      "patient": "Paciente",
+      "record": "Récord",
+      "date": "Fecha",
+      "answered": "{n} de {total} respondidas",
+      "yes": "Sí",
+      "no": "No",
+      "note": "Observación",
+      "additionalNotes": "Observaciones adicionales",
+      "nurse": "Enfermera",
+      "recordedAt": "Fecha y hora",
+      "nursePlaceholder": "Elegir enfermera",
+      "saving": "Guardando…",
+      "offline": "Sin conexión — reintentando",
+      "print": "Imprimir",
+      "back": "Atrás",
+      "savedAt": "Guardado {when}",
+      "notSaved": "Aún sin guardar",
+      "tooLongField": "«{label}» pasa de {max} caracteres.",
+      "tooLongNote": "Una observación pasa de {max} caracteres.",
+      "tooLongNotes": "Las observaciones adicionales pasan de {max} caracteres.",
+      "loadError": "No se pudo cargar la hoja",
+      "notFillable": "Este formato no se llena en pantalla.",
+      "printTitle": "Hoja para imprimir",
+      "printSavedOnly": "El guardado automático no se completó: se imprime la última versión guardada.",
+      "questions": "Preguntas",
+      "header": "Datos de la visita",
+      "signature": "Firma",
+      "outOfRange": "«{label}» debe estar entre {min} y {max} {unit}."
+    },
+    "send": {
+      "fill": "Llenar en pantalla",
+      "qr": "QR",
+      "qrTitle": "Abrir esta hoja en el iPad",
+      "qrHint": "Apunta la cámara del iPad al código y toca el enlace."
+    }
+  },
+  "formats": {
+    "error": {
+      "answersInvalid": "La hoja tiene un dato que no corresponde a este formato.",
+      "sendTargetInvalid": "Esa persona no puede recibir la hoja en este centro (sin cuenta o inactiva).",
+      "writeBackOutOfRange": "El valor está fuera del rango permitido."
+    }
   }
 }

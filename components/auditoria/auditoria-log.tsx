@@ -10,7 +10,6 @@ import {
   listAuditoria,
   getAuditoriaFacetas,
   getAuditoriaResumen,
-  purgarAuditoria,
   type AuditRow,
   type AuditListParams,
   type AuditFacetas,
@@ -18,18 +17,15 @@ import {
 } from "@/lib/api/auditoria";
 import type { Paginated } from "@/lib/api/types";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { apiErrorMessage } from "@/lib/api/errors";
 import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
 import { useResource } from "@/hooks/use-resource";
 import { useMe, isAdmin } from "@/hooks/use-me";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Tooltip } from "@/components/ui/tooltip";
 import { DataTable, type Column } from "@/components/kit/data-table";
-import { useConfirm } from "@/components/kit/confirm-host";
 import {
   Select,
   SelectContent,
@@ -38,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AuditDetailSheet } from "./audit-detail-sheet";
+import { ResumenCards } from "./audit-summary-cards";
 import { agentTool, auditVia } from "@/lib/audit/via";
 
 // Fallback de dominios SOLO si /auditoria/facetas aún no cargó o viene vacío (el desplegable se
@@ -71,14 +68,29 @@ function isoDaysAgo(days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function AuditoriaLog() {
+// `initial*` seed the filters once, for a caller that opens this reused (never copied — rule 9)
+// as a scoped drill-down, e.g. "what did this person do that day" from the Sessions tab. The
+// caller remounts with a fresh `key` per target instead of this component reacting to prop changes.
+export function AuditoriaLog({
+  initialUserId,
+  initialUserLabel,
+  initialSessionId,
+  initialDesde,
+  initialHasta,
+}: {
+  initialUserId?: string;
+  initialUserLabel?: string;
+  initialSessionId?: string;
+  initialDesde?: string;
+  initialHasta?: string;
+} = {}) {
   const t = useTranslations("auditoria");
   const format = useFormatter();
   const tc = useTranslations("common");
 
   // Filtros (los que el endpoint soporta de verdad). page se resetea al cambiar cualquier filtro.
-  const [desde, setDesde] = React.useState(isoDaysAgo(7));
-  const [hasta, setHasta] = React.useState("");
+  const [desde, setDesde] = React.useState(initialDesde ?? isoDaysAgo(7));
+  const [hasta, setHasta] = React.useState(initialHasta ?? "");
   const [dominio, setDominio] = React.useState(TODOS);
   const [accion, setAccion] = React.useState(TODOS);
   const [resultado, setResultado] = React.useState(TODOS);
@@ -91,9 +103,10 @@ export function AuditoriaLog() {
   const [ocultarRuido, setOcultarRuido] = React.useState(true);
   // Filtro por usuario: el BE filtra por userId (authUserId), pero el perfil no expone ese id → no
   // hay mapa nombre→id en el cliente. Se activa clicando la celda Usuario de una fila (trae ambos).
-  const [userId, setUserId] = React.useState("");
-  const [userLabel, setUserLabel] = React.useState("");
+  const [userId, setUserId] = React.useState(initialUserId ?? "");
+  const [userLabel, setUserLabel] = React.useState(initialUserLabel ?? "");
   const [entidadId, setEntidadId] = React.useState(""); // one session, one invoice… (from the detail panel)
+  const [sessionIdFilter, setSessionIdFilter] = React.useState(initialSessionId ?? ""); // one login session (cmr-be #652)
   const [page, setPage] = React.useState(1);
   const [detalle, setDetalle] = React.useState<AuditRow | null>(null);
 
@@ -151,6 +164,7 @@ export function AuditoriaLog() {
     excluirErrorCode: ocultarRuido && hayRateLimited ? "RATE_LIMITED" : undefined,
     userId: userId || undefined,
     entidadId: entidadId || undefined,
+    sessionId: sessionIdFilter || undefined,
     clinicId: clinicId === TODOS ? undefined : clinicId,
     channel: via === TODOS ? undefined : (via as "rest" | "mcp"),
     page,
@@ -406,6 +420,12 @@ export function AuditoriaLog() {
             <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
           </Button>
         ) : null}
+        {sessionIdFilter ? (
+          <Button size="sm" variant="secondary" onClick={() => { setSessionIdFilter(""); setPage(1); }} className="gap-1">
+            {t("filtroSesion", { id: sessionIdFilter.slice(0, 8) })}
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          </Button>
+        ) : null}
         <span className="ml-auto flex items-center gap-3">
           {state.kind === "ok" ? (
             <span className="text-xs text-muted-foreground">{t("totalRegistros", { total: meta.total })}</span>
@@ -438,117 +458,3 @@ export function AuditoriaLog() {
   );
 }
 
-// Tarjetas de resumen (conteos) + botón de purga (admin). Diagnóstico sin arrastrar la tabla.
-function ResumenCards({ resumen, admin }: { resumen: AuditResumen; admin: boolean }) {
-  const t = useTranslations("auditoria");
-  const format = useFormatter();
-  const nf = (n: number) => format.number(n, "integer");
-  const ok = resumen.porResultado.find((r) => r.resultado === "ok")?.total ?? 0;
-  const err = resumen.porResultado.find((r) => r.resultado === "error")?.total ?? 0;
-  const topDom = [...resumen.porDominio].sort((a, b) => b.total - a.total)[0];
-  const descartados = resumen.descartadosDelProceso.reduce((s, d) => s + d.total, 0);
-
-  return (
-    <div className="flex flex-wrap items-stretch gap-3">
-      <Tile label={t("card.total")} value={nf(resumen.total)} />
-      <Tile label={t("card.ok")} value={nf(ok)} tone="ok" />
-      <Tile label={t("card.error")} value={nf(err)} tone="error" />
-      {topDom ? (
-        <Tile
-          label={t("card.topDominio")}
-          value={t.has(`dominio.${topDom.dominio}`) ? t(`dominio.${topDom.dominio}`) : topDom.dominio}
-          sub={nf(topDom.total)}
-        />
-      ) : null}
-      {admin && descartados > 0 ? (
-        <Tile label={t("card.descartados")} value={nf(descartados)} sub={t("card.descartadosSub")} />
-      ) : null}
-      {admin ? (
-        <div className="ml-auto flex items-center">
-          <PurgaButton />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function Tile({
-  label,
-  value,
-  sub,
-  tone,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  tone?: "ok" | "error";
-}) {
-  return (
-    <div className="min-w-[7rem] rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div
-        className={cn(
-          "text-lg font-semibold tabular-nums",
-          tone === "error" && "text-destructive",
-          tone === "ok" && "text-success-foreground",
-        )}
-      >
-        {value}
-      </div>
-      {sub ? <div className="text-[11px] text-muted-foreground">{sub}</div> : null}
-    </div>
-  );
-}
-
-// Purga irreversible, multi-pasada (completa:false → volver a llamar). Confirmación explícita con
-// los umbrales. yaEnCurso no es error. Exige admin sin X-Tenant-ID (lo pone la API con tenant null).
-function PurgaButton() {
-  const t = useTranslations("auditoria");
-  const confirm = useConfirm();
-  const [purgando, setPurgando] = React.useState(false);
-  const asking = React.useRef(false); // a double click must not queue a second prompt
-
-  async function purgar() {
-    if (asking.current) return;
-    asking.current = true;
-    const ok = await confirm({
-      title: t("purga.titulo"),
-      description: t("purga.cuerpo"),
-      confirmLabel: t("purga.confirmar"),
-      cancelLabel: t("purga.cancelar"),
-      destructive: true,
-    }).finally(() => (asking.current = false));
-    if (!ok) return;
-    setPurgando(true);
-    let errores = 0;
-    let mutaciones = 0;
-    try {
-      // Multi-pasada: repetir mientras el BE diga completa:false (queda backlog). Tope de pasadas
-      // por seguridad; si sigue incompleta, avisar para volver a correr.
-      for (let pasada = 0; pasada < 20; pasada++) {
-        const r = await purgarAuditoria();
-        if (r.yaEnCurso) {
-          toast.info(t("purga.enCurso"));
-          return;
-        }
-        errores += r.errores;
-        mutaciones += r.mutaciones;
-        if (r.completa) {
-          toast.success(t("purga.ok", { errores, mutaciones }));
-          return;
-        }
-      }
-      toast.warning(t("purga.parcial", { errores, mutaciones }));
-    } catch (e) {
-      toast.error(apiErrorMessage(e));
-    } finally {
-      setPurgando(false);
-    }
-  }
-
-  return (
-    <Button size="sm" variant="outline" onClick={purgar} disabled={purgando}>
-      {purgando ? t("purga.corriendo") : t("purga.boton")}
-    </Button>
-  );
-}

@@ -34,6 +34,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import {
   Select,
@@ -75,6 +76,9 @@ export default function DailyKardexPage() {
   const [to, setTo] = React.useState(initial.to)
   const [day, setDay] = React.useState<string | null>(null)
   const [tab, setTab] = React.useState<KardexTab>("daily")
+  // «Por día» prints alone unless asked: then the management summary follows, on the same sheet when it
+  // fits and on the next one when it does not (print-keep in lib/reports/print-document.ts).
+  const [printOwner, setPrintOwner] = React.useState(false)
   const printRef = React.useRef<HTMLDivElement>(null)
 
   const ready = !!(centerId && productId && validRange(from, to))
@@ -107,7 +111,10 @@ export default function DailyKardexPage() {
   // One row per delivery, not per raw ledger line (owner, 18-nov-2026: opening a vial and applying
   // its content are two separate stock movements, but staff reading this screen see one clinical
   // event — repeating the same patient 2-4 times over was "a complete disaster" to read).
-  const dayGroups = React.useMemo(() => (movements ? groupKardexDayMovements(movements) : []), [movements])
+  const dayGroups = React.useMemo(
+    () => (movements ? groupKardexDayMovements(movements) : []),
+    [movements]
+  )
 
   const num = (v: number | null | undefined, decimals = 0) =>
     v == null
@@ -142,24 +149,40 @@ export default function DailyKardexPage() {
         }
         actions={
           daily && (
-            <ReportActions
-              target={printRef}
-              title={`${t("title")} · ${daily.product.name}`}
-              subtitle={`${centerName} · ${dayText(from)} – ${dayText(to)}`}
-              csv={() =>
-                tab === "summary"
-                  ? movementsCsv(summary, t, reasonText)
-                  : tab === "owner"
-                    ? ownerCsv(summary, t, reasonText)
-                    : dailyCsv(daily, t)
-              }
-              fileParts={[
-                t("title"),
-                daily.product.sku || daily.product.name,
-                from,
-                to,
-              ]}
-            />
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              {tab === "daily" && summary?.ownerFormat && (
+                <Label
+                  htmlFor="kardex-print-owner"
+                  title={t("printOwnerHint")}
+                  className="cursor-pointer text-sm font-normal"
+                >
+                  <Checkbox
+                    id="kardex-print-owner"
+                    checked={printOwner}
+                    onCheckedChange={(v) => setPrintOwner(v === true)}
+                  />
+                  {t("printOwner")}
+                </Label>
+              )}
+              <ReportActions
+                target={printRef}
+                title={`${t("title")} · ${daily.product.name}`}
+                subtitle={`${centerName} · ${dayText(from)} – ${dayText(to)}`}
+                csv={() =>
+                  tab === "summary"
+                    ? movementsCsv(summary, t, reasonText)
+                    : tab === "owner"
+                      ? ownerCsv(summary, t, reasonText)
+                      : dailyCsv(daily, t)
+                }
+                fileParts={[
+                  t("title"),
+                  daily.product.sku || daily.product.name,
+                  from,
+                  to,
+                ]}
+              />
+            </div>
           )
         }
       />
@@ -444,6 +467,16 @@ export default function DailyKardexPage() {
               )}
             </TabsContent>
           </Tabs>
+          {printOwner && tab === "daily" && summary?.ownerFormat && (
+            <div className="print-only print-keep hidden">
+              <h2 className="print-section">{t("tabOwner")}</h2>
+              <KardexOwnerSummary
+                data={summary.ownerFormat}
+                from={summary.from}
+                to={summary.to}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -472,8 +505,12 @@ export default function DailyKardexPage() {
                     <TableHead>{t("day.patient")}</TableHead>
                     <TableHead>{t("day.record")}</TableHead>
                     <TableHead>{t("day.session")}</TableHead>
-                    <TableHead className="text-right">{t("day.vials")}</TableHead>
-                    <TableHead className="text-right">{t("day.contentAmount")}</TableHead>
+                    <TableHead className="text-right">
+                      {t("day.vials")}
+                    </TableHead>
+                    <TableHead className="text-right">
+                      {t("day.contentAmount")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -483,16 +520,27 @@ export default function DailyKardexPage() {
                         {g.patientName || "—"}
                         {g.retroactiveRecordedAt && (
                           <span className="ml-2 rounded-full bg-warning/15 px-2 py-0.5 text-xs text-warning-foreground">
-                            {t("day.retroactive", { when: format.dateTime(new Date(g.retroactiveRecordedAt), "dateAndTime") })}
+                            {t("day.retroactive", {
+                              when: format.dateTime(
+                                new Date(g.retroactiveRecordedAt),
+                                "dateAndTime"
+                              ),
+                            })}
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="tabular-nums">{g.medicalRecordNumber ?? "—"}</TableCell>
+                      <TableCell className="tabular-nums">
+                        {g.medicalRecordNumber ?? "—"}
+                      </TableCell>
                       <TableCell className="tabular-nums">
                         {sessionLabel(g.sessionNumber, g.sessionsTotal) ?? "—"}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">{g.vials === 0 ? "—" : num(g.vials, 0)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{g.content === 0 ? "—" : num(g.content, 0)}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {g.vials === 0 ? "—" : num(g.vials, 0)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {g.content === 0 ? "—" : num(g.content, 0)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

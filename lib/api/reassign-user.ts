@@ -15,3 +15,10 @@ export function reassignPaymentUser(invoiceId: string, paymentId: string, userId
 export function reassignRefundUser(invoiceId: string, refundId: string, userId: string, centerId?: string): Promise<unknown> {
   return apiFetch(withCenter(`/invoices/${invoiceId}/refunds/${refundId}`, centerId), { method: "PATCH", body: JSON.stringify({ userId }) }, centerId);
 }
+
+/** Change WHO VOIDED a voided refund (cmr-be #649): the void and the reimbursements it took down move to
+ *  that person. Only on a voided refund (else 409 REFUND_NOT_VOIDED). On a past cash day the client's
+ *  shared flow asks the reason and the confirmation (X-Change-Reason / X-Confirm-Action) by itself. */
+export function reassignRefundVoider(invoiceId: string, refundId: string, staffId: string, centerId?: string): Promise<unknown> {
+  return apiFetch(withCenter(`/invoices/${invoiceId}/refunds/${refundId}`, centerId), { method: "PATCH", body: JSON.stringify({ cancelledBy: staffId }) }, centerId);
+}

@@ -14,7 +14,7 @@ import { buildNavGroups, type NavNode } from "@/lib/nav/nav-groups";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
-import { createClient } from "@/lib/supabase/client";
+import { signOutAndLog } from "@/lib/auth/sign-out";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -225,7 +225,7 @@ export function AppSidebar({ onHoverChange }: { onHoverChange?: (hovering: boole
   const [signingOut, setSigningOut] = React.useState(false);
   async function signOut() {
     setSigningOut(true);
-    await createClient().auth.signOut();
+    await signOutAndLog();
     // Navegación DURA (igual que user-menu.tsx): limpia todo el estado de sesión.
     window.location.assign("/login");
   }

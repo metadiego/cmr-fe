@@ -55,6 +55,17 @@ export function inDaysPR(days: number): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" }).format(d);
 }
 
+// Whether an ISO INSTANT (has a time, unlike the day-only values above) falls on "today" in the
+// clinic's timezone — e.g. filtering a panel notice's `acceptedAt` client-side when the BE endpoint
+// has no date filter of its own yet.
+export function isTodayPR(iso: string | null | undefined, now: Date = new Date()): boolean {
+  if (!iso) return false;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return false;
+  const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" });
+  return fmt.format(d) === fmt.format(now);
+}
+
 const DIAS_POR_MES = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 function esBisiesto(anio: number): boolean {
   return (anio % 4 === 0 && anio % 100 !== 0) || anio % 400 === 0;

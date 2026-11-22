@@ -32,6 +32,12 @@ const TONE: Record<string, Tone> = {
   anulada: "destructive",
   // treatment transfers
   aplicada: "success",
+  // login sessions
+  open: "info",
+  closed: "secondary",
+  // format sheets filled on screen (GLP-1 nursing sheet)
+  saved: "success",
+  pending: "warning",
   // API keys (lib/api-keys/key-status.ts): never used = needs attention (the cleanup target)
   active: "success",
   neverUsed: "warning",
@@ -43,6 +49,8 @@ const LABEL_NS = {
   therapy: "servicios.estado",
   invoice: "facturacionList.estado",
   transfer: "patients.transferTreatment.status",
+  session: "auditSessions.status",
+  sheet: "formSheet.home",
   apiKey: "admin.apiKeys.status",
 } as const;
 

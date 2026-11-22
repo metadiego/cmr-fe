@@ -21,6 +21,10 @@ export type PanelSeccion = {
   capacidad?: string | null; // capacidad del personal que puede tomarla (del personal del centro, NO fija)
   asignaA?: string | null; // lista cerrada: sesion.enfermeraId | sesion.tecnicoId | sesion.medicoId
   origen?: Record<string, unknown> | null; // { tipo:'servicio', servicioId } — pasarela (el BE no lo interpreta aún)
+  // cmr-be #668: el chip de esta sección se puede tocar — abre el popover de récords del día de esa
+  // sección (libres para tomar + los propios para editar). Data-driven, nunca una lista fija de claves
+  // en el FE: hoy solo glp1 la trae en true, otra sección la tendrá el día que el BE la encienda.
+  selfClaim?: boolean;
   activo: boolean;
 };
 
@@ -86,21 +90,47 @@ export type PanelNotificacion = {
   sessionId?: string | null;
   patientId?: string | null;
   acceptedById?: string | null;
+  acceptedAt?: string | null;
   status?: string;
   createdAt?: string;
-  // Campos de DISPLAY — el BE debería enriquecerlos (hoy no vienen); ver handoff panel-aviso-enriquecido.
-  // `seccion`, `pacienteNombre` y `servicioNombre` NO están en el mapa → quedan en español.
+  // Campos de DISPLAY — el BE debería enriquecerlos (hoy no vienen todos); ver handoff
+  // panel-aviso-enriquecido. `seccion` y `pacienteNombre` NO están en el mapa → quedan en español.
+  // `serviceName`/`serviceId` SÍ están en el mapa → van en inglés (verificado en vivo 21-nov-2026
+  // contra /api/v2, GET /panels/enfermeria/notifications?status=aceptada: NO es "servicioNombre").
   seccion?: string | null;
   color?: string | null; // se dice igual (CAMPOS_IGUALES)
   audio?: string | null; // se dice igual (CAMPOS_IGUALES)
   pacienteNombre?: string | null;
   medicalRecordNumber?: string | null;
-  servicioNombre?: string | null;
+  // cmr-be #663: id v2 del servicio, junto al nombre — matchear por id cuando venga, nombre de
+  // respaldo mientras un evento viejo o un BE sin el PR aún lo manden sin él.
+  serviceName?: string | null;
+  serviceId?: string | null;
 };
 
 // `bySection` se traduce al inglés en /api/v2 (BE 1-oct); sus CLAVES internas vuelven a ser la `clave` de la
 // sección (vitales, intravenoso) = datos, no se traducen → ya emparejan con `sections[].clave`.
 export type PanelContador = { staffId: string; total: number; bySection: Record<string, number> };
+
+// "Panel de trabajo del día" (cmr-be #666/#668, handoff .personal/handoff-panel-trabajo-del-dia.md,
+// VERSIÓN FINAL 21-nov): una fila por visita de cada sección, `staffId` null = libre. Sirve para dos
+// cosas, por sección: la lista de libres (solo en secciones `selfClaim`, bajo los chips, igual en toda
+// tarjeta) y, al tocar CUALQUIER chip, los propios del día de esa enfermera en esa sección.
+export type PanelWorkRow = {
+  sectionKey: string;
+  kind: "session" | "appointment";
+  sessionId?: string | null;
+  appointmentId?: string | null;
+  patientId?: string | null;
+  patientName?: string | null;
+  medicalRecordNumber?: string | null;
+  serviceId?: string | null;
+  serviceName?: string | null;
+  status?: string | null;
+  time?: string | null;
+  staffId?: string | null;
+  pendingNoticeId?: string | null;
+};
 
 // GET /paneles/:clave/definicion — UNA llamada: panel + secciones + personal + estatus vivo.
 export function getPanelDefinicion(clave: string, centroId?: string): Promise<PanelDefinicion> {
@@ -110,6 +140,16 @@ export function getPanelDefinicion(clave: string, centroId?: string): Promise<Pa
 // GET /paneles/:clave/notificaciones — avisos pendientes al abrir la pantalla.
 export function getPanelNotificaciones(clave: string, centroId?: string): Promise<PanelNotificacion[]> {
   return apiFetch<unknown>(`/panels/${clave}/notifications`, {}, centroId).then((r) =>
+    Array.isArray(r) ? (r as PanelNotificacion[]) : (((r as { items?: PanelNotificacion[] })?.items) ?? []),
+  );
+}
+
+// GET /paneles/:clave/notificaciones?status=aceptada&fecha= — para reabrir «Formatos» tras cerrar
+// el aviso a pantalla completa, o tras recargar la pantalla. `date` en YYYY-MM-DD, zona del centro
+// (cmr-be #664, confirmado en vivo 21-nov-2026 que ya filtra server-side — antes de eso devolvía
+// VALIDATION_ERROR con cualquier fecha).
+export function getPanelNotificacionesAceptadas(clave: string, date: string, centroId?: string): Promise<PanelNotificacion[]> {
+  return apiFetch<unknown>(`/panels/${clave}/notifications?status=aceptada&date=${encodeURIComponent(date)}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelNotificacion[]) : (((r as { items?: PanelNotificacion[] })?.items) ?? []),
   );
 }
@@ -164,6 +204,37 @@ export function cancelarNotificacion(
 export function getPanelContadores(clave: string, fecha: string, centroId?: string): Promise<PanelContador[]> {
   return apiFetch<unknown>(`/panels/${clave}/counters?date=${fecha}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelContador[]) : (((r as { items?: PanelContador[] })?.items) ?? []),
+  );
+}
+
+// GET /paneles/:clave/trabajo?centerIds=&fecha= — una fila por visita de cada sección, con quién la
+// tiene (null = libre). `centerIds` además del tenant (estatuto "permisos por centro").
+function workQuery(centroId?: string, date?: string): string {
+  const sp = new URLSearchParams();
+  if (centroId) sp.set("centerIds", centroId);
+  if (date) sp.set("date", date);
+  const qs = sp.toString();
+  return qs ? `?${qs}` : "";
+}
+export function getPanelTrabajo(clave: string, centroId?: string, date?: string): Promise<PanelWorkRow[]> {
+  return apiFetch<unknown>(`/panels/${clave}/work${workQuery(centroId, date)}`, {}, centroId).then((r) =>
+    Array.isArray(r) ? (r as PanelWorkRow[]) : (((r as { items?: PanelWorkRow[] })?.items) ?? []),
+  );
+}
+
+// POST /paneles/:clave/tomar — la enfermera se adjudica un récord libre de una sección `selfClaim`
+// desde SU PROPIA tarjeta. Responde el aviso aceptado (mismo formato que aceptarNotificacion). 409
+// PANEL_WORK_ALREADY_TAKEN si otra ya lo tomó (trae `staffId` en `err.data`); 400
+// PANEL_SECTION_NOT_SELF_CLAIM si la sección no tiene `selfClaim`.
+export function tomarTrabajoPanel(
+  clave: string,
+  payload: { sectionKey: string; staffId: string; sessionId?: string; appointmentId?: string },
+  centroId?: string,
+): Promise<PanelNotificacion> {
+  return apiFetch<PanelNotificacion>(
+    `/panels/${clave}/claim${workQuery(centroId)}`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
   );
 }
 

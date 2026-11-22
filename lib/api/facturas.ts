@@ -4,7 +4,14 @@ import { apiFetch, apiFetchPaged } from "./client";
 
 // Facturación (BE PR #39+). Tenant-scoped: pasar centroId (X-Tenant-ID) en escrituras.
 export type Factura = components["schemas"]["FacturaEntity"];
-export type FacturaItem = components["schemas"]["FacturaItemEntity"];
+// Derived per line since cmr-be #650 (not in the OpenAPI yet, copied from the real v2 answer for S243352):
+// what the active refunds took and what is still refundable (net of delivered/returned/transferred).
+export type FacturaItem = components["schemas"]["FacturaItemEntity"] & {
+  refundedQuantity?: number | null;
+  refundedSessions?: number | null;
+  refundableQuantity?: number | null;
+  refundableSessions?: number | null;
+};
 export type Producto = components["schemas"]["ProductoEntity"];
 export type FormaPago = components["schemas"]["FormaPagoEntity"];
 // `meta` sale como Record<string,never> en OpenAPI (quirk) → lo tipamos usable: NÚMERO para multiplicador/
@@ -65,6 +72,15 @@ export type FacturaPago = {
 // están en el mapa api-ingles (quedan en español; su contenido sí se traduce por recursión).
 export type FacturaConItems = Omit<Factura, "createdBy" | "issuedBy"> & {
   items?: FacturaItem[];
+  /** Derived refund state (cmr-be #650): a refund leaves `status` alone, so read refunds from here.
+   *  Not in the OpenAPI yet; see lib/factura/refund-status.ts. */
+  refundStatus?: "none" | "partial" | "full";
+  /** Σ of the active refunds. */
+  refundedAmount?: number;
+  /** total − refunded, never negative: the money cap of a new refund (cmr-be #651). */
+  refundableAmount?: number;
+  /** Refunded money no line explains (a legacy refund without lines). */
+  unallocatedRefundedAmount?: number;
   patient?: {
     firstName?: string;
     lastName?: string | null;

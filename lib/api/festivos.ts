@@ -1,5 +1,6 @@
 import { apiFetch, oneCenterPath } from "./client";
 import type { Scope } from "./cupos";
+import { holidayDates, mergeHolidays } from "@/lib/agenda/booking/holidays";
 
 // Holidays. Per-center or global (scope). `bloqueaAgenda` decides whether the
 // day closes scheduling (true) or is just informational (false).
@@ -45,6 +46,19 @@ export async function getFestivos(
 ): Promise<Festivo[]> {
   if (q.scope === "global") return apiFetch<Festivo[]>(`/holidays${params(q)}`, {}, null);
   return apiFetch<Festivo[]>(await oneCenterPath(`/holidays${params(q)}`, q.centroId), {}, q.centroId);
+}
+
+/**
+ * The blocking holiday days of ONE center for the booking screens, over several years. GET /holidays
+ * ignores X-Tenant-ID (it answers for every readable center and, for a multi-center user, leaves the
+ * global ones out), so this asks for the center list AND scope=global and filters/merges on the
+ * client (lib/agenda/booking/holidays.ts). A failure rejects: the caller must not treat it as "none".
+ */
+export async function getBookingHolidays(years: number[], center: string): Promise<string[]> {
+  const lists = await Promise.all(
+    years.flatMap((anio) => [getFestivos({ anio, centroId: center }), getFestivos({ anio, scope: "global" })]),
+  );
+  return holidayDates(mergeHolidays(lists), center);
 }
 
 export function createFestivo(input: FestivoInput, centroId?: string): Promise<Festivo> {

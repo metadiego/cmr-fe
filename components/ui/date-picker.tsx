@@ -1,13 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { useLocale, useTranslations } from "next-intl"
+import { useFormatter, useLocale, useTranslations } from "next-intl"
 import { enUS, es } from "react-day-picker/locale"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Calendar03Icon } from "@hugeicons/core-free-icons"
 
 import { cn } from "@/lib/utils"
-import { formatFechaSolo, parseFechaEscrita, todayPR, validarFechaNacimiento, type FechaEscritaError, type FechaNacimientoError } from "@/lib/format/fecha"
+import { formatFechaSolo, parseDayUTC, parseFechaEscrita, todayPR, validarFechaNacimiento, type FechaEscritaError, type FechaNacimientoError } from "@/lib/format/fecha"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
@@ -58,6 +58,11 @@ type DatePickerProps = {
    * DatePicker (bookings, returns, expiries…) only gets the universal "real calendar date" check. */
   birthDate?: boolean
   placeholder?: string
+  /** "input" (default): a typed MM/DD/YYYY field with a calendar button. "button": a compact button
+   * showing the date in `displayFormat` that opens the calendar (lists of dates, e.g. a series). */
+  variant?: "input" | "button"
+  /** Named format (i18n/formats.ts) of the "button" variant's label. */
+  displayFormat?: "dayMonthYear" | "dayWeekdayShort"
   id?: string
   className?: string
   title?: string
@@ -76,6 +81,8 @@ function DatePicker({
   clearable,
   birthDate,
   placeholder,
+  variant = "input",
+  displayFormat = "dayMonthYear",
   id,
   className,
   title,
@@ -85,6 +92,7 @@ function DatePicker({
 }: DatePickerProps) {
   const t = useTranslations("picker")
   const locale = useLocale()
+  const format = useFormatter()
   const [open, setOpen] = React.useState(false)
 
   const selected = toLocalDate(value)
@@ -148,6 +156,73 @@ function DatePicker({
   const mensajeError = (e: FechaEscritaError | FechaNacimientoError | "rango"): string =>
     e === "formato" ? t("typedFormat") : e === "invalida" ? t("typedInvalid") : e === "futura" ? t("typedFuture") : e === "edad" ? t("typedAge") : t("typedRange")
 
+  const calendar = (
+        <PopoverContent className="w-auto gap-0 overflow-hidden rounded-lg p-0" align={variant === "button" ? "start" : "end"}>
+        <Calendar
+          mode="single"
+          locale={DAY_LOCALES[locale as keyof typeof DAY_LOCALES] ?? es}
+          captionLayout="dropdown"
+          selected={selected}
+          defaultMonth={selected ?? toLocalDate(today)}
+          startMonth={startMonth}
+          endMonth={endMonth}
+          disabled={[
+            ...(minDate ? [{ before: minDate }] : []),
+            ...(maxDate ? [{ after: maxDate }] : []),
+          ]}
+          onSelect={(d) => d && pick(toDayString(d))}
+          autoFocus
+        />
+        <div className="flex items-center gap-2 border-t p-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            disabled={!todayAllowed}
+            onClick={() => pick(today)}
+          >
+            {t("today")}
+          </Button>
+          {clearable && value ? (
+            <Button type="button" variant="ghost" size="sm" className="flex-1" onClick={() => pick("")}>
+              {t("clear")}
+            </Button>
+          ) : null}
+        </div>
+      </PopoverContent>
+  )
+
+  if (variant === "button") {
+    const shown = parseDayUTC(value)
+    return (
+      <Popover open={open} onOpenChange={readOnly ? undefined : setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            title={title}
+            aria-label={ariaLabel}
+            aria-invalid={ariaInvalid}
+            aria-readonly={readOnly || undefined}
+            className={cn(
+              "h-9 justify-start gap-2 px-3 text-left font-normal tabular-nums",
+              !shown && "text-muted-foreground",
+              readOnly && "pointer-events-none bg-muted/40",
+              className,
+            )}
+          >
+            <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} className="size-4 text-muted-foreground" />
+            <span className="truncate">{shown ? format.dateTime(shown, displayFormat) : (placeholder ?? t("pickDate"))}</span>
+          </Button>
+        </PopoverTrigger>
+        {calendar}
+      </Popover>
+    )
+  }
+
   return (
     <div className={cn("relative", className)}>
       <Input
@@ -190,40 +265,7 @@ function DatePicker({
             <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto gap-0 overflow-hidden rounded-lg p-0" align="end">
-        <Calendar
-          mode="single"
-          locale={DAY_LOCALES[locale as keyof typeof DAY_LOCALES] ?? es}
-          captionLayout="dropdown"
-          selected={selected}
-          defaultMonth={selected ?? toLocalDate(today)}
-          startMonth={startMonth}
-          endMonth={endMonth}
-          disabled={[
-            ...(minDate ? [{ before: minDate }] : []),
-            ...(maxDate ? [{ after: maxDate }] : []),
-          ]}
-          onSelect={(d) => d && pick(toDayString(d))}
-          autoFocus
-        />
-        <div className="flex items-center gap-2 border-t p-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            disabled={!todayAllowed}
-            onClick={() => pick(today)}
-          >
-            {t("today")}
-          </Button>
-          {clearable && value ? (
-            <Button type="button" variant="ghost" size="sm" className="flex-1" onClick={() => pick("")}>
-              {t("clear")}
-            </Button>
-          ) : null}
-        </div>
-      </PopoverContent>
+        {calendar}
       </Popover>
       {error && <p className="mt-1 text-xs text-destructive">{mensajeError(error)}</p>}
     </div>

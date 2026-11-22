@@ -371,7 +371,8 @@
     "notAStartTime": "This service only starts on the hour: pick a whole hour",
     "outsideHours": "Outside the center's hours",
     "pastClosing": "Ends after the center closes",
-    "notConfigured": "Service has no resource configured"
+    "notConfigured": "Service has no resource configured",
+    "endsAfterClosing": "Ends after closing: the session would not finish before the last time slot ends."
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -461,6 +462,7 @@
     "trainSeriesOverbooked": "Overbooked",
     "recurringPreviewFirst": "Run the preview first",
     "recurringNothingBookable": "No date in the preview has an open slot",
+    "recurringNoPermission": "You don't have permission to check availability",
     "trainSeriesCalculateFirst": "Press «Calculate» first",
     "trainSeriesNothingPlanned": "No day in the calculation can be booked"
   },
@@ -925,8 +927,8 @@
       "date": "Date",
       "start": "Start time",
       "end": "End time",
-      "patient": "Select patient",
-      "doctor": "Select doctor",
+      "patient": "Patient",
+      "doctor": "Doctor",
       "doctorPlaceholder": "Select doctor",
       "type": "Appointment type",
       "typePlaceholder": "Select type",
@@ -943,14 +945,18 @@
       "noDoctor": "No doctor",
       "followUpPatient": "Follow-up patient (already seen)",
       "time": "Time",
-      "endAuto": "Ends {time} (auto)",
-      "variantList": "List",
-      "variantGrid": "Grid",
       "slotFullWarn": "That time is full; it books anyway (non-blocking).",
       "rescheduledFrom": "The patient already had an appointment on {date}: it was moved to this date (one live appointment per patient).",
       "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date.",
       "holidayClosed": "{name} — holiday, the schedule is closed that day.",
-      "holidayInfo": "{name} — holiday."
+      "holidayInfo": "{name} — holiday.",
+      "editLocked": "To change the date, type or patient, use Reschedule in the actions menu (⋯).",
+      "editLockedError": "An edit cannot change the date, type or patient: use Reschedule.",
+      "chosen": "Appointment",
+      "change": "Change",
+      "addNote": "+ Add note",
+      "previousDay": "Previous day",
+      "nextDay": "Next day"
     },
     "fecha": "Date",
     "prevDay": "Previous day",
@@ -959,11 +965,8 @@
     "endAuto": "Ends {time} · automatic",
     "slot": {
       "free": "{n} free",
-      "freeShort": "{n} free",
       "full": "full",
       "placeholder": "Pick an available time",
-      "variantDropdown": "List",
-      "variantChips": "Grid",
       "fullInSheet": "Full on the sheet"
     },
     "rule": {
@@ -1221,6 +1224,7 @@
       "help": "Move a package's pending sessions from this patient to another person, another center, or both.",
       "step1": "What gets transferred",
       "noPending": "This patient has no pending sessions in any package.",
+      "noPermissionPending": "You don't have permission to see this patient's pending sessions.",
       "pendingN": "Pending: {n} of {total}",
       "step2": "Where to",
       "scope": {
@@ -2600,7 +2604,8 @@
       "reopenPackageClosed": "The package is no longer active: invoice voided, refunded or protocol changed",
       "reopenNotCancelled": "The session is not cancelled",
       "sessionSameDay": "There is already another session of this service today",
-      "sheetSlotTaken": "The sheet has no seat at that time"
+      "sheetSlotTaken": "The sheet has no seat at that time",
+      "sessionDeleteBlocked": "This visit cannot be deleted: it already has a saved clinical sheet. You can cancel it instead."
     },
     "evento": {
       "reopened": "Reopened"
@@ -2807,9 +2812,11 @@
       "byDelivery": "on delivery",
       "compNoReturnable": "not individually returnable",
       "returnOnlyIssued": "Only issued invoices can be returned. This invoice is not issued.",
-      "netExceeds": "The refund cannot exceed the invoice total ({total}).",
       "legacyRoundingAdjustment": "Legacy rounding adjustment: −{amount}",
-      "returnDoneRounded": "Return recorded (rounding adjustment {amount})"
+      "returnDoneRounded": "Return recorded (rounding adjustment {amount})",
+      "returnAlreadyFull": "Everything on this invoice has already been returned: nothing is left to return.",
+      "netExceedsRefundable": "The refund cannot exceed what is left to return ({max}).",
+      "unallocatedRefund": "This invoice has a return with no line detail for {amount}: the most that can be returned now is {max}."
     },
     "columns": {
       "numero": "No.",
@@ -3080,6 +3087,8 @@
         "unidadContenido": "Unit",
         "unidadesPorEnvase": "Units per package",
         "envaseHelp": "How much the vial or box holds (e.g. 10 mg). With this, the recipe computes how many applications a vial yields.",
+        "sesionesPorUnidad": "Sessions per unit",
+        "sesionesPorUnidadHelp": "Sessions each unit sold covers; does not change the price.",
         "grupoNinguno": "No group (supply)",
         "grupoFacturacionHelpSin": "Decides which frontdesk column the patient appears in; with no group, the product is a supply that gets consumed (opens no column).",
         "grupoFacturacionHelpCon": "The patient will appear in this group’s service column ({division}) at the front desk."
@@ -3637,6 +3646,7 @@
     "unitsAreasDaysHint": "Computed: areas × days. Not typed.",
     "packages": "Packages",
     "packagesHint": "How many packages are sold (usually 1).",
+    "sessionsFormula": "Sessions: {qty} × {perUnit}",
     "returnedBadge": "Returned",
     "error": {
       "pago_supera_total": "The money taken is above the invoice total ({sobrante} over). Void the extra payment before issuing.",
@@ -4002,6 +4012,10 @@
     "title": "Audit log",
     "help": "Automatic system log: who did what, when, from which center and whether it succeeded. Filter by date, domain, method and result; click a row for details.",
     "noPermission": "You don't have permission to view the audit log.",
+    "tabs": {
+      "log": "Log",
+      "sessions": "Sessions"
+    },
     "todos": "All",
     "desde": "From",
     "hasta": "To",
@@ -4012,6 +4026,7 @@
     "filtrarPorUsuario": "Filter by this user",
     "filtroUsuario": "User: {nombre}",
     "totalRegistros": "{total, number} records",
+    "resumenTitle": "Summary",
     "card": {
       "total": "Total",
       "ok": "OK",
@@ -4048,7 +4063,8 @@
       "resultado": "Result",
       "duracion": "Duration",
       "centro": "Center",
-      "via": "Via"
+      "via": "Via",
+      "browser": "Browser"
     },
     "verbo": {
       "creo": "Created",
@@ -4073,7 +4089,49 @@
     },
     "tool": "Tool",
     "filtroEntidad": "Entity {id}",
-    "filtrarPorEntidad": "Filter by this entity"
+    "filtrarPorEntidad": "Filter by this entity",
+    "filtroSesion": "Session {id}"
+  },
+  "auditSessions": {
+    "view": {
+      "now": "Now",
+      "days": "By day",
+      "detail": "Detail"
+    },
+    "col": {
+      "user": "User",
+      "clinic": "Center",
+      "startedAt": "Signed in",
+      "endedAt": "Signed out",
+      "lastSeenAt": "Last seen",
+      "status": "Status",
+      "duration": "Duration",
+      "ip": "IP",
+      "browser": "Browser"
+    },
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "now": {
+      "help": "People active in the last 10 minutes. Refreshes on its own every minute.",
+      "empty": "Nobody online right now"
+    },
+    "days": {
+      "col": {
+        "firstSeenAt": "First seen",
+        "sessions": "Sessions",
+        "actions": "Actions",
+        "ips": "IPs"
+      },
+      "empty": "No activity for these filters"
+    },
+    "drillDown": {
+      "title": "What {name} did"
+    },
+    "noEndedAt": "No sign-out — last seen {time}",
+    "emailPlaceholder": "User's email",
+    "empty": "No sessions for these filters"
   },
   "comunicaciones": {
     "title": "Alerts",
@@ -4289,7 +4347,8 @@
       "blocked": "This center does not allow saving this change"
     },
     "reassign": {
-      "staffNotActive": "That person is not active."
+      "staffNotActive": "That person is not active.",
+      "notVoided": "Only a voided refund can change who voided it."
     }
   },
   "patientMerge": {
@@ -4515,7 +4574,8 @@
       "dayNotCounted": "Missing the day's single count",
       "flexible": "Flexible (today's)",
       "split": "Two counts (Consultation and Services & Products)",
-      "single": "One single count"
+      "single": "One single count",
+      "consolidatedOverridesCashiers": "{division} drawer: {countedBy} counted {counted} in the consolidated count instead of the cashiers' counts ({cashiersCounted}). Difference {difference}. Check which one is right; if the cashiers' is, set the consolidated back to the sum."
     },
     "cuadreGeneral": {
       "title": "General cash-up",
@@ -4688,6 +4748,20 @@
     },
     "error": {
       "closeDisabled": "Closing the cash count is turned off for this center."
+    },
+    "descuadre": {
+      "short": "Short {amount}",
+      "over": "Over {amount}",
+      "division": "{division} drawer",
+      "cashiers": "Cashiers · {division}",
+      "cashier": "Cashier",
+      "counted": "Counted",
+      "fund": "Float",
+      "expected": "Expected",
+      "difference": "Difference",
+      "balanced": "Balanced",
+      "overrideBy": "Consolidated count made by {name}: {counted} instead of the {cashiersCounted} the cashiers counted",
+      "unregistered": "an unregistered user"
     }
   },
   "gruposFacturacion": {
@@ -4766,6 +4840,9 @@
       "intravenoso": "IV"
     },
     "cancelarAviso": "Cancel alert",
+    "formatos": "Formats",
+    "sinPacientesHoy": "No patients today",
+    "elegirFormato": "Choose sheet",
     "tema": "Theme",
     "sinSecciones": "No sections configured.",
     "enCola": "{n} in queue",
@@ -5675,33 +5752,6 @@
       "horas_invalidas": "The end time must be after the start time"
     }
   },
-  "serviceDay": {
-    "kpi": {
-      "total": "Appointments",
-      "present": "Present",
-      "attended": "Attended",
-      "pending": "Pending"
-    },
-    "all": "All",
-    "plan": "Plan the day",
-    "occupancy": "Hourly occupancy · {service}",
-    "empty": "No service appointments for this day.",
-    "col": {
-      "time": "Time",
-      "service": "Service",
-      "patient": "Patient",
-      "qty": "Qty",
-      "staff": "Staff",
-      "status": "Status"
-    },
-    "filterService": "Therapy",
-    "filterStatus": "Status",
-    "searchPatient": "Search patient by name or record…",
-    "occupancyTitle": "Resource occupancy by hour",
-    "resource": "Resource",
-    "usedOf": "{used}/{available} station-hours",
-    "cap": "cap {n}"
-  },
   "printHub": {
     "invalidQueue": "The queue or share name has characters that are not allowed (only letters, digits, space and _ . - $).",
     "invalidUrl": "A hub URL is not valid: it must be complete, like https://host:port/print-raw.",
@@ -5786,7 +5836,8 @@
       "sessionsUsed": "A session of its packages has already been delivered.",
       "cashClosed": "That day's cash count is already closed: correcting it changes it.",
       "reasonRequired": "Write the reason to reopen.",
-      "dateOutOfSequence": "That date does not fit between the previous and the next invoice."
+      "dateOutOfSequence": "That date does not fit between the previous and the next invoice.",
+      "refunded": "It already has returns: it cannot be reopened."
     },
     "changePatient": {
       "INVOICE_CHANGE_PATIENT_SAME": "That is already this invoice's patient.",
@@ -5878,7 +5929,9 @@
       "free": "Free: {names}",
       "noneFree": "No one free right now",
       "skillsNotConfigured": "No one is set up for this therapy — go to Staff → capabilities",
-      "chipFull": "{service} {turn} · {min} min"
+      "chipFull": "{service} {turn} · {min} min",
+      "overdueBadge": "{n} overdue in therapy — past the estimated time without being marked attended",
+      "overdueFilterToggle": "Overdue ({n})"
     },
     "bookService": "Book a service",
     "bookConsultation": "Book a consultation",
@@ -6600,7 +6653,9 @@
       "units": "{n} units",
       "mismatch": "The math does not close: it gives {computed} and the system says {closing}. Tell support."
     },
-    "tabOwner": "Management summary"
+    "tabOwner": "Management summary",
+    "printOwner": "Include management summary",
+    "printOwnerHint": "Printed below the daily kardex; if it does not fit on the same sheet, it moves whole to the next one."
   },
   "inventoryReceipts": {
     "tabReceive": "Receive",
@@ -6742,11 +6797,214 @@
     "hint": "Moves it to that person in one step, nothing voided; the cash sheet follows.",
     "same": "It is already under that person.",
     "loadingStaff": "Loading staff…",
-    "staffFailed": "Could not load the staff."
+    "staffFailed": "Could not load the staff.",
+    "voiderHint": "Moves the void (and the reimbursements it took down) to that person; the cash sheet follows."
   },
   "payment": {
     "reassign": {
       "notActive": "A voided payment keeps who made it."
+    }
+  },
+  "appointmentsBooking": {
+    "title": "Appointments",
+    "settings": "Settings",
+    "live": "Live",
+    "loading": "Loading…",
+    "loadFailed": "Could not load: {message}",
+    "retry": "Retry",
+    "whosCalling": {
+      "title": "Who's calling?",
+      "searchLabel": "Search patient",
+      "searchPlaceholder": "Name, record or phone",
+      "hint": "Type a name, record or phone number to find the patient.",
+      "searching": "Searching…",
+      "noResults": "No patient matches “{q}”.",
+      "searchFailed": "The search failed: {message}",
+      "newPatient": "New patient",
+      "record": "Record {record}",
+      "noRecord": "No record",
+      "noPhone": "No phone"
+    },
+    "typePicker": {
+      "title": "What are we booking?",
+      "titleFor": "Book for {name}: what?",
+      "medicalGroup": "Medical appointment",
+      "serviceGroup": "Service",
+      "sessionsLeft": "{n, plural, one {# session left} other {# sessions left}}",
+      "noMedical": "There are no appointment types.",
+      "noServicesPermission": "You do not have permission to see services (servicios.read).",
+      "noServices": "This center has no services.",
+      "searchLabel": "Search appointment type or service",
+      "searchPlaceholder": "Type to filter… (laser, IV, chamber…)",
+      "noMatches": "Nothing matches “{q}”.",
+      "packages": "Packages",
+      "packagesOf": "{name}'s packages",
+      "minutes": "{n} min",
+      "withDoctor": "with doctor",
+      "nextFree": "next free",
+      "today": "Today",
+      "checking": "Looking for the next free time…",
+      "noneSoon": "No free time in the next {days} bookable days (Sundays and holidays skipped)",
+      "noneBookable": "No bookable times in the next {days} bookable days: is it set up?",
+      "nextFailed": "Could not look for the next free time",
+      "notSetUp": "Not set up for booking"
+    },
+    "patient": {
+      "clear": "Back to start",
+      "openRecord": "Open record",
+      "notFound": "Could not load this patient.",
+      "record": "Record {record}",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "noUpcoming": "No upcoming appointments.",
+      "noPast": "No past appointments.",
+      "kindMedical": "Medical",
+      "kindService": "Service",
+      "move": "Move",
+      "stopMove": "Stop moving",
+      "moving": "Moving: pick the new day and time",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "cancelReasonLabel": "Reason for cancelling",
+      "cancelReasonPlaceholder": "Why is it being cancelled?",
+      "confirmCancel": "Cancel appointment",
+      "keep": "Keep it",
+      "loadFailedMedical": "Could not load the medical appointments.",
+      "loadFailedService": "Could not load the service sessions.",
+      "cancelTitle": "Cancel appointment",
+      "moreActions": "More actions"
+    },
+    "toolbar": {
+      "booking": "Booking",
+      "bookingFor": "Book for {name}",
+      "changeType": "Change type",
+      "windowLabel": "Time of day",
+      "windowAny": "Any time",
+      "windowMorning": "Morning",
+      "windowAfternoon": "Afternoon",
+      "viewLabel": "Show",
+      "free": "Free",
+      "booked": "Booked",
+      "nextFree": "Next free",
+      "noNextFree": "No free times soon.",
+      "today": "Today"
+    },
+    "month": {
+      "free": "free",
+      "booked": "booked",
+      "full": "full",
+      "closed": "closed",
+      "noMoreToday": "no more today",
+      "holiday": "holiday",
+      "unavailable": "unavailable",
+      "errorRetry": "Could not load this day. Click to retry.",
+      "notConfigured": "This service has no capacity set up",
+      "notConfiguredHint": "Set up its resources in the scheduling settings to book it here."
+    },
+    "day": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "left": "{n} left",
+      "full": "full",
+      "fullTooltip": "Full — you can still book (overbook)",
+      "unavailable": "unavailable",
+      "openFullDay": "Open full day",
+      "pickDay": "Pick a day to see its times.",
+      "noTimes": "No times on this day.",
+      "noMoreToday": "No more times today.",
+      "closed": "Closed on this day.",
+      "holiday": "Holiday: closed.",
+      "noPermissionMedical": "You do not have permission to book appointments."
+    },
+    "move": {
+      "title": "Move here?",
+      "fromTo": "{from} → {to}",
+      "fullWarning": "This time is full: moving here overbooks it.",
+      "reasonLabel": "Reason for the change",
+      "reasonPlaceholder": "Why is it being moved?",
+      "confirm": "Move",
+      "notThis": "Not this one",
+      "showingCenter": "Showing {center}: the appointment's center"
+    },
+    "series": {
+      "patient": "Patient",
+      "pickPatient": "Choose the patient first.",
+      "notes": "Notes",
+      "notesPlaceholder": "Optional notes",
+      "sessions": "Sessions",
+      "dates": "Dates",
+      "time": "Time",
+      "statusFree": "free",
+      "statusFull": "full · will overbook",
+      "statusClosed": "closed",
+      "statusHoliday": "holiday",
+      "statusDuplicate": "already has this service that day",
+      "statusCancelled": "cancelled session that day: book it on its own",
+      "useTimeInstead": "Use {time} instead",
+      "useDateInstead": "Use {date} instead",
+      "fixRed": "Fix or drop the red dates before booking.",
+      "fullWarning": "This time is full: booking it overbooks.",
+      "remove": "Drop this date",
+      "book": "Book",
+      "bookSeries": "Book {n, plural, one {# session} other {# sessions}}",
+      "checking": "Checking…",
+      "checkFailed": "Could not check these dates.",
+      "noPermission": "You do not have permission to book services.",
+      "changeDate": "Change the date ({date})",
+      "datePast": "That day has already passed.",
+      "dateSunday": "Closed on Sundays: pick another day.",
+      "dateTaken": "Another session of this series is already on that day.",
+      "addDate": "+ Add date",
+      "maxDates": "Up to {n} sessions.",
+      "resetsEdits": "Changing this resets your edits.",
+      "frequency": "Frequency",
+      "once": "Once",
+      "weekly": "Every week",
+      "biweekly": "Every 2 weeks",
+      "fewer": "One session fewer",
+      "more": "One session more",
+      "span": "{n, plural, one {# session} other {# sessions}} · {from} to {to}",
+      "allFree": "All free",
+      "healthFull": "{n, plural, one {# full (overbook)} other {# full (overbook)}}",
+      "healthBlocked": "{n, plural, one {# to fix} other {# to fix}}",
+      "fullShort": "full"
+    },
+    "toasts": {
+      "booked": "{n, plural, one {# session booked} other {# sessions booked}}",
+      "appointmentSaved": "Appointment saved",
+      "moved": "Moved: {from} → {to}",
+      "cancelled": "Appointment cancelled",
+      "skipped": "Not booked: {dates}",
+      "warnings": "Check: {list}",
+      "bookFailed": "Could not book: {message}",
+      "moveFailed": "Could not move: {message}",
+      "cancelFailed": "Could not cancel: {message}",
+      "moveReasonRequired": "A reason is required to move a medical appointment."
+    },
+    "period": {
+      "menuLabel": "Calendar view: {view}",
+      "views": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      },
+      "prev": {
+        "day": "Previous day",
+        "week": "Previous week",
+        "month": "Previous month"
+      },
+      "next": {
+        "day": "Next day",
+        "week": "Next week",
+        "month": "Next month"
+      }
+    },
+    "week": {
+      "loading": "Loading the week…",
+      "noTimes": "No times this week in this time of day.",
+      "noTimeShort": "No times",
+      "cellFree": "{day} · {time}: {n} free",
+      "cellBooked": "{day} · {time}: {n} booked"
     }
   },
   "inventory": {
@@ -6785,5 +7043,50 @@
     "noChanges": "No changes.",
     "readOnly": "Read only: changing it needs the inventory.backdate_settings permission.",
     "daysShort": "{n} days"
+  },
+  "formSheet": {
+    "sheet": {
+      "patient": "Patient",
+      "record": "Record",
+      "date": "Date",
+      "answered": "{n} of {total} answered",
+      "yes": "Yes",
+      "no": "No",
+      "note": "Note",
+      "additionalNotes": "Additional notes",
+      "nurse": "Nurse",
+      "recordedAt": "Date and time",
+      "nursePlaceholder": "Choose nurse",
+      "saving": "Saving…",
+      "offline": "Offline — retrying",
+      "print": "Print",
+      "back": "Back",
+      "savedAt": "Saved {when}",
+      "notSaved": "Not saved yet",
+      "tooLongField": "“{label}” is over {max} characters.",
+      "tooLongNote": "A note is over {max} characters.",
+      "tooLongNotes": "The additional notes are over {max} characters.",
+      "loadError": "Could not load the sheet",
+      "notFillable": "This format is not filled on screen.",
+      "printTitle": "Sheet to print",
+      "printSavedOnly": "The autosave didn't complete: the last saved version is what prints.",
+      "questions": "Questions",
+      "header": "Visit details",
+      "signature": "Signature",
+      "outOfRange": "“{label}” must be between {min} and {max} {unit}."
+    },
+    "send": {
+      "fill": "Fill on screen",
+      "qr": "QR",
+      "qrTitle": "Open this sheet on the iPad",
+      "qrHint": "Point the iPad camera at the code and tap the link."
+    }
+  },
+  "formats": {
+    "error": {
+      "answersInvalid": "The sheet has a value that does not belong to this format.",
+      "sendTargetInvalid": "That person cannot receive the sheet in this center (no account or inactive).",
+      "writeBackOutOfRange": "The value is outside the allowed range."
+    }
   }
 }

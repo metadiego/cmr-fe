@@ -9,11 +9,11 @@ import { toastError } from "@/lib/api/errors";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { DatePicker } from "@/components/ui/date-picker";
 
-// Pintado bajo la mini-tarjeta de un servicio en TherapyDayScheduler cuando el paciente YA tiene sesiones
-// pendientes de ese servicio: hace visible el doble-agendado (el caso real que motivó esto — una técnica
-// agendó lo mismo que ya había agendado otra) y ofrece mover la fecha en el sitio, en vez de crear otra.
-// Solo mueve la FECHA: `ReagendarSesionDto` (lib/api/frontdesk.ts, reagendarSesion) no acepta hora todavía
-// — moverla a otra hora el MISMO día necesita ese campo en el BE primero.
+// Shown under a service's mini card in TherapyDayScheduler when the patient ALREADY has pending sessions
+// of that service: it makes the double booking visible (the real case behind it: one technician booked
+// what another had already booked) and offers to move the date in place instead of creating another.
+// It only moves the DATE: `ReagendarSesionDto` (lib/api/frontdesk.ts, reagendarSesion) now accepts an
+// optional time too, but this badge does not offer one (the booking screen's move does).
 export function ExistingSessionsBadge({
   sesiones,
   centro,

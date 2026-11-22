@@ -174,6 +174,9 @@ export function ServiceSessionsTable({
   const [pendingByPatient, setPendingByPatient] = React.useState<Record<string, PendingDelivery[]>>({})
   React.useEffect(() => {
     if (!patientsToFetch.length || !centerId) return
+    // Sin invoice.read el BE 403 cada llamada — no pedirlo es la forma eficiente de no generar ese
+    // ruido (handoff-ruido-403-auditoria.md), no solo de no mostrarlo.
+    if (!can("invoice.read")) return
     let active = true
     Promise.all(
       patientsToFetch.map((id) =>
@@ -185,6 +188,8 @@ export function ServiceSessionsTable({
     return () => {
       active = false
     }
+    // `can` deliberately excluded: a fresh closure every render would refire this on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientsToFetch, centerId])
 
   return (

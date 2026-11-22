@@ -1,3 +1,4 @@
+import type { DivisionCashierCount, DivisionCountOverride } from "./cash-division-counts";
 import type { components } from "./schema";
 import { apiFetch, oneCenterPath } from "./client";
 import type { CuadreReconciliacion } from "@/lib/caja/totales";
@@ -196,6 +197,8 @@ export interface CashCountModeWarning {
   code: string;
   labelKey: string;
   division?: CountDivisionKey;
+  /** Amounts for the message (e.g. counted / cashiersCounted / difference); only some warnings carry it. */
+  params?: Record<string, number | string | null>;
 }
 export interface CashCountModeStatus {
   mode: CashCountMode;
@@ -215,6 +218,10 @@ export interface DivisionCount {
   expected: number;
   difference: number;
   lines: DivisionCountLine[];
+  /** Each cashier's own count in this division (BE: second part of cuadre-aviso-conteo-consolidado). */
+  cashiers?: DivisionCashierCount[];
+  /** A consolidated count that replaced the cashiers' sum, with who made it; null when there is none. */
+  override?: DivisionCountOverride | null;
 }
 export interface DivisionCounts {
   consultation: DivisionCount;

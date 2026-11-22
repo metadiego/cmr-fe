@@ -28,7 +28,9 @@ import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import { getAllMenu, createMenuItem, type MenuItem } from "@/lib/api/menu";
 import { toastError } from "@/lib/api/errors";
 import { missingFields } from "@/lib/forms/missing";
+import { callIfPermitted } from "@/lib/rbac/call-if-permitted";
 import { useResource } from "@/hooks/use-resource";
+import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
 import { MetaCrud, type Draft } from "@/components/configuracion/meta-crud";
 import { ColumnasTab } from "@/components/configuracion/columnas-tab";
@@ -324,7 +326,14 @@ function PublicarTab({ clave, labelKey, icon }: { clave: string; labelKey: strin
   const tc = useTranslations("common");
   const tRoot = useTranslations();
   const path = `/boards/${clave}`;
-  const { state, reload } = useResource<MenuItem[]>(() => getAllMenu());
+  const me = useMe();
+  const permissions = me.kind === "ok" ? me.me.permissions : [];
+  // menu.read: sin él, el BE 403 cada llamada (handoff-ruido-403-auditoria.md). tablero.admin (el
+  // gate del padre) no implica tenerlo.
+  const { state, reload } = useResource<MenuItem[]>(
+    () => callIfPermitted(permissions, "menu.read", () => getAllMenu(), []),
+    [permissions.join(",")],
+  );
   const existing = state.kind === "ok" ? state.data.find((m) => m.path === path) : undefined;
   const [busy, setBusy] = React.useState(false);
 

@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/menu";
 import { getPermisos } from "@/lib/api/rbac";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -165,16 +166,15 @@ export function MenuEditor() {
   const { state: permisosState } = useResource(() => getPermisos());
   const permisos = permisosState.kind === "ok" ? permisosState.data : [];
 
-  // No hace setState de forma síncrona (el rule react-hooks lo prohíbe dentro de efectos): el
-  // estado solo se toca dentro de los handlers de la promesa.
+  const puedeVerMenu = useCan().can("menu.read"); // el real; rbac.read (el gate) es cosmético
   const load = React.useCallback(() => {
-    getAllMenu()
+    (puedeVerMenu ? getAllMenu() : Promise.resolve(null))
       .then((list) => {
-        setItems(list);
-        setLoadErr(null);
+        setItems(list ?? []);
+        setLoadErr(list ? null : t("noPermission"));
       })
       .catch((e: unknown) => setLoadErr(apiErrorMessage(e)));
-  }, []);
+  }, [puedeVerMenu, t]);
   React.useEffect(() => {
     load();
   }, [load]);

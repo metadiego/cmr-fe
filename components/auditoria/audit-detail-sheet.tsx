@@ -4,6 +4,7 @@ import { useFormatter, useTranslations } from "next-intl"
 
 import type { AuditRow } from "@/lib/api/auditoria"
 import { agentTool, auditVia } from "@/lib/audit/via"
+import { summarizeUserAgent } from "@/lib/format/user-agent"
 import { Badge } from "@/components/ui/badge"
 import { Campo, CopiableCampo } from "@/components/auditoria/audit-fields"
 import { ChangeLogList } from "@/components/change-log/change-log-list"
@@ -107,11 +108,22 @@ export function AuditDetailSheet({
               vacio={t("sinDato")}
             />
             <CopiableCampo
+              label="sessionId"
+              value={row.sessionId ?? null}
+              onCopy={onCopy}
+              vacio={t("sinDato")}
+            />
+            <CopiableCampo
               label="IP"
               value={row.ip}
               onCopy={onCopy}
               vacio={t("sinDato")}
             />
+            {row.userAgent ? (
+              <Campo label={t("col.browser")}>
+                <span className="text-xs">{summarizeUserAgent(row.userAgent)}</span>
+              </Campo>
+            ) : null}
             {/* Before / after of this request (BE #529: today only frontdesk sessions; empty elsewhere). */}
             {row.requestId && row.resultado !== "error" ? (
               <ChangeLogList filter={{ requestId: row.requestId }} pageSize={20} />

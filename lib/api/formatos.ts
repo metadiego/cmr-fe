@@ -41,6 +41,10 @@ export type Formato = {
   letterhead?: boolean | { center?: string } | null;
   sortOrder?: number;
   active?: boolean;
+  // cmr-be #665: true when the format's own definition declares an answers.* origin (where saved
+  // answers print) — a screen-fillable sheet (GLP-1's checklist) vs. a printed-only format (HILT/MLS,
+  // a plain checklist like bpc157_enfermeria). Generic per format, no FE-side slug list.
+  fillable?: boolean | null;
 };
 
 // Par etiqueta/valor del encabezado (layout "campos"). Viaja dentro de `campos` (bolsa OPACA) → claves en español.
@@ -52,6 +56,9 @@ export type FormatoCampo = {
   valor?: string | null;
   origen?: string;
   ancho?: number | null; // px of the fill-in line (layout "paginas": Name ____ Date ____ …)
+  unit?: string | null; // printed after the value or blank: «Peso: ____ lb» (GLP-1, cmr-be #660)
+  // Saving this field also corrects another record (GLP-1 peso → the visit's scale reading), within range.
+  writeBack?: { target: string; min?: number | null; max?: number | null } | null;
 };
 // Sección del documento (dentro de `secciones`, bolsa OPACA → claves en español). El `tipo` discrimina.
 // Ampliado para salir IDÉNTICO al legacy (modelos médicos): además de texto_libre/firmas, se añaden
@@ -59,7 +66,7 @@ export type FormatoCampo = {
 // exactas en docs/specs/formatos-legacy-handoff-be.md. El FE dibuja lo que el BE emita; nada hardcodeado.
 export type FormatoSeccion =
   // OBSERVACIONES: caja (por defecto) o N líneas regladas (`estilo:"lineas"`, `lineas` = nº de renglones).
-  | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number }
+  | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number; text?: string | null }
   // Firmas simples: línea horizontal + label debajo. `lineas` son objetos { label, labelKey } (o string).
   // `estilo:"en_linea"` = the legacy «LABEL: ________» (label first, the line after it), `columnas` per row
   // (default 2: «TÉCNICO | FIRMA DEL PACIENTE», then «HORA»). A line's `valor` is printed on it (e.g. the
@@ -95,7 +102,8 @@ export type FormatoSeccion =
       labelKey?: string | null;
       tipo: "checklist";
       columnas?: { pregunta?: string; si?: string; no?: string; obs?: string };
-      grupos: { titulo?: string | null; preguntas: { texto: string }[] }[];
+      // `value`/`note`: what was saved on screen (format answers, cmr-be #658); absent = blank to fill by hand.
+      grupos: { titulo?: string | null; preguntas: { texto: string; value?: "yes" | "no" | null; note?: string | null }[] }[];
     }
   // Tabla temática (procedimiento): cabecera de color, columna de descripción de color, filas pre-puestas.
   // `cabecera` admite 1 o 2 filas (morpheus8 = 2). `filas` = descripciones ya puestas; `filasEnBlanco` añade
@@ -142,6 +150,11 @@ export type FormatoRenderMeta = {
   estiloSesion?: "caja" | "franjas";
   camposEnLinea?: string[];
   camposEnPares?: boolean;
+  // Header rows: each row lists `fields[].clave` in order, spread on one line; fields in no row go below,
+  // one per line. Never sent together with camposEnLinea (cmr-be #660, GLP-1 «like the paper»).
+  fieldRows?: string[][];
+  // "compact": one Letter sheet — title on one line, smaller type, lower checklist rows. Absent = normal.
+  density?: "compact" | "normal";
   // Values of the "campos" header written ON a line («NOMBRE DEL PACIENTE: ̲M̲I̲G̲E̲N̲E̲S̲…», legacy `.fill`).
   subrayarValores?: boolean;
   numerarFilas?: string;

@@ -23,6 +23,7 @@ import {
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { useDialogForm } from "@/components/kit/use-dialog-form";
 import { useSubmit } from "@/components/kit/use-submit";
+import { canRefundInvoice, canVoidInvoice } from "@/lib/factura/refund-status";
 
 // Acciones por factura (handoff fe-devoluciones-lista-y-acciones, slices A–D):
 //  Ver/Imprimir → detalle · Editar → detalle (borrador) · Email → POST /facturas/:id/email ·
@@ -31,11 +32,14 @@ import { useSubmit } from "@/components/kit/use-submit";
 export function FacturaRowActions({
   facturaId,
   estado,
+  refundStatus,
   centroId,
   onChanged,
 }: {
   facturaId: string;
   estado: string;
+  /** Derived refund state of the row (cmr-be #650); absent on an older BE (read from `estado`). */
+  refundStatus?: string | null;
   centroId?: string;
   onChanged?: () => void;
 }) {
@@ -49,9 +53,10 @@ export function FacturaRowActions({
   const missing = voidReasonMissing({ reason: motivo }).map(() => t("voidReason"));
 
   const esBorrador = estado === "borrador";
-  const esEmitida = estado === "emitida";
-  const puedeAnular = esEmitida && can("factura.anular");
-  const puedeDevolver = (esEmitida || estado === "devuelta_parcial") && can("factura.devolver");
+  // cmr-be #650: a refund leaves the status alone; what is refundable/voidable comes from refundStatus.
+  const inv = { status: estado, refundStatus };
+  const puedeAnular = canVoidInvoice(inv) && can("factura.anular");
+  const puedeDevolver = canRefundInvoice(inv) && can("factura.devolver");
   const puedeEmail = !esBorrador && can("notificaciones.create");
 
   const href = centroId ? `/billing/invoices/${facturaId}?centro=${centroId}` : `/billing/invoices/${facturaId}`;

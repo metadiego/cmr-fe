@@ -10,14 +10,17 @@ import { Input } from "@/components/ui/input";
 
 // Async patient picker: type to search (server-side `q`), click a result to
 // select. Once selected, shows the patient with a "change" affordance.
+// `centerIds`: search in those centers instead of only the session's (X-Tenant-ID).
 export function PacienteSelect({
   id,
   value,
   onChange,
+  centerIds,
 }: {
   id?: string;
   value: Paciente | null;
   onChange: (p: Paciente | null) => void;
+  centerIds?: string[];
 }) {
   const t = useTranslations("appointments");
   const [query, setQuery] = React.useState("");
@@ -33,14 +36,15 @@ export function PacienteSelect({
   const { state } = useResource(
     () =>
       debounced.length >= 1
-        ? listPacientes({ q: debounced, limit: 8 })
+        ? listPacientes({ q: debounced, limit: 8, ...(centerIds?.length ? { centerIds } : {}) })
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 8 } }),
-    [debounced],
+    [debounced, centerIds?.join(",") ?? ""],
   );
 
   if (value) {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+      // Same h-9 box as the inputs/selects around it, so form rows line up.
+      <div className="flex h-9 items-center justify-between gap-2 rounded-md border border-input bg-input/30 pr-1 pl-3">
         <span className="truncate text-sm font-medium">
           {(value.displayName || [value.firstName, value.lastName].filter(Boolean).join(" "))}
           {value.documentId && (
@@ -53,6 +57,7 @@ export function PacienteSelect({
           type="button"
           variant="ghost"
           size="sm"
+          className="h-7"
           onClick={() => {
             onChange(null);
             setQuery("");

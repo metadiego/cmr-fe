@@ -6,6 +6,7 @@ import { useFormatter, useTranslations } from "next-intl";
 
 import type { CajaDivision, ReporteDia } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
+import { DescuadreBox } from "@/components/caja/descuadre-box";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/kit/confirm-host";
@@ -171,28 +172,27 @@ export function ResumenPagos({
         <div className="my-1 border-t" />
         <Row label={tp("cashInDrawer")} value={money(contado)} />
         <Row label={tp("deposit")} value={money(aDepositar)} />
-        <div
-          className={cn(
-            "mt-2 flex items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold",
-            estado === "sinContar"
-              ? "animate-pulse bg-destructive text-destructive-foreground"
-              : estado === "ok"
-                ? "bg-success text-success-foreground"
-                : estado === "over"
-                  ? "bg-warning text-warning-foreground"
-                  : "bg-destructive/10 text-destructive",
-          )}
-        >
-          {sinContar ? (
-            <span>{t("summary.notCounted", { monto: money(Math.abs(diferencia)) })}</span>
-          ) : (
-            <span>
-              {t("summary.variance")}
-              <span className="ml-1 font-normal">({tp(`status.${estado}`)})</span>
-            </span>
-          )}
-          <span className="tabular-nums">{money(diferencia)}</span>
-        </div>
+        {estado === "short" || estado === "over" ? (
+          // Does not balance: the shared red box (owner, 21-nov-2026), same as the cash total.
+          <DescuadreBox className="mt-2" label={t("summary.variance")} difference={diferencia} />
+        ) : (
+          <div
+            className={cn(
+              "mt-2 flex items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold",
+              estado === "sinContar" ? "animate-pulse bg-destructive text-destructive-foreground" : "bg-success text-success-foreground",
+            )}
+          >
+            {sinContar ? (
+              <span>{t("summary.notCounted", { monto: money(Math.abs(diferencia)) })}</span>
+            ) : (
+              <span>
+                {t("summary.variance")}
+                <span className="ml-1 font-normal">({tp(`status.${estado}`)})</span>
+              </span>
+            )}
+            <span className="tabular-nums">{money(diferencia)}</span>
+          </div>
+        )}
       </section>
 
       {/* Acciones */}

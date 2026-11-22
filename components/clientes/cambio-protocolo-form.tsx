@@ -6,16 +6,14 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 
-import {
-  getPendientesEntrega,
-  aplicarCambioProtocolo,
-  type PendienteEntrega,
-  type CambioProtocaloNuevo,
-} from "@/lib/api/frontdesk";
+import { getPendientesEntrega, type PendienteEntrega } from "@/lib/api/frontdesk";
+import { aplicarCambioProtocolo, type CambioProtocaloNuevo } from "@/lib/api/protocol-change";
 import { getCatalogoFacturacion, type Producto } from "@/lib/api/facturas";
 import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
 import { isUsableLine, protocolChangeInvalid, protocolChangeMissing } from "@/lib/pacientes/protocol-change-missing";
+import { callIfPermitted } from "@/lib/rbac/call-if-permitted";
 import { useResource } from "@/hooks/use-resource";
+import { useMe } from "@/hooks/use-me";
 import { Field } from "@/components/kit/field";
 import { FormFooter } from "@/components/kit/form-footer";
 import { RequiredLegend, RequiredMark } from "@/components/kit/required-mark";
@@ -50,9 +48,15 @@ export function CambioProtocoloForm({
   const tc = useTranslations("common");
   const tRoot = useTranslations();
 
+  const me = useMe();
+  const permissions = me.kind === "ok" ? me.me.permissions : [];
   const pendRes = useResource<PendienteEntrega[]>(
-    () => (pacienteId ? getPendientesEntrega(pacienteId, centro) : Promise.resolve([])),
-    [pacienteId, centro],
+    () =>
+      pacienteId
+        // invoice.read: sin él, el BE 403 cada llamada (handoff-ruido-403-auditoria.md).
+        ? callIfPermitted(permissions, "invoice.read", () => getPendientesEntrega(pacienteId, centro), [])
+        : Promise.resolve([]),
+    [pacienteId, centro, permissions.join(",")],
   );
   const pendientes = (pendRes.state.kind === "ok" ? pendRes.state.data : []).filter((p) => (p.pendiente ?? 0) > 0 || (p.totalSessions ?? 0) > 0);
 
