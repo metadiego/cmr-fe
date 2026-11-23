@@ -50,7 +50,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PacienteSelect } from "@/components/citas/paciente-select";
+import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { CitaActions } from "@/components/citas/cita-actions";
 
 // Centinela "Sin médico" para que el Select nunca quede en vacío (Radix no admite value="").
@@ -481,7 +481,7 @@ export function CitaModal({
             {paciente ? paciente.displayName || [paciente.firstName, paciente.lastName].filter(Boolean).join(" ") : "—"}
           </div>
         ) : (
-          <PacienteSelect
+          <PatientPickerWithCreate
             value={paciente}
             onChange={(p) => {
               setPaciente(p);

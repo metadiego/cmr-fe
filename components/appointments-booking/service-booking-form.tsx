@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
-import { PacienteSelect } from "@/components/citas/paciente-select";
+import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { SeriesRows, useDayLabel } from "@/components/appointments-booking/series-rows";
 import { SeriesFrequency, type SeriesMode } from "@/components/appointments-booking/series-frequency";
@@ -383,7 +383,7 @@ export function ServiceBookingForm({
             {screenPatient.displayName || [screenPatient.firstName, screenPatient.lastName].filter(Boolean).join(" ")}
           </span>
         ) : (
-          <PacienteSelect value={localPatient} onChange={setLocalPatient} centerIds={patientCenterIds} />
+          <PatientPickerWithCreate value={localPatient} onChange={setLocalPatient} centerIds={patientCenterIds} />
         )}
         {!!bookableLeft && (
           <span className="block text-xs text-muted-foreground tabular-nums">
