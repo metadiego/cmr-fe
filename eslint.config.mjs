@@ -37,7 +37,7 @@ const DEBT = {
   // STATE itself lives one level up, in patient-detail.tsx (stable per patient; the row can unmount
   // mid-action on refetch). Keeping this prop is reuse of shared code, not new work on the deprecated
   // screen.
-  "components/frontdesk/fila-sesion.tsx": 723,
+  "components/frontdesk/fila-sesion.tsx": 714,
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
   // 08-oct-2026: lowered from 2050 to 1966 — the regenerate-availability dialog moved to

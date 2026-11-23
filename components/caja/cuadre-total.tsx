@@ -3,6 +3,8 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
 
 import {
   abrirCuadreTotal,
@@ -21,6 +23,7 @@ import {
 import { apiErrorMessage } from "@/lib/api/errors";
 import { todayPR } from "@/lib/format/fecha";
 import { toCsv } from "@/lib/caja/export";
+import { sortWarnings, warningSeverity, warningValues } from "@/lib/caja/count-mode-warnings";
 import { subtotalesTarjeta as calcSubtotalesTarjeta } from "@/lib/caja/totales";
 import {
   esSoloLecturaCuadreTotal,
@@ -34,6 +37,7 @@ import { useCan } from "@/hooks/use-can";
 import { useCuadreTotalAutosave } from "@/hooks/use-cuadre-total-autosave";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
+import { DivisionCashiers } from "@/components/caja/division-cashiers";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
@@ -354,16 +358,24 @@ function Editor({
       <ComprobacionCuadreTotal check={reporte.check} ownCount={reporte.dayReconciliation?.ownCount ?? false} />
 
       {/* Avisos del modo de conteo (BE #566): NUNCA deshabilitan el cierre, solo informan. */}
-      {(reporte.countMode?.warnings ?? []).map((w, i) => (
-        <div
-          key={`${w.code}-${i}`}
-          className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-foreground"
-        >
-          {w.division
-            ? tRoot(w.labelKey, { division: t(w.division === "consultation" ? "divisionConsulta" : "divisionGeneral") })
-            : tRoot(w.labelKey)}
-        </div>
-      ))}
+      {sortWarnings(reporte.countMode?.warnings ?? []).map((w, i) => {
+        const red = warningSeverity(w.code) === "destructive";
+        const division = w.division ? t(w.division === "consultation" ? "divisionConsulta" : "divisionGeneral") : undefined;
+        return (
+          <div
+            key={`${w.code}-${i}`}
+            role={red ? "alert" : undefined}
+            className={
+              red
+                ? "flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+                : "rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning-foreground"
+            }
+          >
+            {red && <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />}
+            <span className="tabular-nums">{tRoot(w.labelKey, warningValues(w, division, { countedBy: tCaja("descuadre.unregistered") }))}</span>
+          </div>
+        );
+      })}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         <div className="space-y-4">
@@ -420,6 +432,14 @@ function Editor({
               saveState={contarHabilitado ? autosave.state : "idle"}
               onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
             />
+          )}
+
+          {reporte.divisionCounts && (
+            // Stacked full width: five money columns do not fit beside the payments column until 2xl.
+            <div className="grid gap-4 2xl:grid-cols-2">
+              <DivisionCashiers division={tCaja("division.consulta")} count={reporte.divisionCounts.consultation} />
+              <DivisionCashiers division={tCaja("division.general")} count={reporte.divisionCounts.general} />
+            </div>
           )}
 
           <DesgloseCajeros
