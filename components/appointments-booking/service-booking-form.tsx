@@ -42,6 +42,13 @@ import type { RecurringPlanItem } from "@/lib/agenda/recurring-plan";
 import { agendarVariosServicios, crearSesion, type BookableService } from "@/lib/api/frontdesk";
 import type { ApiWarning } from "@/lib/api/types";
 import type { Paciente } from "@/lib/api/pacientes";
+import type { Centro } from "@/lib/api/centers";
+import {
+  resultCenter,
+  resultPatient,
+  serviceBookingResult,
+  type BookingResult,
+} from "@/lib/agenda/booking/booking-result";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { warningText } from "@/lib/frontdesk/avisos";
 
@@ -64,11 +71,13 @@ export interface ServiceBooked {
   dates: string[];
   /** Everything asked was attempted without a request failing: the form can close. */
   done: boolean;
+  /** What was created, skipped and warned about: the success dialog (spec §1). */
+  result: BookingResult;
 }
 
 export function ServiceBookingForm({
   center,
-  centerName,
+  centerInfo,
   serviceId,
   serviceName,
   date,
@@ -83,8 +92,8 @@ export function ServiceBookingForm({
   onBack,
 }: {
   center: string | undefined;
-  /** The booking center's name (the other-center package warning). */
-  centerName: string | undefined;
+  /** The booking center (the other-center package warning, the success dialog's printout header). */
+  centerInfo: Centro | undefined;
   serviceId: string;
   serviceName: string;
   date: string;
@@ -261,6 +270,22 @@ export function ServiceBookingForm({
                   : t("series.checking")
               : null;
 
+  const resultOf = (
+    p: Paciente,
+    created: { date: string; time: string }[],
+    skipped: string[],
+    warnings: ApiWarning[],
+  ): BookingResult =>
+    serviceBookingResult({
+      patient: resultPatient(p),
+      center: resultCenter(centerInfo),
+      serviceName,
+      created,
+      // The BE skips only a date the patient already has this service on.
+      skipped: skipped.map((date) => ({ date, reason: t("result.skippedHasService") })),
+      warnings: warnings.map((w) => warningText(w, tRoot)),
+    });
+
   // One row: a single session on that row's date and time (the picked ones unless edited).
   const bookSingle = async (p: Paciente) => {
     const row = rows[0];
@@ -269,9 +294,8 @@ export function ServiceBookingForm({
         { patientId: p.id, serviceId, date: row.date, time: normalizeTime(row.time) },
         center,
       );
-      toast.success(t("toasts.booked", { n: 1 }));
-      if (warnings.length) toast.warning(t("toasts.warnings", { list: warnings.map((w) => warningText(w, tRoot)).join(" · ") }));
-      onBooked({ patient: p, dates: [row.date], done: true });
+      const created = [{ date: row.date, time: row.time }];
+      onBooked({ patient: p, dates: [row.date], done: true, result: resultOf(p, created, [], warnings) });
     } catch (err) {
       toast.error(t("toasts.bookFailed", { message: apiErrorLabel(err, tRoot) }));
     }
@@ -279,7 +303,7 @@ export function ServiceBookingForm({
 
   const bookSeries = async (p: Paciente) => {
     const groups = groupByTime(rows);
-    const created: string[] = [];
+    const created: { date: string; time: string }[] = [];
     let createdCount = 0;
     const skipped: string[] = [];
     const warnings: ApiWarning[] = [];
@@ -291,13 +315,13 @@ export function ServiceBookingForm({
           center,
         );
         const list = Array.isArray(res.data.creadas) ? res.data.creadas : [];
-        const made = list.map((s) => (s.date ? String(s.date).slice(0, 10) : "")).filter(Boolean);
+        const made = list.flatMap((s) => (s.date ? [{ date: String(s.date).slice(0, 10), time: s.time ?? g.time }] : []));
         createdCount += list.length;
         created.push(...made);
         // The BE only counts what it skipped (a date the patient already has the service on); the dates
         // are the asked ones it did not create, when every created session carries its date.
         if (Number(res.data.omitidas ?? 0) > 0 && made.length === list.length) {
-          skipped.push(...notCreated(g.dates, made));
+          skipped.push(...notCreated(g.dates, made.map((m) => m.date)));
         }
         // `advertencias` carries BOOKING_DAY_SKIPPED (a day a blocking rule skipped, BE #547): said, never dropped.
         warnings.push(...res.warnings, ...res.advertencias);
@@ -306,20 +330,20 @@ export function ServiceBookingForm({
         toast.error(t("toasts.bookFailed", { message: apiErrorLabel(err, tRoot) }));
       }
     }
-    if (createdCount > 0) toast.success(t("toasts.booked", { n: createdCount }));
-    const notes = [
-      ...(skipped.length ? [t("toasts.skipped", { dates: skipped.map(dayLabel).join(", ") })] : []),
-      ...warnings.map((w) => warningText(w, tRoot)),
-    ];
-    if (notes.length) toast.warning(t("toasts.warnings", { list: notes.join(" · ") }));
     if (failures > 0) {
       // Keep only the rows still to book, so a retry does not ask for the booked ones again.
-      const done = new Set([...created, ...skipped]);
+      const done = new Set([...created.map((c) => c.date), ...skipped]);
       editItems((list) => list.filter((i) => !done.has(i.date)));
       series.retry();
     }
+    // A partial failure keeps the form open with the rows left; what was created shows on top of it.
     if (createdCount > 0 || failures === 0) {
-      onBooked({ patient: p, dates: [...new Set([...created, ...groups.flatMap((g) => g.dates)])], done: failures === 0 });
+      onBooked({
+        patient: p,
+        dates: [...new Set([...created.map((c) => c.date), ...groups.flatMap((g) => g.dates)])],
+        done: failures === 0,
+        result: resultOf(p, created, skipped, warnings),
+      });
     }
   };
 
@@ -368,7 +392,7 @@ export function ServiceBookingForm({
         )}
         {boughtElsewhere.length > 0 && (
           <span className="block text-xs text-warning-foreground">
-            {t("series.otherCenterWarning", { center: boughtElsewhere.join(", "), here: centerName ?? "—" })}
+            {t("series.otherCenterWarning", { center: boughtElsewhere.join(", "), here: centerInfo?.name ?? "—" })}
           </span>
         )}
       </Field>

@@ -1,7 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildBookingResult, type BookingResultItem } from "./booking-result.ts";
+import {
+  buildBookingResult,
+  resultCenter,
+  resultPatient,
+  serviceBookingResult,
+  type BookingResultItem,
+} from "./booking-result.ts";
 
 const base = {
   mode: "booked" as const,
@@ -53,4 +59,45 @@ test("buildBookingResult: a moved item keeps its `from`", () => {
   const from = { date: "2026-12-01", time: "08:00" };
   const r = buildBookingResult({ ...base, mode: "moved", items: [item("2026-12-03", "10:00", "Consulta", { from })] });
   assert.deepEqual(r.items[0].from, from);
+});
+
+test("resultPatient: display name and record; no record stays null", () => {
+  assert.deepEqual(resultPatient({ firstName: "Ana", lastName: "Ruiz", medicalRecordNumber: "77" }), {
+    name: "Ana Ruiz",
+    record: "77",
+  });
+  assert.deepEqual(resultPatient({ firstName: "Ana", lastName: null, displayName: "Ana R." }), {
+    name: "Ana R.",
+    record: null,
+  });
+});
+
+test("resultCenter: name, phone and address; missing ones are null, an unknown center is blank", () => {
+  assert.deepEqual(resultCenter({ name: "CMR Caguas", phone: "787-000-0000" }), {
+    name: "CMR Caguas",
+    phone: "787-000-0000",
+    address: null,
+  });
+  assert.deepEqual(resultCenter(undefined), { name: "", phone: null, address: null });
+});
+
+test("serviceBookingResult: service items with HH:MM times, sorted, skipped and warnings kept", () => {
+  const r = serviceBookingResult({
+    patient: { name: "Ana" },
+    center: { name: "CMR Caguas" },
+    serviceName: "Laser",
+    created: [
+      { date: "2026-12-08", time: "10:00:00" },
+      { date: "2026-12-01", time: "09:30" },
+    ],
+    skipped: [{ date: "2026-12-15", reason: "already has it" }],
+    warnings: ["over capacity"],
+  });
+  assert.equal(r.mode, "booked");
+  assert.deepEqual(r.items, [
+    { date: "2026-12-01", time: "09:30", typeName: "Laser", kind: "service" },
+    { date: "2026-12-08", time: "10:00", typeName: "Laser", kind: "service" },
+  ]);
+  assert.deepEqual(r.skipped, [{ date: "2026-12-15", reason: "already has it" }]);
+  assert.deepEqual(r.warnings, ["over capacity"]);
 });

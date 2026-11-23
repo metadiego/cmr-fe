@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Settings02Icon } from "@hugeicons/core-free-icons";
 
@@ -16,13 +15,10 @@ import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { WhosCallingPanel } from "@/components/appointments-booking/whos-calling-panel";
 import { TypeListPanel } from "@/components/appointments-booking/type-list-panel";
 import { PatientCard } from "@/components/appointments-booking/patient-card";
-import { BookingCalendar, type CalendarMoving } from "@/components/appointments-booking/booking-calendar";
+import { BookingCalendar } from "@/components/appointments-booking/booking-calendar";
 import { ServiceBookingForm } from "@/components/appointments-booking/service-booking-form";
-import {
-  EditAppointmentModal,
-  PatientRail,
-  useAppointmentLabel,
-} from "@/components/appointments-booking/patient-rail";
+import { useBookingResult } from "@/components/appointments-booking/booking-result-provider";
+import { EditAppointmentModal, PatientRail } from "@/components/appointments-booking/patient-rail";
 import type { BookingView } from "@/components/appointments-booking/booking-toolbar";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
@@ -33,6 +29,7 @@ import { bookableCheckKey, unbookableTypeCheck } from "@/lib/agenda/booking/unbo
 import { useBookingCalendar } from "@/hooks/use-booking-calendar";
 import { calendarCenter } from "@/lib/agenda/booking/calendar-center";
 import { usePatientAppointments } from "@/hooks/use-patient-appointments";
+import { useBookingMove } from "@/hooks/use-booking-move";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
 import { normalizeTime, type TimeWindow } from "@/lib/agenda/booking/availability";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
@@ -46,10 +43,8 @@ import {
   OPEN_MODAL_SELECTOR,
 } from "@/lib/agenda/booking/keys";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
-import { reagendarCita, type Cita } from "@/lib/api/citas";
-import { reagendarSesion } from "@/lib/api/frontdesk";
+import type { Cita } from "@/lib/api/citas";
 import { getServiciosDe, type Servicio } from "@/lib/api/servicios";
-import { apiErrorLabel } from "@/lib/api/errors";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
@@ -290,9 +285,8 @@ export function BookingScreen() {
   // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, warning-tone
   // ring on its day). A move never changes the appointment's center, so while it moves the calendar
   // reads availability from the appointment's OWN center (calendarCenter), whatever the picker or the
-  // top bar shows, with a note saying so. The day panel's "Move here?" box commits. Stop, Esc, a change
-  // of the screen's center or a reload that no longer lists it ends the move.
-  const appointmentLabel = useAppointmentLabel();
+  // top bar shows, with a note saying so. The day panel's "Move here?" box commits (useBookingMove).
+  // Stop, Esc, a change of the screen's center or a reload that no longer lists it ends the move.
   const movingItem = state.movingId ? rail.upcoming.find((a) => a.id === state.movingId) : undefined;
   const calCenter = calendarCenter(center, movingItem);
   const calCenterName =
@@ -388,41 +382,20 @@ export function BookingScreen() {
     if (state.movingId) setState((s) => ({ ...s, movingId: null }));
   }
 
-  const moving: CalendarMoving | undefined = movingItem && {
-    fromLabel: appointmentLabel(movingItem.date, movingItem.time),
-    needsReason: movingItem.kind === "medical",
-    onConfirm: async (to, reason) => {
-      const a = movingItem;
-      // The call runs in the appointment's own center (X-Tenant-ID) and keeps it there: no `centerId`
-      // (omit = keep current) and no `doctorId` on the medical reschedule.
-      const tenant = a.centerId ?? center;
-      const why = reason?.trim() ?? "";
-      if (a.kind === "medical" && !why) {
-        toast.error(t("toasts.moveReasonRequired"));
-        return false;
-      }
-      try {
-        if (a.kind === "medical") {
-          await reagendarCita(a.id, { date: to.date, time: to.time, reason: why }, tenant);
-        } else {
-          await reagendarSesion(a.id, to.date, tenant, to.time);
-        }
-      } catch (err) {
-        toast.error(t("toasts.moveFailed", { message: apiErrorLabel(err) }));
-        return false;
-      }
-      toast.success(
-        t("toasts.moved", { from: appointmentLabel(a.date, a.time), to: appointmentLabel(to.date, to.time) }),
-      );
+  const moving = useBookingMove({
+    movingItem,
+    center,
+    onMoved: (dates) => {
       update({ movingId: null });
-      onAppointmentsChanged([a.date, to.date]);
-      return true;
+      onAppointmentsChanged(dates);
     },
-  };
+  });
 
   // ---- Service booking: a dialog for the picked time, like the medical one (never while moving: the
   // calendar shows it only then). It books in the calendar's center; a patient chosen in the form
   // becomes the screen's patient once something is booked.
+  // What it booked shows in the app-wide success dialog (on top of the form if part of a series failed).
+  const { show: showResult } = useBookingResult();
   const serviceForm =
     state.kind === "service" && state.typeId
       ? ({ date, time, clear }: { date: string; time: string; clear: () => void }) => {
@@ -433,7 +406,7 @@ export function BookingScreen() {
             <ServiceBookingForm
               key={`${state.typeId}|${date}|${time}`}
               center={calCenter}
-              centerName={centro.centros.find((c) => c.id === calCenter)?.name}
+              centerInfo={centro.centros.find((c) => c.id === calCenter)}
               serviceId={state.typeId ?? ""}
               serviceName={chosenType?.name ?? ""}
               date={date}
@@ -457,6 +430,7 @@ export function BookingScreen() {
                   pickPatient(r.patient);
                 }
                 onAppointmentsChanged(r.dates);
+                showResult(r.result);
                 if (r.done) clear();
               }}
               onBack={clear}

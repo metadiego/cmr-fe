@@ -1,3 +1,5 @@
+import { patientName } from "../../pacientes/display-name.ts";
+
 export interface BookingResultItem {
   date: string;
   time: string;
@@ -29,4 +31,48 @@ export function buildBookingResult(input: BookingResult): BookingResult {
     });
   const created = new Set(items.map((i) => i.date));
   return { ...input, items, skipped: input.skipped.filter((s) => !created.has(s.date)) };
+}
+
+/** "09:30:00" or "9:30" → "09:30": the dialog's rows dedupe and sort on it. */
+export function resultTime(time: string): string {
+  const [h = "0", m = "00"] = time.split(":");
+  return `${h.padStart(2, "0")}:${m.slice(0, 2).padStart(2, "0")}`;
+}
+
+/** The patient as the result names them: display name and record (none = null, never invented). */
+export function resultPatient(
+  p: { firstName: string; lastName: string | null; displayName?: string | null; medicalRecordNumber?: string | null },
+): BookingResult["patient"] {
+  return { name: patientName(p), record: p.medicalRecordNumber ?? null };
+}
+
+/** The booking center's printout header; a missing field is null (omitted), an unknown center blank. */
+export function resultCenter(
+  c: { name: string; phone?: string | null; address?: string | null } | undefined,
+): BookingResult["center"] {
+  return { name: c?.name ?? "", phone: c?.phone ?? null, address: c?.address ?? null };
+}
+
+/** What a service booking (one session or a series) created, skipped and was warned about. */
+export function serviceBookingResult(input: {
+  patient: BookingResult["patient"];
+  center: BookingResult["center"];
+  serviceName: string;
+  created: { date: string; time: string }[];
+  skipped: BookingResult["skipped"];
+  warnings: string[];
+}): BookingResult {
+  return buildBookingResult({
+    mode: "booked",
+    patient: input.patient,
+    center: input.center,
+    items: input.created.map((c) => ({
+      date: c.date.slice(0, 10),
+      time: resultTime(c.time),
+      typeName: input.serviceName,
+      kind: "service",
+    })),
+    skipped: input.skipped,
+    warnings: input.warnings,
+  });
 }

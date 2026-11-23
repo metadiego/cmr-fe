@@ -8,7 +8,6 @@ import {
   validarCita,
   crearCitaAgenda,
   actualizarCitaAgenda,
-  getCita,
   getCuposLibres,
   type Cita,
   type TipoCita,
@@ -30,6 +29,7 @@ import type { EhrReadinessField } from "@/lib/api/ehr-integration";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { useResource } from "@/hooks/use-resource";
 import { useMe } from "@/hooks/use-me";
+import { useShowAppointmentResult } from "@/hooks/use-appointment-result";
 import { useEstados } from "@/hooks/use-estados";
 import { Badge } from "@/components/ui/badge";
 import { addMinutes } from "@/lib/agenda/calendar";
@@ -279,17 +279,12 @@ export function CitaModal({
   const choiceSummary = bookingSummary([tipo?.name, dayLabel, timeRange(hora, horaFin), clinicName]);
   const footerSummary = bookingSummary([tipo?.name, dayLabel, timeRange(hora, horaFin), clinicName]);
 
-  async function avisarReagendo(fromId: string) {
-    const prev = await getCita(fromId).catch(() => null);
-    const d = prev?.date ? parseDayUTC(String(prev.date).slice(0, 10)) : null;
-    toast.info(d ? t("rescheduledFrom", { date: format.dateTime(d, "dayMonth") }) : t("rescheduledFromUnknown"), { duration: 10000 });
-  }
-
+  const showResult = useShowAppointmentResult();
   // Either the overlap check found conflicts (shown; a second «Guardar» confirms) or the appointment
   // was saved. The button is disabled while anything is missing, so the throw is only a backstop.
   type Outcome =
     | { kind: "conflicts"; conflicts: CitaConflicto[] }
-    | { kind: "saved"; saved: Cita | undefined; advertencias: Parameters<typeof mostrarAvisos>[0] };
+    | { kind: "saved"; saved: Cita | undefined; advertencias: Parameters<typeof mostrarAvisos>[0]; patient: Paciente };
   async function save(): Promise<Outcome> {
     if (!paciente || !tipoCitaId) throw new Error(t("patient"));
     // Validate overlap first (unless the user already confirmed past a warning).
@@ -341,7 +336,7 @@ export function CitaModal({
     const { cita: saved, advertencias } = isEdit
       ? await actualizarCitaAgenda(cita!.id, editPayload ?? {}, effectiveCentro || undefined)
       : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
-    return { kind: "saved", saved, advertencias };
+    return { kind: "saved", saved, advertencias, patient: paciente };
   }
 
   const { submitting, submit } = useSubmit(save, {
@@ -351,13 +346,17 @@ export function CitaModal({
         return;
       }
       if (effectiveCentro) setActiveCentro(effectiveCentro);
-      toast.success(isEdit ? t("updated") : t("created"));
-      // BE #547: interpolates date/time/opensAt/etc. into the labelKey. Not blocking: the appointment
-      // is already saved.
-      mostrarAvisos(r.advertencias, tRoot);
-      // One live appointment per patient: the BE MOVED the existing one instead of creating a second.
-      // Say so, or it looks like nothing happened.
-      if (!isEdit && r.saved?.rescheduledFromId) void avisarReagendo(r.saved.rescheduledFromId);
+      if (isEdit) {
+        toast.success(t("updated"));
+        // BE #547: interpolates date/time/opensAt/etc. into the labelKey. Not blocking: already saved.
+        mostrarAvisos(r.advertencias, tRoot);
+      } else {
+        // Every create shows the booking success dialog (spec §1); "moved" when the BE moved the live one.
+        void showResult(r.saved, r.advertencias, {
+          patient: r.patient, asked: { date: fechaSel, time: hora }, typeName: tipo?.name ?? "",
+          doctor: medicos.find((m) => m.id === medicoId), center: centros.find((c) => c.id === effectiveCentro),
+        });
+      }
       onSaved(r.saved);
       onOpenChange(false);
     },

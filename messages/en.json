@@ -940,14 +940,11 @@
       "overlapWarn": "This time overlaps another appointment for the doctor:",
       "save": "Save",
       "saveAnyway": "Save anyway",
-      "created": "Appointment created.",
       "updated": "Appointment updated.",
       "noDoctor": "No doctor",
       "followUpPatient": "Follow-up patient (already seen)",
       "time": "Time",
       "slotFullWarn": "That time is full; it books anyway (non-blocking).",
-      "rescheduledFrom": "The patient already had an appointment on {date}: it was moved to this date (one live appointment per patient).",
-      "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date.",
       "holidayClosed": "{name} — holiday, the schedule is closed that day.",
       "holidayInfo": "{name} — holiday.",
       "editLocked": "To change the date, type or patient, use Reschedule in the actions menu (⋯).",
@@ -6981,12 +6978,9 @@
       "fullShort": "full"
     },
     "toasts": {
-      "booked": "{n, plural, one {# session booked} other {# sessions booked}}",
       "appointmentSaved": "Appointment saved",
       "moved": "Moved: {from} → {to}",
       "cancelled": "Appointment cancelled",
-      "skipped": "Not booked: {dates}",
-      "warnings": "Check: {list}",
       "bookFailed": "Could not book: {message}",
       "moveFailed": "Could not move: {message}",
       "cancelFailed": "Could not cancel: {message}",
@@ -7031,7 +7025,8 @@
       "printHeading": "Your upcoming appointments",
       "printCallUs": "If you cannot attend, call {phone}.",
       "record": "Record {n}",
-      "movedFrom": "Was: {date} · {time}"
+      "movedFrom": "Was: {date} · {time}",
+      "skippedHasService": "already has this service that day"
     }
   },
   "inventory": {

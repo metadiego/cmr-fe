@@ -940,14 +940,11 @@
       "overlapWarn": "Este horario se solapa con otra cita del médico:",
       "save": "Guardar",
       "saveAnyway": "Guardar de todos modos",
-      "created": "Cita creada.",
       "updated": "Cita actualizada.",
       "noDoctor": "Sin médico",
       "followUpPatient": "Paciente de seguimiento (ya fue atendido)",
       "time": "Hora",
       "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea).",
-      "rescheduledFrom": "El paciente ya tenía una cita el {date}: se movió a esta fecha (una cita viva por paciente).",
-      "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha.",
       "holidayClosed": "{name} — día feriado, la agenda está cerrada ese día.",
       "holidayInfo": "{name} — día feriado.",
       "editLocked": "Para cambiar la fecha, el tipo o el paciente, use Reagendar en el menú de acciones (⋯).",
@@ -6981,12 +6978,9 @@
       "fullShort": "lleno"
     },
     "toasts": {
-      "booked": "{n, plural, one {# sesión agendada} other {# sesiones agendadas}}",
       "appointmentSaved": "Cita guardada",
       "moved": "Movida: {from} → {to}",
       "cancelled": "Cita cancelada",
-      "skipped": "No agendadas: {dates}",
-      "warnings": "Revisar: {list}",
       "bookFailed": "No se pudo agendar: {message}",
       "moveFailed": "No se pudo mover: {message}",
       "cancelFailed": "No se pudo cancelar: {message}",
@@ -7031,7 +7025,8 @@
       "printHeading": "Sus próximas citas",
       "printCallUs": "Si no puede asistir, llame al {phone}.",
       "record": "Récord {n}",
-      "movedFrom": "Antes: {date} · {time}"
+      "movedFrom": "Antes: {date} · {time}",
+      "skippedHasService": "ya tiene este servicio ese día"
     }
   },
   "inventory": {

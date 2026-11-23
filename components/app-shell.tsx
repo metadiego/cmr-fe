@@ -15,6 +15,7 @@ import { MeProvider } from "@/components/me-provider";
 import { ConfirmActionHost } from "@/components/confirm-action-host";
 import { PastDayConfirmHost } from "@/components/caja/past-day-confirm-host";
 import { MenuProvider } from "@/components/menu-provider";
+import { BookingResultProvider } from "@/components/appointments-booking/booking-result-provider";
 import { TooltipProvider } from "@/components/ui/tooltip-radix";
 import {
   SidebarInset,
@@ -65,10 +66,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <MeProvider>
       <MenuProvider>
-        <ShellChrome>{children}</ShellChrome>
-        <ConfirmActionHost />
-        <ConfirmHost />
-        <PastDayConfirmHost />
+        <BookingResultProvider>
+          <ShellChrome>{children}</ShellChrome>
+          <ConfirmActionHost />
+          <ConfirmHost />
+          <PastDayConfirmHost />
+        </BookingResultProvider>
       </MenuProvider>
     </MeProvider>
   );
