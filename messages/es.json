@@ -6918,13 +6918,12 @@
       "noPermissionMedical": "No tienes permiso para agendar citas."
     },
     "move": {
-      "title": "¿Mover aquí?",
+      "dialogTitle": "Mover cita",
       "fromTo": "{from} → {to}",
       "fullWarning": "Esta hora está llena: moverla aquí es un sobrecupo.",
       "reasonLabel": "Motivo del cambio",
       "reasonPlaceholder": "¿Por qué se mueve?",
       "confirm": "Mover",
-      "notThis": "Esta no",
       "showingCenter": "Mostrando {center}: el centro de la cita"
     },
     "series": {
@@ -6979,7 +6978,6 @@
     },
     "toasts": {
       "appointmentSaved": "Cita guardada",
-      "moved": "Movida: {from} → {to}",
       "cancelled": "Cita cancelada",
       "bookFailed": "No se pudo agendar: {message}",
       "moveFailed": "No se pudo mover: {message}",

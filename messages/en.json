@@ -6918,13 +6918,12 @@
       "noPermissionMedical": "You do not have permission to book appointments."
     },
     "move": {
-      "title": "Move here?",
+      "dialogTitle": "Move appointment",
       "fromTo": "{from} → {to}",
       "fullWarning": "This time is full: moving here overbooks it.",
       "reasonLabel": "Reason for the change",
       "reasonPlaceholder": "Why is it being moved?",
       "confirm": "Move",
-      "notThis": "Not this one",
       "showingCenter": "Showing {center}: the appointment's center"
     },
     "series": {
@@ -6979,7 +6978,6 @@
     },
     "toasts": {
       "appointmentSaved": "Appointment saved",
-      "moved": "Moved: {from} → {to}",
       "cancelled": "Appointment cancelled",
       "bookFailed": "Could not book: {message}",
       "moveFailed": "Could not move: {message}",

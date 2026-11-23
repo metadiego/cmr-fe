@@ -8,22 +8,17 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Textarea } from "@/components/ui/textarea";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Field } from "@/components/kit/field";
-import { FormFooter } from "@/components/kit/form-footer";
-import { useDialogForm } from "@/components/kit/use-dialog-form";
-import { useSubmit } from "@/components/kit/use-submit";
-import { missingFields } from "@/lib/forms/missing";
 import { inWindow, type BookingSlot, type TimeWindow } from "@/lib/agenda/booking/availability";
 import type { DayResult } from "@/hooks/use-booking-availability";
+import { MoveAppointmentDialog } from "@/components/appointments-booking/move-appointment-dialog";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
 // The selected day's times: Morning and Afternoon groups in a 4-column grid. Open times are green with
 // "{n} left"; full ones are dashed grey and still clickable (overbook); unavailable ones are dashed,
-// inert, and say why on hover. Below the grid: the "Move here?" box while moving an appointment, or the
+// inert, and say why on hover. Below the grid: the move dialog while moving an appointment, or the
 // picked-time slot (`children`: the service booking dialog, or a medical no-permission note). Scrolls inside itself.
 // The Day view shows it as the main area (`large`): bigger times, more per row, and "Closed" on a closed
 // day (`closedLabel`), since its ‹ › walks every day.
@@ -135,14 +130,14 @@ export function DayPanel({
       )}
 
       {picked && moving ? (
-        <div className={cn(large && "w-full max-w-xl")}>
-          <MoveBox
-            key={`${date} ${picked}`}
-            moving={moving}
-            toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
-            full={pickedSlot?.state === "full"}
-          />
-        </div>
+        <MoveAppointmentDialog
+          key={`${date} ${picked}`}
+          moving={moving}
+          typeName={typeName}
+          toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
+          full={pickedSlot?.state === "full"}
+          onClose={moving.onCancel}
+        />
       ) : picked ? (
         <div className={cn(large && "w-full max-w-3xl")}>{children}</div>
       ) : null}
@@ -240,49 +235,5 @@ function TimeGroup({
         })}
       </div>
     </section>
-  );
-}
-
-function MoveBox({
-  moving,
-  toLabel,
-  full,
-}: {
-  moving: DayPanelMoving;
-  toLabel: string;
-  full: boolean;
-}) {
-  const t = useTranslations("appointmentsBooking.move");
-  // A fresh reason for every target hour (the box stays mounted while the hour changes).
-  const [f, set] = useDialogForm(() => ({ reason: "" }), true, toLabel);
-  const reason = f.reason.trim();
-  // `onConfirm` toasts its own failure and keeps the box (and the typed reason) on screen.
-  const { submitting, submit } = useSubmit(() => moving.onConfirm(moving.needsReason ? reason : undefined));
-  const missing = missingFields(moving.needsReason ? [[t("reasonLabel"), reason !== ""]] : []);
-
-  return (
-    <div className="flex flex-col gap-2 rounded-lg border border-warning/50 bg-warning/10 p-3 text-sm">
-      <p className="font-semibold">{t("title")}</p>
-      <p>{t("fromTo", { from: moving.fromLabel, to: toLabel })}</p>
-      {full && <p className="text-warning-foreground">{t("fullWarning")}</p>}
-      {moving.needsReason && (
-        <Field label={t("reasonLabel")} htmlFor="booking-move-reason" required>
-          <Textarea
-            id="booking-move-reason"
-            value={f.reason}
-            onChange={(e) => set({ reason: e.target.value })}
-            placeholder={t("reasonPlaceholder")}
-            rows={2}
-          />
-        </Field>
-      )}
-      <FormFooter
-        primary={{ label: t("confirm"), onClick: () => submit() }}
-        missing={missing}
-        submitting={submitting}
-        onCancel={moving.onCancel}
-        cancelLabel={t("notThis")}
-      />
-    </div>
   );
 }

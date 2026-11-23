@@ -285,7 +285,7 @@ export function BookingScreen() {
   // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, warning-tone
   // ring on its day). A move never changes the appointment's center, so while it moves the calendar
   // reads availability from the appointment's OWN center (calendarCenter), whatever the picker or the
-  // top bar shows, with a note saying so. The day panel's "Move here?" box commits (useBookingMove).
+  // top bar shows, with a note saying so. The move dialog commits (useBookingMove).
   // Stop, Esc, a change of the screen's center or a reload that no longer lists it ends the move.
   const movingItem = state.movingId ? rail.upcoming.find((a) => a.id === state.movingId) : undefined;
   const calCenter = calendarCenter(center, movingItem);
@@ -385,6 +385,9 @@ export function BookingScreen() {
   const moving = useBookingMove({
     movingItem,
     center,
+    patient,
+    centerInfo: centro.centros.find((c) => c.id === calCenter),
+    typeName: chosenType?.name ?? "",
     onMoved: (dates) => {
       update({ movingId: null });
       onAppointmentsChanged(dates);

@@ -29,14 +29,14 @@ import { Panel } from "@/components/kit/panel";
 // Picking a medical time opens the shared CitaModal with everything preset (it owns doctor choice,
 // validation, the overlap warning, the EHR gate and the BE's reschedule-instead behaviour). Picking a
 // service time renders the `serviceForm` slot under the day's grid. While moving an appointment the day
-// panel asks "Move here?" instead. Data comes from the screen's useBookingCalendar.
+// panel opens the move dialog instead. Data comes from the screen's useBookingCalendar.
 
 type Month = MonthRef;
 
 /**
- * An appointment from the patient rail being moved. The day panel's "Move here?" box confirms with the
+ * An appointment from the patient rail being moved. The move dialog confirms with the
  * picked day and time; `onConfirm` resolves true when the move went through (the picked time is then
- * dropped). "Not this one" only un-picks the time: moving goes on until the screen clears it.
+ * dropped). Closing the dialog only un-picks the time: moving goes on until the screen clears it.
  */
 export interface CalendarMoving {
   fromLabel: string;
