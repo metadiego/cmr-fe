@@ -14,6 +14,7 @@ import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { SeriesRows, useDayLabel } from "@/components/appointments-booking/series-rows";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
+import type { BookableState } from "@/hooks/use-patient-booking-rules";
 import { suggestionKey, useSeriesAvailability, type SeriesNeed } from "@/hooks/use-series-availability";
 import { buildSeriesRows, canBookSeries } from "@/lib/agenda/booking/series";
 import {
@@ -42,7 +43,7 @@ import {
 import { todayPR } from "@/lib/format/fecha";
 import { normalizeTime, type DaySlots } from "@/lib/agenda/booking/availability";
 import type { RecurringPlanItem } from "@/lib/agenda/recurring-plan";
-import { agendarVariosServicios, crearSesion, getServiciosConSaldo } from "@/lib/api/frontdesk";
+import { agendarVariosServicios, crearSesion, getServiciosConSaldo, type BookableService } from "@/lib/api/frontdesk";
 import type { ApiWarning } from "@/lib/api/types";
 import type { Paciente } from "@/lib/api/pacientes";
 import { apiErrorLabel } from "@/lib/api/errors";
@@ -89,6 +90,10 @@ export function ServiceBookingForm({
   patient: Paciente | null;
   /** Centers to search patients in (same as Who's calling). */
   patientCenterIds?: string[];
+  /** The screen's patient's bookable balance per service (usePatientBookingRules); not used yet. */
+  bookable?: ReadonlyMap<string, BookableService>;
+  /** Load state of `bookable`; not used yet. */
+  bookableState?: BookableState;
   onBooked: (r: ServiceBooked) => void;
   onBack: () => void;
 }) {

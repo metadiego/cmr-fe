@@ -28,6 +28,7 @@ import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 import { useResource } from "@/hooks/use-resource";
 import { useBookingTypes } from "@/hooks/use-booking-types";
+import { usePatientBookingRules } from "@/hooks/use-patient-booking-rules";
 import { useBookingCalendar } from "@/hooks/use-booking-calendar";
 import { calendarCenter } from "@/lib/agenda/booking/calendar-center";
 import { usePatientAppointments } from "@/hooks/use-patient-appointments";
@@ -210,6 +211,35 @@ export function BookingScreen() {
   // type), and the calendar stays up, named as the rail names it.
   const typeChosen =
     !!state.kind && !!state.typeId && (types.loading || !!chosenType || !!state.movingId);
+  // ---- Booking rules for the chosen patient (first visit vs follow-up, services they can still book),
+  // one load per patient + booking center, shared by the type list and the service booking form. It
+  // waits for the patient's centers: packages bought in any of them count, and a partial answer must
+  // not drop a service the patient has.
+  const rules = usePatientBookingRules(
+    patientCenters ? state.patientId : undefined,
+    center,
+    (patientCenters ?? []).map((c) => c.id),
+  );
+  // A service from the URL the patient has no sessions left of (a deep link, another patient picked):
+  // checked once per patient + service + center when the balance is in, then the type is cleared so the
+  // list shows. Once only: booking the last session afterwards must not yank the calendar away. Never
+  // while moving (the moved session is already booked, so it is not counted as bookable).
+  const checkedBookable = React.useRef<string | null>(null);
+  const bookableKey =
+    state.patientId && state.kind === "service" && state.typeId ? `${state.patientId}|${state.typeId}|${center}` : null;
+  // Only the URL is written here (an effect must not set state); the URL → state sync above then
+  // clears the type, as for any navigation this screen did not make.
+  const clearUnbookable = React.useEffectEvent(() => {
+    const next = toBookingSearch({ ...latest.current, kind: undefined, typeId: undefined, date: undefined });
+    router.replace(`${pathname}${next}`, { scroll: false });
+  });
+  React.useEffect(() => {
+    if (!bookableKey || state.movingId || rules.bookableState !== "ok" || !rules.bookable) return;
+    if (checkedBookable.current === bookableKey) return;
+    checkedBookable.current = bookableKey;
+    if ((rules.bookable.get(state.typeId ?? "")?.bookable ?? 0) <= 0) clearUnbookable();
+  }, [bookableKey, state.movingId, state.typeId, rules.bookableState, rules.bookable]);
+
   const pickType = (kind: BookingKind, typeId: string) =>
     update({ kind, typeId, view: kind === "medical" ? state.view : "free", movingId: null });
   const clearType = () => update({ kind: undefined, typeId: undefined, date: undefined, movingId: null });
@@ -395,8 +425,14 @@ export function BookingScreen() {
               pickedFull={!!slot && (slot.state === "full" || slot.free <= 0)}
               patient={patient}
               patientCenterIds={patientCenters?.map((c) => c.id)}
+              bookable={rules.bookable}
+              bookableState={rules.bookableState}
               onBooked={(r) => {
-                if (!state.patientId) pickPatient(r.patient);
+                if (!state.patientId) {
+                  // Just booked for them: this service is not re-checked against their balance.
+                  checkedBookable.current = `${r.patient.id}|${state.typeId}|${center}`;
+                  pickPatient(r.patient);
+                }
                 onAppointmentsChanged(r.dates);
                 if (r.done) clear();
               }}
@@ -483,6 +519,7 @@ export function BookingScreen() {
             patientId={state.patientId}
             patientName={state.patientId ? firstName : undefined}
             types={types}
+            rules={rules}
             onPick={pickType}
           />
         ) : (
