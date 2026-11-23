@@ -294,8 +294,8 @@
     margin: 10mm;
   }
 }
-/* Lista de citas agendadas (diálogo de éxito de la agenda): se lleva el paciente a casa. Mismo patrón que
-   `.formato-print`: aísla el bloque dentro del Dialog de Radix y lo imprime en negro sobre blanco, carta. */
+/* List of booked appointments (the agenda's success dialog): the patient takes it home. Same pattern as
+   `.formato-print`: isolates the block inside the Radix Dialog and prints it black on white, Letter size. */
 @media print {
   body:has(.appointments-print) * {
     visibility: hidden !important;

@@ -8,14 +8,16 @@ import { parseDayUTC } from "@/lib/format/fecha";
 import type { BookingResult } from "@/lib/agenda/booking/booking-result";
 import { shortTime } from "./booking-toolbar";
 
+function formatDay(format: ReturnType<typeof useFormatter>, iso: string): string {
+  const d = parseDayUTC(iso);
+  return d ? format.dateTime(d, "dayWeekdayShort") : iso;
+}
+
 /** Items table, shared by the dialog and the printout. */
 function ItemsTable({ result }: { result: BookingResult }) {
   const t = useTranslations("appointmentsBooking.result");
   const format = useFormatter();
-  const day = (iso: string) => {
-    const d = parseDayUTC(iso);
-    return d ? format.dateTime(d, "dayWeekdayShort") : iso;
-  };
+  const day = (iso: string) => formatDay(format, iso);
   return (
     <RecordTable
       head={
@@ -49,10 +51,7 @@ function ItemsTable({ result }: { result: BookingResult }) {
 export function BookingResultDialog({ result, onClose }: { result: BookingResult; onClose: () => void }) {
   const t = useTranslations("appointmentsBooking.result");
   const format = useFormatter();
-  const day = (iso: string) => {
-    const d = parseDayUTC(iso);
-    return d ? format.dateTime(d, "dayWeekdayShort") : iso;
-  };
+  const day = (iso: string) => formatDay(format, iso);
   const { patient, center } = result;
 
   return (
@@ -77,7 +76,7 @@ export function BookingResultDialog({ result, onClose }: { result: BookingResult
           <h3 className="text-sm font-medium">{t("skippedTitle")}</h3>
           <ul className="text-muted-foreground mt-1 list-disc pl-5 text-sm">
             {result.skipped.map((s) => (
-              <li key={s.date}>
+              <li key={`${s.date}|${s.reason}`}>
                 <span className="tabular-nums">{day(s.date)}</span>: {s.reason}
               </li>
             ))}
