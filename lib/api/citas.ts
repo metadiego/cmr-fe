@@ -271,6 +271,15 @@ export async function crearCitaAgenda(
   return { cita: env.data, advertencias: env.meta?.advertencias ?? [] };
 }
 
+// Whether the patient attended before (any center) and the visit type the next booking should use
+// (GET /appointments/patients/:id/visit-kind; appointments.read).
+export async function getVisitKind(
+  patientId: string,
+  centerId?: string,
+): Promise<{ attendedBefore: boolean; nextVisitType: "nueva" | "seguimiento" }> {
+  return apiFetch(`/appointments/patients/${encodeURIComponent(patientId)}/visit-kind`, {}, centerId);
+}
+
 // Update returning cita + warnings (same envelope contract as create). The body is NOT the create
 // payload: UpdateCitaDto (whitelist + forbidNonWhitelisted) accepts only these keys, so build it with
 // citaEditPayload (lib/agenda/cita-edit-payload.ts).

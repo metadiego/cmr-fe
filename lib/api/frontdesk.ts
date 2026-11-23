@@ -140,6 +140,30 @@ export function getServiciosConSaldo(patientId: string, centroId?: string): Prom
   return apiFetch<ServicioConSaldo[]>(`/frontdesk/patients/${patientId}/availability`, {}, centroId);
 }
 
+// Services a patient can still book at the booking center (GET /frontdesk/patients/:id/bookable-services).
+// Rows may share one package pool: never sum `bookable` across rows. `sources` splits it by package center.
+export interface BookableService {
+  serviceId: string;
+  bought: number;
+  booked: number;
+  bookable: number;
+  sources: { centerId: string; centerName: string; bookable: number }[];
+}
+export function getBookableServices(
+  patientId: string,
+  bookingCenterId: string,
+  centerIds: string[],
+): Promise<BookableService[]> {
+  const sp = new URLSearchParams();
+  for (const id of centerIds) sp.append("centerIds", id);
+  const qs = sp.toString();
+  return apiFetch<BookableService[]>(
+    `/frontdesk/patients/${encodeURIComponent(patientId)}/bookable-services${qs ? `?${qs}` : ""}`,
+    {},
+    bookingCenterId,
+  );
+}
+
 // Pestañas del frontdesk (BE 1-oct). `boardSlug` dice qué tablero la sirve: "servicios" o "atencion" (el
 // tablero de Atención que ya existe). /api/v2 en inglés. Handoff consulta-como-pestana-del-frontdesk.
 export interface FrontdeskTab {
