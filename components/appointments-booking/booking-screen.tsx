@@ -289,10 +289,8 @@ export function BookingScreen() {
   // Stop, Esc, a change of the screen's center or a reload that no longer lists it ends the move.
   const movingItem = state.movingId ? rail.upcoming.find((a) => a.id === state.movingId) : undefined;
   const calCenter = calendarCenter(center, movingItem);
-  const calCenterName =
-    movingItem && calCenter !== center
-      ? [...centro.centros, ...(patientCenters ?? [])].find((c) => c.id === calCenter)?.name
-      : undefined;
+  const calCenterInfo = [...centro.centros, ...(patientCenters ?? [])].find((c) => c.id === calCenter);
+  const calCenterName = movingItem && calCenter !== center ? calCenterInfo?.name : undefined;
 
   // ---- Period: Day view always shows a day (today when none is picked); Week asks its six days.
   const today = todayPR();
@@ -331,6 +329,8 @@ export function BookingScreen() {
   };
 
   const startMove = (a: PatientAppointment) => {
+    // The moved session is already booked (a fully booked service): not re-checked when the move ends.
+    checkedBookable.current = bookableCheckKey({ patientId: state.patientId, kind: a.kind, typeId: a.typeId, center });
     update({
       movingId: a.id,
       kind: a.kind,
@@ -382,12 +382,18 @@ export function BookingScreen() {
     if (state.movingId) setState((s) => ({ ...s, movingId: null }));
   }
 
+  // The calendar's and the move result's type name: a moved type missing from the lists by its kind.
+  const calTypeName =
+    chosenType?.name ??
+    (movingItem && !types.loading
+      ? t(movingItem.kind === "medical" ? "patient.kindMedical" : "patient.kindService")
+      : t("loading"));
   const moving = useBookingMove({
     movingItem,
     center,
     patient,
-    centerInfo: centro.centros.find((c) => c.id === calCenter),
-    typeName: chosenType?.name ?? "",
+    centerInfo: calCenterInfo,
+    typeName: calTypeName,
     onMoved: (dates) => {
       update({ movingId: null });
       onAppointmentsChanged(dates);
@@ -409,7 +415,7 @@ export function BookingScreen() {
             <ServiceBookingForm
               key={`${state.typeId}|${date}|${time}`}
               center={calCenter}
-              centerInfo={centro.centros.find((c) => c.id === calCenter)}
+              centerInfo={calCenterInfo}
               serviceId={state.typeId ?? ""}
               serviceName={chosenType?.name ?? ""}
               date={date}
@@ -529,12 +535,7 @@ export function BookingScreen() {
             centerNote={calCenterName ? t("move.showingCenter", { center: calCenterName }) : undefined}
             kind={state.kind ?? "medical"}
             typeId={state.typeId ?? ""}
-            typeName={
-              chosenType?.name ??
-              (movingItem && !types.loading
-                ? t(movingItem.kind === "medical" ? "patient.kindMedical" : "patient.kindService")
-                : t("loading"))
-            }
+            typeName={calTypeName}
             color={chosenType?.color ?? null}
             label={firstName ? t("toolbar.bookingFor", { name: firstName }) : t("toolbar.booking")}
             onClearType={clearType}

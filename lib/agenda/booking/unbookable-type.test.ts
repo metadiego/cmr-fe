@@ -51,3 +51,9 @@ test("unbookableTypeCheck: nothing to check without a patient or for a medical t
   assert.equal(unbookableTypeCheck({ ...base, patientId: undefined }), "done");
   assert.equal(unbookableTypeCheck({ ...base, kind: "medical" }), "done");
 });
+
+test("unbookableTypeCheck: a move records its key when it starts, so ending the move keeps a fully booked service", () => {
+  const atStart = bookableCheckKey({ patientId: "p1", kind: "service", typeId: "s0", center: "c1" });
+  assert.equal(unbookableTypeCheck({ ...base, typeId: "s0", moving: true, checkedKey: atStart }), "done");
+  assert.equal(unbookableTypeCheck({ ...base, typeId: "s0", moving: false, checkedKey: atStart }), "done");
+});
