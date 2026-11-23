@@ -8,7 +8,9 @@ import { toast } from "sonner";
 
 import { getApiKeys, revokeApiKey, type ApiKey } from "@/lib/api/api-keys";
 import { getCenters, type Centro } from "@/lib/api/centers";
-import { isFullAccess, isLive, keyStatus, sortKeys, summarize } from "@/lib/api-keys/key-status";
+import { inTopBarCenter, isFullAccess, isLive, keyStatus, sortKeys, summarize } from "@/lib/api-keys/key-status";
+import { topBarSelection } from "@/lib/clinic-read-scope";
+import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { useResource } from "@/hooks/use-resource";
 import { toastError } from "@/lib/api/errors";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +25,8 @@ import { ApiKeyCreateDialog } from "./api-key-create-dialog";
 
 // API keys (machines and scripts: scales, print hubs, the phone bridge, integrations). Admin-only tab
 // of /admin. The risky ones (never used, full access) sort first, so the cleanup is done from here.
+// The top bar filters the keys bound to one center (all-centers keys always show; «Ambos» = all);
+// the calls themselves read every center (lib/api/api-keys.ts). The picker reloads the page.
 // Revoke goes through the BE's confirmation shield: apiFetch shows its dialog (naming the key) and
 // repeats the request. Contract: cmr-be docs/specs/api-keys-admin.md; handoff
 // docs/specs/api-keys-admin-handoff.md.
@@ -38,7 +42,7 @@ export function ApiKeysAdmin() {
   const [busyId, setBusyId] = React.useState<string | null>(null);
   const confirm = useConfirm();
 
-  const keys = res.state.kind === "ok" ? res.state.data : [];
+  const keys = inTopBarCenter(res.state.kind === "ok" ? res.state.data : [], topBarSelection(isClinicViewAll(), getActiveCentro()));
   const centerList = centers.state.kind === "ok" ? centers.state.data : [];
   const centerName = (id: string | null) => (id === null ? t("allCenters") : (centerList.find((c) => c.id === id)?.name ?? id));
   const when = (iso: string | null) =>
