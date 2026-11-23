@@ -38,14 +38,19 @@ export function PatientPickerWithCreate({
           </Button>
         </Can>
       )}
-      <PacienteFormSheet
-        open={newOpen}
-        onOpenChange={setNewOpen}
-        onSaved={(saved) => {
-          setNewOpen(false);
-          onChange(saved);
-        }}
-      />
+      {/* Mounted only while open: the sheet reads the user's centers and settings when it mounts. */}
+      {newOpen && (
+        <Can permiso="pacientes.create">
+          <PacienteFormSheet
+            open
+            onOpenChange={setNewOpen}
+            onSaved={(saved) => {
+              setNewOpen(false);
+              onChange(saved);
+            }}
+          />
+        </Can>
+      )}
     </div>
   );
 }
