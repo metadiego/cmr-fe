@@ -8,9 +8,10 @@
 import type { FrontdeskQueue } from "../api/frontdesk-queue.ts";
 
 export type TechnicianFree = { id: string; name: string };
-// `records`: every patient this technician has in therapy right now (owner, 23-nov) — usually one,
-// but a technician can be in two sessions at once, so it is a list, never just the first.
-export type TechnicianBusy = { id: string; name: string; servicio: string; records: string[] };
+export type TherapyPatient = { record: string | null; name: string };
+// `patients`: everyone this technician has in therapy right now (owner, 23-nov) — usually one, but a
+// technician can be in two sessions at once, so it is a list, never just the first.
+export type TechnicianBusy = { id: string; name: string; servicio: string; patients: TherapyPatient[] };
 
 export function techniciansNow(queue: FrontdeskQueue | null): {
   libres: TechnicianFree[];
@@ -19,17 +20,14 @@ export function techniciansNow(queue: FrontdeskQueue | null): {
   activosHoy: Map<string, string>;
 } {
   const label = (id: string, name: string | null | undefined) => name ?? id.slice(0, 8);
-  const servicioDe = new Map<string, { name: string; servicio: string; records: string[] }>();
+  const servicioDe = new Map<string, { name: string; servicio: string; patients: TherapyPatient[] }>();
   for (const s of queue?.services ?? []) {
     for (const p of s.inTherapy) {
       if (!p.technicianId) continue;
-      const record = p.medicalRecordNumber;
+      const patient = { record: p.medicalRecordNumber, name: p.patientName };
       const existing = servicioDe.get(p.technicianId);
-      if (existing) {
-        if (record) existing.records.push(record);
-      } else {
-        servicioDe.set(p.technicianId, { name: label(p.technicianId, p.technicianName), servicio: s.name, records: record ? [record] : [] });
-      }
+      if (existing) existing.patients.push(patient);
+      else servicioDe.set(p.technicianId, { name: label(p.technicianId, p.technicianName), servicio: s.name, patients: [patient] });
     }
   }
 
@@ -49,7 +47,7 @@ export function techniciansNow(queue: FrontdeskQueue | null): {
         id,
         name: activosHoy.get(id)!,
         servicio: servicioDe.get(id)?.servicio ?? "",
-        records: servicioDe.get(id)?.records ?? [],
+        patients: servicioDe.get(id)?.patients ?? [],
       })),
       activosHoy,
     };

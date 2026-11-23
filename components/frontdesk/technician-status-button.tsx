@@ -142,7 +142,12 @@ export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fec
                   <li key={p.id} className="flex items-center justify-between gap-2 rounded-md bg-card px-2 py-1.5 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                     <span>
                       {p.name}
-                      {p.records.length > 0 && <span className="text-muted-foreground"> · {p.records.map((r) => `#${r}`).join(", ")}</span>}
+                      {p.patients.length > 0 && (
+                        <span className="text-muted-foreground">
+                          {" "}
+                          · {p.patients.map((pt) => (pt.record ? `#${pt.record} ${pt.name}` : pt.name)).join(", ")}
+                        </span>
+                      )}
                     </span>
                     <span className="text-xs text-muted-foreground">{p.servicio}</span>
                   </li>

@@ -6,22 +6,23 @@ import type { FrontdeskQueue } from "../api/frontdesk-queue.ts";
 
 const svc = (
   name: string,
-  inTherapy: Array<[string, string] | [string, string, string]>,
+  inTherapy: Array<[string, string, string | null, string]>,
   waiting: Array<[string | null, string | null]> = [],
 ) =>
   ({
     name,
-    inTherapy: inTherapy.map(([technicianId, technicianName, medicalRecordNumber]) => ({
+    inTherapy: inTherapy.map(([technicianId, technicianName, medicalRecordNumber, patientName]) => ({
       technicianId,
       technicianName,
-      medicalRecordNumber: medicalRecordNumber ?? null,
+      medicalRecordNumber,
+      patientName,
     })),
     waiting: waiting.map(([technicianId, technicianName]) => ({ technicianId, technicianName })),
   }) as unknown as FrontdeskQueue["services"][number];
 
-test("techniciansToday: who finished their patient is FREE; in therapy is busy with its service and record", () => {
+test("techniciansToday: who finished their patient is FREE; in therapy is busy with its service, record and patient", () => {
   const q = {
-    services: [svc("Láser", [["t2", "Ana", "103165"]])],
+    services: [svc("Láser", [["t2", "Ana", "103165", "Jose Ramos"]])],
     techniciansToday: [
       { staffId: "t1", name: "Fabian Rodriguez", clinicId: "c", sessions: 1, inTherapy: false },
       { staffId: "t2", name: "Ana", clinicId: "c", sessions: 3, inTherapy: true },
@@ -29,28 +30,45 @@ test("techniciansToday: who finished their patient is FREE; in therapy is busy w
   } as unknown as FrontdeskQueue;
   const r = techniciansNow(q);
   assert.deepEqual(r.libres, [{ id: "t1", name: "Fabian Rodriguez" }]);
-  assert.deepEqual(r.ocupados, [{ id: "t2", name: "Ana", servicio: "Láser", records: ["103165"] }]);
+  assert.deepEqual(r.ocupados, [
+    { id: "t2", name: "Ana", servicio: "Láser", patients: [{ record: "103165", name: "Jose Ramos" }] },
+  ]);
   assert.deepEqual([...r.activosHoy.keys()], ["t1", "t2"]);
 });
 
-test("owner, 23-nov: two patients in therapy with the same technician at once shows BOTH records", () => {
+test("owner, 23-nov: two patients in therapy with the same technician at once shows BOTH", () => {
   const q = {
-    services: [svc("EMTT", [["t2", "Ana", "103165"], ["t2", "Ana", "103200"]])],
+    services: [
+      svc("EMTT", [
+        ["t2", "Ana", "103165", "Jose Ramos"],
+        ["t2", "Ana", "103200", "Maria Lopez"],
+      ]),
+    ],
     techniciansToday: [{ staffId: "t2", name: "Ana", clinicId: "c", sessions: 2, inTherapy: true }],
   } as unknown as FrontdeskQueue;
   const r = techniciansNow(q);
-  assert.deepEqual(r.ocupados, [{ id: "t2", name: "Ana", servicio: "EMTT", records: ["103165", "103200"] }]);
+  assert.deepEqual(r.ocupados, [
+    {
+      id: "t2",
+      name: "Ana",
+      servicio: "EMTT",
+      patients: [
+        { record: "103165", name: "Jose Ramos" },
+        { record: "103200", name: "Maria Lopez" },
+      ],
+    },
+  ]);
 });
 
-test("a patient with no record does not add a blank entry", () => {
+test("a patient with no record keeps their name, record null", () => {
   const q = {
-    services: [svc("EMTT", [["t2", "Ana", ""]])],
+    services: [svc("EMTT", [["t2", "Ana", null, "Jose Ramos"]])],
     techniciansToday: [{ staffId: "t2", name: "Ana", clinicId: "c", sessions: 1, inTherapy: true }],
   } as unknown as FrontdeskQueue;
-  // medicalRecordNumber null, not "" — the fixture's "" models a missing record from the BE
-  q.services[0].inTherapy[0].medicalRecordNumber = null;
   const r = techniciansNow(q);
-  assert.deepEqual(r.ocupados, [{ id: "t2", name: "Ana", servicio: "EMTT", records: [] }]);
+  assert.deepEqual(r.ocupados, [
+    { id: "t2", name: "Ana", servicio: "EMTT", patients: [{ record: null, name: "Jose Ramos" }] },
+  ]);
 });
 
 test("techniciansToday ignores waiting[]: only the roster defines who is active", () => {
@@ -61,10 +79,16 @@ test("techniciansToday ignores waiting[]: only the roster defines who is active"
 });
 
 test("fallback without techniciansToday: busy from inTherapy, free from called waiting", () => {
-  const q = { services: [svc("Láser", [["t2", "Ana", "103165"]], [["t1", "Fabian"], ["t2", "Ana"], [null, null]])] } as unknown as FrontdeskQueue;
+  const q = {
+    services: [
+      svc("Láser", [["t2", "Ana", "103165", "Jose Ramos"]], [["t1", "Fabian"], ["t2", "Ana"], [null, null]]),
+    ],
+  } as unknown as FrontdeskQueue;
   const r = techniciansNow(q);
   assert.deepEqual(r.libres, [{ id: "t1", name: "Fabian" }]);
-  assert.deepEqual(r.ocupados, [{ id: "t2", name: "Ana", servicio: "Láser", records: ["103165"] }]);
+  assert.deepEqual(r.ocupados, [
+    { id: "t2", name: "Ana", servicio: "Láser", patients: [{ record: "103165", name: "Jose Ramos" }] },
+  ]);
   assert.deepEqual(techniciansNow(null), { libres: [], ocupados: [], activosHoy: new Map() });
 });
 
