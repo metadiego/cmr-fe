@@ -148,7 +148,8 @@ export interface BookableService {
   bought: number;
   booked: number;
   bookable: number;
-  sources: { centerId: string; centerName: string; bookable: number }[];
+  /** `centerName` is null when the BE cannot name the package's center. */
+  sources: { centerId: string; centerName: string | null; bookable: number }[];
 }
 export function getBookableServices(
   patientId: string,

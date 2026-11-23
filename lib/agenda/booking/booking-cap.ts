@@ -29,10 +29,16 @@ export function balanceReason(rows: number, bookable: number | undefined): "noBa
   return rows > bookable ? "overBalance" : null;
 }
 
-/** Names of the centers other than the booking one whose packages still have sessions to book. */
+/**
+ * Names of the centers other than the booking one whose packages still have sessions to book. A center
+ * the BE could not name (null or blank) is skipped: never an invented or empty name.
+ */
 export function otherCenters(
-  sources: ReadonlyArray<{ centerId: string; centerName: string; bookable: number }>,
-  bookingCenter: string,
+  sources: ReadonlyArray<{ centerId: string; centerName: string | null; bookable: number }>,
+  bookingCenter: string | undefined,
 ): string[] {
-  return sources.filter((s) => s.centerId !== bookingCenter && s.bookable > 0).map((s) => s.centerName);
+  return sources
+    .filter((s) => s.centerId !== bookingCenter && s.bookable > 0)
+    .map((s) => s.centerName?.trim() ?? "")
+    .filter((name) => name !== "");
 }

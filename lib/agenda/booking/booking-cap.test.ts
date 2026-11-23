@@ -56,3 +56,13 @@ test("otherCenters names only other centers that still have sessions", () => {
   assert.deepEqual(otherCenters(sources, "cag"), ["CMR Bayamon"]);
   assert.deepEqual(otherCenters([], "bay"), []);
 });
+
+test("otherCenters skips a center the BE could not name (never «Bought in» with nothing)", () => {
+  const sources = [
+    { centerId: "cag", centerName: null, bookable: 2 },
+    { centerId: "x", centerName: "  ", bookable: 1 },
+    { centerId: "bay", centerName: "CMR Bayamon", bookable: 4 },
+  ];
+  assert.deepEqual(otherCenters(sources, "zzz"), ["CMR Bayamon"]);
+  assert.deepEqual(otherCenters(sources.slice(0, 2), "zzz"), []);
+});

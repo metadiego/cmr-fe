@@ -18,6 +18,7 @@ import {
   type TypeListGroupKey,
 } from "@/lib/agenda/booking/type-list";
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
+import { otherCenters } from "@/lib/agenda/booking/booking-cap";
 import { getBookingHolidays } from "@/lib/api/festivos";
 import { inDaysPR, todayPR } from "@/lib/format/fecha";
 import { ErrorState, Panel } from "@/components/kit/panel";
@@ -114,11 +115,10 @@ export function TypeListPanel({
         : t("typePicker.noBookable"),
   };
   // Another center's name for each service whose bookable sessions were bought there.
-  const otherCentersOf = (serviceId: string) =>
-    bookable
-      ?.get(serviceId)
-      ?.sources.filter((s) => s.centerId !== center && s.bookable > 0)
-      .map((s) => s.centerName);
+  const otherCentersOf = (serviceId: string) => {
+    const sources = bookable?.get(serviceId)?.sources;
+    return sources ? otherCenters(sources, center) : undefined;
+  };
 
   const rows = () => [...(listRef.current?.querySelectorAll<HTMLButtonElement>("[data-type-row]") ?? [])];
   const onListKey = (e: React.KeyboardEvent) => {
