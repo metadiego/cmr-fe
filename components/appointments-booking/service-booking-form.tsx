@@ -196,7 +196,8 @@ export function ServiceBookingForm({
 
   const span = seriesSpan(rows.map((r) => r.date));
   const health = seriesHealth(rows);
-  const single = rows.length === 1;
+  // From the generated items, not `rows`: rows stay empty until a patient is chosen.
+  const single = items.length === 1;
   const sunday = startDay === 0;
   const pickDays = weekly && !daysMatch(days, perWeek);
   const ready = !!patient && canBook && !busy && !sunday && !pickDays && seriesOk;
@@ -305,7 +306,7 @@ export function ServiceBookingForm({
       size="xl"
       title={`${serviceName} · ${dayLabel(date)} · ${shortTime(time)}`}
       onSubmit={book}
-      submitLabel={single ? t("series.book") : t("series.bookSeries", { n: rows.length })}
+      submitLabel={single ? t("series.book") : t("series.bookSeries", { n: items.length })}
       submitting={busy}
       missing={missing}
       blocked={!!reason}
@@ -324,7 +325,8 @@ export function ServiceBookingForm({
         )}
       </Field>
 
-      {pickedFull && items.length === 1 && !(patient && allLoaded) && (
+      {/* Until the row has loaded; then its own status (and the full warning below) says it. */}
+      {pickedFull && single && !(patient && allLoaded) && (
         <p className="text-sm text-warning-foreground">{t("series.fullWarning")}</p>
       )}
 
@@ -353,7 +355,7 @@ export function ServiceBookingForm({
 
       {!sunday && (
         <div className="flex flex-col gap-2 text-sm">
-          {edited && <p className="text-xs text-muted-foreground">{t("series.resetsEdits")}</p>}
+          {weekly && edited && <p className="text-xs text-muted-foreground">{t("series.resetsEdits")}</p>}
 
           {!patient ? (
             <p className="text-muted-foreground">{t("series.pickPatient")}</p>
@@ -361,9 +363,11 @@ export function ServiceBookingForm({
             <>
               {span && (
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                  <p className="text-sm font-medium tabular-nums">
-                    {single ? "" : t("series.span", { n: rows.length, from: dayLabel(span.first), to: dayLabel(span.last) })}
-                  </p>
+                  {!single && (
+                    <p className="text-sm font-medium tabular-nums">
+                      {t("series.span", { n: rows.length, from: dayLabel(span.first), to: dayLabel(span.last) })}
+                    </p>
+                  )}
                   {allLoaded && !anyFailed && (
                     <p className="text-xs font-medium">
                       {health.full === 0 && health.blocked === 0 ? (
