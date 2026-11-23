@@ -139,6 +139,14 @@ export function PatientDesk() {
     setServiceArrivedPending(false)
     setConsultSubtypeFilter(null)
   }
+  // A patient clicked in the therapy queue (owner, 23-nov-2026: "que filtre y traiga el paciente para
+  // que vaya más rápido") — the queue is always a therapy, never a consultation, so "services" with no
+  // sub-filter is the one kind guaranteed to show them, whatever the screen was filtered to before.
+  const selectFromQueue = (patientId: string) => {
+    pickKind("services")
+    setQuery("")
+    setSelectedId(patientId)
+  }
   const [summaryOf, setSummaryOf] = React.useState<ServiceOfTheDay | null>(null)
   const servicesToday = React.useMemo(
     () => servicesOfTheDay(day.patients),
@@ -419,7 +427,7 @@ export function PatientDesk() {
 
       {/* No margins here: PageContainer's gap spaces the rows, and a strip that renders nothing
           (no queue today) adds no gap, so no empty band is left behind. */}
-      <TherapyQueueStrip centerId={gate.centro} date={date} />
+      <TherapyQueueStrip centerId={gate.centro} date={date} onSelectPatient={selectFromQueue} />
       {summaryOf && gate.centro && (
         <DaySummaryDialog
           open

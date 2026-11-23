@@ -41,6 +41,11 @@ interface Props {
   centerId: string | undefined
   date: string
   className?: string
+  // Owner, 23-nov-2026: clicking a patient's name/record in the queue brings them up in patient-desk
+  // instead of just showing their place in line — "que filtre y traiga el paciente para que vaya más
+  // rápido". Selecting them and adjusting the filter so the pick stays visible is patient-desk's own
+  // job (it owns that state); this component only closes its own Sheet (selectAndClose below).
+  onSelectPatient?: (patientId: string) => void
 }
 
 function serviceName(queue: FrontdeskQueue, serviceId: string): string {
@@ -54,7 +59,7 @@ function serviceName(queue: FrontdeskQueue, serviceId: string): string {
 // está en terapia, y quién está libre para tomarla ahora. Oculta en la vista "Consulta" (acuerdo
 // con BE 10-oct-2026, §2.1.3 del spec): esa vista no tiene terapias que colear. Verificado en
 // navegador real contra Bayamón (10-oct-2026, commit dd31008).
-export function TherapyQueueStrip({ centerId, date, className }: Props) {
+export function TherapyQueueStrip({ centerId, date, className, onSelectPatient }: Props) {
   const t = useTranslations("patientDesk.queue")
   const tRoot = useTranslations()
   const { queue, refresh } = useTherapyQueue(centerId, date)
@@ -81,6 +86,11 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
     return () => window.clearInterval(id)
   }, [])
   const [overdueOnly, setOverdueOnly] = React.useState(false)
+
+  function selectAndClose(patientId: string) {
+    onSelectPatient?.(patientId)
+    setOpenServiceId(null)
+  }
 
   async function handleCall(sessionId: string, technicianId?: string) {
     setBusy(sessionId)
@@ -236,8 +246,20 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
                               overdueRow ? "bg-destructive/10" : "bg-muted/40",
                             )}
                           >
-                            <div className="min-w-0">
-                              <div className="truncate font-medium">
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              title={t("openInPatientDesk")}
+                              onClick={() => selectAndClose(e.patientId)}
+                              onKeyDown={(ev) => {
+                                if (ev.key === "Enter" || ev.key === " ") {
+                                  ev.preventDefault()
+                                  selectAndClose(e.patientId)
+                                }
+                              }}
+                              className="min-w-0 cursor-pointer"
+                            >
+                              <div className="truncate font-medium underline decoration-dotted underline-offset-2">
                                 {queueEntryDisplayName(e)}
                               </div>
                               <div className="text-xs text-muted-foreground">
@@ -324,8 +346,20 @@ export function TherapyQueueStrip({ centerId, date, className }: Props) {
                           className="rounded-md px-3 py-2 text-sm ring-1 ring-foreground/10"
                         >
                           <div className="flex items-center justify-between">
-                            <div className="min-w-0">
-                              <div className="truncate font-medium">
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              title={t("openInPatientDesk")}
+                              onClick={() => selectAndClose(e.patientId)}
+                              onKeyDown={(ev) => {
+                                if (ev.key === "Enter" || ev.key === " ") {
+                                  ev.preventDefault()
+                                  selectAndClose(e.patientId)
+                                }
+                              }}
+                              className="min-w-0 cursor-pointer"
+                            >
+                              <div className="truncate font-medium underline decoration-dotted underline-offset-2">
                                 {queueEntryDisplayName(e)}
                               </div>
                               <div className="text-xs text-muted-foreground">
