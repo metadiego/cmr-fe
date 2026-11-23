@@ -80,12 +80,17 @@ interface BookingResult {
 - Callers: `ServiceBookingForm` (single + series; built from `creadas` / `omitidas` / `advertencias`),
   the medical `CitaModal` create path in `booking-calendar.tsx` (`onSaved(cita)`), and the move confirm in
   `booking-screen.tsx` (one item: the new date/time; plus the old one shown as "from").
-- **Claude's call — medical:** `CitaModal` gets an opt-in prop (e.g. `reportResult`) that, on create,
-  skips its own success toast, warnings toast and "rescheduled" notice and hands them back
-  (`warnings`, `rescheduledFromId`) to the caller. Other screens keep today's behaviour. `CitaModal` is
-  599 lines: extract a piece (e.g. its toasts/notice helpers) so it stays under its limit.
-  When the BE moved an existing live appointment instead of creating one (`rescheduledFromId` set), the
-  modal and the printout say "Cita movida" with old → new date.
+- **Medical, every screen (owner, 2026-11-23: no switch, the success modal is the only behaviour):**
+  on **create**, `CitaModal` no longer shows its success toast, warnings toast or "rescheduled" notice;
+  it hands the result to the app-wide result dialog instead. This applies wherever `CitaModal` creates
+  (booking screen, agenda day view, patient record actions). **Edits** keep the "Cita actualizada" toast
+  (an edit is not a booking — Claude's call). `CitaModal` is 599 lines: extract a piece (its
+  toasts/notice helpers) so it stays under its limit.
+- **App-wide dialog (Claude's call):** a `BookingResultProvider` mounted once in `components/app-shell.tsx`
+  renders `BookingResultDialog`; callers use `useBookingResult().show(result)`. So the dialog outlives the
+  form that produced it (callers unmount `CitaModal` on save) and no screen wires it by hand.
+- When the BE moved an existing live appointment instead of creating one (`rescheduledFromId` set: one
+  live medical appointment per patient), the modal and the printout say "Cita movida" with old → new date.
 - Rows sorted by date then time; `tabular-nums`; dates via `useFormatter` + `parseDayUTC`.
 - **Imprimir**: `window.print()`. The dialog contains a `.appointments-print` block (hidden on screen,
   shown in print) with: center name, address, phone; patient name + record; a table Date · Time · Service

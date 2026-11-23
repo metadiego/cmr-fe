@@ -219,9 +219,9 @@ Run `npm ci` once. Gate for every task: `npm test && npm run typecheck && npm ru
 
 **Files:**
 - Modify: `components/appointments-booking/service-booking-form.tsx` — `ServiceBooked` gains `result: BookingResult`; build it with `buildBookingResult` from created sessions, skipped dates (reason: `toasts.skipped` text per date) and translated warnings; drop the success and warning toasts (error toasts stay).
-- Modify: `components/agenda/cita-modal.tsx` — new optional prop `reportResult?: (r: { saved: Cita | undefined; warnings: string[]; rescheduledFrom?: { date: string; time: string } | null }) => void`. When set (create only): skip `toast.success`, `mostrarAvisos`, `avisarReagendo`; resolve the previous appointment's date/time (`getCita`) and call `reportResult`. To keep ≤ its limit, move `avisarReagendo` + the warnings-to-strings mapping into `lib/agenda/appointment-result.ts` (+ test for the mapping) or a small hook file.
-- Modify: `components/appointments-booking/booking-calendar.tsx` — pass `reportResult` to its `CitaModal`; lift to the screen via a new prop `onResult(r: BookingResult)`.
-- Modify: `components/appointments-booking/booking-screen.tsx` — `const [result, setResult] = useState<BookingResult | null>(null)`; render `<BookingResultDialog>`; feed it from service `onBooked`, calendar `onResult`, and (Task B8) move. Center info from the loaded centers list (`name`, `phone`, `address`); patient name + `record` from `patient`.
+- Create: `components/appointments-booking/booking-result-provider.tsx` — `BookingResultProvider` (holds `BookingResult | null`, renders `BookingResultDialog`) and `useBookingResult(): { show: (r: BookingResult) => void }`. Mount once in `components/app-shell.tsx` (inside the intl/Me providers).
+- Modify: `components/agenda/cita-modal.tsx` — **no prop, for every caller** (owner): on **create**, drop `toast.success`, `mostrarAvisos`, `avisarReagendo`; instead build a `BookingResult` (mode `"moved"` with `from` = the previous appointment's date/time via `getCita` when `rescheduledFromId` is set, else `"booked"`; warnings translated; patient, type name, doctor, center from the modal's own state/centros) and call `useBookingResult().show(…)`, then `onSaved` as today. **Edit** keeps `toast.success(t("updated"))`. To keep ≤ its limit, move the warnings-to-strings mapping and the result building into `lib/agenda/appointment-result.ts` (+ test) and the `getCita` lookup into a small hook.
+- Modify: `components/appointments-booking/booking-screen.tsx` and `service-booking-form.tsx` — the service path calls `useBookingResult().show(result)` on booking (no screen-level state). Center info from the loaded centers list (`name`, `phone`, `address`); patient name + `record` from `patient`.
 
 - [ ] Implement; tests for any mapping moved to `lib/`; gate clean.
 - [ ] Commit `feat(booking): show the success dialog after every booking`.
@@ -231,7 +231,7 @@ Run `npm ci` once. Gate for every task: `npm test && npm run typecheck && npm ru
 **Files:**
 - Create: `components/appointments-booking/move-appointment-dialog.tsx` — `MoveAppointmentDialog({ moving, typeName, toLabel, full, onClose }: { moving: DayPanelMoving; typeName: string; toLabel: string; full: boolean; onClose: () => void })`: `FormDialog` size `md`, title `move.dialogTitle` ("Mover cita"/"Move appointment"), `typeName`, `move.fromTo`, `move.fullWarning` when full, reason `Field` (required when `moving.needsReason`, `useDialogForm` keyed by `toLabel`), `missing` via `missingFields`, submit `move.confirm`, cancel = `onClose`. Moving is outward → `onSubmit={() => {}}` + `actions` (rule 8: Enter must not fire it).
 - Modify: `components/appointments-booking/day-panel.tsx` — delete `MoveBox`; when `picked && moving`, render `MoveAppointmentDialog`; `onClose` un-picks the time only (move mode stays).
-- Modify: `components/appointments-booking/booking-screen.tsx` — `moving.onConfirm`: on success replace `toast.success(moved)` with `setResult(buildBookingResult({ mode: "moved", … items: [{ …to, from }] }))`.
+- Modify: `components/appointments-booking/booking-screen.tsx` — `moving.onConfirm`: on success replace `toast.success(moved)` with `show(buildBookingResult({ mode: "moved", … items: [{ …to, from }] }))` (`useBookingResult`).
 - Modify: `messages/*.json` — `move.dialogTitle`; remove `move.title` and `move.notThis` if unused, and `toasts.moved` if unused (grep first).
 
 - [ ] Implement; gate clean. Commit `feat(booking): move an appointment in a dialog`.
@@ -242,7 +242,7 @@ Run `npm ci` once. Gate for every task: `npm test && npm run typecheck && npm ru
   - service: Manual 1 row, Manual 3 rows, Semanal 2×/week with total from balance; result dialog; Imprimir → print preview shows only the sheet.
   - patient with no bookable services → empty message; patient with a package from the other center → "Comprado en …" + form warning; over-balance blocked with reason.
   - attended patient sees Seguimiento only; never-attended sees Nueva only; visit-kind failure (stop BE briefly) → both.
-  - medical booking → result dialog; booking that the BE turns into a move → "Cita movida".
+  - medical booking from the booking screen, the agenda day view and the patient record → result dialog on each; booking that the BE turns into a move → "Cita movida"; editing an appointment still shows the "Cita actualizada" toast.
   - move medical (reason required) and service; cancel keeps move mode; success → result dialog.
 - [ ] `npm test && npm run typecheck && npm run lint && npm run build` → green.
 - [ ] Push; open PR (Spanish description OK) with before/after screenshots, linking the spec and the cmr-be PR; note "merge after cmr-be PR is deployed".
