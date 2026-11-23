@@ -62,6 +62,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
+import { tinteFila } from "@/lib/agenda/tinte-tipo"
 
 // Patient desk — the frontdesk turned around (alternative to /boards/frontdesk, which stays as is):
 // the day's patients first, services and consultation together; pick one to see and work all their
@@ -274,15 +275,33 @@ export function PatientDesk() {
             // The active Servicios/Consulta tab carries its own sub-filter: clicking it opens the menu
             // (owner, 17-nov-2026: no separate ▾ button floating next to the tabs).
             const hasMenu = active && k !== "all"
+            // «Consulta» has its own color when the BE catalogue sets one (consultationTab.color, same
+            // field every service board carries); «Servicios» groups many boards, each with its OWN
+            // color, so there is no single color to give that tab — it stays on the generic primary.
+            // No color from the BE yet (owner, 23-nov-2026: no API to set one today) → the `warning`
+            // theme token, the only other solid tone in the kit, so Consulta still reads as its own tab
+            // instead of the same primary fill as Todos/Servicios.
+            const consultColor = k === "consultation" ? data.consultationTab?.color : null
             const tab = (
               <button
                 key={k}
                 type="button"
                 onClick={hasMenu ? undefined : () => pickKind(k)}
                 aria-pressed={active}
+                style={
+                  active && consultColor
+                    ? { backgroundColor: tinteFila(consultColor), color: consultColor }
+                    : undefined
+                }
                 className={cn(
                   "inline-flex items-center gap-1 rounded px-3 py-1 text-xs font-medium",
-                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+                  active
+                    ? consultColor
+                      ? "font-semibold"
+                      : k === "consultation"
+                        ? "bg-warning text-warning-foreground font-semibold"
+                        : "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
                 )}
               >
                 {t(`kind.${k}`)}
