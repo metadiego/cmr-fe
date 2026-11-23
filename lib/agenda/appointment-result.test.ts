@@ -39,3 +39,21 @@ test("appointmentResult: no doctor stays null", () => {
   const r = appointmentResult({ ...base, doctor: null, moved: false });
   assert.equal(r.items[0].doctor, null);
 });
+
+test("appointmentResult: names the SAVED type (the BE may flip first visit / follow-up), else the asked one", () => {
+  const types = [
+    { id: "t-new", name: "Nueva" },
+    { id: "t-fu", name: "Seguimiento" },
+  ];
+  const flipped = appointmentResult({ ...base, typeName: "Nueva", savedTypeId: "t-fu", types, moved: false });
+  assert.equal(flipped.items[0].typeName, "Seguimiento");
+  const unknown = appointmentResult({ ...base, typeName: "Nueva", savedTypeId: "t-gone", types, moved: false });
+  assert.equal(unknown.items[0].typeName, "Nueva");
+  const none = appointmentResult({ ...base, typeName: "Nueva", savedTypeId: null, types, moved: false });
+  assert.equal(none.items[0].typeName, "Nueva");
+});
+
+test("appointmentResult: an old appointment with a date but no time still shows the old date", () => {
+  const r = appointmentResult({ ...base, moved: true, from: { date: "2026-11-30T00:00:00.000Z", time: null } });
+  assert.deepEqual(r.items[0].from, { date: "2026-11-30" });
+});

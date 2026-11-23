@@ -73,7 +73,7 @@ export function useBookingMove({
                 time: resultTime(to.time),
                 typeName,
                 kind: a.kind,
-                from: { date: a.date, time: a.time ? resultTime(a.time) : "" },
+                from: { date: a.date, ...(a.time ? { time: resultTime(a.time) } : {}) },
               },
             ],
             skipped: [],

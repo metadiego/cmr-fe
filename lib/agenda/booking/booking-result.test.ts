@@ -101,3 +101,19 @@ test("serviceBookingResult: service items with HH:MM times, sorted, skipped and 
   assert.deepEqual(r.skipped, [{ date: "2026-12-15", reason: "already has it" }]);
   assert.deepEqual(r.warnings, ["over capacity"]);
 });
+
+test("buildBookingResult: the same warning (or skipped date + reason) twice is listed once", () => {
+  const r = buildBookingResult({
+    mode: "booked",
+    patient: { name: "Ana" },
+    center: { name: "C" },
+    items: [],
+    skipped: [
+      { date: "2026-12-01", reason: "lleno" },
+      { date: "2026-12-01", reason: "lleno" },
+    ],
+    warnings: ["Cupo lleno", "Revisar pago", "Cupo lleno"],
+  });
+  assert.deepEqual(r.warnings, ["Cupo lleno", "Revisar pago"]);
+  assert.deepEqual(r.skipped, [{ date: "2026-12-01", reason: "lleno" }]);
+});

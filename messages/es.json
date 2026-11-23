@@ -941,6 +941,7 @@
       "save": "Guardar",
       "saveAnyway": "Guardar de todos modos",
       "updated": "Cita actualizada.",
+      "created": "Cita creada.",
       "noDoctor": "Sin médico",
       "followUpPatient": "Paciente de seguimiento (ya fue atendido)",
       "time": "Hora",
@@ -6971,7 +6972,7 @@
       "allFree": "Todas libres",
       "healthFull": "{n, plural, one {# llena (sobrecupo)} other {# llenas (sobrecupo)}}",
       "healthBlocked": "{n, plural, one {# por corregir} other {# por corregir}}",
-      "noBalanceReason": "No tiene servicios con sesiones disponibles. Pásalo por facturación para añadirlo.",
+      "noBalanceReason": "No le quedan sesiones de este servicio. Pásalo por facturación para añadirlo.",
       "overBalanceReason": "Solo le quedan {n, plural, one {# sesión} other {# sesiones}} por agendar.",
       "otherCenterWarning": "Este paquete se compró en {center}; estás agendando en {here}.",
       "fullShort": "lleno"
@@ -7024,6 +7025,7 @@
       "printCallUs": "Si no puede asistir, llame al {phone}.",
       "record": "Récord {n}",
       "movedFrom": "Antes: {date} · {time}",
+      "movedFromDate": "Antes: {date}",
       "skippedHasService": "ya tiene este servicio ese día"
     }
   },

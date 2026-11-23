@@ -6,7 +6,8 @@ export interface BookingResultItem {
   typeName: string;
   kind: "medical" | "service";
   doctor?: string | null;
-  from?: { date: string; time: string };
+  /** The moved appointment's old day; `time` absent when it had none (the date alone is shown). */
+  from?: { date: string; time?: string };
 }
 
 export interface BookingResult {
@@ -18,7 +19,10 @@ export interface BookingResult {
   warnings: string[];
 }
 
-/** Sorts by date+time, dedupes identical date+time+typeName, drops skipped dates that were also created. */
+/**
+ * Sorts by date+time, dedupes identical date+time+typeName, drops skipped dates that were also created,
+ * and lists a repeated skipped date + reason or warning once (the dialog keys its rows on them).
+ */
 export function buildBookingResult(input: BookingResult): BookingResult {
   const seen = new Set<string>();
   const items = [...input.items]
@@ -30,7 +34,14 @@ export function buildBookingResult(input: BookingResult): BookingResult {
       return true;
     });
   const created = new Set(items.map((i) => i.date));
-  return { ...input, items, skipped: input.skipped.filter((s) => !created.has(s.date)) };
+  const skippedSeen = new Set<string>();
+  const skipped = input.skipped.filter((s) => {
+    const key = `${s.date}|${s.reason}`;
+    if (created.has(s.date) || skippedSeen.has(key)) return false;
+    skippedSeen.add(key);
+    return true;
+  });
+  return { ...input, items, skipped, warnings: [...new Set(input.warnings)] };
 }
 
 /** "09:30:00" or "9:30" → "09:30": the dialog's rows dedupe and sort on it. */

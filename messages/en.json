@@ -941,6 +941,7 @@
       "save": "Save",
       "saveAnyway": "Save anyway",
       "updated": "Appointment updated.",
+      "created": "Appointment created.",
       "noDoctor": "No doctor",
       "followUpPatient": "Follow-up patient (already seen)",
       "time": "Time",
@@ -6971,7 +6972,7 @@
       "allFree": "All free",
       "healthFull": "{n, plural, one {# full (overbook)} other {# full (overbook)}}",
       "healthBlocked": "{n, plural, one {# to fix} other {# to fix}}",
-      "noBalanceReason": "No services with sessions left. Send them to billing to add one.",
+      "noBalanceReason": "No sessions of this service left. Send them to billing to add one.",
       "overBalanceReason": "Only {n, plural, one {# session} other {# sessions}} left to book.",
       "otherCenterWarning": "This package was bought at {center}; you are booking at {here}.",
       "fullShort": "full"
@@ -7024,6 +7025,7 @@
       "printCallUs": "If you cannot attend, call {phone}.",
       "record": "Record {n}",
       "movedFrom": "Was: {date} · {time}",
+      "movedFromDate": "Was: {date}",
       "skippedHasService": "already has this service that day"
     }
   },

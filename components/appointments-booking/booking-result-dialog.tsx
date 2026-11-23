@@ -35,7 +35,9 @@ function ItemsTable({ result }: { result: BookingResult }) {
             {day(i.date)}
             {i.from && (
               <div className="text-muted-foreground text-xs">
-                {t("movedFrom", { date: day(i.from.date), time: shortTime(i.from.time) })}
+                {i.from.time
+                  ? t("movedFrom", { date: day(i.from.date), time: shortTime(i.from.time) })
+                  : t("movedFromDate", { date: day(i.from.date) })}
               </div>
             )}
           </Td>

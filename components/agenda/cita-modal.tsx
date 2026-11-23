@@ -353,7 +353,7 @@ export function CitaModal({
       } else {
         // Every create shows the booking success dialog (spec §1); "moved" when the BE moved the live one.
         void showResult(r.saved, r.advertencias, {
-          patient: r.patient, asked: { date: fechaSel, time: hora }, typeName: tipo?.name ?? "",
+          patient: r.patient, asked: { date: fechaSel, time: hora }, typeName: tipo?.name ?? "", types: tipos,
           doctor: medicos.find((m) => m.id === medicoId), center: centros.find((c) => c.id === effectiveCentro),
         });
       }
