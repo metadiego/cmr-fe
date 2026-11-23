@@ -41,3 +41,11 @@ Lógica pura con prueba: `lib/api-keys/key-status.ts`, `lib/api-keys/create-miss
 
 Primero cmr-be#656 (si el FE va antes, la lista funciona —el BE viejo ignora `status`— pero revocar
 no pregunta en el BE). Luego este PR.
+
+## Todos los centros (corrección, 23-nov-2026)
+
+Las llamadas de `lib/api/api-keys.ts` **no mandan `X-Tenant-ID`** (`tenant: null`): con el centro de
+la barra superior, el BE acotaba al admin a ese centro y la pestaña solo enseñaba las keys de ese
+centro (ninguna de «todos los centros», que son las de acceso total). Revocar una de las ocultas
+daba 404, y una key de «todos los centros» creada con un centro activo quedaba atada a él (eso se
+corrige también en el BE).
