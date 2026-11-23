@@ -11,14 +11,12 @@ import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { SeriesRows, useDayLabel } from "@/components/appointments-booking/series-rows";
 import { SeriesFrequency, type SeriesMode } from "@/components/appointments-booking/series-frequency";
 import { useCan } from "@/hooks/use-can";
-import { useResource } from "@/hooks/use-resource";
-import type { BookableState } from "@/hooks/use-patient-booking-rules";
+import { usePatientBookingRules, type BookableState } from "@/hooks/use-patient-booking-rules";
 import { suggestionKey, useSeriesAvailability, type SeriesNeed } from "@/hooks/use-series-availability";
 import { buildSeriesRows, canBookSeries } from "@/lib/agenda/booking/series";
+import { balanceReason, capFor, otherCenters } from "@/lib/agenda/booking/booking-cap";
 import {
-  MAX_SESSIONS,
   applySuggestion,
-  defaultSessions,
   dropRow,
   groupByTime,
   notCreated,
@@ -41,7 +39,7 @@ import { weekdayOf } from "@/lib/agenda/recurring-plan";
 import { todayPR } from "@/lib/format/fecha";
 import { normalizeTime, type DaySlots } from "@/lib/agenda/booking/availability";
 import type { RecurringPlanItem } from "@/lib/agenda/recurring-plan";
-import { agendarVariosServicios, crearSesion, getServiciosConSaldo, type BookableService } from "@/lib/api/frontdesk";
+import { agendarVariosServicios, crearSesion, type BookableService } from "@/lib/api/frontdesk";
 import type { ApiWarning } from "@/lib/api/types";
 import type { Paciente } from "@/lib/api/pacientes";
 import { apiErrorLabel } from "@/lib/api/errors";
@@ -56,6 +54,8 @@ import { warningText } from "@/lib/frontdesk/avisos";
 // (overbook) with a warning; a blocked row (holiday, closed, already has the service that day) must
 // be fixed or dropped first. Once a row is edited (time, date, suggestion, drop, "+ Add date") the
 // rows are that explicit list; changing the mode, days or total regenerates them.
+// The patient's bookable balance for the service caps the rows (Semanal total, "+ Add date") and,
+// with nothing left or more rows than left, blocks booking with a reason (spec §4).
 
 
 export interface ServiceBooked {
@@ -68,6 +68,7 @@ export interface ServiceBooked {
 
 export function ServiceBookingForm({
   center,
+  centerName,
   serviceId,
   serviceName,
   date,
@@ -75,10 +76,15 @@ export function ServiceBookingForm({
   pickedFull,
   patient: screenPatient,
   patientCenterIds,
+  bookable: screenBookable,
+  bookableState: screenBookableState,
+  reloadBookable: screenReloadBookable,
   onBooked,
   onBack,
 }: {
   center: string | undefined;
+  /** The booking center's name (the other-center package warning). */
+  centerName: string | undefined;
   serviceId: string;
   serviceName: string;
   date: string;
@@ -89,10 +95,12 @@ export function ServiceBookingForm({
   patient: Paciente | null;
   /** Centers to search patients in (same as Who's calling). */
   patientCenterIds?: string[];
-  /** The screen's patient's bookable balance per service (usePatientBookingRules); not used yet. */
-  bookable?: ReadonlyMap<string, BookableService>;
-  /** Load state of `bookable`; not used yet. */
-  bookableState?: BookableState;
+  /** The screen's patient's bookable balance per service (usePatientBookingRules). */
+  bookable: ReadonlyMap<string, BookableService> | undefined;
+  /** Load state of `bookable`. */
+  bookableState: BookableState;
+  /** Reloads the screen's `bookable` (after a failed load). */
+  reloadBookable: () => void;
   onBooked: (r: ServiceBooked) => void;
   onBack: () => void;
 }) {
@@ -114,14 +122,22 @@ export function ServiceBookingForm({
   const [totalChoice, setTotalChoice] = React.useState<number | null>(null);
   const [busy, setBusy] = React.useState(false);
 
-  // Sessions left on the patient's package for this service: the default number of sessions.
-  const saldoRes = useResource(
-    () => (patientId && center ? getServiciosConSaldo(patientId, center) : Promise.resolve([])),
-    [patientId, center],
+  // The bookable balance for this service: the screen's for its patient, or loaded here (same hook, same
+  // rule) for a patient picked in this form, once the centers to count packages in are known.
+  const ownRules = usePatientBookingRules(
+    !screenPatient && patientCenterIds ? localPatient?.id : undefined,
+    center,
+    patientCenterIds ?? [],
   );
-  const sessionsLeft =
-    saldoRes.state.kind === "ok" ? saldoRes.state.data.find((s) => s.serviceId === serviceId)?.pending : undefined;
-  const total = Math.min(MAX_SESSIONS, Math.max(1, totalChoice ?? defaultSessions(sessionsLeft)));
+  const bookableMap = screenPatient ? screenBookable : ownRules.bookable;
+  const bookableState = screenPatient ? screenBookableState : ownRules.bookableState;
+  const reloadBookable = screenPatient ? screenReloadBookable : ownRules.reloadBookable;
+  // Known only once loaded; a service missing from the answer has nothing left (strict, never a fallback).
+  const balance = bookableState === "ok" ? bookableMap?.get(serviceId) : undefined;
+  const bookableLeft = bookableState === "ok" && bookableMap ? (balance?.bookable ?? 0) : undefined;
+  const cap = capFor(bookableLeft);
+  const total = Math.max(1, Math.min(cap.max, totalChoice ?? cap.defaultTotal));
+  const boughtElsewhere = balance && center ? otherCenters(balance.sources, center) : [];
 
   // The rows as generated, unless edited for this mode, days and total. A row whose date just
   // changed gets its time fitted to that day as soon as the day loads (derived, so no extra render).
@@ -135,7 +151,8 @@ export function ServiceBookingForm({
       ? generateWeeklyPattern(date, days, total)
       : [{ date }];
 
-  const rowDates = patientId ? baseItems.map((i) => i.date) : [];
+  // Availability is read only once there is a balance to book against.
+  const rowDates = patientId && bookableLeft ? baseItems.map((i) => i.date) : [];
   const series = useSeriesAvailability({ center, serviceId, patientId, dates: rowDates });
   const items = fitLoadedTimes(baseItems, series.days, time);
   const editItems = (fn: (items: EditableItem[]) => EditableItem[]) => setEdits({ key: genKey, items: fn(items) });
@@ -200,9 +217,22 @@ export function ServiceBookingForm({
   const single = items.length === 1;
   const sunday = startDay === 0;
   const pickDays = weekly && !daysMatch(days, perWeek);
-  const ready = !!patient && canBook && !busy && !sunday && !pickDays && seriesOk;
+  const balanceVerdict = balanceReason(items.length, bookableLeft);
+  const balanceIssue = !patient
+    ? null
+    : bookableState === "fail"
+      ? t("typePicker.bookableFailed")
+      : bookableLeft === undefined
+        ? t("series.checking")
+        : balanceVerdict === "noBalance"
+          ? t("series.noBalanceReason")
+          : balanceVerdict === "overBalance"
+            ? t("series.overBalanceReason", { n: bookableLeft })
+            : null;
+  const ready = !!patient && canBook && !busy && !sunday && !balanceIssue && !pickDays && seriesOk;
   // What keeps «Agendar» grey, said above it (forms kit): the patient is a missing field; no permission,
-  // a Sunday start, weekdays still to pick or rows that cannot go yet are a reason.
+  // a Sunday start, the balance (loading, failed, none or fewer than the rows), weekdays still to pick
+  // or rows that cannot go yet are a reason.
   const missing = patient ? [] : [t("series.patient")];
   const reason = !permsReady
     ? tRoot("common.loading")
@@ -210,15 +240,17 @@ export function ServiceBookingForm({
       ? t("series.noPermission")
       : sunday
         ? t("series.dateSunday")
-        : pickDays
-          ? t("series.pickDaysReason", { n: perWeek })
-          : patient && !seriesOk
-            ? anyFailed
-              ? t("series.checkFailed")
-              : allLoaded
-                ? t("series.fixRed")
-                : t("series.checking")
-            : null;
+        : balanceIssue
+          ? balanceIssue
+          : pickDays
+            ? t("series.pickDaysReason", { n: perWeek })
+            : patient && !seriesOk
+              ? anyFailed
+                ? t("series.checkFailed")
+                : allLoaded
+                  ? t("series.fixRed")
+                  : t("series.checking")
+              : null;
 
   // One row: a single session on that row's date and time (the picked ones unless edited).
   const bookSingle = async (p: Paciente) => {
@@ -320,8 +352,15 @@ export function ServiceBookingForm({
         ) : (
           <PacienteSelect value={localPatient} onChange={setLocalPatient} centerIds={patientCenterIds} />
         )}
-        {sessionsLeft != null && sessionsLeft > 0 && (
-          <span className="block text-xs text-muted-foreground">{t("typePicker.sessionsLeft", { n: sessionsLeft })}</span>
+        {!!bookableLeft && (
+          <span className="block text-xs text-muted-foreground tabular-nums">
+            {t("typePicker.sessionsLeft", { n: bookableLeft })}
+          </span>
+        )}
+        {boughtElsewhere.length > 0 && (
+          <span className="block text-xs text-warning-foreground">
+            {t("series.otherCenterWarning", { center: boughtElsewhere.join(", "), here: centerName ?? "—" })}
+          </span>
         )}
       </Field>
 
@@ -345,7 +384,8 @@ export function ServiceBookingForm({
           setEdits(null);
         }}
         total={edited ? items.length : total}
-        maxTotal={MAX_SESSIONS}
+        maxTotal={Math.max(1, cap.max)}
+        limitedBy20={cap.limitedBy20}
         onTotal={(n) => {
           setTotalChoice(n);
           setEdits(null);
@@ -359,6 +399,17 @@ export function ServiceBookingForm({
 
           {!patient ? (
             <p className="text-muted-foreground">{t("series.pickPatient")}</p>
+          ) : bookableState === "fail" ? (
+            <div className="flex items-center gap-2 text-destructive">
+              <span>{t("typePicker.bookableFailed")}</span>
+              <Button type="button" size="xs" variant="outline" onClick={reloadBookable}>
+                {t("retry")}
+              </Button>
+            </div>
+          ) : bookableLeft === undefined ? (
+            <p className="text-muted-foreground">{t("series.checking")}</p>
+          ) : bookableLeft === 0 ? (
+            <p className="text-destructive">{t("series.noBalanceReason")}</p>
           ) : (
             <>
               {span && (
@@ -399,13 +450,13 @@ export function ServiceBookingForm({
                   type="button"
                   size="xs"
                   variant="outline"
-                  disabled={busy || !addDate}
+                  disabled={busy || !addDate || items.length >= cap.max}
                   onClick={() => addDate && editItems((list) => addItem(list, addDate))}
                 >
                   {t("series.addDate")}
                 </Button>
-                {items.length >= MAX_SESSIONS && (
-                  <span className="text-xs text-muted-foreground">{t("series.maxDates", { n: MAX_SESSIONS })}</span>
+                {items.length >= cap.max && (
+                  <span className="text-xs text-muted-foreground">{t("series.maxDates", { n: cap.max })}</span>
                 )}
               </div>
               {anyFailed && (

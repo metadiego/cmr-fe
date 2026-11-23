@@ -32,6 +32,7 @@ export function SeriesFrequency({
   onDays,
   total,
   maxTotal,
+  limitedBy20,
   onTotal,
   disabled,
 }: {
@@ -44,6 +45,8 @@ export function SeriesFrequency({
   onDays: (next: { days: number[]; perWeek: number }) => void;
   total: number;
   maxTotal: number;
+  /** `maxTotal` is the 20-per-booking limit (not the patient's balance): say so at the top. */
+  limitedBy20: boolean;
   onTotal: (total: number) => void;
   disabled?: boolean;
 }) {
@@ -106,7 +109,7 @@ export function SeriesFrequency({
               })}
             </div>
           </Field>
-          <Field label={t("total")} hint={total >= maxTotal ? t("maxPerBooking", { n: maxTotal }) : undefined}>
+          <Field label={t("total")} hint={limitedBy20 && total >= maxTotal ? t("maxPerBooking", { n: maxTotal }) : undefined}>
             <Stepper label={t("total")} value={total} min={1} max={maxTotal} disabled={disabled} onChange={onTotal} />
           </Field>
         </div>

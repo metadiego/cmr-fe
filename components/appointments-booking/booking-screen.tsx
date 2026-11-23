@@ -433,6 +433,7 @@ export function BookingScreen() {
             <ServiceBookingForm
               key={`${state.typeId}|${date}|${time}`}
               center={calCenter}
+              centerName={centro.centros.find((c) => c.id === calCenter)?.name}
               serviceId={state.typeId ?? ""}
               serviceName={chosenType?.name ?? ""}
               date={date}
@@ -442,6 +443,7 @@ export function BookingScreen() {
               patientCenterIds={patientCenters?.map((c) => c.id)}
               bookable={rules.bookable}
               bookableState={rules.bookableState}
+              reloadBookable={reloadBookable}
               onBooked={(r) => {
                 if (!state.patientId) {
                   // Just booked for them: this service is not re-checked against their balance.

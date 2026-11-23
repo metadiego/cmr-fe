@@ -6975,6 +6975,9 @@
       "allFree": "All free",
       "healthFull": "{n, plural, one {# full (overbook)} other {# full (overbook)}}",
       "healthBlocked": "{n, plural, one {# to fix} other {# to fix}}",
+      "noBalanceReason": "No services with sessions left. Send them to billing to add one.",
+      "overBalanceReason": "Only {n, plural, one {# session} other {# sessions}} left to book.",
+      "otherCenterWarning": "This package was bought at {center}; you are booking at {here}.",
       "fullShort": "full"
     },
     "toasts": {

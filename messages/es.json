@@ -6975,6 +6975,9 @@
       "allFree": "Todas libres",
       "healthFull": "{n, plural, one {# llena (sobrecupo)} other {# llenas (sobrecupo)}}",
       "healthBlocked": "{n, plural, one {# por corregir} other {# por corregir}}",
+      "noBalanceReason": "No tiene servicios con sesiones disponibles. Pásalo por facturación para añadirlo.",
+      "overBalanceReason": "Solo le quedan {n, plural, one {# sesión} other {# sesiones}} por agendar.",
+      "otherCenterWarning": "Este paquete se compró en {center}; estás agendando en {here}.",
       "fullShort": "lleno"
     },
     "toasts": {
