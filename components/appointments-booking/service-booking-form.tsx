@@ -93,13 +93,13 @@ export function ServiceBookingForm({
   pickedFull: boolean;
   /** The screen's patient; null = choose one here. */
   patient: Paciente | null;
-  /** Centers to search patients in (same as Who's calling). */
-  patientCenterIds?: string[];
+  /** Centers to search patients in (same as Who's calling); undefined until loaded (or failed). */
+  patientCenterIds: string[] | undefined;
   /** The screen's patient's bookable balance per service (usePatientBookingRules). */
   bookable: ReadonlyMap<string, BookableService> | undefined;
-  /** Load state of `bookable`. */
+  /** Load state of `bookable`; "fail" also when the patient's centers could not be read. */
   bookableState: BookableState;
-  /** Reloads the screen's `bookable` (after a failed load). */
+  /** Reloads the screen's `bookable`, or the patient's centers when those failed. */
   reloadBookable: () => void;
   onBooked: (r: ServiceBooked) => void;
   onBack: () => void;
@@ -123,15 +123,24 @@ export function ServiceBookingForm({
   const [busy, setBusy] = React.useState(false);
 
   // The bookable balance for this service: the screen's for its patient, or loaded here (same hook, same
-  // rule) for a patient picked in this form, once the centers to count packages in are known.
+  // rule) for a patient picked in this form. That read waits for the patient's centers (packages from any
+  // of them count): never read without them, or another center's package would look like no balance.
+  // Until they load it is "loading"; if they failed, the screen's failed state and retry (the centers').
   const ownRules = usePatientBookingRules(
     !screenPatient && patientCenterIds ? localPatient?.id : undefined,
     center,
     patientCenterIds ?? [],
   );
+  const waitingCenters = !screenPatient && !patientCenterIds;
   const bookableMap = screenPatient ? screenBookable : ownRules.bookable;
-  const bookableState = screenPatient ? screenBookableState : ownRules.bookableState;
-  const reloadBookable = screenPatient ? screenReloadBookable : ownRules.reloadBookable;
+  const bookableState: BookableState = screenPatient
+    ? screenBookableState
+    : waitingCenters
+      ? screenBookableState === "fail"
+        ? "fail"
+        : "loading"
+      : ownRules.bookableState;
+  const reloadBookable = screenPatient || waitingCenters ? screenReloadBookable : ownRules.reloadBookable;
   // Known only once loaded; a service missing from the answer has nothing left (strict, never a fallback).
   const balance = bookableState === "ok" ? bookableMap?.get(serviceId) : undefined;
   const bookableLeft = bookableState === "ok" && bookableMap ? (balance?.bookable ?? 0) : undefined;

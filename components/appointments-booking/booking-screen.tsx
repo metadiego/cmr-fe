@@ -440,10 +440,11 @@ export function BookingScreen() {
               time={time}
               pickedFull={!!slot && (slot.state === "full" || slot.free <= 0)}
               patient={patient}
-              patientCenterIds={patientCenters?.map((c) => c.id)}
+              // Only a loaded list (no balance read without them); failed centers = a failed balance.
+              patientCenterIds={centersFailed ? undefined : patientCenters?.map((c) => c.id)}
               bookable={rules.bookable}
-              bookableState={rules.bookableState}
-              reloadBookable={reloadBookable}
+              bookableState={centersFailed ? "fail" : rules.bookableState}
+              reloadBookable={centersFailed ? reloadPatientCenters : reloadBookable}
               onBooked={(r) => {
                 if (!state.patientId) {
                   // Just booked for them: this service is not re-checked against their balance.
