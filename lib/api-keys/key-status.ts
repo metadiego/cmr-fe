@@ -54,3 +54,11 @@ function rank(key: ApiKey, now: Date): number {
 export function sortKeys(keys: ApiKey[], now: Date = new Date()): ApiKey[] {
   return [...keys].sort((a, b) => rank(a, now) - rank(b, now) || a.name.localeCompare(b.name));
 }
+
+// The top bar (Bayamón / Caguas / Ambos) filters the keys bound to one center; an all-centers key
+// (clinicId null) works in every center, so it always shows. `selection` is `topBarSelection(...)`
+// from lib/clinic-read-scope: one center, or null on «Ambos» (everything).
+export function inTopBarCenter(keys: ApiKey[], selection: string[] | null): ApiKey[] {
+  if (!selection) return keys;
+  return keys.filter((k) => k.clinicId === null || selection.includes(k.clinicId));
+}

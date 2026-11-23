@@ -49,3 +49,8 @@ la barra superior, el BE acotaba al admin a ese centro y la pestaña solo enseñ
 centro (ninguna de «todos los centros», que son las de acceso total). Revocar una de las ocultas
 daba 404, y una key de «todos los centros» creada con un centro activo quedaba atada a él (eso se
 corrige también en el BE).
+
+**Filtro de la barra superior.** Las llamadas leen todos los centros, y la pantalla filtra con la barra
+superior (`inTopBarCenter`, `lib/api-keys/key-status.ts`): con Bayamón o Caguas salen las keys de ese
+centro **y las de «todos los centros»** (funcionan en cualquiera); con «Ambos», todas. El resumen
+cuenta lo filtrado.

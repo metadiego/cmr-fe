@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { keyStatus, isFullAccess, summarize, sortKeys } from "./key-status.ts";
+import { keyStatus, isFullAccess, summarize, sortKeys, inTopBarCenter } from "./key-status.ts";
 
 const now = new Date("2026-11-20T12:00:00Z");
 const base = {
@@ -55,4 +55,15 @@ test("order: the risky ones first (never used with full access), then live, then
     { ...base, id: "full-unused", name: "z" },
   ];
   assert.deepEqual(sortKeys(keys, now).map((k) => k.id), ["full-unused", "limited-unused", "used", "revoked"]);
+});
+
+test("the top bar filters center keys; all-centers keys always show", () => {
+  const all = { ...base, id: "all", clinicId: null };
+  const bay = { ...base, id: "bay", scope: "clinic" as const, clinicId: "bayamon", permissions: ["x"] };
+  const cag = { ...base, id: "cag", scope: "clinic" as const, clinicId: "caguas", permissions: ["x"] };
+  const ids = (ks: { id: string }[]) => ks.map((k) => k.id);
+  // One center picked: its keys and the all-centers ones (they work there too), not the other center's.
+  assert.deepEqual(ids(inTopBarCenter([all, bay, cag], ["bayamon"])), ["all", "bay"]);
+  // «Ambos» (no single center): everything.
+  assert.deepEqual(ids(inTopBarCenter([all, bay, cag], null)), ["all", "bay", "cag"]);
 });
