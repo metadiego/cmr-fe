@@ -2,6 +2,7 @@ import type { components } from "./schema";
 import type { ApiWarning } from "./types";
 import { apiFetch, apiFetchEnvelope, oneCenterPath, tenantOf } from "./client";
 import type { CenterChoice } from "@/lib/clinic-read-scope";
+import { bookableServicesPath } from "@/lib/frontdesk/bookable-services-path";
 import { normalizeBookMultipleResult, type BookMultipleResultRaw } from "./book-multiple";
 
 // Escritura con avisos NO bloqueantes (BE PR #168): la operación se realiza y el BE adjunta
@@ -154,14 +155,7 @@ export function getBookableServices(
   bookingCenterId: string,
   centerIds: string[],
 ): Promise<BookableService[]> {
-  const sp = new URLSearchParams();
-  for (const id of centerIds) sp.append("centerIds", id);
-  const qs = sp.toString();
-  return apiFetch<BookableService[]>(
-    `/frontdesk/patients/${encodeURIComponent(patientId)}/bookable-services${qs ? `?${qs}` : ""}`,
-    {},
-    bookingCenterId,
-  );
+  return apiFetch<BookableService[]>(bookableServicesPath(patientId, centerIds), {}, bookingCenterId);
 }
 
 // Pestañas del frontdesk (BE 1-oct). `boardSlug` dice qué tablero la sirve: "servicios" o "atencion" (el
