@@ -28,7 +28,8 @@ import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 import { useResource } from "@/hooks/use-resource";
 import { useBookingTypes } from "@/hooks/use-booking-types";
-import { usePatientBookingRules } from "@/hooks/use-patient-booking-rules";
+import { usePatientBookingRules, type PatientBookingRules } from "@/hooks/use-patient-booking-rules";
+import { bookableCheckKey, unbookableTypeCheck } from "@/lib/agenda/booking/unbookable-type";
 import { useBookingCalendar } from "@/hooks/use-booking-calendar";
 import { calendarCenter } from "@/lib/agenda/booking/calendar-center";
 import { usePatientAppointments } from "@/hooks/use-patient-appointments";
@@ -214,19 +215,23 @@ export function BookingScreen() {
   // ---- Booking rules for the chosen patient (first visit vs follow-up, services they can still book),
   // one load per patient + booking center, shared by the type list and the service booking form. It
   // waits for the patient's centers: packages bought in any of them count, and a partial answer must
-  // not drop a service the patient has.
-  const rules = usePatientBookingRules(
-    patientCenters ? state.patientId : undefined,
+  // not drop a service the patient has. If those centers cannot be read, the balance counts as failed
+  // (error + retry of the centers), never as "no centers".
+  const centersFailed = patientCentersRes.state.kind === "fail";
+  const loadedRules = usePatientBookingRules(
+    patientCentersRes.state.kind === "ok" ? state.patientId : undefined,
     center,
     (patientCenters ?? []).map((c) => c.id),
   );
-  // A service from the URL the patient has no sessions left of (a deep link, another patient picked):
-  // checked once per patient + service + center when the balance is in, then the type is cleared so the
-  // list shows. Once only: booking the last session afterwards must not yank the calendar away. Never
-  // while moving (the moved session is already booked, so it is not counted as bookable).
+  const reloadPatientCenters = patientCentersRes.reload;
+  const rules: PatientBookingRules =
+    centersFailed && state.patientId && center
+      ? { ...loadedRules, bookable: undefined, bookableState: "fail", reloadBookable: reloadPatientCenters }
+      : loadedRules;
+  const reloadBookable = rules.reloadBookable;
+  // A service from the URL the patient has no sessions left of (a deep link, another patient picked) is
+  // cleared so the list shows: decided once per patient + service + center (unbookableTypeCheck).
   const checkedBookable = React.useRef<string | null>(null);
-  const bookableKey =
-    state.patientId && state.kind === "service" && state.typeId ? `${state.patientId}|${state.typeId}|${center}` : null;
   // Only the URL is written here (an effect must not set state); the URL → state sync above then
   // clears the type, as for any navigation this screen did not make.
   const clearUnbookable = React.useEffectEvent(() => {
@@ -234,11 +239,18 @@ export function BookingScreen() {
     router.replace(`${pathname}${next}`, { scroll: false });
   });
   React.useEffect(() => {
-    if (!bookableKey || state.movingId || rules.bookableState !== "ok" || !rules.bookable) return;
-    if (checkedBookable.current === bookableKey) return;
-    checkedBookable.current = bookableKey;
-    if ((rules.bookable.get(state.typeId ?? "")?.bookable ?? 0) <= 0) clearUnbookable();
-  }, [bookableKey, state.movingId, state.typeId, rules.bookableState, rules.bookable]);
+    const check = { patientId: state.patientId, kind: state.kind, typeId: state.typeId, center };
+    const verdict = unbookableTypeCheck({
+      ...check,
+      checkedKey: checkedBookable.current,
+      moving: !!state.movingId,
+      bookableState: rules.bookableState,
+      bookable: rules.bookable,
+    });
+    if (verdict !== "keep" && verdict !== "clear") return;
+    checkedBookable.current = bookableCheckKey(check);
+    if (verdict === "clear") clearUnbookable();
+  }, [state.patientId, state.kind, state.typeId, center, state.movingId, rules.bookableState, rules.bookable]);
 
   const pickType = (kind: BookingKind, typeId: string) =>
     update({ kind, typeId, view: kind === "medical" ? state.view : "free", movingId: null });
@@ -315,10 +327,13 @@ export function BookingScreen() {
   const live = calendar.live;
   const refreshCalendarDates = calendar.refreshDates;
 
-  // After a booking, move, edit or cancel: refresh those dates (month + day) and the patient's list.
+  // After a booking, move, edit or cancel: refresh those dates (month + day), the patient's list and
+  // their bookable balance (a service whose last session was just booked must leave the list; the
+  // once-per-key check above keeps the open calendar where it is).
   const onAppointmentsChanged = (dates: string[]) => {
     refreshCalendarDates([...new Set(dates.filter(Boolean))]);
     reloadRail();
+    reloadBookable();
   };
 
   const startMove = (a: PatientAppointment) => {
@@ -430,7 +445,12 @@ export function BookingScreen() {
               onBooked={(r) => {
                 if (!state.patientId) {
                   // Just booked for them: this service is not re-checked against their balance.
-                  checkedBookable.current = `${r.patient.id}|${state.typeId}|${center}`;
+                  checkedBookable.current = bookableCheckKey({
+                    patientId: r.patient.id,
+                    kind: "service",
+                    typeId: state.typeId,
+                    center,
+                  });
                   pickPatient(r.patient);
                 }
                 onAppointmentsChanged(r.dates);
