@@ -38,6 +38,11 @@ const TONE: Record<string, Tone> = {
   // format sheets filled on screen (GLP-1 nursing sheet)
   saved: "success",
   pending: "warning",
+  // API keys (lib/api-keys/key-status.ts): never used = needs attention (the cleanup target)
+  active: "success",
+  neverUsed: "warning",
+  expired: "secondary",
+  revoked: "destructive",
 };
 const LABEL_NS = {
   appointment: "citas.estado",
@@ -46,6 +51,7 @@ const LABEL_NS = {
   transfer: "patients.transferTreatment.status",
   session: "auditSessions.status",
   sheet: "formSheet.home",
+  apiKey: "admin.apiKeys.status",
 } as const;
 
 export function StatusBadge({ kind, value }: { kind: keyof typeof LABEL_NS; value?: string | null }) {
