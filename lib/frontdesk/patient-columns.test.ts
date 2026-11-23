@@ -6,6 +6,7 @@ import {
   hidePresente,
   hideServiceStatus,
   notifyColumn,
+  patientFirst,
   staffAndFlowFirst,
 } from "./patient-columns.ts"
 
@@ -34,6 +35,30 @@ test("the consultation board's own keys too", () => {
     ]).map((c) => c.clave),
     ["medico"]
   )
+})
+
+test("owner, 23-nov: a secondary viewer keeps name and record with keepPatient, still drops the bell", () => {
+  assert.deepEqual(
+    blockColumns(cols, { keepPatient: true }).map((c) => c.clave),
+    ["fd_paciente", "fd_record", "fd_enfermera", "fd_dosis"]
+  )
+  // Default behavior (patient-desk) is unchanged when the option is omitted.
+  assert.deepEqual(blockColumns(cols).map((c) => c.clave), ["fd_enfermera", "fd_dosis"])
+})
+
+test("patientFirst: record then name, ahead of everything else, whatever the board's own order", () => {
+  const col = (clave: string) => ({ kind: "col" as const, col: { clave } })
+  const items = [col("fd_enfermera"), col("fd_paciente"), col("fd_dosis"), col("fd_record")]
+  assert.deepEqual(
+    patientFirst(items).map((i) => i.col.clave),
+    ["fd_record", "fd_paciente", "fd_enfermera", "fd_dosis"]
+  )
+})
+
+test("patientFirst is a no-op without name/record columns", () => {
+  const col = (clave: string) => ({ kind: "col" as const, col: { clave } })
+  const items = [col("fd_enfermera"), col("fd_dosis")]
+  assert.deepEqual(patientFirst(items), items)
 })
 
 test("the notify column is found by its render kind, whatever its key", () => {

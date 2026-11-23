@@ -23,6 +23,7 @@ import {
   isSessionColumn,
   isStaffColumn,
   notifyColumn,
+  patientFirst,
   staffAndFlowFirst,
 } from "@/lib/frontdesk/patient-columns"
 import type {
@@ -56,6 +57,10 @@ interface Props {
   sessionIds: string[]
   date: string
   centerId: string | undefined
+  // Secondary viewer (ServiceBoardViewer, owner 23-nov): many patients on one screen, not one
+  // already-titled detail, so name/record are kept instead of blocked. Default false — patient-desk
+  // itself does not change. Governed-by-the-board rule: same table, same pipeline, one prop.
+  showPatient?: boolean
   onChanged: () => void
   onSchedule: (ctx: {
     pacienteId: string
@@ -80,6 +85,7 @@ export function ServiceSessionsTable({
   sessionIds,
   date,
   centerId,
+  showPatient = false,
   onChanged,
   onSchedule,
   onEhrGate,
@@ -89,13 +95,16 @@ export function ServiceSessionsTable({
   const tFrontdesk = useTranslations("frontdesk")
   const { can } = useCan()
   const columns = React.useMemo(() => board?.columns ?? [], [board])
-  // Name and record are the detail's title already; the notify bell goes to this block's title.
+  // Name and record are the detail's title already in patient-desk; the notify bell goes to this
+  // block's title either way. A secondary viewer (showPatient) keeps them, first in the row.
   const render = React.useMemo(
     () =>
-      staffAndFlowFirst(
-        renderColumns(hideServiceStatus(blockColumns(columns)))
+      patientFirst(
+        staffAndFlowFirst(
+          renderColumns(hideServiceStatus(blockColumns(columns, { keepPatient: showPatient })))
+        )
       ),
-    [columns]
+    [columns, showPatient]
   )
   const notify = React.useMemo(() => notifyColumn(columns), [columns])
   const flow = React.useMemo(() => flowColumns(columns), [columns])

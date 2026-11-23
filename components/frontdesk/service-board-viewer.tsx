@@ -62,6 +62,7 @@ export function ServiceBoardViewer({
             sessionIds={sessionIds}
             date={fecha}
             centerId={centro}
+            showPatient
             onChanged={data.refresh}
             onSchedule={(ctx) => setProgramar({ open: true, ...ctx, servicioId: ctx.servicioId ?? servicio.id })}
             onEhrGate={setServiceEhrGate}

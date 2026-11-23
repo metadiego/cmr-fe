@@ -11,9 +11,26 @@ export interface ColumnLike {
 
 export const isNotifyColumn = (c: ColumnLike) => (c.render as { kind?: string } | null)?.kind === "notificar";
 
-// Columns shown inside a patient's block: everything but name, record and the notify bell.
-export function blockColumns<C extends ColumnLike>(cols: C[]): C[] {
-  return cols.filter((c) => !PATIENT_KEYS.has(c.clave) && !isNotifyColumn(c));
+// Columns shown inside a patient's block: everything but name, record and the notify bell. A
+// secondary viewer governed by patient-desk (ServiceBoardViewer, owner 23-nov) needs the opposite
+// for name/record — many patients on one screen, not one already-titled detail — so `keepPatient`
+// lets it keep passing through the SAME table component instead of a parallel column pipeline. The
+// notify bell stays dropped either way: it belongs in the block header, never duplicated per row.
+export function blockColumns<C extends ColumnLike>(cols: C[], opts: { keepPatient?: boolean } = {}): C[] {
+  return cols.filter((c) => (opts.keepPatient || !PATIENT_KEYS.has(c.clave)) && !isNotifyColumn(c));
+}
+
+const RECORD_KEYS = new Set(["fd_record", "record"]);
+const NAME_KEYS = new Set(["fd_paciente", "paciente"]);
+
+// Record, then name, ahead of the staff/flow/session lead: "#103165 · Nombre" — only matters when
+// `blockColumns` kept them in (`keepPatient`); a no-op otherwise, since there is then nothing to
+// find. Explicit record-before-name order, whatever position the board itself puts them in.
+export function patientFirst<I extends { kind: string; col?: ColumnLike }>(items: I[]): I[] {
+  const record = items.filter((i) => i.kind === "col" && i.col && RECORD_KEYS.has(i.col.clave));
+  const name = items.filter((i) => i.kind === "col" && i.col && NAME_KEYS.has(i.col.clave));
+  const lead = [...record, ...name];
+  return [...lead, ...items.filter((i) => !lead.includes(i))];
 }
 
 export function notifyColumn<C extends ColumnLike>(cols: C[]): C | undefined {
