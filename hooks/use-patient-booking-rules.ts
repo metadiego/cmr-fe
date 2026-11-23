@@ -5,12 +5,15 @@ import * as React from "react"
 import type { VisitKind } from "@/lib/agenda/booking/type-list"
 import { getVisitKind } from "@/lib/api/citas"
 import { getBookableServices, type BookableService } from "@/lib/api/frontdesk"
+import { useCan } from "@/hooks/use-can"
 import { useResource } from "@/hooks/use-resource"
 
 // What a chosen patient may be booked for (spec 2026-11-23-appointments-booking-upgrades §4): whether
 // they were attended before (first visit vs follow-up) and, per service of the booking center, how many
 // sessions they can still book (packages from any of `centerIds` count). One load per patient + center,
-// owned by the booking screen and shared by the type list and the service booking form.
+// owned by the booking screen and shared by the type list and the service booking form. The balance is
+// read only with `frontdesk.read` (the BE's permission for it): without it nothing is read, the state
+// stays "idle" and `bookableHidden` says why (a no-permission note, not a failed load).
 
 export type BookableState = "idle" | "loading" | "ok" | "fail"
 
@@ -20,6 +23,8 @@ export interface PatientBookingRules {
   /** service id → its balance; undefined until known (never a fallback to every service). */
   bookable: Map<string, BookableService> | undefined
   bookableState: BookableState
+  /** The user may not read the balance (no `frontdesk.read`): it is never read. */
+  bookableHidden: boolean
   reloadBookable: () => void
 }
 
@@ -28,7 +33,10 @@ export function usePatientBookingRules(
   bookingCenter: string | undefined,
   centerIds: string[],
 ): PatientBookingRules {
-  const active = !!patientId && !!bookingCenter
+  const { can, ready: permsReady } = useCan()
+  const canReadBookable = permsReady && can("frontdesk.read")
+  const bookableHidden = permsReady && !canReadBookable
+  const active = !!patientId && !!bookingCenter && canReadBookable
   const centersKey = [...centerIds].sort().join(",")
 
   const visitRes = useResource<VisitKind | null>(
@@ -40,10 +48,10 @@ export function usePatientBookingRules(
   )
   const bookableRes = useResource<BookableService[] | null>(
     () =>
-      patientId && bookingCenter
+      patientId && bookingCenter && canReadBookable
         ? getBookableServices(patientId, bookingCenter, centersKey ? centersKey.split(",") : [])
         : Promise.resolve(null),
-    [patientId, bookingCenter, centersKey],
+    [patientId, bookingCenter, centersKey, canReadBookable],
   )
 
   const visitKind = visitRes.state.kind === "ok" ? (visitRes.state.data ?? undefined) : undefined
@@ -53,5 +61,5 @@ export function usePatientBookingRules(
   }, [bookableRes.state])
   const bookableState: BookableState = !active ? "idle" : bookableRes.state.kind
 
-  return { visitKind, bookable, bookableState, reloadBookable: bookableRes.reload }
+  return { visitKind, bookable, bookableState, bookableHidden, reloadBookable: bookableRes.reload }
 }

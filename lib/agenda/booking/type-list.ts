@@ -55,6 +55,20 @@ export function bookableServicesList<T extends { id: string }>(
 }
 
 /**
+ * What the patient's services group shows: "hidden" when the user may not read the services or the
+ * balance (a no-permission note, never an error with a retry that cannot work), else by the balance's
+ * load state: skeleton rows while unknown ("idle" too), an error with retry, or the list.
+ */
+export function patientServicesView(p: {
+  hidden: boolean;
+  bookableState: "idle" | "loading" | "ok" | "fail";
+}): "hidden" | "loading" | "fail" | "list" {
+  if (p.hidden) return "hidden";
+  if (p.bookableState === "fail") return "fail";
+  return p.bookableState === "ok" ? "list" : "loading";
+}
+
+/**
  * The list's groups after the search; the input order is kept inside each group.
  *
  * Without a patient (`patientMode` false): Medical first, then the services with package sessions

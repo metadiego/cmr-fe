@@ -6839,6 +6839,7 @@
       "packages": "Paquetes",
       "patientServices": "Servicios de {name}",
       "noBookable": "No tiene servicios con sesiones disponibles. Pásalo por facturación para añadirlo.",
+      "noBookablePermission": "No tiene permiso para ver las sesiones que le quedan (frontdesk.read).",
       "bookableFailed": "No se pudieron cargar los servicios que le quedan por agendar.",
       "otherCenter": "Comprado en {center}",
       "minutes": "{n} min",

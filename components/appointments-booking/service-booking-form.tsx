@@ -117,6 +117,8 @@ export function ServiceBookingForm({
   const tRoot = useTranslations();
   const { can, ready: permsReady } = useCan();
   const canBook = can("frontdesk.create");
+  // Without `frontdesk.read` the balance is never read (usePatientBookingRules): say so, not "checking".
+  const balanceHidden = permsReady && !can("frontdesk.read");
   const dayLabel = useDayLabel();
 
   const [localPatient, setLocalPatient] = React.useState<Paciente | null>(null);
@@ -238,15 +240,17 @@ export function ServiceBookingForm({
   const balanceVerdict = balanceReason(items.length, bookableLeft);
   const balanceIssue = !patient
     ? null
-    : bookableState === "fail"
-      ? t("typePicker.bookableFailed")
-      : bookableLeft === undefined
-        ? t("series.checking")
-        : balanceVerdict === "noBalance"
-          ? t("series.noBalanceReason")
-          : balanceVerdict === "overBalance"
-            ? t("series.overBalanceReason", { n: bookableLeft })
-            : null;
+    : balanceHidden
+      ? t("typePicker.noBookablePermission")
+      : bookableState === "fail"
+        ? t("typePicker.bookableFailed")
+        : bookableLeft === undefined
+          ? t("series.checking")
+          : balanceVerdict === "noBalance"
+            ? t("series.noBalanceReason")
+            : balanceVerdict === "overBalance"
+              ? t("series.overBalanceReason", { n: bookableLeft })
+              : null;
   const ready = !!patient && canBook && !busy && !sunday && !balanceIssue && !pickDays && seriesOk;
   // What keeps «Agendar» grey, said above it (forms kit): the patient is a missing field; no permission,
   // a Sunday start, the balance (loading, failed, none or fewer than the rows), weekdays still to pick
@@ -432,6 +436,8 @@ export function ServiceBookingForm({
 
           {!patient ? (
             <p className="text-muted-foreground">{t("series.pickPatient")}</p>
+          ) : balanceHidden ? (
+            <p className="text-muted-foreground">{t("typePicker.noBookablePermission")}</p>
           ) : bookableState === "fail" ? (
             <div className="flex items-center gap-2 text-destructive">
               <span>{t("typePicker.bookableFailed")}</span>

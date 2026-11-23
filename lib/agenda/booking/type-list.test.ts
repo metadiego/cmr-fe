@@ -12,6 +12,7 @@ import {
   foldText,
   isEmptyDay,
   matchesQuery,
+  patientServicesView,
   scanDates,
   typeListGroups,
 } from "./type-list.ts";
@@ -165,4 +166,14 @@ test("emptyRunStep: a fully booked week never stops a service scan (openings aft
   assert.equal(st.run, 13);
   assert.equal(hasBookableTime(booked), true);
   assert.equal(hasBookableTime({ date: "2026-11-04", slots: [] }), false);
+});
+
+test("patientServicesView: no permission is a note (never an error), else by the balance's load state", () => {
+  for (const bookableState of ["idle", "loading", "ok", "fail"] as const) {
+    assert.equal(patientServicesView({ hidden: true, bookableState }), "hidden", bookableState);
+  }
+  assert.equal(patientServicesView({ hidden: false, bookableState: "idle" }), "loading");
+  assert.equal(patientServicesView({ hidden: false, bookableState: "loading" }), "loading");
+  assert.equal(patientServicesView({ hidden: false, bookableState: "fail" }), "fail");
+  assert.equal(patientServicesView({ hidden: false, bookableState: "ok" }), "list");
 });

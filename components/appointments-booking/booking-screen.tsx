@@ -220,7 +220,7 @@ export function BookingScreen() {
   );
   const reloadPatientCenters = patientCentersRes.reload;
   const rules: PatientBookingRules =
-    centersFailed && state.patientId && center
+    centersFailed && state.patientId && center && !loadedRules.bookableHidden
       ? { ...loadedRules, bookable: undefined, bookableState: "fail", reloadBookable: reloadPatientCenters }
       : loadedRules;
   const reloadBookable = rules.reloadBookable;

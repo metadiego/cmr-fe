@@ -13,6 +13,7 @@ import {
   bookableServicesList,
   filterMedicalTypes,
   NEXT_OPENING_DAYS,
+  patientServicesView,
   typeListGroups,
   type TypeListGroupKey,
 } from "@/lib/agenda/booking/type-list";
@@ -61,8 +62,13 @@ export function TypeListPanel({
   const patientMode = !!patientId;
   const { bookable, bookableState } = rules;
   // With a patient and no answer yet ("idle" too: the screen waits for the patient's centers), the
-  // services group is unknown, never "every service".
-  const bookableUnknown = patientMode && bookableState !== "ok";
+  // services group is unknown, never "every service". Without permission to read the services or the
+  // balance it says so (no read is made, no error shown).
+  const servicesView = patientServicesView({
+    hidden: types.servicesHidden || rules.bookableHidden,
+    bookableState,
+  });
+  const bookableUnknown = patientMode && servicesView === "loading";
 
   // The scans' days skip the center's holidays: this year's, and next year's near the turn of the year.
   const years = [...new Set([todayPR(), inDaysPR(NEXT_OPENING_DAYS * 2)].map((d) => Number(d.slice(0, 4))))];
@@ -101,7 +107,11 @@ export function TypeListPanel({
     medical: t("typePicker.noMedical"),
     packages: "",
     services: noServices,
-    patientServices: types.servicesHidden ? noServices : t("typePicker.noBookable"),
+    patientServices: types.servicesHidden
+      ? noServices
+      : rules.bookableHidden
+        ? t("typePicker.noBookablePermission")
+        : t("typePicker.noBookable"),
   };
   // Another center's name for each service whose bookable sessions were bought there.
   const otherCentersOf = (serviceId: string) =>
@@ -167,7 +177,7 @@ export function TypeListPanel({
                   <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                     {groupLabel[g.key]}
                   </h3>
-                  {g.key === "patientServices" && bookableState === "fail" ? (
+                  {g.key === "patientServices" && servicesView === "fail" ? (
                     <div className="flex flex-col items-start gap-2">
                       <ErrorState message={t("typePicker.bookableFailed")} />
                       <Button variant="outline" size="sm" onClick={rules.reloadBookable}>

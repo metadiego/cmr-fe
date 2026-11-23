@@ -6839,6 +6839,7 @@
       "packages": "Packages",
       "patientServices": "{name}'s services",
       "noBookable": "No services with sessions left. Send them to billing to add one.",
+      "noBookablePermission": "You do not have permission to see the sessions they have left (frontdesk.read).",
       "bookableFailed": "Could not load the services they can still book.",
       "otherCenter": "Bought in {center}",
       "minutes": "{n} min",
