@@ -96,3 +96,62 @@ export function fitLoadedTimes(
   });
   return changed ? out : items;
 }
+
+/** The weekly-pattern "sessions per week" bounds: one to six (the clinic is closed on Sundays). */
+export function clampPerWeek(n: number): number {
+  return Math.min(6, Math.max(1, Math.trunc(n)));
+}
+
+/**
+ * The "Semanal" series: walks forward from `start` (inclusive) one day at a time and keeps the days
+ * whose weekday is in `weekdays` (1..6 = Mon..Sat, `getUTCDay` numbering), until `count` rows. The
+ * start's weekday always counts, so the first row is the start. Sundays never match; holidays are
+ * not skipped.
+ */
+export function generateWeeklyPattern(start: string, weekdays: readonly number[], count: number): EditableItem[] {
+  const wanted = new Set(weekdays.filter((d) => d >= 1 && d <= 6));
+  wanted.add(weekdayOf(start));
+  wanted.delete(0);
+  const items: EditableItem[] = [];
+  let date = start;
+  // The start's weekday is in `wanted` (a Sunday start is the only exception: step past it).
+  for (let guard = 0; items.length < count && guard < 7 * MAX_SESSIONS * 2 + 7; guard++) {
+    if (wanted.has(weekdayOf(date))) items.push({ date });
+    date = addDays(date, 1);
+  }
+  return items;
+}
+
+/**
+ * Toggles `day` in the selected weekdays. The start's weekday cannot be removed; adding past
+ * `perWeek` bumps `perWeek` to fit. Selected days keep the order they were added in.
+ */
+export function toggleWeekday(
+  selected: number[],
+  day: number,
+  startDay: number,
+  perWeek: number,
+): { days: number[]; perWeek: number } {
+  if (day === startDay) return { days: selected, perWeek };
+  if (selected.includes(day)) return { days: selected.filter((d) => d !== day), perWeek };
+  const days = [...selected, day];
+  return { days, perWeek: Math.max(perWeek, clampPerWeek(days.length)) };
+}
+
+/**
+ * Applies a new "sessions per week" to the selected weekdays: clamps it to 1..6 and, when it is below
+ * the selection, drops the most recently added days (never the start's weekday).
+ */
+export function setPerWeek(selected: number[], perWeek: number, startDay: number): number[] {
+  const limit = clampPerWeek(perWeek);
+  const days = [...selected];
+  for (let i = days.length - 1; i >= 0 && days.length > limit; i--) {
+    if (days[i] !== startDay) days.splice(i, 1);
+  }
+  return days;
+}
+
+/** True when the selected weekday count equals `perWeek` (the form shows a hint otherwise). */
+export function daysMatch(selected: number[], perWeek: number): boolean {
+  return selected.length === perWeek;
+}
