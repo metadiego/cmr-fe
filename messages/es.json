@@ -7006,6 +7006,22 @@
       "noTimeShort": "Sin horas",
       "cellFree": "{day} · {time}: {n} libres",
       "cellBooked": "{day} · {time}: {n} ocupados"
+    },
+    "result": {
+      "bookedTitle": "Citas agendadas",
+      "movedTitle": "Cita movida",
+      "print": "Imprimir",
+      "close": "Cerrar",
+      "colDate": "Fecha",
+      "colTime": "Hora",
+      "colService": "Servicio",
+      "colDoctor": "Doctor",
+      "skippedTitle": "Fechas omitidas",
+      "warningsTitle": "Avisos",
+      "printHeading": "Sus próximas citas",
+      "printCallUs": "Si no puede asistir, llame al {phone}.",
+      "record": "Récord {n}",
+      "movedFrom": "Antes: {date} · {time}"
     }
   },
   "inventory": {

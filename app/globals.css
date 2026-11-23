@@ -294,6 +294,46 @@
     margin: 10mm;
   }
 }
+/* Lista de citas agendadas (diálogo de éxito de la agenda): se lleva el paciente a casa. Mismo patrón que
+   `.formato-print`: aísla el bloque dentro del Dialog de Radix y lo imprime en negro sobre blanco, carta. */
+@media print {
+  body:has(.appointments-print) * {
+    visibility: hidden !important;
+  }
+  .appointments-print,
+  .appointments-print * {
+    visibility: visible !important;
+  }
+  body:has(.appointments-print) [role="dialog"],
+  body:has(.appointments-print) [data-radix-popper-content-wrapper],
+  body:has(.appointments-print) [data-radix-dialog-content] {
+    position: static !important;
+    transform: none !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    inset: auto !important;
+    width: auto !important;
+  }
+  .appointments-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 8mm;
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  .appointments-print * {
+    color: #000 !important;
+  }
+  @page {
+    size: letter;
+    margin: 10mm;
+  }
+}
 /* Bloques SOLO para impresión (membrete/pie de reportes): ocultos en pantalla; la ventana de impresión de
    cada reporte los muestra con su propio CSS. Ver estadísticas de servicios. */
 .solo-print {
