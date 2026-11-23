@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { fillableReportsFor } from "./panel-formatos.ts";
+import { fillableReportsFor, reportsFor } from "./panel-formatos.ts";
 
 const servicios = [
   {
@@ -42,4 +42,14 @@ test("serviceId wins over the display name when both would resolve to a differen
 test("nothing is fillable until the caller's own fillable-slugs set says so (no FE-side list)", () => {
   const reports = fillableReportsFor({ serviceId: "s1", serviceName: "GLP-1" }, servicios, new Set());
   assert.deepEqual(reports, []);
+});
+
+test("reportsFor: every report of the matched service, fillable or print-only alike", () => {
+  const reports = reportsFor({ serviceId: "s1", serviceName: "GLP-1" }, servicios);
+  assert.deepEqual(reports.map((r) => r.id), ["glp1_adherencia", "hilt"]);
+});
+
+test("reportsFor: a service with no formAcciones, or none matched, offers nothing", () => {
+  assert.deepEqual(reportsFor({ serviceId: "s3", serviceName: "Sin formatos" }, servicios), []);
+  assert.deepEqual(reportsFor({ serviceId: "nope", serviceName: "nope" }, servicios), []);
 });

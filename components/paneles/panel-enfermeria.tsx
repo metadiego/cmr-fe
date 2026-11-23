@@ -292,6 +292,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
               est={estatusById.get(p.id)}
               servicios={servicios}
               fillableSlugs={fillableSlugs}
+              centro={centro}
               puedeOrdenar={puedeOrdenar}
               dragId={dragId}
               overId={overId}
