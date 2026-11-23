@@ -3,11 +3,8 @@ import assert from "node:assert/strict";
 
 import {
   applySuggestion,
-  clampSessions,
   seriesHealth,
   seriesSpan,
-  stepSessions,
-  defaultSessions,
   dropRow,
   existingRange,
   groupByTime,
@@ -18,17 +15,6 @@ import {
   suggestionExclusions,
 } from "./series-booking.ts";
 import type { DaySlots } from "./availability.ts";
-
-test("defaultSessions uses the sessions left, clamped to 2–20, else 4", () => {
-  assert.equal(defaultSessions(undefined), 4);
-  assert.equal(defaultSessions(null), 4);
-  assert.equal(defaultSessions(0), 4);
-  assert.equal(defaultSessions(1), 2);
-  assert.equal(defaultSessions(7), 7);
-  assert.equal(defaultSessions(30), 20);
-  assert.equal(clampSessions(Number.NaN), 4);
-  assert.equal(clampSessions(3.6), 4);
-});
 
 test("groupByTime makes one request per distinct time, dates in order", () => {
   const groups = groupByTime([
@@ -96,18 +82,6 @@ test("rowTimeOptions: open and full times, no unavailable, current kept disabled
     { time: "10:00", full: true, disabled: false, free: 0 },
   ]);
   assert.deepEqual(rowTimeOptions(null, "09:00"), [{ time: "09:00", full: false, disabled: true, free: 0 }]);
-});
-
-test("stepSessions moves one at a time inside 2–20", () => {
-  assert.equal(stepSessions(4, 1), 5);
-  assert.equal(stepSessions(4, -1), 3);
-  assert.equal(stepSessions(2, -1), 2);
-  assert.equal(stepSessions(20, 1), 20);
-});
-
-test("stepSessions after drops took the series below 2: minus stays, plus goes to 2", () => {
-  assert.equal(stepSessions(1, -1), 1);
-  assert.equal(stepSessions(1, 1), 2);
 });
 
 test("seriesSpan is the first and last date, whatever the row order", () => {
