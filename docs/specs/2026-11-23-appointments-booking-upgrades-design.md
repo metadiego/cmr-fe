@@ -200,6 +200,21 @@ With a patient chosen:
    - Permission: `frontdesk.read`. The existing `/availability` endpoint stays as is (other callers).
 - Both: Swagger, MCP tools (`patient_visit_kind`, `patient_bookable_services`), unit tests, no schema change.
 
+### 5. Create a patient from the booking forms (owner, 2026-11-23)
+
+When an appointment is started without a patient, the «Nueva cita» dialog (`CitaModal`) only searches
+(`PacienteSelect`). Add a **«+ Nuevo paciente»** button next to the search that opens the existing
+`PacienteFormSheet` (the one the "¿Quién llama?" panel uses) on top of the dialog. On save, the new
+patient becomes the dialog's patient and the dialog stays open with everything already chosen (type, day,
+time, center, doctor, notes), so reception just presses «Guardar». Cancelling the sheet returns to the
+dialog unchanged.
+
+- One shared component `PatientPickerWithCreate` (search + button + sheet) replaces `PacienteSelect` in
+  `CitaModal` and in `ServiceBookingForm` (no growth in `cita-modal.tsx`).
+- The button only shows with `pacientes.create` (`<Can>`).
+- A new patient has never been attended: the medical type lands on «Nueva» (part 4 and the BE agree). On
+  the service form a new patient has nothing bookable, so it shows the billing message (part 4) — expected.
+
 ## Left to the builder
 
 - Exact endpoint path naming within cmr-be routing conventions (`ruta-en-ingles`), keeping the response shape.

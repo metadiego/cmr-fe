@@ -236,7 +236,17 @@ Run `npm ci` once. Gate for every task: `npm test && npm run typecheck && npm ru
 
 - [ ] Implement; gate clean. Commit `feat(booking): move an appointment in a dialog`.
 
-### Task B9: browser QA and PR
+### Task B9: create a patient from the booking forms
+
+**Files:**
+- Create: `components/citas/patient-picker-with-create.tsx` — `PatientPickerWithCreate({ id, value, onChange, centerIds }: { id?: string; value: Paciente | null; onChange: (p: Paciente | null) => void; centerIds?: string[] })`: `PacienteSelect` + `<Can permiso="pacientes.create">` button `«+ Nuevo paciente»` (reuse the key the who's-calling panel uses for `newPatient`, or add `appointmentsBooking.newPatient` to both catalogues) + `PacienteFormSheet` (`onSaved` → close sheet, `onChange(saved)`). Pattern: `components/appointments-booking/whos-calling-panel.tsx:58-131`.
+- Modify: `components/agenda/cita-modal.tsx:485` — swap `PacienteSelect` for `PatientPickerWithCreate` (net line count must not grow; the patient-change handler that auto-selects «Nueva»/«Seguimiento» must run for the new patient too).
+- Modify: `components/appointments-booking/service-booking-form.tsx:296` — same swap.
+
+- [ ] Implement; check the sheet stacks above the dialog (focus trap, Esc closes only the sheet) in the browser; gate clean.
+- [ ] Commit `feat(booking): create a new patient from the appointment dialogs`.
+
+### Task B10: browser QA and PR
 
 - [ ] Run cmr-be Part A branch locally (`npm run start:dev`, port 3000) and `npm run dev` (8080). QA, light + dark, desktop + 375px:
   - service: Manual 1 row, Manual 3 rows, Semanal 2×/week with total from balance; result dialog; Imprimir → print preview shows only the sheet.
@@ -244,5 +254,6 @@ Run `npm ci` once. Gate for every task: `npm test && npm run typecheck && npm ru
   - attended patient sees Seguimiento only; never-attended sees Nueva only; visit-kind failure (stop BE briefly) → both.
   - medical booking from the booking screen, the agenda day view and the patient record → result dialog on each; booking that the BE turns into a move → "Cita movida"; editing an appointment still shows the "Cita actualizada" toast.
   - move medical (reason required) and service; cancel keeps move mode; success → result dialog.
+  - «Nueva cita» with no patient → «+ Nuevo paciente» → save → back in the dialog with the slot kept and type «Nueva» → Guardar → result dialog. Without `pacientes.create` the button is hidden.
 - [ ] `npm test && npm run typecheck && npm run lint && npm run build` → green.
 - [ ] Push; open PR (Spanish description OK) with before/after screenshots, linking the spec and the cmr-be PR; note "merge after cmr-be PR is deployed".
