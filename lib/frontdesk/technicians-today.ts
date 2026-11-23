@@ -8,7 +8,9 @@
 import type { FrontdeskQueue } from "../api/frontdesk-queue.ts";
 
 export type TechnicianFree = { id: string; name: string };
-export type TechnicianBusy = { id: string; name: string; servicio: string };
+// `records`: every patient this technician has in therapy right now (owner, 23-nov) — usually one,
+// but a technician can be in two sessions at once, so it is a list, never just the first.
+export type TechnicianBusy = { id: string; name: string; servicio: string; records: string[] };
 
 export function techniciansNow(queue: FrontdeskQueue | null): {
   libres: TechnicianFree[];
@@ -17,11 +19,16 @@ export function techniciansNow(queue: FrontdeskQueue | null): {
   activosHoy: Map<string, string>;
 } {
   const label = (id: string, name: string | null | undefined) => name ?? id.slice(0, 8);
-  const servicioDe = new Map<string, { name: string; servicio: string }>();
+  const servicioDe = new Map<string, { name: string; servicio: string; records: string[] }>();
   for (const s of queue?.services ?? []) {
     for (const p of s.inTherapy) {
-      if (p.technicianId && !servicioDe.has(p.technicianId)) {
-        servicioDe.set(p.technicianId, { name: label(p.technicianId, p.technicianName), servicio: s.name });
+      if (!p.technicianId) continue;
+      const record = p.medicalRecordNumber;
+      const existing = servicioDe.get(p.technicianId);
+      if (existing) {
+        if (record) existing.records.push(record);
+      } else {
+        servicioDe.set(p.technicianId, { name: label(p.technicianId, p.technicianName), servicio: s.name, records: record ? [record] : [] });
       }
     }
   }
@@ -38,7 +45,12 @@ export function techniciansNow(queue: FrontdeskQueue | null): {
     }
     return {
       libres: [...activosHoy].filter(([id]) => !busy.has(id)).map(([id, name]) => ({ id, name })),
-      ocupados: [...busy].map((id) => ({ id, name: activosHoy.get(id)!, servicio: servicioDe.get(id)?.servicio ?? "" })),
+      ocupados: [...busy].map((id) => ({
+        id,
+        name: activosHoy.get(id)!,
+        servicio: servicioDe.get(id)?.servicio ?? "",
+        records: servicioDe.get(id)?.records ?? [],
+      })),
       activosHoy,
     };
   }

@@ -140,7 +140,10 @@ export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fec
               <ul className="space-y-1">
                 {ocupados.map((p) => (
                   <li key={p.id} className="flex items-center justify-between gap-2 rounded-md bg-card px-2 py-1.5 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-                    <span>{p.name}</span>
+                    <span>
+                      {p.name}
+                      {p.records.length > 0 && <span className="text-muted-foreground"> · {p.records.map((r) => `#${r}`).join(", ")}</span>}
+                    </span>
                     <span className="text-xs text-muted-foreground">{p.servicio}</span>
                   </li>
                 ))}
