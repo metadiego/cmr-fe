@@ -116,7 +116,10 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
   const [state, setState] = React.useState<SheetState>(() => initialSheetState(data.answers, firstSection));
   const payload = sheetPayload(state, editableKeys, questions, areas);
   const payloadJson = JSON.stringify(payload);
-  const [savedJson, setSavedJson] = React.useState(() => (data.answers.saved ? payloadJson : ""));
+  // The baseline is what the sheet opened with, saved or not: only a change the nurse makes saves.
+  // Opening an unsaved sheet must never write it (a saved sheet prints on the patient's record and
+  // blocks deleting the visit) — it used to autosave the bare suggestions one second after opening.
+  const [savedJson, setSavedJson] = React.useState(() => payloadJson);
   const dirty = payloadJson !== savedJson;
   const [printing, setPrinting] = React.useState(false);
   // No separate Guardar any more (owner, 21-nov-2026): every change saves itself. "offline" covers any
