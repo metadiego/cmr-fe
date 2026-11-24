@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert02Icon, CheckmarkCircle02Icon, Stethoscope02Icon } from "@hugeicons/core-free-icons";
@@ -7,6 +8,7 @@ import { Alert02Icon, CheckmarkCircle02Icon, Stethoscope02Icon } from "@hugeicon
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { FormFooter } from "@/components/kit/form-footer";
 import { parseDayUTC } from "@/lib/format/fecha";
+import { buildReportHtml } from "@/lib/reports/print-document";
 import type { BookingResult, BookingResultItem } from "@/lib/agenda/booking/booking-result";
 import { shortTime } from "./booking-toolbar";
 import { DateTile } from "./date-tile";
@@ -50,20 +52,20 @@ function ItemCard({ item }: { item: BookingResultItem }) {
   );
 }
 
-/** The patient-facing printout: plain table, black on white (see `.appointments-print` in globals.css). */
-function PrintSheet({ result }: { result: BookingResult }) {
+/** The house logo, the same asset the reports print. */
+const PRINT_LOGO = "/img/logo_cmr.png";
+
+/** The patient-facing printout's body: never shown on screen; «Imprimir» copies its HTML into its own
+ *  window with the reports' letterhead (lib/reports/print-document.ts). Printing in place came out BLANK:
+ *  the shell's print CSS isolates the thermal receipt and hides everything else. */
+const PrintSheet = React.forwardRef<HTMLDivElement, { result: BookingResult }>(function PrintSheet({ result }, ref) {
   const t = useTranslations("appointmentsBooking.result");
   const format = useFormatter();
-  const { patient, center } = result;
+  const { patient } = result;
   return (
-    <div className="appointments-print hidden space-y-4 print:block">
+    <div ref={ref} hidden>
       <div>
-        <div className="text-lg font-semibold">{center.name}</div>
-        {center.address && <div className="text-sm">{center.address}</div>}
-        {center.phone && <div className="text-sm">{center.phone}</div>}
-      </div>
-      <div>
-        <h2 className="text-base font-semibold">{t("printHeading")}</h2>
+        <h2 className="print-section">{t("printHeading")}</h2>
         <p className="text-sm">
           {patient.name}
           {patient.record && ` · ${t("record", { n: patient.record })}`}
@@ -92,10 +94,10 @@ function PrintSheet({ result }: { result: BookingResult }) {
           ))}
         </tbody>
       </table>
-      {center.phone && <p className="text-sm">{t("printCallUs", { phone: center.phone })}</p>}
+      {result.center.phone && <p>{t("printCallUs", { phone: result.center.phone })}</p>}
     </div>
   );
-}
+});
 
 /**
  * What a booking or a move produced: a confirmation header, one card per appointment (date tile, time,
@@ -107,6 +109,28 @@ export function BookingResultDialog({ result, onClose }: { result: BookingResult
   const format = useFormatter();
   const { patient, center } = result;
   const n = result.items.length;
+  const sheet = React.useRef<HTMLDivElement>(null);
+  const print = () => {
+    const el = sheet.current;
+    if (!el) return;
+    const w = window.open("", "_blank", "width=900,height=1100");
+    if (!w) return; // popup blocked
+    w.document.write(
+      buildReportHtml({
+        title: center.name,
+        subtitle: [center.address, center.phone].filter(Boolean).join(" · ") || undefined,
+        bodyHtml: el.innerHTML,
+        logoUrl: `${window.location.origin}${PRINT_LOGO}`,
+      }),
+    );
+    w.document.close();
+    w.focus();
+    // Wait for the logo so it is on the page, not a blank box.
+    const imgs = Array.from(w.document.images ?? []);
+    if (imgs.every((i) => i.complete)) w.print();
+    else
+      Promise.all(imgs.map((i) => new Promise((r) => ((i.onload = r), (i.onerror = r))))).then(() => w.print());
+  };
   const title = result.mode === "moved" ? t("movedTitle") : t("bookedCount", { n });
   const notes = [
     ...result.skipped.map((s) => ({ key: `s|${s.date}|${s.reason}`, text: `${formatDay(format, s.date)}: ${s.reason}` })),
@@ -160,12 +184,12 @@ export function BookingResultDialog({ result, onClose }: { result: BookingResult
         </div>
 
         <FormFooter
-          primary={{ label: t("print"), onClick: () => window.print() }}
+          primary={{ label: t("print"), onClick: print }}
           onCancel={onClose}
           cancelLabel={t("close")}
         />
 
-        <PrintSheet result={result} />
+        <PrintSheet ref={sheet} result={result} />
       </DialogContent>
     </Dialog>
   );
