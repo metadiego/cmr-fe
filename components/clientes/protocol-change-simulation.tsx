@@ -125,8 +125,8 @@ export function ProtocolChangeSimulation({
             <span
               className={cn(
                 "rounded-md px-2 py-0.5 font-semibold",
-                tone === "success" && "bg-success/15 text-success",
-                tone === "warning" && "bg-warning/20 text-warning-foreground",
+                tone === "success" && "bg-success text-success-foreground",
+                tone === "warning" && "bg-warning text-warning-foreground",
               )}
             >
               {t("difference", { amount: diff != null ? signedMoney(diff, money) : "—" })}
@@ -147,16 +147,16 @@ export function ProtocolChangeSimulation({
 
 function SimTable({ caption, t, children }: { caption: string; t: (k: string) => string; children: React.ReactNode }) {
   return (
-    <div className="min-w-0 overflow-x-auto">
+    <div className="min-w-0">
       <h3 className="px-5 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{caption}</h3>
       <RecordTable
         head={
-          <tr>
+          <>
             <Th>{t("product")}</Th>
             <Th right>{t("units")}</Th>
             <Th>{t("unitPrice")}</Th>
             <Th right>{t("value")}</Th>
-          </tr>
+          </>
         }
       >
         {children}
