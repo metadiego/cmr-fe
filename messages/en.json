@@ -6631,7 +6631,44 @@
     },
     "tabOwner": "Management summary",
     "printOwner": "Include management summary",
-    "printOwnerHint": "Printed below the daily kardex; if it does not fit on the same sheet, it moves whole to the next one."
+    "printOwnerHint": "Printed below the daily kardex; if it does not fit on the same sheet, it moves whole to the next one.",
+    "tabDelivery": "Delivery control",
+    "delivery": {
+      "legacyMonth": "Legacy, no date",
+      "empty": "No purchases of this product in the period.",
+      "totalPending": "Total pending delivery",
+      "refundNote": "Refund #{number}",
+      "protocolsTitle": "Injectables applied / Infiltration protocol",
+      "protocolsTotal": "Total: {n}",
+      "warehouseTitle": "Warehouse",
+      "col": {
+        "record": "Record",
+        "patient": "Patient",
+        "date": "Date",
+        "invoice": "Invoice",
+        "sold": "Sold qty.",
+        "delivered": "Delivered qty.",
+        "deliveryDates": "Delivery dates",
+        "pending": "Pending",
+        "notes": "Notes"
+      },
+      "protocolsCol": {
+        "protocol": "Protocol"
+      },
+      "warehouse": {
+        "freeStock": "Free stock",
+        "pending": "Pending delivery",
+        "physical": "In warehouse (physical)",
+        "soldInPeriod": "Sold in period",
+        "protocols": "Protocols",
+        "systemStock": "System stock"
+      },
+      "warning": {
+        "NEGATIVE_STOCK": "Free stock went negative: {quantity} units below zero.",
+        "DOUBLE_DEDUCTION": "{quantity} units may have been deducted from stock twice.",
+        "unknown": "System warning ({code}): {quantity} units."
+      }
+    }
   },
   "inventoryReceipts": {
     "tabReceive": "Receive",

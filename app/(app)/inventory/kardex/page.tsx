@@ -6,9 +6,11 @@ import { useFormatter, useTranslations } from "next-intl"
 import {
   getDailyKardex,
   getKardexDay,
+  getKardexDeliveryControl,
   getKardexSummary,
   type KardexDaily,
   type KardexDayMovement,
+  type KardexDeliveryControl,
   type KardexSummary,
 } from "@/lib/api/inventory-kardex"
 import {
@@ -18,14 +20,16 @@ import {
   sessionLabel,
   validRange,
 } from "@/lib/inventory/kardex"
-import { formatFechaSolo, todayPR } from "@/lib/format/fecha"
+import { formatFechaSolo, parseDayUTC, todayPR } from "@/lib/format/fecha"
 import { useResource } from "@/hooks/use-resource"
 import { useCentroGate } from "@/hooks/use-centro-gate"
 import { ProductoPicker } from "@/components/inventario/producto-picker"
 import { Button } from "@/components/ui/button"
 import { ReportActions } from "@/components/reports/report-actions"
 import { KardexOwnerSummary } from "@/components/inventario/kardex-owner-summary"
+import { KardexDeliveryControlView } from "@/components/inventario/kardex-delivery-control"
 import { dailyCsv, movementsCsv, ownerCsv } from "@/lib/inventory/kardex-csv"
+import { deliveryCsv } from "@/lib/inventory/delivery-control-csv"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   Dialog,
@@ -59,7 +63,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 // which reason lands in which column (cmr-be docs/specs/kardex-diario-de-inventario.md, handoff
 // docs/specs/kardex-diario-handoff.md). Print = the browser's (PDF included); the filters are no-print.
 
-type KardexTab = "daily" | "owner" | "summary"
+type KardexTab = "daily" | "owner" | "summary" | "delivery"
 
 export default function DailyKardexPage() {
   const t = useTranslations("inventoryKardex")
@@ -103,10 +107,18 @@ export default function DailyKardexPage() {
         : Promise.resolve(null),
     [day, productId, centerId]
   )
+  const deliveryRes = useResource<KardexDeliveryControl | null>(
+    () =>
+      ready
+        ? getKardexDeliveryControl({ productId, from, to }, centerId)
+        : Promise.resolve(null),
+    [productId, from, to, centerId]
+  )
 
   const daily = dailyRes.state.kind === "ok" ? dailyRes.state.data : null
   const summary = summaryRes.state.kind === "ok" ? summaryRes.state.data : null
   const movements = dayRes.state.kind === "ok" ? dayRes.state.data : null
+  const delivery = deliveryRes.state.kind === "ok" ? deliveryRes.state.data : null
   const withProportion = daily?.product.capacity != null
   // One row per delivery, not per raw ledger line (owner, 18-nov-2026: opening a vial and applying
   // its content are two separate stock movements, but staff reading this screen see one clinical
@@ -129,6 +141,8 @@ export default function DailyKardexPage() {
   // reason = movement_reasons.slug; a new reason is a DB row, so an unknown slug shows as-is.
   const reasonText = (r: string | null | undefined) =>
     !r ? "—" : t.has(`reason.${r}`) ? t(`reason.${r}`) : r
+  const monthLabel = (m: string | null) =>
+    m ? format.dateTime(parseDayUTC(`${m}-01`) ?? new Date(), "monthYear") : t("delivery.legacyMonth")
   const totals = daily?.days.reduce(
     (a, d) => ({
       inbound: a.inbound + d.inbound,
@@ -173,7 +187,9 @@ export default function DailyKardexPage() {
                     ? movementsCsv(summary, t, reasonText)
                     : tab === "owner"
                       ? ownerCsv(summary, t, reasonText)
-                      : dailyCsv(daily, t)
+                      : tab === "delivery"
+                        ? deliveryCsv(delivery, t, monthLabel)
+                        : dailyCsv(daily, t)
                 }
                 fileParts={[
                   t("title"),
@@ -254,6 +270,7 @@ export default function DailyKardexPage() {
                 <TabsTrigger value="owner">{t("tabOwner")}</TabsTrigger>
               )}
               <TabsTrigger value="summary">{t("tabSummary")}</TabsTrigger>
+              <TabsTrigger value="delivery">{t("tabDelivery")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="daily">
@@ -465,6 +482,16 @@ export default function DailyKardexPage() {
                   </Table>
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="delivery">
+              {deliveryRes.state.kind === "loading" && (
+                <p className="text-sm text-muted-foreground">{t("loading")}</p>
+              )}
+              {deliveryRes.state.kind === "fail" && (
+                <p className="text-sm text-destructive">{deliveryRes.state.message}</p>
+              )}
+              {delivery && <KardexDeliveryControlView data={delivery} />}
             </TabsContent>
           </Tabs>
           {printOwner && tab === "daily" && summary?.ownerFormat && (

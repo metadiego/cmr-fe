@@ -6631,7 +6631,44 @@
     },
     "tabOwner": "Resumen gerencial",
     "printOwner": "Incluir resumen gerencial",
-    "printOwnerHint": "Se imprime debajo del kárdex por día; si no cabe en la misma hoja, pasa entero a la siguiente."
+    "printOwnerHint": "Se imprime debajo del kárdex por día; si no cabe en la misma hoja, pasa entero a la siguiente.",
+    "tabDelivery": "Control de entregas",
+    "delivery": {
+      "legacyMonth": "Legado sin fecha",
+      "empty": "No hay compras de este producto en el período.",
+      "totalPending": "Total por entregar",
+      "refundNote": "Devolución #{number}",
+      "protocolsTitle": "Inyectables aplicados / Protocolo de infiltraciones",
+      "protocolsTotal": "Total: {n}",
+      "warehouseTitle": "Almacén",
+      "col": {
+        "record": "Récord",
+        "patient": "Paciente",
+        "date": "Fecha",
+        "invoice": "Factura",
+        "sold": "Cant. vendida",
+        "delivered": "Cant. entregada",
+        "deliveryDates": "Fechas de entrega",
+        "pending": "Por entregar",
+        "notes": "Observaciones"
+      },
+      "protocolsCol": {
+        "protocol": "Protocolo"
+      },
+      "warehouse": {
+        "freeStock": "Inventario libre",
+        "pending": "Por entregar",
+        "physical": "En almacén (físico)",
+        "soldInPeriod": "Vendidas en el período",
+        "protocols": "Protocolos",
+        "systemStock": "Existencia del sistema"
+      },
+      "warning": {
+        "NEGATIVE_STOCK": "El inventario libre quedó negativo: {quantity} unidades por debajo de cero.",
+        "DOUBLE_DEDUCTION": "{quantity} unidades pueden estar descontadas dos veces del inventario.",
+        "unknown": "Aviso del sistema ({code}): {quantity} unidades."
+      }
+    }
   },
   "inventoryReceipts": {
     "tabReceive": "Recibir",
