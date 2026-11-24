@@ -151,6 +151,50 @@ export function getKardexDeliveryControl(p: { productId: string; from: string; t
   );
 }
 
+// ---- Kardex overview of ALL products (BE: cmr-be #699, docs/specs/kardex-resumen-de-todos-los-productos.md) ----
+// One call for the whole catalog in a center and range, split by deduction mode so the owner can see
+// "a la venta" and "a la entrega" products together or apart without picking one product at a time.
+
+export type KardexOverviewTotals = {
+  opening: number;
+  inbound: number;
+  applied: number;
+  manualOutputs: number;
+  adjustments: number;
+  closing: number;
+  pending: number;
+  physical: number;
+  freeStock: number;
+};
+export type KardexOverviewProduct = KardexOverviewTotals & {
+  productId: string;
+  sku: string;
+  name: string;
+  deductionMode: string;
+};
+export type KardexOverviewGroup = {
+  deductionMode: string;
+  totals: KardexOverviewTotals;
+  productIds: string[];
+};
+export type KardexOverview = {
+  from: string;
+  to: string;
+  products: KardexOverviewProduct[];
+  groups: KardexOverviewGroup[];
+  totals: KardexOverviewTotals;
+};
+
+export function getKardexOverview(p: { from: string; to: string; deductionMode?: string }, centerId?: string | null) {
+  const params: Record<string, string> = { desde: p.from, hasta: p.to };
+  if (p.deductionMode) params.modoDescarga = p.deductionMode;
+  return apiFetch<KardexOverview>(
+    `/inventory/reports/kardex-overview?${query(params, centerId)}`,
+    {},
+    centerId ?? undefined,
+  );
+}
+
 /** The management summary in the owner's sheet layout (cmr-be #626): classified by the BE, painted here. */
 export type KardexOwnerFormat = {
   opening: number;

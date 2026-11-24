@@ -6584,6 +6584,11 @@
     "center": "Centro",
     "product": "Producto",
     "pickProduct": "Elige un producto",
+    "mode": {
+      "label": "Modo",
+      "product": "Un producto",
+      "allProducts": "Todos los productos"
+    },
     "from": "Desde",
     "to": "Hasta",
     "badRange": "La fecha «Desde» debe ser anterior o igual a «Hasta».",
@@ -6693,6 +6698,36 @@
         "NEGATIVE_STOCK": "El inventario libre quedó negativo: {quantity} unidades por debajo de cero.",
         "DOUBLE_DEDUCTION": "{quantity} unidades pueden estar descontadas dos veces del inventario.",
         "unknown": "Aviso del sistema ({code}): {quantity} unidades."
+      }
+    },
+    "overview": {
+      "title": "Todos los productos",
+      "viewLabel": "Vista",
+      "view": {
+        "together": "Juntos",
+        "separated": "Separados",
+        "saleOnly": "Solo a la venta",
+        "deliveryOnly": "Solo a la entrega"
+      },
+      "search": "Buscar por SKU o nombre…",
+      "empty": "No hay productos con movimiento en el período.",
+      "groupTotal": "Total",
+      "group": {
+        "a_la_venta": "A la venta",
+        "a_la_entrega": "A la entrega"
+      },
+      "col": {
+        "sku": "SKU",
+        "name": "Producto",
+        "opening": "Inicial",
+        "inbound": "Entradas",
+        "applied": "Aplicadas",
+        "manualOutputs": "Salidas",
+        "adjustments": "Ajustes",
+        "closing": "Cierre",
+        "pending": "Por entregar",
+        "physical": "En almacén",
+        "freeStock": "Libre"
       }
     }
   },

@@ -6584,6 +6584,11 @@
     "center": "Center",
     "product": "Product",
     "pickProduct": "Pick a product",
+    "mode": {
+      "label": "Mode",
+      "product": "One product",
+      "allProducts": "All products"
+    },
     "from": "From",
     "to": "To",
     "badRange": "«From» must be on or before «To».",
@@ -6693,6 +6698,36 @@
         "NEGATIVE_STOCK": "Free stock went negative: {quantity} units below zero.",
         "DOUBLE_DEDUCTION": "{quantity} units may have been deducted from stock twice.",
         "unknown": "System warning ({code}): {quantity} units."
+      }
+    },
+    "overview": {
+      "title": "All products",
+      "viewLabel": "View",
+      "view": {
+        "together": "Together",
+        "separated": "Separated",
+        "saleOnly": "Sale only",
+        "deliveryOnly": "Delivery only"
+      },
+      "search": "Search by SKU or name…",
+      "empty": "No products moved in the period.",
+      "groupTotal": "Total",
+      "group": {
+        "a_la_venta": "Sale",
+        "a_la_entrega": "Delivery"
+      },
+      "col": {
+        "sku": "SKU",
+        "name": "Product",
+        "opening": "Opening",
+        "inbound": "Inbound",
+        "applied": "Applied",
+        "manualOutputs": "Outputs",
+        "adjustments": "Adjustments",
+        "closing": "Closing",
+        "pending": "Pending",
+        "physical": "In warehouse",
+        "freeStock": "Free"
       }
     }
   },
