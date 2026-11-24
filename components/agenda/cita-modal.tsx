@@ -8,18 +8,14 @@ import {
   validarCita,
   crearCitaAgenda,
   actualizarCitaAgenda,
-  getCuposLibres,
   type Cita,
   type TipoCita,
   type CitaConflicto,
-  type CuposLibres,
 } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { parseDayUTC } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { cappedBySheet } from "@/lib/agenda/sheet";
-import type { Slot } from "@/components/agenda/slot-picker";
 import { AppointmentWhenFields } from "@/components/agenda/appointment-when-fields";
 import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
 import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
@@ -28,6 +24,7 @@ import { datosFaltantesDe } from "@/lib/api/ehr-gate";
 import type { EhrReadinessField } from "@/lib/api/ehr-integration";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { useResource } from "@/hooks/use-resource";
+import { useAppointmentSlots } from "@/hooks/use-appointment-slots";
 import { useMe } from "@/hooks/use-me";
 import { useShowAppointmentResult } from "@/hooks/use-appointment-result";
 import { useEstados } from "@/hooks/use-estados";
@@ -67,8 +64,10 @@ export function CitaModal({
   tipos,
   medicos: medicosProp,
   canal,
+  estadoInicial,
   onOpenChange,
   onSaved,
+  onPatientDataClosed,
 }: {
   open: boolean;
   fecha: string; // ISO prefilled
@@ -83,9 +82,13 @@ export function CitaModal({
   // patient with none yet). Each screen declares its own; undeclared sends nothing and the BE uses
   // 'frontdesk'. Handoff bug-canal-callcenter-no-se-manda-handoff-fe.md.
   canal?: "frontdesk" | "callcenter";
+  // Create only: the status the toggle starts on, over the channel's default (a board's walk-in: confirmada).
+  estadoInicial?: "programada" | "confirmada";
   onOpenChange: (open: boolean) => void;
   // Gets the appointment just saved (create/edit) so the caller can show it at once.
   onSaved: (cita?: Cita) => void;
+  // The EHR-data form (PACIENTE_DATOS_REQUERIDOS) was closed without completing it: a board filters on them.
+  onPatientDataClosed?: (patient: Paciente) => void;
 }) {
   const t = useTranslations("agenda.modal");
   const tc = useTranslations("common");
@@ -144,23 +147,8 @@ export function CitaModal({
     return addMinutes(start, tp?.durationMinutes ?? 30);
   });
 
-  // One time, from the type's SLOTS that day (available-slots endpoint): whole-hour bands with free/capacity
-  // plus the type's duration (for the end time). Never blocking. Handoff citas-hora-por-cupo-handoff-be.
-  const cuposRes = useResource<CuposLibres | null>(
-    () => (effectiveCentro && fechaSel && tipoCitaId ? getCuposLibres(fechaSel, tipoCitaId, effectiveCentro) : Promise.resolve(null)),
-    [effectiveCentro, fechaSel, tipoCitaId],
-  );
-  const slots: Slot[] = React.useMemo(() => {
-    if (cuposRes.state.kind !== "ok" || !cuposRes.state.data) return [];
-    // Tolera `slots` o `franjas` (el BE oscila el nombre) y NUNCA `.map` sobre undefined → reventaba el modal.
-    const arr = cuposRes.state.data.slots ?? cuposRes.state.data.franjas ?? [];
-    return arr.map((s) => ({ time: s.time, vacios: s.free, cupo: s.capacity, enHoja: cappedBySheet(s) }));
-  }, [cuposRes.state]);
-  // Duración del tipo (del endpoint; manda sobre el catálogo). Se usa para derivar la hora de fin.
-  const slotDuration = cuposRes.state.kind === "ok" ? cuposRes.state.data?.durationMinutes ?? null : null;
-  // Festivo del día elegido (BE handoff booking-availability-fixes §D): explica un selector vacío por
-  // `closedByHoliday` en vez de dejarlo en silencio. El informativo (no bloqueante) también se muestra.
-  const festivoHoy = cuposRes.state.kind === "ok" ? cuposRes.state.data?.holidays?.[0] : null;
+  // One time, from the type's SLOTS that day; never blocking (hooks/use-appointment-slots.ts).
+  const { slots, duration: slotDuration, holiday: festivoHoy, sheet } = useAppointmentSlots(effectiveCentro, fechaSel, tipoCitaId);
   // La hora elegida ya no tiene cupo → aviso NO bloqueante (el BE deja agendar igual).
   const slotLleno = !!hora && slots.some((s) => s.time === hora && s.vacios <= 0);
 
@@ -173,7 +161,7 @@ export function CitaModal({
   // The status a NEW appointment starts with (BE allowlist programada|confirmada). Call center books
   // remotely, so it starts at the catalogue's initial status; any other channel has the patient present,
   // so it starts "confirmada" (owner, 13-oct-2026). Still editable below; this is only the default.
-  const claveInicial = (
+  const claveInicial = estadoInicial ?? (
     canal === "callcenter"
       ? (estados.find((e) => e.isInitial)?.slug ?? "programada")
       : "confirmada"
@@ -523,7 +511,7 @@ export function CitaModal({
             endTime={horaFin}
             onTimeChange={onHoraChange}
             holiday={festivoHoy}
-            sheet={cuposRes.state.kind === "ok" ? cuposRes.state.data?.sheet : null}
+            sheet={sheet}
           />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{statusField}</div>
         </>
@@ -586,7 +574,10 @@ export function CitaModal({
         pacienteId={paciente.id}
         faltantes={ehrGate}
         centroId={effectiveCentro || undefined}
-        onCancel={() => setEhrGate(null)}
+        onCancel={() => {
+          setEhrGate(null);
+          onPatientDataClosed?.(paciente);
+        }}
         onCompleted={() => {
           setEhrGate(null);
           void submit();

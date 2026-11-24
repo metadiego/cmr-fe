@@ -34,7 +34,7 @@ import {
 import { TableroDinamico } from "@/components/agenda/tablero-dinamico";
 import { TableroAcciones } from "@/components/tablero/tablero-acciones";
 import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
-import { AgregarCitaModal } from "@/components/tablero/agregar-cita-modal";
+import { BoardAppointmentModal } from "@/components/tablero/board-appointment-modal";
 import { readDensity, type Density } from "@/hooks/use-board-prefs";
 import { coincide } from "@/lib/frontdesk/search";
 import { useCan } from "@/hooks/use-can";
@@ -353,8 +353,7 @@ export function GenericBoard({
       })()}
 
       {adding && centroId && (
-        <AgregarCitaModal
-          tablero={tablero}
+        <BoardAppointmentModal
           centroId={centroId}
           onClose={() => setAdding(false)}
           onSaved={filasRes.refresh}

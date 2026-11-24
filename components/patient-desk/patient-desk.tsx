@@ -35,7 +35,7 @@ import { MedicosLibresWidget } from "@/components/frontdesk/medicos-libres-widge
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button"
 import { TechnicianStatusButton } from "@/components/frontdesk/technician-status-button"
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler"
-import { AgregarCitaModal as AddConsultationModal } from "@/components/tablero/agregar-cita-modal"
+import { BoardAppointmentModal } from "@/components/tablero/board-appointment-modal"
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker"
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
 import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip"
@@ -61,7 +61,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
 
 // Patient desk — the frontdesk turned around (alternative to /boards/frontdesk, which stays as is):
 // the day's patients first, services and consultation together; pick one to see and work all their
@@ -527,8 +526,7 @@ export function PatientDesk() {
       </Dialog>
 
       {addingConsultation.open && (
-        <AddConsultationModal
-          tablero={CONSULTATION_BOARD}
+        <BoardAppointmentModal
           centroId={gate.centro}
           lockedPatient={
             addingConsultation.pacienteId

@@ -54,3 +54,15 @@ export function startsWithChoiceMade(opts: { isEdit: boolean; typeId?: string; t
 export function clinicIsFixed(opts: { isEdit: boolean; givenClinic?: string; givenTime?: string }): boolean {
   return !opts.isEdit && !!opts.givenClinic && !!opts.givenTime;
 }
+
+/**
+ * The whole hour after `now` ("HH:mm", the clinic's clock): a walk-in booked from a board starts there
+ * and reception edits it. Strictly after (09:00 → 10:00), capped at 23:00 so it never rolls into
+ * tomorrow; an unreadable clock gives 09:00, the dialog's usual default.
+ */
+export function nextFullHour(now: string): string {
+  const m = /^(\d{1,2}):\d{2}/.exec(now);
+  if (!m) return "09:00";
+  const hour = Math.min(Number(m[1]) + 1, 23);
+  return `${String(hour).padStart(2, "0")}:00`;
+}
