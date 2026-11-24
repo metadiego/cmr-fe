@@ -2652,7 +2652,10 @@
     "legacyLabel": {
       "invalid": "The session goes from 1 to the total.",
       "notMigrated": "This session is numbered by its package; fix it from the package."
-    }
+    },
+    "sinAsistirTerapia": "Therapy",
+    "sinAsistirConsulta": "Consultation",
+    "sinAsistirAbrir": "Open that day →"
   },
   "programarCitas": {
     "title": "Schedule sessions",

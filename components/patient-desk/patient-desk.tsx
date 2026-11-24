@@ -44,6 +44,7 @@ import { ServiceFilterDropdown, consultSubtypeLabel, type ServiceOfTheDay } from
 import { DaySummaryDialog } from "@/components/patient-desk/day-summary-dialog"
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail"
 import { EnTerapiaSinAsistirBanner } from "@/components/frontdesk/en-terapia-sin-asistir-banner"
+import type { OverdueVisit } from "@/lib/frontdesk/overdue-visits"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -146,6 +147,15 @@ export function PatientDesk() {
     pickKind("services")
     setQuery("")
     setSelectedId(patientId)
+  }
+  // A visit left open on a past day, clicked in the banner (owner, 24-nov-2026): its day, its kind (and
+  // service), that patient selected — so it is closed with the desk's own cells, nothing parallel.
+  const openOverdueVisit = (v: OverdueVisit) => {
+    setDate(v.date)
+    pickKind(v.kind)
+    if (v.kind === "services" && v.serviceId) setServiceFilter(v.serviceId)
+    setQuery("")
+    setSelectedId(v.patientId)
   }
   const [summaryOf, setSummaryOf] = React.useState<ServiceOfTheDay | null>(null)
   const servicesToday = React.useMemo(
@@ -257,7 +267,7 @@ export function PatientDesk() {
           The live badge sits in the toolbar instead of costing the page a row of its own. */}
       <PageHeader title={t("title")} />
       {!gate.cargando && !gate.sinCentro && !gate.necesitaPicker && (
-        <EnTerapiaSinAsistirBanner centro={gate.centro} />
+        <EnTerapiaSinAsistirBanner centro={gate.centro} onOpenVisit={openOverdueVisit} />
       )}
 
       {/* ONE row, the same in every tab (owner, 17-nov-2026): what the list shows on the left (tab,

@@ -2652,7 +2652,10 @@
     "legacyLabel": {
       "invalid": "La sesión va de 1 al total.",
       "notMigrated": "Esta sesión la numera su paquete; corrígela desde el paquete."
-    }
+    },
+    "sinAsistirTerapia": "Terapia",
+    "sinAsistirConsulta": "Consulta",
+    "sinAsistirAbrir": "Abrir ese día →"
   },
   "programarCitas": {
     "title": "Programar citas",
