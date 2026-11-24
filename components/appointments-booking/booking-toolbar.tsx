@@ -6,19 +6,13 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { TimeWindow } from "@/lib/agenda/booking/availability";
 import { parseDayUTC } from "@/lib/format/fecha";
 
 // The booking calendar's top rows: "Booking" / "Book for Ana" + the type chip (✕ to change it), the
-// time-of-day window, the Free/Booked switch (medical types only) and the "Next free" strip.
+// Free/Booked switch (medical types only) and the "Next free" strip. Every hour of the day is always
+// shown: the Mañana/Tarde filter was removed (owner, 2026-11-23).
 
 export type BookingView = "free" | "booked";
-
-const WINDOWS: { value: TimeWindow; key: "windowAny" | "windowMorning" | "windowAfternoon" }[] = [
-  { value: "any", key: "windowAny" },
-  { value: "morning", key: "windowMorning" },
-  { value: "afternoon", key: "windowAfternoon" },
-];
 
 /** "08:00" → "8:00" (24-hour digits carry no language). */
 export function shortTime(time: string): string {
@@ -30,8 +24,6 @@ export function BookingToolbar({
   typeName,
   color,
   onClearType,
-  window,
-  onWindow,
   view,
   onView,
   nextFree,
@@ -42,8 +34,6 @@ export function BookingToolbar({
   typeName: string;
   color: string | null;
   onClearType: () => void;
-  window: TimeWindow;
-  onWindow: (w: TimeWindow) => void;
   /** Omit (with onView) to hide the Free/Booked switch: services only offer Free. */
   view?: BookingView;
   onView?: (v: BookingView) => void;
@@ -77,15 +67,6 @@ export function BookingToolbar({
         </span>
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <Tabs value={window} onValueChange={(v) => onWindow(v as TimeWindow)}>
-            <TabsList aria-label={t("windowLabel")}>
-              {WINDOWS.map((w) => (
-                <TabsTrigger key={w.value} value={w.value}>
-                  {t(w.key)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
           {view && onView && (
             <Tabs value={view} onValueChange={(v) => onView(v as BookingView)}>
               <TabsList aria-label={t("viewLabel")}>

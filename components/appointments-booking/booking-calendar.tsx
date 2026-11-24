@@ -44,10 +44,12 @@ export interface CalendarMoving {
   onConfirm: (to: { date: string; time: string }, reason?: string) => Promise<boolean>;
 }
 
+/** Every hour of the day: the Mañana/Tarde filter was removed (owner, 2026-11-23). */
+const ALL_DAY: TimeWindow = "any";
+
 export interface BookingCalendarPatch {
   date?: string;
   month?: Month;
-  window?: TimeWindow;
   view?: BookingView;
   /** Week view: any day of the shown week. */
   anchor?: string;
@@ -65,7 +67,6 @@ export function BookingCalendar({
   onClearType,
   date,
   month,
-  window,
   view,
   period,
   anchor,
@@ -90,7 +91,6 @@ export function BookingCalendar({
   onClearType: () => void;
   date: string | undefined;
   month: Month;
-  window: TimeWindow;
   view: BookingView;
   period: BookingPeriod;
   /** Week view: any day of the shown week. */
@@ -177,8 +177,6 @@ export function BookingCalendar({
         typeName={typeName}
         color={color}
         onClearType={onClearType}
-        window={window}
-        onWindow={(w) => onChange({ window: w })}
         view={medical ? view : undefined}
         onView={medical ? (v) => onChange({ view: v }) : undefined}
         nextFree={data.notConfigured ? [] : data.nextFree}
@@ -223,7 +221,7 @@ export function BookingCalendar({
               holidays={data.holidays}
               days={data.days}
               view={medical ? view : "free"}
-              window={window}
+              window={ALL_DAY}
               selected={date}
               ringDate={ringDate}
               onSelect={selectDay}
@@ -237,7 +235,7 @@ export function BookingCalendar({
               holidays={data.holidays}
               days={data.weekDays}
               view={medical ? view : "free"}
-              window={window}
+              window={ALL_DAY}
               selected={date}
               picked={picked}
               ringDate={ringDate}
@@ -249,7 +247,7 @@ export function BookingCalendar({
             date={date}
             typeName={typeName}
             day={data.day}
-            window={window}
+            window={ALL_DAY}
             picked={picked}
             onPickTime={(time) => date && pickTime(date, time)}
             onRetry={data.retrySelected}

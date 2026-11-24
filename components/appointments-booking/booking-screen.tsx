@@ -31,7 +31,7 @@ import { calendarCenter } from "@/lib/agenda/booking/calendar-center";
 import { usePatientAppointments } from "@/hooks/use-patient-appointments";
 import { useBookingMove } from "@/hooks/use-booking-move";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
-import { normalizeTime, type TimeWindow } from "@/lib/agenda/booking/availability";
+import { normalizeTime } from "@/lib/agenda/booking/availability";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
 import { monthOf } from "@/lib/agenda/booking/month";
 import { periodFocus, periodForKey, type BookingPeriod } from "@/lib/agenda/booking/period";
@@ -59,7 +59,7 @@ import { cn } from "@/lib/utils";
 //   patient, no type    → patient rail | "Book for <name>: what?"
 //   patient, type       → patient rail | calendar slot
 // kind/typeId/date/patientId and the Day/Week/Month view live in the URL (?type=kind:id&date=&patient=
-// &view=) so reload and links restore the screen; the rest (time window, Free/Booked, visible month and
+// &view=) so reload and links restore the screen; the rest (Free/Booked, visible month and
 // week, the appointment being moved) is local. D / W / M switch the view (not while typing).
 // The work area fills the window (useFillViewportHeight); the panels scroll inside it, never the page.
 
@@ -70,7 +70,6 @@ export interface BookingScreenState {
   typeId?: string;
   date?: string; // YYYY-MM-DD, the selected day
   patientId?: string;
-  window: TimeWindow;
   view: BookingView; // "booked" is only offered for medical types
   period: BookingPeriod; // Day / Week / Month (URL `view=`)
   month: { year: number; month0: number };
@@ -91,7 +90,6 @@ function initialState(sp: URLSearchParams): BookingScreenState {
     ...url,
     date,
     period: url.period ?? "month",
-    window: "any",
     view: "free",
     month: monthOf(focus),
     anchor: focus,
@@ -313,7 +311,7 @@ export function BookingScreen() {
     month: state.month,
     date: shownDate,
     patientId: state.patientId,
-    window: state.window,
+    window: "any",
     week: typeChosen && state.period === "week" ? weekDays(state.anchor) : [],
   });
   const live = calendar.live;
@@ -541,7 +539,6 @@ export function BookingScreen() {
             onClearType={clearType}
             date={shownDate}
             month={state.month}
-            window={state.window}
             view={state.view}
             period={state.period}
             anchor={state.anchor}
