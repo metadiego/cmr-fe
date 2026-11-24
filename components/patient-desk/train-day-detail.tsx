@@ -11,12 +11,13 @@ import type { PatientTrain } from "@/lib/api/resources";
 import type { SeriesRow } from "@/lib/agenda/booking/series";
 import { sameDaySessions, trainSchedule } from "@/lib/agenda/booking/train-rows";
 import type { ExistingSession } from "@/hooks/use-train-series-availability";
+import { cn } from "@/lib/utils";
 
-// What goes under one date of the patient desk's therapy form: how that day's train runs, one therapy
-// per line with the start and end the BE planned and its minutes (the row above already shows when the
-// patient leaves). Each therapy can be taken off that date (never the day's last one) and put back.
-// When the day is refused because the patient already has one of its therapies, it first says what
-// they already have and at what time, so the clashing one can be taken off.
+// The timetable under one date of the patient desk's therapy form: one line per therapy with the start
+// and end the BE planned and its minutes (the row above shows when the patient leaves), in a quiet inset
+// box. A therapy the patient already has that day is marked on its own line, red, with the time and
+// status of what is booked, so it can be taken off right there. Each therapy can be taken off that date
+// (never the last one; the ✕ shows on hover from sm up) and put back from the chips below.
 
 const STATUS_KEYS = ["pendiente", "presente", "en_terapia", "asistido"] as const;
 
@@ -44,8 +45,9 @@ export function TrainDayDetail({
   onRestore: (id: string) => void;
 }) {
   const t = useTranslations("therapyBooking");
-  const duplicate = row.status === "blocked" && row.reason === "duplicate";
-  const had = duplicate ? sameDaySessions(sessions, row.date, serviceIds) : [];
+  const tStatus = useTranslations("therapyBooking.sessionStatus");
+  const booked = new Map<string, ExistingSession | { time: string | null; status: string }>();
+  for (const s of sameDaySessions(sessions, row.date, serviceIds)) if (!booked.has(s.serviceId)) booked.set(s.serviceId, s);
   const plan = trainSchedule(train, row.time);
   // Without a plan for that hour (closed, holiday) the therapies are still listed, without times.
   const lines = plan
@@ -54,51 +56,57 @@ export function TrainDayDetail({
   const canRemove = serviceIds.length > 1;
 
   return (
-    <div className="ml-7 flex flex-col gap-1">
-      {had.length > 0 && (
-        <p className="text-xs text-destructive tabular-nums">
-          {t("alreadyHas")}{" "}
-          {had.map((s, i) => (
-            <React.Fragment key={`${s.serviceId}|${s.time}|${i}`}>
-              {i > 0 && " · "}
-              <span className="font-medium">{serviceName(s.serviceId)}</span>
-              {s.time && ` ${shortTime(s.time)}`}
-              {(STATUS_KEYS as readonly string[]).includes(s.status) &&
-                ` (${t(`sessionStatus.${s.status as (typeof STATUS_KEYS)[number]}`)})`}
-            </React.Fragment>
-          ))}
-        </p>
-      )}
-      <ol className="max-w-md border-l pl-3 text-xs tabular-nums" aria-label={t("daySchedule")}>
-        {lines.map((leg) => (
-          <li key={leg.serviceId} className="grid min-h-6 grid-cols-[5.5rem_1fr_auto_1.5rem] items-center gap-x-3">
-            <span className="font-medium">{leg.start && leg.end ? `${shortTime(leg.start)} – ${shortTime(leg.end)}` : "—"}</span>
-            <span className="min-w-0 truncate">
-              {serviceName(leg.serviceId)}
-              {(leg.parallel || leg.together) && <span className="text-muted-foreground"> · {t("alongside")}</span>}
-            </span>
-            <span className="text-muted-foreground">{leg.minutes !== null ? t("minutes", { n: leg.minutes }) : ""}</span>
-            {canRemove ? (
-              <Button
-                type="button"
-                size="icon-xs"
-                variant="ghost"
-                className="text-muted-foreground"
-                disabled={disabled}
-                aria-label={t("removeFromDay", { therapy: serviceName(leg.serviceId) })}
-                title={t("removeFromDay", { therapy: serviceName(leg.serviceId) })}
-                onClick={() => onRemove(leg.serviceId)}
-              >
-                <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
-              </Button>
-            ) : (
-              <span />
-            )}
-          </li>
-        ))}
+    <div className="ml-7 flex flex-col gap-1.5">
+      <ol
+        className="rounded-lg bg-muted/40 px-3 py-1 text-xs tabular-nums dark:bg-muted/25"
+        aria-label={t("daySchedule")}
+      >
+        {lines.map((leg) => {
+          const had = booked.get(leg.serviceId);
+          const status = had && (STATUS_KEYS as readonly string[]).includes(had.status) ? tStatus(had.status as (typeof STATUS_KEYS)[number]) : null;
+          return (
+            <li key={leg.serviceId} className="group grid min-h-7 grid-cols-[5.75rem_minmax(0,1fr)_auto_1.5rem] items-center gap-x-3">
+              <span className={cn("font-medium", !leg.start && "text-muted-foreground")}>
+                {leg.start && leg.end ? `${shortTime(leg.start)} – ${shortTime(leg.end)}` : "—"}
+              </span>
+              <span className="flex min-w-0 flex-col py-1 leading-tight">
+                <span className={cn("truncate", had && "font-medium text-destructive")}>
+                  {serviceName(leg.serviceId)}
+                  {(leg.parallel || leg.together) && <span className="font-normal text-muted-foreground"> · {t("alongside")}</span>}
+                </span>
+                {had && (
+                  <span className="truncate text-[11px] text-destructive/80">
+                    {had.time ? t("bookedAt", { time: shortTime(had.time) }) : t("alreadyBooked", { n: 1 })}
+                    {status && ` · ${status}`}
+                  </span>
+                )}
+              </span>
+              <span className="text-muted-foreground">{leg.minutes !== null ? t("minutes", { n: leg.minutes }) : ""}</span>
+              {canRemove ? (
+                <Button
+                  type="button"
+                  size="icon-xs"
+                  variant="ghost"
+                  className={cn(
+                    "text-muted-foreground transition-opacity focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100",
+                    had && "text-destructive sm:opacity-100",
+                  )}
+                  disabled={disabled}
+                  aria-label={t("removeFromDay", { therapy: serviceName(leg.serviceId) })}
+                  title={t("removeFromDay", { therapy: serviceName(leg.serviceId) })}
+                  onClick={() => onRemove(leg.serviceId)}
+                >
+                  <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+                </Button>
+              ) : (
+                <span />
+              )}
+            </li>
+          );
+        })}
       </ol>
       {removed.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 pl-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           <span>{t("removedFromDay")}</span>
           {removed.map((id) => (
             <Button

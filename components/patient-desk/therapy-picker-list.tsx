@@ -22,8 +22,8 @@ const MAX_AREAS = 6;
 
 // The «Terapias» field of the patient desk's booking form: one bordered list with a row per therapy the
 // patient has sessions left for, the same shape as the Citas type list and date rows. A ticked row shows
-// its turn in the train (with 2+ ticked) and, for a per-area therapy, the areas stepper. No colours:
-// selection is the accent background, the balance is the Citas success pill.
+// its turn in the train (with 2+ ticked) as a numbered badge before the name and, for a per-area
+// therapy, the areas stepper on the right. Duration and sessions left share one quiet line under the name.
 export function TherapyPickerList({
   services,
   selected,
@@ -55,43 +55,48 @@ export function TherapyPickerList({
           <li
             key={s.id}
             className={cn(
-              "grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1.5 px-3 py-2 sm:grid-cols-[auto_minmax(0,1fr)_auto]",
+              "flex items-center gap-3 px-3 py-2.5 transition-colors",
               on ? "bg-accent/50" : "hover:bg-muted/50",
             )}
           >
             <Checkbox id={id} checked={on} disabled={disabled} onCheckedChange={() => onToggle(s.id)} />
-            <label htmlFor={id} className="flex min-w-0 cursor-pointer flex-col">
-              <span className="truncate text-sm font-medium">{s.name}</span>
-              {s.minutes != null && (
-                <span className="text-xs text-muted-foreground tabular-nums">
-                  {s.perArea ? t("minutesPerArea", { n: s.minutes }) : t("minutes", { n: s.minutes })}
-                </span>
-              )}
-            </label>
-            <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3 sm:justify-end">
-              {on && s.perArea && (
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  {t("areas")}
-                  <Stepper
-                    compact
-                    label={`${t("areas")} · ${s.name}`}
-                    value={areas[s.id] ?? 1}
-                    min={1}
-                    max={MAX_AREAS}
-                    disabled={disabled}
-                    onChange={(n) => onAreas(s.id, n)}
-                  />
-                </span>
-              )}
-              <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success-foreground tabular-nums">
-                {t("left", { n: s.bookable })}
+            <label htmlFor={id} className="flex min-w-0 flex-1 cursor-pointer flex-col gap-0.5">
+              <span className="flex min-w-0 items-center gap-2">
+                {/* Its turn in the train, once two or more are ticked. */}
+                {showTurns && on && turn >= 0 && (
+                  <span
+                    title={t("turn", { n: turn + 1 })}
+                    className="grid size-5 shrink-0 place-items-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground tabular-nums"
+                  >
+                    {turn + 1}
+                  </span>
+                )}
+                <span className="truncate text-sm font-medium">{s.name}</span>
               </span>
-              {showTurns && (
-                <span className="w-6 text-right text-xs font-medium text-muted-foreground tabular-nums" aria-hidden={!on}>
-                  {on && turn >= 0 ? t("turn", { n: turn + 1 }) : ""}
-                </span>
-              )}
-            </div>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {s.minutes != null && (
+                  <>
+                    {s.perArea ? t("minutesPerArea", { n: s.minutes }) : t("minutes", { n: s.minutes })}
+                    <span aria-hidden> · </span>
+                  </>
+                )}
+                <span className="font-medium text-success-foreground">{t("left", { n: s.bookable })}</span>
+              </span>
+            </label>
+            {on && s.perArea && (
+              <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+                {t("areas")}
+                <Stepper
+                  compact
+                  label={`${t("areas")} · ${s.name}`}
+                  value={areas[s.id] ?? 1}
+                  min={1}
+                  max={MAX_AREAS}
+                  disabled={disabled}
+                  onChange={(n) => onAreas(s.id, n)}
+                />
+              </span>
+            )}
           </li>
         );
       })}

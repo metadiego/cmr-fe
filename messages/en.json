@@ -7105,12 +7105,10 @@
     "minutesPerArea": "{n} min per area",
     "areas": "Areas",
     "turn": "#{n}",
-    "clinicTime": "{n} min at the clinic",
     "endsAt": "– {time}",
     "bookVisits": "Book {n, plural, one {# visit} other {# visits}}",
     "seriesDayFailed": "{date} no longer fits: nothing in the series was booked.",
     "catalogueFailed": "Could not load the therapies.",
-    "alreadyHas": "Already has that day:",
     "alongside": "alongside",
     "sessionStatus": {
       "pendiente": "booked",
@@ -7123,6 +7121,12 @@
     "removeFromDay": "Remove {therapy} from this day",
     "removedFromDay": "Removed:",
     "restoreToDay": "Put {therapy} back on this day",
-    "left": "{n} left"
+    "left": "{n} left",
+    "visitLength": "Visit length",
+    "orderAuto": "Scarcest rooms first. The number by each therapy is its turn.",
+    "orderKept": "In the order you ticked them.",
+    "titleMore": "{name} + {n} more",
+    "alreadyBooked": "{n} already booked",
+    "bookedAt": "already booked {time}"
   }
 }

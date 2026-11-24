@@ -41,6 +41,7 @@ export function SeriesRows({
   onDrop,
   optionHint,
   rowDetail,
+  statusLabel,
 }: {
   rows: SeriesRow[];
   days: Record<string, SeriesDay>;
@@ -57,6 +58,8 @@ export function SeriesRows({
   optionHint?: (date: string, time: string) => string | null;
   /** A line under a checked row (the patient desk's train: each therapy's time, or what blocks it). */
   rowDetail?: (row: SeriesRow) => React.ReactNode;
+  /** Replaces a checked row's status text (the train names how many of its therapies clash). */
+  statusLabel?: (row: SeriesRow) => string | null;
 }) {
   const t = useTranslations("appointmentsBooking.series");
   const tDay = useTranslations("appointmentsBooking.day");
@@ -100,6 +103,8 @@ export function SeriesRows({
                     ),
                     tone: "bg-destructive/10 text-destructive",
                   };
+        const custom = !loading && !failed ? statusLabel?.(r) : null;
+        if (custom) chip.label = custom;
         const s = !loading && !failed ? r.suggestion : null;
         return (
           <li

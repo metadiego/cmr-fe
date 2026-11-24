@@ -32,7 +32,7 @@ import {
   type EditableItem,
 } from "@/lib/agenda/booking/series-edit";
 import { trainBookingResult } from "@/lib/agenda/booking/booking-result";
-import { trainCap, trainEndsAt, trainOrder, trainRequest } from "@/lib/agenda/booking/train-rows";
+import { sameDaySessions, trainCap, trainEndsAt, trainOrder, trainRequest } from "@/lib/agenda/booking/train-rows";
 import {
   dayTherapies,
   forgetTherapy,
@@ -332,8 +332,9 @@ export function TherapyBookingForm({
     if (next) setEdits({ key: genKey, items: next, off: forgetTherapy(off, id) });
   };
 
+  const names = order.map(serviceName);
   const title = selected.length
-    ? `${order.map(serviceName).join(" + ")} · ${dayLabel(rows[0]?.date ?? defaultDate)} · ${shortTime(rows[0]?.time ?? seriesTime)}`
+    ? `${names.length > 2 ? t("titleMore", { name: names[0], n: names.length - 1 }) : names.join(" + ")} · ${dayLabel(rows[0]?.date ?? defaultDate)} · ${shortTime(rows[0]?.time ?? seriesTime)}`
     : `${t("title")} · ${dayLabel(defaultDate)}`;
   const busy = submitting;
 
@@ -428,13 +429,22 @@ export function TherapyBookingForm({
                 {selected.length === 0 ? (
                   <span className="text-xs text-muted-foreground">{t("pickHint")}</span>
                 ) : (
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm">
-                    <span className="text-muted-foreground tabular-nums">
-                      {order.length > 1 && <span className="font-medium text-foreground">{order.map(serviceName).join(" → ")} · </span>}
-                      {firstTrain ? t("clinicTime", { n: firstTrain.patientMinutes }) : tSeries("checking")}
-                    </span>
+                  // The visit at a glance: how long the patient stays and who decides the order.
+                  <div className="divide-y rounded-xl border bg-muted/30 text-sm">
+                    <div className="flex items-baseline justify-between gap-3 px-3 py-2">
+                      <span className="text-muted-foreground">{t("visitLength")}</span>
+                      <span className="font-medium tabular-nums">
+                        {firstTrain ? t("minutes", { n: firstTrain.patientMinutes }) : "—"}
+                      </span>
+                    </div>
                     {selected.length > 1 && (
-                      <label className="flex items-center gap-2 text-muted-foreground">
+                      <label className="flex cursor-pointer items-start justify-between gap-3 px-3 py-2">
+                        <span className="flex min-w-0 flex-col">
+                          <span>{tPlanner("keepOrder")}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {keepOrder ? t("orderKept") : t("orderAuto")}
+                          </span>
+                        </span>
                         <Switch
                           checked={keepOrder}
                           disabled={busy}
@@ -443,7 +453,6 @@ export function TherapyBookingForm({
                             trainChanged();
                           }}
                         />
-                        {tPlanner("keepOrder")}
                       </label>
                     )}
                   </div>
@@ -516,7 +525,12 @@ export function TherapyBookingForm({
                   const end = trainEndsAt(avail.trains[date], time);
                   return end ? t("endsAt", { time: shortTime(end) }) : null;
                 }}
-                rowDetail={(r) => (
+                statusLabel={(r) => {
+              if (r.status !== "blocked" || r.reason !== "duplicate") return null;
+              const n = new Set(sameDaySessions(avail.sessions, r.date, therapiesOn(r.date)).map((x) => x.serviceId)).size;
+              return n ? t("alreadyBooked", { n }) : null;
+            }}
+            rowDetail={(r) => (
                   <TrainDayDetail
                     row={r}
                     train={avail.trains[r.date]}
