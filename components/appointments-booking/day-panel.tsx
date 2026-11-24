@@ -145,6 +145,11 @@ export function DayPanel({
   );
 }
 
+// The second line of every hour box: one line, cut with an ellipsis, so every box is the same size
+// whatever it says ("no disponible" wrapped to two lines and made those boxes taller; owner, 2026-11-23).
+// The full reason is in the box's tooltip.
+const SLOT_LABEL = "w-full truncate text-center text-[11px]";
+
 function TimeGroup({
   title,
   slots,
@@ -187,7 +192,7 @@ function TimeGroup({
                   aria-label={`${shortTime(s.time)} · ${reason}`}
                 >
                   <span className="font-medium tabular-nums">{shortTime(s.time)}</span>
-                  <span className="text-[11px]">{t("unavailable")}</span>
+                  <span className={SLOT_LABEL}>{t("unavailable")}</span>
                 </span>
               </Tooltip>
             );
@@ -211,7 +216,7 @@ function TimeGroup({
                   onClick={() => onPick(s.time)}
                 >
                   <span className="font-medium tabular-nums">{shortTime(s.time)}</span>
-                  <span className="text-[11px]">{t("full")}</span>
+                  <span className={SLOT_LABEL}>{t("full")}</span>
                 </button>
               </Tooltip>
             );
@@ -229,7 +234,7 @@ function TimeGroup({
               onClick={() => onPick(s.time)}
             >
               <span className="font-medium tabular-nums">{shortTime(s.time)}</span>
-              <span className="text-[11px]">{t("left", { n: s.free })}</span>
+              <span className={SLOT_LABEL}>{t("left", { n: s.free })}</span>
             </button>
           );
         })}
