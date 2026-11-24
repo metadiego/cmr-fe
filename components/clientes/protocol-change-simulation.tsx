@@ -87,7 +87,7 @@ export function ProtocolChangeSimulation({
                       onChange={(v) => onClosePrice(c.packageId, v)}
                       label={c.name ?? ""}
                     />
-                    <Ref text={c.chargedUnitPrice != null ? t("charged", { amount: money(c.chargedUnitPrice) }) : null} />
+                    <PriceOptions t={t} charged={c.chargedUnitPrice} list={c.listUnitPrice} onPick={(v) => onClosePrice(c.packageId, v)} />
                   </Td>
                   <Td className="text-right tabular-nums">{c.value != null ? money(c.value) : "—"}</Td>
                 </tr>
@@ -110,7 +110,9 @@ export function ProtocolChangeSimulation({
                           label={c.name ?? ""}
                         />
                       )}
-                      <Ref text={c.listUnitPrice != null ? t("list", { amount: money(c.listUnitPrice) }) : null} />
+                      {key != null && (
+                        <PriceOptions t={t} charged={c.chargedUnitPrice} list={c.listUnitPrice} onPick={(v) => onCreatePrice(key, v)} />
+                      )}
                     </Td>
                     <Td className="text-right tabular-nums">{c.value != null ? money(c.value) : "—"}</Td>
                   </tr>
@@ -180,6 +182,36 @@ function PriceInput({ id, value, proposed, onChange, label }: { id: string; valu
   );
 }
 
-function Ref({ text }: { text: string | null }) {
-  return text ? <span className="mt-0.5 block text-[11px] text-muted-foreground tabular-nums">{text}</span> : null;
+// The range of prices to pick from (owner, 24-nov-2026): what was charged and the list price, each a
+// one-tap button that fills the price. A reference the BE does not send is simply not offered.
+function PriceOptions({
+  t,
+  charged,
+  list,
+  onPick,
+}: {
+  t: (k: string, v?: Record<string, string>) => string;
+  charged?: number | null;
+  list?: number | null;
+  onPick: (v: string) => void;
+}) {
+  const opts = [
+    charged != null ? { k: "charged", label: t("charged", { amount: money(charged) }), v: charged } : null,
+    list != null ? { k: "list", label: t("list", { amount: money(list) }), v: list } : null,
+  ].filter((o): o is { k: string; label: string; v: number } => o !== null);
+  if (opts.length === 0) return null;
+  return (
+    <span className="mt-1 flex flex-wrap gap-1">
+      {opts.map((o) => (
+        <button
+          key={o.k}
+          type="button"
+          onClick={() => onPick(String(o.v))}
+          className="rounded-md border px-1.5 py-0.5 text-[11px] text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
+        >
+          {o.label}
+        </button>
+      ))}
+    </span>
+  );
 }

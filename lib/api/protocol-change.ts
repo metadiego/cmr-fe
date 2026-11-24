@@ -39,6 +39,8 @@ export interface ProtocolChangeClose {
   units: number;
   /** What was charged per unit, as a reference; null without an invoice line. */
   chargedUnitPrice: number | null;
+  /** The product's list price in the center, as a second reference (requested 24-nov; absent on an older BE). */
+  listUnitPrice?: number | null;
   unitPrice: number | null;
   value: number | null;
   valueSource: "manual" | "invoice" | "list" | null;
@@ -52,6 +54,8 @@ export interface ProtocolChangeCreate {
   units: number;
   unitPrice: number | null;
   listUnitPrice: number | null;
+  /** Charged per unit on the patient's latest invoice of this product (requested 24-nov; absent on an older BE). */
+  chargedUnitPrice?: number | null;
   value: number | null;
   valueSource: "manual" | "list" | null;
 }
