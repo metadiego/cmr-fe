@@ -39,6 +39,7 @@ export function SeriesRows({
   onDate,
   onSuggestion,
   onDrop,
+  optionHint,
 }: {
   rows: SeriesRow[];
   days: Record<string, SeriesDay>;
@@ -51,6 +52,8 @@ export function SeriesRows({
   onDate: (index: number, date: string) => void;
   onSuggestion: (index: number, s: { date: string; time: string }) => void;
   onDrop: (index: number) => void;
+  /** Replaces the "N left" text after each hour (the patient desk's train shows its end time). */
+  optionHint?: (date: string, time: string) => string | null;
 }) {
   const t = useTranslations("appointmentsBooking.series");
   const tDay = useTranslations("appointmentsBooking.day");
@@ -130,7 +133,11 @@ export function SeriesRows({
                       <span className="tabular-nums">{shortTime(o.time)}</span>
                       {!o.disabled && (
                         <span className={cn("text-xs", o.full ? "text-warning-foreground" : "text-muted-foreground")}>
-                          {o.full ? t("fullShort") : tDay("left", { n: o.free })}
+                          {optionHint
+                            ? optionHint(r.date, o.time)
+                            : o.full
+                              ? t("fullShort")
+                              : tDay("left", { n: o.free })}
                         </span>
                       )}
                     </SelectItem>

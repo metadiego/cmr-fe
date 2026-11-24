@@ -7095,5 +7095,20 @@
       "writeBackOutOfRange": "The value is outside the allowed range.",
       "noSavedSheet": "That visit has no saved sheet."
     }
+  },
+  "therapyBooking": {
+    "title": "Book therapies",
+    "therapies": "Therapies",
+    "pickHint": "Tick one or more.",
+    "noneBookable": "No therapies with sessions left. Send them to billing to add one.",
+    "minutes": "{n} min",
+    "minutesPerArea": "{n} min per area",
+    "areas": "Areas",
+    "turn": "#{n}",
+    "clinicTime": "{n} min at the clinic",
+    "endsAt": "– {time}",
+    "bookVisits": "Book {n, plural, one {# visit} other {# visits}}",
+    "overCap": "Only {n, plural, one {# session} other {# sessions}} of {therapy} left to book.",
+    "seriesDayFailed": "{date} no longer fits: nothing in the series was booked."
   }
 }

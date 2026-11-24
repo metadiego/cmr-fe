@@ -7095,5 +7095,20 @@
       "writeBackOutOfRange": "El valor está fuera del rango permitido.",
       "noSavedSheet": "Esa visita no tiene una hoja guardada."
     }
+  },
+  "therapyBooking": {
+    "title": "Programar terapias",
+    "therapies": "Terapias",
+    "pickHint": "Marca una o varias.",
+    "noneBookable": "No tiene terapias con sesiones disponibles. Pásalo por facturación para añadirlo.",
+    "minutes": "{n} min",
+    "minutesPerArea": "{n} min por área",
+    "areas": "Áreas",
+    "turn": "{n}º",
+    "clinicTime": "{n} min en la clínica",
+    "endsAt": "– {time}",
+    "bookVisits": "Agendar {n, plural, one {# visita} other {# visitas}}",
+    "overCap": "Solo le quedan {n, plural, one {# sesión} other {# sesiones}} de {therapy} por agendar.",
+    "seriesDayFailed": "El {date} ya no cabe: no se agendó nada de la serie."
   }
 }
