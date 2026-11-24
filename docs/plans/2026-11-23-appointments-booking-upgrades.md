@@ -266,3 +266,9 @@ Run `npm ci` once. Gate for every task: `npm test && npm run typecheck && npm ru
 - Delete: `components/tablero/agregar-cita-modal.tsx`, and `lib/board/add-appointment-missing.ts` + test only if nothing else uses them (name removed tests in the commit). Remove i18n keys left unused (`agregarCita.*`) after grepping.
 
 - [ ] Implement; gate `npm test && npm run typecheck && npm run lint`; commit `feat(boards): add appointments with the Citas form`.
+
+## Follow-up (next PR, not this branch)
+
+Citas gets an «Agenda del día» tab: the redesigned day sheet (today's `/scheduling/appointments/[date]`)
+next to «Agendar» (owner, 2026-11-23). Draft design and open questions:
+`docs/specs/2026-11-23-citas-day-sheet-tab-design.md`. Starts after this PR merges.
