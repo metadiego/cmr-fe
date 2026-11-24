@@ -485,7 +485,9 @@ export function BookingScreen() {
       >
         {/* LEFT: who is calling, or the chosen patient with their upcoming/past appointments. */}
         {state.patientId ? (
-          <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto" data-slot="booking-patient-rail">
+          // `-m-1 p-1`: the card being moved draws a 2px ring outside its box and this scroll area clips both
+          // axes; the padding gives the ring room, the negative margin keeps the rail aligned (owner).
+          <aside className="-m-1 flex min-h-0 flex-col gap-3 overflow-y-auto p-1" data-slot="booking-patient-rail">
             <PatientCard
               patientId={state.patientId}
               patient={patient}
