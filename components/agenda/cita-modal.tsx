@@ -13,14 +13,17 @@ import {
   type CitaConflicto,
 } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { AppointmentWhenFields } from "@/components/agenda/appointment-when-fields";
+import { DoctorField, StatusField } from "@/components/agenda/cita-modal-fields";
 import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
 import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { datosFaltantesDe } from "@/lib/api/ehr-gate";
+import { citaBlockingCode } from "@/lib/api/cita-errors";
+import { apiErrorLabel } from "@/lib/api/errors";
 import type { EhrReadinessField } from "@/lib/api/ehr-integration";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { useResource } from "@/hooks/use-resource";
@@ -28,7 +31,6 @@ import { useAppointmentSlots } from "@/hooks/use-appointment-slots";
 import { useMe } from "@/hooks/use-me";
 import { useShowAppointmentResult } from "@/hooks/use-appointment-result";
 import { useEstados } from "@/hooks/use-estados";
-import { Badge } from "@/components/ui/badge";
 import { addMinutes } from "@/lib/agenda/calendar";
 import { appointmentMissing, type AppointmentField } from "@/lib/agenda/appointment-missing";
 import { citaEditPayload } from "@/lib/agenda/cita-edit-payload";
@@ -49,9 +51,6 @@ import {
 } from "@/components/ui/select";
 import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { CitaActions } from "@/components/citas/cita-actions";
-
-// Centinela "Sin médico" para que el Select nunca quede en vacío (Radix no admite value="").
-const NONE_MEDICO = "__sin_medico__";
 
 export function CitaModal({
   open,
@@ -173,6 +172,10 @@ export function CitaModal({
   const [motivo, setMotivo] = React.useState(cita?.reason ?? "");
   const [notas, setNotas] = React.useState(cita?.notes ?? "");
   const [warn, setWarn] = React.useState<CitaConflicto[] | null>(null);
+  // VISIT_IN_PROGRESS / APPOINTMENT_DATE_IN_PAST (cmr-be #696/#697): a hard block discovered only on
+  // submit, shown inline (never a toast) until the next attempt — handoff
+  // .personal/handoff-citas-en-curso-y-fecha-pasada.md.
+  const [blockError, setBlockError] = React.useState<string | null>(null);
   // Another clinic has its own hours: the hour is picked again from that clinic's slots.
   function pickClinic(id: string) {
     setCentroSel(id);
@@ -274,6 +277,7 @@ export function CitaModal({
     | { kind: "conflicts"; conflicts: CitaConflicto[] }
     | { kind: "saved"; saved: Cita | undefined; advertencias: Parameters<typeof mostrarAvisos>[0]; patient: Paciente };
   async function save(): Promise<Outcome> {
+    setBlockError(null);
     if (!paciente || !tipoCitaId) throw new Error(t("patient"));
     // Validate overlap first (unless the user already confirmed past a warning).
     if (warn === null) {
@@ -351,55 +355,37 @@ export function CitaModal({
     // The BE's PACIENTE_DATOS_REQUERIDOS lock: open the modal that says what is missing.
     onError: (err) => {
       const faltantes = datosFaltantesDe(err);
-      if (!faltantes) return false;
-      setEhrGate(faltantes);
-      return true;
+      if (faltantes) {
+        setEhrGate(faltantes);
+        return true;
+      }
+      if (citaBlockingCode(err)) {
+        setBlockError(apiErrorLabel(err, tRoot));
+        return true;
+      }
+      return false;
     },
   });
 
   // Never empty: with no doctor it reads "Sin médico" (blocks saving only when the TYPE requires one).
   const doctorField = (
-    <Field label={t("doctor")} required={medicoRequired}>
-      <Select value={medicoId || NONE_MEDICO} onValueChange={(v) => { setMedicoId(v === NONE_MEDICO ? "" : v); setWarn(null); }}>
-        <SelectTrigger className="w-full" aria-label={t("doctor")}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={NONE_MEDICO}>{t("noDoctor")}</SelectItem>
-          {medicos.map((m) => (
-            <SelectItem key={m.id} value={m.id}>
-              {[m.name, m.lastName].filter(Boolean).join(" ")}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </Field>
+    <DoctorField
+      medicoId={medicoId}
+      onChange={(v) => { setMedicoId(v); setWarn(null); }}
+      medicoRequired={medicoRequired}
+      medicos={medicos}
+    />
   );
   // On create, the state it is born with (BE allowlist): two options, so a toggle. Colours and labels
   // come from the status catalogue. On edit, the current status as a badge.
   const statusField = (
-    <Field label={t("status")}>
-      {isEdit ? (
-        <div className="flex h-9 items-center">
-          <Badge
-            variant="secondary"
-            style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
-          >
-            {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
-          </Badge>
-        </div>
-      ) : (
-        <SegmentedControl
-          ariaLabel={t("status")}
-          value={estadoCrear}
-          onChange={setEstadoElegido}
-          options={(["programada", "confirmada"] as const).map((key) => {
-            const d = estadosMap.get(key);
-            return { value: key, label: d ? tRoot(d.labelKey) : key, dot: d?.color };
-          })}
-        />
-      )}
-    </Field>
+    <StatusField
+      isEdit={isEdit}
+      estadoDef={estadoDef}
+      estadosMap={estadosMap}
+      estadoCrear={estadoCrear}
+      onChange={setEstadoElegido}
+    />
   );
 
   return (
@@ -415,8 +401,8 @@ export function CitaModal({
       actions={warn ? [{ label: t("saveAnyway"), onClick: () => submit() }] : undefined}
       submitting={submitting}
       missing={missing}
-      blocked={clinicPending}
-      reason={clinicReason}
+      blocked={clinicPending || !!blockError}
+      reason={clinicReason ?? blockError}
       extra={footerSummary ? <p className="truncate text-sm text-muted-foreground tabular-nums sm:mr-auto">{footerSummary}</p> : undefined}
     >
       <div className="flex items-center justify-between gap-2">
@@ -506,6 +492,7 @@ export function CitaModal({
             date={fechaSel}
             onDateChange={setFechaSel}
             dateLocked={isEdit}
+            min={isEdit ? undefined : todayPR()}
             slots={slots}
             time={hora}
             endTime={horaFin}

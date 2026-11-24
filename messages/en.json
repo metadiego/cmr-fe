@@ -519,7 +519,11 @@
     },
     "medico_requerido_en_consulta": "To enter consultation the appointment needs an assigned doctor.",
     "datos_requeridos_para_presente": "The patient is missing required data to be marked present.",
-    "closedByHoliday": "Holiday: the schedule is closed"
+    "closedByHoliday": "Holiday: the schedule is closed",
+    "error": {
+      "visit_in_progress": "The patient is already in the center with this visit in progress: it cannot be rescheduled. Book the next one once this one is done.",
+      "date_in_past": "You can't book a date in the past ({fecha})."
+    }
   },
   "tableroBoard": {
     "live": "Live",

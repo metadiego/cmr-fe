@@ -22,6 +22,7 @@ export function AppointmentWhenFields({
   date,
   onDateChange,
   dateLocked,
+  min,
   slots,
   time,
   endTime,
@@ -33,6 +34,8 @@ export function AppointmentWhenFields({
   onDateChange: (date: string) => void;
   /** Edit mode: a new date is a reschedule, not an edit. */
   dateLocked?: boolean;
+  /** Earliest pickable day (YYYY-MM-DD) — APPOINTMENT_DATE_IN_PAST (cmr-be #697): the BE never books a past day. */
+  min?: string;
   slots: Slot[];
   time: string;
   endTime: string;
@@ -44,6 +47,7 @@ export function AppointmentWhenFields({
   const format = useFormatter();
   const slotFull = !!time && slots.some((s) => s.time === time && s.vacios <= 0);
   const day = date ? parseDayUTC(date.slice(0, 10)) : null;
+  const atMin = !!min && !!date && date <= min;
 
   return (
     <>
@@ -55,7 +59,7 @@ export function AppointmentWhenFields({
             size="icon"
             className="size-9 shrink-0"
             aria-label={t("previousDay")}
-            disabled={dateLocked || !date}
+            disabled={dateLocked || !date || atMin}
             onClick={() => onDateChange(shiftDay(date, -1))}
           >
             <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
@@ -65,6 +69,7 @@ export function AppointmentWhenFields({
             value={date}
             onChange={(v) => v && onDateChange(v)}
             disabled={dateLocked}
+            min={min}
             aria-label={t("date")}
           />
           <Button
