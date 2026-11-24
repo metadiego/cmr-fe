@@ -197,10 +197,11 @@ export function BookingCalendar({
         // container query, so the app sidebar being open or folded counts): main >= ~560px + gap + the
         // 19rem day panel. Narrower (laptops with the sidebar open), the day panel sits under the main
         // area and both share the height; the day panel scrolls inside itself, the page never does.
-        // Day view is the day panel alone, large.
+        // Day view is the day panel alone, large. Week view is the week grid alone (owner, 2026-11-23): the
+        // day panel only renders what a picked cell opens (move or service dialog).
         <div
           className={
-            period === "day"
+            period !== "month"
               ? "flex min-h-0 flex-1 flex-col"
               : "grid min-h-0 flex-1 grid-cols-1 gap-4 lg:@max-[880px]:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @min-[880px]:grid-cols-[minmax(0,1fr)_19rem] @min-[880px]:grid-rows-[minmax(0,1fr)]"
           }
@@ -257,6 +258,7 @@ export function BookingCalendar({
             fullDayHref={fullDayHref}
             large={period === "day"}
             closedLabel={closedLabel}
+            dialogsOnly={period === "week"}
           >
             {date && picked && serviceForm ? (
               serviceForm({ date, time: picked, clear: () => setPick(null) })

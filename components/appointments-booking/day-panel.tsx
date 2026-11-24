@@ -44,6 +44,7 @@ export function DayPanel({
   fullDayHref,
   large = false,
   closedLabel,
+  dialogsOnly = false,
   children,
 }: {
   date: string | undefined;
@@ -59,6 +60,9 @@ export function DayPanel({
   large?: boolean;
   /** The day is closed (Sunday, holiday): shown instead of its times. */
   closedLabel?: string;
+  /** Week view: no day detail next to the week grid (owner, 2026-11-23) — only what a picked cell opens:
+   *  the move dialog, or `children` (the service booking dialog / the medical note). */
+  dialogsOnly?: boolean;
   /** Shown under the grid once a time is picked, not while moving: the service form, or a medical note. */
   children?: React.ReactNode;
 }) {
@@ -79,6 +83,21 @@ export function DayPanel({
   const morning = slots.filter((s) => inWindow(s.time, "morning"));
   const afternoon = slots.filter((s) => inWindow(s.time, "afternoon"));
   const pickedSlot = picked ? slots.find((s) => s.time === picked) : undefined;
+  const picks =
+    picked && moving ? (
+      <MoveAppointmentDialog
+        key={`${date} ${picked}`}
+        moving={moving}
+        typeName={typeName}
+        toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
+        full={pickedSlot?.state === "full"}
+        onClose={moving.onCancel}
+      />
+    ) : picked ? (
+      <div className={cn(large && "w-full max-w-3xl")}>{children}</div>
+    ) : null;
+
+  if (dialogsOnly) return picks;
 
   return (
     // px-1 (not just pr-1): the picked time's ring + offset draws ~3px outside its box, and this
@@ -129,18 +148,7 @@ export function DayPanel({
         </>
       )}
 
-      {picked && moving ? (
-        <MoveAppointmentDialog
-          key={`${date} ${picked}`}
-          moving={moving}
-          typeName={typeName}
-          toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
-          full={pickedSlot?.state === "full"}
-          onClose={moving.onCancel}
-        />
-      ) : picked ? (
-        <div className={cn(large && "w-full max-w-3xl")}>{children}</div>
-      ) : null}
+      {picks}
     </aside>
   );
 }
