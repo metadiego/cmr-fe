@@ -8,29 +8,25 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Textarea } from "@/components/ui/textarea";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Field } from "@/components/kit/field";
-import { FormFooter } from "@/components/kit/form-footer";
-import { useDialogForm } from "@/components/kit/use-dialog-form";
-import { useSubmit } from "@/components/kit/use-submit";
-import { missingFields } from "@/lib/forms/missing";
 import { inWindow, type BookingSlot, type TimeWindow } from "@/lib/agenda/booking/availability";
 import type { DayResult } from "@/hooks/use-booking-availability";
+import { MoveAppointmentDialog } from "@/components/appointments-booking/move-appointment-dialog";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
+import { FROM_CLASS } from "@/components/appointments-booking/availability-month";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
 // The selected day's times: Morning and Afternoon groups in a 4-column grid. Open times are green with
 // "{n} left"; full ones are dashed grey and still clickable (overbook); unavailable ones are dashed,
-// inert, and say why on hover. Below the grid: the "Move here?" box while moving an appointment, or the
+// inert, and say why on hover. Below the grid: the move dialog while moving an appointment, or the
 // picked-time slot (`children`: the service booking dialog, or a medical no-permission note). Scrolls inside itself.
 // The Day view shows it as the main area (`large`): bigger times, more per row, and "Closed" on a closed
 // day (`closedLabel`), since its ‹ › walks every day.
 
 export interface DayPanelMoving {
-  /** The appointment's current day and time, already formatted ("Thu, Nov 5 · 8:00"). */
-  fromLabel: string;
+  /** The appointment's current day and time. */
+  from: { date: string; time: string | null };
   /** Medical moves need a reason (POST /appointments/:id/reschedule); service moves do not. */
   needsReason: boolean;
   onConfirm: (reason?: string) => Promise<void>;
@@ -49,6 +45,7 @@ export function DayPanel({
   fullDayHref,
   large = false,
   closedLabel,
+  dialogsOnly = false,
   children,
 }: {
   date: string | undefined;
@@ -64,6 +61,9 @@ export function DayPanel({
   large?: boolean;
   /** The day is closed (Sunday, holiday): shown instead of its times. */
   closedLabel?: string;
+  /** Week view: no day detail next to the week grid (owner, 2026-11-23) — only what a picked cell opens:
+   *  the move dialog, or `children` (the service booking dialog / the medical note). */
+  dialogsOnly?: boolean;
   /** Shown under the grid once a time is picked, not while moving: the service form, or a medical note. */
   children?: React.ReactNode;
 }) {
@@ -84,6 +84,23 @@ export function DayPanel({
   const morning = slots.filter((s) => inWindow(s.time, "morning"));
   const afternoon = slots.filter((s) => inWindow(s.time, "afternoon"));
   const pickedSlot = picked ? slots.find((s) => s.time === picked) : undefined;
+  // Moving: the appointment's current hour on this day is painted solid primary («Actual»).
+  const fromTime = moving && moving.from.date === date && moving.from.time ? shortTime(moving.from.time) : undefined;
+  const picks =
+    picked && moving ? (
+      <MoveAppointmentDialog
+        key={`${date} ${picked}`}
+        moving={moving}
+        typeName={typeName}
+        to={{ date, time: picked }}
+        full={pickedSlot?.state === "full"}
+        onClose={moving.onCancel}
+      />
+    ) : picked ? (
+      <div className={cn(large && "w-full max-w-3xl")}>{children}</div>
+    ) : null;
+
+  if (dialogsOnly) return picks;
 
   return (
     // px-1 (not just pr-1): the picked time's ring + offset draws ~3px outside its box, and this
@@ -126,29 +143,23 @@ export function DayPanel({
       ) : (
         <>
           {morning.length > 0 && (
-            <TimeGroup title={t("morning")} slots={morning} picked={picked} onPick={onPickTime} large={large} />
+            <TimeGroup title={t("morning")} slots={morning} picked={picked} onPick={onPickTime} large={large} fromTime={fromTime} />
           )}
           {afternoon.length > 0 && (
-            <TimeGroup title={t("afternoon")} slots={afternoon} picked={picked} onPick={onPickTime} large={large} />
+            <TimeGroup title={t("afternoon")} slots={afternoon} picked={picked} onPick={onPickTime} large={large} fromTime={fromTime} />
           )}
         </>
       )}
 
-      {picked && moving ? (
-        <div className={cn(large && "w-full max-w-xl")}>
-          <MoveBox
-            key={`${date} ${picked}`}
-            moving={moving}
-            toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
-            full={pickedSlot?.state === "full"}
-          />
-        </div>
-      ) : picked ? (
-        <div className={cn(large && "w-full max-w-3xl")}>{children}</div>
-      ) : null}
+      {picks}
     </aside>
   );
 }
+
+// The second line of every hour box: one line, cut with an ellipsis, so every box is the same size
+// whatever it says ("no disponible" wrapped to two lines and made those boxes taller; owner, 2026-11-23).
+// The full reason is in the box's tooltip.
+const SLOT_LABEL = "w-full truncate text-center text-[11px]";
 
 function TimeGroup({
   title,
@@ -156,14 +167,18 @@ function TimeGroup({
   picked,
   onPick,
   large,
+  fromTime,
 }: {
   title: string;
   slots: BookingSlot[];
   picked: string | null;
   onPick: (time: string) => void;
   large?: boolean;
+  /** The moving appointment's current time on this day ("8:00"), shown as «Actual», not bookable. */
+  fromTime?: string;
 }) {
   const t = useTranslations("appointmentsBooking.day");
+  const tm = useTranslations("appointmentsBooking.move");
   const tRoot = useTranslations();
 
   return (
@@ -182,6 +197,18 @@ function TimeGroup({
             "flex w-full flex-col items-center rounded-md px-1",
             large ? "py-3 text-base" : "py-1.5 text-sm",
           );
+          if (fromTime && shortTime(s.time) === fromTime) {
+            return (
+              <span
+                key={s.time}
+                className={cn(timeClass, "border border-primary", FROM_CLASS)}
+                aria-label={`${shortTime(s.time)} · ${tm("currentBadge")}`}
+              >
+                <span className="font-medium tabular-nums">{shortTime(s.time)}</span>
+                <span className={SLOT_LABEL}>{tm("currentBadge")}</span>
+              </span>
+            );
+          }
           if (s.state === "unavailable") {
             const reason = s.reasonKey && tRoot.has(s.reasonKey) ? tRoot(s.reasonKey) : t("unavailable");
             return (
@@ -192,7 +219,7 @@ function TimeGroup({
                   aria-label={`${shortTime(s.time)} · ${reason}`}
                 >
                   <span className="font-medium tabular-nums">{shortTime(s.time)}</span>
-                  <span className="text-[11px]">{t("unavailable")}</span>
+                  <span className={SLOT_LABEL}>{t("unavailable")}</span>
                 </span>
               </Tooltip>
             );
@@ -216,7 +243,7 @@ function TimeGroup({
                   onClick={() => onPick(s.time)}
                 >
                   <span className="font-medium tabular-nums">{shortTime(s.time)}</span>
-                  <span className="text-[11px]">{t("full")}</span>
+                  <span className={SLOT_LABEL}>{t("full")}</span>
                 </button>
               </Tooltip>
             );
@@ -234,55 +261,11 @@ function TimeGroup({
               onClick={() => onPick(s.time)}
             >
               <span className="font-medium tabular-nums">{shortTime(s.time)}</span>
-              <span className="text-[11px]">{t("left", { n: s.free })}</span>
+              <span className={SLOT_LABEL}>{t("left", { n: s.free })}</span>
             </button>
           );
         })}
       </div>
     </section>
-  );
-}
-
-function MoveBox({
-  moving,
-  toLabel,
-  full,
-}: {
-  moving: DayPanelMoving;
-  toLabel: string;
-  full: boolean;
-}) {
-  const t = useTranslations("appointmentsBooking.move");
-  // A fresh reason for every target hour (the box stays mounted while the hour changes).
-  const [f, set] = useDialogForm(() => ({ reason: "" }), true, toLabel);
-  const reason = f.reason.trim();
-  // `onConfirm` toasts its own failure and keeps the box (and the typed reason) on screen.
-  const { submitting, submit } = useSubmit(() => moving.onConfirm(moving.needsReason ? reason : undefined));
-  const missing = missingFields(moving.needsReason ? [[t("reasonLabel"), reason !== ""]] : []);
-
-  return (
-    <div className="flex flex-col gap-2 rounded-lg border border-warning/50 bg-warning/10 p-3 text-sm">
-      <p className="font-semibold">{t("title")}</p>
-      <p>{t("fromTo", { from: moving.fromLabel, to: toLabel })}</p>
-      {full && <p className="text-warning-foreground">{t("fullWarning")}</p>}
-      {moving.needsReason && (
-        <Field label={t("reasonLabel")} htmlFor="booking-move-reason" required>
-          <Textarea
-            id="booking-move-reason"
-            value={f.reason}
-            onChange={(e) => set({ reason: e.target.value })}
-            placeholder={t("reasonPlaceholder")}
-            rows={2}
-          />
-        </Field>
-      )}
-      <FormFooter
-        primary={{ label: t("confirm"), onClick: () => submit() }}
-        missing={missing}
-        submitting={submitting}
-        onCancel={moving.onCancel}
-        cancelLabel={t("notThis")}
-      />
-    </div>
   );
 }

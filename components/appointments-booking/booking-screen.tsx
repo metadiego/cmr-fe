@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Settings02Icon } from "@hugeicons/core-free-icons";
 
@@ -16,23 +15,23 @@ import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { WhosCallingPanel } from "@/components/appointments-booking/whos-calling-panel";
 import { TypeListPanel } from "@/components/appointments-booking/type-list-panel";
 import { PatientCard } from "@/components/appointments-booking/patient-card";
-import { BookingCalendar, type CalendarMoving } from "@/components/appointments-booking/booking-calendar";
+import { BookingCalendar } from "@/components/appointments-booking/booking-calendar";
 import { ServiceBookingForm } from "@/components/appointments-booking/service-booking-form";
-import {
-  EditAppointmentModal,
-  PatientRail,
-  useAppointmentLabel,
-} from "@/components/appointments-booking/patient-rail";
+import { useBookingResult } from "@/components/appointments-booking/booking-result-provider";
+import { EditAppointmentModal, PatientRail } from "@/components/appointments-booking/patient-rail";
 import type { BookingView } from "@/components/appointments-booking/booking-toolbar";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 import { useResource } from "@/hooks/use-resource";
 import { useBookingTypes } from "@/hooks/use-booking-types";
+import { usePatientBookingRules, type PatientBookingRules } from "@/hooks/use-patient-booking-rules";
+import { bookableCheckKey, unbookableTypeCheck } from "@/lib/agenda/booking/unbookable-type";
 import { useBookingCalendar } from "@/hooks/use-booking-calendar";
 import { calendarCenter } from "@/lib/agenda/booking/calendar-center";
 import { usePatientAppointments } from "@/hooks/use-patient-appointments";
+import { useBookingMove } from "@/hooks/use-booking-move";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
-import { normalizeTime, type TimeWindow } from "@/lib/agenda/booking/availability";
+import { normalizeTime } from "@/lib/agenda/booking/availability";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
 import { monthOf } from "@/lib/agenda/booking/month";
 import { periodFocus, periodForKey, type BookingPeriod } from "@/lib/agenda/booking/period";
@@ -44,10 +43,8 @@ import {
   OPEN_MODAL_SELECTOR,
 } from "@/lib/agenda/booking/keys";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
-import { reagendarCita, type Cita } from "@/lib/api/citas";
-import { reagendarSesion } from "@/lib/api/frontdesk";
+import type { Cita } from "@/lib/api/citas";
 import { getServiciosDe, type Servicio } from "@/lib/api/servicios";
-import { apiErrorLabel } from "@/lib/api/errors";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
@@ -62,7 +59,7 @@ import { cn } from "@/lib/utils";
 //   patient, no type    → patient rail | "Book for <name>: what?"
 //   patient, type       → patient rail | calendar slot
 // kind/typeId/date/patientId and the Day/Week/Month view live in the URL (?type=kind:id&date=&patient=
-// &view=) so reload and links restore the screen; the rest (time window, Free/Booked, visible month and
+// &view=) so reload and links restore the screen; the rest (Free/Booked, visible month and
 // week, the appointment being moved) is local. D / W / M switch the view (not while typing).
 // The work area fills the window (useFillViewportHeight); the panels scroll inside it, never the page.
 
@@ -73,7 +70,6 @@ export interface BookingScreenState {
   typeId?: string;
   date?: string; // YYYY-MM-DD, the selected day
   patientId?: string;
-  window: TimeWindow;
   view: BookingView; // "booked" is only offered for medical types
   period: BookingPeriod; // Day / Week / Month (URL `view=`)
   month: { year: number; month0: number };
@@ -94,7 +90,6 @@ function initialState(sp: URLSearchParams): BookingScreenState {
     ...url,
     date,
     period: url.period ?? "month",
-    window: "any",
     view: "free",
     month: monthOf(focus),
     anchor: focus,
@@ -210,6 +205,46 @@ export function BookingScreen() {
   // type), and the calendar stays up, named as the rail names it.
   const typeChosen =
     !!state.kind && !!state.typeId && (types.loading || !!chosenType || !!state.movingId);
+  // ---- Booking rules for the chosen patient (first visit vs follow-up, services they can still book),
+  // one load per patient + booking center, shared by the type list and the service booking form. It
+  // waits for the patient's centers: packages bought in any of them count, and a partial answer must
+  // not drop a service the patient has. If those centers cannot be read, the balance counts as failed
+  // (error + retry of the centers), never as "no centers".
+  const centersFailed = patientCentersRes.state.kind === "fail";
+  const loadedRules = usePatientBookingRules(
+    patientCentersRes.state.kind === "ok" ? state.patientId : undefined,
+    center,
+    (patientCenters ?? []).map((c) => c.id),
+  );
+  const reloadPatientCenters = patientCentersRes.reload;
+  const rules: PatientBookingRules =
+    centersFailed && state.patientId && center && !loadedRules.bookableHidden
+      ? { ...loadedRules, bookable: undefined, bookableState: "fail", reloadBookable: reloadPatientCenters }
+      : loadedRules;
+  const reloadBookable = rules.reloadBookable;
+  // A service from the URL the patient has no sessions left of (a deep link, another patient picked) is
+  // cleared so the list shows: decided once per patient + service + center (unbookableTypeCheck).
+  const checkedBookable = React.useRef<string | null>(null);
+  // Only the URL is written here (an effect must not set state); the URL → state sync above then
+  // clears the type, as for any navigation this screen did not make.
+  const clearUnbookable = React.useEffectEvent(() => {
+    const next = toBookingSearch({ ...latest.current, kind: undefined, typeId: undefined, date: undefined });
+    router.replace(`${pathname}${next}`, { scroll: false });
+  });
+  React.useEffect(() => {
+    const check = { patientId: state.patientId, kind: state.kind, typeId: state.typeId, center };
+    const verdict = unbookableTypeCheck({
+      ...check,
+      checkedKey: checkedBookable.current,
+      moving: !!state.movingId,
+      bookableState: rules.bookableState,
+      bookable: rules.bookable,
+    });
+    if (verdict !== "keep" && verdict !== "clear") return;
+    checkedBookable.current = bookableCheckKey(check);
+    if (verdict === "clear") clearUnbookable();
+  }, [state.patientId, state.kind, state.typeId, center, state.movingId, rules.bookableState, rules.bookable]);
+
   const pickType = (kind: BookingKind, typeId: string) =>
     update({ kind, typeId, view: kind === "medical" ? state.view : "free", movingId: null });
   const clearType = () => update({ kind: undefined, typeId: undefined, date: undefined, movingId: null });
@@ -248,15 +283,12 @@ export function BookingScreen() {
   // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, warning-tone
   // ring on its day). A move never changes the appointment's center, so while it moves the calendar
   // reads availability from the appointment's OWN center (calendarCenter), whatever the picker or the
-  // top bar shows, with a note saying so. The day panel's "Move here?" box commits. Stop, Esc, a change
-  // of the screen's center or a reload that no longer lists it ends the move.
-  const appointmentLabel = useAppointmentLabel();
+  // top bar shows, with a note saying so. The move dialog commits (useBookingMove).
+  // Stop, Esc, a change of the screen's center or a reload that no longer lists it ends the move.
   const movingItem = state.movingId ? rail.upcoming.find((a) => a.id === state.movingId) : undefined;
   const calCenter = calendarCenter(center, movingItem);
-  const calCenterName =
-    movingItem && calCenter !== center
-      ? [...centro.centros, ...(patientCenters ?? [])].find((c) => c.id === calCenter)?.name
-      : undefined;
+  const calCenterInfo = [...centro.centros, ...(patientCenters ?? [])].find((c) => c.id === calCenter);
+  const calCenterName = movingItem && calCenter !== center ? calCenterInfo?.name : undefined;
 
   // ---- Period: Day view always shows a day (today when none is picked); Week asks its six days.
   const today = todayPR();
@@ -279,19 +311,23 @@ export function BookingScreen() {
     month: state.month,
     date: shownDate,
     patientId: state.patientId,
-    window: state.window,
     week: typeChosen && state.period === "week" ? weekDays(state.anchor) : [],
   });
   const live = calendar.live;
   const refreshCalendarDates = calendar.refreshDates;
 
-  // After a booking, move, edit or cancel: refresh those dates (month + day) and the patient's list.
+  // After a booking, move, edit or cancel: refresh those dates (month + day), the patient's list and
+  // their bookable balance (a service whose last session was just booked must leave the list; the
+  // once-per-key check above keeps the open calendar where it is).
   const onAppointmentsChanged = (dates: string[]) => {
     refreshCalendarDates([...new Set(dates.filter(Boolean))]);
     reloadRail();
+    reloadBookable();
   };
 
   const startMove = (a: PatientAppointment) => {
+    // The moved session is already booked (a fully booked service): not re-checked when the move ends.
+    checkedBookable.current = bookableCheckKey({ patientId: state.patientId, kind: a.kind, typeId: a.typeId, center });
     update({
       movingId: a.id,
       kind: a.kind,
@@ -343,41 +379,29 @@ export function BookingScreen() {
     if (state.movingId) setState((s) => ({ ...s, movingId: null }));
   }
 
-  const moving: CalendarMoving | undefined = movingItem && {
-    fromLabel: appointmentLabel(movingItem.date, movingItem.time),
-    needsReason: movingItem.kind === "medical",
-    onConfirm: async (to, reason) => {
-      const a = movingItem;
-      // The call runs in the appointment's own center (X-Tenant-ID) and keeps it there: no `centerId`
-      // (omit = keep current) and no `doctorId` on the medical reschedule.
-      const tenant = a.centerId ?? center;
-      const why = reason?.trim() ?? "";
-      if (a.kind === "medical" && !why) {
-        toast.error(t("toasts.moveReasonRequired"));
-        return false;
-      }
-      try {
-        if (a.kind === "medical") {
-          await reagendarCita(a.id, { date: to.date, time: to.time, reason: why }, tenant);
-        } else {
-          await reagendarSesion(a.id, to.date, tenant, to.time);
-        }
-      } catch (err) {
-        toast.error(t("toasts.moveFailed", { message: apiErrorLabel(err) }));
-        return false;
-      }
-      toast.success(
-        t("toasts.moved", { from: appointmentLabel(a.date, a.time), to: appointmentLabel(to.date, to.time) }),
-      );
+  // The calendar's and the move result's type name: a moved type missing from the lists by its kind.
+  const calTypeName =
+    chosenType?.name ??
+    (movingItem && !types.loading
+      ? t(movingItem.kind === "medical" ? "patient.kindMedical" : "patient.kindService")
+      : t("loading"));
+  const moving = useBookingMove({
+    movingItem,
+    center,
+    patient,
+    centerInfo: calCenterInfo,
+    typeName: calTypeName,
+    onMoved: (dates) => {
       update({ movingId: null });
-      onAppointmentsChanged([a.date, to.date]);
-      return true;
+      onAppointmentsChanged(dates);
     },
-  };
+  });
 
   // ---- Service booking: a dialog for the picked time, like the medical one (never while moving: the
   // calendar shows it only then). It books in the calendar's center; a patient chosen in the form
   // becomes the screen's patient once something is booked.
+  // What it booked shows in the app-wide success dialog (on top of the form if part of a series failed).
+  const { show: showResult } = useBookingResult();
   const serviceForm =
     state.kind === "service" && state.typeId
       ? ({ date, time, clear }: { date: string; time: string; clear: () => void }) => {
@@ -388,16 +412,31 @@ export function BookingScreen() {
             <ServiceBookingForm
               key={`${state.typeId}|${date}|${time}`}
               center={calCenter}
+              centerInfo={calCenterInfo}
               serviceId={state.typeId ?? ""}
               serviceName={chosenType?.name ?? ""}
               date={date}
               time={time}
               pickedFull={!!slot && (slot.state === "full" || slot.free <= 0)}
               patient={patient}
-              patientCenterIds={patientCenters?.map((c) => c.id)}
+              // Only a loaded list (no balance read without them); failed centers = a failed balance.
+              patientCenterIds={centersFailed ? undefined : patientCenters?.map((c) => c.id)}
+              bookable={rules.bookable}
+              bookableState={centersFailed ? "fail" : rules.bookableState}
+              reloadBookable={centersFailed ? reloadPatientCenters : reloadBookable}
               onBooked={(r) => {
-                if (!state.patientId) pickPatient(r.patient);
+                if (!state.patientId) {
+                  // Just booked for them: this service is not re-checked against their balance.
+                  checkedBookable.current = bookableCheckKey({
+                    patientId: r.patient.id,
+                    kind: "service",
+                    typeId: state.typeId,
+                    center,
+                  });
+                  pickPatient(r.patient);
+                }
                 onAppointmentsChanged(r.dates);
+                showResult(r.result);
                 if (r.done) clear();
               }}
               onBack={clear}
@@ -446,7 +485,9 @@ export function BookingScreen() {
       >
         {/* LEFT: who is calling, or the chosen patient with their upcoming/past appointments. */}
         {state.patientId ? (
-          <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto" data-slot="booking-patient-rail">
+          // `-m-1 p-1`: the card being moved draws a 2px ring outside its box and this scroll area clips both
+          // axes; the padding gives the ring room, the negative margin keeps the rail aligned (owner).
+          <aside className="-m-1 flex min-h-0 flex-col gap-3 overflow-y-auto p-1" data-slot="booking-patient-rail">
             <PatientCard
               patientId={state.patientId}
               patient={patient}
@@ -483,6 +524,7 @@ export function BookingScreen() {
             patientId={state.patientId}
             patientName={state.patientId ? firstName : undefined}
             types={types}
+            rules={rules}
             onPick={pickType}
           />
         ) : (
@@ -492,18 +534,12 @@ export function BookingScreen() {
             centerNote={calCenterName ? t("move.showingCenter", { center: calCenterName }) : undefined}
             kind={state.kind ?? "medical"}
             typeId={state.typeId ?? ""}
-            typeName={
-              chosenType?.name ??
-              (movingItem && !types.loading
-                ? t(movingItem.kind === "medical" ? "patient.kindMedical" : "patient.kindService")
-                : t("loading"))
-            }
+            typeName={calTypeName}
             color={chosenType?.color ?? null}
             label={firstName ? t("toolbar.bookingFor", { name: firstName }) : t("toolbar.booking")}
             onClearType={clearType}
             date={shownDate}
             month={state.month}
-            window={state.window}
             view={state.view}
             period={state.period}
             anchor={state.anchor}

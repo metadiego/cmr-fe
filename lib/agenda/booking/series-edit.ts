@@ -96,3 +96,33 @@ export function fitLoadedTimes(
   });
   return changed ? out : items;
 }
+
+/**
+ * The "Semanal" series: walks forward from `start` (inclusive) one day at a time and keeps the days
+ * whose weekday is in `weekdays` (1..6 = Mon..Sat, `getUTCDay` numbering), until `count` rows. The
+ * start's weekday always counts, so the first row is the start. Sundays never match; holidays are
+ * not skipped.
+ */
+export function generateWeeklyPattern(start: string, weekdays: readonly number[], count: number): EditableItem[] {
+  const wanted = new Set(weekdays.filter((d) => d >= 1 && d <= 6));
+  wanted.add(weekdayOf(start));
+  wanted.delete(0);
+  const items: EditableItem[] = [];
+  let date = start;
+  // The start's weekday is in `wanted` (a Sunday start is the only exception: step past it).
+  for (let guard = 0; items.length < count && guard < 7 * MAX_SESSIONS * 2 + 7; guard++) {
+    if (wanted.has(weekdayOf(date))) items.push({ date });
+    date = addDays(date, 1);
+  }
+  return items;
+}
+
+/**
+ * Toggles `day` in the selected weekdays (the times per week are the days chosen). The start's weekday
+ * cannot be removed. Selected days keep the order they were added in.
+ */
+export function toggleWeekday(selected: number[], day: number, startDay: number): number[] {
+  if (day === startDay) return selected;
+  if (selected.includes(day)) return selected.filter((d) => d !== day);
+  return [...selected, day];
+}

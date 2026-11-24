@@ -271,6 +271,15 @@ export async function crearCitaAgenda(
   return { cita: env.data, advertencias: env.meta?.advertencias ?? [] };
 }
 
+// Whether the patient attended before (any center) and the visit type the next booking should use
+// (GET /appointments/patients/:id/visit-kind; appointments.read).
+export async function getVisitKind(
+  patientId: string,
+  centerId?: string,
+): Promise<{ attendedBefore: boolean; nextVisitType: "nueva" | "seguimiento" }> {
+  return apiFetch(`/appointments/patients/${encodeURIComponent(patientId)}/visit-kind`, {}, centerId);
+}
+
 // Update returning cita + warnings (same envelope contract as create). The body is NOT the create
 // payload: UpdateCitaDto (whitelist + forbidNonWhitelisted) accepts only these keys, so build it with
 // citaEditPayload (lib/agenda/cita-edit-payload.ts).
@@ -335,21 +344,6 @@ export function reagendarCita(
     { method: "POST", body: JSON.stringify(payload) },
     tenant,
   );
-}
-
-// Reschedule returning cita + warnings (same envelope contract as crearCitaAgenda/actualizarCitaAgenda —
-// e.g. sheet.unavailable when the call-center sheet didn't take the new slot but the move went through).
-export async function reagendarCitaConAvisos(
-  id: string,
-  payload: Parameters<typeof reagendarCita>[1],
-  tenant?: string,
-): Promise<{ cita: Cita; advertencias: NonNullable<import("./types").ApiMeta["advertencias"]> }> {
-  const env = await apiFetchEnvelope<Cita>(
-    `/appointments/${id}/reschedule`,
-    { method: "POST", body: JSON.stringify(payload) },
-    tenant,
-  );
-  return { cita: env.data, advertencias: env.meta?.advertencias ?? [] };
 }
 
 // Appointment audit trail (GET /appointments/:id/history). The reschedule event

@@ -6,9 +6,11 @@ import {
   fitLoadedTimes,
   fittedTime,
   generateItems,
+  generateWeeklyPattern,
   nextDate,
   rejectDate,
   replaceDate,
+  toggleWeekday,
   type EditableItem,
 } from "./series-edit.ts";
 import { dropRow, groupByTime, overridesOf } from "./series-booking.ts";
@@ -125,4 +127,42 @@ test("edited rows still book as one request per time, after a drop and an add", 
     { time: "10:00", dates: ["2026-11-19"] },
     { time: "09:00", dates: ["2026-11-24", "2026-12-01"] },
   ]);
+});
+
+const dates = (items: EditableItem[]) => items.map((it) => it.date);
+
+test("generateWeeklyPattern: walks forward from a Wednesday start through the chosen weekdays", () => {
+  assert.deepEqual(dates(generateWeeklyPattern("2026-11-25", [3, 5], 4)), [
+    "2026-11-25",
+    "2026-11-27",
+    "2026-12-02",
+    "2026-12-04",
+  ]);
+});
+
+test("generateWeeklyPattern: a Saturday start skips Sunday", () => {
+  assert.deepEqual(dates(generateWeeklyPattern("2026-11-28", [1, 6], 3)), [
+    "2026-11-28",
+    "2026-11-30",
+    "2026-12-05",
+  ]);
+});
+
+test("generateWeeklyPattern: count 1 gives only the start", () => {
+  assert.deepEqual(dates(generateWeeklyPattern("2026-11-25", [3, 5], 1)), ["2026-11-25"]);
+});
+
+test("generateWeeklyPattern: the start weekday is the first row even when not in weekdays", () => {
+  assert.deepEqual(dates(generateWeeklyPattern("2026-11-25", [5], 3)), [
+    "2026-11-25",
+    "2026-11-27",
+    "2026-12-02",
+  ]);
+});
+
+test("toggleWeekday: the start day is locked; other days toggle in the order added", () => {
+  assert.deepEqual(toggleWeekday([3], 3, 3), [3]);
+  assert.deepEqual(toggleWeekday([3], 5, 3), [3, 5]);
+  assert.deepEqual(toggleWeekday([3, 5], 1, 3), [3, 5, 1]);
+  assert.deepEqual(toggleWeekday([3, 5], 5, 3), [3]);
 });

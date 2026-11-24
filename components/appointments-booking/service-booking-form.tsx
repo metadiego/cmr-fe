@@ -5,28 +5,23 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
-import { SegmentedControl } from "@/components/kit/segmented-control";
-import { PacienteSelect } from "@/components/citas/paciente-select";
+import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { SeriesRows, useDayLabel } from "@/components/appointments-booking/series-rows";
+import { SeriesFrequency, type SeriesMode } from "@/components/appointments-booking/series-frequency";
 import { useCan } from "@/hooks/use-can";
-import { useResource } from "@/hooks/use-resource";
+import { usePatientBookingRules, type BookableState } from "@/hooks/use-patient-booking-rules";
 import { suggestionKey, useSeriesAvailability, type SeriesNeed } from "@/hooks/use-series-availability";
 import { buildSeriesRows, canBookSeries } from "@/lib/agenda/booking/series";
+import { balanceReason, capFor, otherCenters } from "@/lib/agenda/booking/booking-cap";
 import {
-  MAX_SESSIONS,
-  MIN_SESSIONS,
   applySuggestion,
-  defaultSessions,
   dropRow,
   groupByTime,
   notCreated,
   seriesHealth,
   seriesSpan,
-  stepSessions,
   overridesOf,
   setRowTime,
   suggestionExclusions,
@@ -34,28 +29,39 @@ import {
 import {
   addItem,
   fitLoadedTimes,
-  generateItems,
+  generateWeeklyPattern,
   nextDate,
   replaceDate,
   type EditableItem,
 } from "@/lib/agenda/booking/series-edit";
+import { weekdayOf } from "@/lib/agenda/recurring-plan";
 import { todayPR } from "@/lib/format/fecha";
 import { normalizeTime, type DaySlots } from "@/lib/agenda/booking/availability";
 import type { RecurringPlanItem } from "@/lib/agenda/recurring-plan";
-import { agendarVariosServicios, crearSesion, getServiciosConSaldo } from "@/lib/api/frontdesk";
+import { agendarVariosServicios, crearSesion, type BookableService } from "@/lib/api/frontdesk";
 import type { ApiWarning } from "@/lib/api/types";
 import type { Paciente } from "@/lib/api/pacientes";
+import type { Centro } from "@/lib/api/centers";
+import {
+  resultCenter,
+  resultPatient,
+  serviceBookingResult,
+  type BookingResult,
+} from "@/lib/agenda/booking/booking-result";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { warningText } from "@/lib/frontdesk/avisos";
 
 // The service booking dialog, opened by picking a time in the day panel (spec "Booking form", Service),
-// the same way a medical time opens the appointment dialog: the patient (the
-// screen's, or a search here), then Book for the picked day and time; or Frequency = every week / every
-// 2 weeks with an N-sessions stepper, one row per date with its own time, status and the planner's suggestion. A full
-// time is bookable (overbook) with a warning; a blocked row (holiday, closed, already has the service
-// that day) must be fixed or dropped first. A series goes out as one bulk request per distinct time.
-// Once a row is edited (time, date, suggestion, drop, "+ Add date") the rows are that explicit list;
-// changing the frequency or the number of sessions regenerates it from start + every + count.
+// the same way a medical time opens the appointment dialog: the patient (the screen's, or a search
+// here), then the rows, one per date with its own time, status and the planner's suggestion.
+// Frequency Manual (default) = the picked date, plus any date added by hand; Semanal = times per week,
+// which weekdays and how many in total, the dates filled in from the picked date. One row books as a
+// single session; two or more go out as one bulk request per distinct time. A full time is bookable
+// (overbook) with a warning; a blocked row (holiday, closed, already has the service that day) must
+// be fixed or dropped first. Once a row is edited (time, date, suggestion, drop, "+ Add date") the
+// rows are that explicit list; changing the mode, days or total regenerates them.
+// The patient's bookable balance for the service caps the rows (Semanal total, "+ Add date") and,
+// with nothing left or more rows than left, blocks booking with a reason (spec §4).
 
 
 export interface ServiceBooked {
@@ -64,10 +70,13 @@ export interface ServiceBooked {
   dates: string[];
   /** Everything asked was attempted without a request failing: the form can close. */
   done: boolean;
+  /** What was created, skipped and warned about: the success dialog (spec §1). */
+  result: BookingResult;
 }
 
 export function ServiceBookingForm({
   center,
+  centerInfo,
   serviceId,
   serviceName,
   date,
@@ -75,10 +84,15 @@ export function ServiceBookingForm({
   pickedFull,
   patient: screenPatient,
   patientCenterIds,
+  bookable: screenBookable,
+  bookableState: screenBookableState,
+  reloadBookable: screenReloadBookable,
   onBooked,
   onBack,
 }: {
   center: string | undefined;
+  /** The booking center (the other-center package warning, the success dialog's printout header). */
+  centerInfo: Centro | undefined;
   serviceId: string;
   serviceName: string;
   date: string;
@@ -87,8 +101,14 @@ export function ServiceBookingForm({
   pickedFull: boolean;
   /** The screen's patient; null = choose one here. */
   patient: Paciente | null;
-  /** Centers to search patients in (same as Who's calling). */
-  patientCenterIds?: string[];
+  /** Centers to search patients in (same as Who's calling); undefined until loaded (or failed). */
+  patientCenterIds: string[] | undefined;
+  /** The screen's patient's bookable balance per service (usePatientBookingRules). */
+  bookable: ReadonlyMap<string, BookableService> | undefined;
+  /** Load state of `bookable`; "fail" also when the patient's centers could not be read. */
+  bookableState: BookableState;
+  /** Reloads the screen's `bookable`, or the patient's centers when those failed. */
+  reloadBookable: () => void;
   onBooked: (r: ServiceBooked) => void;
   onBack: () => void;
 }) {
@@ -96,38 +116,65 @@ export function ServiceBookingForm({
   const tRoot = useTranslations();
   const { can, ready: permsReady } = useCan();
   const canBook = can("frontdesk.create");
+  // Without `frontdesk.read` the balance is never read (usePatientBookingRules): say so, not "checking".
+  const balanceHidden = permsReady && !can("frontdesk.read");
   const dayLabel = useDayLabel();
 
   const [localPatient, setLocalPatient] = React.useState<Paciente | null>(null);
   const patient = screenPatient ?? localPatient;
   const patientId = patient?.id;
 
-  const [repeat, setRepeat] = React.useState(false);
-  const [everyWeeks, setEveryWeeks] = React.useState<1 | 2>(1);
-  const [countChoice, setCountChoice] = React.useState<number | null>(null);
+  // The form is keyed on the picked date, so the start's weekday is fixed for its lifetime.
+  const startDay = weekdayOf(date);
+  const [mode, setMode] = React.useState<SeriesMode>("manual");
+  const [days, setDays] = React.useState<number[]>(() => (startDay === 0 ? [] : [startDay]));
+  const [totalChoice, setTotalChoice] = React.useState<number | null>(null);
   const [busy, setBusy] = React.useState(false);
 
-  // Sessions left on the patient's package for this service: the default number of sessions.
-  const saldoRes = useResource(
-    () => (patientId && center ? getServiciosConSaldo(patientId, center) : Promise.resolve([])),
-    [patientId, center],
+  // The bookable balance for this service: the screen's for its patient, or loaded here (same hook, same
+  // rule) for a patient picked in this form. That read waits for the patient's centers (packages from any
+  // of them count): never read without them, or another center's package would look like no balance.
+  // Until they load it is "loading"; if they failed, the screen's failed state and retry (the centers').
+  const ownRules = usePatientBookingRules(
+    !screenPatient && patientCenterIds ? localPatient?.id : undefined,
+    center,
+    patientCenterIds ?? [],
   );
-  const sessionsLeft =
-    saldoRes.state.kind === "ok" ? saldoRes.state.data.find((s) => s.serviceId === serviceId)?.pending : undefined;
-  const count = countChoice ?? defaultSessions(sessionsLeft);
+  const waitingCenters = !screenPatient && !patientCenterIds;
+  const bookableMap = screenPatient ? screenBookable : ownRules.bookable;
+  const bookableState: BookableState = screenPatient
+    ? screenBookableState
+    : waitingCenters
+      ? screenBookableState === "fail"
+        ? "fail"
+        : "loading"
+      : ownRules.bookableState;
+  const reloadBookable = screenPatient || waitingCenters ? screenReloadBookable : ownRules.reloadBookable;
+  // Known only once loaded; a service missing from the answer has nothing left (strict, never a fallback).
+  const balance = bookableState === "ok" ? bookableMap?.get(serviceId) : undefined;
+  const bookableLeft = bookableState === "ok" && bookableMap ? (balance?.bookable ?? 0) : undefined;
+  const cap = capFor(bookableLeft);
+  const total = Math.max(1, Math.min(cap.max, totalChoice ?? cap.defaultTotal));
+  const boughtElsewhere = balance && center ? otherCenters(balance.sources, center) : [];
 
-  // The rows as generated, unless edited for this start, cadence and count. A row whose date just
+  // The rows as generated, unless edited for this mode, days and total. A row whose date just
   // changed gets its time fitted to that day as soon as the day loads (derived, so no extra render).
-  const genKey = `${date}|${everyWeeks}|${count}`;
+  const weekly = mode === "weekly";
+  const genKey = weekly ? `${date}|weekly|${days.join(",")}|${total}` : `${date}|manual`;
   const [edits, setEdits] = React.useState<{ key: string; items: EditableItem[] } | null>(null);
   const edited = !!edits && edits.key === genKey;
-  const baseItems: EditableItem[] = edited ? edits.items : generateItems(date, everyWeeks, count);
+  const baseItems: EditableItem[] = edited
+    ? edits.items
+    : weekly
+      ? generateWeeklyPattern(date, days, total)
+      : [{ date }];
 
-  const rowDates = repeat && patientId ? baseItems.map((i) => i.date) : [];
+  // Availability is read only once there is a balance to book against.
+  const rowDates = patientId && bookableLeft ? baseItems.map((i) => i.date) : [];
   const series = useSeriesAvailability({ center, serviceId, patientId, dates: rowDates });
   const items = fitLoadedTimes(baseItems, series.days, time);
   const editItems = (fn: (items: EditableItem[]) => EditableItem[]) => setEdits({ key: genKey, items: fn(items) });
-  const addDate = nextDate(items, everyWeeks, todayPR());
+  const addDate = nextDate(items, 1, todayPR());
 
   const loadedDays: Record<string, DaySlots | null> = {};
   for (const [d, v] of Object.entries(series.days)) if (v !== "error") loadedDays[d] = v;
@@ -184,28 +231,69 @@ export function ServiceBookingForm({
 
   const span = seriesSpan(rows.map((r) => r.date));
   const health = seriesHealth(rows);
-  const ready = !!patient && canBook && !busy && (!repeat || seriesOk);
-  // What keeps «Agendar» grey, said above it (forms kit): the patient is a missing field; no permission
-  // or a series that cannot go yet is a reason.
+  // From the generated items, not `rows`: rows stay empty until a patient is chosen.
+  const single = items.length === 1;
+  const sunday = startDay === 0;
+  const balanceVerdict = balanceReason(items.length, bookableLeft);
+  const balanceIssue = !patient
+    ? null
+    : balanceHidden
+      ? t("typePicker.noBookablePermission")
+      : bookableState === "fail"
+        ? t("typePicker.bookableFailed")
+        : bookableLeft === undefined
+          ? t("series.checking")
+          : balanceVerdict === "noBalance"
+            ? t("series.noBalanceReason")
+            : balanceVerdict === "overBalance"
+              ? t("series.overBalanceReason", { n: bookableLeft })
+              : null;
+  const ready = !!patient && canBook && !busy && !sunday && !balanceIssue && seriesOk;
+  // What keeps «Agendar» grey, said above it (forms kit): the patient is a missing field; no permission,
+  // a Sunday start, the balance (loading, failed, none or fewer than the rows) or rows that cannot go yet are a reason.
   const missing = patient ? [] : [t("series.patient")];
   const reason = !permsReady
     ? tRoot("common.loading")
     : !canBook
       ? t("series.noPermission")
-      : repeat && patient && !seriesOk
-        ? anyFailed
-          ? t("series.checkFailed")
-          : allLoaded
-            ? t("series.fixRed")
-            : t("series.checking")
-        : null;
+      : sunday
+        ? t("series.dateSunday")
+        : balanceIssue
+          ? balanceIssue
+          : patient && !seriesOk
+              ? anyFailed
+                ? t("series.checkFailed")
+                : allLoaded
+                  ? t("series.fixRed")
+                  : t("series.checking")
+              : null;
 
+  const resultOf = (
+    p: Paciente,
+    created: { date: string; time: string }[],
+    skipped: string[],
+    warnings: ApiWarning[],
+  ): BookingResult =>
+    serviceBookingResult({
+      patient: resultPatient(p),
+      center: resultCenter(centerInfo),
+      serviceName,
+      created,
+      // The BE skips only a date the patient already has this service on.
+      skipped: skipped.map((date) => ({ date, reason: t("result.skippedHasService") })),
+      warnings: warnings.map((w) => warningText(w, tRoot)),
+    });
+
+  // One row: a single session on that row's date and time (the picked ones unless edited).
   const bookSingle = async (p: Paciente) => {
+    const row = rows[0];
     try {
-      const { warnings } = await crearSesion({ patientId: p.id, serviceId, date, time: normalizeTime(time) }, center);
-      toast.success(t("toasts.booked", { n: 1 }));
-      if (warnings.length) toast.warning(t("toasts.warnings", { list: warnings.map((w) => warningText(w, tRoot)).join(" · ") }));
-      onBooked({ patient: p, dates: [date], done: true });
+      const { warnings } = await crearSesion(
+        { patientId: p.id, serviceId, date: row.date, time: normalizeTime(row.time) },
+        center,
+      );
+      const created = [{ date: row.date, time: row.time }];
+      onBooked({ patient: p, dates: [row.date], done: true, result: resultOf(p, created, [], warnings) });
     } catch (err) {
       toast.error(t("toasts.bookFailed", { message: apiErrorLabel(err, tRoot) }));
     }
@@ -213,7 +301,7 @@ export function ServiceBookingForm({
 
   const bookSeries = async (p: Paciente) => {
     const groups = groupByTime(rows);
-    const created: string[] = [];
+    const created: { date: string; time: string }[] = [];
     let createdCount = 0;
     const skipped: string[] = [];
     const warnings: ApiWarning[] = [];
@@ -225,13 +313,13 @@ export function ServiceBookingForm({
           center,
         );
         const list = Array.isArray(res.data.creadas) ? res.data.creadas : [];
-        const made = list.map((s) => (s.date ? String(s.date).slice(0, 10) : "")).filter(Boolean);
+        const made = list.flatMap((s) => (s.date ? [{ date: String(s.date).slice(0, 10), time: s.time ?? g.time }] : []));
         createdCount += list.length;
         created.push(...made);
         // The BE only counts what it skipped (a date the patient already has the service on); the dates
         // are the asked ones it did not create, when every created session carries its date.
         if (Number(res.data.omitidas ?? 0) > 0 && made.length === list.length) {
-          skipped.push(...notCreated(g.dates, made));
+          skipped.push(...notCreated(g.dates, made.map((m) => m.date)));
         }
         // `advertencias` carries BOOKING_DAY_SKIPPED (a day a blocking rule skipped, BE #547): said, never dropped.
         warnings.push(...res.warnings, ...res.advertencias);
@@ -240,20 +328,20 @@ export function ServiceBookingForm({
         toast.error(t("toasts.bookFailed", { message: apiErrorLabel(err, tRoot) }));
       }
     }
-    if (createdCount > 0) toast.success(t("toasts.booked", { n: createdCount }));
-    const notes = [
-      ...(skipped.length ? [t("toasts.skipped", { dates: skipped.map(dayLabel).join(", ") })] : []),
-      ...warnings.map((w) => warningText(w, tRoot)),
-    ];
-    if (notes.length) toast.warning(t("toasts.warnings", { list: notes.join(" · ") }));
     if (failures > 0) {
       // Keep only the rows still to book, so a retry does not ask for the booked ones again.
-      const done = new Set([...created, ...skipped]);
+      const done = new Set([...created.map((c) => c.date), ...skipped]);
       editItems((list) => list.filter((i) => !done.has(i.date)));
       series.retry();
     }
+    // A partial failure keeps the form open with the rows left; what was created shows on top of it.
     if (createdCount > 0 || failures === 0) {
-      onBooked({ patient: p, dates: [...new Set([...created, ...groups.flatMap((g) => g.dates)])], done: failures === 0 });
+      onBooked({
+        patient: p,
+        dates: [...new Set([...created.map((c) => c.date), ...groups.flatMap((g) => g.dates)])],
+        done: failures === 0,
+        result: resultOf(p, created, skipped, warnings),
+      });
     }
   };
 
@@ -264,8 +352,8 @@ export function ServiceBookingForm({
     inFlight.current = true;
     setBusy(true);
     try {
-      if (repeat) await bookSeries(patient);
-      else await bookSingle(patient);
+      if (single) await bookSingle(patient);
+      else await bookSeries(patient);
     } finally {
       inFlight.current = false;
       setBusy(false);
@@ -281,7 +369,7 @@ export function ServiceBookingForm({
       size="xl"
       title={`${serviceName} · ${dayLabel(date)} · ${shortTime(time)}`}
       onSubmit={book}
-      submitLabel={repeat ? t("series.bookSeries", { n: rows.length }) : t("series.book")}
+      submitLabel={single ? t("series.book") : t("series.bookSeries", { n: items.length })}
       submitting={busy}
       missing={missing}
       blocked={!!reason}
@@ -293,90 +381,75 @@ export function ServiceBookingForm({
             {screenPatient.displayName || [screenPatient.firstName, screenPatient.lastName].filter(Boolean).join(" ")}
           </span>
         ) : (
-          <PacienteSelect value={localPatient} onChange={setLocalPatient} centerIds={patientCenterIds} />
+          <PatientPickerWithCreate value={localPatient} onChange={setLocalPatient} centerIds={patientCenterIds} />
         )}
-        {sessionsLeft != null && sessionsLeft > 0 && (
-          <span className="block text-xs text-muted-foreground">{t("typePicker.sessionsLeft", { n: sessionsLeft })}</span>
+        {!!bookableLeft && (
+          <span className="block text-xs text-muted-foreground tabular-nums">
+            {t("typePicker.sessionsLeft", { n: bookableLeft })}
+          </span>
+        )}
+        {boughtElsewhere.length > 0 && (
+          <span className="block text-xs text-warning-foreground">
+            {t("series.otherCenterWarning", { center: boughtElsewhere.join(", "), here: centerInfo?.name ?? "—" })}
+          </span>
         )}
       </Field>
 
-      {!repeat && pickedFull && <p className="text-sm text-warning-foreground">{t("series.fullWarning")}</p>}
+      {/* Until the row has loaded; then its own status (and the full warning below) says it. */}
+      {pickedFull && single && !(patient && allLoaded) && (
+        <p className="text-sm text-warning-foreground">{t("series.fullWarning")}</p>
+      )}
 
-      {/* How often, in one control: once, every week or every two weeks. */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <Field label={t("series.frequency")}>
-          <SegmentedControl
-            ariaLabel={t("series.frequency")}
-            disabled={busy}
-            value={repeat ? String(everyWeeks) : "once"}
-            options={[
-              { value: "once", label: t("series.once") },
-              { value: "1", label: t("series.weekly") },
-              { value: "2", label: t("series.biweekly") },
-            ]}
-            onChange={(v) => {
-              if (v === "once") return setRepeat(false);
-              setRepeat(true);
-              const weeks = v === "2" ? 2 : 1;
-              if (weeks !== everyWeeks) {
-                setEveryWeeks(weeks);
-                setEdits(null);
-              }
-            }}
-          />
-        </Field>
-        {repeat && (
-          <Field label={t("series.sessions")}>
-            <div className="flex h-9 items-center rounded-md border border-input" role="group" aria-label={t("series.sessions")}>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-9"
-                aria-label={t("series.fewer")}
-                disabled={busy || items.length <= MIN_SESSIONS}
-                onClick={() => {
-                  setCountChoice(stepSessions(items.length, -1));
-                  setEdits(null);
-                }}
-              >
-                <HugeiconsIcon icon={MinusSignIcon} className="size-4" />
-              </Button>
-              <span className="w-8 text-center text-sm font-medium tabular-nums" aria-live="polite">
-                {items.length}
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-9"
-                aria-label={t("series.more")}
-                disabled={busy || items.length >= MAX_SESSIONS}
-                onClick={() => {
-                  setCountChoice(stepSessions(items.length, 1));
-                  setEdits(null);
-                }}
-              >
-                <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
-              </Button>
-            </div>
-          </Field>
-        )}
-      </div>
+      <SeriesFrequency
+        mode={mode}
+        onMode={(m) => {
+          setMode(m);
+          setEdits(null);
+        }}
+        days={days}
+        startDay={startDay}
+        onDays={(next) => {
+          setDays(next);
+          setEdits(null);
+        }}
+        total={edited ? items.length : total}
+        maxTotal={Math.max(1, cap.max)}
+        limitedBy20={cap.limitedBy20}
+        onTotal={(n) => {
+          setTotalChoice(n);
+          setEdits(null);
+        }}
+        disabled={busy || sunday}
+      />
 
-      {repeat && (
+      {!sunday && (
         <div className="flex flex-col gap-2 text-sm">
-          {edited && <p className="text-xs text-muted-foreground">{t("series.resetsEdits")}</p>}
+          {weekly && edited && <p className="text-xs text-muted-foreground">{t("series.resetsEdits")}</p>}
 
           {!patient ? (
             <p className="text-muted-foreground">{t("series.pickPatient")}</p>
+          ) : balanceHidden ? (
+            <p className="text-muted-foreground">{t("typePicker.noBookablePermission")}</p>
+          ) : bookableState === "fail" ? (
+            <div className="flex items-center gap-2 text-destructive">
+              <span>{t("typePicker.bookableFailed")}</span>
+              <Button type="button" size="xs" variant="outline" onClick={reloadBookable}>
+                {t("retry")}
+              </Button>
+            </div>
+          ) : bookableLeft === undefined ? (
+            <p className="text-muted-foreground">{t("series.checking")}</p>
+          ) : bookableLeft === 0 ? (
+            <p className="text-destructive">{t("series.noBalanceReason")}</p>
           ) : (
             <>
               {span && (
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                  <p className="text-sm font-medium tabular-nums">
-                    {t("series.span", { n: rows.length, from: dayLabel(span.first), to: dayLabel(span.last) })}
-                  </p>
+                  {!single && (
+                    <p className="text-sm font-medium tabular-nums">
+                      {t("series.span", { n: rows.length, from: dayLabel(span.first), to: dayLabel(span.last) })}
+                    </p>
+                  )}
                   {allLoaded && !anyFailed && (
                     <p className="text-xs font-medium">
                       {health.full === 0 && health.blocked === 0 ? (
@@ -408,13 +481,13 @@ export function ServiceBookingForm({
                   type="button"
                   size="xs"
                   variant="outline"
-                  disabled={busy || !addDate}
+                  disabled={busy || !addDate || items.length >= cap.max}
                   onClick={() => addDate && editItems((list) => addItem(list, addDate))}
                 >
                   {t("series.addDate")}
                 </Button>
-                {items.length >= MAX_SESSIONS && (
-                  <span className="text-xs text-muted-foreground">{t("series.maxDates", { n: MAX_SESSIONS })}</span>
+                {items.length >= cap.max && (
+                  <span className="text-xs text-muted-foreground">{t("series.maxDates", { n: cap.max })}</span>
                 )}
               </div>
               {anyFailed && (

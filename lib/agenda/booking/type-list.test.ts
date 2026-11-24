@@ -3,13 +3,16 @@ import assert from "node:assert/strict";
 
 import type { BookingSlot } from "./availability.ts";
 import {
+  bookableServicesList,
   EMPTY_RUN_LIMIT,
+  filterMedicalTypes,
   emptyRunStep,
   hasBookableTime,
   firstOpening,
   foldText,
   isEmptyDay,
   matchesQuery,
+  patientServicesView,
   scanDates,
   typeListGroups,
 } from "./type-list.ts";
@@ -57,6 +60,46 @@ test("typeListGroups: the search filters every group and drops the empty ones", 
   assert.deepEqual(typeListGroups({ medical, services, packages: new Map(), query: "zzz" }), []);
   const lasers = typeListGroups({ medical, services, packages: new Map([["s1", 6]]), query: "LASER" });
   assert.deepEqual(lasers.map((x) => x.key), ["packages"]);
+});
+
+const k = (id: string, slug: string) => ({ id, slug });
+const kinds = [k("n", "nueva"), k("s", "seguimiento"), k("o", "otra-consulta")];
+
+test("filterMedicalTypes: attended before drops 'nueva', other slugs untouched", () => {
+  assert.deepEqual(filterMedicalTypes(kinds, { attendedBefore: true }).map((x) => x.id), ["s", "o"]);
+});
+
+test("filterMedicalTypes: never attended drops 'seguimiento', other slugs untouched", () => {
+  assert.deepEqual(filterMedicalTypes(kinds, { attendedBefore: false }).map((x) => x.id), ["n", "o"]);
+});
+
+test("filterMedicalTypes: unknown visit kind (loading or failed) keeps every type", () => {
+  assert.deepEqual(filterMedicalTypes(kinds, undefined).map((x) => x.id), ["n", "s", "o"]);
+});
+
+test("bookableServicesList: only bookable > 0, most bookable first; undefined while unknown", () => {
+  const list = bookableServicesList(services, new Map([["s1", { bookable: 2 }], ["s2", { bookable: 0 }], ["s3", { bookable: 5 }]]));
+  assert.deepEqual(list?.map((x) => x.id), ["s3", "s1"]);
+  assert.equal(bookableServicesList(services, undefined), undefined);
+  assert.deepEqual(bookableServicesList(services, new Map()), []);
+});
+
+test("typeListGroups patient mode: Medical + the patient's services, no packages/services groups", () => {
+  const g = typeListGroups({ medical, services: [services[2], services[0]], packages: new Map([["s2", 3]]), query: "", patientMode: true });
+  assert.deepEqual(
+    g.map((x) => [x.key, x.items.map((i) => i.id)]),
+    [
+      ["medical", ["m1", "m2"]],
+      ["patientServices", ["s3", "s1"]],
+    ],
+  );
+});
+
+test("typeListGroups patient mode: an empty patient services group stays without a search, drops with one", () => {
+  const g = typeListGroups({ medical, services: [], query: "", patientMode: true });
+  assert.deepEqual(g.map((x) => [x.key, x.items.length]), [["medical", 2], ["patientServices", 0]]);
+  const searched = typeListGroups({ medical, services: [], query: "consulta", patientMode: true });
+  assert.deepEqual(searched.map((x) => x.key), ["medical"]);
 });
 
 test("scanDates: n bookable days from today, skipping Sundays and holidays", () => {
@@ -123,4 +166,14 @@ test("emptyRunStep: a fully booked week never stops a service scan (openings aft
   assert.equal(st.run, 13);
   assert.equal(hasBookableTime(booked), true);
   assert.equal(hasBookableTime({ date: "2026-11-04", slots: [] }), false);
+});
+
+test("patientServicesView: no permission is a note (never an error), else by the balance's load state", () => {
+  for (const bookableState of ["idle", "loading", "ok", "fail"] as const) {
+    assert.equal(patientServicesView({ hidden: true, bookableState }), "hidden", bookableState);
+  }
+  assert.equal(patientServicesView({ hidden: false, bookableState: "idle" }), "loading");
+  assert.equal(patientServicesView({ hidden: false, bookableState: "loading" }), "loading");
+  assert.equal(patientServicesView({ hidden: false, bookableState: "fail" }), "fail");
+  assert.equal(patientServicesView({ hidden: false, bookableState: "ok" }), "list");
 });

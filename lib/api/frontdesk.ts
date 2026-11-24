@@ -2,6 +2,7 @@ import type { components } from "./schema";
 import type { ApiWarning } from "./types";
 import { apiFetch, apiFetchEnvelope, oneCenterPath, tenantOf } from "./client";
 import type { CenterChoice } from "@/lib/clinic-read-scope";
+import { bookableServicesPath } from "@/lib/frontdesk/bookable-services-path";
 import { normalizeBookMultipleResult, type BookMultipleResultRaw } from "./book-multiple";
 
 // Escritura con avisos NO bloqueantes (BE PR #168): la operación se realiza y el BE adjunta
@@ -138,6 +139,24 @@ export async function agendarVariosServicios(
 export type ServicioConSaldo = { serviceId: string; name: string; slug: string; pending: number };
 export function getServiciosConSaldo(patientId: string, centroId?: string): Promise<ServicioConSaldo[]> {
   return apiFetch<ServicioConSaldo[]>(`/frontdesk/patients/${patientId}/availability`, {}, centroId);
+}
+
+// Services a patient can still book at the booking center (GET /frontdesk/patients/:id/bookable-services).
+// Rows may share one package pool: never sum `bookable` across rows. `sources` splits it by package center.
+export interface BookableService {
+  serviceId: string;
+  bought: number;
+  booked: number;
+  bookable: number;
+  /** `centerName` is null when the BE cannot name the package's center. */
+  sources: { centerId: string; centerName: string | null; bookable: number }[];
+}
+export function getBookableServices(
+  patientId: string,
+  bookingCenterId: string,
+  centerIds: string[],
+): Promise<BookableService[]> {
+  return apiFetch<BookableService[]>(bookableServicesPath(patientId, centerIds), {}, bookingCenterId);
 }
 
 // Pestañas del frontdesk (BE 1-oct). `boardSlug` dice qué tablero la sirve: "servicios" o "atencion" (el

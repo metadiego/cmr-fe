@@ -2,27 +2,13 @@ import { addDays } from "../recurring-plan.ts";
 import { normalizeTime, type DaySlots } from "./availability.ts";
 
 // Pure helpers behind the service booking form's weekly series: the editable list of dates, the
-// sessions default, the dates a suggestion must avoid, the time options of a row and the grouping of
-// rows into booking requests (the bulk endpoint takes ONE time for all its dates).
+// dates a suggestion must avoid, the time options of a row and the grouping of rows into booking
+// requests (the bulk endpoint takes ONE time for all its dates).
 
-export const MIN_SESSIONS = 2;
 export const MAX_SESSIONS = 20;
-export const DEFAULT_SESSIONS = 4;
 
 /** How far past the last row the patient's existing sessions are read (the suggestion's forward search). */
 export const SUGGESTION_LOOKAHEAD_DAYS = 8 * 7;
-
-export function clampSessions(n: number): number {
-  if (!Number.isFinite(n)) return DEFAULT_SESSIONS;
-  return Math.min(MAX_SESSIONS, Math.max(MIN_SESSIONS, Math.round(n)));
-}
-
-/** Sessions left on the patient's package for this service when known (> 0), else 4; always 2–20. */
-/** The sessions stepper: one up or down inside MIN–MAX. Below MIN (rows dropped) minus does nothing. */
-export function stepSessions(current: number, delta: 1 | -1): number {
-  if (delta < 0) return current <= MIN_SESSIONS ? current : clampSessions(current - 1);
-  return current >= MAX_SESSIONS ? current : Math.max(MIN_SESSIONS, current + 1);
-}
 
 /** How the series stands at a glance: free rows, full ones (overbook) and blocked ones (fix or drop). */
 export function seriesHealth(rows: ReadonlyArray<{ status: "free" | "full" | "blocked" }>): {
@@ -40,10 +26,6 @@ export function seriesSpan(dates: readonly string[]): { first: string; last: str
   if (dates.length === 0) return null;
   const sorted = [...dates].sort();
   return { first: sorted[0], last: sorted[sorted.length - 1] };
-}
-
-export function defaultSessions(sessionsLeft?: number | null): number {
-  return sessionsLeft != null && sessionsLeft > 0 ? clampSessions(sessionsLeft) : DEFAULT_SESSIONS;
 }
 
 /** One date of the series as the user left it: `time` set = a per-row override of the series time. */

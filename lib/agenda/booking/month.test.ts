@@ -44,14 +44,9 @@ test("shiftMonth: forward, back and across years", () => {
   assert.deepEqual(shiftMonth({ year: 2026, month0: 5 }, 0), { year: 2026, month0: 5 });
 });
 
-test("monthRowsTemplate: weeks wholly past fold to one line, the rest keep a floor", () => {
+test("monthRowsTemplate: every week has the same height (past weeks no longer fold; owner, 2026-11-23)", () => {
   const nov = monthWeeks(2026, 10); // 5 weeks, Sunday-first from Nov 1
-  assert.equal(
-    monthRowsTemplate(nov, "2026-11-20"),
-    "1.75rem 1.75rem minmax(4.5rem, 1fr) minmax(4.5rem, 1fr) minmax(4.5rem, 1fr)",
-  );
-  // today's own week never folds, even on its last day
-  assert.equal(monthRowsTemplate(nov, "2026-11-21").split(" ").filter((r) => r === "1.75rem").length, 2);
-  // a month seen before it starts: nothing folds
-  assert.ok(!monthRowsTemplate(nov, "2026-10-01").includes("1.75rem"));
+  const row = "minmax(4.5rem, 1fr)";
+  assert.equal(monthRowsTemplate(nov), [row, row, row, row, row].join(" "));
+  assert.equal(monthRowsTemplate(monthWeeks(2026, 7)).split(" minmax").length, 6); // Aug 2026: 6 weeks
 });

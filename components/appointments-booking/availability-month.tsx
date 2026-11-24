@@ -22,6 +22,10 @@ import { cn } from "@/lib/utils";
 // whose request failed shows "—" and asks again on click. The ‹ Today › row and the title live in the
 // PeriodHeader above it.
 
+/** The slot an appointment is being moved FROM: solid primary, used nowhere else on the booking screen
+ *  (availability is green/amber, the selection only an outline), so it cannot be missed (owner, 2026-11-23). */
+export const FROM_CLASS = "bg-primary text-primary-foreground hover:bg-primary/90";
+
 export const FREE_CLASS: Record<ReturnType<typeof freeBucket>, string> = {
   full: "bg-destructive/10 text-destructive",
   low: "bg-warning text-warning-foreground",
@@ -71,6 +75,7 @@ export function AvailabilityMonth({
   onRetry: (date: string) => void;
 }) {
   const t = useTranslations("appointmentsBooking.month");
+  const tm = useTranslations("appointmentsBooking.move");
   const format = useFormatter();
 
   const cellOf = (date: string): Cell => {
@@ -111,7 +116,7 @@ export function AvailabilityMonth({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2" data-slot="availability-month">
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
+      <div className="grid grid-cols-7 gap-1 px-1 text-center text-xs font-medium text-muted-foreground">
         {(weeks[0] ?? []).map((d) => {
           const day = parseDayUTC(d);
           return <div key={d}>{day ? format.dateTime(day, "dayWeekdayOnly") : ""}</div>;
@@ -119,9 +124,11 @@ export function AvailabilityMonth({
       </div>
 
       <div
-        className="grid min-h-0 flex-1 grid-cols-7 gap-1 overflow-y-auto"
-        // Past weeks fold to a line; the rest never shrink below a cell's content (scrolls if cramped).
-        style={{ gridTemplateRows: monthRowsTemplate(weeks, todayIso) }}
+        className="grid min-h-0 flex-1 grid-cols-7 gap-1 overflow-y-auto p-1"
+        // Every week the same height, never below a cell's content (scrolls if cramped). `p-1`: the
+        // selected day's outline (2px + 1px offset) draws outside its cell, and this scroll container
+        // clips both axes — without the padding the edge columns' outline was cut off (as in day-panel).
+        style={{ gridTemplateRows: monthRowsTemplate(weeks) }}
       >
         {weeks.flat().map((date) => {
           const cell = cellOf(date);
@@ -131,17 +138,22 @@ export function AvailabilityMonth({
           const base = cn(
             "relative flex min-h-0 flex-col overflow-hidden rounded-md p-1.5 text-left text-xs transition-colors",
             isSelected && "outline-2 outline-offset-1 outline-primary",
-            isRing && "ring-2 ring-warning",
           );
+          // The day being moved from: solid primary (last, so it wins over the cell's own colour).
+          const fromClass = isRing && FROM_CLASS;
 
           if (cell.kind === "outside") {
             return <div key={date} className={cn(base, "text-muted-foreground/40")}>{dayNum}</div>;
           }
           if (cell.kind === "inert") {
             return (
-              <div key={date} className={cn(base, "bg-muted/60 text-muted-foreground")}>
+              <div key={date} className={cn(base, "bg-muted/60 text-muted-foreground", fromClass)}>
                 <span>{dayNum}</span>
-                {cell.label && <span className="mt-auto truncate">{cell.label}</span>}
+                {isRing ? (
+                  <span className="mt-auto truncate font-medium">{tm("currentBadge")}</span>
+                ) : (
+                  cell.label && <span className="mt-auto truncate">{cell.label}</span>
+                )}
               </div>
             );
           }
@@ -172,13 +184,15 @@ export function AvailabilityMonth({
             <button
               key={date}
               type="button"
-              className={cn(base, cell.className, "hover:brightness-95")}
+              className={cn(base, cell.className, "hover:brightness-95", fromClass)}
               aria-pressed={isSelected}
               onClick={() => onSelect(date)}
             >
               <span>{dayNum}</span>
               <span className="m-auto text-xl leading-none font-semibold tabular-nums">{cell.value}</span>
-              <span className="truncate opacity-80">{cell.label}</span>
+              <span className={cn("truncate", isRing ? "font-medium" : "opacity-80")}>
+                {isRing ? tm("currentBadge") : cell.label}
+              </span>
             </button>
           );
         })}

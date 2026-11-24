@@ -29,25 +29,28 @@ import { Panel } from "@/components/kit/panel";
 // Picking a medical time opens the shared CitaModal with everything preset (it owns doctor choice,
 // validation, the overlap warning, the EHR gate and the BE's reschedule-instead behaviour). Picking a
 // service time renders the `serviceForm` slot under the day's grid. While moving an appointment the day
-// panel asks "Move here?" instead. Data comes from the screen's useBookingCalendar.
+// panel opens the move dialog instead. Data comes from the screen's useBookingCalendar.
 
 type Month = MonthRef;
 
 /**
- * An appointment from the patient rail being moved. The day panel's "Move here?" box confirms with the
+ * An appointment from the patient rail being moved. The move dialog confirms with the
  * picked day and time; `onConfirm` resolves true when the move went through (the picked time is then
- * dropped). "Not this one" only un-picks the time: moving goes on until the screen clears it.
+ * dropped). Closing the dialog only un-picks the time: moving goes on until the screen clears it.
  */
 export interface CalendarMoving {
-  fromLabel: string;
+  /** The appointment's current day and time. */
+  from: { date: string; time: string | null };
   needsReason: boolean;
   onConfirm: (to: { date: string; time: string }, reason?: string) => Promise<boolean>;
 }
 
+/** Every hour of the day: the Mañana/Tarde filter was removed (owner, 2026-11-23). */
+const ALL_DAY: TimeWindow = "any";
+
 export interface BookingCalendarPatch {
   date?: string;
   month?: Month;
-  window?: TimeWindow;
   view?: BookingView;
   /** Week view: any day of the shown week. */
   anchor?: string;
@@ -65,7 +68,6 @@ export function BookingCalendar({
   onClearType,
   date,
   month,
-  window,
   view,
   period,
   anchor,
@@ -90,7 +92,6 @@ export function BookingCalendar({
   onClearType: () => void;
   date: string | undefined;
   month: Month;
-  window: TimeWindow;
   view: BookingView;
   period: BookingPeriod;
   /** Week view: any day of the shown week. */
@@ -139,11 +140,6 @@ export function BookingCalendar({
     if (day !== date) onChange({ date: day });
   };
 
-  const pickNext = (day: string, time: string) => {
-    if (day !== date) onChange({ date: day, month: monthOf(day), anchor: day });
-    pickTime(day, time);
-  };
-
   // A week cell = that day + the hour's first time with room, exactly like picking it in the day panel.
   const pickCell = (day: string, time: string) => {
     if (day !== date) onChange({ date: day });
@@ -177,13 +173,8 @@ export function BookingCalendar({
         typeName={typeName}
         color={color}
         onClearType={onClearType}
-        window={window}
-        onWindow={(w) => onChange({ window: w })}
         view={medical ? view : undefined}
         onView={medical ? (v) => onChange({ view: v }) : undefined}
-        nextFree={data.notConfigured ? [] : data.nextFree}
-        nextFreeLoading={data.nextFreeLoading}
-        onPickNext={pickNext}
       />
       {centerNote && <p className="text-xs font-medium text-primary">{centerNote}</p>}
       <PeriodHeader
@@ -207,10 +198,11 @@ export function BookingCalendar({
         // container query, so the app sidebar being open or folded counts): main >= ~560px + gap + the
         // 19rem day panel. Narrower (laptops with the sidebar open), the day panel sits under the main
         // area and both share the height; the day panel scrolls inside itself, the page never does.
-        // Day view is the day panel alone, large.
+        // Day view is the day panel alone, large. Week view is the week grid alone (owner, 2026-11-23): the
+        // day panel only renders what a picked cell opens (move or service dialog).
         <div
           className={
-            period === "day"
+            period !== "month"
               ? "flex min-h-0 flex-1 flex-col"
               : "grid min-h-0 flex-1 grid-cols-1 gap-4 lg:@max-[880px]:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @min-[880px]:grid-cols-[minmax(0,1fr)_19rem] @min-[880px]:grid-rows-[minmax(0,1fr)]"
           }
@@ -223,7 +215,7 @@ export function BookingCalendar({
               holidays={data.holidays}
               days={data.days}
               view={medical ? view : "free"}
-              window={window}
+              window={ALL_DAY}
               selected={date}
               ringDate={ringDate}
               onSelect={selectDay}
@@ -237,10 +229,11 @@ export function BookingCalendar({
               holidays={data.holidays}
               days={data.weekDays}
               view={medical ? view : "free"}
-              window={window}
+              window={ALL_DAY}
               selected={date}
               picked={picked}
               ringDate={ringDate}
+              ringTime={moving?.from.time}
               onPick={pickCell}
               onRetry={data.retryDay}
             />
@@ -249,13 +242,13 @@ export function BookingCalendar({
             date={date}
             typeName={typeName}
             day={data.day}
-            window={window}
+            window={ALL_DAY}
             picked={picked}
             onPickTime={(time) => date && pickTime(date, time)}
             onRetry={data.retrySelected}
             moving={
               moving && {
-                fromLabel: moving.fromLabel,
+                from: moving.from,
                 needsReason: moving.needsReason,
                 onConfirm: async (reason) => {
                   if (!date || !picked) return;
@@ -267,6 +260,7 @@ export function BookingCalendar({
             fullDayHref={fullDayHref}
             large={period === "day"}
             closedLabel={closedLabel}
+            dialogsOnly={period === "week"}
           >
             {date && picked && serviceForm ? (
               serviceForm({ date, time: picked, clear: () => setPick(null) })

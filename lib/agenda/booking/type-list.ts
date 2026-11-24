@@ -2,8 +2,8 @@ import { addDays, weekdayOf } from "../recurring-plan.ts";
 import { nextFree, type DaySlots } from "./availability.ts";
 
 // "What are we booking?" as a searchable list: the search (accent- and case-insensitive), the groups
-// (Medical, then the patient's packages, then the other services, each in its configured order) and the
-// days the "next free" column scans. Pure, no app imports.
+// (Medical, then the services; with a patient, only what that patient can book) and the days the
+// "next free" column scans. Pure, no app imports.
 
 /** Lower case without accents or surrounding spaces: "Sónica " → "sonica". */
 export function foldText(s: string): string {
@@ -18,34 +18,92 @@ export function matchesQuery(name: string, query: string): boolean {
   return words.every((w) => folded.includes(w));
 }
 
-export type TypeListGroupKey = "medical" | "packages" | "services";
+export type TypeListGroupKey = "medical" | "packages" | "services" | "patientServices";
 
 export interface TypeListGroup<T> {
   key: TypeListGroupKey;
   items: T[];
 }
 
+/** Whether the patient was attended before (GET /appointments/patients/:id/visit-kind). */
+export type VisitKind = { attendedBefore: boolean };
+
 /**
- * The list's groups after the search. Medical first, then the services the patient has package sessions
- * for (`packages`: service id → sessions left; only those with sessions left count), then the rest of the
- * services; the input order (the configured one) is kept inside each group. Without a search, Medical
- * and Services are always there (empty ones say so) and Packages only when it has rows; with a search,
- * empty groups are dropped.
+ * The medical types a patient can be booked for: attended before → no first visit (`nueva`); never
+ * attended → no follow-up (`seguimiento`). Unknown (loading or failed) → every type: the BE still
+ * corrects the type on save, so booking is never blocked on this read. Other slugs are untouched.
+ * The slugs are the backend's (un-paciente-conocido-es-seguimiento.ts).
+ */
+export function filterMedicalTypes<T extends { slug: string }>(types: T[], kind: VisitKind | undefined): T[] {
+  if (!kind) return types;
+  const hidden = kind.attendedBefore ? "nueva" : "seguimiento";
+  return types.filter((x) => x.slug !== hidden);
+}
+
+/**
+ * The services a patient can still book: only those with bookable sessions left (bought − attended −
+ * already booked), most bookable first. `undefined` while the balance is unknown (loading or failed):
+ * there is no fallback to every service once a patient is chosen.
+ */
+export function bookableServicesList<T extends { id: string }>(
+  services: T[],
+  bookable: ReadonlyMap<string, { bookable: number }> | undefined,
+): T[] | undefined {
+  if (!bookable) return undefined;
+  const left = (x: T) => bookable.get(x.id)?.bookable ?? 0;
+  return services.filter((x) => left(x) > 0).sort((a, b) => left(b) - left(a));
+}
+
+/**
+ * What the patient's services group shows: "hidden" when the user may not read the services or the
+ * balance (a no-permission note, never an error with a retry that cannot work), else by the balance's
+ * load state: skeleton rows while unknown ("idle" too), an error with retry, or the list.
+ */
+export function patientServicesView(p: {
+  hidden: boolean;
+  bookableState: "idle" | "loading" | "ok" | "fail";
+}): "hidden" | "loading" | "fail" | "list" {
+  if (p.hidden) return "hidden";
+  if (p.bookableState === "fail") return "fail";
+  return p.bookableState === "ok" ? "list" : "loading";
+}
+
+/**
+ * The list's groups after the search; the input order is kept inside each group.
+ *
+ * Without a patient (`patientMode` false): Medical first, then the services with package sessions
+ * (`packages`: service id → sessions left; only those with sessions left count), then the rest of the
+ * services. Without a search, Medical and Services are always there (empty ones say so) and Packages
+ * only when it has rows.
+ *
+ * With a patient (`patientMode` true): Medical and the patient's services (`services` is then already
+ * the bookable list, see bookableServicesList), both always there without a search.
+ *
+ * With a search, empty groups are dropped.
  */
 export function typeListGroups<T extends { id: string; name: string }>(p: {
   medical: T[];
   services: T[];
-  packages: ReadonlyMap<string, number>;
+  packages?: ReadonlyMap<string, number>;
   query: string;
+  patientMode?: boolean;
 }): TypeListGroup<T>[] {
   const hit = (x: T) => matchesQuery(x.name, p.query);
-  const hasPackage = (x: T) => (p.packages.get(x.id) ?? 0) > 0;
+  const searching = foldText(p.query) !== "";
+  if (p.patientMode) {
+    const groups: TypeListGroup<T>[] = [
+      { key: "medical", items: p.medical.filter(hit) },
+      { key: "patientServices", items: p.services.filter(hit) },
+    ];
+    return groups.filter((g) => g.items.length > 0 || !searching);
+  }
+  const packages = p.packages ?? new Map<string, number>();
+  const hasPackage = (x: T) => (packages.get(x.id) ?? 0) > 0;
   const groups: TypeListGroup<T>[] = [
     { key: "medical", items: p.medical.filter(hit) },
     { key: "packages", items: p.services.filter((x) => hasPackage(x) && hit(x)) },
     { key: "services", items: p.services.filter((x) => !hasPackage(x) && hit(x)) },
   ];
-  const searching = foldText(p.query) !== "";
   return groups.filter((g) => g.items.length > 0 || (!searching && g.key !== "packages"));
 }
 

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { bookingSummary, clinicIsFixed, shiftDay, slotTone, startsWithChoiceMade, timeRange } from "./appointment-form.ts";
+import { bookingSummary, clinicIsFixed, nextFullHour, shiftDay, slotTone, startsWithChoiceMade, timeRange } from "./appointment-form.ts";
 
 test("slotTone: no places left is full, one is low, more is open", () => {
   assert.equal(slotTone(0), "full");
@@ -56,4 +56,21 @@ test("clinicIsFixed: a time picked from one clinic's hours keeps that clinic", (
   assert.equal(clinicIsFixed({ isEdit: false, givenClinic: undefined, givenTime: "13:00" }), false);
   // Edit: an appointment never changes clinic; the dialog already hides the picker.
   assert.equal(clinicIsFixed({ isEdit: true, givenClinic: "bay", givenTime: "13:00" }), false);
+});
+
+test("nextFullHour: the next whole hour after the clock, never the current one", () => {
+  assert.equal(nextFullHour("09:15"), "10:00");
+  assert.equal(nextFullHour("09:00"), "10:00");
+  assert.equal(nextFullHour("00:59"), "01:00");
+  assert.equal(nextFullHour("17:45"), "18:00"); // after closing still gives an hour; reception edits it
+});
+
+test("nextFullHour: stays on the same day (late night caps at 23:00)", () => {
+  assert.equal(nextFullHour("23:10"), "23:00");
+  assert.equal(nextFullHour("22:30"), "23:00");
+});
+
+test("nextFullHour: an unreadable clock falls back to 09:00", () => {
+  assert.equal(nextFullHour(""), "09:00");
+  assert.equal(nextFullHour("abc"), "09:00");
 });

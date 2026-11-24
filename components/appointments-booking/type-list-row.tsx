@@ -12,7 +12,8 @@ import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
 // One row of "What are we booking?": a thin colour bar (accent only), the name, a meta line (duration
-// and "with doctor" for medical types, "N sessions left" for a patient's package) and, on the right, the
+// and "with doctor" for medical types, "N sessions left" for a patient's service, "Bought in <center>"
+// when those sessions come from another center) and, on the right, the
 // next free time. The next free time is asked only once the row is on screen (IntersectionObserver).
 
 export function TypeListRow({
@@ -20,12 +21,15 @@ export function TypeListRow({
   center,
   holidays,
   sessionsLeft,
+  otherCenters,
   onPick,
 }: {
   type: BookingType;
   center: string | undefined;
   holidays: string[] | null;
   sessionsLeft: number;
+  /** A patient's sessions bought in another center than the booking one: those centers' names. */
+  otherCenters?: string[];
   onPick: (kind: BookingKind, typeId: string) => void;
 }) {
   const t = useTranslations("appointmentsBooking.typePicker");
@@ -103,6 +107,11 @@ export function TypeListRow({
             {sessionsLeft > 0 && (
               <span className="rounded-full bg-success/15 px-2 py-0.5 font-medium text-success-foreground">
                 {t("sessionsLeft", { n: sessionsLeft })}
+              </span>
+            )}
+            {otherCenters && otherCenters.length > 0 && (
+              <span className="rounded-full bg-warning/15 px-2 py-0.5 font-medium text-warning-foreground">
+                {t("otherCenter", { center: otherCenters.join(", ") })}
               </span>
             )}
           </span>
