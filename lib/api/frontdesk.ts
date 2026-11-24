@@ -420,6 +420,8 @@ export type PendienteEntrega = {
   deliveredSessions?: number | null;
   groupKey?: string | null;
   multiplicadores?: Record<string, number> | null; // NO en el mapa — dejado en español
+  /** Laser areas each session covers (cmr-be #689); null when unknown or not an area product. */
+  areasPerSession?: number | null;
 };
 export function getPendientesEntrega(pacienteId: string, centroId?: string): Promise<PendienteEntrega[]> {
   return apiFetch<unknown>(

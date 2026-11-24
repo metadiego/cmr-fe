@@ -10,6 +10,7 @@ import { getPendientesEntrega, type PendienteEntrega } from "@/lib/api/frontdesk
 import { aplicarCambioProtocolo, type CambioProtocaloNuevo } from "@/lib/api/protocol-change";
 import { getCatalogoFacturacion, type Producto } from "@/lib/api/facturas";
 import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
+import { pendingAreas, toggleSealedUnits } from "@/lib/pacientes/protocol-change-origin";
 import { isUsableLine, protocolChangeInvalid, protocolChangeMissing } from "@/lib/pacientes/protocol-change-missing";
 import { callIfPermitted } from "@/lib/rbac/call-if-permitted";
 import { useResource } from "@/hooks/use-resource";
@@ -82,8 +83,11 @@ export function CambioProtocoloForm({
     setReintegros({});
   }
 
-  function toggleOrigen(id: string) {
-    setOrigenSel((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  function toggleOrigen(id: string, pendiente: number | null | undefined) {
+    const checked = !origenSel.has(id);
+    setOrigenSel((s) => { const n = new Set(s); if (checked) n.add(id); else n.delete(id); return n; });
+    // Ticked → the sealed units start at the whole pending count, selected; unticked → cleared.
+    setReintegros((r) => toggleSealedUnits(r, id, checked, pendiente));
   }
   function setLinea(key: number, patch: Partial<NuevaLinea>) {
     setLineas((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)));
@@ -167,15 +171,21 @@ export function CambioProtocoloForm({
         <ul className="space-y-2">
           {pendientes.map((p) => {
             const marcado = origenSel.has(p.id);
+            const areas = pendingAreas(p);
             return (
               <li key={p.id} className={"rounded-md ring-1 ring-foreground/10 px-3 py-2 " + (marcado ? "border-primary bg-primary/5" : "")}>
                 <label className="flex items-start gap-2">
-                  <Checkbox checked={marcado} onCheckedChange={() => toggleOrigen(p.id)} className="mt-0.5" />
+                  <Checkbox checked={marcado} onCheckedChange={() => toggleOrigen(p.id, p.pendiente)} className="mt-0.5" />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium">{p.productoNombre ?? p.sku ?? "—"}</span>
-                    <span className="block text-xs text-muted-foreground">
+                    <span className="block text-xs text-muted-foreground tabular-nums">
                       {t("pendientesN", { n: p.pendiente ?? 0, total: p.totalSessions ?? 0 })}
                     </span>
+                    {areas && (
+                      <span className="block text-xs text-muted-foreground tabular-nums">
+                        {t("areasPending", { perSession: areas.perSession, pending: areas.pending })}
+                      </span>
+                    )}
                   </span>
                 </label>
                 {marcado && (
@@ -184,6 +194,8 @@ export function CambioProtocoloForm({
                     <Input
                       value={reintegros[p.id] ?? ""}
                       onChange={(e) => setReintegros((r) => ({ ...r, [p.id]: e.target.value }))}
+                      onFocus={(e) => e.currentTarget.select()}
+                      autoFocus
                       inputMode="numeric"
                       className="h-7 w-20 text-right tabular-nums"
                       placeholder="0"

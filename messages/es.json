@@ -4981,7 +4981,8 @@
       "enCentro": "En {centro}",
       "cambioResumen": "{cerrados} cerrado(s) · {creados} nuevo(s)",
       "nuevoTitulo": "Nuevo cambio",
-      "sessionsAtLeastOne": "Las sesiones deben ser 1 o más."
+      "sessionsAtLeastOne": "Las sesiones deben ser 1 o más.",
+      "areasPending": "{perSession} áreas por sesión · {pending} áreas pendientes"
     }
   },
   "perfiles": {
