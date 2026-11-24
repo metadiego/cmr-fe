@@ -4807,7 +4807,8 @@
     "enfermeria": "Nursing panel",
     "seccion": {
       "vitales": "Vitals",
-      "intravenoso": "IV"
+      "intravenoso": "IV",
+      "bpc": "BPC-157"
     },
     "cancelarAviso": "Cancel alert",
     "formatos": "Formats",

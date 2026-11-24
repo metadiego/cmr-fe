@@ -35,6 +35,7 @@ import {
   writeBackProblems,
   type RangeProblem,
   type SheetState,
+  sheetTextAreas,
 } from "@/lib/format-sheet/sheet";
 
 type Loaded = { assembly: FormatoArmado; answers: SheetAnswers; staff: PersonalEnAlcance[] };
@@ -109,9 +110,11 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
   const editable = allFields.filter((f) => !isReadOnlyField(f));
   const editableKeys = editable.map((f) => f.clave);
 
+  const areas = React.useMemo(() => sheetTextAreas(data.assembly), [data.assembly]);
+
   const [answers, setAnswers] = React.useState<SheetAnswers>(data.answers);
   const [state, setState] = React.useState<SheetState>(() => initialSheetState(data.answers, firstSection));
-  const payload = sheetPayload(state, editableKeys, questions);
+  const payload = sheetPayload(state, editableKeys, questions, areas);
   const payloadJson = JSON.stringify(payload);
   const [savedJson, setSavedJson] = React.useState(() => (data.answers.saved ? payloadJson : ""));
   const dirty = payloadJson !== savedJson;
@@ -272,15 +275,31 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
 
       <Panel title={t("signature")}>
         <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <Field label={t("additionalNotes")} htmlFor="sheet-notes">
-            <Textarea
-              id="sheet-notes"
-              rows={4}
-              value={state.additionalNotes}
-              onChange={(e) => setState((s) => ({ ...s, additionalNotes: e.target.value }))}
-              className="text-base"
-            />
-          </Field>
+          {/* One area per free-text section of the format (BPC-157 has two, GLP-1 one); labels from the format. */}
+          <div className="grid content-start gap-4">
+            {areas.keyed.map((a) => (
+              <Field key={a.key} label={a.label ?? t("additionalNotes")} htmlFor={`sheet-note-${a.key}`}>
+                <Textarea
+                  id={`sheet-note-${a.key}`}
+                  rows={3}
+                  value={state.notes[a.key] ?? ""}
+                  onChange={(e) => setState((s) => ({ ...s, notes: { ...s.notes, [a.key]: e.target.value } }))}
+                  className="text-base"
+                />
+              </Field>
+            ))}
+            {areas.unkeyed && (
+              <Field label={t("additionalNotes")} htmlFor="sheet-notes">
+                <Textarea
+                  id="sheet-notes"
+                  rows={4}
+                  value={state.additionalNotes}
+                  onChange={(e) => setState((s) => ({ ...s, additionalNotes: e.target.value }))}
+                  className="text-base"
+                />
+              </Field>
+            )}
+          </div>
           <div className="grid content-start gap-4">
             <Field label={t("nurse")} htmlFor="sheet-nurse">
               <Select value={state.nurseId || undefined} onValueChange={(v) => setState((s) => ({ ...s, nurseId: v }))}>

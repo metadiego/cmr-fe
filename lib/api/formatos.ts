@@ -66,7 +66,8 @@ export type FormatoCampo = {
 // exactas en docs/specs/formatos-legacy-handoff-be.md. El FE dibuja lo que el BE emita; nada hardcodeado.
 export type FormatoSeccion =
   // OBSERVACIONES: caja (por defecto) o N líneas regladas (`estilo:"lineas"`, `lineas` = nº de renglones).
-  | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number; text?: string | null }
+  // `clave` is set only on a keyed area saved in the sheet's `notes` (BPC-157, cmr-be #684); null otherwise.
+  | { clave?: string | null; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number; text?: string | null }
   // Firmas simples: línea horizontal + label debajo. `lineas` son objetos { label, labelKey } (o string).
   // `estilo:"en_linea"` = the legacy «LABEL: ________» (label first, the line after it), `columnas` per row
   // (default 2: «TÉCNICO | FIRMA DEL PACIENTE», then «HORA»). A line's `valor` is printed on it (e.g. the

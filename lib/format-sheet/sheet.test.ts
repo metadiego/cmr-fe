@@ -20,6 +20,7 @@ import {
   sheetPayload,
   sheetProblems,
   sheetQuestions,
+  sheetTextAreas,
 } from "./sheet.ts";
 
 // Shapes copied from docs/specs/glp1-hoja-enfermeria-ipad-contrato-be.md.
@@ -155,6 +156,61 @@ test("the payload is the whole sheet: every question, trimmed notes, editable fi
   assert.equal(body.nurseId, "n1");
   assert.equal(body.recordedAt, "2026-11-20T14:30:00-04:00");
   assert.equal(answeredCount(state, qs), 2);
+});
+
+// BPC-157 (cmr-be #684): two keyed areas and no unkeyed one.
+const bpcAssembly = {
+  sections: [
+    { tipo: "checklist", grupos: [{ titulo: "1. Vial", preguntas: [{ texto: "¿Vial del paciente?" }] }] },
+    { clave: "patient_comments", tipo: "texto_libre", titulo: "Comentarios del paciente:" },
+    { clave: null, tipo: "texto_libre", titulo: null, estilo: "lineas" },
+    { clave: "nursing_notes", tipo: "texto_libre", titulo: "Observaciones de enfermería:" },
+    { tipo: "firmas" },
+  ],
+} as unknown as FormatoArmado;
+
+test("text areas: keyed sections are their own areas; only the first unkeyed one is additional notes", () => {
+  assert.deepEqual(sheetTextAreas(bpcAssembly), {
+    keyed: [
+      { key: "patient_comments", label: "Comentarios del paciente" },
+      { key: "nursing_notes", label: "Observaciones de enfermería" },
+    ],
+    unkeyed: { label: null },
+  });
+  const glp1Like = { sections: [{ tipo: "texto_libre", titulo: "Observaciones adicionales:" }, { tipo: "texto_libre" }] } as unknown as FormatoArmado;
+  assert.deepEqual(sheetTextAreas(glp1Like), { keyed: [], unkeyed: { label: "Observaciones adicionales" } });
+  assert.deepEqual(sheetTextAreas({ sections: [] } as unknown as FormatoArmado), { keyed: [], unkeyed: null });
+});
+
+test("keyed notes round-trip; a format without an unkeyed area never sends additionalNotes", () => {
+  const areas = { keyed: [{ key: "patient_comments", label: null }, { key: "nursing_notes", label: null }], unkeyed: null };
+  const saved: SheetAnswers = { ...unsaved, saved: true, notes: [{ key: "nursing_notes", value: "Sin reacción" }] };
+  const state = initialSheetState(saved, 0, NOW);
+  assert.deepEqual(state.notes, { nursing_notes: "Sin reacción" } as Record<string, string>);
+  state.notes.patient_comments = "  Menos dolor ";
+  state.additionalNotes = "typed before the change"; // the BE answers 400 to this on BPC
+  const body = sheetPayload(state, [], sheetQuestions(bpcAssembly), areas);
+  assert.deepEqual(body.notes, [
+    { key: "patient_comments", value: "Menos dolor" },
+    { key: "nursing_notes", value: "Sin reacción" },
+  ]);
+  assert.equal(body.additionalNotes, null);
+});
+
+test("GLP-1's body is unchanged: no notes key, additional notes still sent", () => {
+  const state = initialSheetState(unsaved, 0, NOW);
+  state.additionalNotes = " Estable ";
+  // As prod serves glp1_adherencia: its texto_libre has no clave.
+  const glp1 = { sections: [assembly.sections![0], { tipo: "texto_libre", clave: null, titulo: "Observaciones adicionales:" }] } as unknown as FormatoArmado;
+  const body = sheetPayload(state, [], sheetQuestions(glp1), sheetTextAreas(glp1));
+  assert.equal("notes" in body, false);
+  assert.equal(body.additionalNotes, "Estable");
+});
+
+test("a keyed area over the limit is a reason", () => {
+  const state = initialSheetState(unsaved, 0, NOW);
+  state.notes.nursing_notes = "n".repeat(4001);
+  assert.deepEqual(sheetProblems(state), [{ kind: "textArea", key: "nursing_notes" }]);
 });
 
 test("Puerto Rico wall clock round-trips (no DST)", () => {

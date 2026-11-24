@@ -4807,7 +4807,8 @@
     "enfermeria": "Panel de Enfermería",
     "seccion": {
       "vitales": "Vitales",
-      "intravenoso": "Intravenoso"
+      "intravenoso": "Intravenoso",
+      "bpc": "BPC-157"
     },
     "cancelarAviso": "Cancelar aviso",
     "formatos": "Formatos",

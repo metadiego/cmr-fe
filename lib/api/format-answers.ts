@@ -21,6 +21,12 @@ export interface SheetAnswer {
   note?: string | null;
 }
 
+/** The text of one keyed free-text section (`sections[].clave` of type texto_libre), cmr-be #684. */
+export interface SheetNote {
+  key: string;
+  value: string | null;
+}
+
 export interface SheetPerson {
   id: string;
   name: string;
@@ -38,6 +44,8 @@ export interface SheetAnswers {
   saved: boolean;
   fields: SheetField[];
   answers: SheetAnswer[];
+  /** Keyed free-text sections; empty (or absent on an older BE) when the format has none. */
+  notes?: SheetNote[];
   additionalNotes: string | null;
   nurseId: string | null;
   recordedAt: string | null;
@@ -55,6 +63,9 @@ export interface SheetAnswers {
 export interface SheetAnswersInput {
   fields: SheetField[];
   answers: SheetAnswer[];
+  /** Sent only when the format has keyed free-text sections: the array replaces the saved one. */
+  notes?: SheetNote[];
+  /** The first UNKEYED free-text section; the BE answers 400 to text here when the format has none. */
   additionalNotes: string | null;
   nurseId: string | null;
   recordedAt: string | null;
