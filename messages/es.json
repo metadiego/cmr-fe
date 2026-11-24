@@ -6934,10 +6934,8 @@
       "frequency": "Frecuencia",
       "manual": "Manual",
       "weeklyPattern": "Semanal",
-      "timesPerWeek": "Veces por semana",
       "days": "Días",
       "total": "Citas",
-      "pickDaysReason": "Elige {n, plural, one {# día} other {# días}} de la semana.",
       "maxPerBooking": "Hasta {n} por vez.",
       "fewer": "Una sesión menos",
       "more": "Una sesión más",
@@ -6948,7 +6946,8 @@
       "noBalanceReason": "No le quedan sesiones de este servicio. Pásalo por facturación para añadirlo.",
       "overBalanceReason": "Solo le quedan {n, plural, one {# sesión} other {# sesiones}} por agendar.",
       "otherCenterWarning": "Este paquete se compró en {center}; estás agendando en {here}.",
-      "fullShort": "lleno"
+      "fullShort": "lleno",
+      "perWeekSummary": "{n, plural, one {# vez por semana} other {# veces por semana}}"
     },
     "toasts": {
       "appointmentSaved": "Cita guardada",

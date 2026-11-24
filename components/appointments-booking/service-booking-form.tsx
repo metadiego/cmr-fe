@@ -28,7 +28,6 @@ import {
 } from "@/lib/agenda/booking/series-booking";
 import {
   addItem,
-  daysMatch,
   fitLoadedTimes,
   generateWeeklyPattern,
   nextDate,
@@ -128,7 +127,6 @@ export function ServiceBookingForm({
   // The form is keyed on the picked date, so the start's weekday is fixed for its lifetime.
   const startDay = weekdayOf(date);
   const [mode, setMode] = React.useState<SeriesMode>("manual");
-  const [perWeek, setPerWeekState] = React.useState(1);
   const [days, setDays] = React.useState<number[]>(() => (startDay === 0 ? [] : [startDay]));
   const [totalChoice, setTotalChoice] = React.useState<number | null>(null);
   const [busy, setBusy] = React.useState(false);
@@ -236,7 +234,6 @@ export function ServiceBookingForm({
   // From the generated items, not `rows`: rows stay empty until a patient is chosen.
   const single = items.length === 1;
   const sunday = startDay === 0;
-  const pickDays = weekly && !daysMatch(days, perWeek);
   const balanceVerdict = balanceReason(items.length, bookableLeft);
   const balanceIssue = !patient
     ? null
@@ -251,10 +248,9 @@ export function ServiceBookingForm({
             : balanceVerdict === "overBalance"
               ? t("series.overBalanceReason", { n: bookableLeft })
               : null;
-  const ready = !!patient && canBook && !busy && !sunday && !balanceIssue && !pickDays && seriesOk;
+  const ready = !!patient && canBook && !busy && !sunday && !balanceIssue && seriesOk;
   // What keeps «Agendar» grey, said above it (forms kit): the patient is a missing field; no permission,
-  // a Sunday start, the balance (loading, failed, none or fewer than the rows), weekdays still to pick
-  // or rows that cannot go yet are a reason.
+  // a Sunday start, the balance (loading, failed, none or fewer than the rows) or rows that cannot go yet are a reason.
   const missing = patient ? [] : [t("series.patient")];
   const reason = !permsReady
     ? tRoot("common.loading")
@@ -264,9 +260,7 @@ export function ServiceBookingForm({
         ? t("series.dateSunday")
         : balanceIssue
           ? balanceIssue
-          : pickDays
-            ? t("series.pickDaysReason", { n: perWeek })
-            : patient && !seriesOk
+          : patient && !seriesOk
               ? anyFailed
                 ? t("series.checkFailed")
                 : allLoaded
@@ -412,12 +406,10 @@ export function ServiceBookingForm({
           setMode(m);
           setEdits(null);
         }}
-        perWeek={perWeek}
         days={days}
         startDay={startDay}
         onDays={(next) => {
-          setDays(next.days);
-          setPerWeekState(next.perWeek);
+          setDays(next);
           setEdits(null);
         }}
         total={edited ? items.length : total}

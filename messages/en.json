@@ -6934,10 +6934,8 @@
       "frequency": "Frequency",
       "manual": "Manual",
       "weeklyPattern": "Weekly",
-      "timesPerWeek": "Times per week",
       "days": "Days",
       "total": "Appointments",
-      "pickDaysReason": "Pick {n, plural, one {# day} other {# days}} of the week.",
       "maxPerBooking": "Up to {n} at a time.",
       "fewer": "One session fewer",
       "more": "One session more",
@@ -6948,7 +6946,8 @@
       "noBalanceReason": "No sessions of this service left. Send them to billing to add one.",
       "overBalanceReason": "Only {n, plural, one {# session} other {# sessions}} left to book.",
       "otherCenterWarning": "This package was bought at {center}; you are booking at {here}.",
-      "fullShort": "full"
+      "fullShort": "full",
+      "perWeekSummary": "{n, plural, one {# time a week} other {# times a week}}"
     },
     "toasts": {
       "appointmentSaved": "Appointment saved",

@@ -7,7 +7,7 @@ import { MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/kit/form-dialog";
 import { SegmentedControl } from "@/components/kit/segmented-control";
-import { clampPerWeek, setPerWeek, toggleWeekday } from "@/lib/agenda/booking/series-edit";
+import { toggleWeekday } from "@/lib/agenda/booking/series-edit";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +20,13 @@ const sampleDay = (d: number) => parseDayUTC(`2024-01-0${d}`);
 
 /**
  * How a service series is built: Manual (the picked date, plus any dates added by hand) or Semanal
- * (times per week, which weekdays, how many in total; the dates fill in). The picked date's weekday is
- * selected and locked. Controls only: the form owns the state and the rows.
+ * (which weekdays and how many in total; the dates fill in). The times per week ARE the days chosen, so
+ * they are only shown, never set separately (owner, 2026-11-23). The picked date's weekday is selected
+ * and locked. Controls only: the form owns the state and the rows.
  */
 export function SeriesFrequency({
   mode,
   onMode,
-  perWeek,
   days,
   startDay,
   onDays,
@@ -38,11 +38,10 @@ export function SeriesFrequency({
 }: {
   mode: SeriesMode;
   onMode: (mode: SeriesMode) => void;
-  perWeek: number;
   days: number[];
   /** The picked date's weekday (getUTCDay numbering). */
   startDay: number;
-  onDays: (next: { days: number[]; perWeek: number }) => void;
+  onDays: (days: number[]) => void;
   total: number;
   maxTotal: number;
   /** `maxTotal` is the 20-per-booking limit (not the patient's balance): say so at the top. */
@@ -68,21 +67,8 @@ export function SeriesFrequency({
         />
       </Field>
       {mode === "weekly" && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[auto_minmax(0,1fr)]">
-          <Field label={t("timesPerWeek")}>
-            <Stepper
-              label={t("timesPerWeek")}
-              value={perWeek}
-              min={1}
-              max={6}
-              disabled={disabled}
-              onChange={(n) => {
-                const next = clampPerWeek(n);
-                onDays({ days: setPerWeek(days, next, startDay), perWeek: next });
-              }}
-            />
-          </Field>
-          <Field label={t("days")}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
+          <Field label={t("days")} hint={t("perWeekSummary", { n: days.length })}>
             <div className="flex flex-wrap gap-1.5" role="group" aria-label={t("days")}>
               {WEEKDAYS.map((d) => {
                 const on = days.includes(d);
@@ -94,7 +80,7 @@ export function SeriesFrequency({
                     type="button"
                     aria-pressed={on}
                     disabled={disabled || locked}
-                    onClick={() => onDays(toggleWeekday(days, d, startDay, perWeek))}
+                    onClick={() => onDays(toggleWeekday(days, d, startDay))}
                     className={cn(
                       "h-9 min-w-11 rounded-full border px-3 text-sm font-medium capitalize transition-colors",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

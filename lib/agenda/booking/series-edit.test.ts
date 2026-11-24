@@ -3,8 +3,6 @@ import assert from "node:assert/strict";
 
 import {
   addItem,
-  clampPerWeek,
-  daysMatch,
   fitLoadedTimes,
   fittedTime,
   generateItems,
@@ -12,7 +10,6 @@ import {
   nextDate,
   rejectDate,
   replaceDate,
-  setPerWeek,
   toggleWeekday,
   type EditableItem,
 } from "./series-edit.ts";
@@ -163,21 +160,9 @@ test("generateWeeklyPattern: the start weekday is the first row even when not in
   ]);
 });
 
-test("toggleWeekday: the start day is locked; adding beyond perWeek bumps it", () => {
-  assert.deepEqual(toggleWeekday([3], 3, 3, 1), { days: [3], perWeek: 1 });
-  assert.deepEqual(toggleWeekday([3], 5, 3, 1), { days: [3, 5], perWeek: 2 });
-  assert.deepEqual(toggleWeekday([3, 5], 5, 3, 2), { days: [3], perWeek: 2 });
-});
-
-test("setPerWeek: lowering drops the most recently added non-start days; clamps to 1..6", () => {
-  assert.deepEqual(setPerWeek([3, 5, 1], 2, 3), [3, 5]);
-  assert.deepEqual(setPerWeek([3, 5, 1], 1, 3), [3]);
-  assert.deepEqual(setPerWeek([3], 9, 3), [3]);
-  assert.equal(clampPerWeek(9), 6);
-  assert.equal(clampPerWeek(0), 1);
-});
-
-test("daysMatch: selected day count equals perWeek", () => {
-  assert.equal(daysMatch([3, 5], 2), true);
-  assert.equal(daysMatch([3], 2), false);
+test("toggleWeekday: the start day is locked; other days toggle in the order added", () => {
+  assert.deepEqual(toggleWeekday([3], 3, 3), [3]);
+  assert.deepEqual(toggleWeekday([3], 5, 3), [3, 5]);
+  assert.deepEqual(toggleWeekday([3, 5], 1, 3), [3, 5, 1]);
+  assert.deepEqual(toggleWeekday([3, 5], 5, 3), [3]);
 });
