@@ -4982,7 +4982,27 @@
       "cambioResumen": "{cerrados} closed · {creados} new",
       "nuevoTitulo": "New change",
       "sessionsAtLeastOne": "Sessions must be 1 or more.",
-      "areasPending": "{perSession} areas per session · {pending} areas pending"
+      "areasPending": "{perSession} areas per session · {pending} areas pending",
+      "descartar": "Discard",
+      "priceInvalid": "The price per unit must be a number equal to or greater than 0.",
+      "valuation": "Agreed: closed {closed} · created {created} · difference {difference}",
+      "sim": {
+        "title": "Simulation",
+        "hint": "Type the agreed price per unit. Empty uses what was charged (what closes) or the list price (what is created). Nothing is saved until you apply.",
+        "empty": "Tick what is replaced and add what replaces it to see whether it balances.",
+        "error": "The change could not be simulated.",
+        "closes": "Closes",
+        "creates": "Created",
+        "product": "Product",
+        "units": "Units",
+        "unitPrice": "Price per unit",
+        "value": "Value",
+        "charged": "charged {amount}",
+        "list": "list {amount}",
+        "totalClosed": "Closes {amount}",
+        "totalCreated": "Created {amount}",
+        "difference": "Difference {amount}"
+      }
     }
   },
   "perfiles": {

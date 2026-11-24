@@ -6,6 +6,8 @@ import { useFormatter, useTranslations } from "next-intl";
 import { getCambiosProtocolo, type CambioProtocoloHistorial } from "@/lib/api/protocol-change";
 import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
 import { parseDayUTC } from "@/lib/format/fecha";
+import { money } from "@/lib/caja/totales";
+import { signedMoney } from "@/lib/pacientes/protocol-change-simulation";
 import { useResource } from "@/hooks/use-resource";
 import { CambioProtocoloPorCentro } from "@/components/clientes/cambio-protocolo-por-centro";
 import { EmptyState, Panel } from "@/components/kit/panel";
@@ -61,6 +63,25 @@ export function FichaCambioProtocolo({ pacienteId, centro }: { pacienteId: strin
                   <dt className="text-muted-foreground">{t("medico")}</dt>
                   <dd>{c.doctorId ? (medById.get(c.doctorId) ?? "—") : "—"}</dd>
                 </dl>
+                {/* What was agreed (cmr-be #691); changes before 24-nov-2026 have none and show nothing. */}
+                {c.valuation && (
+                  <div className="mt-2 space-y-1 text-xs">
+                    <p className="font-medium tabular-nums">
+                      {t("valuation", {
+                        closed: money(c.valuation.totals.closedValue),
+                        created: money(c.valuation.totals.createdValue),
+                        difference: signedMoney(c.valuation.totals.difference, money),
+                      })}
+                    </p>
+                    <ul className="text-muted-foreground tabular-nums">
+                      {[...c.valuation.closes.map((x) => ({ k: `c-${x.packageId}`, sign: "−", ...x })), ...c.valuation.creates.map((x, i) => ({ k: `n-${x.productId}-${i}`, sign: "+", ...x }))].map((x) => (
+                        <li key={x.k}>
+                          {x.sign} {x.name ?? "—"} · {x.units} × {x.unitPrice != null ? money(x.unitPrice) : "—"} = {x.value != null ? money(x.value) : "—"}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </li>
             ))}
           </ol>

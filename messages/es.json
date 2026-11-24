@@ -4982,7 +4982,27 @@
       "cambioResumen": "{cerrados} cerrado(s) · {creados} nuevo(s)",
       "nuevoTitulo": "Nuevo cambio",
       "sessionsAtLeastOne": "Las sesiones deben ser 1 o más.",
-      "areasPending": "{perSession} áreas por sesión · {pending} áreas pendientes"
+      "areasPending": "{perSession} áreas por sesión · {pending} áreas pendientes",
+      "descartar": "Descartar",
+      "priceInvalid": "El precio por unidad debe ser un número igual o mayor que 0.",
+      "valuation": "Acordado: se cerró {closed} · se creó {created} · diferencia {difference}",
+      "sim": {
+        "title": "Simulacro",
+        "hint": "Escribe el precio por unidad acordado. Vacío usa lo cobrado (lo que se cierra) o la lista (lo que se crea). No se guarda nada hasta aplicar.",
+        "empty": "Marca qué se reemplaza y agrega con qué para ver si cuadra.",
+        "error": "No se pudo simular el cambio.",
+        "closes": "Se cierra",
+        "creates": "Se crea",
+        "product": "Producto",
+        "units": "Unidades",
+        "unitPrice": "Precio por unidad",
+        "value": "Valor",
+        "charged": "cobrado {amount}",
+        "list": "lista {amount}",
+        "totalClosed": "Se cierra {amount}",
+        "totalCreated": "Se crea {amount}",
+        "difference": "Diferencia {amount}"
+      }
     }
   },
   "perfiles": {
