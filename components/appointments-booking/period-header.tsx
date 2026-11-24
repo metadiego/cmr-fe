@@ -19,8 +19,8 @@ import type { MonthRef } from "@/lib/agenda/booking/month";
 import { parseDayUTC } from "@/lib/format/fecha";
 
 // The calendar's period controls: ‹ [view menu] › and the period's title. The view menu (Day D / Week W /
-// Month M) sits between the arrows where «Hoy» was; there is no «Hoy» button (owner, 2026-11-24). They
-// render at the left of the toolbar row, next to «Agendando» (BookingToolbar's `leading`).
+// Month M) sits between the arrows where «Hoy» was; there is no «Hoy» button (owner, 2026-11-24). The
+// row sits under «Agendando».
 
 const SHORTCUT: Record<BookingPeriod, string> = { day: "D", week: "W", month: "M" };
 

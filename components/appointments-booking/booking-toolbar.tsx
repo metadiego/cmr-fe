@@ -1,6 +1,5 @@
 "use client";
 
-import type * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
@@ -8,8 +7,7 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// The booking calendar's top row: the period controls (`leading`, at the left corner, owner 2026-11-24),
-// "Booking" / "Book for Ana" + the type chip (✕ to change it), the
+// The booking calendar's top rows: "Booking" / "Book for Ana" + the type chip (✕ to change it), the
 // Free/Booked switch (medical types only). The "Next free" strip was removed (owner, 2026-11-23). Every hour of the day is always
 // shown: the Mañana/Tarde filter was removed (owner, 2026-11-23).
 
@@ -21,7 +19,6 @@ export function shortTime(time: string): string {
 }
 
 export function BookingToolbar({
-  leading,
   label,
   typeName,
   color,
@@ -29,8 +26,6 @@ export function BookingToolbar({
   view,
   onView,
 }: {
-  /** Rendered first, at the row's left corner: the period controls. */
-  leading?: React.ReactNode;
   label: string;
   typeName: string;
   color: string | null;
@@ -43,28 +38,25 @@ export function BookingToolbar({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        {leading}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold">{label}</span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-1 pl-2.5 text-sm">
-            <span
-              className="size-2.5 rounded-full bg-muted-foreground/40"
-              style={color ? { backgroundColor: color } : undefined}
-              aria-hidden
-            />
-            {typeName}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-6"
-              onClick={onClearType}
-              aria-label={t("changeType")}
-            >
-              <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3.5" />
-            </Button>
-          </span>
-        </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-semibold">{label}</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-1 pl-2.5 text-sm">
+          <span
+            className="size-2.5 rounded-full bg-muted-foreground/40"
+            style={color ? { backgroundColor: color } : undefined}
+            aria-hidden
+          />
+          {typeName}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-6"
+            onClick={onClearType}
+            aria-label={t("changeType")}
+          >
+            <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3.5" />
+          </Button>
+        </span>
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {view && onView && (

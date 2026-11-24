@@ -23,9 +23,9 @@ import type { Paciente } from "@/lib/api/pacientes";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { Panel } from "@/components/kit/panel";
 
-// The calendar half of the booking screen: one toolbar row (‹ Day/Week/Month › · title, «Agendando» +
-// the type chip) and the period itself: Month (month of free spots + the selected day's times), Week
-// (hours × days + the selected day's times) or Day (that day's times, large, hosting the form / Move box itself).
+// The calendar half of the booking screen: toolbar, the period row (‹ Day/Week/Month › · title)
+// and the period itself: Month (month of free spots + the selected day's times), Week (hours × days +
+// the selected day's times) or Day (that day's times, large, hosting the form / Move box itself).
 // Picking a medical time opens the shared CitaModal with everything preset (it owns doctor choice,
 // validation, the overlap warning, the EHR gate and the BE's reschedule-instead behaviour). Picking a
 // service time renders the `serviceForm` slot under the day's grid. While moving an appointment the day
@@ -169,17 +169,6 @@ export function BookingCalendar({
   return (
     <Panel className="@container flex min-h-0 flex-col gap-3 p-4">
       <BookingToolbar
-        leading={
-          <PeriodHeader
-            period={period}
-            month={month}
-            anchor={anchor}
-            date={dayDate}
-            canGoBack={period !== "day" || dayDate > today}
-            onShift={shift}
-            onPeriod={onPeriod}
-          />
-        }
         label={label}
         typeName={typeName}
         color={color}
@@ -188,6 +177,15 @@ export function BookingCalendar({
         onView={medical ? (v) => onChange({ view: v }) : undefined}
       />
       {centerNote && <p className="text-xs font-medium text-primary">{centerNote}</p>}
+      <PeriodHeader
+        period={period}
+        month={month}
+        anchor={anchor}
+        date={dayDate}
+        canGoBack={period !== "day" || dayDate > today}
+        onShift={shift}
+        onPeriod={onPeriod}
+      />
 
       {data.notConfigured ? (
         <EmptyState
