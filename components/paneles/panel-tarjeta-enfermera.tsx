@@ -3,15 +3,17 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { ArrowUp01Icon, ArrowDown01Icon, PrinterIcon } from "@hugeicons/core-free-icons";
 
 import type { PanelSeccion, PanelPersonal, PanelEstatus, PanelContador, PanelWorkRow } from "@/lib/api/paneles";
 import type { Servicio } from "@/lib/api/servicios";
 import { freeRowsForSection, rowsForStaffInSection, sectionVisibleForStaff } from "@/lib/panel/panel-trabajo";
-import { fillableReportsFor } from "@/lib/panel/panel-formatos";
+import { fillableReportsFor, reportsFor } from "@/lib/panel/panel-formatos";
+import { todayPR } from "@/lib/format/fecha";
 import { colorForName } from "@/lib/frontdesk/color";
 import { Card } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 
 // Tinte suave (~12% alfa) a partir de un color hex del BE; si no es hex de 6 dígitos, sin tinte.
 function tinteHex(color?: string | null): string | undefined {
@@ -33,6 +35,7 @@ export function PanelTarjetaEnfermera({
   est,
   servicios,
   fillableSlugs,
+  centro,
   puedeOrdenar,
   dragId,
   overId,
@@ -53,6 +56,7 @@ export function PanelTarjetaEnfermera({
   est?: PanelEstatus;
   servicios: readonly Servicio[];
   fillableSlugs: ReadonlySet<string>;
+  centro?: string;
   puedeOrdenar: boolean;
   dragId: string | null;
   overId: string | null;
@@ -68,6 +72,11 @@ export function PanelTarjetaEnfermera({
   const tRoot = useTranslations();
   const pc = colorForName(persona.name);
   const [seccionAbierta, setSeccionAbierta] = React.useState<string | null>(null);
+  // "Imprimir formato" directo desde la fila, sin pasar por la hoja llenable: mismo motor del
+  // tablero (FormatosModal → GenericFormatoRender), solo que resuelto por servicio del panel en vez
+  // de por la fila del frontdesk — cualquier servicio con reports, no solo GLP-1 (owner, 23-nov-2026).
+  const [filaFormato, setFilaFormato] = React.useState<PanelWorkRow | null>(null);
+  const servicioFormato = filaFormato ? servicios.find((s) => s.id === filaFormato.serviceId || s.name === filaFormato.serviceName) : undefined;
 
   const seccionesVisibles = secciones.filter((s) => s.visible && sectionVisibleForStaff(rows, s.clave, persona.id));
   const seccionesSelfClaim = secciones.filter((s) => s.visible && s.selfClaim);
@@ -79,6 +88,7 @@ export function PanelTarjetaEnfermera({
   }
 
   return (
+    <>
     <Card
       data-size="sm"
       draggable={puedeOrdenar}
@@ -134,14 +144,28 @@ export function PanelTarjetaEnfermera({
                   <ul className="flex flex-col gap-1 text-sm">
                     {misRows.map((row) => {
                       const clickable = row.kind === "session" && row.sessionId && fillableReportsFor(row, servicios, fillableSlugs).length > 0;
+                      // Imprimir: CUALQUIER report del servicio (llenable o solo-impresión), no el subconjunto
+                      // llenable — esa es la diferencia con `clickable`/`abrir` arriba.
+                      const imprimible = row.kind === "session" && row.sessionId && reportsFor(row, servicios).length > 0;
                       return (
-                        <li
-                          key={`${row.kind}:${row.sessionId ?? row.appointmentId}`}
-                          onClick={clickable ? () => { abrir(row); setSeccionAbierta(null); } : undefined}
-                          className={"truncate rounded px-1.5 py-1 " + (clickable ? "cursor-pointer hover:bg-muted" : "text-muted-foreground")}
-                        >
-                          {row.medicalRecordNumber ? `#${row.medicalRecordNumber} · ` : ""}
-                          {row.patientName ?? "—"}
+                        <li key={`${row.kind}:${row.sessionId ?? row.appointmentId}`} className="flex items-center gap-1 rounded px-1.5 py-1">
+                          <span
+                            onClick={clickable ? () => { abrir(row); setSeccionAbierta(null); } : undefined}
+                            className={"min-w-0 flex-1 truncate " + (clickable ? "cursor-pointer hover:underline" : "text-muted-foreground")}
+                          >
+                            {row.medicalRecordNumber ? `#${row.medicalRecordNumber} · ` : ""}
+                            {row.patientName ?? "—"}
+                          </span>
+                          {imprimible && (
+                            <button
+                              type="button"
+                              aria-label={t("imprimirFormato")}
+                              onClick={() => { setFilaFormato(row); setSeccionAbierta(null); }}
+                              className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            >
+                              <HugeiconsIcon icon={PrinterIcon} className="size-3.5" />
+                            </button>
+                          )}
                         </li>
                       );
                     })}
@@ -202,5 +226,22 @@ export function PanelTarjetaEnfermera({
         </div>
       )}
     </Card>
+
+    {filaFormato && servicioFormato && (
+      <FormatosModal
+        open
+        onOpenChange={(o) => !o && setFilaFormato(null)}
+        servicioNombre={servicioFormato.name}
+        formAcciones={servicioFormato.formActions}
+        pacienteNombre={filaFormato.patientName ?? ""}
+        record={filaFormato.medicalRecordNumber}
+        servicioId={servicioFormato.id}
+        pacienteId={filaFormato.patientId ?? undefined}
+        sesionId={filaFormato.sessionId ?? undefined}
+        fecha={todayPR()}
+        centro={centro}
+      />
+    )}
+    </>
   );
 }
