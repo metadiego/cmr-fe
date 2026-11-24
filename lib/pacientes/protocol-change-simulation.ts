@@ -40,3 +40,17 @@ export function signedMoney(diff: number, money: (v: number) => string): string 
   if (Math.abs(diff) < 0.005) return money(0);
   return (diff > 0 ? "+" : "-") + money(Math.abs(diff));
 }
+
+/**
+ * What the patient would end up with of a product being created, when they still have it pending
+ * (owner, 24-nov-2026): the BE's `continuesAfter` lists those packages (the new one starts after them).
+ * Null when the patient has none of it pending.
+ */
+export function totalWithExisting(
+  productId: string,
+  units: number,
+  continuesAfter: readonly { productId: string; pendingSessions: number }[] | undefined,
+): { existing: number; total: number } | null {
+  const existing = (continuesAfter ?? []).filter((c) => c.productId === productId).reduce((n, c) => n + Math.max(0, c.pendingSessions || 0), 0);
+  return existing > 0 ? { existing, total: existing + units } : null;
+}

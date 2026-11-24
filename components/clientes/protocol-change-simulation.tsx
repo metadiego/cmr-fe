@@ -7,7 +7,7 @@ import { Alert02Icon } from "@hugeicons/core-free-icons";
 
 import { simularCambioProtocolo, type CambioProtocoloPayload, type ProtocolChangeSimulation } from "@/lib/api/protocol-change";
 import { money } from "@/lib/caja/totales";
-import { differenceTone, signedMoney } from "@/lib/pacientes/protocol-change-simulation";
+import { differenceTone, signedMoney, totalWithExisting } from "@/lib/pacientes/protocol-change-simulation";
 import { EmptyState, ErrorState, LoadingPanel, Panel, RecordTable, Td, Th } from "@/components/kit/panel";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -99,7 +99,14 @@ export function ProtocolChangeSimulation({
                 return (
                   <tr key={key ?? `c-${i}`}>
                     <Td>{c.name ?? c.sku ?? "—"}</Td>
-                    <Td className="text-right tabular-nums">{c.units}</Td>
+                    <Td className="text-right tabular-nums">
+                      {c.units}
+                      {(() => {
+                        // Already pending of this product: what the patient would end up with (owner, 24-nov).
+                        const w = totalWithExisting(c.productId, c.units, data.continuesAfter);
+                        return w ? <span className="block text-[11px] font-medium text-info">{t("withExisting", { existing: w.existing, total: w.total })}</span> : null;
+                      })()}
+                    </Td>
                     <Td>
                       {key != null && (
                         <PriceInput

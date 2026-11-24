@@ -5001,7 +5001,8 @@
         "list": "list {amount}",
         "totalClosed": "Closes {amount}",
         "totalCreated": "Created {amount}",
-        "difference": "Difference {amount}"
+        "difference": "Difference {amount}",
+        "withExisting": "already has {existing} · would have {total}"
       }
     }
   },

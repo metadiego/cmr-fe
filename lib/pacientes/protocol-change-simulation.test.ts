@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { differenceTone, originPrices, priceInvalid, priceOf, signedMoney } from "./protocol-change-simulation.ts";
+import { differenceTone, originPrices, priceInvalid, priceOf, signedMoney, totalWithExisting } from "./protocol-change-simulation.ts";
 
 const money = (v: number) => `$${v.toFixed(2)}`;
 
@@ -32,4 +32,15 @@ test("difference: green at zero to the cent, amber with its sign otherwise", () 
   assert.equal(signedMoney(0.001, money), "$0.00");
   assert.equal(signedMoney(90, money), "+$90.00");
   assert.equal(signedMoney(-90, money), "-$90.00");
+});
+
+test("a created product the patient still has pending adds up: every pending package of that product counts", () => {
+  const after = [
+    { productId: "vitc", packageId: "p1", pendingSessions: 3 },
+    { productId: "iv", packageId: "p2", pendingSessions: 2 },
+    { productId: "vitc", packageId: "p3", pendingSessions: 1 },
+  ];
+  assert.deepEqual(totalWithExisting("vitc", 15, after), { existing: 4, total: 19 });
+  assert.equal(totalWithExisting("nano", 3, after), null);
+  assert.equal(totalWithExisting("vitc", 15, undefined), null);
 });
