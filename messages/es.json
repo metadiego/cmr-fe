@@ -7109,6 +7109,7 @@
     "endsAt": "– {time}",
     "bookVisits": "Agendar {n, plural, one {# visita} other {# visitas}}",
     "overCap": "Solo le quedan {n, plural, one {# sesión} other {# sesiones}} de {therapy} por agendar.",
-    "seriesDayFailed": "El {date} ya no cabe: no se agendó nada de la serie."
+    "seriesDayFailed": "El {date} ya no cabe: no se agendó nada de la serie.",
+    "catalogueFailed": "No se pudieron cargar las terapias."
   }
 }

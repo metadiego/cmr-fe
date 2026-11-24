@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 import type { PatientTrain, TrainSlot } from "../../api/resources.ts";
 import type { BookableService } from "../../api/frontdesk.ts";
-import { liveSessionDates, trainCap, trainDaySlots, trainEndsAt, trainOrder } from "./train-rows.ts";
+import { liveSessionDates, trainCap, trainDaySlots, trainEndsAt, trainOrder, trainRequest } from "./train-rows.ts";
 
 function slot(p: Partial<TrainSlot> & { time: string }): TrainSlot {
   return { fits: true, endsAt: "", legs: [], staffBlocks: [], ...p };
@@ -101,4 +101,18 @@ test("trainOrder follows the BE's legs, else the ticked order", () => {
   assert.deepEqual(trainOrder(train([], ["emtt", "laser"]), ["laser", "emtt"]), ["emtt", "laser"]);
   assert.deepEqual(trainOrder(null, ["laser", "emtt"]), ["laser", "emtt"]);
   assert.deepEqual(trainOrder(train([], []), ["laser"]), ["laser"]);
+});
+
+test("trainRequest keeps the ticked order when keepOrder is on", () => {
+  const r = trainRequest(["zzz-laser", "aaa-emtt"], {}, true);
+  assert.deepEqual(r.serviceIds, ["zzz-laser", "aaa-emtt"]);
+  assert.notEqual(r.key, trainRequest(["aaa-emtt", "zzz-laser"], {}, true).key);
+});
+
+test("trainRequest ignores tick order when the BE orders by weight", () => {
+  assert.equal(trainRequest(["zzz-laser", "aaa-emtt"], {}, false).key, trainRequest(["aaa-emtt", "zzz-laser"], {}, false).key);
+});
+
+test("trainRequest sends areas for the ticked therapies only, 1 when untouched", () => {
+  assert.deepEqual(trainRequest(["laser", "emtt"], { laser: 3, pemf: 2 }, false).areas, { laser: 3, emtt: 1 });
 });

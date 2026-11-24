@@ -7109,6 +7109,7 @@
     "endsAt": "– {time}",
     "bookVisits": "Book {n, plural, one {# visit} other {# visits}}",
     "overCap": "Only {n, plural, one {# session} other {# sessions}} of {therapy} left to book.",
-    "seriesDayFailed": "{date} no longer fits: nothing in the series was booked."
+    "seriesDayFailed": "{date} no longer fits: nothing in the series was booked.",
+    "catalogueFailed": "Could not load the therapies."
   }
 }

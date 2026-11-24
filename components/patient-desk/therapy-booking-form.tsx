@@ -31,8 +31,8 @@ import {
   type EditableItem,
 } from "@/lib/agenda/booking/series-edit";
 import { trainBookingResult } from "@/lib/agenda/booking/booking-result";
-import { trainCap, trainEndsAt, trainOrder } from "@/lib/agenda/booking/train-rows";
-import { trainFormReason, type TrainFormReason } from "@/lib/agenda/booking/train-form";
+import { trainCap, trainEndsAt, trainOrder, trainRequest } from "@/lib/agenda/booking/train-rows";
+import { seriesKey, trainFormReason, type TrainFormReason } from "@/lib/agenda/booking/train-form";
 import type { DaySlots } from "@/lib/agenda/booking/availability";
 import { weekdayOf } from "@/lib/agenda/recurring-plan";
 import { todayPR } from "@/lib/format/fecha";
@@ -124,13 +124,14 @@ export function TherapyBookingForm({
   const cap = trainCap(balanceState === "ok" ? rules.bookable : undefined, selected);
   const total = Math.max(1, Math.min(Math.max(1, cap.max), totalChoice ?? cap.max));
   const weekly = mode === "weekly";
-  const genKey = weekly ? `weekly|${days.join(",")}|${total}` : "manual";
+  const genKey = seriesKey(mode, days, totalChoice);
   const [edits, setEdits] = React.useState<{ key: string; items: EditableItem[] } | null>(null);
   const edited = !!edits && edits.key === genKey;
+  // Generated rows fit their own day: the series time when the train fits there, else that day's first.
   const baseItems: EditableItem[] = edited
     ? edits.items
     : weekly
-      ? generateWeeklyPattern(defaultDate, days, total)
+      ? generateWeeklyPattern(defaultDate, days, total).map((i) => ({ ...i, fitTime: true }))
       : [{ date: defaultDate }];
 
   const avail = useTrainSeriesAvailability({
@@ -182,9 +183,11 @@ export function TherapyBookingForm({
     ...(selected.length ? [] : [t("therapies")]),
   ];
   // Without a patient there is no balance to judge yet: «Paciente» is the missing field, no reason.
+  const catalogueFailed = servRes.state.kind === "fail" || resRes.state.kind === "fail";
   const why = !patient ? null : trainFormReason({
     permsReady,
     canBook,
+    catalogueFailed,
     balanceHidden: rules.bookableHidden,
     balanceState,
     ticked: selected.length,
@@ -203,6 +206,8 @@ export function TherapyBookingForm({
         return tRoot("common.loading");
       case "noPermission":
         return tSeries("noPermission");
+      case "catalogueFailed":
+        return t("catalogueFailed");
       case "balanceHidden":
         return tType("noBookablePermission");
       case "balanceFailed":
@@ -224,15 +229,19 @@ export function TherapyBookingForm({
   const centerInfo = centersRes.state.kind === "ok" ? centersRes.state.data.find((c) => c.id === center) : undefined;
   async function book() {
     if (!patient || !selected.length || reason) throw new Error(reason ?? missing.join(" · "));
-    const serviceIds = order;
+    // The same therapies, order and areas the hours were planned with.
+    const { serviceIds, areas: areaMap } = trainRequest(selected, areas, keepOrder);
     const timeOf = new Map(rows.map((r) => [r.date, r.time]));
     if (single) {
       const r = rows[0];
-      const res = await bookTrain({ patientId: patient.id, date: r.date, time: r.time, serviceIds, areas, keepOrder }, center);
+      const res = await bookTrain(
+        { patientId: patient.id, date: r.date, time: r.time, serviceIds, areas: areaMap, keepOrder },
+        center,
+      );
       return { sessions: res.data.sessions, warnings: [...res.warnings, ...res.advertencias], timeOf };
     }
     const res = await bookTrainSeries(
-      { patientId: patient.id, areas, keepOrder, days: rows.map((r) => ({ date: r.date, time: r.time, serviceIds })) },
+      { patientId: patient.id, areas: areaMap, keepOrder, days: rows.map((r) => ({ date: r.date, time: r.time, serviceIds })) },
       center,
     );
     return { sessions: res.data.days.flatMap((d) => d.sessions), warnings: [...res.warnings, ...res.advertencias], timeOf };
@@ -336,6 +345,21 @@ export function TherapyBookingForm({
       <Field label={t("therapies")} required>
         {!patient ? (
           <p className="text-sm text-muted-foreground">{tSeries("pickPatient")}</p>
+        ) : catalogueFailed ? (
+          <div className="flex items-center gap-2 text-sm text-destructive">
+            <span>{t("catalogueFailed")}</span>
+            <Button
+              type="button"
+              size="xs"
+              variant="outline"
+              onClick={() => {
+                if (servRes.state.kind === "fail") servRes.reload();
+                if (resRes.state.kind === "fail") resRes.reload();
+              }}
+            >
+              {tRoot("appointmentsBooking.retry")}
+            </Button>
+          </div>
         ) : rules.bookableHidden ? (
           <p className="text-sm text-muted-foreground">{tType("noBookablePermission")}</p>
         ) : balanceState === "fail" ? (

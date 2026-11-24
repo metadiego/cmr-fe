@@ -1,11 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { trainFormReason, type TrainFormState } from "./train-form.ts";
+import { seriesKey, trainFormReason, type TrainFormState } from "./train-form.ts";
 
 const ok: TrainFormState = {
   permsReady: true,
   canBook: true,
+  catalogueFailed: false,
   balanceHidden: false,
   balanceState: "ok",
   ticked: 2,
@@ -56,4 +57,14 @@ test("trainFormReason waits for the rows, then reports a failed check, then rows
   assert.deepEqual(trainFormReason({ ...ok, rowsLoaded: false, rowsBlocked: true }), { key: "checking" });
   assert.deepEqual(trainFormReason({ ...ok, rowsFailed: true, rowsBlocked: true }), { key: "checkFailed" });
   assert.deepEqual(trainFormReason({ ...ok, rowsBlocked: true }), { key: "fixRed" });
+});
+
+test("trainFormReason reports a failed catalogue before the balance", () => {
+  assert.deepEqual(trainFormReason({ ...ok, catalogueFailed: true, balanceState: "loading" }), { key: "catalogueFailed" });
+});
+
+test("seriesKey does not change when only the sessions-left cap changes", () => {
+  assert.equal(seriesKey("weekly", [2, 4], null), seriesKey("weekly", [2, 4], null));
+  assert.notEqual(seriesKey("weekly", [2, 4], 3), seriesKey("weekly", [2, 4], null));
+  assert.equal(seriesKey("manual", [2], 5), "manual");
 });

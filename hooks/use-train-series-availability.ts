@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { dropPastTimes } from "@/lib/agenda/booking/availability";
 import { runLimited } from "@/lib/agenda/booking/day-cache";
-import { liveSessionDates, trainDaySlots } from "@/lib/agenda/booking/train-rows";
+import { liveSessionDates, trainDaySlots, trainRequest } from "@/lib/agenda/booking/train-rows";
 import { planPatientTrain, type PatientTrain } from "@/lib/api/resources";
 import { listSesionesRango } from "@/lib/api/frontdesk";
 import { getBookingHolidays } from "@/lib/api/festivos";
@@ -41,11 +41,15 @@ export function useTrainSeriesAvailability(p: {
   retry: () => void;
 } {
   const { center, patientId, serviceIds, areas, keepOrder, dates } = p;
-  const idsKey = [...serviceIds].sort().join(",");
-  const areasKey = JSON.stringify(Object.fromEntries(serviceIds.map((id) => [id, areas[id] ?? 1]).sort()));
+  // Asked in tick order (what «Mantener mi orden» keeps), keyed on what changes the plan.
+  const request = trainRequest(serviceIds, areas, keepOrder);
+  const requestRef = React.useRef(request);
+  React.useEffect(() => {
+    requestRef.current = request;
+  });
   const [nonce, setNonce] = React.useState(0);
   const scope =
-    center && patientId && idsKey ? `${center}|${patientId}|${idsKey}|${areasKey}|${keepOrder}|${nonce}` : "";
+    center && patientId && serviceIds.length ? `${center}|${patientId}|${request.key}|${nonce}` : "";
   const datesKey = [...new Set(dates)].sort().join(",");
 
   const [raw, setRaw] = React.useState<{ scope: string; map: Record<string, PatientTrain | "error"> }>({
@@ -64,8 +68,7 @@ export function useTrainSeriesAvailability(p: {
   React.useEffect(() => {
     if (!scope || !datesKey || !center || !patientId) return;
     const requestScope = scope;
-    const ids = idsKey.split(",");
-    const areaMap = JSON.parse(areasKey) as Record<string, number>;
+    const { serviceIds: ids, areas: areaMap } = requestRef.current;
     const missing = datesKey.split(",").filter((d) => !asked.current.has(`${requestScope}#${d}`));
     if (missing.length === 0) return;
     for (const d of missing) asked.current.add(`${requestScope}#${d}`);
@@ -82,7 +85,7 @@ export function useTrainSeriesAvailability(p: {
       }),
       CONCURRENCY,
     );
-  }, [scope, datesKey, center, patientId, idsKey, areasKey, keepOrder]);
+  }, [scope, datesKey, center, patientId, keepOrder]);
 
   const todayIso = todayPR();
   const nowTime = nowTimePR();
@@ -125,8 +128,9 @@ export function useTrainSeriesAvailability(p: {
   );
 
   const existingDates = React.useMemo(
-    () => (existingRes.state.kind === "ok" ? liveSessionDates(existingRes.state.data, idsKey.split(",")) : []),
-    [existingRes.state, idsKey],
+    () => (existingRes.state.kind === "ok" ? liveSessionDates(existingRes.state.data, request.serviceIds) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- request.key covers request.serviceIds
+    [existingRes.state, request.key],
   );
   const holidays = React.useMemo(
     () => (holidaysRes.state.kind === "ok" ? holidaysRes.state.data : []),

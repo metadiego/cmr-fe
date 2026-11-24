@@ -69,3 +69,21 @@ export function trainOrder(train: PatientTrain | null | undefined, ticked: reado
   const legs = train?.legs.map((l) => l.serviceId).filter((id) => ticked.includes(id)) ?? [];
   return legs.length ? [...legs, ...ticked.filter((id) => !legs.includes(id))] : [...ticked];
 }
+
+/**
+ * What the train plan and the booking are both asked with: the ticked therapies (in tick order, which is
+ * the order «Mantener mi orden» keeps; the BE reorders by weight otherwise), their areas (ticked only,
+ * 1 when untouched) and a cache key that changes exactly when the plan would.
+ */
+export function trainRequest(
+  ticked: readonly string[],
+  areas: Readonly<Record<string, number>>,
+  keepOrder: boolean,
+): { serviceIds: string[]; areas: Record<string, number>; key: string } {
+  const serviceIds = [...ticked];
+  const areaMap: Record<string, number> = {};
+  for (const id of serviceIds) areaMap[id] = areas[id] ?? 1;
+  const keyIds = keepOrder ? serviceIds : [...serviceIds].sort();
+  const key = `${keyIds.join(",")}|${keyIds.map((id) => areaMap[id]).join(",")}|${keepOrder ? "asked" : "weight"}`;
+  return { serviceIds, areas: areaMap, key };
+}
