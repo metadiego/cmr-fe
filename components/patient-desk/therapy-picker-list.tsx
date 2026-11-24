@@ -43,7 +43,6 @@ export function TherapyPickerList({
   onAreas: (id: string, n: number) => void;
 }) {
   const t = useTranslations("therapyBooking");
-  const tType = useTranslations("appointmentsBooking.typePicker");
   const showTurns = order.length > 1;
 
   return (
@@ -85,7 +84,7 @@ export function TherapyPickerList({
                 </span>
               )}
               <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success-foreground tabular-nums">
-                {tType("sessionsLeft", { n: s.bookable })}
+                {t("left", { n: s.bookable })}
               </span>
               {showTurns && (
                 <span className="w-6 text-right text-xs font-medium text-muted-foreground tabular-nums" aria-hidden={!on}>

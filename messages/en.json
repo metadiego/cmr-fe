@@ -7122,6 +7122,7 @@
     "overCapDays": "{therapy} is on {used} dates but only {n, plural, one {# session} other {# sessions}} left: take it off some.",
     "removeFromDay": "Remove {therapy} from this day",
     "removedFromDay": "Removed:",
-    "restoreToDay": "Put {therapy} back on this day"
+    "restoreToDay": "Put {therapy} back on this day",
+    "left": "{n} left"
   }
 }

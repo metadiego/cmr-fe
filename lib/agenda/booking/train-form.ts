@@ -59,3 +59,14 @@ export function trainFormReason(s: TrainFormState): TrainFormReason | null {
 export function seriesKey(mode: "manual" | "weekly", days: readonly number[], totalChoice: number | null): string {
   return mode === "weekly" ? `weekly|${days.join(",")}|${totalChoice ?? "auto"}` : "manual";
 }
+
+/**
+ * Another train (therapies, areas, order, or a therapy taken off one `date`) changes the rows' hours.
+ * Hand-edited rows are re-fitted (each keeps its time where the new train still fits, else takes that
+ * day's first fitting time); generated rows fit on their own and are left alone (null = store
+ * nothing), since storing them would freeze them as edits at whatever count they had.
+ */
+export function refitRows<T extends { date: string; fitTime?: boolean }>(edited: boolean, items: T[], date?: string): T[] | null {
+  if (!edited) return null;
+  return items.map((i) => (date === undefined || i.date === date ? { ...i, fitTime: true } : i));
+}

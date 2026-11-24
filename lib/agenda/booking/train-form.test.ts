@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { seriesKey, trainFormReason, type TrainFormState } from "./train-form.ts";
+import { refitRows, seriesKey, trainFormReason, type TrainFormState } from "./train-form.ts";
 
 const ok: TrainFormState = {
   permsReady: true,
@@ -66,4 +66,17 @@ test("seriesKey does not change when only the sessions-left cap changes", () => 
   assert.equal(seriesKey("weekly", [2, 4], null), seriesKey("weekly", [2, 4], null));
   assert.notEqual(seriesKey("weekly", [2, 4], 3), seriesKey("weekly", [2, 4], null));
   assert.equal(seriesKey("manual", [2], 5), "manual");
+});
+
+test("refitRows leaves generated rows alone: ticking a therapy must not freeze them as edits", () => {
+  assert.equal(refitRows(false, [{ date: "2026-11-24" }, { date: "2026-12-01" }]), null);
+});
+
+test("refitRows re-fits every edited row, or only the one date given", () => {
+  const items = [{ date: "2026-11-24", time: "09:00" }, { date: "2026-12-01" }];
+  assert.deepEqual(refitRows(true, items), [
+    { date: "2026-11-24", time: "09:00", fitTime: true },
+    { date: "2026-12-01", fitTime: true },
+  ]);
+  assert.deepEqual(refitRows(true, items, "2026-12-01"), [{ date: "2026-11-24", time: "09:00" }, { date: "2026-12-01", fitTime: true }]);
 });
