@@ -120,8 +120,8 @@ export function AvailabilityMonth({
 
       <div
         className="grid min-h-0 flex-1 grid-cols-7 gap-1 overflow-y-auto"
-        // Past weeks fold to a line; the rest never shrink below a cell's content (scrolls if cramped).
-        style={{ gridTemplateRows: monthRowsTemplate(weeks, todayIso) }}
+        // Every week the same height, never below a cell's content (scrolls if cramped).
+        style={{ gridTemplateRows: monthRowsTemplate(weeks) }}
       >
         {weeks.flat().map((date) => {
           const cell = cellOf(date);

@@ -57,12 +57,10 @@ export function shiftMonth(m: MonthRef, delta: number): MonthRef {
   return { year: Math.floor(i / 12), month0: ((i % 12) + 12) % 12 };
 }
 
-/** CSS `grid-template-rows` for the month: a week that is wholly before today has nothing to book, so it
- *  folds to one line (the day numbers) and leaves the height to the weeks that do; every other week never
- *  shrinks below what a cell prints (day, count, label). Without the floor a short screen (1366x768 with
- *  the day panel underneath) squeezed the rows until the counts overlapped the next week. */
-export function monthRowsTemplate(weeks: string[][], todayIso: string): string {
-  return weeks
-    .map((w) => (w.every((d) => d < todayIso) ? "1.75rem" : "minmax(4.5rem, 1fr)"))
-    .join(" ");
+/** CSS `grid-template-rows` for the month: every week gets the same height, past or not (owner,
+ *  2026-11-23: cells differ by colour, never by size), and never shrinks below what a cell prints (day,
+ *  count, label). Without the floor a short screen (1366x768 with the day panel underneath) squeezed the
+ *  rows until the counts overlapped the next week. */
+export function monthRowsTemplate(weeks: string[][]): string {
+  return weeks.map(() => "minmax(4.5rem, 1fr)").join(" ");
 }
