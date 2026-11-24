@@ -6800,7 +6800,10 @@
         "before": "Antes",
         "after": "Después"
       }
-    }
+    },
+    "addProduct": "Agregar producto",
+    "emptyLines": "Busca un producto arriba para agregarlo. Cada uno entra aquí, el último primero.",
+    "alreadyAdded": "{name} ya está en la lista; te llevé a su línea."
   },
   "legacyLabel": {
     "correct": "Corregir numeración",

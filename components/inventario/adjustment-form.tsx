@@ -12,7 +12,7 @@ import { formatFechaSolo, todayPR } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { ApiError } from "@/lib/api/types";
 import { toastError } from "@/lib/api/errors";
-import { adjustmentPayload, draftNet, draftProblems, quantityInput, type DraftLine } from "@/lib/inventory/adjustments";
+import { addProductLine, adjustmentPayload, draftNet, draftProblems, quantityInput, type DraftLine } from "@/lib/inventory/adjustments";
 import { useResource } from "@/hooks/use-resource";
 import { useSettled } from "@/hooks/use-settled";
 import { BackdatePreview } from "@/components/inventario/backdate-preview";
@@ -30,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 // producto»). Header once (warehouse, reason, date, optional patient, note), then the lines; one «Guardar»
 // writes them all or none under one number (cmr-be #627). A refused line is pointed at by its index.
 let seq = 0;
-const blank = (): DraftLine => ({ key: `l${++seq}`, productId: "", productName: "", quantity: "", sign: "negativo", notes: "" });
+const ADD_ID = "adj-add-product";
 
 export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSaved: (number: string) => void }) {
   const t = useTranslations("inventoryAdjustments");
@@ -42,7 +42,10 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
   const [date, setDate] = React.useState(today);
   const [patient, setPatient] = React.useState<Paciente | null>(null);
   const [notes, setNotes] = React.useState("");
-  const [lines, setLines] = React.useState<DraftLine[]>(() => [blank()]);
+  const [lines, setLines] = React.useState<DraftLine[]>([]);
+  // The line just added (or the one a repeated pick pointed at): tinted, and its quantity gets the focus.
+  const [focusKey, setFocusKey] = React.useState<string | null>(null);
+  const [already, setAlready] = React.useState<string | null>(null);
   const [badLine, setBadLine] = React.useState<number | null>(null);
   // Lines where a minus was typed and turned into «Sale»: they say so, so the switch is never silent.
   const [flipped, setFlipped] = React.useState<ReadonlySet<string>>(() => new Set());
@@ -84,12 +87,22 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
     : null;
 
   function patch(i: number, p: Partial<DraftLine>) {
-    setLines((ls) => {
-      const next = ls.map((l, j) => (j === i ? { ...l, ...p } : l));
-      // Always one empty line at the bottom, so adding a product is just picking it.
-      return next.at(-1)?.productId ? [...next, blank()] : next;
-    });
+    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, ...p } : l)));
     setBadLine(null);
+  }
+
+  function add(product: { id: string; name: string }) {
+    const r = addProductLine(lines, product, `l${++seq}`);
+    setLines(r.lines);
+    setFocusKey(r.key);
+    setAlready(r.existed ? product.name : null);
+    setBadLine(null);
+    // After the row renders: straight to its quantity.
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`${r.key}-qty`) as HTMLInputElement | null;
+      el?.focus();
+      el?.select();
+    });
   }
 
   async function save() {
@@ -99,7 +112,9 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
       const body = adjustmentPayload({ warehouseId: warehouse, reason, notes, effectiveDate, patientId: patient?.id ?? null, lines });
       const res = await createAdjustment(body, centerId);
       toast.success(t("saved", { number: res.number, n: body.lines.length }), res.isRetroactive ? { description: t("backdate.savedBackdated", { day: formatFechaSolo(date) }) } : undefined);
-      setLines([blank()]);
+      setLines([]);
+      setFocusKey(null);
+      setAlready(null);
       setFlipped(new Set());
       setNotes("");
       setPatient(null);
@@ -159,86 +174,103 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
         <p className="rounded-md bg-warning/10 px-3 py-2 text-sm text-warning-foreground">{t("backdate.banner")}</p>
       )}
 
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-10">#</TableHead>
-              <TableHead>{t("product")}</TableHead>
-              <TableHead className="w-44">{t("direction")}</TableHead>
-              <TableHead className="w-32 text-right">{t("quantity")}</TableHead>
-              <TableHead>{t("lineNote")}</TableHead>
-              <TableHead className="w-10" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {lines.map((l, i) => (
-              <TableRow key={l.key} className={badLine === i ? "bg-destructive/10" : undefined}>
-                <TableCell className="text-muted-foreground tabular-nums">{l.productId ? i + 1 : ""}</TableCell>
-                <TableCell className={lineProblem(i, "product") ? "ring-1 ring-destructive" : undefined}>
-                  <ProductoPicker value={l.productId} onChange={(id, p) => patch(i, { productId: id, productName: String(p?.name ?? "") })} placeholder={t("pickProduct")} />
-                </TableCell>
-                <TableCell>
-                  <div className="inline-flex rounded-md border p-0.5">
-                    {(["negativo", "positivo"] as const).map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => patch(i, { sign: s })}
-                        className={`rounded px-2.5 py-1 text-xs font-medium ${l.sign === s ? (s === "negativo" ? "bg-destructive text-white" : "bg-success-foreground text-white") : "text-muted-foreground"}`}
-                      >
-                        {t(s === "negativo" ? "out" : "in")}
-                      </button>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Input
-                    inputMode="decimal"
-                    value={l.quantity}
-                    onKeyDown={(e) => {
-                      // The amount is always positive; the toggle gives the direction.
-                      if (e.key === "-") {
-                        e.preventDefault();
-                        if (l.sign !== "negativo") patch(i, { sign: "negativo" });
-                        setFlipped((f) => new Set(f).add(l.key));
-                      }
-                    }}
-                    onChange={(e) => {
-                      const { quantity, hadMinus } = quantityInput(e.target.value);
-                      patch(i, hadMinus ? { quantity, sign: "negativo" } : { quantity });
-                      if (hadMinus) setFlipped((f) => new Set(f).add(l.key));
-                    }}
-                    aria-invalid={lineProblem(i, "quantity")}
-                    aria-describedby={lineProblem(i, "quantity") || flipped.has(l.key) ? `${l.key}-qty-hint` : undefined}
-                    className="text-right tabular-nums"
-                  />
-                  {((lineProblem(i, "quantity") && l.quantity.trim() !== "") || flipped.has(l.key)) && (
-                    <p id={`${l.key}-qty-hint`} className={`mt-1 text-xs ${lineProblem(i, "quantity") ? "text-destructive" : "text-muted-foreground"}`}>
-                      {t("quantityPositive")}
-                    </p>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Input value={l.notes} onChange={(e) => patch(i, { notes: e.target.value })} maxLength={200} />
-                </TableCell>
-                <TableCell>
-                  {lines.length > 1 && l.productId && (
+      <div className="rounded-lg border bg-card">
+        {/* The picker stays put above the lines (and pinned while the page scrolls): with a long list the
+            old empty row at the bottom fell off screen, and adding one more meant scrolling to find it. */}
+        <div className="sticky top-0 z-20 flex flex-wrap items-center gap-3 rounded-t-lg border-b bg-card px-4 py-3">
+          <Label htmlFor={ADD_ID} className="shrink-0">{t("addProduct")}</Label>
+          <ProductoPicker id={ADD_ID} value="" onChange={(_, p) => p && add({ id: String(p.id), name: String(p.name ?? "") })} placeholder={t("pickProduct")} className="min-w-64 flex-1" />
+          {already && <span className="text-xs text-muted-foreground">{t("alreadyAdded", { name: already })}</span>}
+        </div>
+        {lines.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">{t("emptyLines")}</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10">#</TableHead>
+                <TableHead>{t("product")}</TableHead>
+                <TableHead className="w-44">{t("direction")}</TableHead>
+                <TableHead className="w-32 text-right">{t("quantity")}</TableHead>
+                <TableHead>{t("lineNote")}</TableHead>
+                <TableHead className="w-10" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* Newest first, right under the picker: what was just added is where the eyes already are.
+                  The array keeps pick order (the payload's, which the BE's refused `index` counts). */}
+              {lines.map((l, i) => ({ l, i })).reverse().map(({ l, i }) => (
+                <TableRow key={l.key} className={badLine === i ? "bg-destructive/10" : l.key === focusKey ? "bg-info/10" : undefined}>
+                  <TableCell className="text-muted-foreground tabular-nums">{i + 1}</TableCell>
+                  <TableCell className="text-sm font-medium">{l.productName || "—"}</TableCell>
+                  <TableCell>
+                    <div className="inline-flex rounded-md border p-0.5">
+                      {(["negativo", "positivo"] as const).map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => patch(i, { sign: s })}
+                          className={`rounded px-2.5 py-1 text-xs font-medium ${l.sign === s ? (s === "negativo" ? "bg-destructive text-white" : "bg-success-foreground text-white") : "text-muted-foreground"}`}
+                        >
+                          {t(s === "negativo" ? "out" : "in")}
+                        </button>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      id={`${l.key}-qty`}
+                      inputMode="decimal"
+                      value={l.quantity}
+                      onKeyDown={(e) => {
+                        // Enter goes back to the picker for the next product (nothing is saved on Enter).
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          document.getElementById(ADD_ID)?.click();
+                          return;
+                        }
+                        // The amount is always positive; the toggle gives the direction.
+                        if (e.key === "-") {
+                          e.preventDefault();
+                          if (l.sign !== "negativo") patch(i, { sign: "negativo" });
+                          setFlipped((f) => new Set(f).add(l.key));
+                        }
+                      }}
+                      onChange={(e) => {
+                        const { quantity, hadMinus } = quantityInput(e.target.value);
+                        patch(i, hadMinus ? { quantity, sign: "negativo" } : { quantity });
+                        if (hadMinus) setFlipped((f) => new Set(f).add(l.key));
+                      }}
+                      aria-invalid={lineProblem(i, "quantity")}
+                      aria-describedby={lineProblem(i, "quantity") || flipped.has(l.key) ? `${l.key}-qty-hint` : undefined}
+                      className="text-right tabular-nums"
+                    />
+                    {((lineProblem(i, "quantity") && l.quantity.trim() !== "") || flipped.has(l.key)) && (
+                      <p id={`${l.key}-qty-hint`} className={`mt-1 text-xs ${lineProblem(i, "quantity") ? "text-destructive" : "text-muted-foreground"}`}>
+                        {t("quantityPositive")}
+                      </p>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Input value={l.notes} onChange={(e) => patch(i, { notes: e.target.value })} maxLength={200} />
+                  </TableCell>
+                  <TableCell>
                     <Button variant="ghost" size="sm" aria-label={t("removeLine")} onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))}>
                       ×
                     </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
 
       {previewBody && (previewRes.state.kind !== "ok" ? <BackdatePreview state={previewRes.state} /> : preview && <BackdatePreview state={{ kind: "ok", data: preview }} />)}
 
-      <div className="flex flex-wrap items-center justify-end gap-4">
-        <span className="text-sm text-muted-foreground">
+      {/* The save bar stays in view however long the list grows. */}
+      <div className="sticky bottom-0 z-20 -mx-1 flex flex-wrap items-center justify-end gap-4 border-t bg-background px-1 py-3">
+        <span className="text-sm text-muted-foreground tabular-nums">
           {t("summary", { n: lines.filter((l) => l.productId).length, net: (net > 0 ? "+" : "") + net })}
         </span>
         {problems.length > 0 && typeof problems[0] === "string" && <span className="text-sm text-muted-foreground">{t(`problem.${problems[0]}`)}</span>}
