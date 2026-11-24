@@ -6354,7 +6354,8 @@
       "adminRevoke": "Take away full access (Administrator role)",
       "modifyPastCashDay": "You're about to change the {day} cash sheet",
       "backdatedInventoryAdjustment": "Backdated inventory adjustment",
-      "apiKeyRevoke": "Revoke the API key “{name}”"
+      "apiKeyRevoke": "Revoke the API key “{name}”",
+      "voidFormatSheet": "Void the saved sheet"
     },
     "effect": {
       "returnsPackageSession": "Returns the session to the package",
@@ -6374,7 +6375,8 @@
       "backdateRewritesBalances": "Changes every day's balance from that date until today.",
       "backdateClosedPeriod": "Touches a period that is already closed.",
       "backdateAfterCount": "There are physical counts after that date.",
-      "backdateNegativeBalance": "Some day will go negative."
+      "backdateNegativeBalance": "Some day will go negative.",
+      "formatSheetVoided": "The sheet stops counting as saved and printing; who, when and why stay in the history"
     },
     "policies": {
       "title": "Confirmations",
@@ -7064,7 +7066,19 @@
       "questions": "Questions",
       "header": "Visit details",
       "signature": "Signature",
-      "outOfRange": "“{label}” must be between {min} and {max} {unit}."
+      "outOfRange": "“{label}” must be between {min} and {max} {unit}.",
+      "more": "More actions",
+      "void": {
+        "action": "Void the sheet",
+        "title": "Void the saved sheet",
+        "description": "The sheet stops counting as saved and stops printing, and the visit can be filled again. Who, when and why stays in the history.",
+        "reason": "Reason",
+        "reasonHint": "3 to 500 characters. It stays in the history.",
+        "tooShort": "The reason needs at least {min} characters.",
+        "tooLong": "The reason cannot be longer than {max} characters.",
+        "voiding": "Voiding…",
+        "done": "Sheet voided."
+      }
     },
     "send": {
       "fill": "Fill on screen",
@@ -7077,7 +7091,8 @@
     "error": {
       "answersInvalid": "The sheet has a value that does not belong to this format.",
       "sendTargetInvalid": "That person cannot receive the sheet in this center (no account or inactive).",
-      "writeBackOutOfRange": "The value is outside the allowed range."
+      "writeBackOutOfRange": "The value is outside the allowed range.",
+      "noSavedSheet": "That visit has no saved sheet."
     }
   }
 }

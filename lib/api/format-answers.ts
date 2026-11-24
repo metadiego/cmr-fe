@@ -51,6 +51,8 @@ export interface SheetAnswers {
   recordedAt: string | null;
   updatedBy: string | null;
   updatedAt: string | null;
+  /** Only on the answer to a void (cmr-be #685): who took the saved sheet down, when and why. */
+  voided?: { id: string; voidedAt: string; voidedBy: string | null; voidReason: string } | null;
   /** Pre-fill, always present: saved values win over these. */
   suggested: {
     fields: SheetField[];
@@ -88,6 +90,20 @@ export function saveSheetAnswers(
   return apiFetch<SheetAnswers>(
     `${base(slug)}/${encodeURIComponent(sessionId)}/answers`,
     { method: "PUT", body: JSON.stringify(input) },
+    centerId,
+  );
+}
+
+/**
+ * POST …/answers/void — takes a saved sheet down with a reason (cmr-be #685, permission `formats.void`
+ * on the visit's center). The BE asks for confirmation (428) and the shared host in the client handles
+ * it. Answers the sheet as the iPad reads it: `saved: false`, ready to be filled again.
+ */
+export function voidSheetAnswers(slug: string, sessionId: string, reason: string, centerId?: string): Promise<SheetAnswers> {
+  const qs = centerId ? `?centerIds=${encodeURIComponent(centerId)}` : "";
+  return apiFetch<SheetAnswers>(
+    `${base(slug)}/${encodeURIComponent(sessionId)}/answers/void${qs}`,
+    { method: "POST", body: JSON.stringify({ reason: reason.trim() }) },
     centerId,
   );
 }

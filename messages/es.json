@@ -6354,7 +6354,8 @@
       "adminRevoke": "Quitar el acceso total (rol Administrador)",
       "modifyPastCashDay": "Vas a cambiar el cuadre del {day}",
       "backdatedInventoryAdjustment": "Ajuste de inventario con fecha pasada",
-      "apiKeyRevoke": "Revocar la API key «{name}»"
+      "apiKeyRevoke": "Revocar la API key «{name}»",
+      "voidFormatSheet": "Dar de baja la hoja guardada"
     },
     "effect": {
       "returnsPackageSession": "Devuelve la sesión al paquete",
@@ -6374,7 +6375,8 @@
       "backdateRewritesBalances": "Cambia los saldos de cada día desde esa fecha hasta hoy.",
       "backdateClosedPeriod": "Toca un periodo que ya tiene cierre.",
       "backdateAfterCount": "Hay conteos físicos posteriores a esa fecha.",
-      "backdateNegativeBalance": "Algún día quedará en negativo."
+      "backdateNegativeBalance": "Algún día quedará en negativo.",
+      "formatSheetVoided": "La hoja deja de contar como guardada y de imprimirse; queda en el historial con quién, cuándo y por qué"
     },
     "policies": {
       "title": "Confirmaciones",
@@ -7064,7 +7066,19 @@
       "questions": "Preguntas",
       "header": "Datos de la visita",
       "signature": "Firma",
-      "outOfRange": "«{label}» debe estar entre {min} y {max} {unit}."
+      "outOfRange": "«{label}» debe estar entre {min} y {max} {unit}.",
+      "more": "Más acciones",
+      "void": {
+        "action": "Dar de baja la hoja",
+        "title": "Dar de baja la hoja guardada",
+        "description": "La hoja deja de contar como guardada y de imprimirse, y la visita se puede volver a llenar. Queda en el historial quién, cuándo y por qué.",
+        "reason": "Motivo",
+        "reasonHint": "De 3 a 500 caracteres. Queda en el historial.",
+        "tooShort": "El motivo debe tener al menos {min} caracteres.",
+        "tooLong": "El motivo no puede pasar de {max} caracteres.",
+        "voiding": "Dando de baja…",
+        "done": "Hoja dada de baja."
+      }
     },
     "send": {
       "fill": "Llenar en pantalla",
@@ -7077,7 +7091,8 @@
     "error": {
       "answersInvalid": "La hoja tiene un dato que no corresponde a este formato.",
       "sendTargetInvalid": "Esa persona no puede recibir la hoja en este centro (sin cuenta o inactiva).",
-      "writeBackOutOfRange": "El valor está fuera del rango permitido."
+      "writeBackOutOfRange": "El valor está fuera del rango permitido.",
+      "noSavedSheet": "Esa visita no tiene una hoja guardada."
     }
   }
 }

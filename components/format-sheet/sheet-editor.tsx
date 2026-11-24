@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01Icon, PrinterIcon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, Delete02Icon, MoreVerticalIcon, PrinterIcon } from "@hugeicons/core-free-icons";
 
 import { PageContainer } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,9 @@ import { Panel, ErrorState, LoadingPanel } from "@/components/kit/panel";
 import { StatusBadge } from "@/components/kit/status-badge";
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
 import { SheetQuestions } from "@/components/format-sheet/sheet-questions";
+import { VoidSheetDialog } from "@/components/format-sheet/void-sheet-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { getFormatoArmado, getFormatos, type FormatoArmado, type FormatoCampo } from "@/lib/api/formatos";
 import { getSheetAnswers, saveSheetAnswers, type SheetAnswers } from "@/lib/api/format-answers";
@@ -122,6 +125,20 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
   const [savedJson, setSavedJson] = React.useState(() => payloadJson);
   const dirty = payloadJson !== savedJson;
   const [printing, setPrinting] = React.useState(false);
+  const [voiding, setVoiding] = React.useState(false);
+  const { can } = useCan();
+
+  // After a void the sheet is blank again (cmr-be #685): start over from what the BE answered, and
+  // make that the autosave baseline, so the void itself is never followed by a save.
+  function afterVoid(sheet: SheetAnswers) {
+    // A pending autosave timer is dropped by the effect's cleanup once the baseline matches.
+    const next = initialSheetState(sheet, firstSection);
+    setAnswers(sheet);
+    setState(next);
+    setSavedJson(JSON.stringify(sheetPayload(next, editableKeys, questions, areas)));
+    setStatus("idle");
+    setVoiding(false);
+  }
   // No separate Guardar any more (owner, 21-nov-2026): every change saves itself. "offline" covers any
   // failed attempt (network, or an unexpected BE rejection) — it retries on its own; it is never shown
   // for a problem this screen already knows about client-side (`reason` below), which blocks the
@@ -242,6 +259,21 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {t("print")}
           </Button>
+          {answers.saved && can("formats.void") && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label={t("more")}>
+                  <HugeiconsIcon icon={MoreVerticalIcon} className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem variant="destructive" onSelect={() => setVoiding(true)}>
+                  <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+                  {t("void.action")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 
@@ -330,6 +362,10 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
           </div>
         </div>
       </Panel>
+
+      {voiding && (
+        <VoidSheetDialog slug={slug} sessionId={sessionId} centerId={center} onClose={() => setVoiding(false)} onVoided={afterVoid} />
+      )}
 
       <Dialog open={printing} onOpenChange={setPrinting}>
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-4xl">
