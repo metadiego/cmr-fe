@@ -6983,7 +6983,6 @@
       "cellBooked": "{day} · {time}: {n} booked"
     },
     "result": {
-      "bookedTitle": "Appointments booked",
       "movedTitle": "Appointment moved",
       "print": "Print",
       "close": "Close",
@@ -6992,13 +6991,13 @@
       "colService": "Service",
       "colDoctor": "Doctor",
       "skippedTitle": "Skipped dates",
-      "warningsTitle": "Warnings",
       "printHeading": "Your upcoming appointments",
       "printCallUs": "If you cannot attend, call {phone}.",
       "record": "Record {n}",
       "movedFrom": "Was: {date} · {time}",
       "movedFromDate": "Was: {date}",
-      "skippedHasService": "already has this service that day"
+      "skippedHasService": "already has this service that day",
+      "bookedCount": "{n, plural, one {# appointment booked} other {# appointments booked}}"
     }
   },
   "inventory": {

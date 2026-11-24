@@ -6983,7 +6983,6 @@
       "cellBooked": "{day} · {time}: {n} ocupados"
     },
     "result": {
-      "bookedTitle": "Citas agendadas",
       "movedTitle": "Cita movida",
       "print": "Imprimir",
       "close": "Cerrar",
@@ -6992,13 +6991,13 @@
       "colService": "Servicio",
       "colDoctor": "Doctor",
       "skippedTitle": "Fechas omitidas",
-      "warningsTitle": "Avisos",
       "printHeading": "Sus próximas citas",
       "printCallUs": "Si no puede asistir, llame al {phone}.",
       "record": "Récord {n}",
       "movedFrom": "Antes: {date} · {time}",
       "movedFromDate": "Antes: {date}",
-      "skippedHasService": "ya tiene este servicio ese día"
+      "skippedHasService": "ya tiene este servicio ese día",
+      "bookedCount": "{n, plural, one {# cita agendada} other {# citas agendadas}}"
     }
   },
   "inventory": {
