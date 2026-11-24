@@ -14,6 +14,7 @@ import { SeriesRows, useDayLabel } from "@/components/appointments-booking/serie
 import { SeriesFrequency, type SeriesMode } from "@/components/appointments-booking/series-frequency";
 import { useBookingResult } from "@/components/appointments-booking/booking-result-provider";
 import { TherapyPickerList, type PickableTherapy } from "@/components/patient-desk/therapy-picker-list";
+import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { usePatientBookingRules } from "@/hooks/use-patient-booking-rules";
@@ -40,6 +41,8 @@ import { listResources, bookTrain, bookTrainSeries, type Resource } from "@/lib/
 import { getCentrosDondePuedo, getMyCentros, type Centro } from "@/lib/api/centers";
 import { ApiError, type ApiWarning } from "@/lib/api/types";
 import { warningText } from "@/lib/frontdesk/avisos";
+import { patientName } from "@/lib/pacientes/display-name";
+import type { Paciente } from "@/lib/api/pacientes";
 
 // «Cita de servicio» on the patient desk: the Citas service form (patient, Frecuencia, one row per date,
 // the success dialog) with a «Terapias» field where several are ticked. Each visit is the WHOLE train at
@@ -48,14 +51,15 @@ import { warningText } from "@/lib/frontdesk/avisos";
 // docs/specs/2026-11-24-patient-center-therapy-booking-form-design.md
 
 export function TherapyBookingForm({
-  patient,
+  patient: givenPatient,
   center,
   defaultDate,
   defaultServiceId,
   onClose,
   onBooked,
 }: {
-  patient: { id: string; name: string; record?: string | null };
+  /** The desk's patient; absent (the header's «Agendar servicio») = picked here, as in Citas. */
+  patient?: { id: string; name: string; record?: string | null };
   center: string | undefined;
   defaultDate: string;
   /** Ticked on open when the patient has sessions of it left. */
@@ -72,6 +76,9 @@ export function TherapyBookingForm({
   const canBook = can("frontdesk.create");
   const dayLabel = useDayLabel();
   const { show: showResult } = useBookingResult();
+  const [picked, setPicked] = React.useState<Paciente | null>(null);
+  const patient =
+    givenPatient ?? (picked ? { id: picked.id, name: patientName(picked), record: picked.medicalRecordNumber ?? null } : null);
 
   // ---- Catalogues: names, per-area services, the booking center, the patient's balance.
   const servRes = useResource<Servicio[]>(() => getServicios(center), [center]);
@@ -80,7 +87,7 @@ export function TherapyBookingForm({
   const patientCentersRes = useResource<Centro[]>(() => getCentrosDondePuedo("pacientes.read"));
   const patientCenterIds = patientCentersRes.state.kind === "ok" ? patientCentersRes.state.data.map((c) => c.id) : [];
   const rules = usePatientBookingRules(
-    patientCentersRes.state.kind === "ok" ? patient.id : undefined,
+    patientCentersRes.state.kind === "ok" ? patient?.id : undefined,
     center,
     patientCenterIds,
   );
@@ -128,7 +135,7 @@ export function TherapyBookingForm({
 
   const avail = useTrainSeriesAvailability({
     center,
-    patientId: patient.id,
+    patientId: patient?.id,
     serviceIds: selected,
     areas,
     keepOrder,
@@ -170,8 +177,12 @@ export function TherapyBookingForm({
   const span = seriesSpan(rows.map((r) => r.date));
 
   // ---- What blocks «Agendar».
-  const missing = selected.length ? [] : [t("therapies")];
-  const why = trainFormReason({
+  const missing = [
+    ...(patient ? [] : [tSeries("patient")]),
+    ...(selected.length ? [] : [t("therapies")]),
+  ];
+  // Without a patient there is no balance to judge yet: «Paciente» is the missing field, no reason.
+  const why = !patient ? null : trainFormReason({
     permsReady,
     canBook,
     balanceHidden: rules.bookableHidden,
@@ -212,7 +223,7 @@ export function TherapyBookingForm({
   // ---- Booking.
   const centerInfo = centersRes.state.kind === "ok" ? centersRes.state.data.find((c) => c.id === center) : undefined;
   async function book() {
-    if (!selected.length || reason) throw new Error(reason ?? missing.join(" · "));
+    if (!patient || !selected.length || reason) throw new Error(reason ?? missing.join(" · "));
     const serviceIds = order;
     const timeOf = new Map(rows.map((r) => [r.date, r.time]));
     if (single) {
@@ -230,7 +241,7 @@ export function TherapyBookingForm({
     onSuccess: ({ sessions, warnings, timeOf }) => {
       showResult(
         trainBookingResult({
-          patient: { name: patient.name, record: patient.record ?? null },
+          patient: { name: patient?.name ?? "", record: patient?.record ?? null },
           center: { name: centerInfo?.name ?? "", phone: centerInfo?.phone ?? null, address: centerInfo?.address ?? null },
           sessions: sessions.map((s) => ({ serviceId: s.serviceId, date: String(s.date), time: s.time })),
           serviceName,
@@ -304,11 +315,28 @@ export function TherapyBookingForm({
       reason={reason}
     >
       <Field label={tSeries("patient")} required>
-        <span className="block text-sm font-medium">{patient.name}</span>
+        {givenPatient ? (
+          <span className="block text-sm font-medium">{givenPatient.name}</span>
+        ) : (
+          <PatientPickerWithCreate
+            value={picked}
+            onChange={(p) => {
+              setPicked(p);
+              setSelected([]);
+              setAreas({});
+              setDefaultApplied(false);
+              setEdits(null);
+              setBaseTime("");
+            }}
+            centerIds={patientCentersRes.state.kind === "ok" ? patientCenterIds : undefined}
+          />
+        )}
       </Field>
 
       <Field label={t("therapies")} required>
-        {rules.bookableHidden ? (
+        {!patient ? (
+          <p className="text-sm text-muted-foreground">{tSeries("pickPatient")}</p>
+        ) : rules.bookableHidden ? (
           <p className="text-sm text-muted-foreground">{tType("noBookablePermission")}</p>
         ) : balanceState === "fail" ? (
           <div className="flex items-center gap-2 text-sm text-destructive">
