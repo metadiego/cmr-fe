@@ -6759,7 +6759,8 @@
       "noWarehouse": "Falta el almacén",
       "noReason": "Falta el motivo",
       "noNotes": "Falta la nota",
-      "noLines": "Agrega al menos un producto"
+      "noLines": "Agrega al menos un producto",
+      "noQuantity": "Falta la cantidad en {n, plural, one {# producto} other {# productos}}"
     },
     "from": "Desde",
     "to": "Hasta",

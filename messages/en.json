@@ -6759,7 +6759,8 @@
       "noWarehouse": "Warehouse missing",
       "noReason": "Reason missing",
       "noNotes": "Note missing",
-      "noLines": "Add at least one product"
+      "noLines": "Add at least one product",
+      "noQuantity": "Quantity missing on {n, plural, one {# product} other {# products}}"
     },
     "from": "From",
     "to": "To",

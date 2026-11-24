@@ -64,6 +64,7 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
   const lineProblem = (i: number, field: "product" | "quantity") =>
     problems.some((p) => typeof p === "object" && p.line === i && p.field === field);
   const net = draftNet(lines);
+  const noQuantity = lines.filter((l, i) => !l.quantity.trim() && lineProblem(i, "quantity")).length;
 
   // A PAST day: ask the BE what it would do (debounced) and let its `problems` gate the save.
   const past = isPastDay(date, today);
@@ -241,7 +242,8 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
                         patch(i, hadMinus ? { quantity, sign: "negativo" } : { quantity });
                         if (hadMinus) setFlipped((f) => new Set(f).add(l.key));
                       }}
-                      aria-invalid={lineProblem(i, "quantity")}
+                      // Empty is "still to fill" (counted in the save bar), not an error: only a typed bad value is red.
+                      aria-invalid={lineProblem(i, "quantity") && l.quantity.trim() !== ""}
                       aria-describedby={lineProblem(i, "quantity") || flipped.has(l.key) ? `${l.key}-qty-hint` : undefined}
                       className="text-right tabular-nums"
                     />
@@ -274,6 +276,7 @@ export function AdjustmentForm({ centerId, onSaved }: { centerId: string; onSave
           {t("summary", { n: lines.filter((l) => l.productId).length, net: (net > 0 ? "+" : "") + net })}
         </span>
         {problems.length > 0 && typeof problems[0] === "string" && <span className="text-sm text-muted-foreground">{t(`problem.${problems[0]}`)}</span>}
+        {problems.length > 0 && typeof problems[0] !== "string" && noQuantity > 0 && <span className="text-sm text-muted-foreground">{t("problem.noQuantity", { n: noQuantity })}</span>}
         {problems.length === 0 && blockText && <span className={`text-sm ${block?.kind === "loading" ? "text-muted-foreground" : "text-destructive"}`}>{blockText}</span>}
         <Button onClick={save} disabled={busy || problems.length > 0 || !!block}>
           {busy ? tRoot("common.loading") : t("save")}
