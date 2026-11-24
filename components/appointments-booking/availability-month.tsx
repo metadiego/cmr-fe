@@ -111,7 +111,7 @@ export function AvailabilityMonth({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2" data-slot="availability-month">
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
+      <div className="grid grid-cols-7 gap-1 px-1 text-center text-xs font-medium text-muted-foreground">
         {(weeks[0] ?? []).map((d) => {
           const day = parseDayUTC(d);
           return <div key={d}>{day ? format.dateTime(day, "dayWeekdayOnly") : ""}</div>;
@@ -119,8 +119,10 @@ export function AvailabilityMonth({
       </div>
 
       <div
-        className="grid min-h-0 flex-1 grid-cols-7 gap-1 overflow-y-auto"
-        // Every week the same height, never below a cell's content (scrolls if cramped).
+        className="grid min-h-0 flex-1 grid-cols-7 gap-1 overflow-y-auto p-1"
+        // Every week the same height, never below a cell's content (scrolls if cramped). `p-1`: the
+        // selected day's outline (2px + 1px offset) draws outside its cell, and this scroll container
+        // clips both axes — without the padding the edge columns' outline was cut off (as in day-panel).
         style={{ gridTemplateRows: monthRowsTemplate(weeks) }}
       >
         {weeks.flat().map((date) => {
