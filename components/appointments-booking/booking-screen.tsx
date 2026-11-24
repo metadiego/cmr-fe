@@ -289,16 +289,15 @@ export function BookingScreen() {
   const calCenterInfo = [...centro.centros, ...(patientCenters ?? [])].find((c) => c.id === calCenter);
   const calCenterName = movingItem && calCenter !== center ? calCenterInfo?.name : undefined;
 
-  // ---- Period: Day view always shows a day (today when none is picked); Week asks its six days.
+  // ---- Period: Week asks its six days; Month its month (no Day view, owner 2026-11-24).
   const today = todayPR();
-  const shownDate = state.period === "day" ? (state.date ?? today) : state.date;
+  const shownDate = state.date;
   const setPeriod = (period: BookingPeriod) => {
     if (period === state.period) return;
     const focus = periodFocus({ ...state, date: shownDate }, today);
     const month = monthOf(focus);
     if (period === "month") update({ period, month });
-    else if (period === "week") update({ period, anchor: focus, month });
-    else update({ period, date: focus, month });
+    else update({ period, anchor: focus, month });
   };
 
   // ---- Calendar data: holidays, the month's free spots, the selected day, Next free and the live

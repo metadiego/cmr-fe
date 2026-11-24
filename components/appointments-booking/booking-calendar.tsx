@@ -15,7 +15,7 @@ import { useResource } from "@/hooks/use-resource";
 import type { BookingCalendarData } from "@/hooks/use-booking-calendar";
 import type { TimeWindow } from "@/lib/agenda/booking/availability";
 import { dayKind, monthOf, shiftMonth, type MonthRef } from "@/lib/agenda/booking/month";
-import { shiftDay, type BookingPeriod } from "@/lib/agenda/booking/period";
+import type { BookingPeriod } from "@/lib/agenda/booking/period";
 import { shiftWeek, weekDays } from "@/lib/agenda/booking/week";
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import type { TipoCita } from "@/lib/api/citas";
@@ -25,7 +25,7 @@ import { Panel } from "@/components/kit/panel";
 
 // The calendar half of the booking screen: toolbar, the period row (‹ Day/Week/Month › · title)
 // and the period itself: Month (month of free spots + the selected day's times), Week (hours × days +
-// the selected day's times) or Day (that day's times, large, hosting the form / Move box itself).
+// the selected day's times); there is no Day view (owner, 2026-11-24).
 // Picking a medical time opens the shared CitaModal with everything preset (it owns doctor choice,
 // validation, the overlap warning, the EHR gate and the BE's reschedule-instead behaviour). Picking a
 // service time renders the `serviceForm` slot under the day's grid. While moving an appointment the day
@@ -147,16 +147,12 @@ export function BookingCalendar({
   };
 
   const today = data.todayIso;
-  const dayDate = date ?? today;
   const shift = (delta: -1 | 1) => {
     if (period === "month") {
       onChange({ month: shiftMonth(month, delta) });
-    } else if (period === "week") {
+    } else {
       const next = shiftWeek(anchor, delta);
       onChange({ anchor: next, month: monthOf(next) });
-    } else {
-      const next = shiftDay(dayDate, delta);
-      onChange({ date: next < today ? today : next, month: monthOf(next) });
     }
   };
   const closedKind = date ? dayKind(date, monthOf(date).month0, today, data.holidays) : undefined;
@@ -181,8 +177,6 @@ export function BookingCalendar({
         period={period}
         month={month}
         anchor={anchor}
-        date={dayDate}
-        canGoBack={period !== "day" || dayDate > today}
         onShift={shift}
         onPeriod={onPeriod}
       />
@@ -198,7 +192,7 @@ export function BookingCalendar({
         // container query, so the app sidebar being open or folded counts): main >= ~560px + gap + the
         // 19rem day panel. Narrower (laptops with the sidebar open), the day panel sits under the main
         // area and both share the height; the day panel scrolls inside itself, the page never does.
-        // Day view is the day panel alone, large. Week view is the week grid alone (owner, 2026-11-23): the
+        // Week view is the week grid alone (owner, 2026-11-23): the
         // day panel only renders what a picked cell opens (move or service dialog).
         <div
           className={
@@ -258,7 +252,6 @@ export function BookingCalendar({
               }
             }
             fullDayHref={fullDayHref}
-            large={period === "day"}
             closedLabel={closedLabel}
             dialogsOnly={period === "week"}
           >

@@ -7019,17 +7019,14 @@
     "period": {
       "menuLabel": "Vista del calendario: {view}",
       "views": {
-        "day": "Día",
         "week": "Semana",
         "month": "Mes"
       },
       "prev": {
-        "day": "Día anterior",
         "week": "Semana anterior",
         "month": "Mes anterior"
       },
       "next": {
-        "day": "Día siguiente",
         "week": "Semana siguiente",
         "month": "Mes siguiente"
       }

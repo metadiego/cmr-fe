@@ -1,8 +1,8 @@
 import { isPeriod, type BookingPeriod } from "./period.ts";
 
 // URL state of the booking screen:
-// ?type=medical:<id>|service:<id>&date=YYYY-MM-DD&patient=<id>&view=day|week (month, the default, is
-// left out of the URL).
+// ?type=medical:<id>|service:<id>&date=YYYY-MM-DD&patient=<id>&view=week (month, the default, is
+// left out of the URL; an old view=day reads as month).
 
 export type BookingKind = "medical" | "service";
 

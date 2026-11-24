@@ -1,22 +1,22 @@
-import { addDays } from "../recurring-plan.ts";
 import { monthOf, type MonthRef } from "./month.ts";
 import { weekDays, weekStart } from "./week.ts";
 
-// The booking calendar's three views (Day / Week / Month) and the day each one is "about", used to
-// carry the place over when the view changes. Pure, no app imports.
+// The booking calendar's two views (Week / Month) and the day each one is "about", used to carry the
+// place over when the view changes. There is no Day view (owner, 2026-11-24): an old `view=day` link
+// opens on Month. Pure, no app imports.
 
-export type BookingPeriod = "day" | "week" | "month";
+export type BookingPeriod = "week" | "month";
 
-export const PERIODS: BookingPeriod[] = ["day", "week", "month"];
+export const PERIODS: BookingPeriod[] = ["week", "month"];
 
 export function isPeriod(s: string | null | undefined): s is BookingPeriod {
-  return s === "day" || s === "week" || s === "month";
+  return s === "week" || s === "month";
 }
 
-/** D / W / M (any case) → the view; anything else → null. */
+/** W / M (any case) → the view; anything else → null. */
 export function periodForKey(key: string): BookingPeriod | null {
   const k = key.toLowerCase();
-  return k === "d" ? "day" : k === "w" ? "week" : k === "m" ? "month" : null;
+  return k === "w" ? "week" : k === "m" ? "month" : null;
 }
 
 function inMonth(date: string, m: MonthRef): boolean {
@@ -25,8 +25,8 @@ function inMonth(date: string, m: MonthRef): boolean {
 }
 
 /**
- * The day the current view is about, never before today: Day → its day; Week → the selected day when it
- * is in the shown week, else the week's Monday; Month → the selected day when it is in the shown month,
+ * The day the current view is about, never before today: Week → the selected day when it is in the
+ * shown week, else the week's Monday; Month → the selected day when it is in the shown month,
  * else today when the month is the current one, else the month's first day.
  */
 export function periodFocus(
@@ -34,9 +34,7 @@ export function periodFocus(
   todayIso: string,
 ): string {
   let focus: string;
-  if (p.period === "day") {
-    focus = p.date ?? todayIso;
-  } else if (p.period === "week") {
+  if (p.period === "week") {
     focus = p.date && weekDays(p.anchor).includes(p.date) ? p.date : weekStart(p.anchor);
   } else if (p.date && inMonth(p.date, p.month)) {
     focus = p.date;
@@ -46,9 +44,4 @@ export function periodFocus(
     focus = `${p.month.year}-${String(p.month.month0 + 1).padStart(2, "0")}-01`;
   }
   return focus < todayIso ? todayIso : focus;
-}
-
-/** Day view's ‹ ›: one day, skipping nothing (a closed day shows "Closed"). */
-export function shiftDay(date: string, delta: number): string {
-  return addDays(date, delta);
 }

@@ -22,14 +22,12 @@ import { parseDayUTC } from "@/lib/format/fecha";
 // Month M) sits between the arrows where «Hoy» was; there is no «Hoy» button (owner, 2026-11-24). The
 // row sits under «Agendando».
 
-const SHORTCUT: Record<BookingPeriod, string> = { day: "D", week: "W", month: "M" };
+const SHORTCUT: Record<BookingPeriod, string> = { week: "W", month: "M" };
 
 export function PeriodHeader({
   period,
   month,
   anchor,
-  date,
-  canGoBack,
   onShift,
   onPeriod,
 }: {
@@ -37,10 +35,6 @@ export function PeriodHeader({
   month: MonthRef;
   /** Week view: any day of the shown week. */
   anchor: string;
-  /** Day view: the shown day. */
-  date: string;
-  /** False disables ‹ (Day view never goes before today). */
-  canGoBack: boolean;
   /** -1 / +1 period. */
   onShift: (delta: -1 | 1) => void;
   onPeriod: (p: BookingPeriod) => void;
@@ -52,26 +46,17 @@ export function PeriodHeader({
   if (period === "month") {
     const d = parseDayUTC(`${month.year}-${String(month.month0 + 1).padStart(2, "0")}-01`);
     title = d ? format.dateTime(d, "monthYear") : "";
-  } else if (period === "week") {
+  } else {
     const days = weekDays(anchor);
     const a = parseDayUTC(days[0]);
     const b = parseDayUTC(days[5]);
     title = a && b ? format.dateTimeRange(a, b, "dayMonthYear") : "";
-  } else {
-    const d = parseDayUTC(date);
-    title = d ? format.dateTime(d, "dayWeekdayLong") : "";
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2" data-slot="period-header">
       <div className="flex items-center gap-1">
-        <Button
-          variant="outline"
-          size="icon-sm"
-          onClick={() => onShift(-1)}
-          disabled={!canGoBack}
-          aria-label={t(`prev.${period}`)}
-        >
+        <Button variant="outline" size="icon-sm" onClick={() => onShift(-1)} aria-label={t(`prev.${period}`)}>
           <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
         </Button>
         <DropdownMenu>
