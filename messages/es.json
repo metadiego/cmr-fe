@@ -2608,7 +2608,9 @@
       "sessionSameDay": "Ya tiene otra sesión de este servicio hoy",
       "sheetSlotTaken": "La hoja no tiene hueco a esa hora",
       "sessionDeleteBlocked": "No se puede borrar esta visita: ya tiene una hoja clínica guardada. Puedes cancelarla.",
-      "no_package_to_attend": "No se puede asistir: el paciente no tiene sesiones disponibles de {service}."
+      "no_package_to_attend": "No se puede asistir: el paciente no tiene sesiones disponibles de {service}.",
+      "invalid_dose": "La dosis tiene que ser un número mayor que 0 (o vacía para un vial entero).",
+      "vial_used_by_another_visit": "Ese vial ya lo usó una visita posterior del paciente. Corrige primero esa otra visita."
     },
     "no_package": {
       "title": "Sin sesiones disponibles",
@@ -2677,7 +2679,13 @@
     },
     "sinAsistirTerapia": "Terapia",
     "sinAsistirConsulta": "Consulta",
-    "sinAsistirAbrir": "Abrir ese día →"
+    "sinAsistirAbrir": "Abrir ese día →",
+    "vial": {
+      "remnant": "Resto del vial n.º {number} · quedan {remaining}",
+      "expires": "vence {day}",
+      "expired": "Vial n.º {number} vencido: descartar",
+      "remnantVisit": "Resto del vial"
+    }
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -2721,7 +2729,8 @@
       "enfermera": "Enfermera",
       "cantidad": "Cantidad",
       "protocolo": "Protocolo",
-      "compras": "Compras"
+      "compras": "Compras",
+      "dosis_mg": "Dosis (mg)"
     },
     "binding": {
       "dosis": "Dosis (producto aplicado)",
@@ -3114,7 +3123,10 @@
         "sesionesPorUnidadHelp": "Sesiones que cubre cada unidad vendida; no cambia el precio.",
         "grupoNinguno": "Sin grupo (insumo)",
         "grupoFacturacionHelpSin": "Decide en qué columna del frontdesk aparece el paciente; sin grupo, el producto es un insumo que se consume (no abre columna).",
-        "grupoFacturacionHelpCon": "El paciente aparecerá en la columna del servicio de este grupo ({division}) en el frontdesk."
+        "grupoFacturacionHelpCon": "El paciente aparecerá en la columna del servicio de este grupo ({division}) en el frontdesk.",
+        "diasVialAbierto": "Días que dura abierto",
+        "diasVialAbiertoHelp": "Vacío = no vence. Pasado ese plazo, el resto del vial del paciente no se usa.",
+        "diasVialAbiertoInvalid": "Los días que dura abierto van en número entero, 1 o más."
       },
       "proveedorMas": "+{n}",
       "noResults": "Sin resultados para «{q}»",
@@ -3829,7 +3841,9 @@
       "activo": "Activo",
       "startStep": "Minutos entre horas de inicio",
       "startStepHint": "60 = solo en punto, como la hoja del call center. Vacío = cualquier hora del día. No cambia la duración.",
-      "startStepAny": "Cualquier hora"
+      "startStepAny": "Cualquier hora",
+      "sessionUnit": "Qué es una sesión",
+      "sessionUnitHint": "Vial: la dosis de cada visita decide. Abrir un vial gasta una sesión; usar el resto del vial del paciente no gasta ninguna."
     },
     "primaryPackageRuleRow": "Por renglón (cada paquete cuenta su propia sesión)",
     "primaryPackageRuleMostDelivered": "El que tiene más entregas (p. ej. MLS sobre el ancla HILT)",
@@ -3849,7 +3863,9 @@
     "multiSinCambios": "Sin cambios (todos los centros ya estaban iguales)",
     "cargaParcial": "No se pudieron cargar los servicios de: {centros}. La vista puede estar incompleta.",
     "ordenArrastrar": "Arrastra para reordenar las pestañas",
-    "sortOrderInvalid": "El orden debe ser un número."
+    "sortOrderInvalid": "El orden debe ser un número.",
+    "sessionUnitVisit": "Una visita",
+    "sessionUnitVial": "Un vial (dosis por visita)"
   },
   "transferencias": {
     "title": "Transferencias",

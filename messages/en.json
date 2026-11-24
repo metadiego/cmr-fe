@@ -2608,7 +2608,9 @@
       "sessionSameDay": "There is already another session of this service today",
       "sheetSlotTaken": "The sheet has no seat at that time",
       "sessionDeleteBlocked": "This visit cannot be deleted: it already has a saved clinical sheet. You can cancel it instead.",
-      "no_package_to_attend": "Can't attend: the patient has no available {service} sessions."
+      "no_package_to_attend": "Can't attend: the patient has no available {service} sessions.",
+      "invalid_dose": "The dose must be a number greater than 0 (or empty for a whole vial).",
+      "vial_used_by_another_visit": "A later visit of this patient already used that vial. Fix that other visit first."
     },
     "no_package": {
       "title": "No sessions available",
@@ -2677,7 +2679,13 @@
     },
     "sinAsistirTerapia": "Therapy",
     "sinAsistirConsulta": "Consultation",
-    "sinAsistirAbrir": "Open that day →"
+    "sinAsistirAbrir": "Open that day →",
+    "vial": {
+      "remnant": "Vial no. {number} remnant · {remaining} left",
+      "expires": "expires {day}",
+      "expired": "Vial no. {number} expired: discard",
+      "remnantVisit": "Vial remnant"
+    }
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -2721,7 +2729,8 @@
       "enfermera": "Nurse",
       "cantidad": "Quantity",
       "protocolo": "Protocol",
-      "compras": "Purchases"
+      "compras": "Purchases",
+      "dosis_mg": "Dose (mg)"
     },
     "binding": {
       "dosis": "Dose (applied product)",
@@ -3114,7 +3123,10 @@
         "sesionesPorUnidadHelp": "Sessions each unit sold covers; does not change the price.",
         "grupoNinguno": "No group (supply)",
         "grupoFacturacionHelpSin": "Decides which frontdesk column the patient appears in; with no group, the product is a supply that gets consumed (opens no column).",
-        "grupoFacturacionHelpCon": "The patient will appear in this group’s service column ({division}) at the front desk."
+        "grupoFacturacionHelpCon": "The patient will appear in this group’s service column ({division}) at the front desk.",
+        "diasVialAbierto": "Days it lasts once opened",
+        "diasVialAbiertoHelp": "Empty = never expires. After that, the patient's vial remnant is not used.",
+        "diasVialAbiertoInvalid": "Days once opened must be a whole number, 1 or more."
       },
       "proveedorMas": "+{n}",
       "noResults": "No results for “{q}”",
@@ -3829,7 +3841,9 @@
       "activo": "Active",
       "startStep": "Minutes between start times",
       "startStepHint": "60 = on the hour only, like the call-center sheet. Empty = any slot of the day. It does not change the duration.",
-      "startStepAny": "Any time"
+      "startStepAny": "Any time",
+      "sessionUnit": "What a session is",
+      "sessionUnitHint": "Vial: each visit's dose decides. Opening a vial spends a session; using the patient's remnant spends none."
     },
     "primaryPackageRuleRow": "Per row (each package counts its own session)",
     "primaryPackageRuleMostDelivered": "The one with the most delivered (e.g. MLS over the HILT anchor)",
@@ -3849,7 +3863,9 @@
     "multiSinCambios": "No changes (all centers were already the same)",
     "cargaParcial": "Could not load services from: {centros}. The view may be incomplete.",
     "ordenArrastrar": "Drag to reorder the tabs",
-    "sortOrderInvalid": "The order must be a number."
+    "sortOrderInvalid": "The order must be a number.",
+    "sessionUnitVisit": "A visit",
+    "sessionUnitVial": "A vial (dose per visit)"
   },
   "transferencias": {
     "title": "Transfers",

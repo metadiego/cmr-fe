@@ -68,6 +68,7 @@ import {
 } from "@/components/ui/select";
 import { FormSheet } from "@/components/kit/form-sheet";
 import { Field } from "@/components/kit/field";
+import { openedShelfLife } from "@/lib/inventory/opened-shelf-life";
 import { useDialogForm } from "@/components/kit/use-dialog-form";
 import { useSubmit } from "@/components/kit/use-submit";
 import { missingFields } from "@/lib/forms/missing";
@@ -490,6 +491,7 @@ type FormState = {
   // Sesiones que cubre cada unidad vendida (BE #657, cmr-be "sesiones por unidad"): si la línea de
   // factura no manda sesiones, nace con cantidad × este número. No cambia el precio.
   sesionesPorUnidad: string;
+  diasVialAbierto: string; // openedShelfLifeDays (cmr-be #700): empty = no limit
   imprimeComponentes: boolean;
   aplicaPrecioBaseDevolucion: boolean;
   activo: boolean;
@@ -515,6 +517,7 @@ const EMPTY: FormState = {
   unidadContenidoId: "",
   unidadesPorEnvase: "",
   sesionesPorUnidad: "",
+  diasVialAbierto: "",
   imprimeComponentes: true,
   aplicaPrecioBaseDevolucion: false,
   activo: true,
@@ -568,6 +571,7 @@ function ProductoForm({
             unidadContenidoId: producto.contentUnitId ?? "",
             unidadesPorEnvase: producto.unitsPerContainer != null ? String(producto.unitsPerContainer) : "",
             sesionesPorUnidad: producto.sessionsPerUnit != null ? String(producto.sessionsPerUnit) : "",
+            diasVialAbierto: producto.openedShelfLifeDays != null ? String(producto.openedShelfLifeDays) : "",
             imprimeComponentes: (producto as { printComponents?: boolean }).printComponents ?? true,
             aplicaPrecioBaseDevolucion: (producto as { applyBasePriceOnRefund?: boolean }).applyBasePriceOnRefund ?? false,
             activo: producto.active ?? true,
@@ -667,6 +671,7 @@ function ProductoForm({
         ...(id(form.unidadContenidoId) ? { contentUnitId: id(form.unidadContenidoId) } : {}),
         ...(num(form.unidadesPorEnvase) != null ? { unitsPerContainer: num(form.unidadesPorEnvase) } : {}),
         ...(num(form.sesionesPorUnidad) != null ? { sessionsPerUnit: num(form.sesionesPorUnidad) } : {}),
+        openedShelfLifeDays: openedShelfLife(form.diasVialAbierto).value,
         // Devolución a precio base (láser/vit C/GLP-1…): la política precio_base solo aplica a los marcados.
         applyBasePriceOnRefund: form.aplicaPrecioBaseDevolucion,
         // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
@@ -714,6 +719,7 @@ function ProductoForm({
       onSubmit={() => submit()}
       submitting={submitting}
       missing={missing}
+      reason={openedShelfLife(form.diasVialAbierto).invalid ? t("field.diasVialAbiertoInvalid") : undefined}
     >
       <Field label={t("field.nombre")} htmlFor="prod-name" required>
         <Input id="prod-name" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
@@ -897,18 +903,14 @@ function ProductoForm({
         </div>
         <p className="mt-2 text-[11px] text-muted-foreground">{t("field.envaseHelp")}</p>
       </div>
-      <Field label={t("field.sesionesPorUnidad")} htmlFor="prod-sessions-per-unit" hint={t("field.sesionesPorUnidadHelp")}>
-        <Input
-          id="prod-sessions-per-unit"
-          type="number"
-          inputMode="numeric"
-          min={1}
-          step="1"
-          value={form.sesionesPorUnidad}
-          onChange={(e) => set("sesionesPorUnidad", e.target.value)}
-          placeholder="4"
-        />
-      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("field.sesionesPorUnidad")} htmlFor="prod-sessions-per-unit" hint={t("field.sesionesPorUnidadHelp")}>
+          <Input id="prod-sessions-per-unit" type="number" inputMode="numeric" min={1} step="1" value={form.sesionesPorUnidad} onChange={(e) => set("sesionesPorUnidad", e.target.value)} placeholder="4" />
+        </Field>
+        <Field label={t("field.diasVialAbierto")} htmlFor="prod-opened-shelf-life" hint={t("field.diasVialAbiertoHelp")}>
+          <Input id="prod-opened-shelf-life" type="number" inputMode="numeric" min={1} step="1" value={form.diasVialAbierto} onChange={(e) => set("diasVialAbierto", e.target.value)} placeholder="—" />
+        </Field>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <Field label={t("field.tipo")} htmlFor="prod-type">
           <Select

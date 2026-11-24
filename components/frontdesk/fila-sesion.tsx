@@ -25,6 +25,8 @@ import type { EhrGateCtx, PackageGateCtx } from "@/components/tablero/flujo-aten
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import { SesionesCell } from "@/components/frontdesk/sesiones-cell";
 import { MedicionCell } from "@/components/frontdesk/medicion-cell";
+import { VialRemnantChips } from "@/components/frontdesk/vial-remnant-chip";
+import { isRemnantVisit } from "@/lib/frontdesk/vial-remnant";
 import { RowMenu } from "@/components/frontdesk/row-menu";
 import { FilaSesionModales } from "@/components/frontdesk/fila-sesion-modales";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
@@ -232,13 +234,22 @@ export function FilaSesion({
       );
     }
     if (c.clave === "fd_sesiones") {
+      // Vial services (cmr-be #700): a visit on the patient's remnant has no session number, and the row
+      // shows what is left of the vial opened in their name. The unit comes from the dose column's render.
+      const vial = servicio?.sessionUnit === "vial";
+      const doseUnit = colsRender.map((x) => (x.kind === "col" ? (x.col.render as { writeBinding?: string; unidad?: string } | null) : null)).find((r) => r?.writeBinding === "sesion.doseAmount")?.unidad;
       return (
-        <SesionesCell
-          display={v == null || v === "" ? "—" : String(v)}
-          servicio={servicio}
-          pacienteId={sesion?.patientId}
-          centro={centro}
-        />
+        <span className="inline-flex flex-wrap items-center gap-1.5">
+          <SesionesCell
+            display={isRemnantVisit(sesion, servicio?.sessionUnit) ? t("vial.remnantVisit") : v == null || v === "" ? "—" : String(v)}
+            servicio={servicio}
+            pacienteId={sesion?.patientId}
+            centro={centro}
+          />
+          {vial && sesion?.patientId && (
+            <VialRemnantChips patientId={sesion.patientId} productId={servicio?.productId} unit={doseUnit} centro={centro} refreshKey={`${sesion.status}-${sesion.quantity}-${sesion.doseAmount}`} />
+          )}
+        </span>
       );
     }
     // Select editable (p. ej. DOSIS): opciones data-driven del grupo del servicio; escribe vía
@@ -357,7 +368,7 @@ export function FilaSesion({
     if (c.tipo === "medicion" && c.render) {
       return (
         <MedicionCell
-          col={c} sesion={sesion}
+          col={c} sesion={sesion} rowValue={v}
           sessionId={sesion?.id} centroId={centro}
           disabled={busy || cancelada}
           onSave={(valor) => run(() => guardarCelda(c.clave, valor, etiquetaCol(c)))}

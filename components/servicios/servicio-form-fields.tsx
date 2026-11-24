@@ -64,6 +64,23 @@ export function PrimaryPackageRuleSelect({
   );
 }
 
+// What one package session is (cmr-be #700): a visit (default) or a vial, where the dose of each visit
+// decides — opening a vial spends a session, using the patient's remnant spends none.
+export function SessionUnitSelect({ id, value, onChange }: { id?: string; value: "visit" | "vial"; onChange: (v: "visit" | "vial") => void }) {
+  const t = useTranslations("servicios");
+  return (
+    <Field label={t("field.sessionUnit")} htmlFor={id} hint={t("field.sessionUnitHint")}>
+      <Select value={value} onValueChange={(v) => onChange(v as "visit" | "vial")}>
+        <SelectTrigger id={id} className="w-full"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="visit">{t("sessionUnitVisit")}</SelectItem>
+          <SelectItem value="vial">{t("sessionUnitVial")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </Field>
+  );
+}
+
 export function Toggle({
   label,
   hint,

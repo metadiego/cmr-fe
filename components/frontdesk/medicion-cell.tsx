@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 export function MedicionCell({
   col,
   sesion,
+  rowValue,
   sessionId,
   centroId,
   disabled,
@@ -25,17 +26,24 @@ export function MedicionCell({
 }: {
   col: FrontdeskColumna;
   sesion?: Sesion;
+  /** The value the board resolved for this column: the source when the binding is a session field
+   *  (`@.doseAmount`, cmr-be #700) rather than one of `datos`. */
+  rowValue?: unknown;
   sessionId?: string;
   centroId?: string;
   disabled: boolean;
-  onSave: (valor: number) => void;
+  onSave: (valor: number | null) => void;
   /** The value SHOWN but not saved yet (proposal or typed), or null: a transition saves it first. */
   onPending?: (dato: string, valor: number | null) => void;
 }) {
   const tRoot = useTranslations();
-  const r = (col.render ?? {}) as { dato?: string; unidadKey?: string; min?: number; max?: number; paso?: number };
+  const r = (col.render ?? {}) as { dato?: string; unidadKey?: string; unidad?: string; min?: number; max?: number; paso?: number; writeBinding?: string };
   const dato = r.dato ?? col.clave;
-  const actual = (sesion?.data as Record<string, unknown> | null | undefined)?.[dato];
+  const fromData = (sesion?.data as Record<string, unknown> | null | undefined)?.[dato];
+  const actual = fromData ?? (rowValue === "" ? null : rowValue) ?? null;
+  // A session field (writeBinding `sesion.*`, e.g. the dose) is nullable by contract: emptying it saves
+  // null. A `datos` measurement keeps the old rule — an empty box saves nothing.
+  const clearable = (r.writeBinding ?? "").startsWith("sesion.");
 
   const [propuesto, setPropuesto] = React.useState<number | null>(null);
   React.useEffect(() => {
@@ -67,6 +75,7 @@ export function MedicionCell({
   const commit = () => {
     setFocused(false);
     const n = Number(val);
+    if (val === "" && clearable && actual != null) return onSave(null);
     if (val === "" || Number.isNaN(n)) return;
     if (actual != null && Number(actual) === n) return;
     onSave(n);
@@ -92,7 +101,7 @@ export function MedicionCell({
         value={val}
         min={r.min}
         max={r.max}
-        step={r.paso ?? 1}
+        step={r.paso ?? (clearable ? "any" : 1)}
         disabled={disabled}
         onFocus={() => setFocused(true)}
         onChange={(e) => setVal(e.target.value)}
@@ -102,7 +111,7 @@ export function MedicionCell({
         aria-label={tRoot(col.labelKey)}
         title={esPropuesto ? tRoot("frontdesk.aplicadasPropuesto") : undefined}
       />
-      {r.unidadKey && <span className="text-xs text-muted-foreground">{tRoot(r.unidadKey)}</span>}
+      {r.unidadKey ? <span className="text-xs text-muted-foreground">{tRoot(r.unidadKey)}</span> : r.unidad && <span className="text-xs text-muted-foreground">{r.unidad}</span>}
     </span>
   );
 }

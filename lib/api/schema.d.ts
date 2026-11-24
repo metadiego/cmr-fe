@@ -3449,6 +3449,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/paquetes/excepcion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dar disponibilidad SIN compra (excepcional): paquete sin factura, con motivo obligatorio; no es venta.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/paquetes/excepcion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ExceptionalAvailabilityController_grant[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/paquetes/exception": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dar disponibilidad SIN compra (excepcional): paquete sin factura, con motivo obligatorio; no es venta.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/paquetes/exception`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ExceptionalAvailabilityController_grant[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/packages/excepcion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dar disponibilidad SIN compra (excepcional): paquete sin factura, con motivo obligatorio; no es venta.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/packages/excepcion`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ExceptionalAvailabilityController_grant[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/packages/exception": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dar disponibilidad SIN compra (excepcional): paquete sin factura, con motivo obligatorio; no es venta.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/packages/exception`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ExceptionalAvailabilityController_grant[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/paquetes/excepcion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dar disponibilidad SIN compra (excepcional): paquete sin factura, con motivo obligatorio; no es venta. */
+        post: operations["ExceptionalAvailabilityController_grant[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/paquetes/exception": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dar disponibilidad SIN compra (excepcional): paquete sin factura, con motivo obligatorio; no es venta. */
+        post: operations["ExceptionalAvailabilityController_grant[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/packages/excepcion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dar disponibilidad SIN compra (excepcional): paquete sin factura, con motivo obligatorio; no es venta. */
+        post: operations["ExceptionalAvailabilityController_grant[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/packages/exception": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dar disponibilidad SIN compra (excepcional): paquete sin factura, con motivo obligatorio; no es venta. */
+        post: operations["ExceptionalAvailabilityController_grant[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/transferencias": {
         parameters: {
             query?: never;
@@ -13657,6 +13809,158 @@ export interface paths {
         put?: never;
         /** Cambio de protocolo: deja sin efecto las terapias pendientes y crea las nuevas (decisión médica). */
         post: operations["CambioProtocoloController_cambioProtocolo[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/paquetes/cambio-protocolo/{pacienteId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula un cambio de protocolo sin escribir nada: qué se cierra (pendiente y su valor a lo cobrado), qué se crea (a precio de lista), qué ya tiene el paciente del mismo producto y la diferencia. Avisa, no bloquea.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/paquetes/cambio-protocolo/{pacienteId}/simular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CambioProtocoloController_simular[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/packages/protocol-change/{pacienteId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula un cambio de protocolo sin escribir nada: qué se cierra (pendiente y su valor a lo cobrado), qué se crea (a precio de lista), qué ya tiene el paciente del mismo producto y la diferencia. Avisa, no bloquea.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/packages/protocol-change/{pacienteId}/simulate`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CambioProtocoloController_simular[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/paquetes/cambio-protocolo/{pacienteId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula un cambio de protocolo sin escribir nada: qué se cierra (pendiente y su valor a lo cobrado), qué se crea (a precio de lista), qué ya tiene el paciente del mismo producto y la diferencia. Avisa, no bloquea.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/paquetes/cambio-protocolo/{pacienteId}/simular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CambioProtocoloController_simular[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/packages/protocol-change/{pacienteId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simula un cambio de protocolo sin escribir nada: qué se cierra (pendiente y su valor a lo cobrado), qué se crea (a precio de lista), qué ya tiene el paciente del mismo producto y la diferencia. Avisa, no bloquea.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/packages/protocol-change/{pacienteId}/simulate`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CambioProtocoloController_simular[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/paquetes/cambio-protocolo/{pacienteId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula un cambio de protocolo sin escribir nada: qué se cierra (pendiente y su valor a lo cobrado), qué se crea (a precio de lista), qué ya tiene el paciente del mismo producto y la diferencia. Avisa, no bloquea. */
+        post: operations["CambioProtocoloController_simular[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/packages/protocol-change/{pacienteId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula un cambio de protocolo sin escribir nada: qué se cierra (pendiente y su valor a lo cobrado), qué se crea (a precio de lista), qué ya tiene el paciente del mismo producto y la diferencia. Avisa, no bloquea. */
+        post: operations["CambioProtocoloController_simular[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/paquetes/cambio-protocolo/{pacienteId}/simular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula un cambio de protocolo sin escribir nada: qué se cierra (pendiente y su valor a lo cobrado), qué se crea (a precio de lista), qué ya tiene el paciente del mismo producto y la diferencia. Avisa, no bloquea. */
+        post: operations["CambioProtocoloController_simular[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/packages/protocol-change/{pacienteId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Simula un cambio de protocolo sin escribir nada: qué se cierra (pendiente y su valor a lo cobrado), qué se crea (a precio de lista), qué ya tiene el paciente del mismo producto y la diferencia. Avisa, no bloquea. */
+        post: operations["CambioProtocoloController_simular[7]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -25501,17 +25805,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Qué VE este rol en el menú: todos los ítems, con allowed = está en su lista blanca. La lista blanca es visibilidad; los permisos gobiernan las acciones. Un rol sin lista cae a los permisos (compatibilidad).
+         * Qué VE este rol en el menú: todos los ítems, con allowed = sus permisos lo abren. El menú sale de los permisos; la lista blanca por rol ya no existe (paso 8 de la limpieza de accesos).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/roles/{id}/menu`, que devuelve lo mismo con los nombres en inglés.
          */
         get: operations["RbacController_getRoleMenu_v1"];
-        /**
-         * Fija la LISTA BLANCA de menú del rol: exactamente los ítems que verá quien lo tenga. NO toca permisos — para las acciones está el editor de permisos. Lista vacía = no ve nada de menú.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/roles/{id}/menu`, que devuelve lo mismo con los nombres en inglés.
-         */
-        put: operations["RbacController_setRoleMenu_v1"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -25526,10 +25825,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Qué VE este rol en el menú: todos los ítems, con allowed = está en su lista blanca. La lista blanca es visibilidad; los permisos gobiernan las acciones. Un rol sin lista cae a los permisos (compatibilidad). */
+        /** Qué VE este rol en el menú: todos los ítems, con allowed = sus permisos lo abren. El menú sale de los permisos; la lista blanca por rol ya no existe (paso 8 de la limpieza de accesos). */
         get: operations["RbacController_getRoleMenu_v2"];
-        /** Fija la LISTA BLANCA de menú del rol: exactamente los ítems que verá quien lo tenga. NO toca permisos — para las acciones está el editor de permisos. Lista vacía = no ve nada de menú. */
-        put: operations["RbacController_setRoleMenu_v2"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -29233,6 +29531,178 @@ export interface paths {
         put?: never;
         /** In the warehouse's center: a vial opened from a Caguas warehouse is a Caguas vial. */
         post: operations["VialesAbiertosController_create[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/viales-abiertos/paciente/{pacienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remnants waiting in a patient's own open vials.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/viales-abiertos/paciente/{pacienteId}`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Each open vial in the patient's name with something left: vialAbiertoId, numero, productoId, producto, fechaApertura, caducaApertura (null = no expiry), capacidad, remaining (content unit of the vial) and vencido (expired after opening: it is not used for a dose and is left to discard).
+         */
+        get: operations["VialesAbiertosController_remnantsOfPatient[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/viales-abiertos/patient/{pacienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remnants waiting in a patient's own open vials.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/viales-abiertos/patient/{pacienteId}`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Each open vial in the patient's name with something left: vialAbiertoId, numero, productoId, producto, fechaApertura, caducaApertura (null = no expiry), capacidad, remaining (content unit of the vial) and vencido (expired after opening: it is not used for a dose and is left to discard).
+         */
+        get: operations["VialesAbiertosController_remnantsOfPatient[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/open-vials/paciente/{pacienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remnants waiting in a patient's own open vials.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/open-vials/paciente/{pacienteId}`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Each open vial in the patient's name with something left: vialAbiertoId, numero, productoId, producto, fechaApertura, caducaApertura (null = no expiry), capacidad, remaining (content unit of the vial) and vencido (expired after opening: it is not used for a dose and is left to discard).
+         */
+        get: operations["VialesAbiertosController_remnantsOfPatient[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/open-vials/patient/{pacienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remnants waiting in a patient's own open vials.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/open-vials/patient/{pacienteId}`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Each open vial in the patient's name with something left: vialAbiertoId, numero, productoId, producto, fechaApertura, caducaApertura (null = no expiry), capacidad, remaining (content unit of the vial) and vencido (expired after opening: it is not used for a dose and is left to discard).
+         */
+        get: operations["VialesAbiertosController_remnantsOfPatient[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/viales-abiertos/paciente/{pacienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remnants waiting in a patient's own open vials.
+         * @description Each open vial in the patient's name with something left: vialAbiertoId, numero, productoId, producto, fechaApertura, caducaApertura (null = no expiry), capacidad, remaining (content unit of the vial) and vencido (expired after opening: it is not used for a dose and is left to discard).
+         */
+        get: operations["VialesAbiertosController_remnantsOfPatient[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/viales-abiertos/patient/{pacienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remnants waiting in a patient's own open vials.
+         * @description Each open vial in the patient's name with something left: vialAbiertoId, numero, productoId, producto, fechaApertura, caducaApertura (null = no expiry), capacidad, remaining (content unit of the vial) and vencido (expired after opening: it is not used for a dose and is left to discard).
+         */
+        get: operations["VialesAbiertosController_remnantsOfPatient[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/open-vials/paciente/{pacienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remnants waiting in a patient's own open vials.
+         * @description Each open vial in the patient's name with something left: vialAbiertoId, numero, productoId, producto, fechaApertura, caducaApertura (null = no expiry), capacidad, remaining (content unit of the vial) and vencido (expired after opening: it is not used for a dose and is left to discard).
+         */
+        get: operations["VialesAbiertosController_remnantsOfPatient[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/open-vials/patient/{pacienteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Remnants waiting in a patient's own open vials.
+         * @description Each open vial in the patient's name with something left: vialAbiertoId, numero, productoId, producto, fechaApertura, caducaApertura (null = no expiry), capacidad, remaining (content unit of the vial) and vencido (expired after opening: it is not used for a dose and is left to discard).
+         */
+        get: operations["VialesAbiertosController_remnantsOfPatient[7]_v2"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -33271,6 +33741,342 @@ export interface paths {
         };
         /** Period summary: opening, each inbound and adjustment, applied, closing. */
         get: operations["ReportesController_kardexResumen[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/control-entregas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Delivery control of one product: sold, delivered at patient-desk, pending per patient (older
+         *     months carried) and the warehouse box. docs/specs/control-de-entregas-por-producto.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/control-entregas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_controlEntregas[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/delivery-control": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Delivery control of one product: sold, delivered at patient-desk, pending per patient (older
+         *     months carried) and the warehouse box. docs/specs/control-de-entregas-por-producto.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/delivery-control`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_controlEntregas[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/control-entregas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Delivery control of one product: sold, delivered at patient-desk, pending per patient (older
+         *     months carried) and the warehouse box. docs/specs/control-de-entregas-por-producto.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/control-entregas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_controlEntregas[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/delivery-control": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Delivery control of one product: sold, delivered at patient-desk, pending per patient (older
+         *     months carried) and the warehouse box. docs/specs/control-de-entregas-por-producto.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/delivery-control`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_controlEntregas[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/control-entregas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Delivery control of one product: sold, delivered at patient-desk, pending per patient (older
+         *     months carried) and the warehouse box. docs/specs/control-de-entregas-por-producto.md
+         */
+        get: operations["ReportesController_controlEntregas[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/delivery-control": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Delivery control of one product: sold, delivered at patient-desk, pending per patient (older
+         *     months carried) and the warehouse box. docs/specs/control-de-entregas-por-producto.md
+         */
+        get: operations["ReportesController_controlEntregas[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/control-entregas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Delivery control of one product: sold, delivered at patient-desk, pending per patient (older
+         *     months carried) and the warehouse box. docs/specs/control-de-entregas-por-producto.md
+         */
+        get: operations["ReportesController_controlEntregas[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/delivery-control": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Delivery control of one product: sold, delivered at patient-desk, pending per patient (older
+         *     months carried) and the warehouse box. docs/specs/control-de-entregas-por-producto.md
+         */
+        get: operations["ReportesController_controlEntregas[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/kardex-todos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The kardex of EVERY product for a period, grouped by deduction mode (sold at the counter vs
+         *     delivered at patient-desk): together or apart. docs/specs/kardex-resumen-de-todos-los-productos.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/kardex-todos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexTodos[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/reportes/kardex-overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The kardex of EVERY product for a period, grouped by deduction mode (sold at the counter vs
+         *     delivered at patient-desk): together or apart. docs/specs/kardex-resumen-de-todos-los-productos.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/reportes/kardex-overview`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexTodos[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/kardex-todos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The kardex of EVERY product for a period, grouped by deduction mode (sold at the counter vs
+         *     delivered at patient-desk): together or apart. docs/specs/kardex-resumen-de-todos-los-productos.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/kardex-todos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexTodos[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/reports/kardex-overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The kardex of EVERY product for a period, grouped by deduction mode (sold at the counter vs
+         *     delivered at patient-desk): together or apart. docs/specs/kardex-resumen-de-todos-los-productos.md
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/reports/kardex-overview`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ReportesController_kardexTodos[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/kardex-todos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The kardex of EVERY product for a period, grouped by deduction mode (sold at the counter vs
+         *     delivered at patient-desk): together or apart. docs/specs/kardex-resumen-de-todos-los-productos.md
+         */
+        get: operations["ReportesController_kardexTodos[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/reportes/kardex-overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The kardex of EVERY product for a period, grouped by deduction mode (sold at the counter vs
+         *     delivered at patient-desk): together or apart. docs/specs/kardex-resumen-de-todos-los-productos.md
+         */
+        get: operations["ReportesController_kardexTodos[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/kardex-todos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The kardex of EVERY product for a period, grouped by deduction mode (sold at the counter vs
+         *     delivered at patient-desk): together or apart. docs/specs/kardex-resumen-de-todos-los-productos.md
+         */
+        get: operations["ReportesController_kardexTodos[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/reports/kardex-overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The kardex of EVERY product for a period, grouped by deduction mode (sold at the counter vs
+         *     delivered at patient-desk): together or apart. docs/specs/kardex-resumen-de-todos-los-productos.md
+         */
+        get: operations["ReportesController_kardexTodos[7]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -39983,6 +40789,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/citas/pacientes/{pacienteId}/tipo-de-visita": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Was the patient attended before? Tells the booking screen whether the visit is nueva or seguimiento (same source the save uses).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/pacientes/{pacienteId}/tipo-de-visita`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_visitKind[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/patients/{pacienteId}/visit-kind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Was the patient attended before? Tells the booking screen whether the visit is nueva or seguimiento (same source the save uses).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/patients/{pacienteId}/visit-kind`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_visitKind[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/pacientes/{pacienteId}/tipo-de-visita": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Was the patient attended before? Tells the booking screen whether the visit is nueva or seguimiento (same source the save uses).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/pacientes/{pacienteId}/tipo-de-visita`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_visitKind[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/patients/{pacienteId}/visit-kind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Was the patient attended before? Tells the booking screen whether the visit is nueva or seguimiento (same source the save uses).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/patients/{pacienteId}/visit-kind`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_visitKind[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/pacientes/{pacienteId}/tipo-de-visita": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Was the patient attended before? Tells the booking screen whether the visit is nueva or seguimiento (same source the save uses). */
+        get: operations["CitasController_visitKind[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/patients/{pacienteId}/visit-kind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Was the patient attended before? Tells the booking screen whether the visit is nueva or seguimiento (same source the save uses). */
+        get: operations["CitasController_visitKind[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/pacientes/{pacienteId}/tipo-de-visita": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Was the patient attended before? Tells the booking screen whether the visit is nueva or seguimiento (same source the save uses). */
+        get: operations["CitasController_visitKind[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/patients/{pacienteId}/visit-kind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Was the patient attended before? Tells the booking screen whether the visit is nueva or seguimiento (same source the save uses). */
+        get: operations["CitasController_visitKind[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/citas/estados": {
         parameters: {
             query?: never;
@@ -44399,6 +45357,278 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/callcenter/canales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Our phone lines and the channel each stands for (Facebook, TV, general line).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/canales`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Configuration, as data: a call touching one of these numbers takes its channel and the other number is the patient. One call center: callcenter.read in any center (those of centerIds) lists them all, each with clinicName.
+         */
+        get: operations["CallcenterController_listChannels[0]_v1"];
+        put?: never;
+        /**
+         * Add one of our lines with its channel (written in the session center).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/canales`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CallcenterController_createChannel[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Our phone lines and the channel each stands for (Facebook, TV, general line).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/channels`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Configuration, as data: a call touching one of these numbers takes its channel and the other number is the patient. One call center: callcenter.read in any center (those of centerIds) lists them all, each with clinicName.
+         */
+        get: operations["CallcenterController_listChannels[1]_v1"];
+        put?: never;
+        /**
+         * Add one of our lines with its channel (written in the session center).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/channels`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CallcenterController_createChannel[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/canales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Our phone lines and the channel each stands for (Facebook, TV, general line).
+         * @description Configuration, as data: a call touching one of these numbers takes its channel and the other number is the patient. One call center: callcenter.read in any center (those of centerIds) lists them all, each with clinicName.
+         */
+        get: operations["CallcenterController_listChannels[2]_v2"];
+        put?: never;
+        /** Add one of our lines with its channel (written in the session center). */
+        post: operations["CallcenterController_createChannel[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Our phone lines and the channel each stands for (Facebook, TV, general line).
+         * @description Configuration, as data: a call touching one of these numbers takes its channel and the other number is the patient. One call center: callcenter.read in any center (those of centerIds) lists them all, each with clinicName.
+         */
+        get: operations["CallcenterController_listChannels[3]_v2"];
+        put?: never;
+        /** Add one of our lines with its channel (written in the session center). */
+        post: operations["CallcenterController_createChannel[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/canales/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change a line: number, channel, label or active.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/canales/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["CallcenterController_updateChannel[0]_v1"];
+        post?: never;
+        /**
+         * Remove a line (its past calls keep the channel they got).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/canales/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CallcenterController_removeChannel[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/channels/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Change a line: number, channel, label or active.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/channels/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["CallcenterController_updateChannel[1]_v1"];
+        post?: never;
+        /**
+         * Remove a line (its past calls keep the channel they got).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/channels/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["CallcenterController_removeChannel[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/canales/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Change a line: number, channel, label or active. */
+        put: operations["CallcenterController_updateChannel[2]_v2"];
+        post?: never;
+        /** Remove a line (its past calls keep the channel they got). */
+        delete: operations["CallcenterController_removeChannel[2]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/channels/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Change a line: number, channel, label or active. */
+        put: operations["CallcenterController_updateChannel[3]_v2"];
+        post?: never;
+        /** Remove a line (its past calls keep the channel they got). */
+        delete: operations["CallcenterController_removeChannel[3]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/llamadas/completar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete stored calls with channel, operator and patient (same rules as the ingest).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/llamadas/completar`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Fills only what is empty, oldest first, `limit` per run. Returns `next`: send it as `after` to continue; null means done.
+         */
+        post: operations["CallcenterController_completeCalls[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/calls/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete stored calls with channel, operator and patient (same rules as the ingest).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/calls/complete`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Fills only what is empty, oldest first, `limit` per run. Returns `next`: send it as `after` to continue; null means done.
+         */
+        post: operations["CallcenterController_completeCalls[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/llamadas/completar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete stored calls with channel, operator and patient (same rules as the ingest).
+         * @description Fills only what is empty, oldest first, `limit` per run. Returns `next`: send it as `after` to continue; null means done.
+         */
+        post: operations["CallcenterController_completeCalls[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/calls/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete stored calls with channel, operator and patient (same rules as the ingest).
+         * @description Fills only what is empty, oldest first, `limit` per run. Returns `next`: send it as `after` to continue; null means done.
+         */
+        post: operations["CallcenterController_completeCalls[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/callcenter/eventos": {
         parameters: {
             query?: never;
@@ -44668,6 +45898,82 @@ export interface paths {
         put?: never;
         post: operations["StreamableHttpController_handlePostRequest"];
         delete: operations["StreamableHttpController_handleDeleteRequest"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/api-keys`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ApiKeysController_findAll_v1"];
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/api-keys`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ApiKeysController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ApiKeysController_findAll_v2"];
+        put?: never;
+        post: operations["ApiKeysController_create_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/api-keys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/api-keys/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["ApiKeysController_revoke_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/api-keys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["ApiKeysController_revoke_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -50981,6 +52287,82 @@ export interface paths {
         };
         /** Resumen del día de UN servicio: cada sesión asistida (récord, paciente, cantidad, dosis, enfermera, quién la asistió, hora) y los totales, con los viales abiertos. `complete` = todas las sesiones del día asistidas (x/x). Para imprimir/CSV/email: POST /export con recurso frontdesk-day-summary. */
         get: operations["ServiceDaySummaryController_get[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/pacientes/{pacienteId}/servicios-agendables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Services of the booking center (X-Tenant-ID) the patient can still book: bought (packages of EVERY center, whatever the caller read scope: owner decision 2026-11-23) minus booked (upcoming pendiente/presente/en_terapia sessions of every center; past unmarked ones do not count). Needs frontdesk.read in the booking center. `centerIds` is accepted for compatibility but does NOT narrow the count. A session counts against every service whose products (billing group, else product) overlap its own, so rows that share packages share one pool: never add rows up. A `simultaneo` service (laser MLS + HILT) counts visits by its leading product, not the sum. Unlinked services never appear. `sources` splits what is bookable by the center of the package.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/pacientes/{pacienteId}/servicios-agendables`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BookableServicesController_forPatient[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/patients/{pacienteId}/bookable-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Services of the booking center (X-Tenant-ID) the patient can still book: bought (packages of EVERY center, whatever the caller read scope: owner decision 2026-11-23) minus booked (upcoming pendiente/presente/en_terapia sessions of every center; past unmarked ones do not count). Needs frontdesk.read in the booking center. `centerIds` is accepted for compatibility but does NOT narrow the count. A session counts against every service whose products (billing group, else product) overlap its own, so rows that share packages share one pool: never add rows up. A `simultaneo` service (laser MLS + HILT) counts visits by its leading product, not the sum. Unlinked services never appear. `sources` splits what is bookable by the center of the package.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/patients/{pacienteId}/bookable-services`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BookableServicesController_forPatient[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/pacientes/{pacienteId}/servicios-agendables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Services of the booking center (X-Tenant-ID) the patient can still book: bought (packages of EVERY center, whatever the caller read scope: owner decision 2026-11-23) minus booked (upcoming pendiente/presente/en_terapia sessions of every center; past unmarked ones do not count). Needs frontdesk.read in the booking center. `centerIds` is accepted for compatibility but does NOT narrow the count. A session counts against every service whose products (billing group, else product) overlap its own, so rows that share packages share one pool: never add rows up. A `simultaneo` service (laser MLS + HILT) counts visits by its leading product, not the sum. Unlinked services never appear. `sources` splits what is bookable by the center of the package. */
+        get: operations["BookableServicesController_forPatient[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/patients/{pacienteId}/bookable-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Services of the booking center (X-Tenant-ID) the patient can still book: bought (packages of EVERY center, whatever the caller read scope: owner decision 2026-11-23) minus booked (upcoming pendiente/presente/en_terapia sessions of every center; past unmarked ones do not count). Needs frontdesk.read in the booking center. `centerIds` is accepted for compatibility but does NOT narrow the count. A session counts against every service whose products (billing group, else product) overlap its own, so rows that share packages share one pool: never add rows up. A `simultaneo` service (laser MLS + HILT) counts visits by its leading product, not the sum. Unlinked services never appear. `sources` splits what is bookable by the center of the package. */
+        get: operations["BookableServicesController_forPatient[3]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -58613,6 +59995,310 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/paneles/{clave}/trabajo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The day's patients of every panel section and who has each one (the same fields the counters count), with the pending bell notice if any. One center: centerIds[0] (checked) or the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/trabajo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PanelesController_workOfDay[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/work": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The day's patients of every panel section and who has each one (the same fields the counters count), with the pending bell notice if any. One center: centerIds[0] (checked) or the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/work`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PanelesController_workOfDay[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/panels/{clave}/trabajo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The day's patients of every panel section and who has each one (the same fields the counters count), with the pending bell notice if any. One center: centerIds[0] (checked) or the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/trabajo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PanelesController_workOfDay[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/panels/{clave}/work": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The day's patients of every panel section and who has each one (the same fields the counters count), with the pending bell notice if any. One center: centerIds[0] (checked) or the session center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/work`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PanelesController_workOfDay[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/paneles/{clave}/trabajo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The day's patients of every panel section and who has each one (the same fields the counters count), with the pending bell notice if any. One center: centerIds[0] (checked) or the session center. */
+        get: operations["PanelesController_workOfDay[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/paneles/{clave}/work": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The day's patients of every panel section and who has each one (the same fields the counters count), with the pending bell notice if any. One center: centerIds[0] (checked) or the session center. */
+        get: operations["PanelesController_workOfDay[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/panels/{clave}/trabajo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The day's patients of every panel section and who has each one (the same fields the counters count), with the pending bell notice if any. One center: centerIds[0] (checked) or the session center. */
+        get: operations["PanelesController_workOfDay[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/panels/{clave}/work": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The day's patients of every panel section and who has each one (the same fields the counters count), with the pending bell notice if any. One center: centerIds[0] (checked) or the session center. */
+        get: operations["PanelesController_workOfDay[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/tomar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A staff member takes a patient of a section without a bell notice: raises and accepts the notice in one step (409 PANEL_WORK_ALREADY_TAKEN if someone else has it; idempotent if it is already theirs). centerIds narrows where the row is looked for; it is written in the row center with panel.accept checked there.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/tomar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PanelesController_claim[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A staff member takes a patient of a section without a bell notice: raises and accepts the notice in one step (409 PANEL_WORK_ALREADY_TAKEN if someone else has it; idempotent if it is already theirs). centerIds narrows where the row is looked for; it is written in the row center with panel.accept checked there.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/paneles/{clave}/claim`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PanelesController_claim[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/panels/{clave}/tomar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A staff member takes a patient of a section without a bell notice: raises and accepts the notice in one step (409 PANEL_WORK_ALREADY_TAKEN if someone else has it; idempotent if it is already theirs). centerIds narrows where the row is looked for; it is written in the row center with panel.accept checked there.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/tomar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PanelesController_claim[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/panels/{clave}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A staff member takes a patient of a section without a bell notice: raises and accepts the notice in one step (409 PANEL_WORK_ALREADY_TAKEN if someone else has it; idempotent if it is already theirs). centerIds narrows where the row is looked for; it is written in the row center with panel.accept checked there.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/panels/{clave}/claim`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PanelesController_claim[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/paneles/{clave}/tomar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A staff member takes a patient of a section without a bell notice: raises and accepts the notice in one step (409 PANEL_WORK_ALREADY_TAKEN if someone else has it; idempotent if it is already theirs). centerIds narrows where the row is looked for; it is written in the row center with panel.accept checked there. */
+        post: operations["PanelesController_claim[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/paneles/{clave}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A staff member takes a patient of a section without a bell notice: raises and accepts the notice in one step (409 PANEL_WORK_ALREADY_TAKEN if someone else has it; idempotent if it is already theirs). centerIds narrows where the row is looked for; it is written in the row center with panel.accept checked there. */
+        post: operations["PanelesController_claim[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/panels/{clave}/tomar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A staff member takes a patient of a section without a bell notice: raises and accepts the notice in one step (409 PANEL_WORK_ALREADY_TAKEN if someone else has it; idempotent if it is already theirs). centerIds narrows where the row is looked for; it is written in the row center with panel.accept checked there. */
+        post: operations["PanelesController_claim[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/panels/{clave}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A staff member takes a patient of a section without a bell notice: raises and accepts the notice in one step (409 PANEL_WORK_ALREADY_TAKEN if someone else has it; idempotent if it is already theirs). centerIds narrows where the row is looked for; it is written in the row center with panel.accept checked there. */
+        post: operations["PanelesController_claim[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/formatos": {
         parameters: {
             query?: never;
@@ -58847,6 +60533,334 @@ export interface paths {
         get: operations["FormatosController_armado[7]_v2"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formatos/{clave}/sesiones/{sessionId}/respuestas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * La hoja de una visita: siempre 200, con `saved` (lo guardado) y `suggested` (lo que se pre-llena: peso de la báscula, dosis, semana, medicamento, paciente, enfermera).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formatos/{clave}/sesiones/{sessionId}/respuestas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FormatosController_answers[0]_v1"];
+        /**
+         * Guarda (upsert) la hoja de la visita en el centro de la visita: hace falta formats.fill allí. Lo que no se manda se conserva; un array mandado reemplaza al guardado. Un campo con writeBack (el peso de GLP-1 → scale.weightLbs) corrige o crea también la medida de báscula de la visita, en la misma transacción.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formatos/{clave}/sesiones/{sessionId}/respuestas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["FormatosController_saveAnswers[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formatos/{clave}/sessions/{sessionId}/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * La hoja de una visita: siempre 200, con `saved` (lo guardado) y `suggested` (lo que se pre-llena: peso de la báscula, dosis, semana, medicamento, paciente, enfermera).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formatos/{clave}/sessions/{sessionId}/answers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FormatosController_answers[1]_v1"];
+        /**
+         * Guarda (upsert) la hoja de la visita en el centro de la visita: hace falta formats.fill allí. Lo que no se manda se conserva; un array mandado reemplaza al guardado. Un campo con writeBack (el peso de GLP-1 → scale.weightLbs) corrige o crea también la medida de báscula de la visita, en la misma transacción.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formatos/{clave}/sessions/{sessionId}/answers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["FormatosController_saveAnswers[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formats/{clave}/sesiones/{sessionId}/respuestas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * La hoja de una visita: siempre 200, con `saved` (lo guardado) y `suggested` (lo que se pre-llena: peso de la báscula, dosis, semana, medicamento, paciente, enfermera).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formats/{clave}/sesiones/{sessionId}/respuestas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FormatosController_answers[2]_v1"];
+        /**
+         * Guarda (upsert) la hoja de la visita en el centro de la visita: hace falta formats.fill allí. Lo que no se manda se conserva; un array mandado reemplaza al guardado. Un campo con writeBack (el peso de GLP-1 → scale.weightLbs) corrige o crea también la medida de báscula de la visita, en la misma transacción.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formats/{clave}/sesiones/{sessionId}/respuestas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["FormatosController_saveAnswers[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formats/{clave}/sessions/{sessionId}/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * La hoja de una visita: siempre 200, con `saved` (lo guardado) y `suggested` (lo que se pre-llena: peso de la báscula, dosis, semana, medicamento, paciente, enfermera).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formats/{clave}/sessions/{sessionId}/answers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FormatosController_answers[3]_v1"];
+        /**
+         * Guarda (upsert) la hoja de la visita en el centro de la visita: hace falta formats.fill allí. Lo que no se manda se conserva; un array mandado reemplaza al guardado. Un campo con writeBack (el peso de GLP-1 → scale.weightLbs) corrige o crea también la medida de báscula de la visita, en la misma transacción.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formats/{clave}/sessions/{sessionId}/answers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["FormatosController_saveAnswers[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/formatos/{clave}/sesiones/{sessionId}/respuestas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** La hoja de una visita: siempre 200, con `saved` (lo guardado) y `suggested` (lo que se pre-llena: peso de la báscula, dosis, semana, medicamento, paciente, enfermera). */
+        get: operations["FormatosController_answers[4]_v2"];
+        /** Guarda (upsert) la hoja de la visita en el centro de la visita: hace falta formats.fill allí. Lo que no se manda se conserva; un array mandado reemplaza al guardado. Un campo con writeBack (el peso de GLP-1 → scale.weightLbs) corrige o crea también la medida de báscula de la visita, en la misma transacción. */
+        put: operations["FormatosController_saveAnswers[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/formatos/{clave}/sessions/{sessionId}/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** La hoja de una visita: siempre 200, con `saved` (lo guardado) y `suggested` (lo que se pre-llena: peso de la báscula, dosis, semana, medicamento, paciente, enfermera). */
+        get: operations["FormatosController_answers[5]_v2"];
+        /** Guarda (upsert) la hoja de la visita en el centro de la visita: hace falta formats.fill allí. Lo que no se manda se conserva; un array mandado reemplaza al guardado. Un campo con writeBack (el peso de GLP-1 → scale.weightLbs) corrige o crea también la medida de báscula de la visita, en la misma transacción. */
+        put: operations["FormatosController_saveAnswers[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/formats/{clave}/sesiones/{sessionId}/respuestas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** La hoja de una visita: siempre 200, con `saved` (lo guardado) y `suggested` (lo que se pre-llena: peso de la báscula, dosis, semana, medicamento, paciente, enfermera). */
+        get: operations["FormatosController_answers[6]_v2"];
+        /** Guarda (upsert) la hoja de la visita en el centro de la visita: hace falta formats.fill allí. Lo que no se manda se conserva; un array mandado reemplaza al guardado. Un campo con writeBack (el peso de GLP-1 → scale.weightLbs) corrige o crea también la medida de báscula de la visita, en la misma transacción. */
+        put: operations["FormatosController_saveAnswers[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/formats/{clave}/sessions/{sessionId}/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** La hoja de una visita: siempre 200, con `saved` (lo guardado) y `suggested` (lo que se pre-llena: peso de la báscula, dosis, semana, medicamento, paciente, enfermera). */
+        get: operations["FormatosController_answers[7]_v2"];
+        /** Guarda (upsert) la hoja de la visita en el centro de la visita: hace falta formats.fill allí. Lo que no se manda se conserva; un array mandado reemplaza al guardado. Un campo con writeBack (el peso de GLP-1 → scale.weightLbs) corrige o crea también la medida de báscula de la visita, en la misma transacción. */
+        put: operations["FormatosController_saveAnswers[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formatos/{clave}/sesiones/{sessionId}/respuestas/anular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Da de baja (baja lógica) la hoja guardada de la visita, en el centro de la visita: hace falta formats.void allí y un motivo. Queda como historia con quién y cuándo; ya no se lee como guardada ni se imprime, y la visita se puede volver a llenar. Pide confirmación (428 ACTION_REQUIRES_CONFIRMATION hasta repetir con X-Confirm-Action: formats.answers.void).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formatos/{clave}/sesiones/{sessionId}/respuestas/anular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FormatosController_voidAnswers[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formatos/{clave}/sessions/{sessionId}/answers/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Da de baja (baja lógica) la hoja guardada de la visita, en el centro de la visita: hace falta formats.void allí y un motivo. Queda como historia con quién y cuándo; ya no se lee como guardada ni se imprime, y la visita se puede volver a llenar. Pide confirmación (428 ACTION_REQUIRES_CONFIRMATION hasta repetir con X-Confirm-Action: formats.answers.void).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formatos/{clave}/sessions/{sessionId}/answers/void`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FormatosController_voidAnswers[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formats/{clave}/sesiones/{sessionId}/respuestas/anular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Da de baja (baja lógica) la hoja guardada de la visita, en el centro de la visita: hace falta formats.void allí y un motivo. Queda como historia con quién y cuándo; ya no se lee como guardada ni se imprime, y la visita se puede volver a llenar. Pide confirmación (428 ACTION_REQUIRES_CONFIRMATION hasta repetir con X-Confirm-Action: formats.answers.void).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formats/{clave}/sesiones/{sessionId}/respuestas/anular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FormatosController_voidAnswers[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formats/{clave}/sessions/{sessionId}/answers/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Da de baja (baja lógica) la hoja guardada de la visita, en el centro de la visita: hace falta formats.void allí y un motivo. Queda como historia con quién y cuándo; ya no se lee como guardada ni se imprime, y la visita se puede volver a llenar. Pide confirmación (428 ACTION_REQUIRES_CONFIRMATION hasta repetir con X-Confirm-Action: formats.answers.void).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/formats/{clave}/sessions/{sessionId}/answers/void`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FormatosController_voidAnswers[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/formatos/{clave}/sesiones/{sessionId}/respuestas/anular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Da de baja (baja lógica) la hoja guardada de la visita, en el centro de la visita: hace falta formats.void allí y un motivo. Queda como historia con quién y cuándo; ya no se lee como guardada ni se imprime, y la visita se puede volver a llenar. Pide confirmación (428 ACTION_REQUIRES_CONFIRMATION hasta repetir con X-Confirm-Action: formats.answers.void). */
+        post: operations["FormatosController_voidAnswers[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/formatos/{clave}/sessions/{sessionId}/answers/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Da de baja (baja lógica) la hoja guardada de la visita, en el centro de la visita: hace falta formats.void allí y un motivo. Queda como historia con quién y cuándo; ya no se lee como guardada ni se imprime, y la visita se puede volver a llenar. Pide confirmación (428 ACTION_REQUIRES_CONFIRMATION hasta repetir con X-Confirm-Action: formats.answers.void). */
+        post: operations["FormatosController_voidAnswers[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/formats/{clave}/sesiones/{sessionId}/respuestas/anular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Da de baja (baja lógica) la hoja guardada de la visita, en el centro de la visita: hace falta formats.void allí y un motivo. Queda como historia con quién y cuándo; ya no se lee como guardada ni se imprime, y la visita se puede volver a llenar. Pide confirmación (428 ACTION_REQUIRES_CONFIRMATION hasta repetir con X-Confirm-Action: formats.answers.void). */
+        post: operations["FormatosController_voidAnswers[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/formats/{clave}/sessions/{sessionId}/answers/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Da de baja (baja lógica) la hoja guardada de la visita, en el centro de la visita: hace falta formats.void allí y un motivo. Queda como historia con quién y cuándo; ya no se lee como guardada ni se imprime, y la visita se puede volver a llenar. Pide confirmación (428 ACTION_REQUIRES_CONFIRMATION hasta repetir con X-Confirm-Action: formats.answers.void). */
+        post: operations["FormatosController_voidAnswers[7]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -65039,82 +67053,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/api-keys": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/api-keys`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["ApiKeysController_findAll_v1"];
-        put?: never;
-        /**
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/api-keys`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["ApiKeysController_create_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/api-keys": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["ApiKeysController_findAll_v2"];
-        put?: never;
-        post: operations["ApiKeysController_create_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/api-keys/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/api-keys/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        delete: operations["ApiKeysController_revoke_v1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/api-keys/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["ApiKeysController_revoke_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -65332,6 +67270,38 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        ExceptionalAvailabilityDto: {
+            /**
+             * Format: uuid
+             * @description Paciente que recibe las sesiones.
+             */
+            patientId: string;
+            /**
+             * Format: uuid
+             * @description Producto de la terapia (el del grupo de facturación del servicio).
+             */
+            productId: string;
+            /**
+             * @description Sesiones que se dan sin compra.
+             * @example 1
+             */
+            sessions: number;
+            /**
+             * @description Por qué se da disponibilidad sin compra (queda en el registro). Mínimo 10 caracteres.
+             * @example Compra del legado (factura S040008) que no se migró
+             */
+            reason: string;
+            /**
+             * Format: uuid
+             * @description Centro donde se da (por defecto el de la sesión); exige el permiso allí.
+             */
+            centerId?: string;
+            /**
+             * Format: uuid
+             * @description Personal que la da (auditoría); por defecto, el de la sesión.
+             */
+            actorId?: string;
         };
         TransferirTratamientoDto: {
             /**
@@ -66479,6 +68449,23 @@ export interface components {
             quantity?: number;
             /** @description Áreas de la terapia nueva (láser). Si se omite, se heredan del paquete reemplazado. */
             areas?: number;
+            /**
+             * @description Precio acordado POR UNIDAD de la terapia nueva (gana al de lista). Unidades = cantidad, o sesiones × áreas. Ver docs/specs/protocol-change-simulation.md (anexo 24-nov-2026).
+             * @example 1000
+             */
+            unitPrice?: number;
+        };
+        PrecioDeOrigenDto: {
+            /**
+             * Format: uuid
+             * @description Uno de los paqueteOrigenIds.
+             */
+            packageId: string;
+            /**
+             * @description Precio POR UNIDAD (terapia: sesión × área) de lo pendiente. Valor = precio × unidades pendientes.
+             * @example 100
+             */
+            unitPrice: number;
         };
         ReintegroSelladoDto: {
             /**
@@ -66489,11 +68476,35 @@ export interface components {
             /** @description Cuántas unidades vuelven CERRADAS, sin destapar. Lo aplicado al paciente es irreversible y no se declara aquí. */
             unidadesSelladas: number;
         };
+        SimularCambioProtocoloDto: {
+            /** @description Paquetes pendientes que se dejan sin efecto. Pueden ser varios (se juntan en la(s) terapia(s) nueva(s)). */
+            paqueteOrigenIds: string[];
+            /** @description Las terapias nuevas. Al menos una: sin ninguna sería una cancelación, no un cambio. */
+            newOnes: components["schemas"]["TerapiaNuevaDto"][];
+            /** @description Precio acordado por unidad de lo que se cierra (gana a lo cobrado). Un paquete que no se cierra → 400. */
+            preciosOrigen?: components["schemas"]["PrecioDeOrigenDto"][];
+            /**
+             * Format: uuid
+             * @description Médico que AUTORIZA el cambio (personal). Es una decisión clínica y queda con nombre.
+             */
+            doctorId?: string;
+            /** @description Unidades cerradas que vuelven al almacén. Si el producto descargaba a la entrega se ignora y la respuesta lo avisa: nunca salió. */
+            reintegros?: components["schemas"]["ReintegroSelladoDto"][];
+            /**
+             * Format: uuid
+             * @description Almacén al que vuelven las unidades cerradas.
+             */
+            warehouseId?: string;
+            /** @description Optional when simulating: nothing is recorded. */
+            reason?: string;
+        };
         CambioProtocoloDto: {
             /** @description Paquetes pendientes que se dejan sin efecto. Pueden ser varios (se juntan en la(s) terapia(s) nueva(s)). */
             paqueteOrigenIds: string[];
             /** @description Las terapias nuevas. Al menos una: sin ninguna sería una cancelación, no un cambio. */
             newOnes: components["schemas"]["TerapiaNuevaDto"][];
+            /** @description Precio acordado por unidad de lo que se cierra (gana a lo cobrado). Un paquete que no se cierra → 400. */
+            preciosOrigen?: components["schemas"]["PrecioDeOrigenDto"][];
             /**
              * Format: uuid
              * @description Médico que AUTORIZA el cambio (personal). Es una decisión clínica y queda con nombre.
@@ -67461,6 +69472,8 @@ export interface components {
             group?: string;
             /** @description Fuente de opciones de un select (medicos|enfermeras|tecnicos|personal|tipos_cita|estados|productos_grupo). */
             optionsSource?: string;
+            /** @description Transition this column's ASSIGNMENT starts (a resource select: technician/nurse → 'en_terapia', doctor → 'consulta'). Runs after the value is saved, with the caller's permission and the transition's state guard; if it cannot run, the assignment stays saved and the response says why (`autoAction`). null on a board/center placement switches it off. See docs/specs/assign-starts-session.md. */
+            onAssign?: string | null;
             /** @description Only with optionsSource=personal: the staff capabilities that fill this person-select (e.g. ["tecnico","enfermera"]). Active staff of the board's center holding ANY of them, once each. Empty = nobody. */
             capabilities?: string[];
             /** @description Solo con optionsSource=productos_grupo: lista los productos de ESTE grupo de facturación en vez del grupo anclado al servicio. Sirve para que un select ofrezca otro catálogo sin reanclar el servicio entero. */
@@ -67711,10 +69724,7 @@ export interface components {
             lastName: string | null;
             /** @enum {string} */
             status: "pendiente" | "aprobado" | "rechazado" | "suspendido";
-            isMaster: boolean;
             mustChangePassword: boolean;
-            /** @enum {string} */
-            accessMode: "operativo" | "gerencial";
             approvedBy: string | null;
             /** Format: date-time */
             approvedAt: string | null;
@@ -67734,7 +69744,6 @@ export interface components {
             type: "base" | "temporal" | "fijo";
             validFrom: string;
             validUntil: string | null;
-            forced: boolean;
             active: boolean;
             profile?: components["schemas"]["PerfilEntity"];
             center?: components["schemas"]["CentroEntity"];
@@ -68209,16 +70218,6 @@ export interface components {
             description: string | null;
             isSystem: boolean;
             /**
-             * @description Si el MENÚ de este rol se rige por su lista blanca (`roles_menu_items`).
-             *
-             *     Hace falta una bandera explícita porque "no hay filas" es ambiguo: puede ser un rol que nadie ha
-             *     configurado (menú por permisos, como siempre) o uno al que el admin decidió no darle ningún ítem.
-             *     Deducirlo del conteo hacía que guardar una lista VACÍA devolviera el menú completo — justo el
-             *     desbordamiento que esto viene a cerrar — y que un fallo a mitad del guardado ampliara el acceso en
-             *     vez de restringirlo.
-             */
-            menuAllowlist: boolean;
-            /**
              * @description Si la FUNCIÓN de este rol es inherentemente multi-centro. Los roles empaquetan permisos para un
              *     grupo de gente, y el alcance de centro es la misma idea aplicada a la tenencia: quien agenda citas
              *     necesita ver los pacientes de los DOS centros, así que esa verdad vive en el rol y la hereda
@@ -68242,9 +70241,6 @@ export interface components {
             description?: string;
         };
         SetRolPermisosDto: {
-            claves: string[];
-        };
-        SetRolMenuDto: {
             claves: string[];
         };
         AssignRolDto: {
@@ -68551,6 +70547,7 @@ export interface components {
             minimumSessions: number | null;
             sessionOptions: number[] | null;
             sessionsPerUnit: number | null;
+            openedShelfLifeDays: number | null;
             hasDefinedRule: boolean;
             inventoryUnitId: string | null;
             unidadInventarioIdRef?: Record<string, never>;
@@ -68620,6 +70617,11 @@ export interface components {
              *     the price. null = 1 per unit. docs/specs/sesiones-por-unidad-del-producto.md.
              */
             sessionsPerUnit?: number | null;
+            /**
+             * @description Days an opened vial stays usable; an expired remnant is not used for a dose. null = no expiry.
+             *     docs/specs/vial-dividido-entre-visitas.md.
+             */
+            openedShelfLifeDays?: number | null;
             /** Format: uuid */
             inventoryUnitId?: string;
             content?: number;
@@ -68688,6 +70690,11 @@ export interface components {
              *     the price. null = 1 per unit. docs/specs/sesiones-por-unidad-del-producto.md.
              */
             sessionsPerUnit?: number | null;
+            /**
+             * @description Days an opened vial stays usable; an expired remnant is not used for a dose. null = no expiry.
+             *     docs/specs/vial-dividido-entre-visitas.md.
+             */
+            openedShelfLifeDays?: number | null;
             /** Format: uuid */
             inventoryUnitId?: string;
             content?: number;
@@ -69965,6 +71972,12 @@ export interface components {
             reason?: string;
         };
         ReagendarCitaDto: {
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
+            actorId?: string;
             date: string;
             time?: string;
             reason: string;
@@ -69982,11 +71995,6 @@ export interface components {
             doctorId?: string;
             /**
              * Format: uuid
-             * @description Personal que reagenda (queda en el evento reprogramada + como citadoPor de la nueva).
-             */
-            actorId?: string;
-            /**
-             * Format: uuid
              * @description Type of the NEW appointment (v2: `appointmentTypeId`). Omitted = the original's type. Changing to
              *     a type that is not the first-visit one clears the first-visit mark.
              *     See docs/specs/reagendar-con-tipo-de-cita.md.
@@ -69994,7 +72002,11 @@ export interface components {
             appointmentTypeId?: string;
         };
         TransicionCitaDto: {
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
             actorId?: string;
             reason?: string;
             /**
@@ -70015,22 +72027,34 @@ export interface components {
             en?: string;
         };
         AsignarMedicoDto: {
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
+            actorId?: string;
             /** Format: uuid */
             doctorId: string;
             /** @enum {string} */
             scope?: "temporal" | "total";
-            /** Format: uuid */
-            actorId?: string;
         };
         CancelarCitaDto: {
-            reason: string;
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
             actorId?: string;
+            reason: string;
         };
         RepararCitaDto: {
-            reason: string;
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
             actorId?: string;
+            reason: string;
             /** @enum {string} */
             status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
             /** Format: uuid */
@@ -70326,6 +72350,57 @@ export interface components {
             /** @enum {string} */
             kind: "vacation" | "leave";
         };
+        CallChannelEntity: {
+            clinicRef?: Record<string, never>;
+            number: string;
+            channel: string;
+            labelKey: string | null;
+            active: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateCallChannelDto: {
+            /**
+             * @description Our line; any format, stored as its last 10 digits.
+             * @example 787-780-2425
+             */
+            number: string;
+            /**
+             * @description Channel key (facebook, tv, normal...).
+             * @example facebook
+             */
+            channel: string;
+            /** @description i18n key of the channel name. */
+            labelKey?: string;
+            /** @description Inactive lines are ignored. */
+            active?: boolean;
+        };
+        UpdateCallChannelDto: {
+            /**
+             * @description Our line; any format, stored as its last 10 digits.
+             * @example 787-780-2425
+             */
+            number?: string;
+            /**
+             * @description Channel key (facebook, tv, normal...).
+             * @example facebook
+             */
+            channel?: string;
+            /** @description i18n key of the channel name. */
+            labelKey?: string;
+            /** @description Inactive lines are ignored. */
+            active?: boolean;
+        };
+        CompleteCallsDto: {
+            /** @description How many stored calls to complete in this run (default 500, max 5000). */
+            limit?: number;
+            /** @description Continue after this start time (the `next` of the previous run). */
+            after?: string;
+        };
         IngestaDto: {
             /**
              * @description Qué central manda el lote (ucm-bayamon, 3cx…). Es DATO: mañana puede haber otra central sin tocar código.
@@ -70372,12 +72447,69 @@ export interface components {
             /** @enum {string} */
             status: "desconocido" | "perdida" | "fallida" | "contestada" | "ocupada";
             recordingFile: string | null;
+            channel: string;
+            staffId: string | null;
+            patientId: string | null;
+            transcript: string | null;
+            /** Format: date-time */
+            transcribedAt: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        CreateApiKeyDto: {
+            name: string;
+            permissions: string[];
+            expiresAt?: string;
+            /** @enum {string} */
+            scope?: "clinic" | "admin";
+            clinicId?: string;
+        };
+        ApiKeyCreatedResponseDto: {
+            plainKey: string;
+            id: string;
+            name: string;
+            keyPrefix: string;
+            /** @enum {string} */
+            scope: "admin" | "clinic";
+            clinicId: string | null;
+            permissions: string[];
+            /** Format: date-time */
+            expiresAt: string | null;
+            /** Format: date-time */
+            revokedAt: string | null;
+            createdBy: string;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Last time the key authenticated a request (5-minute resolution); null = not since tracking began.
+             */
+            lastUsedAt?: string | null;
+        };
+        ApiKeyResponseDto: {
+            id: string;
+            name: string;
+            keyPrefix: string;
+            /** @enum {string} */
+            scope: "admin" | "clinic";
+            clinicId: string | null;
+            permissions: string[];
+            /** Format: date-time */
+            expiresAt: string | null;
+            /** Format: date-time */
+            revokedAt: string | null;
+            createdBy: string;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Last time the key authenticated a request (5-minute resolution); null = not since tracking began.
+             */
+            lastUsedAt?: string | null;
         };
         ProveedorEntity: {
             name: string;
@@ -70939,6 +73071,8 @@ export interface components {
             requiresTechnician: boolean;
             requiresNurse: boolean;
             packageConsumption: string;
+            /** @enum {string} */
+            sessionUnit: "visit" | "vial";
             primaryPackageRule: string;
             badge: boolean;
             formActions: Record<string, never> | null;
@@ -70962,6 +73096,12 @@ export interface components {
             updatedAt: string;
         };
         CreateServicioDto: {
+            /**
+             * @description What one package session is: 'visit', or 'vial' (a vial opened; a visit that uses the patient's
+             *     remnant consumes none). docs/specs/vial-dividido-entre-visitas.md.
+             * @enum {string}
+             */
+            sessionUnit?: "visit" | "vial";
             /**
              * @description Which package numbers a visit that consumes several at once: 'row' (the anchored one) or
              *     'most_delivered' (laser MLS + HILT). See docs/specs/laser-sesion-del-dia-y-areas.md.
@@ -71008,6 +73148,12 @@ export interface components {
              * @example cantidad
              */
             statisticsUnitKey?: string | null;
+            /**
+             * @description What one package session is: 'visit', or 'vial' (a vial opened; a visit that uses the patient's
+             *     remnant consumes none). docs/specs/vial-dividido-entre-visitas.md.
+             * @enum {string}
+             */
+            sessionUnit?: "visit" | "vial";
             /**
              * @description Which package numbers a visit that consumes several at once: 'row' (the anchored one) or
              *     'most_delivered' (laser MLS + HILT). See docs/specs/laser-sesion-del-dia-y-areas.md.
@@ -71059,6 +73205,12 @@ export interface components {
              * @example cantidad
              */
             statisticsUnitKey?: string | null;
+            /**
+             * @description What one package session is: 'visit', or 'vial' (a vial opened; a visit that uses the patient's
+             *     remnant consumes none). docs/specs/vial-dividido-entre-visitas.md.
+             * @enum {string}
+             */
+            sessionUnit?: "visit" | "vial";
             /**
              * @description Which package numbers a visit that consumes several at once: 'row' (the anchored one) or
              *     'most_delivered' (laser MLS + HILT). See docs/specs/laser-sesion-del-dia-y-areas.md.
@@ -71167,6 +73319,12 @@ export interface components {
         CreateSesionDto: {
             /** @description Franja horaria "HH:mm" (p. ej. "08:00") elegida por el usuario; descuenta el cupo de esa hora (NO bloqueante). Omitir/null = agenda por día, sin tocar cupos por hora. */
             time?: string;
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
+            actorId?: string;
             /** Format: uuid */
             patientId: string;
             /** Format: uuid */
@@ -71179,8 +73337,6 @@ export interface components {
             /** Format: uuid */
             nurseId?: string;
             quantity?: number;
-            /** Format: uuid */
-            actorId?: string;
         };
         AgendarMultipleDto: {
             /**
@@ -71194,24 +73350,32 @@ export interface components {
             dates: string[];
             /** @description Franja horaria "HH:mm" aplicada a TODAS las fechas agendadas; descuenta cupo por hora (NO bloqueante). Omitir = por día. */
             time?: string;
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
+            actorId?: string;
             /** Format: uuid */
             patientId: string;
-            /** Format: uuid */
-            actorId?: string;
         };
         ReagendarSesionDto: {
             /** @description Franja horaria "HH:mm" nueva. Omitir = se queda con la que tenía (solo cambia la fecha). */
             time?: string;
-            date: string;
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
             actorId?: string;
+            date: string;
         };
         FrontdeskEventoEntity: {
             clinicRef?: Record<string, never>;
             sessionId: string;
             sesionIdRef?: Record<string, never>;
             /** @enum {string} */
-            type: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete" | "called" | "call_undone" | "reopened";
+            type: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete" | "called" | "call_undone" | "reopened" | "dosis_de_resto" | "resto_vencido";
             actorId: string | null;
             actorIdRef?: Record<string, never>;
             reason: string | null;
@@ -71229,7 +73393,11 @@ export interface components {
             date?: string;
         };
         TransicionSesionDto: {
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
             actorId?: string;
             /** Format: uuid */
             technicianId?: string;
@@ -71265,6 +73433,9 @@ export interface components {
             /** @enum {string} */
             status: "pendiente" | "presente" | "en_terapia" | "asistido" | "cancelada";
             quantity: number;
+            doseAmount: number | null;
+            packageSessionsConsumed: number | null;
+            openedVialIds: string[] | null;
             /** Format: date-time */
             presentAt: string | null;
             /** Format: date-time */
@@ -71293,35 +73464,50 @@ export interface components {
             updatedAt: string;
         };
         RepararSesionDto: {
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
+            actorId?: string;
             reason: string;
             quantity?: number;
             /** Format: uuid */
             productId?: string;
             /** Format: uuid */
             openVialId?: string;
+            /** @description Dose of a 'vial' service visit, in the vial's unit (mg); null = a whole vial. docs/specs/vial-dividido-entre-visitas.md. */
+            doseAmount?: number | null;
             status?: string;
             effectiveDate?: string;
             /** Format: uuid */
             warehouseId?: string;
-            /** Format: uuid */
-            actorId?: string;
         };
         GuardarDatosDto: {
-            data: Record<string, never>;
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
             actorId?: string;
+            data: Record<string, never>;
         };
         CancelarSesionDto: {
-            reason: string;
-            /** Format: uuid */
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
             actorId?: string;
+            reason: string;
         };
         ReopenSessionDto: {
             /** @description Why it is reopened (kept in its trace). */
             reason?: string;
             /**
              * Format: uuid
-             * @description Staff member who reopens it; defaults to the caller.
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
              */
             actorId?: string;
         };
@@ -71333,7 +73519,8 @@ export interface components {
             centerId?: string;
             /**
              * Format: uuid
-             * @description Staff member who does it; defaults to the caller.
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
              */
             actorId?: string;
             /** @description One reason for all of them. */
@@ -71349,7 +73536,8 @@ export interface components {
             centerId?: string;
             /**
              * Format: uuid
-             * @description Staff member who does it; defaults to the caller.
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
              */
             actorId?: string;
         };
@@ -71413,7 +73601,8 @@ export interface components {
             centerId?: string;
             /**
              * Format: uuid
-             * @description Staff member who books; defaults to the caller.
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
              */
             actorId?: string;
         };
@@ -71443,7 +73632,8 @@ export interface components {
             centerId?: string;
             /**
              * Format: uuid
-             * @description Staff member who books; defaults to the caller.
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
              */
             actorId?: string;
         };
@@ -71668,6 +73858,8 @@ export interface components {
             capacity?: string;
             /** @description Nombre lógico del sonido de alarma (el FE resuelve el archivo). */
             audio?: string;
+            /** @description True = staff take this section patients from the panel without the bell (first to pick gets it). */
+            selfClaim?: boolean;
             slug: string;
             labelKey: string;
             sortOrder?: number;
@@ -71686,6 +73878,7 @@ export interface components {
             assignsTo: string;
             capacity: string;
             audio: string | null;
+            selfClaim: boolean;
             active: boolean;
             id: string;
             clinicId: string | null;
@@ -71708,6 +73901,8 @@ export interface components {
             ordenes: components["schemas"]["OrdenSeccionDto"][];
         };
         UpdatePanelSeccionDto: {
+            /** @description True = staff take this section patients from the panel without the bell (first to pick gets it). */
+            selfClaim?: boolean;
             labelKey?: string;
             sortOrder?: number;
             color?: string;
@@ -71754,27 +73949,97 @@ export interface components {
             /** @description Por qué se retira. Queda en `meta` del aviso, para poder explicarlo después. */
             reason?: string;
         };
-        FormatoTerapiaEntity: {
-            clinicRef?: Record<string, never>;
-            slug: string;
-            labelKey: string;
-            title: string;
-            serviceSlug: string;
-            layout: string;
-            columns: Record<string, never>[] | null;
-            rows: number;
-            fields: Record<string, never>[] | null;
-            sections: Record<string, never>[] | null;
-            render: Record<string, never> | null;
-            letterhead: boolean;
-            sortOrder: number;
-            active: boolean;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
+        ClaimPanelWorkDto: {
+            /** @description The section key (panel_sections.slug), e.g. glp1. */
+            sectionKey: string;
+            /**
+             * Format: uuid
+             * @description The visit (frontdesk session) of a service section.
+             */
+            sessionId?: string;
+            /**
+             * Format: uuid
+             * @description The appointment of the appointment (vitals) section.
+             */
+            appointmentId?: string;
+            /**
+             * Format: uuid
+             * @description The staff member who takes the patient (must be eligible staff of the row center).
+             */
+            staffId: string;
+        };
+        FormatFieldValueDto: {
+            /**
+             * @description Slug of one of the format's fields (assembly `fields[].clave`, e.g. peso, ta, medicamento, dosis, semana).
+             * @example peso
+             */
+            key: string;
+            /**
+             * @description What is written; null or omitted = blank.
+             * @example 212.4
+             */
+            value?: string | null;
+        };
+        FormatQuestionAnswerDto: {
+            /**
+             * @description Index of the section in the format (`sections`). Omitted = the first section with questions.
+             * @example 0
+             */
+            section?: number;
+            /**
+             * @description Index of the group in the section.
+             * @example 0
+             */
+            group: number;
+            /**
+             * @description Index of the question in the group.
+             * @example 1
+             */
+            question: number;
+            /**
+             * @description yes | no; null or omitted = not answered.
+             * @enum {string|null}
+             */
+            value?: "yes" | "no" | null;
+            /** @description Optional note (observation) for the question. */
+            note?: string | null;
+        };
+        FormatNoteDto: {
+            /**
+             * @description Key of one of the format's free-text sections (`sections[].clave` of type texto_libre, e.g. patient_comments, nursing_notes).
+             * @example nursing_notes
+             */
+            key: string;
+            /**
+             * @description What is written; null or omitted = blank.
+             * @example Sin reacción local
+             */
+            value?: string | null;
+        };
+        SaveFormatAnswersDto: {
+            fields?: components["schemas"]["FormatFieldValueDto"][];
+            answers?: components["schemas"]["FormatQuestionAnswerDto"][];
+            /** @description Text of each free-text section that declares a key (a format may have several, e.g. BPC-157's patient comments and nursing notes). A sent array replaces the saved one. */
+            notes?: components["schemas"]["FormatNoteDto"][];
+            /** @description Text of the format's first free-text section WITHOUT a key (additional notes, GLP-1). 400 when the format has no such section: use notes. */
+            additionalNotes?: string | null;
+            /**
+             * Format: uuid
+             * @description staff.id of the nurse who signs; active staff of the visit's center.
+             */
+            nurseId?: string | null;
+            /**
+             * @description When the nurse signs (ISO 8601 with offset), printed on the signature line.
+             * @example 2026-11-20T14:30:00-04:00
+             */
+            recordedAt?: string | null;
+        };
+        VoidFormatAnswersDto: {
+            /**
+             * @description Why the saved sheet is voided (kept with who and when). Mandatory.
+             * @example Saved by the editor autosave on open; nobody filled it.
+             */
+            reason: string;
         };
         ColumnaFormatoDto: {
             /** @description Ancho sugerido de la columna al imprimir. */
@@ -71790,13 +74055,25 @@ export interface components {
             label?: string;
             /** @description Texto fijo que el papel imprime siempre en ese hueco. */
             valorFijo?: string;
+            /** @description Unidad impresa DESPUÉS del hueco/valor (p. ej. "lb" en «Peso: ____ lb»). / Unit printed after the value. */
+            unit?: string;
             /** @description Ancho del campo en su fila: número (puntos) o texto CSS ("40%"). / Field width: a number or a CSS length. */
             ancho?: number | string;
             /**
              * @description Origen del valor. Del paciente/sesión: paciente.nombre | paciente.record | sesion.fecha | sesion.sesiones (X/Y) | sesion.dosis (producto aplicado). De la última medición corporal: medicion.pesoKg | medicion.imc | medicion.grasaPct | medicion.masaMuscularKg | medicion.aguaPct | medicion.fecha. Cadena vacía = hueco en blanco para rellenar a mano.
              * @enum {string}
              */
-            source?: "" | "paciente.nombre" | "paciente.record" | "paciente.telefono" | "paciente.apellidosNombre" | "sesion.fecha" | "sesion.sesiones" | "sesion.sesionYTerapia" | "sesion.dosis" | "sesion.enfermera" | "sesion.tecnico" | "usuario.nombre" | "scale.weightLbs" | "scale.weightKg" | "scale.bmi" | "scale.bodyFatPct" | "scale.skeletalMusclePct" | "scale.muscleMassKg" | "scale.proteinPct" | "scale.bmrKcal" | "scale.visceralFat" | "scale.hydrationPct" | "scale.boneMassKg" | "scale.metabolicAge" | "tape.neck" | "tape.shoulder" | "tape.leftBiceps" | "tape.rightBiceps" | "tape.chest" | "tape.waist" | "tape.abdomen" | "tape.hip" | "tape.leftThigh" | "tape.rightThigh" | "tape.leftCalf" | "tape.rightCalf" | "tape.waistHipRatio";
+            source?: "" | "paciente.nombre" | "paciente.record" | "paciente.telefono" | "paciente.apellidosNombre" | "sesion.fecha" | "sesion.sesiones" | "sesion.sesionYTerapia" | "sesion.dosis" | "sesion.enfermera" | "sesion.tecnico" | "usuario.nombre" | "session.lastDose" | "session.serviceVisitNumber" | "package.product" | "session.applicationTime" | "scale.weightLbs" | "scale.weightKg" | "scale.bmi" | "scale.bodyFatPct" | "scale.skeletalMusclePct" | "scale.muscleMassKg" | "scale.proteinPct" | "scale.bmrKcal" | "scale.visceralFat" | "scale.hydrationPct" | "scale.boneMassKg" | "scale.metabolicAge" | "tape.neck" | "tape.shoulder" | "tape.leftBiceps" | "tape.rightBiceps" | "tape.chest" | "tape.waist" | "tape.abdomen" | "tape.hip" | "tape.leftThigh" | "tape.rightThigh" | "tape.leftCalf" | "tape.rightCalf" | "tape.waistHipRatio";
+            /**
+             * @description Where the suggested value of this field comes from when the sheet is filled on screen (GET …/sessions/:sessionId/answers → suggested). Same catalog as origen, e.g. scale.weightLbs, session.lastDose, session.serviceVisitNumber, package.product. Never printed.
+             * @enum {string}
+             */
+            suggestFrom?: "paciente.nombre" | "paciente.record" | "paciente.telefono" | "paciente.apellidosNombre" | "sesion.fecha" | "sesion.sesiones" | "sesion.sesionYTerapia" | "sesion.dosis" | "sesion.enfermera" | "sesion.tecnico" | "usuario.nombre" | "session.lastDose" | "session.serviceVisitNumber" | "package.product" | "session.applicationTime" | "scale.weightLbs" | "scale.weightKg" | "scale.bmi" | "scale.bodyFatPct" | "scale.skeletalMusclePct" | "scale.muscleMassKg" | "scale.proteinPct" | "scale.bmrKcal" | "scale.visceralFat" | "scale.hydrationPct" | "scale.boneMassKg" | "scale.metabolicAge" | "tape.neck" | "tape.shoulder" | "tape.leftBiceps" | "tape.rightBiceps" | "tape.chest" | "tape.waist" | "tape.abdomen" | "tape.hip" | "tape.leftThigh" | "tape.rightThigh" | "tape.leftCalf" | "tape.rightCalf" | "tape.waistHipRatio";
+            writeBack?: {
+                target: string;
+                min: number;
+                max: number;
+            };
             slug: string;
             labelKey: string;
         };
@@ -71820,6 +74097,28 @@ export interface components {
             layout?: "tabla" | "campos" | "sesiones" | "paginas";
             letterhead?: boolean;
             sortOrder?: number;
+        };
+        FormatoTerapiaEntity: {
+            clinicRef?: Record<string, never>;
+            slug: string;
+            labelKey: string;
+            title: string;
+            serviceSlug: string;
+            layout: string;
+            columns: Record<string, never>[] | null;
+            rows: number;
+            fields: Record<string, never>[] | null;
+            sections: Record<string, never>[] | null;
+            render: Record<string, never> | null;
+            letterhead: boolean;
+            sortOrder: number;
+            active: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         UpdateFormatoDto: {
             /** @description Rejilla; null/omitido en un formato de solo campos. */
@@ -72103,6 +74402,9 @@ export interface components {
             notes: string | null;
             /** @enum {string|null} */
             countMode: "split" | "flexible" | "single" | null;
+            countedByStaffId: string | null;
+            /** Format: date-time */
+            countedAt: string | null;
             /** Format: date-time */
             closedAt: string | null;
             id: string;
@@ -72805,57 +75107,6 @@ export interface components {
             externalCode?: string;
             /** Format: uuid */
             staffId?: string;
-        };
-        CreateApiKeyDto: {
-            name: string;
-            permissions: string[];
-            expiresAt?: string;
-            /** @enum {string} */
-            scope?: "clinic" | "admin";
-            clinicId?: string;
-        };
-        ApiKeyCreatedResponseDto: {
-            plainKey: string;
-            id: string;
-            name: string;
-            keyPrefix: string;
-            /** @enum {string} */
-            scope: "admin" | "clinic";
-            clinicId: string | null;
-            permissions: string[];
-            /** Format: date-time */
-            expiresAt: string | null;
-            /** Format: date-time */
-            revokedAt: string | null;
-            createdBy: string;
-            /** Format: date-time */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description Last time the key authenticated a request (5-minute resolution); null = not since tracking began.
-             */
-            lastUsedAt?: string | null;
-        };
-        ApiKeyResponseDto: {
-            id: string;
-            name: string;
-            keyPrefix: string;
-            /** @enum {string} */
-            scope: "admin" | "clinic";
-            clinicId: string | null;
-            permissions: string[];
-            /** Format: date-time */
-            expiresAt: string | null;
-            /** Format: date-time */
-            revokedAt: string | null;
-            createdBy: string;
-            /** Format: date-time */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description Last time the key authenticated a request (5-minute resolution); null = not since tracking began.
-             */
-            lastUsedAt?: string | null;
         };
     };
     responses: never;
@@ -78161,6 +80412,190 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "ExceptionalAvailabilityController_grant[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionalAvailabilityDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "ExceptionalAvailabilityController_grant[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionalAvailabilityDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "ExceptionalAvailabilityController_grant[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionalAvailabilityDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "ExceptionalAvailabilityController_grant[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionalAvailabilityDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "ExceptionalAvailabilityController_grant[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionalAvailabilityDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "ExceptionalAvailabilityController_grant[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionalAvailabilityDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "ExceptionalAvailabilityController_grant[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionalAvailabilityDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
+                };
+            };
+        };
+    };
+    "ExceptionalAvailabilityController_grant[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionalAvailabilityDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaqueteSesionEntity"];
                 };
             };
         };
@@ -92625,6 +95060,206 @@ export interface operations {
         };
         responses: {
             /** @description Devuelve cambioId, los paquetes cerrados, los creados, el pendiente cerrado y los `avisos` (diferencia de valor, reintegros que no aplican). Todo o nada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CambioProtocoloController_simular[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Paciente dueño del tratamiento. */
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimularCambioProtocoloDto"];
+            };
+        };
+        responses: {
+            /** @description closes, creates, continuesAfter, pendingClosed, totals { closedValue, createdValue, difference } y warnings. Nada queda escrito. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CambioProtocoloController_simular[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Paciente dueño del tratamiento. */
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimularCambioProtocoloDto"];
+            };
+        };
+        responses: {
+            /** @description closes, creates, continuesAfter, pendingClosed, totals { closedValue, createdValue, difference } y warnings. Nada queda escrito. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CambioProtocoloController_simular[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Paciente dueño del tratamiento. */
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimularCambioProtocoloDto"];
+            };
+        };
+        responses: {
+            /** @description closes, creates, continuesAfter, pendingClosed, totals { closedValue, createdValue, difference } y warnings. Nada queda escrito. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CambioProtocoloController_simular[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Paciente dueño del tratamiento. */
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimularCambioProtocoloDto"];
+            };
+        };
+        responses: {
+            /** @description closes, creates, continuesAfter, pendingClosed, totals { closedValue, createdValue, difference } y warnings. Nada queda escrito. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CambioProtocoloController_simular[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Paciente dueño del tratamiento. */
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimularCambioProtocoloDto"];
+            };
+        };
+        responses: {
+            /** @description closes, creates, continuesAfter, pendingClosed, totals { closedValue, createdValue, difference } y warnings. Nada queda escrito. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CambioProtocoloController_simular[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Paciente dueño del tratamiento. */
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimularCambioProtocoloDto"];
+            };
+        };
+        responses: {
+            /** @description closes, creates, continuesAfter, pendingClosed, totals { closedValue, createdValue, difference } y warnings. Nada queda escrito. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CambioProtocoloController_simular[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Paciente dueño del tratamiento. */
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimularCambioProtocoloDto"];
+            };
+        };
+        responses: {
+            /** @description closes, creates, continuesAfter, pendingClosed, totals { closedValue, createdValue, difference } y warnings. Nada queda escrito. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CambioProtocoloController_simular[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Paciente dueño del tratamiento. */
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimularCambioProtocoloDto"];
+            };
+        };
+        responses: {
+            /** @description closes, creates, continuesAfter, pendingClosed, totals { closedValue, createdValue, difference } y warnings. Nada queda escrito. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -111052,30 +113687,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-        };
-    };
-    RbacController_setRoleMenu_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetRolMenuDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": Record<string, never>[];
                 };
-                content?: never;
             };
         };
     };
@@ -111094,30 +113708,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-        };
-    };
-    RbacController_setRoleMenu_v2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetRolMenuDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
+                content: {
+                    "application/json": Record<string, never>[];
                 };
-                content?: never;
             };
         };
     };
@@ -117353,6 +119946,174 @@ export interface operations {
             };
         };
     };
+    "VialesAbiertosController_remnantsOfPatient[0]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string;
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_remnantsOfPatient[1]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string;
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_remnantsOfPatient[2]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string;
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_remnantsOfPatient[3]_v1": {
+        parameters: {
+            query?: {
+                centerIds?: string;
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_remnantsOfPatient[4]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string;
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_remnantsOfPatient[5]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string;
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_remnantsOfPatient[6]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string;
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_remnantsOfPatient[7]_v2": {
+        parameters: {
+            query?: {
+                centerIds?: string;
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "VialesAbiertosController_reporte[0]_v1": {
         parameters: {
             query: {
@@ -122677,6 +125438,358 @@ export interface operations {
                 productId: string;
                 from: string;
                 to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_controlEntregas[0]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_controlEntregas[1]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_controlEntregas[2]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_controlEntregas[3]_v1": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_controlEntregas[4]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_controlEntregas[5]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_controlEntregas[6]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_controlEntregas[7]_v2": {
+        parameters: {
+            query: {
+                productId: string;
+                from: string;
+                to: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexTodos[0]_v1": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                deductionMode?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexTodos[1]_v1": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                deductionMode?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexTodos[2]_v1": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                deductionMode?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexTodos[3]_v1": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                deductionMode?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexTodos[4]_v2": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                deductionMode?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexTodos[5]_v2": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                deductionMode?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexTodos[6]_v2": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                deductionMode?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ReportesController_kardexTodos[7]_v2": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                deductionMode?: string;
                 centerIds?: string[];
             };
             header?: never;
@@ -132125,6 +135238,158 @@ export interface operations {
             };
         };
     };
+    "CitasController_visitKind[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CitasController_visitKind[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CitasController_visitKind[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CitasController_visitKind[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CitasController_visitKind[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CitasController_visitKind[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CitasController_visitKind[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CitasController_visitKind[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "CitasController_estadosCatalogo[0]_v1": {
         parameters: {
             query?: never;
@@ -138845,6 +142110,482 @@ export interface operations {
             };
         };
     };
+    "CallcenterController_listChannels[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"][];
+                };
+            };
+        };
+    };
+    "CallcenterController_createChannel[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCallChannelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_listChannels[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"][];
+                };
+            };
+        };
+    };
+    "CallcenterController_createChannel[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCallChannelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_listChannels[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"][];
+                };
+            };
+        };
+    };
+    "CallcenterController_createChannel[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCallChannelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_listChannels[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"][];
+                };
+            };
+        };
+    };
+    "CallcenterController_createChannel[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCallChannelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_updateChannel[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallChannelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_removeChannel[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_updateChannel[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallChannelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_removeChannel[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_updateChannel[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallChannelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_removeChannel[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_updateChannel[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallChannelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallChannelEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_removeChannel[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_completeCalls[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteCallsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_completeCalls[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteCallsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_completeCalls[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteCallsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_completeCalls[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteCallsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "CallcenterController_eventos[0]_v1": {
         parameters: {
             query?: never;
@@ -139181,6 +142922,134 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_findAll_v1: {
+        parameters: {
+            query?: {
+                /** @description active = not revoked and not expired; revoked; expired = not revoked, expiry passed; all (or omitted) = every key. */
+                status?: "active" | "revoked" | "expired" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyResponseDto"][];
+                };
+            };
+        };
+    };
+    ApiKeysController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateApiKeyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyCreatedResponseDto"];
+                };
+            };
+        };
+    };
+    ApiKeysController_findAll_v2: {
+        parameters: {
+            query?: {
+                /** @description active = not revoked and not expired; revoked; expired = not revoked, expiry passed; all (or omitted) = every key. */
+                status?: "active" | "revoked" | "expired" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyResponseDto"][];
+                };
+            };
+        };
+    };
+    ApiKeysController_create_v2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateApiKeyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyCreatedResponseDto"];
+                };
+            };
+        };
+    };
+    ApiKeysController_revoke_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApiKeysController_revoke_v2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -148562,6 +152431,102 @@ export interface operations {
             };
         };
     };
+    "BookableServicesController_forPatient[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BookableServicesController_forPatient[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BookableServicesController_forPatient[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BookableServicesController_forPatient[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
     "ServiciosController_catalogoFuentesRequisito[0]_v1": {
         parameters: {
             query?: never;
@@ -157466,7 +161431,10 @@ export interface operations {
     };
     "PanelesController_crear[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -157513,7 +161481,10 @@ export interface operations {
     };
     "PanelesController_crear[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -157560,7 +161531,10 @@ export interface operations {
     };
     "PanelesController_crear[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -157607,7 +161581,10 @@ export interface operations {
     };
     "PanelesController_crear[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -157630,7 +161607,10 @@ export interface operations {
     };
     "PanelesController_actualizar[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -157655,7 +161635,10 @@ export interface operations {
     };
     "PanelesController_borrarPanel[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -157674,7 +161657,10 @@ export interface operations {
     };
     "PanelesController_actualizar[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -157699,7 +161685,10 @@ export interface operations {
     };
     "PanelesController_borrarPanel[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -157718,7 +161707,10 @@ export interface operations {
     };
     "PanelesController_actualizar[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -157743,7 +161735,10 @@ export interface operations {
     };
     "PanelesController_borrarPanel[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -157762,7 +161757,10 @@ export interface operations {
     };
     "PanelesController_actualizar[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -157787,7 +161785,10 @@ export interface operations {
     };
     "PanelesController_borrarPanel[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -157999,7 +162000,10 @@ export interface operations {
     "PanelesController_listarSecciones[0]_v1": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = also the inactive sections. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path: {
@@ -158021,7 +162025,10 @@ export interface operations {
     };
     "PanelesController_agregarSeccion[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158047,7 +162054,10 @@ export interface operations {
     "PanelesController_listarSecciones[1]_v1": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = also the inactive sections. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path: {
@@ -158069,7 +162079,10 @@ export interface operations {
     };
     "PanelesController_agregarSeccion[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158095,7 +162108,10 @@ export interface operations {
     "PanelesController_listarSecciones[2]_v1": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = also the inactive sections. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path: {
@@ -158117,7 +162133,10 @@ export interface operations {
     };
     "PanelesController_agregarSeccion[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158143,7 +162162,10 @@ export interface operations {
     "PanelesController_listarSecciones[3]_v1": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = also the inactive sections. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path: {
@@ -158165,7 +162187,10 @@ export interface operations {
     };
     "PanelesController_agregarSeccion[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158191,7 +162216,10 @@ export interface operations {
     "PanelesController_listarSecciones[4]_v2": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = also the inactive sections. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path: {
@@ -158213,7 +162241,10 @@ export interface operations {
     };
     "PanelesController_agregarSeccion[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158239,7 +162270,10 @@ export interface operations {
     "PanelesController_listarSecciones[5]_v2": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = also the inactive sections. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path: {
@@ -158261,7 +162295,10 @@ export interface operations {
     };
     "PanelesController_agregarSeccion[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158287,7 +162324,10 @@ export interface operations {
     "PanelesController_listarSecciones[6]_v2": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = also the inactive sections. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path: {
@@ -158309,7 +162349,10 @@ export interface operations {
     };
     "PanelesController_agregarSeccion[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158335,7 +162378,10 @@ export interface operations {
     "PanelesController_listarSecciones[7]_v2": {
         parameters: {
             query?: {
-                includeInactive?: string;
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description 'true' = also the inactive sections. */
+                includeInactive?: "true" | "false";
             };
             header?: never;
             path: {
@@ -158357,7 +162403,10 @@ export interface operations {
     };
     "PanelesController_agregarSeccion[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158382,7 +162431,10 @@ export interface operations {
     };
     "PanelesController_reordenarSecciones[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158407,7 +162459,10 @@ export interface operations {
     };
     "PanelesController_reordenarSecciones[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158432,7 +162487,10 @@ export interface operations {
     };
     "PanelesController_reordenarSecciones[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158457,7 +162515,10 @@ export interface operations {
     };
     "PanelesController_reordenarSecciones[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158482,7 +162543,10 @@ export interface operations {
     };
     "PanelesController_reordenarSecciones[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158507,7 +162571,10 @@ export interface operations {
     };
     "PanelesController_reordenarSecciones[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158532,7 +162599,10 @@ export interface operations {
     };
     "PanelesController_reordenarSecciones[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158557,7 +162627,10 @@ export interface operations {
     };
     "PanelesController_reordenarSecciones[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 slug: string;
@@ -158582,7 +162655,10 @@ export interface operations {
     };
     "PanelesController_actualizarSeccion[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158607,7 +162683,10 @@ export interface operations {
     };
     "PanelesController_borrarSeccion[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158626,7 +162705,10 @@ export interface operations {
     };
     "PanelesController_actualizarSeccion[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158651,7 +162733,10 @@ export interface operations {
     };
     "PanelesController_borrarSeccion[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158670,7 +162755,10 @@ export interface operations {
     };
     "PanelesController_actualizarSeccion[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158695,7 +162783,10 @@ export interface operations {
     };
     "PanelesController_borrarSeccion[2]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158714,7 +162805,10 @@ export interface operations {
     };
     "PanelesController_actualizarSeccion[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158739,7 +162833,10 @@ export interface operations {
     };
     "PanelesController_borrarSeccion[3]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158758,7 +162855,10 @@ export interface operations {
     };
     "PanelesController_actualizarSeccion[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158783,7 +162883,10 @@ export interface operations {
     };
     "PanelesController_borrarSeccion[4]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158802,7 +162905,10 @@ export interface operations {
     };
     "PanelesController_actualizarSeccion[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158827,7 +162933,10 @@ export interface operations {
     };
     "PanelesController_borrarSeccion[5]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158846,7 +162955,10 @@ export interface operations {
     };
     "PanelesController_actualizarSeccion[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158871,7 +162983,10 @@ export interface operations {
     };
     "PanelesController_borrarSeccion[6]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158890,7 +163005,10 @@ export interface operations {
     };
     "PanelesController_actualizarSeccion[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -158915,7 +163033,10 @@ export interface operations {
     };
     "PanelesController_borrarSeccion[7]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description The center to write in: at most ONE (two or more are a 400). Without it, the session center. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -159347,6 +163468,8 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Estado de los avisos (default pendiente). */
                 status?: string;
+                /** @description Día YYYY-MM-DD: solo los avisos creados ese día en la zona del centro (p. ej. los aceptados de hoy). Sin él, todos los de ese estado. */
+                date?: string;
             };
             header?: never;
             path: {
@@ -159373,6 +163496,8 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Estado de los avisos (default pendiente). */
                 status?: string;
+                /** @description Día YYYY-MM-DD: solo los avisos creados ese día en la zona del centro (p. ej. los aceptados de hoy). Sin él, todos los de ese estado. */
+                date?: string;
             };
             header?: never;
             path: {
@@ -159399,6 +163524,8 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Estado de los avisos (default pendiente). */
                 status?: string;
+                /** @description Día YYYY-MM-DD: solo los avisos creados ese día en la zona del centro (p. ej. los aceptados de hoy). Sin él, todos los de ese estado. */
+                date?: string;
             };
             header?: never;
             path: {
@@ -159425,6 +163552,8 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Estado de los avisos (default pendiente). */
                 status?: string;
+                /** @description Día YYYY-MM-DD: solo los avisos creados ese día en la zona del centro (p. ej. los aceptados de hoy). Sin él, todos los de ese estado. */
+                date?: string;
             };
             header?: never;
             path: {
@@ -159451,6 +163580,8 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Estado de los avisos (default pendiente). */
                 status?: string;
+                /** @description Día YYYY-MM-DD: solo los avisos creados ese día en la zona del centro (p. ej. los aceptados de hoy). Sin él, todos los de ese estado. */
+                date?: string;
             };
             header?: never;
             path: {
@@ -159477,6 +163608,8 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Estado de los avisos (default pendiente). */
                 status?: string;
+                /** @description Día YYYY-MM-DD: solo los avisos creados ese día en la zona del centro (p. ej. los aceptados de hoy). Sin él, todos los de ese estado. */
+                date?: string;
             };
             header?: never;
             path: {
@@ -159503,6 +163636,8 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Estado de los avisos (default pendiente). */
                 status?: string;
+                /** @description Día YYYY-MM-DD: solo los avisos creados ese día en la zona del centro (p. ej. los aceptados de hoy). Sin él, todos los de ese estado. */
+                date?: string;
             };
             header?: never;
             path: {
@@ -159529,6 +163664,8 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Estado de los avisos (default pendiente). */
                 status?: string;
+                /** @description Día YYYY-MM-DD: solo los avisos creados ese día en la zona del centro (p. ej. los aceptados de hoy). Sin él, todos los de ese estado. */
+                date?: string;
             };
             header?: never;
             path: {
@@ -160156,6 +164293,438 @@ export interface operations {
             };
         };
     };
+    "PanelesController_workOfDay[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PanelesController_workOfDay[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PanelesController_workOfDay[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PanelesController_workOfDay[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PanelesController_workOfDay[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PanelesController_workOfDay[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PanelesController_workOfDay[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PanelesController_workOfDay[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Día YYYY-MM-DD (default hoy, en la zona del centro). */
+                date?: string;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PanelesController_claim[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimPanelWorkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PanelesController_claim[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimPanelWorkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PanelesController_claim[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimPanelWorkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PanelesController_claim[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimPanelWorkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PanelesController_claim[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimPanelWorkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PanelesController_claim[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimPanelWorkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PanelesController_claim[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimPanelWorkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PanelesController_claim[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimPanelWorkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     "FormatosController_listar[0]_v1": {
         parameters: {
             query?: {
@@ -160173,7 +164742,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FormatoTerapiaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -160218,7 +164787,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FormatoTerapiaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -160263,7 +164832,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FormatoTerapiaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -160308,7 +164877,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FormatoTerapiaEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -160525,6 +165094,950 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "FormatosController_answers[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description La visita no está en los centros donde se tiene formats.read, o su centro no tiene el formato. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_saveAnswers[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FORMAT_ANSWERS_INVALID (formats.error.answersInvalid): un campo o una pregunta que el formato no tiene, repetidos, un valor fuera de yes/no/null o una enfermera que no es del centro. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sin formats.fill en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_answers[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description La visita no está en los centros donde se tiene formats.read, o su centro no tiene el formato. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_saveAnswers[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FORMAT_ANSWERS_INVALID (formats.error.answersInvalid): un campo o una pregunta que el formato no tiene, repetidos, un valor fuera de yes/no/null o una enfermera que no es del centro. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sin formats.fill en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_answers[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description La visita no está en los centros donde se tiene formats.read, o su centro no tiene el formato. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_saveAnswers[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FORMAT_ANSWERS_INVALID (formats.error.answersInvalid): un campo o una pregunta que el formato no tiene, repetidos, un valor fuera de yes/no/null o una enfermera que no es del centro. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sin formats.fill en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_answers[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description La visita no está en los centros donde se tiene formats.read, o su centro no tiene el formato. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_saveAnswers[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FORMAT_ANSWERS_INVALID (formats.error.answersInvalid): un campo o una pregunta que el formato no tiene, repetidos, un valor fuera de yes/no/null o una enfermera que no es del centro. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sin formats.fill en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_answers[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description La visita no está en los centros donde se tiene formats.read, o su centro no tiene el formato. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_saveAnswers[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FORMAT_ANSWERS_INVALID (formats.error.answersInvalid): un campo o una pregunta que el formato no tiene, repetidos, un valor fuera de yes/no/null o una enfermera que no es del centro. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sin formats.fill en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_answers[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description La visita no está en los centros donde se tiene formats.read, o su centro no tiene el formato. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_saveAnswers[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FORMAT_ANSWERS_INVALID (formats.error.answersInvalid): un campo o una pregunta que el formato no tiene, repetidos, un valor fuera de yes/no/null o una enfermera que no es del centro. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sin formats.fill en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_answers[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description La visita no está en los centros donde se tiene formats.read, o su centro no tiene el formato. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_saveAnswers[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FORMAT_ANSWERS_INVALID (formats.error.answersInvalid): un campo o una pregunta que el formato no tiene, repetidos, un valor fuera de yes/no/null o una enfermera que no es del centro. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sin formats.fill en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_answers[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description La visita no está en los centros donde se tiene formats.read, o su centro no tiene el formato. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_saveAnswers[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FORMAT_ANSWERS_INVALID (formats.error.answersInvalid): un campo o una pregunta que el formato no tiene, repetidos, un valor fuera de yes/no/null o una enfermera que no es del centro. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sin formats.fill en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_voidAnswers[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sin formats.void en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La visita no está en el alcance, su centro no tiene el formato, o no tiene hoja guardada viva. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_voidAnswers[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sin formats.void en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La visita no está en el alcance, su centro no tiene el formato, o no tiene hoja guardada viva. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_voidAnswers[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sin formats.void en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La visita no está en el alcance, su centro no tiene el formato, o no tiene hoja guardada viva. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_voidAnswers[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sin formats.void en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La visita no está en el alcance, su centro no tiene el formato, o no tiene hoja guardada viva. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_voidAnswers[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sin formats.void en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La visita no está en el alcance, su centro no tiene el formato, o no tiene hoja guardada viva. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_voidAnswers[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sin formats.void en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La visita no está en el alcance, su centro no tiene el formato, o no tiene hoja guardada viva. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_voidAnswers[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sin formats.void en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La visita no está en el alcance, su centro no tiene el formato, o no tiene hoja guardada viva. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FormatosController_voidAnswers[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                slug: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidFormatAnswersDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sin formats.void en el centro de la visita. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La visita no está en el alcance, su centro no tiene el formato, o no tiene hoja guardada viva. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -170007,128 +175520,6 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ApiKeysController_findAll_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiKeyResponseDto"][];
-                };
-            };
-        };
-    };
-    ApiKeysController_create_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateApiKeyDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiKeyCreatedResponseDto"];
-                };
-            };
-        };
-    };
-    ApiKeysController_findAll_v2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiKeyResponseDto"][];
-                };
-            };
-        };
-    };
-    ApiKeysController_create_v2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateApiKeyDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiKeyCreatedResponseDto"];
-                };
-            };
-        };
-    };
-    ApiKeysController_revoke_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ApiKeysController_revoke_v2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            204: {
                 headers: {
                     [name: string]: unknown;
                 };
