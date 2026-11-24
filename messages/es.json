@@ -7127,6 +7127,7 @@
     "orderKept": "En el orden en que las marcaste.",
     "titleMore": "{name} + {n} más",
     "alreadyBooked": "{n, plural, one {# ya agendada} other {# ya agendadas}}",
-    "bookedAt": "ya agendada {time}"
+    "bookedAt": "ya agendada {time}",
+    "visitVaries": "Cambia según el día"
   }
 }

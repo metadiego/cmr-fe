@@ -40,6 +40,7 @@ import {
   overCapTherapy,
   removeOff,
   restoreOff,
+  summaryTrain,
   trainMaxRows,
   type DayOff,
 } from "@/lib/agenda/booking/train-days";
@@ -193,7 +194,13 @@ export function TherapyBookingForm({
   });
   const rowsLoaded = avail.ready && rowDates.every((d) => avail.days[d] !== undefined);
   const rowsFailed = avail.failed || rowDates.some((d) => avail.days[d] === "error");
-  const firstTrain = avail.trains[rows[0]?.date ?? ""];
+  // The summary (visit length, minutes, turns) describes a date with every ticked therapy on it.
+  const summary = summaryTrain(
+    rows.map((r) => ({ date: r.date, serviceIds: therapiesOn(r.date) })),
+    avail.trains,
+    selected,
+  );
+  const firstTrain = summary.train;
   const order = trainOrder(firstTrain, selected);
   const addDate = nextDate(items, 1, todayPR());
   const single = items.length === 1;
@@ -434,7 +441,11 @@ export function TherapyBookingForm({
                     <div className="flex items-baseline justify-between gap-3 px-3 py-2">
                       <span className="text-muted-foreground">{t("visitLength")}</span>
                       <span className="font-medium tabular-nums">
-                        {firstTrain ? t("minutes", { n: firstTrain.patientMinutes }) : "—"}
+                        {firstTrain
+                          ? t("minutes", { n: firstTrain.patientMinutes })
+                          : summary.pending
+                            ? tSeries("checking")
+                            : t("visitVaries")}
                       </span>
                     </div>
                     {selected.length > 1 && (

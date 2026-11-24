@@ -7127,6 +7127,7 @@
     "orderKept": "In the order you ticked them.",
     "titleMore": "{name} + {n} more",
     "alreadyBooked": "{n} already booked",
-    "bookedAt": "already booked {time}"
+    "bookedAt": "already booked {time}",
+    "visitVaries": "Varies by day"
   }
 }

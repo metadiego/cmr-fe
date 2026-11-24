@@ -1,5 +1,6 @@
 // Type-only imports: the test runner must never load app code (see recurring-plan.ts).
 import type { BookableService } from "../../api/frontdesk.ts";
+import type { PatientTrain } from "../../api/resources.ts";
 import { MAX_SESSIONS } from "./series-booking.ts";
 
 // The patient desk's therapy form books the ticked therapies on every date, but a therapy can be taken
@@ -10,10 +11,14 @@ import { MAX_SESSIONS } from "./series-booking.ts";
 /** Therapies taken off, per row date. */
 export type DayOff = Readonly<Record<string, readonly string[]>>;
 
-/** The day's therapies: the ticked ones, in tick order, minus those taken off that date. */
+/**
+ * The day's therapies: the ticked ones, in tick order, minus those taken off that date. A date never
+ * ends up empty (every therapy left on it unticked): it then gets all the ticked ones back.
+ */
 export function dayTherapies(selected: readonly string[], off: DayOff, date: string): string[] {
   const gone = off[date] ?? [];
-  return selected.filter((id) => !gone.includes(id));
+  const left = selected.filter((id) => !gone.includes(id));
+  return left.length ? left : [...selected];
 }
 
 /** Takes `id` off `date`. The day's last therapy stays (drop the row instead): same object back. */
@@ -70,4 +75,19 @@ export function forgetTherapy(off: DayOff, id: string): DayOff {
     if (rest.length) out[date] = rest;
   }
   return out;
+}
+
+/**
+ * The plan the form's summary (visit length, each therapy's minutes, the turns) describes: the first
+ * date that has EVERY ticked therapy and whose plan has loaded, never a date with some taken off.
+ * `pending` = such a date exists but is still loading; false with no train = no date has them all.
+ */
+export function summaryTrain(
+  rows: ReadonlyArray<{ date: string; serviceIds: readonly string[] }>,
+  trains: Readonly<Record<string, PatientTrain>>,
+  selected: readonly string[],
+): { train: PatientTrain | undefined; pending: boolean } {
+  const full = rows.filter((r) => selected.every((id) => r.serviceIds.includes(id)));
+  const loaded = full.find((r) => trains[r.date]);
+  return loaded ? { train: trains[loaded.date], pending: false } : { train: undefined, pending: full.length > 0 };
 }

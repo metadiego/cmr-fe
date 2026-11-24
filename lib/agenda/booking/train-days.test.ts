@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import type { BookableService } from "../../api/frontdesk.ts";
-import { dayTherapies, forgetTherapy, moveOff, overCapTherapy, removeOff, restoreOff, trainMaxRows } from "./train-days.ts";
+import type { PatientTrain } from "../../api/resources.ts";
+import { dayTherapies, forgetTherapy, moveOff, summaryTrain, overCapTherapy, removeOff, restoreOff, trainMaxRows } from "./train-days.ts";
 
 function bookable(entries: Record<string, number>): Map<string, BookableService> {
   return new Map(
@@ -59,4 +60,21 @@ test("forgetTherapy drops an unticked therapy from every day, so ticking it agai
   assert.deepEqual(forgetTherapy({ "2026-11-25": ["sonica"], "2026-11-26": ["sonica", "emtt"] }, "sonica"), {
     "2026-11-26": ["emtt"],
   });
+});
+
+test("dayTherapies never leaves a date empty: with every ticked one taken off, the date gets them all back", () => {
+  // EMTT and Láser off 25 nov, then SÓNICA unticked: nothing would be left to plan.
+  assert.deepEqual(dayTherapies(["emtt", "laser"], { "2026-11-25": ["emtt", "laser"] }, "2026-11-25"), ["emtt", "laser"]);
+});
+
+test("summaryTrain describes the whole visit: the first loaded date that has every ticked therapy", () => {
+  const plan = (date: string) => ({ date }) as unknown as PatientTrain;
+  const trains = { "2026-11-25": plan("2026-11-25"), "2026-11-27": plan("2026-11-27") };
+  const rows = [
+    { date: "2026-11-25", serviceIds: ["sonica"] },
+    { date: "2026-11-27", serviceIds: ["laser", "emtt", "sonica"] },
+  ];
+  assert.equal(summaryTrain(rows, trains, ["emtt", "laser", "sonica"]).train?.date, "2026-11-27");
+  assert.deepEqual(summaryTrain(rows, {}, ["emtt", "laser", "sonica"]), { train: undefined, pending: true });
+  assert.deepEqual(summaryTrain(rows.slice(0, 1), trains, ["emtt", "sonica"]), { train: undefined, pending: false });
 });
