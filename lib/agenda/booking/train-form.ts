@@ -1,7 +1,7 @@
 // What keeps «Agendar» grey on the patient desk's therapy form, beyond the missing «Terapias» field
 // (forms kit: a missing field is `missing`, anything else is a `reason` said above the button). The
 // first cause that applies wins, in the order a receptionist can act on it: permissions, the balance,
-// the sessions-left cap, the start day, then the rows.
+// a therapy over its sessions left, the start day, then the rows.
 
 export interface TrainFormState {
   permsReady: boolean;
@@ -13,11 +13,8 @@ export interface TrainFormState {
   balanceState: "idle" | "loading" | "ok" | "fail";
   /** How many therapies are ticked. */
   ticked: number;
-  rows: number;
-  /** trainCap().max */
-  max: number;
-  /** trainCap().limitedBy: the therapy whose balance caps the visits. */
-  limitedBy: string | null;
+  /** overCapTherapy(): a therapy booked on more days than it has sessions left. */
+  overCap: { therapyId: string; used: number; left: number } | null;
   startsSunday: boolean;
   /** Every row's plan, the existing sessions and the holidays have answered. */
   rowsLoaded: boolean;
@@ -33,7 +30,7 @@ export type TrainFormReason =
   | { key: "balanceHidden" }
   | { key: "balanceFailed" }
   | { key: "checking" }
-  | { key: "overCap"; n: number; therapyId: string | null }
+  | { key: "overCap"; therapyId: string; used: number; left: number }
   | { key: "dateSunday" }
   | { key: "checkFailed" }
   | { key: "fixRed" };
@@ -46,7 +43,7 @@ export function trainFormReason(s: TrainFormState): TrainFormReason | null {
   if (s.balanceState === "fail") return { key: "balanceFailed" };
   if (s.balanceState !== "ok") return { key: "checking" };
   if (s.ticked === 0) return null;
-  if (s.rows > s.max) return { key: "overCap", n: s.max, therapyId: s.limitedBy };
+  if (s.overCap) return { key: "overCap", ...s.overCap };
   if (s.startsSunday) return { key: "dateSunday" };
   if (!s.rowsLoaded) return { key: "checking" };
   if (s.rowsFailed) return { key: "checkFailed" };

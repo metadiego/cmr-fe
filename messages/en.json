@@ -7108,8 +7108,20 @@
     "clinicTime": "{n} min at the clinic",
     "endsAt": "– {time}",
     "bookVisits": "Book {n, plural, one {# visit} other {# visits}}",
-    "overCap": "Only {n, plural, one {# session} other {# sessions}} of {therapy} left to book.",
     "seriesDayFailed": "{date} no longer fits: nothing in the series was booked.",
-    "catalogueFailed": "Could not load the therapies."
+    "catalogueFailed": "Could not load the therapies.",
+    "alreadyHas": "Already has that day:",
+    "alongside": "alongside",
+    "sessionStatus": {
+      "pendiente": "booked",
+      "presente": "checked in",
+      "en_terapia": "in therapy",
+      "asistido": "attended"
+    },
+    "daySchedule": "The day's schedule",
+    "overCapDays": "{therapy} is on {used} dates but only {n, plural, one {# session} other {# sessions}} left: take it off some.",
+    "removeFromDay": "Remove {therapy} from this day",
+    "removedFromDay": "Removed:",
+    "restoreToDay": "Put {therapy} back on this day"
   }
 }

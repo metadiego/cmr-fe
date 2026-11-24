@@ -14,6 +14,7 @@ import { SeriesRows, useDayLabel } from "@/components/appointments-booking/serie
 import { SeriesFrequency, type SeriesMode } from "@/components/appointments-booking/series-frequency";
 import { useBookingResult } from "@/components/appointments-booking/booking-result-provider";
 import { TherapyPickerList, type PickableTherapy } from "@/components/patient-desk/therapy-picker-list";
+import { TrainDayDetail } from "@/components/patient-desk/train-day-detail";
 import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
@@ -32,6 +33,16 @@ import {
 } from "@/lib/agenda/booking/series-edit";
 import { trainBookingResult } from "@/lib/agenda/booking/booking-result";
 import { trainCap, trainEndsAt, trainOrder, trainRequest } from "@/lib/agenda/booking/train-rows";
+import {
+  dayTherapies,
+  forgetTherapy,
+  moveOff,
+  overCapTherapy,
+  removeOff,
+  restoreOff,
+  trainMaxRows,
+  type DayOff,
+} from "@/lib/agenda/booking/train-days";
 import { seriesKey, trainFormReason, type TrainFormReason } from "@/lib/agenda/booking/train-form";
 import type { DaySlots } from "@/lib/agenda/booking/availability";
 import { weekdayOf } from "@/lib/agenda/recurring-plan";
@@ -121,12 +132,19 @@ export function TherapyBookingForm({
   const [mode, setMode] = React.useState<SeriesMode>("manual");
   const [days, setDays] = React.useState<number[]>(() => (startDay === 0 ? [] : [startDay]));
   const [totalChoice, setTotalChoice] = React.useState<number | null>(null);
-  const cap = trainCap(balanceState === "ok" ? rules.bookable : undefined, selected);
-  const total = Math.max(1, Math.min(Math.max(1, cap.max), totalChoice ?? cap.max));
+  // The visits start at the smallest balance among the ticked (every therapy on every day) and may go up
+  // to the largest: a therapy is then taken off some dates (SÓNICA on 2 of 8 visits).
+  const balance = balanceState === "ok" ? rules.bookable : undefined;
+  const cap = trainCap(balance, selected);
+  const maxRows = Math.max(1, trainMaxRows(balance, selected));
+  const total = Math.max(1, Math.min(maxRows, totalChoice ?? cap.max));
   const weekly = mode === "weekly";
   const genKey = seriesKey(mode, days, totalChoice);
-  const [edits, setEdits] = React.useState<{ key: string; items: EditableItem[] } | null>(null);
+  // Hand edits: the rows and the therapies taken off each date (kept per date, see train-days.ts).
+  const [edits, setEdits] = React.useState<{ key: string; items: EditableItem[]; off: DayOff } | null>(null);
   const edited = !!edits && edits.key === genKey;
+  const off: DayOff = edited ? edits.off : {};
+  const therapiesOn = (date: string) => dayTherapies(selected, off, date);
   // Generated rows fit their own day: the series time when the train fits there, else that day's first.
   const baseItems: EditableItem[] = edited
     ? edits.items
@@ -137,10 +155,9 @@ export function TherapyBookingForm({
   const avail = useTrainSeriesAvailability({
     center,
     patientId: patient?.id,
-    serviceIds: selected,
+    rows: selected.length ? baseItems.map((i) => ({ date: i.date, serviceIds: therapiesOn(i.date) })) : [],
     areas,
     keepOrder,
-    dates: selected.length ? baseItems.map((i) => i.date) : [],
   });
   const loadedDays: Record<string, DaySlots | null> = {};
   for (const [d, v] of Object.entries(avail.days)) if (v !== "error") loadedDays[d] = v;
@@ -154,10 +171,16 @@ export function TherapyBookingForm({
   const seriesTime = baseTime || autoTime || "09:00";
 
   const items = fitLoadedTimes(baseItems, avail.days, seriesTime);
-  const editItems = (fn: (list: EditableItem[]) => EditableItem[]) => setEdits({ key: genKey, items: fn(items) });
-  // Another train (therapies, areas, order) changes every row's hours: each row keeps its time when the
-  // new train still fits there, else takes that day's first fitting time.
-  const refitRows = () => setEdits({ key: genKey, items: items.map((i) => ({ ...i, fitTime: true })) });
+  const editItems = (fn: (list: EditableItem[]) => EditableItem[], nextOff: DayOff = off) =>
+    setEdits({ key: genKey, items: fn(items), off: nextOff });
+  // Another train (therapies, areas, order) changes a row's hours: the row keeps its time when the new
+  // train still fits there, else takes that day's first fitting time.
+  const refitRows = (date?: string, nextOff: DayOff = off) =>
+    setEdits({
+      key: genKey,
+      items: items.map((i) => (date === undefined || i.date === date ? { ...i, fitTime: true } : i)),
+      off: nextOff,
+    });
 
   const rowDates = selected.length ? items.map((i) => i.date) : [];
   const rows = buildSeriesRows({
@@ -191,9 +214,11 @@ export function TherapyBookingForm({
     balanceHidden: rules.bookableHidden,
     balanceState,
     ticked: selected.length,
-    rows: items.length,
-    max: cap.max,
-    limitedBy: cap.limitedBy,
+    overCap: overCapTherapy(
+      items.map((i) => therapiesOn(i.date)),
+      balance,
+      selected,
+    ),
     startsSunday: weekly && startDay === 0,
     rowsLoaded,
     rowsFailed,
@@ -215,7 +240,7 @@ export function TherapyBookingForm({
       case "checking":
         return tSeries("checking");
       case "overCap":
-        return t("overCap", { n: r.n, therapy: r.therapyId ? serviceName(r.therapyId) : "—" });
+        return t("overCapDays", { therapy: serviceName(r.therapyId), used: r.used, n: r.left });
       case "dateSunday":
         return tSeries("dateSunday");
       case "checkFailed":
@@ -229,19 +254,20 @@ export function TherapyBookingForm({
   const centerInfo = centersRes.state.kind === "ok" ? centersRes.state.data.find((c) => c.id === center) : undefined;
   async function book() {
     if (!patient || !selected.length || reason) throw new Error(reason ?? missing.join(" · "));
-    // The same therapies, order and areas the hours were planned with.
-    const { serviceIds, areas: areaMap } = trainRequest(selected, areas, keepOrder);
+    // Each day's own therapies, in the order and with the areas its hours were planned with.
+    const { areas: areaMap } = trainRequest(selected, areas, keepOrder);
+    const idsOn = (date: string) => trainRequest(therapiesOn(date), areas, keepOrder).serviceIds;
     const timeOf = new Map(rows.map((r) => [r.date, r.time]));
     if (single) {
       const r = rows[0];
       const res = await bookTrain(
-        { patientId: patient.id, date: r.date, time: r.time, serviceIds, areas: areaMap, keepOrder },
+        { patientId: patient.id, date: r.date, time: r.time, serviceIds: idsOn(r.date), areas: areaMap, keepOrder },
         center,
       );
       return { sessions: res.data.sessions, warnings: [...res.warnings, ...res.advertencias], timeOf };
     }
     const res = await bookTrainSeries(
-      { patientId: patient.id, areas: areaMap, keepOrder, days: rows.map((r) => ({ date: r.date, time: r.time, serviceIds })) },
+      { patientId: patient.id, areas: areaMap, keepOrder, days: rows.map((r) => ({ date: r.date, time: r.time, serviceIds: idsOn(r.date) })) },
       center,
     );
     return { sessions: res.data.days.flatMap((d) => d.sessions), warnings: [...res.warnings, ...res.advertencias], timeOf };
@@ -302,7 +328,7 @@ export function TherapyBookingForm({
   }
   const toggle = (id: string) => {
     setSelected((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]));
-    refitRows();
+    refitRows(undefined, forgetTherapy(off, id));
   };
 
   const title = selected.length
@@ -435,8 +461,8 @@ export function TherapyBookingForm({
           setEdits(null);
         }}
         total={edited ? items.length : total}
-        maxTotal={Math.max(1, cap.max)}
-        limitedBy20={cap.limitedBy === null && cap.left !== undefined}
+        maxTotal={maxRows}
+        limitedBy20={!!balance && selected.some((id) => (balance.get(id)?.bookable ?? 0) > maxRows)}
         onTotal={(n) => {
           setTotalChoice(n);
           setEdits(null);
@@ -476,13 +502,28 @@ export function TherapyBookingForm({
             disabled={busy}
             canDrop={rows.length > 1}
             onTime={(index, v) => editItems((list) => setRowTime(list, index, v, seriesTime))}
-            onDate={(index, d) => editItems((list) => replaceDate(list, index, d))}
+            onDate={(index, d) =>
+              editItems((list) => replaceDate(list, index, d), moveOff(off, items[index]?.date ?? d, d))
+            }
             onSuggestion={() => {}}
-            onDrop={(index) => editItems((list) => dropRow(list, index))}
+            onDrop={(index) => editItems((list) => dropRow(list, index), moveOff(off, items[index]?.date ?? "", null))}
             optionHint={(date, time) => {
               const end = trainEndsAt(avail.trains[date], time);
               return end ? t("endsAt", { time: shortTime(end) }) : null;
             }}
+            rowDetail={(r) => (
+              <TrainDayDetail
+                row={r}
+                train={avail.trains[r.date]}
+                sessions={avail.sessions}
+                serviceIds={therapiesOn(r.date)}
+                removed={selected.filter((id) => !therapiesOn(r.date).includes(id))}
+                serviceName={serviceName}
+                disabled={busy}
+                onRemove={(id) => refitRows(r.date, removeOff(off, r.date, id, selected))}
+                onRestore={(id) => refitRows(r.date, restoreOff(off, r.date, id))}
+              />
+            )}
           />
           {!weekly && (
             <div className="flex items-center gap-2">
@@ -490,16 +531,11 @@ export function TherapyBookingForm({
                 type="button"
                 size="xs"
                 variant="outline"
-                disabled={busy || !addDate || items.length >= cap.max}
+                disabled={busy || !addDate || items.length >= maxRows}
                 onClick={() => addDate && editItems((list) => addItem(list, addDate))}
               >
                 {tSeries("addDate")}
               </Button>
-              {items.length >= cap.max && cap.limitedBy && (
-                <span className="text-xs text-muted-foreground">
-                  {t("overCap", { n: cap.max, therapy: serviceName(cap.limitedBy) })}
-                </span>
-              )}
             </div>
           )}
           {rowsFailed && (

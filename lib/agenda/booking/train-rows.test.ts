@@ -3,7 +3,15 @@ import assert from "node:assert/strict";
 
 import type { PatientTrain, TrainSlot } from "../../api/resources.ts";
 import type { BookableService } from "../../api/frontdesk.ts";
-import { liveSessionDates, trainCap, trainDaySlots, trainEndsAt, trainOrder, trainRequest } from "./train-rows.ts";
+import {
+  sameDaySessions,
+  trainCap,
+  trainDaySlots,
+  trainEndsAt,
+  trainOrder,
+  trainRequest,
+  trainSchedule,
+} from "./train-rows.ts";
 
 function slot(p: Partial<TrainSlot> & { time: string }): TrainSlot {
   return { fits: true, endsAt: "", legs: [], staffBlocks: [], ...p };
@@ -83,20 +91,6 @@ test("trainCap with an unknown balance or nothing ticked applies only the 20", (
   assert.deepEqual(trainCap(bookable({ laser: 3 }), []), { max: 20, limitedBy: null, left: undefined });
 });
 
-test("liveSessionDates keeps live sessions of the ticked therapies only", () => {
-  const dates = liveSessionDates(
-    [
-      { serviceId: "laser", date: "2026-11-26", status: "pendiente" },
-      { serviceId: "laser", date: "2026-11-26T00:00:00", status: "asistido" },
-      { serviceId: "emtt", date: "2026-11-27", status: "cancelada" },
-      { serviceId: "pemf", date: "2026-11-28", status: "pendiente" },
-      { serviceId: "emtt", date: "2026-11-25", status: "presente" },
-    ],
-    ["laser", "emtt"],
-  );
-  assert.deepEqual(dates, ["2026-11-25", "2026-11-26"]);
-});
-
 test("trainOrder follows the BE's legs, else the ticked order", () => {
   assert.deepEqual(trainOrder(train([], ["emtt", "laser"]), ["laser", "emtt"]), ["emtt", "laser"]);
   assert.deepEqual(trainOrder(null, ["laser", "emtt"]), ["laser", "emtt"]);
@@ -115,4 +109,80 @@ test("trainRequest ignores tick order when the BE orders by weight", () => {
 
 test("trainRequest sends areas for the ticked therapies only, 1 when untouched", () => {
   assert.deepEqual(trainRequest(["laser", "emtt"], { laser: 3, pemf: 2 }, false).areas, { laser: 3, emtt: 1 });
+});
+
+function leg(serviceId: string, start: string, p: { parallel?: boolean; minutes?: number } = {}) {
+  return { serviceId, start, slot: start, minutes: p.minutes ?? 10, parallel: p.parallel ?? false, configured: true };
+}
+
+test("trainSchedule lists one therapy per row, in train order, with its start, end and minutes", () => {
+  const tr = train([
+    slot({ time: "09:00", endsAt: "09:40:00", legs: [leg("laser", "09:00:00"), leg("emtt", "09:10", { minutes: 30 })] }),
+  ]);
+  assert.deepEqual(trainSchedule(tr, "09:00:00"), {
+    legs: [
+      { serviceId: "laser", start: "09:00", end: "09:10", minutes: 10, parallel: false, together: false },
+      { serviceId: "emtt", start: "09:10", end: "09:40", minutes: 30, parallel: false, together: false },
+    ],
+    endsAt: "09:40",
+  });
+});
+
+test("trainSchedule marks a blocking therapy that starts with one running alongside as together", () => {
+  const tr = train([slot({ time: "14:10", legs: [leg("vitc", "14:10", { minutes: 60 }), leg("iv", "14:10", { minutes: 60, parallel: true })] })]);
+  assert.deepEqual(
+    trainSchedule(tr, "14:10")?.legs.map((l) => [l.serviceId, l.parallel || l.together]),
+    [
+      ["vitc", true],
+      ["iv", true],
+    ],
+  );
+});
+
+test("trainSchedule marks therapies that start together as together (the IV chair)", () => {
+  const tr = train([slot({ time: "09:00", endsAt: "10:00", legs: [leg("vitc", "09:00", { minutes: 60 }), leg("iv", "09:00", { minutes: 60 })] })]);
+  assert.deepEqual(
+    trainSchedule(tr, "09:00")?.legs.map((l) => [l.serviceId, l.together]),
+    [
+      ["vitc", true],
+      ["iv", true],
+    ],
+  );
+});
+
+test("trainSchedule keeps a therapy that runs alongside apart, marked parallel", () => {
+  const tr = train([
+    slot({ time: "09:00", endsAt: "09:20", legs: [leg("emtt", "09:00"), leg("tms", "09:00", { parallel: true, minutes: 30 }), leg("laser", "09:10")] }),
+  ]);
+  assert.deepEqual(
+    trainSchedule(tr, "09:00")?.legs.map((l) => [l.serviceId, l.end, l.parallel, l.together]),
+    [
+      ["emtt", "09:10", false, true],
+      ["tms", "09:30", true, false],
+      ["laser", "09:20", false, false],
+    ],
+  );
+});
+
+test("trainSchedule is null for an hour the plan does not have or one with no legs", () => {
+  const tr = train([slot({ time: "09:00", legs: [] })]);
+  assert.equal(trainSchedule(tr, "10:00"), null);
+  assert.equal(trainSchedule(tr, "09:00"), null);
+  assert.equal(trainSchedule(undefined, "09:00"), null);
+});
+
+test("sameDaySessions lists the live sessions of ticked therapies that day, by time", () => {
+  const sessions = [
+    { serviceId: "emtt", date: "2026-11-24", time: "10:30:00", status: "pendiente" },
+    { serviceId: "laser", date: "2026-11-24T00:00:00.000Z", time: "09:00", status: "asistido" },
+    { serviceId: "emtt", date: "2026-11-24", time: "08:00", status: "cancelada" },
+    { serviceId: "pemf", date: "2026-11-24", time: "08:00", status: "pendiente" },
+    { serviceId: "emtt", date: "2026-11-25", time: "08:00", status: "pendiente" },
+    { serviceId: "laser", date: "2026-11-24", time: null, status: "pendiente" },
+  ];
+  assert.deepEqual(sameDaySessions(sessions, "2026-11-24", ["emtt", "laser"]), [
+    { serviceId: "laser", time: "09:00", status: "asistido" },
+    { serviceId: "emtt", time: "10:30", status: "pendiente" },
+    { serviceId: "laser", time: null, status: "pendiente" },
+  ]);
 });

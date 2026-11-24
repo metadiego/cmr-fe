@@ -50,20 +50,6 @@ export function trainCap(
   return { max: left, limitedBy, left };
 }
 
-/**
- * Days the patient already has a live (not cancelled) session of a ticked therapy: the BE refuses a second
- * one that day (FRONTDESK_SESSION_SAME_DAY), so those rows are blocked up front.
- */
-export function liveSessionDates(
-  sessions: ReadonlyArray<{ serviceId: string; date: string; status: string }>,
-  serviceIds: readonly string[],
-): string[] {
-  const ticked = new Set(serviceIds);
-  const days = new Set<string>();
-  for (const s of sessions) if (ticked.has(s.serviceId) && s.status !== "cancelada") days.add(s.date.slice(0, 10));
-  return [...days].sort();
-}
-
 /** The order the therapies are done in: the BE's plan when it has one, else the order they were ticked. */
 export function trainOrder(train: PatientTrain | null | undefined, ticked: readonly string[]): string[] {
   const legs = train?.legs.map((l) => l.serviceId).filter((id) => ticked.includes(id)) ?? [];
@@ -86,4 +72,61 @@ export function trainRequest(
   const keyIds = keepOrder ? serviceIds : [...serviceIds].sort();
   const key = `${keyIds.join(",")}|${keyIds.map((id) => areaMap[id]).join(",")}|${keepOrder ? "asked" : "weight"}`;
   return { serviceIds, areas: areaMap, key };
+}
+
+/** One therapy of a day's train, as the BE planned it. */
+export interface TrainLegRow {
+  serviceId: string;
+  start: string;
+  end: string;
+  minutes: number;
+  /** Runs alongside the others (blocking:false, e.g. Transcraneal): it does not hold the patient. */
+  parallel: boolean;
+  /** Starts at the same time as another therapy (the IV chair holds two at once; one running alongside). */
+  together: boolean;
+}
+
+function plusMinutes(hhmm: string, minutes: number): string {
+  const [h, m] = hhmm.split(":").map(Number);
+  const total = h * 60 + m + minutes;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+/**
+ * How the train runs that day if the patient arrives at `time`: one entry per therapy, in the order
+ * the BE planned, with its start, end and minutes, and when the patient leaves. Null when that hour is
+ * not planned or has no legs. Read-only: the BE books every leg at its own planned slot.
+ */
+export function trainSchedule(
+  train: PatientTrain | null | undefined,
+  time: string,
+): { legs: TrainLegRow[]; endsAt: string | null } | null {
+  const t = normalizeTime(time);
+  const slot = train?.slots.find((s) => normalizeTime(s.time) === t);
+  if (!slot || slot.legs.length === 0) return null;
+  const legs = slot.legs.map((leg) => {
+    const start = normalizeTime(leg.start);
+    return { serviceId: leg.serviceId, start, end: plusMinutes(start, leg.minutes), minutes: leg.minutes, parallel: leg.parallel };
+  });
+  const rows = legs.map((l) => ({
+    ...l,
+    together: !l.parallel && legs.some((o) => o !== l && o.start === l.start),
+  }));
+  return { legs: rows, endsAt: slot.endsAt ? normalizeTime(slot.endsAt) : null };
+}
+
+/**
+ * What the patient already has that day of the ticked therapies (not cancelled), earliest first and
+ * those without a time last: what a row blocked as a same-day duplicate names.
+ */
+export function sameDaySessions(
+  sessions: ReadonlyArray<{ serviceId: string; date: string; time: string | null; status: string }>,
+  date: string,
+  serviceIds: readonly string[],
+): { serviceId: string; time: string | null; status: string }[] {
+  const ticked = new Set(serviceIds);
+  return sessions
+    .filter((s) => ticked.has(s.serviceId) && s.status !== "cancelada" && s.date.slice(0, 10) === date)
+    .map((s) => ({ serviceId: s.serviceId, time: s.time ? normalizeTime(s.time) : null, status: s.status }))
+    .sort((a, b) => (a.time ?? "99:99").localeCompare(b.time ?? "99:99"));
 }

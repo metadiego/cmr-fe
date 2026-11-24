@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { dropPastTimes } from "@/lib/agenda/booking/availability";
 import { runLimited } from "@/lib/agenda/booking/day-cache";
-import { liveSessionDates, trainDaySlots, trainRequest } from "@/lib/agenda/booking/train-rows";
+import { sameDaySessions, trainDaySlots, trainRequest } from "@/lib/agenda/booking/train-rows";
 import { planPatientTrain, type PatientTrain } from "@/lib/api/resources";
 import { listSesionesRango } from "@/lib/api/frontdesk";
 import { getBookingHolidays } from "@/lib/api/festivos";
@@ -13,26 +13,30 @@ import { useResource } from "@/hooks/use-resource";
 import type { SeriesDay } from "@/hooks/use-series-availability";
 
 // What the patient desk's therapy form needs for its rows, the train counterpart of
-// useSeriesAvailability: for each row date the BE's plan of the WHOLE train (POST /resources/patient-train,
-// 4 at a time) as Citas day slots, the days the patient already has a live session of a ticked therapy,
-// and the holidays the rows cross. Changing the patient, center, therapies, areas or order drops every
-// plan: each one depends on all of them.
+// useSeriesAvailability: for each row date the BE's plan of THAT DAY's train (POST
+// /resources/patient-train, 4 at a time; a therapy can be taken off one date) as Citas day slots, the
+// days the patient already has a live session of one of that day's therapies, and the holidays the
+// rows cross. A plan is cached per date and per request (therapies, areas, order): taking a therapy
+// off one date asks that date again and nothing else.
 
 const CONCURRENCY = 4;
+
+export type ExistingSession = { serviceId: string; date: string; time: string | null; status: string };
 
 export function useTrainSeriesAvailability(p: {
   center: string | undefined;
   patientId: string | undefined;
-  serviceIds: string[];
+  /** Each row's date and its therapies (tick order); empty = nothing to load. */
+  rows: { date: string; serviceIds: string[] }[];
   areas: Record<string, number>;
   keepOrder: boolean;
-  /** Row dates; empty = nothing to load. */
-  dates: string[];
 }): {
   days: Record<string, SeriesDay>;
   /** The raw plan per date (end time, legs order, minutes). */
   trains: Record<string, PatientTrain>;
   existingDates: string[];
+  /** The patient's sessions in the rows' range (any therapy, any status): what a blocked row names. */
+  sessions: ExistingSession[];
   holidays: string[];
   /** Existing sessions and holidays answered (or failed): rows may be judged. */
   ready: boolean;
@@ -40,17 +44,18 @@ export function useTrainSeriesAvailability(p: {
   /** Asks every plan, the sessions and the holidays again (after a failed load or a refused booking). */
   retry: () => void;
 } {
-  const { center, patientId, serviceIds, areas, keepOrder, dates } = p;
-  // Asked in tick order (what «Mantener mi orden» keeps), keyed on what changes the plan.
-  const request = trainRequest(serviceIds, areas, keepOrder);
-  const requestRef = React.useRef(request);
+  const { center, patientId, rows, areas, keepOrder } = p;
+  // Each date asked in tick order (what «Mantener mi orden» keeps), keyed on what changes its plan.
+  const asks = rows
+    .filter((r) => r.serviceIds.length)
+    .map((r) => ({ date: r.date, ...trainRequest(r.serviceIds, areas, keepOrder) }));
+  const asksRef = React.useRef(asks);
   React.useEffect(() => {
-    requestRef.current = request;
+    asksRef.current = asks;
   });
   const [nonce, setNonce] = React.useState(0);
-  const scope =
-    center && patientId && serviceIds.length ? `${center}|${patientId}|${request.key}|${nonce}` : "";
-  const datesKey = [...new Set(dates)].sort().join(",");
+  const scope = center && patientId && asks.length ? `${center}|${patientId}|${nonce}` : "";
+  const asksKey = asks.map((a) => `${a.date}#${a.key}`).sort().join(";");
 
   const [raw, setRaw] = React.useState<{ scope: string; map: Record<string, PatientTrain | "error"> }>({
     scope: "",
@@ -66,26 +71,29 @@ export function useTrainSeriesAvailability(p: {
   }, [scope]);
 
   React.useEffect(() => {
-    if (!scope || !datesKey || !center || !patientId) return;
+    if (!scope || !asksKey || !center || !patientId) return;
     const requestScope = scope;
-    const { serviceIds: ids, areas: areaMap } = requestRef.current;
-    const missing = datesKey.split(",").filter((d) => !asked.current.has(`${requestScope}#${d}`));
+    const missing = asksRef.current.filter((a) => !asked.current.has(`${a.date}#${a.key}`));
     if (missing.length === 0) return;
-    for (const d of missing) asked.current.add(`${requestScope}#${d}`);
+    for (const a of missing) asked.current.add(`${a.date}#${a.key}`);
     void runLimited(
-      missing.map((date) => async () => {
+      missing.map((a) => async () => {
         let value: PatientTrain | "error";
         try {
-          value = await planPatientTrain({ date, serviceIds: ids, areas: areaMap, patientId, keepOrder }, center);
+          value = await planPatientTrain(
+            { date: a.date, serviceIds: a.serviceIds, areas: a.areas, patientId, keepOrder },
+            center,
+          );
         } catch {
           value = "error";
         }
         if (scopeRef.current !== requestScope) return;
-        setRaw((s) => ({ scope: requestScope, map: { ...(s.scope === requestScope ? s.map : {}), [date]: value } }));
+        const k = `${a.date}#${a.key}`;
+        setRaw((s) => ({ scope: requestScope, map: { ...(s.scope === requestScope ? s.map : {}), [k]: value } }));
       }),
       CONCURRENCY,
     );
-  }, [scope, datesKey, center, patientId, keepOrder]);
+  }, [scope, asksKey, center, patientId, keepOrder]);
 
   const todayIso = todayPR();
   const nowTime = nowTimePR();
@@ -93,7 +101,10 @@ export function useTrainSeriesAvailability(p: {
     const d: Record<string, SeriesDay> = {};
     const tr: Record<string, PatientTrain> = {};
     if (raw.scope !== scope) return { days: d, trains: tr };
-    for (const [date, v] of Object.entries(raw.map)) {
+    for (const a of asks) {
+      const date = a.date;
+      const v = raw.map[`${date}#${a.key}`];
+      if (v === undefined) continue;
       if (v === "error") d[date] = "error";
       else {
         tr[date] = v;
@@ -102,17 +113,18 @@ export function useTrainSeriesAvailability(p: {
       }
     }
     return { days: d, trains: tr };
-  }, [raw, scope, todayIso, nowTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- asksKey covers asks
+  }, [raw, scope, asksKey, todayIso, nowTime]);
 
-  const sorted = datesKey ? datesKey.split(",") : [];
+  const sorted = [...new Set(asks.map((a) => a.date))].sort();
   const from = sorted[0];
   const to = sorted[sorted.length - 1];
 
-  const existingRes = useResource<{ serviceId: string; date: string; status: string }[]>(
+  const existingRes = useResource<ExistingSession[]>(
     () =>
       scope && from && to
         ? listSesionesRango({ desde: from, hasta: to, pacienteId: patientId, centroId: center }).then((list) =>
-            list.map((s) => ({ serviceId: s.serviceId, date: String(s.date), status: s.status })),
+            list.map((s) => ({ serviceId: s.serviceId, date: String(s.date), time: s.time ?? null, status: s.status })),
           )
         : Promise.resolve([]),
     [scope, from, to],
@@ -127,10 +139,15 @@ export function useTrainSeriesAvailability(p: {
     [scope, years.join(",")],
   );
 
+  const sessions = React.useMemo(
+    () => (existingRes.state.kind === "ok" ? existingRes.state.data : []),
+    [existingRes.state],
+  );
+  // A date is taken when the patient already has one of THAT day's therapies (live) that day.
   const existingDates = React.useMemo(
-    () => (existingRes.state.kind === "ok" ? liveSessionDates(existingRes.state.data, request.serviceIds) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- request.key covers request.serviceIds
-    [existingRes.state, request.key],
+    () => asks.filter((a) => sameDaySessions(sessions, a.date, a.serviceIds).length > 0).map((a) => a.date),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- asksKey covers asks
+    [sessions, asksKey],
   );
   const holidays = React.useMemo(
     () => (holidaysRes.state.kind === "ok" ? holidaysRes.state.data : []),
@@ -142,5 +159,5 @@ export function useTrainSeriesAvailability(p: {
 
   const retry = React.useCallback(() => setNonce((n) => n + 1), []);
 
-  return { days, trains, existingDates, holidays, ready, failed, retry };
+  return { days, trains, existingDates, sessions, holidays, ready, failed, retry };
 }

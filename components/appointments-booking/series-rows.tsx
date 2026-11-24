@@ -40,6 +40,7 @@ export function SeriesRows({
   onSuggestion,
   onDrop,
   optionHint,
+  rowDetail,
 }: {
   rows: SeriesRow[];
   days: Record<string, SeriesDay>;
@@ -54,6 +55,8 @@ export function SeriesRows({
   onDrop: (index: number) => void;
   /** Replaces the "N left" text after each hour (the patient desk's train shows its end time). */
   optionHint?: (date: string, time: string) => string | null;
+  /** A line under a checked row (the patient desk's train: each therapy's time, or what blocks it). */
+  rowDetail?: (row: SeriesRow) => React.ReactNode;
 }) {
   const t = useTranslations("appointmentsBooking.series");
   const tDay = useTranslations("appointmentsBooking.day");
@@ -172,6 +175,7 @@ export function SeriesRows({
                 </Button>
               )}
             </div>
+            {rowDetail && !loading && !failed && rowDetail(r)}
             {refused?.index === r.index && (
               <p role="alert" className="pl-7 text-xs text-destructive">
                 {t(refused.reason === "past" ? "datePast" : refused.reason === "sunday" ? "dateSunday" : "dateTaken")}

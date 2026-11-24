@@ -10,9 +10,7 @@ const ok: TrainFormState = {
   balanceHidden: false,
   balanceState: "ok",
   ticked: 2,
-  rows: 1,
-  max: 3,
-  limitedBy: "emtt",
+  overCap: null,
   startsSunday: false,
   rowsLoaded: true,
   rowsFailed: false,
@@ -37,16 +35,17 @@ test("trainFormReason explains the balance before the rows", () => {
   assert.deepEqual(trainFormReason({ ...ok, balanceState: "loading" }), { key: "checking" });
 });
 
-test("trainFormReason puts the cap ahead of rows to fix", () => {
-  assert.deepEqual(trainFormReason({ ...ok, rows: 4, max: 3, rowsBlocked: true }), {
+test("trainFormReason puts a therapy over its sessions left ahead of rows to fix", () => {
+  assert.deepEqual(trainFormReason({ ...ok, overCap: { therapyId: "sonica", used: 3, left: 2 }, rowsBlocked: true }), {
     key: "overCap",
-    n: 3,
-    therapyId: "emtt",
+    therapyId: "sonica",
+    used: 3,
+    left: 2,
   });
 });
 
 test("trainFormReason has no reason with nothing ticked: «Terapias» is the missing field", () => {
-  assert.equal(trainFormReason({ ...ok, ticked: 0, rows: 4, max: 0, rowsBlocked: true, rowsLoaded: false }), null);
+  assert.equal(trainFormReason({ ...ok, ticked: 0, overCap: { therapyId: "x", used: 1, left: 0 }, rowsBlocked: true, rowsLoaded: false }), null);
 });
 
 test("trainFormReason refuses a Sunday start", () => {

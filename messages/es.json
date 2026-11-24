@@ -7108,8 +7108,20 @@
     "clinicTime": "{n} min en la clínica",
     "endsAt": "– {time}",
     "bookVisits": "Agendar {n, plural, one {# visita} other {# visitas}}",
-    "overCap": "Solo le quedan {n, plural, one {# sesión} other {# sesiones}} de {therapy} por agendar.",
     "seriesDayFailed": "El {date} ya no cabe: no se agendó nada de la serie.",
-    "catalogueFailed": "No se pudieron cargar las terapias."
+    "catalogueFailed": "No se pudieron cargar las terapias.",
+    "alreadyHas": "Ya tiene ese día:",
+    "alongside": "a la vez",
+    "sessionStatus": {
+      "pendiente": "agendada",
+      "presente": "presente",
+      "en_terapia": "en terapia",
+      "asistido": "asistida"
+    },
+    "daySchedule": "Horario del día",
+    "overCapDays": "{therapy} está en {used} fechas y solo le quedan {n, plural, one {# sesión} other {# sesiones}}: quítala de alguna.",
+    "removeFromDay": "Quitar {therapy} de este día",
+    "removedFromDay": "Quitadas:",
+    "restoreToDay": "Volver a poner {therapy} este día"
   }
 }
