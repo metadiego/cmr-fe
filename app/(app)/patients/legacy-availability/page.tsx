@@ -28,9 +28,14 @@ export default function DisponibilidadLegadoPage() {
   const t = useTranslations("pacientes.dispLegado");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
-  const centro = useSearchParams().get("centro") ?? undefined;
+  const params = useSearchParams();
+  const centro = params.get("centro") ?? undefined;
+  // Deep link from patient-desk's "sin sesiones" dialog (cmr-be #693, handoff
+  // .personal/handoff-asistir-exige-sesiones.md): prefills the record and runs the lookup at once,
+  // instead of making the desk re-type what it already knows.
+  const prefillRecord = params.get("record") ?? "";
 
-  const [record, setRecord] = React.useState("");
+  const [record, setRecord] = React.useState(prefillRecord);
   const [busy, setBusy] = React.useState(false);
   const [candidatos, setCandidatos] = React.useState<CandidatoRecord[] | null>(null);
   const [diag, setDiag] = React.useState<DiagnosticoLegado | null>(null);
@@ -94,6 +99,12 @@ export default function DisponibilidadLegadoPage() {
       setBusy(false);
     }
   }
+
+  React.useEffect(() => {
+    if (prefillRecord) void diagnosticar(prefillRecord);
+    // Runs once, on the prefilled record only — not on every `record` keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillRecord]);
 
   const items = Array.isArray(diag?.items) ? (diag!.items as unknown[]) : [];
 

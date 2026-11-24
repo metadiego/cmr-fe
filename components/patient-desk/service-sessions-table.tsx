@@ -35,7 +35,7 @@ import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers"
 import { isSessionToday } from "@/lib/frontdesk/reopen"
 import { todayISO } from "@/lib/agenda/calendar"
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion"
-import type { EhrGateCtx } from "@/components/tablero/flujo-atencion"
+import type { EhrGateCtx, PackageGateCtx } from "@/components/tablero/flujo-atencion"
 import { useCan } from "@/hooks/use-can"
 import { cn } from "@/lib/utils"
 import { ServiceTableSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
@@ -68,6 +68,7 @@ interface Props {
     servicioId?: string
   }) => void
   onEhrGate?: (ctx: EhrGateCtx) => void
+  onPackageGate?: (ctx: PackageGateCtx) => void
 }
 
 // One of the patient's services for the day: the service's own columns (exactly the frontdesk board's,
@@ -89,6 +90,7 @@ export function ServiceSessionsTable({
   onChanged,
   onSchedule,
   onEhrGate,
+  onPackageGate,
 }: Props) {
   const t = useTranslations("patientDesk")
   const tRoot = useTranslations()
@@ -318,6 +320,7 @@ export function ServiceSessionsTable({
                   onChanged={onChanged}
                   onProgramar={onSchedule}
                   onEhrGate={onEhrGate}
+                  onPackageGate={onPackageGate}
                 />
               ))}
             </tbody>

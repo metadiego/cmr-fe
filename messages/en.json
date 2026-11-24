@@ -2607,7 +2607,25 @@
       "reopenNotCancelled": "The session is not cancelled",
       "sessionSameDay": "There is already another session of this service today",
       "sheetSlotTaken": "The sheet has no seat at that time",
-      "sessionDeleteBlocked": "This visit cannot be deleted: it already has a saved clinical sheet. You can cancel it instead."
+      "sessionDeleteBlocked": "This visit cannot be deleted: it already has a saved clinical sheet. You can cancel it instead.",
+      "no_package_to_attend": "Can't attend: the patient has no available {service} sessions."
+    },
+    "no_package": {
+      "title": "No sessions available",
+      "invoice": "Invoice",
+      "loadLegacy": "Load legacy purchase",
+      "exceptional": "Grant exceptional availability"
+    },
+    "exceptional_availability": {
+      "title": "Exceptional availability",
+      "product": "Product",
+      "sessions": "Sessions",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why it's granted with no purchase",
+      "reasonTooShort": "The reason needs at least 10 characters.",
+      "notice": "Exceptional: sessions with no purchase, not a sale; who and why is recorded.",
+      "save": "Grant availability",
+      "saved": "Exceptional availability recorded"
     },
     "evento": {
       "reopened": "Reopened"

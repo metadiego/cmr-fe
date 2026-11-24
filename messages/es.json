@@ -2607,7 +2607,25 @@
       "reopenNotCancelled": "La sesión no está cancelada",
       "sessionSameDay": "Ya tiene otra sesión de este servicio hoy",
       "sheetSlotTaken": "La hoja no tiene hueco a esa hora",
-      "sessionDeleteBlocked": "No se puede borrar esta visita: ya tiene una hoja clínica guardada. Puedes cancelarla."
+      "sessionDeleteBlocked": "No se puede borrar esta visita: ya tiene una hoja clínica guardada. Puedes cancelarla.",
+      "no_package_to_attend": "No se puede asistir: el paciente no tiene sesiones disponibles de {service}."
+    },
+    "no_package": {
+      "title": "Sin sesiones disponibles",
+      "invoice": "Facturar",
+      "loadLegacy": "Cargar compra del legado",
+      "exceptional": "Dar disponibilidad excepcional"
+    },
+    "exceptional_availability": {
+      "title": "Disponibilidad excepcional",
+      "product": "Producto",
+      "sessions": "Sesiones",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué se da sin compra",
+      "reasonTooShort": "El motivo necesita al menos 10 caracteres.",
+      "notice": "Excepcional: sesiones sin compra, no es venta; queda registrado quién y por qué.",
+      "save": "Dar disponibilidad",
+      "saved": "Disponibilidad excepcional registrada"
     },
     "evento": {
       "reopened": "Reabierta"

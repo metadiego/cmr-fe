@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 
-import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
+import { ejecutarAccion, type Opcion, type Transicion } from "@/lib/api/tablero";
 import { ApiError } from "@/lib/api/types";
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
 import { resolveToggle } from "@/lib/tablero/toggle-hora";
@@ -25,6 +25,19 @@ export type EhrGateCtx = {
   // quejas-de-mostrador-2026-10-20 §1b). Presente: `skip` repite la MISMA acción sin haber guardado
   // nada. Omitido = candado normal (cancelar no hace nada, solo cierra).
   skip?: () => void;
+};
+
+// Attending refused for lack of sessions (cmr-be #693, 422 NO_PACKAGE_TO_ATTEND): nothing was saved,
+// the row stays en_terapia. Three ways out — invoice, load a legacy purchase, or (permission-gated)
+// grant an exceptional package — handoff .personal/handoff-asistir-exige-sesiones.md.
+export type PackageGateCtx = {
+  patientId: string;
+  service: string | null;
+  packagesWithoutBalance: string[];
+  // The row's own dose/product options (optionsSource "productos_grupo"): what "Dar disponibilidad
+  // excepcional" offers as the product to grant, so it never asks the BE again for the same list.
+  productOptions: Opcion[];
+  onCompleted: () => void;
 };
 
 function fmtHora(v: unknown): string | null {
