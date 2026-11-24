@@ -5003,7 +5003,9 @@
         "totalCreated": "Created {amount}",
         "difference": "Difference {amount}",
         "withExisting": "already has {existing} · would have {total}"
-      }
+      },
+      "historialVer": "Show previous changes ({n})",
+      "historialOcultar": "Hide previous changes"
     }
   },
   "perfiles": {
