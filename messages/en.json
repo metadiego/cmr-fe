@@ -6887,12 +6887,13 @@
     },
     "move": {
       "dialogTitle": "Move appointment",
-      "fromTo": "{from} → {to}",
       "fullWarning": "This time is full: moving here overbooks it.",
       "reasonLabel": "Reason for the change",
       "reasonPlaceholder": "Why is it being moved?",
       "confirm": "Move",
-      "showingCenter": "Showing {center}: the appointment's center"
+      "showingCenter": "Showing {center}: the appointment's center",
+      "nowLabel": "Now",
+      "newLabel": "New time"
     },
     "series": {
       "patient": "Patient",

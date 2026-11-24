@@ -9,7 +9,6 @@ import type { Centro } from "@/lib/api/centers";
 import type { Paciente } from "@/lib/api/pacientes";
 
 import type { CalendarMoving } from "@/components/appointments-booking/booking-calendar";
-import { useAppointmentLabel } from "@/components/appointments-booking/patient-rail";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
 import { reagendarCita } from "@/lib/api/citas";
 import { apiErrorLabel } from "@/lib/api/errors";
@@ -38,11 +37,10 @@ export function useBookingMove({
   onMoved: (dates: string[]) => void;
 }): CalendarMoving | undefined {
   const t = useTranslations("appointmentsBooking");
-  const appointmentLabel = useAppointmentLabel();
   const { show: showResult } = useBookingResult();
   return (
     movingItem && {
-      fromLabel: appointmentLabel(movingItem.date, movingItem.time),
+      from: { date: movingItem.date, time: movingItem.time },
       needsReason: movingItem.kind === "medical",
       onConfirm: async (to, reason) => {
         const a = movingItem;

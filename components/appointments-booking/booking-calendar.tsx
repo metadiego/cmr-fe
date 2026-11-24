@@ -39,7 +39,8 @@ type Month = MonthRef;
  * dropped). Closing the dialog only un-picks the time: moving goes on until the screen clears it.
  */
 export interface CalendarMoving {
-  fromLabel: string;
+  /** The appointment's current day and time. */
+  from: { date: string; time: string | null };
   needsReason: boolean;
   onConfirm: (to: { date: string; time: string }, reason?: string) => Promise<boolean>;
 }
@@ -246,7 +247,7 @@ export function BookingCalendar({
             onRetry={data.retrySelected}
             moving={
               moving && {
-                fromLabel: moving.fromLabel,
+                from: moving.from,
                 needsReason: moving.needsReason,
                 onConfirm: async (reason) => {
                   if (!date || !picked) return;

@@ -24,8 +24,8 @@ import { cn } from "@/lib/utils";
 // day (`closedLabel`), since its ‹ › walks every day.
 
 export interface DayPanelMoving {
-  /** The appointment's current day and time, already formatted ("Thu, Nov 5 · 8:00"). */
-  fromLabel: string;
+  /** The appointment's current day and time. */
+  from: { date: string; time: string | null };
   /** Medical moves need a reason (POST /appointments/:id/reschedule); service moves do not. */
   needsReason: boolean;
   onConfirm: (reason?: string) => Promise<void>;
@@ -89,7 +89,7 @@ export function DayPanel({
         key={`${date} ${picked}`}
         moving={moving}
         typeName={typeName}
-        toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
+        to={{ date, time: picked }}
         full={pickedSlot?.state === "full"}
         onClose={moving.onCancel}
       />

@@ -9,6 +9,7 @@ import { FormFooter } from "@/components/kit/form-footer";
 import { parseDayUTC } from "@/lib/format/fecha";
 import type { BookingResult, BookingResultItem } from "@/lib/agenda/booking/booking-result";
 import { shortTime } from "./booking-toolbar";
+import { DateTile } from "./date-tile";
 
 type Format = ReturnType<typeof useFormatter>;
 
@@ -22,20 +23,6 @@ function movedFromText(t: ReturnType<typeof useTranslations>, format: Format, fr
   return from.time
     ? t("movedFrom", { date: formatDay(format, from.date), time: shortTime(from.time) })
     : t("movedFromDate", { date: formatDay(format, from.date) });
-}
-
-/** A calendar leaf: weekday, day number, month. */
-function DateTile({ iso }: { iso: string }) {
-  const format = useFormatter();
-  const d = parseDayUTC(iso);
-  if (!d) return null;
-  return (
-    <div className="flex w-14 shrink-0 flex-col items-center rounded-lg bg-primary/10 py-1.5 text-primary">
-      <span className="text-[10px] font-semibold tracking-wider uppercase">{format.dateTime(d, "dayWeekdayOnly")}</span>
-      <span className="text-xl leading-tight font-semibold tabular-nums">{d.getUTCDate()}</span>
-      <span className="text-[10px] font-medium tracking-wider uppercase">{format.dateTime(d, "monthShort")}</span>
-    </div>
-  );
 }
 
 function ItemCard({ item }: { item: BookingResultItem }) {

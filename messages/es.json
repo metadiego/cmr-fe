@@ -6887,12 +6887,13 @@
     },
     "move": {
       "dialogTitle": "Mover cita",
-      "fromTo": "{from} → {to}",
       "fullWarning": "Esta hora está llena: moverla aquí es un sobrecupo.",
       "reasonLabel": "Motivo del cambio",
       "reasonPlaceholder": "¿Por qué se mueve?",
       "confirm": "Mover",
-      "showingCenter": "Mostrando {center}: el centro de la cita"
+      "showingCenter": "Mostrando {center}: el centro de la cita",
+      "nowLabel": "Ahora",
+      "newLabel": "Nueva hora"
     },
     "series": {
       "patient": "Paciente",
