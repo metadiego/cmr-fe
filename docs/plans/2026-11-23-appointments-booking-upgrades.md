@@ -257,3 +257,12 @@ Run `npm ci` once. Gate for every task: `npm test && npm run typecheck && npm ru
   - «Nueva cita» with no patient → «+ Nuevo paciente» → save → back in the dialog with the slot kept and type «Nueva» → Guardar → result dialog. Without `pacientes.create` the button is hidden.
 - [ ] `npm test && npm run typecheck && npm run lint && npm run build` → green.
 - [ ] Push; open PR (Spanish description OK) with before/after screenshots, linking the spec and the cmr-be PR; note "merge after cmr-be PR is deployed".
+
+### Task B11: boards open the Citas form
+
+**Files:**
+- Modify: `components/patient-desk/patient-desk.tsx` (~L38, ~L530) and `components/tablero/generic-board.tsx` (~L37, ~L356): replace `AgregarCitaModal` with `CitaModal` (`fecha = todayPR()`, `horaInicial` = next full hour in PR time via a lib helper with a test, initial status `confirmada`, `pacienteInicial` from `lockedPatient` (load with `getPaciente`), `centroId`, `canal="frontdesk"`, `tipos` from `getTiposCita`, `medicos` as the board loads them; `onSaved` → the board's existing refresh).
+- Modify: `components/agenda/cita-modal.tsx`: optional `estadoInicial?: string` (preselects the status on create) and an optional `onPatientDataClosed?(p)` hook for the board's "filter on that patient" step — **must stay ≤ 600 lines** (extract first).
+- Delete: `components/tablero/agregar-cita-modal.tsx`, and `lib/board/add-appointment-missing.ts` + test only if nothing else uses them (name removed tests in the commit). Remove i18n keys left unused (`agregarCita.*`) after grepping.
+
+- [ ] Implement; gate `npm test && npm run typecheck && npm run lint`; commit `feat(boards): add appointments with the Citas form`.

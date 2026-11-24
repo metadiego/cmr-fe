@@ -231,3 +231,13 @@ dialog unchanged.
 - Browser QA (localhost:8080): each booking path → result modal → print preview; move → dialog → result;
   type list with an attended patient, a never-attended patient, a patient with no balance; light/dark,
   desktop/375px.
+
+### 6. Boards use the Citas form (owner, 2026-11-23)
+
+The "Agregar cita" button on the patient desk (`components/patient-desk/patient-desk.tsx`) and the generic
+boards (`components/tablero/generic-board.tsx`) opens the same `CitaModal` as Citas instead of
+`AgregarCitaModal`, so it also ends in the success dialog (part 1). Defaults that keep the board's walk-in
+behaviour (Claude's calls): date = today; time = the next full hour (editable); status preselected
+**Confirmada** so it lands on today's board; patient preloaded when the board already has one
+(`lockedPatient`); channel `frontdesk`. The "close the EHR-data form → filter the board on that patient"
+step stays. `AgregarCitaModal` and whatever only it uses are removed (tests named in the commit).
