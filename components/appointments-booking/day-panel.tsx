@@ -13,6 +13,7 @@ import { inWindow, type BookingSlot, type TimeWindow } from "@/lib/agenda/bookin
 import type { DayResult } from "@/hooks/use-booking-availability";
 import { MoveAppointmentDialog } from "@/components/appointments-booking/move-appointment-dialog";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
+import { FROM_CLASS } from "@/components/appointments-booking/availability-month";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +84,8 @@ export function DayPanel({
   const morning = slots.filter((s) => inWindow(s.time, "morning"));
   const afternoon = slots.filter((s) => inWindow(s.time, "afternoon"));
   const pickedSlot = picked ? slots.find((s) => s.time === picked) : undefined;
+  // Moving: the appointment's current hour on this day is painted solid primary («Actual»).
+  const fromTime = moving && moving.from.date === date && moving.from.time ? shortTime(moving.from.time) : undefined;
   const picks =
     picked && moving ? (
       <MoveAppointmentDialog
@@ -140,10 +143,10 @@ export function DayPanel({
       ) : (
         <>
           {morning.length > 0 && (
-            <TimeGroup title={t("morning")} slots={morning} picked={picked} onPick={onPickTime} large={large} />
+            <TimeGroup title={t("morning")} slots={morning} picked={picked} onPick={onPickTime} large={large} fromTime={fromTime} />
           )}
           {afternoon.length > 0 && (
-            <TimeGroup title={t("afternoon")} slots={afternoon} picked={picked} onPick={onPickTime} large={large} />
+            <TimeGroup title={t("afternoon")} slots={afternoon} picked={picked} onPick={onPickTime} large={large} fromTime={fromTime} />
           )}
         </>
       )}
@@ -164,14 +167,18 @@ function TimeGroup({
   picked,
   onPick,
   large,
+  fromTime,
 }: {
   title: string;
   slots: BookingSlot[];
   picked: string | null;
   onPick: (time: string) => void;
   large?: boolean;
+  /** The moving appointment's current time on this day ("8:00"), shown as «Actual», not bookable. */
+  fromTime?: string;
 }) {
   const t = useTranslations("appointmentsBooking.day");
+  const tm = useTranslations("appointmentsBooking.move");
   const tRoot = useTranslations();
 
   return (
@@ -190,6 +197,18 @@ function TimeGroup({
             "flex w-full flex-col items-center rounded-md px-1",
             large ? "py-3 text-base" : "py-1.5 text-sm",
           );
+          if (fromTime && shortTime(s.time) === fromTime) {
+            return (
+              <span
+                key={s.time}
+                className={cn(timeClass, "border border-primary", FROM_CLASS)}
+                aria-label={`${shortTime(s.time)} · ${tm("currentBadge")}`}
+              >
+                <span className="font-medium tabular-nums">{shortTime(s.time)}</span>
+                <span className={SLOT_LABEL}>{tm("currentBadge")}</span>
+              </span>
+            );
+          }
           if (s.state === "unavailable") {
             const reason = s.reasonKey && tRoot.has(s.reasonKey) ? tRoot(s.reasonKey) : t("unavailable");
             return (

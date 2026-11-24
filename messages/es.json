@@ -6893,7 +6893,8 @@
       "confirm": "Mover",
       "showingCenter": "Mostrando {center}: el centro de la cita",
       "nowLabel": "Ahora",
-      "newLabel": "Nueva hora"
+      "newLabel": "Nueva hora",
+      "currentBadge": "Actual"
     },
     "series": {
       "patient": "Paciente",

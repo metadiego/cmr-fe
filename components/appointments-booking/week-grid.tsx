@@ -12,7 +12,7 @@ import { dayKind, monthOf } from "@/lib/agenda/booking/month";
 import { hourLabel, weekCell, weekHours } from "@/lib/agenda/booking/week";
 import type { DayResult } from "@/hooks/use-booking-availability";
 import type { BookingView } from "@/components/appointments-booking/booking-toolbar";
-import { BOOKED_CLASS, FREE_CLASS } from "@/components/appointments-booking/availability-month";
+import { BOOKED_CLASS, FREE_CLASS, FROM_CLASS } from "@/components/appointments-booking/availability-month";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +37,7 @@ export function WeekGrid({
   selected,
   picked,
   ringDate,
+  ringTime,
   onPick,
   onRetry,
 }: {
@@ -50,12 +51,16 @@ export function WeekGrid({
   selected?: string;
   /** The picked time on the selected day (its cell is outlined). */
   picked: string | null;
+  /** Moving: the appointment's current day and time — that day's header and that hour's cell are
+   *  painted solid primary with "Actual". */
   ringDate?: string;
+  ringTime?: string | null;
   onPick: (date: string, time: string) => void;
   onRetry: (date: string) => void;
 }) {
   const t = useTranslations("appointmentsBooking.month");
   const tw = useTranslations("appointmentsBooking.week");
+  const tm = useTranslations("appointmentsBooking.move");
   const format = useFormatter();
 
   const columnOf = (date: string): Column => {
@@ -89,7 +94,7 @@ export function WeekGrid({
               className={cn(
                 "flex flex-col rounded-md py-1",
                 date === todayIso && "text-primary",
-                date === ringDate && "ring-2 ring-warning",
+                date === ringDate && "bg-primary font-semibold text-primary-foreground",
               )}
             >
               <span className="first-letter:uppercase">{d ? format.dateTime(d, "dayWeekdayNum") : date}</span>
@@ -126,6 +131,8 @@ export function WeekGrid({
               window={window}
               selected={selected}
               pickedHour={pickedHour}
+              from={ringDate && ringTime ? { date: ringDate, hour: ringTime.slice(0, 2) } : undefined}
+              currentLabel={tm("currentBadge")}
               onPick={onPick}
               emptyLabel={tw("noTimeShort")}
               cellLabel={(date, value) =>
@@ -150,6 +157,8 @@ function WeekRow({
   window,
   selected,
   pickedHour,
+  from,
+  currentLabel,
   onPick,
   emptyLabel,
   cellLabel,
@@ -160,6 +169,8 @@ function WeekRow({
   window: TimeWindow;
   selected?: string;
   pickedHour?: string;
+  from?: { date: string; hour: string };
+  currentLabel: string;
   onPick: (date: string, time: string) => void;
   emptyLabel: string;
   cellLabel: (date: string, value: number) => string;
@@ -182,6 +193,14 @@ function WeekRow({
           return <div key={date} className={cn(base, "bg-muted/60")} />;
         }
         const cell = weekCell(col.day, hour, window);
+        const isFrom = from?.date === date && from.hour === hour;
+        if (isFrom && !cell) {
+          return (
+            <div key={date} className={cn(base, FROM_CLASS, "flex-col text-xs font-medium")}>
+              {currentLabel}
+            </div>
+          );
+        }
         if (!cell) {
           return (
             <div key={date} className={cn(base, "bg-muted/40 text-muted-foreground")} aria-label={emptyLabel}>
@@ -202,12 +221,14 @@ function WeekRow({
               className,
               "font-semibold hover:brightness-95",
               isPicked && "outline-2 outline-offset-1 outline-primary",
+              isFrom && cn(FROM_CLASS, "flex-col gap-0.5"),
             )}
             aria-pressed={isPicked}
-            aria-label={cellLabel(date, value)}
+            aria-label={isFrom ? `${currentLabel} · ${cellLabel(date, value)}` : cellLabel(date, value)}
             onClick={() => onPick(date, cell.time)}
           >
             {value}
+            {isFrom && <span className="text-[10px] leading-none font-medium">{currentLabel}</span>}
           </button>
         );
       })}

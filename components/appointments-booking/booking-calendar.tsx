@@ -233,6 +233,7 @@ export function BookingCalendar({
               selected={date}
               picked={picked}
               ringDate={ringDate}
+              ringTime={moving?.from.time}
               onPick={pickCell}
               onRetry={data.retryDay}
             />
