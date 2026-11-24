@@ -10,7 +10,6 @@ import { Settings02Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Can } from "@/components/kit/can";
-import { LiveBadge } from "@/components/live-badge";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { WhosCallingPanel } from "@/components/appointments-booking/whos-calling-panel";
 import { TypeListPanel } from "@/components/appointments-booking/type-list-panel";
@@ -290,20 +289,20 @@ export function BookingScreen() {
   const calCenterInfo = [...centro.centros, ...(patientCenters ?? [])].find((c) => c.id === calCenter);
   const calCenterName = movingItem && calCenter !== center ? calCenterInfo?.name : undefined;
 
-  // ---- Period: Day view always shows a day (today when none is picked); Week asks its six days.
+  // ---- Period: Week asks its six days; Month its month (no Day view, owner 2026-11-24).
   const today = todayPR();
-  const shownDate = state.period === "day" ? (state.date ?? today) : state.date;
+  const shownDate = state.date;
   const setPeriod = (period: BookingPeriod) => {
     if (period === state.period) return;
     const focus = periodFocus({ ...state, date: shownDate }, today);
     const month = monthOf(focus);
     if (period === "month") update({ period, month });
-    else if (period === "week") update({ period, anchor: focus, month });
-    else update({ period, date: focus, month });
+    else update({ period, anchor: focus, month });
   };
 
   // ---- Calendar data: holidays, the month's free spots, the selected day, Next free and the live
-  // refresh (which re-asks the month dates and the selected day an event touches).
+  // refresh (which re-asks the month dates and the selected day an event touches). No «En vivo» badge
+  // (owner, 2026-11-24): the refresh still runs, it just is not announced.
   const calendar = useBookingCalendar({
     center: calCenter,
     kind: typeChosen ? state.kind : undefined,
@@ -313,7 +312,6 @@ export function BookingScreen() {
     patientId: state.patientId,
     week: typeChosen && state.period === "week" ? weekDays(state.anchor) : [],
   });
-  const live = calendar.live;
   const refreshCalendarDates = calendar.refreshDates;
 
   // After a booking, move, edit or cancel: refresh those dates (month + day), the patient's list and
@@ -461,7 +459,6 @@ export function BookingScreen() {
         actions={
           <>
             <CentroPantallaSelector estado={centroEstado} />
-            {typeChosen && live && <LiveBadge label={t("live")} />}
             <Can permiso="citas.config">
               <Button variant="outline" asChild>
                 <Link href="/scheduling/slots">

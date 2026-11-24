@@ -6924,7 +6924,6 @@
   "appointmentsBooking": {
     "title": "Citas",
     "settings": "Configuración",
-    "live": "En vivo",
     "loading": "Cargando…",
     "loadFailed": "No se pudo cargar: {message}",
     "retry": "Reintentar",
@@ -7000,8 +6999,7 @@
       "changeType": "Cambiar tipo",
       "viewLabel": "Mostrar",
       "free": "Libres",
-      "booked": "Ocupados",
-      "today": "Hoy"
+      "booked": "Ocupados"
     },
     "month": {
       "free": "libres",
@@ -7101,17 +7099,14 @@
     "period": {
       "menuLabel": "Vista del calendario: {view}",
       "views": {
-        "day": "Día",
         "week": "Semana",
         "month": "Mes"
       },
       "prev": {
-        "day": "Día anterior",
         "week": "Semana anterior",
         "month": "Mes anterior"
       },
       "next": {
-        "day": "Día siguiente",
         "week": "Semana siguiente",
         "month": "Mes siguiente"
       }
