@@ -87,3 +87,33 @@ export function serviceBookingResult(input: {
     warnings: input.warnings,
   });
 }
+
+/**
+ * What a therapy train booking (one visit or a series of visits) created: one row per leg, at the time
+ * the BE booked it (the day's entry time when a session carries none).
+ */
+export function trainBookingResult(input: {
+  patient: BookingResult["patient"];
+  center: BookingResult["center"];
+  sessions: ReadonlyArray<{ serviceId: string; date: string; time: string | null }>;
+  serviceName: (id: string) => string;
+  fallbackTime: (date: string) => string;
+  warnings: string[];
+}): BookingResult {
+  return buildBookingResult({
+    mode: "booked",
+    patient: input.patient,
+    center: input.center,
+    items: input.sessions.map((s) => {
+      const date = s.date.slice(0, 10);
+      return {
+        date,
+        time: resultTime(s.time || input.fallbackTime(date)),
+        typeName: input.serviceName(s.serviceId),
+        kind: "service" as const,
+      };
+    }),
+    skipped: [],
+    warnings: input.warnings,
+  });
+}

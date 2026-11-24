@@ -6,6 +6,7 @@ import {
   resultCenter,
   resultPatient,
   serviceBookingResult,
+  trainBookingResult,
   type BookingResultItem,
 } from "./booking-result.ts";
 
@@ -116,4 +117,42 @@ test("buildBookingResult: the same warning (or skipped date + reason) twice is l
   });
   assert.deepEqual(r.warnings, ["Cupo lleno", "Revisar pago"]);
   assert.deepEqual(r.skipped, [{ date: "2026-12-01", reason: "lleno" }]);
+});
+
+const trainBase = {
+  patient: { name: "RIVERA SOTO, ANA", record: "10482" },
+  center: { name: "CMR Bayamon", phone: null, address: null },
+  serviceName: (id: string) => ({ laser: "Láser", emtt: "EMTT" })[id] ?? id,
+  fallbackTime: () => "10:00",
+  warnings: [] as string[],
+};
+
+test("trainBookingResult lists one row per leg in time order", () => {
+  const r = trainBookingResult({
+    ...trainBase,
+    sessions: [
+      { serviceId: "emtt", date: "2026-11-24", time: "09:10" },
+      { serviceId: "laser", date: "2026-11-24", time: "09:00:00" },
+    ],
+  });
+  assert.equal(r.mode, "booked");
+  assert.deepEqual(r.items, [
+    { date: "2026-11-24", time: "09:00", typeName: "Láser", kind: "service" },
+    { date: "2026-11-24", time: "09:10", typeName: "EMTT", kind: "service" },
+  ]);
+  assert.deepEqual(r.skipped, []);
+});
+
+test("trainBookingResult uses the day's entry time when a session has none", () => {
+  const r = trainBookingResult({ ...trainBase, sessions: [{ serviceId: "laser", date: "2026-11-25T00:00:00", time: null }] });
+  assert.deepEqual(r.items, [{ date: "2026-11-25", time: "10:00", typeName: "Láser", kind: "service" }]);
+});
+
+test("trainBookingResult lists a repeated warning once", () => {
+  const r = trainBookingResult({
+    ...trainBase,
+    sessions: [{ serviceId: "laser", date: "2026-11-24", time: "09:00" }],
+    warnings: ["Lleno", "Lleno"],
+  });
+  assert.deepEqual(r.warnings, ["Lleno"]);
 });
