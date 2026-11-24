@@ -6856,8 +6856,6 @@
       "viewLabel": "Show",
       "free": "Free",
       "booked": "Booked",
-      "nextFree": "Next free",
-      "noNextFree": "No free times soon.",
       "today": "Today"
     },
     "month": {

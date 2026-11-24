@@ -311,7 +311,6 @@ export function BookingScreen() {
     month: state.month,
     date: shownDate,
     patientId: state.patientId,
-    window: "any",
     week: typeChosen && state.period === "week" ? weekDays(state.anchor) : [],
   });
   const live = calendar.live;

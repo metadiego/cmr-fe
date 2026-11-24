@@ -139,11 +139,6 @@ export function BookingCalendar({
     if (day !== date) onChange({ date: day });
   };
 
-  const pickNext = (day: string, time: string) => {
-    if (day !== date) onChange({ date: day, month: monthOf(day), anchor: day });
-    pickTime(day, time);
-  };
-
   // A week cell = that day + the hour's first time with room, exactly like picking it in the day panel.
   const pickCell = (day: string, time: string) => {
     if (day !== date) onChange({ date: day });
@@ -179,9 +174,6 @@ export function BookingCalendar({
         onClearType={onClearType}
         view={medical ? view : undefined}
         onView={medical ? (v) => onChange({ view: v }) : undefined}
-        nextFree={data.notConfigured ? [] : data.nextFree}
-        nextFreeLoading={data.nextFreeLoading}
-        onPickNext={pickNext}
       />
       {centerNote && <p className="text-xs font-medium text-primary">{centerNote}</p>}
       <PeriodHeader

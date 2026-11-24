@@ -6856,8 +6856,6 @@
       "viewLabel": "Mostrar",
       "free": "Libres",
       "booked": "Ocupados",
-      "nextFree": "Próximos libres",
-      "noNextFree": "No hay horas libres pronto.",
       "today": "Hoy"
     },
     "month": {
