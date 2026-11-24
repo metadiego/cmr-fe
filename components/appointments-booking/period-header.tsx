@@ -18,8 +18,9 @@ import { weekDays } from "@/lib/agenda/booking/week";
 import type { MonthRef } from "@/lib/agenda/booking/month";
 import { parseDayUTC } from "@/lib/format/fecha";
 
-// The calendar's period row, like Google Calendar: ‹ Today › (navigation only: Today jumps to today in
-// the current view), the period's title, and on the right the view menu (Day D / Week W / Month M).
+// The calendar's period controls: ‹ [view menu] › and the period's title. The view menu (Day D / Week W /
+// Month M) sits between the arrows where «Hoy» was; there is no «Hoy» button (owner, 2026-11-24). They
+// render at the left of the toolbar row, next to «Agendando» (BookingToolbar's `leading`).
 
 const SHORTCUT: Record<BookingPeriod, string> = { day: "D", week: "W", month: "M" };
 
@@ -40,12 +41,11 @@ export function PeriodHeader({
   date: string;
   /** False disables ‹ (Day view never goes before today). */
   canGoBack: boolean;
-  /** -1 / +1 period, or 0 for today. */
-  onShift: (delta: -1 | 0 | 1) => void;
+  /** -1 / +1 period. */
+  onShift: (delta: -1 | 1) => void;
   onPeriod: (p: BookingPeriod) => void;
 }) {
   const t = useTranslations("appointmentsBooking.period");
-  const tt = useTranslations("appointmentsBooking.toolbar");
   const format = useFormatter();
 
   let title = "";
@@ -74,33 +74,29 @@ export function PeriodHeader({
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
         </Button>
-        <Button variant="outline" size="sm" onClick={() => onShift(0)}>
-          {tt("today")}
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" aria-label={t("menuLabel", { view: t(`views.${period}`) })}>
+              {t(`views.${period}`)}
+              <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} data-icon="inline-end" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44 min-w-44">
+            <DropdownMenuRadioGroup value={period} onValueChange={(v) => onPeriod(v as BookingPeriod)}>
+              {PERIODS.map((p) => (
+                <DropdownMenuRadioItem key={p} value={p}>
+                  {t(`views.${p}`)}
+                  <DropdownMenuShortcut>{SHORTCUT[p]}</DropdownMenuShortcut>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button variant="outline" size="icon-sm" onClick={() => onShift(1)} aria-label={t(`next.${period}`)}>
           <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
         </Button>
       </div>
       <h2 className="text-base font-semibold first-letter:uppercase">{title}</h2>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="ml-auto" aria-label={t("menuLabel", { view: t(`views.${period}`) })}>
-            {t(`views.${period}`)}
-            <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} data-icon="inline-end" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44 min-w-44">
-          <DropdownMenuRadioGroup value={period} onValueChange={(v) => onPeriod(v as BookingPeriod)}>
-            {PERIODS.map((p) => (
-              <DropdownMenuRadioItem key={p} value={p}>
-                {t(`views.${p}`)}
-                <DropdownMenuShortcut>{SHORTCUT[p]}</DropdownMenuShortcut>
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </div>
   );
 }

@@ -6844,7 +6844,6 @@
   "appointmentsBooking": {
     "title": "Appointments",
     "settings": "Settings",
-    "live": "Live",
     "loading": "Loading…",
     "loadFailed": "Could not load: {message}",
     "retry": "Retry",
@@ -6920,8 +6919,7 @@
       "changeType": "Change type",
       "viewLabel": "Show",
       "free": "Free",
-      "booked": "Booked",
-      "today": "Today"
+      "booked": "Booked"
     },
     "month": {
       "free": "free",
