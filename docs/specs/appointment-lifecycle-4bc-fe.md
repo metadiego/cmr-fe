@@ -25,7 +25,7 @@ Replaces, for the new screens, `POST frontdesk/patients/:id/present` plus the ex
   |---|---|---|
   | `patientId` | uuid | required |
   | `centerId` | uuid | required: the visit's center (send the row's center, not only the active one) |
-  | `date` | `YYYY-MM-DD` | optional, default today in the center's time zone. A day that has not come: 400 `VALIDATION_ERROR`, labelKey `presente.enElFuturo` |
+  | `date` | `YYYY-MM-DD` | optional, default today in the center's time zone. **Only the plain calendar day**: a timestamp (`2026-11-25T00:00:00Z`) or `20261125` is a 400 `VALIDATION_ERROR` ("date must be YYYY-MM-DD"). A day that has not come: 400 `VALIDATION_ERROR`, labelKey `presente.enElFuturo` |
   | `appointmentIds` | uuid[] (1-100) | optional. Without it: every **booked or confirmed** row of the patient that day at that center, both kinds. With it: only those rows; a **no-show or not-served row named here is a same-day recovery** (section 3) |
 
 - **Response (HTTP 200 even when every row failed):**
@@ -40,6 +40,8 @@ Replaces, for the new screens, `POST frontdesk/patients/:id/present` plus the ex
   ```
 
   - `skipped` = already arrived (a second receptionist, or a double click): **not an error**, show nothing.
+    A not-served row is never `skipped`: named in `appointmentIds` it is a same-day recovery (section 3);
+    without ids it is left alone and appears nowhere.
   - `failed[].missingFields` (was `faltantes` in the 4a hand-off's plan text) is present when a
     consultation's lock refused for missing patient data (code `PACIENTE_DATOS_REQUERIDOS`, labelKey
     `citas.datos_requeridos_para_presente`): open the same "complete the patient" flow the board uses
@@ -57,13 +59,17 @@ Replaces, for the new screens, `POST frontdesk/patients/:id/present` plus the ex
   answers **404**.
 - **Body:** `{ "appointmentIds"?: uuid[] }`, default every row of the visit.
 - Undoes the arrival of rows still **waiting** (consultation) or **waiting / called** (therapy). A row
-  further on (triage, in consultation, in therapy, done) is in `failed` with
-  `LIFECYCLE_ACTION_NOT_ALLOWED`: the way back from there is the row's own correction action.
+  further on (triage, in consultation, in therapy, done): **without `appointmentIds` it is in `skipped`**
+  (the undo never targets it: not an error, show nothing); **named in `appointmentIds`** it is in `failed`
+  with `LIFECYCLE_ACTION_NOT_ALLOWED`. The way back from there is the row's own correction action.
 - **Confirmation:** a therapy row may ask `frontdesk.undo_present` (per center policy): the call
   answers **428 `ACTION_REQUIRES_CONFIRMATION`** before anything is written; repeat it with the header
   `X-Confirm-Action: frontdesk.undo_present` (one header covers every row). Use `useConfirm()`.
-- Same response shape; `arrived` lists the rows undone. When the visit is left empty it is **voided** and
-  `visitId` is `null`. Checking the patient in again opens a new visit.
+- **Response (HTTP 200):** `{ "visitId": "uuid | null", "undone": [{ "id", "kind" }], "skipped": [...],
+  "failed": [...] }`. **`undone`** lists the rows taken back before arrival (the undo has no `arrived`
+  key). `failed` holds only rows it tried and could not move (e.g. per-row `FORBIDDEN`), named rows that
+  cannot go back, and ids not in the visit (`ENTITY_NOT_FOUND`). When the visit is left empty it is
+  **voided** and `visitId` is `null`. Checking the patient in again opens a new visit.
 
 ### MCP
 
@@ -93,10 +99,10 @@ click answers 400 `LIFECYCLE_ACTION_NOT_ALLOWED`. No new label: it is `lifecycle
 
 The backend menu (`GET /me/menu`) gains:
 
-| key | `booked-appointments` |
+| key | `appointments-day` (the key cmr-fe #155 maps) |
 |---|---|
 | path | `/scheduling/booked` |
-| labelKey | `nav.bookedAppointments` (**new**: add to `messages/es.json` "Citas" and `messages/en.json` "Appointments"; the existing `nav.citas` item becomes "Agendar cita" / "Book appointment" per `citas-day-screen.md`) |
+| labelKey | `nav.appointmentsDay` (**new**: add to `messages/es.json` "Citas" and `messages/en.json` "Appointments"; the existing `nav.citas` item becomes "Agendar cita" / "Book appointment" per `citas-day-screen.md`) |
 | icon | `list-checks` |
 | group / order | `g-agenda`, right after the booking screen |
 | permission | `appointments.read` |
@@ -120,17 +126,21 @@ screen should read them right.
   | **Therapy still pending** | **stays pending** (no therapy no-show in this piece) |
   | In consultation, in therapy, done | untouched |
 
-  Then the day's open visits close. History rows say actor `system`, reason `end_of_day`.
+  Then the day's open visits close. History rows say actor `system`, reason `end_of_day`. **The
+  call-center sheet is not touched:** a no-show or not-served row keeps its sheet seat (only a person's
+  no-show / not-served frees it, as today).
 - **Each day closes once.** A patient checked in after the cutoff (from `no_show` or not served: the
-  recoveries of section 3) stays checked in; their visit stays `closed`, which the screen can ignore.
+  recoveries of section 3) stays checked in; their visit stays `closed`, which the screen can ignore. A
+  patient with no visit that day gets a new one, which the next run (within 30 minutes) closes.
+- At deploy, a one-off cleanup closes every open visit before the switch date and voids empty ones.
 - A day the server missed is closed later (up to a week back): rows of past days can change state the
   next morning.
 - A center with `endOfDay.releasePresent: false` keeps its waiting patients as they are.
 - The old behaviour ("presente goes back to agendada / pendiente" and the opt-in "confirmed goes back to
   agendada") stops for days from the switch date; the opt-in one is gone altogether.
-- The preferences screen: saving the **system** layer must keep `endOfDay.lifecycleFrom` (the layer is
-  saved whole; dropping the key hands the end of day back to the old jobs). If the FE has a system
-  preferences editor that rebuilds the object, keep unknown keys.
+- The preferences screen: saving the **system** layer keeps `endOfDay.lifecycleFrom` **on the backend**:
+  a save that does not name it (the theme Reset sends `{}`) leaves the stored date; only an explicit
+  `endOfDay.lifecycleFrom: null` removes it. Never send that null from a screen.
 
 ## 6. What changed against section 7 of the 4a hand-off
 
@@ -139,17 +149,20 @@ screen should read them right.
   = per-row `FORBIDDEN`.
 - Undo: 404 for a visit the caller cannot see; ids not in the visit come back `ENTITY_NOT_FOUND`;
   confirmation by 428 + `X-Confirm-Action: frontdesk.undo_present`.
-- End of day: each day once, catch-up of missed days, `releasePresent` honoured.
+- Undo answers `undone` (not `arrived`); rows it never targets are `skipped`, not `failed`.
+- Check-in `date` only as `YYYY-MM-DD`.
+- Menu key `appointments-day`, label `nav.appointmentsDay` (first seeded as `booked-appointments`).
+- End of day: each day once, catch-up of missed days, `releasePresent` honoured, sheet seats kept.
 
 ## 7. Files to change (live screens only)
 
 - **Citas day screen (new, `/scheduling/booked`)**: register the route in `lib/nav-manifest.ts`; the
-  labels `nav.bookedAppointments` in both catalogues; "Llegó" calls `POST visits/check-in` with the
+  labels `nav.appointmentsDay` in both catalogues; "Llegó" calls `POST visits/check-in` with the
   row's patient and center and `appointmentIds: [id]` (or without ids for "the whole day").
 - `components/patient-desk/*` and `hooks/use-patient-day.ts`: patient present → `POST visits/check-in`
   (replaces `frontdesk/patients/:id/present` plus the consultation `presente`), undo present →
-  `POST visits/:id/undo`; show `failed` rows with their labelKey, `missingFields` opening the patient
-  data form; no toast for `skipped`.
+  `POST visits/:id/undo` (read `undone`); show `failed` rows with their labelKey, `missingFields` opening
+  the patient data form; no toast for `skipped`.
 - `lib/api/visits.ts` (new) with the two calls and the response type; `lib/api/schema.d.ts` regenerated
   (`npm run gen:api`) against a backend running the 4b branch.
 - The decision of which row in `failed` to show first and how goes to `lib/` with a test (guardrail 5).
