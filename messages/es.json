@@ -7357,13 +7357,17 @@
   },
   "appointmentsDay": {
     "title": "Citas",
-    "live": "En vivo",
-    "offline": "Sin conexión en vivo",
     "prevDay": "Día anterior",
     "nextDay": "Día siguiente",
     "today": "Hoy",
     "type": {
-      "new": "Nueva"
+      "new": "Nueva",
+      "followUp": "Seguimiento",
+      "therapy": "Terapia"
+    },
+    "clinic": {
+      "label": "Clínica",
+      "all": "Todas"
     },
     "typeFilter": {
       "label": "Tipo",
@@ -7392,6 +7396,7 @@
     },
     "col": {
       "time": "Hora",
+      "clinic": "Clínica",
       "patient": "Paciente",
       "type": "Tipo",
       "bookedBy": "Agendada por",

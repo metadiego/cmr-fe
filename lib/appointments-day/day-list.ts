@@ -4,8 +4,21 @@
 // No imports on purpose: Node runs this file's test on its own.
 
 export type DayKind = "medical" | "service"
-export type BookingStatus = "booked" | "confirmed" | "arrived" | "cancelled" | "no_show" | "rescheduled"
-export type CareStatus = "waiting" | "triage" | "in_consultation" | "called" | "in_therapy" | "done" | "not_served"
+export type BookingStatus =
+  | "booked"
+  | "confirmed"
+  | "arrived"
+  | "cancelled"
+  | "no_show"
+  | "rescheduled"
+export type CareStatus =
+  | "waiting"
+  | "triage"
+  | "in_consultation"
+  | "called"
+  | "in_therapy"
+  | "done"
+  | "not_served"
 export type ConfirmedVia = "person" | "bridge" | "import"
 
 /** A staff member named on a row; `name` is null when the id is not a staff row (old rows). */
@@ -69,7 +82,10 @@ export const BOOKED_BY_STORAGE_KEY = "cmr.appointmentsDay.bookedBy"
 export const OWNER_STORAGE_KEY = "cmr.appointmentsDay.portfolioOwner"
 
 /** The remembered choice, or the default (Me). Someone with no staff record cannot be "me": All. */
-export function bookedByOrDefault(stored: string | null | undefined, myStaffId: string | null | undefined): string {
+export function bookedByOrDefault(
+  stored: string | null | undefined,
+  myStaffId: string | null | undefined
+): string {
   const choice = stored || BOOKED_BY_ME
   if (choice === BOOKED_BY_ME && !myStaffId) return BOOKED_BY_ALL
   return choice
@@ -85,12 +101,13 @@ export function bookedByOrDefault(stored: string | null | undefined, myStaffId: 
 export function bookedByChoice(
   stored: string | null | undefined,
   myStaffId: string | null | undefined,
-  staffOptions: readonly string[] | null,
+  staffOptions: readonly string[] | null
 ): string | null {
   if (myStaffId === undefined) return null
   if (stored && stored !== BOOKED_BY_ME && stored !== BOOKED_BY_ALL) {
     if (!staffOptions) return null
-    if (!staffOptions.includes(stored)) return bookedByOrDefault(null, myStaffId)
+    if (!staffOptions.includes(stored))
+      return bookedByOrDefault(null, myStaffId)
   }
   return bookedByOrDefault(stored, myStaffId)
 }
@@ -105,7 +122,7 @@ export function ownerChoice(
   fromUrl: string | null | undefined,
   stored: string | null | undefined,
   myStaffId: string | null | undefined,
-  staffOptions: readonly string[] | null,
+  staffOptions: readonly string[] | null
 ): string | null {
   const choice = fromUrl || stored || BOOKED_BY_ALL
   if (choice === BOOKED_BY_ALL) return BOOKED_BY_ALL
@@ -118,7 +135,10 @@ export function ownerChoice(
 }
 
 /** The staff id a "me / all / id" choice stands for; null = no filter. */
-function staffFor(choice: string | undefined, myStaffId: string | null | undefined): string | null {
+function staffFor(
+  choice: string | undefined,
+  myStaffId: string | null | undefined
+): string | null {
   if (!choice || choice === BOOKED_BY_ALL) return null
   return choice === BOOKED_BY_ME ? (myStaffId ?? null) : choice
 }
@@ -141,16 +161,32 @@ export interface TypeOption {
  * (`GET services`, active only by default), each group sorted by name.
  */
 export function typeOptions(
-  types: readonly { id: string; slug: string; name: string; active?: boolean }[],
-  services: readonly { id: string; name: string }[],
+  types: readonly {
+    id: string
+    slug: string
+    name: string
+    active?: boolean
+  }[],
+  services: readonly { id: string; name: string }[]
 ): TypeOption[] {
-  const byLabel = (a: TypeOption, b: TypeOption) => a.label.localeCompare(b.label)
+  const byLabel = (a: TypeOption, b: TypeOption) =>
+    a.label.localeCompare(b.label)
   const medical = types
     .filter((t) => t.active !== false)
-    .map((t) => ({ id: t.id, kind: "medical" as const, label: t.name, isNewPatientType: t.slug === NEW_PATIENT_TYPE_SLUG }))
+    .map((t) => ({
+      id: t.id,
+      kind: "medical" as const,
+      label: t.name,
+      isNewPatientType: t.slug === NEW_PATIENT_TYPE_SLUG,
+    }))
     .sort(byLabel)
   const service = services
-    .map((s) => ({ id: s.id, kind: "service" as const, label: s.name, isNewPatientType: false }))
+    .map((s) => ({
+      id: s.id,
+      kind: "service" as const,
+      label: s.name,
+      isNewPatientType: false,
+    }))
     .sort(byLabel)
   return [...medical, ...service]
 }
@@ -161,7 +197,10 @@ export function typeOptions(
  * loading, [] when their request failed (the pick is then dropped so the list always loads). Ids that
  * are not among the options are left out.
  */
-export function pickedTypes(picked: readonly string[], options: readonly TypeOption[] | null): TypeOption[] | null {
+export function pickedTypes(
+  picked: readonly string[],
+  options: readonly TypeOption[] | null
+): TypeOption[] | null {
   if (picked.length === 0) return []
   if (!options) return null
   const ids = new Set(picked)
@@ -185,8 +224,12 @@ export function dayListQuery(p: {
 }): DayListQuery {
   const q: DayListQuery = { date: p.date }
   if (p.centerId) q.centerIds = p.centerId
-  const typeIds = (p.picked ?? []).filter((o) => o.kind === "medical").map((o) => o.id)
-  const serviceIds = (p.picked ?? []).filter((o) => o.kind === "service").map((o) => o.id)
+  const typeIds = (p.picked ?? [])
+    .filter((o) => o.kind === "medical")
+    .map((o) => o.id)
+  const serviceIds = (p.picked ?? [])
+    .filter((o) => o.kind === "service")
+    .map((o) => o.id)
   if (typeIds.length) q.appointmentTypeIds = typeIds.join(",")
   if (serviceIds.length) q.serviceIds = serviceIds.join(",")
   const creator = staffFor(p.bookedBy, p.myStaffId)
@@ -198,8 +241,20 @@ export function dayListQuery(p: {
 }
 
 /** `dayListQuery` as a query string. */
-export function dayListSearch(p: Parameters<typeof dayListQuery>[0]): URLSearchParams {
-  return new URLSearchParams(Object.entries(dayListQuery(p)) as [string, string][])
+export function dayListSearch(
+  p: Parameters<typeof dayListQuery>[0]
+): URLSearchParams {
+  return new URLSearchParams(
+    Object.entries(dayListQuery(p)) as [string, string][]
+  )
+}
+
+/** The Type column's one badge: new patient / follow-up for medical rows, the service for therapies. */
+export function typeBadge(
+  r: Pick<DayListRow, "kind" | "isNewPatientType" | "serviceName">
+): { kind: "new" | "followUp" } | { kind: "therapy"; label: string | null } {
+  if (r.kind === "service") return { kind: "therapy", label: r.serviceName }
+  return { kind: r.isNewPatientType ? "new" : "followUp" }
 }
 
 // ---- status ---------------------------------------------------------------------------------------
@@ -215,7 +270,13 @@ export function rowStatus(row: DayListRow): RowStatus {
   if (row.careStatus) return { stage: row.careStatus, confirmation: null }
   const confirmation =
     row.bookingStatus === "confirmed" && row.confirmedVia
-      ? { via: row.confirmedVia, name: row.confirmedVia === "person" ? (row.confirmedBy?.name ?? null) : null }
+      ? {
+          via: row.confirmedVia,
+          name:
+            row.confirmedVia === "person"
+              ? (row.confirmedBy?.name ?? null)
+              : null,
+        }
       : null
   return { stage: row.bookingStatus, confirmation }
 }
@@ -223,7 +284,10 @@ export function rowStatus(row: DayListRow): RowStatus {
 // ---- today ----------------------------------------------------------------------------------------
 
 /** The day (YYYY-MM-DD) and the minute (HH:mm, 24h) at `now` in an IANA time zone. */
-export function nowInZone(now: Date, timeZone: string): { day: string; hhmm: string } {
+export function nowInZone(
+  now: Date,
+  timeZone: string
+): { day: string; hhmm: string } {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone,
     year: "numeric",
@@ -234,7 +298,10 @@ export function nowInZone(now: Date, timeZone: string): { day: string; hhmm: str
     hourCycle: "h23",
   }).formatToParts(now)
   const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ""
-  return { day: `${get("year")}-${get("month")}-${get("day")}`, hhmm: `${get("hour")}:${get("minute")}` }
+  return {
+    day: `${get("year")}-${get("month")}-${get("day")}`,
+    hhmm: `${get("hour")}:${get("minute")}`,
+  }
 }
 
 export type TodayGroup = "arrived" | "late" | "upcoming"
@@ -246,13 +313,20 @@ const STILL_BOOKED = new Set<BookingStatus | null>(["booked", "confirmed"])
  * late (still booked or confirmed and its time has passed), upcoming (time ahead, or no time: a therapy
  * with no time is never late). No-show, cancelled and rescheduled rows are in no group.
  */
-export function todayGroup(row: DayListRow, nowHHmm: string): TodayGroup | null {
-  if (row.visit || row.careStatus || row.bookingStatus === "arrived") return "arrived"
+export function todayGroup(
+  row: DayListRow,
+  nowHHmm: string
+): TodayGroup | null {
+  if (row.visit || row.careStatus || row.bookingStatus === "arrived")
+    return "arrived"
   if (!STILL_BOOKED.has(row.bookingStatus)) return null
   return row.time !== null && row.time < nowHHmm ? "late" : "upcoming"
 }
 
-export function todaySummary(rows: DayListRow[], nowHHmm: string): Record<TodayGroup, number> {
+export function todaySummary(
+  rows: DayListRow[],
+  nowHHmm: string
+): Record<TodayGroup, number> {
   const out: Record<TodayGroup, number> = { arrived: 0, late: 0, upcoming: 0 }
   for (const r of rows) {
     const g = todayGroup(r, nowHHmm)
@@ -295,25 +369,34 @@ export interface DayScreenParams {
   types: string[]
   /** "Cartera" from the URL (`?owner=`): me, a staff id, or null (not in the URL; the device decides). */
   owner: string | null
+  /** One clinic (`?clinic=`, or `?centro=` from older links); null = every clinic the person can read. */
+  clinic: string | null
 }
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 
-/** `?date=&cancelled=1&types=a,b&owner=`; a missing or malformed day opens on `today`. */
-export function parseDayScreenParams(sp: URLSearchParams, today: string): DayScreenParams {
+/** `?date=&cancelled=1&types=a,b&owner=&clinic=`; a missing or malformed day opens on `today`. */
+export function parseDayScreenParams(
+  sp: URLSearchParams,
+  today: string
+): DayScreenParams {
   const date = sp.get("date") ?? ""
   return {
     date: DAY.test(date) ? date : today,
     includeCancelled: sp.get("cancelled") === "1",
     types: [...new Set((sp.get("types") ?? "").split(",").filter(Boolean))],
     owner: sp.get("owner") || null,
+    clinic: sp.get("clinic") || sp.get("centro") || null,
   }
 }
 
 export function toDayScreenSearch(p: DayScreenParams): string {
   const parts = [`date=${p.date}`]
   if (p.includeCancelled) parts.push("cancelled=1")
-  if (p.types.length) parts.push(`types=${p.types.map(encodeURIComponent).join(",")}`)
-  if (p.owner && p.owner !== BOOKED_BY_ALL) parts.push(`owner=${encodeURIComponent(p.owner)}`)
+  if (p.types.length)
+    parts.push(`types=${p.types.map(encodeURIComponent).join(",")}`)
+  if (p.owner && p.owner !== BOOKED_BY_ALL)
+    parts.push(`owner=${encodeURIComponent(p.owner)}`)
+  if (p.clinic) parts.push(`clinic=${encodeURIComponent(p.clinic)}`)
   return parts.join("&")
 }

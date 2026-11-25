@@ -16,6 +16,7 @@ import {
   pickedTypes,
   todaySummary,
   toDayScreenSearch,
+  typeBadge,
   typeOptions,
   type DayListRow,
   type TypeOption,
@@ -47,7 +48,13 @@ function row(over: Partial<DayListRow> = {}): DayListRow {
 // ---- query --------------------------------------------------------------------------------------
 
 test("the query always names the day and the center", () => {
-  const sp = dayListSearch({ date: "2026-11-24", centerId: "c1", bookedBy: BOOKED_BY_ALL, myStaffId: "me1", includeCancelled: false })
+  const sp = dayListSearch({
+    date: "2026-11-24",
+    centerId: "c1",
+    bookedBy: BOOKED_BY_ALL,
+    myStaffId: "me1",
+    includeCancelled: false,
+  })
   assert.equal(sp.get("date"), "2026-11-24")
   assert.equal(sp.get("centerIds"), "c1")
   assert.equal(sp.has("kind"), false)
@@ -57,17 +64,47 @@ test("the query always names the day and the center", () => {
 
 test("booked by: me sends my staff id, a person sends theirs, all sends none", () => {
   const base = { date: "2026-11-24", includeCancelled: false }
-  assert.equal(dayListSearch({ ...base, bookedBy: BOOKED_BY_ME, myStaffId: "me1" }).get("staffIds"), "me1")
-  assert.equal(dayListSearch({ ...base, bookedBy: "s9", myStaffId: "me1" }).get("staffIds"), "s9")
-  assert.equal(dayListSearch({ ...base, bookedBy: BOOKED_BY_ALL, myStaffId: "me1" }).has("staffIds"), false)
+  assert.equal(
+    dayListSearch({ ...base, bookedBy: BOOKED_BY_ME, myStaffId: "me1" }).get(
+      "staffIds"
+    ),
+    "me1"
+  )
+  assert.equal(
+    dayListSearch({ ...base, bookedBy: "s9", myStaffId: "me1" }).get(
+      "staffIds"
+    ),
+    "s9"
+  )
+  assert.equal(
+    dayListSearch({ ...base, bookedBy: BOOKED_BY_ALL, myStaffId: "me1" }).has(
+      "staffIds"
+    ),
+    false
+  )
 })
 
 test("cartera: sent as portfolioOwnerIds only when it is not All (me = my staff id); booked by stays creator-only", () => {
-  const base = { date: "2026-11-24", includeCancelled: false, bookedBy: BOOKED_BY_ME, myStaffId: "me1" }
+  const base = {
+    date: "2026-11-24",
+    includeCancelled: false,
+    bookedBy: BOOKED_BY_ME,
+    myStaffId: "me1",
+  }
   const none = dayListSearch(base)
   assert.equal(none.has("portfolioOwnerIds"), false)
-  assert.equal(dayListSearch({ ...base, portfolioOwner: BOOKED_BY_ALL }).has("portfolioOwnerIds"), false)
-  assert.equal(dayListSearch({ ...base, portfolioOwner: BOOKED_BY_ME }).get("portfolioOwnerIds"), "me1")
+  assert.equal(
+    dayListSearch({ ...base, portfolioOwner: BOOKED_BY_ALL }).has(
+      "portfolioOwnerIds"
+    ),
+    false
+  )
+  assert.equal(
+    dayListSearch({ ...base, portfolioOwner: BOOKED_BY_ME }).get(
+      "portfolioOwnerIds"
+    ),
+    "me1"
+  )
   const both = dayListSearch({ ...base, portfolioOwner: "s9" })
   assert.equal(both.get("portfolioOwnerIds"), "s9")
   assert.equal(both.get("staffIds"), "me1")
@@ -90,16 +127,41 @@ test("cartera: All never waits; Me waits for me and needs a staff record; a staf
 })
 
 test("the URL keeps the cartera (?owner=), All is left out", () => {
-  const base = { date: "2026-11-24", includeCancelled: false, types: [] }
-  assert.equal(parseDayScreenParams(new URLSearchParams("owner=s9"), "2026-11-25").owner, "s9")
-  assert.equal(parseDayScreenParams(new URLSearchParams(""), "2026-11-25").owner, null)
-  assert.equal(toDayScreenSearch({ ...base, owner: "s9" }), "date=2026-11-24&owner=s9")
-  assert.equal(toDayScreenSearch({ ...base, owner: BOOKED_BY_ALL }), "date=2026-11-24")
-  assert.equal(toDayScreenSearch({ ...base, owner: null }), "date=2026-11-24")
+  const base = {
+    date: "2026-11-24",
+    includeCancelled: false,
+    types: [],
+    clinic: null,
+  }
+  assert.equal(
+    parseDayScreenParams(new URLSearchParams("owner=s9"), "2026-11-25").owner,
+    "s9"
+  )
+  assert.equal(
+    parseDayScreenParams(new URLSearchParams(""), "2026-11-25").owner,
+    null
+  )
+  assert.equal(
+    toDayScreenSearch({ ...base, owner: "s9" }),
+    "date=2026-11-24&owner=s9"
+  )
+  assert.equal(
+    toDayScreenSearch({ ...base, owner: BOOKED_BY_ALL }),
+    "date=2026-11-24"
+  )
+  assert.equal(
+    toDayScreenSearch({ ...base, owner: null, clinic: null }),
+    "date=2026-11-24"
+  )
 })
 
 test("show cancelled asks the backend for cancelled and rescheduled rows", () => {
-  const sp = dayListSearch({ date: "2026-11-24", bookedBy: BOOKED_BY_ALL, myStaffId: null, includeCancelled: true })
+  const sp = dayListSearch({
+    date: "2026-11-24",
+    bookedBy: BOOKED_BY_ALL,
+    myStaffId: null,
+    includeCancelled: true,
+  })
   assert.equal(sp.get("includeCancelled"), "true")
 })
 
@@ -118,16 +180,36 @@ test("before arrival the status is the booking stage", () => {
 })
 
 test("a confirmed row says who confirmed it, or that it came from the call-center sheet", () => {
-  const byPerson = rowStatus(row({ bookingStatus: "confirmed", confirmedVia: "person", confirmedBy: { id: "s2", name: "Luis" } }))
-  assert.deepEqual(byPerson, { stage: "confirmed", confirmation: { via: "person", name: "Luis" } })
-  const bySheet = rowStatus(row({ bookingStatus: "confirmed", confirmedVia: "bridge" }))
+  const byPerson = rowStatus(
+    row({
+      bookingStatus: "confirmed",
+      confirmedVia: "person",
+      confirmedBy: { id: "s2", name: "Luis" },
+    })
+  )
+  assert.deepEqual(byPerson, {
+    stage: "confirmed",
+    confirmation: { via: "person", name: "Luis" },
+  })
+  const bySheet = rowStatus(
+    row({ bookingStatus: "confirmed", confirmedVia: "bridge" })
+  )
   assert.deepEqual(bySheet.confirmation, { via: "bridge", name: null })
-  const unknown = rowStatus(row({ bookingStatus: "confirmed", confirmedVia: null }))
+  const unknown = rowStatus(
+    row({ bookingStatus: "confirmed", confirmedVia: null })
+  )
   assert.equal(unknown.confirmation, null)
 })
 
 test("once arrived the status is the care stage, and arrival never reads as confirmed", () => {
-  const r = rowStatus(row({ bookingStatus: "arrived", careStatus: "in_consultation", confirmedVia: "person", confirmedBy: { id: "s2", name: "Luis" } }))
+  const r = rowStatus(
+    row({
+      bookingStatus: "arrived",
+      careStatus: "in_consultation",
+      confirmedVia: "person",
+      confirmedBy: { id: "s2", name: "Luis" },
+    })
+  )
   assert.deepEqual(r, { stage: "in_consultation", confirmation: null })
 })
 
@@ -139,19 +221,41 @@ test("a row not yet reconciled has no stage", () => {
 
 test("now in a zone: the day and the minute there, not the browser's", () => {
   // 2026-11-25 02:30 UTC is still the 24th at 22:30 in Puerto Rico (UTC-4)
-  assert.deepEqual(nowInZone(new Date("2026-11-25T02:30:00Z"), "America/Puerto_Rico"), { day: "2026-11-24", hhmm: "22:30" })
-  assert.deepEqual(nowInZone(new Date("2026-11-25T14:05:00Z"), "America/Puerto_Rico"), { day: "2026-11-25", hhmm: "10:05" })
+  assert.deepEqual(
+    nowInZone(new Date("2026-11-25T02:30:00Z"), "America/Puerto_Rico"),
+    { day: "2026-11-24", hhmm: "22:30" }
+  )
+  assert.deepEqual(
+    nowInZone(new Date("2026-11-25T14:05:00Z"), "America/Puerto_Rico"),
+    { day: "2026-11-25", hhmm: "10:05" }
+  )
 })
 
 test("today groups: arrived (has a visit), late (time passed), upcoming", () => {
-  assert.equal(todayGroup(row({ bookingStatus: "arrived", careStatus: "waiting", visit: { id: "v", arrivedAt: null } }), "10:00"), "arrived")
+  assert.equal(
+    todayGroup(
+      row({
+        bookingStatus: "arrived",
+        careStatus: "waiting",
+        visit: { id: "v", arrivedAt: null },
+      }),
+      "10:00"
+    ),
+    "arrived"
+  )
   assert.equal(todayGroup(row({ time: "09:00" }), "10:00"), "late")
-  assert.equal(todayGroup(row({ time: "10:00", bookingStatus: "confirmed" }), "10:00"), "upcoming")
+  assert.equal(
+    todayGroup(row({ time: "10:00", bookingStatus: "confirmed" }), "10:00"),
+    "upcoming"
+  )
   assert.equal(todayGroup(row({ time: "11:30" }), "10:00"), "upcoming")
 })
 
 test("a therapy with no time is never late: upcoming until it arrives", () => {
-  assert.equal(todayGroup(row({ kind: "service", time: null }), "23:00"), "upcoming")
+  assert.equal(
+    todayGroup(row({ kind: "service", time: null }), "23:00"),
+    "upcoming"
+  )
 })
 
 test("no-show and cancelled rows are in no group", () => {
@@ -161,26 +265,68 @@ test("no-show and cancelled rows are in no group", () => {
 
 test("the summary counts each group", () => {
   const rows = [
-    row({ id: "a", bookingStatus: "arrived", careStatus: "done", visit: { id: "v", arrivedAt: null } }),
+    row({
+      id: "a",
+      bookingStatus: "arrived",
+      careStatus: "done",
+      visit: { id: "v", arrivedAt: null },
+    }),
     row({ id: "b", time: "08:00" }),
     row({ id: "c", time: "08:30", bookingStatus: "confirmed" }),
     row({ id: "d", time: "12:00" }),
     row({ id: "e", bookingStatus: "no_show" }),
   ]
-  assert.deepEqual(todaySummary(rows, "10:00"), { arrived: 1, late: 2, upcoming: 1 })
+  assert.deepEqual(todaySummary(rows, "10:00"), {
+    arrived: 1,
+    late: 2,
+    upcoming: 1,
+  })
 })
 
 // ---- URL ------------------------------------------------------------------------------------------
 
 test("the URL keeps the day and show-cancelled; a bad day falls back", () => {
-  const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&cancelled=1"), "2026-11-25")
-  assert.deepEqual(p, { date: "2026-11-24", includeCancelled: true, types: [], owner: null })
-  const bad = parseDayScreenParams(new URLSearchParams("date=24-11"), "2026-11-25")
-  assert.deepEqual(bad, { date: "2026-11-25", includeCancelled: false, types: [], owner: null })
-  assert.equal(toDayScreenSearch({ date: "2026-11-24", includeCancelled: false, types: [], owner: null }), "date=2026-11-24")
+  const p = parseDayScreenParams(
+    new URLSearchParams("date=2026-11-24&cancelled=1"),
+    "2026-11-25"
+  )
+  assert.deepEqual(p, {
+    date: "2026-11-24",
+    includeCancelled: true,
+    types: [],
+    owner: null,
+    clinic: null,
+  })
+  const bad = parseDayScreenParams(
+    new URLSearchParams("date=24-11"),
+    "2026-11-25"
+  )
+  assert.deepEqual(bad, {
+    date: "2026-11-25",
+    includeCancelled: false,
+    types: [],
+    owner: null,
+    clinic: null,
+  })
   assert.equal(
-    toDayScreenSearch({ date: "2026-11-24", includeCancelled: true, types: [], owner: null }),
-    "date=2026-11-24&cancelled=1",
+    toDayScreenSearch({
+      date: "2026-11-24",
+      includeCancelled: false,
+      types: [],
+      owner: null,
+      clinic: null,
+    }),
+    "date=2026-11-24"
+  )
+  assert.equal(
+    toDayScreenSearch({
+      date: "2026-11-24",
+      includeCancelled: true,
+      types: [],
+      owner: null,
+      clinic: null,
+    }),
+    "date=2026-11-24&cancelled=1"
   )
 })
 
@@ -226,7 +372,7 @@ test("type options: the active medical types, then the services, each group by n
       ["medical", "tS", "Seguimiento", false],
       ["service", "sL", "Láser", false],
       ["service", "sV", "Vitamina C", false],
-    ],
+    ]
   )
 })
 
@@ -236,29 +382,49 @@ test("picked types: none picked never waits; a pick waits for the options; a fai
   assert.deepEqual(pickedTypes(["tN"], []), [])
   assert.deepEqual(
     pickedTypes(["sL", "gone", "tN"], OPTIONS)?.map((o) => o.id),
-    ["tN", "sL"],
+    ["tN", "sL"]
   )
 })
 
 test("the query sends the picked medical types and services as comma lists; none picked sends neither", () => {
-  const base = { date: "2026-11-24", bookedBy: BOOKED_BY_ALL, myStaffId: null, includeCancelled: false }
+  const base = {
+    date: "2026-11-24",
+    bookedBy: BOOKED_BY_ALL,
+    myStaffId: null,
+    includeCancelled: false,
+  }
   const none = dayListSearch({ ...base, picked: [] })
   assert.equal(none.has("appointmentTypeIds"), false)
   assert.equal(none.has("serviceIds"), false)
-  const onlyServices = dayListSearch({ ...base, picked: pickedTypes(["sL", "sV"], OPTIONS) ?? [] })
+  const onlyServices = dayListSearch({
+    ...base,
+    picked: pickedTypes(["sL", "sV"], OPTIONS) ?? [],
+  })
   assert.equal(onlyServices.get("serviceIds"), "sL,sV")
   assert.equal(onlyServices.has("appointmentTypeIds"), false)
-  const mix = dayListSearch({ ...base, picked: pickedTypes(["tS", "sV"], OPTIONS) ?? [] })
+  const mix = dayListSearch({
+    ...base,
+    picked: pickedTypes(["tS", "sV"], OPTIONS) ?? [],
+  })
   assert.equal(mix.get("appointmentTypeIds"), "tS")
   assert.equal(mix.get("serviceIds"), "sV")
 })
 
 test("the URL keeps the picked types (?types=a,b), deduplicated", () => {
-  const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&types=tS,sV,,tS"), "2026-11-25")
+  const p = parseDayScreenParams(
+    new URLSearchParams("date=2026-11-24&types=tS,sV,,tS"),
+    "2026-11-25"
+  )
   assert.deepEqual(p.types, ["tS", "sV"])
   assert.equal(
-    toDayScreenSearch({ date: "2026-11-24", includeCancelled: false, types: ["tS", "sV"], owner: null }),
-    "date=2026-11-24&types=tS,sV",
+    toDayScreenSearch({
+      date: "2026-11-24",
+      includeCancelled: false,
+      types: ["tS", "sV"],
+      owner: null,
+      clinic: null,
+    }),
+    "date=2026-11-24&types=tS,sV"
   )
 })
 
@@ -297,4 +463,57 @@ test("KPIs: arrived = booking stage arrived (not served included); cancelled and
   ]
   assert.deepEqual(dayKpis(rows), { booked: 4, confirmed: 1, arrived: 2 })
   assert.deepEqual(dayKpis([]), { booked: 0, confirmed: 0, arrived: 0 })
+})
+
+// ---- clinic and type badge -------------------------------------------------------------------------
+
+test("the URL keeps one clinic (?clinic=, or ?centro= from older links); none = every clinic", () => {
+  assert.equal(
+    parseDayScreenParams(new URLSearchParams("clinic=c1"), "2026-11-25").clinic,
+    "c1"
+  )
+  assert.equal(
+    parseDayScreenParams(new URLSearchParams("centro=c2"), "2026-11-25").clinic,
+    "c2"
+  )
+  assert.equal(
+    parseDayScreenParams(new URLSearchParams(""), "2026-11-25").clinic,
+    null
+  )
+  const base = {
+    date: "2026-11-24",
+    includeCancelled: false,
+    types: [],
+    owner: null,
+  }
+  assert.equal(
+    toDayScreenSearch({ ...base, clinic: "c1" }),
+    "date=2026-11-24&clinic=c1"
+  )
+  assert.equal(toDayScreenSearch({ ...base, clinic: null }), "date=2026-11-24")
+})
+
+test("every clinic sends no centerIds; one clinic sends it", () => {
+  const base = {
+    date: "2026-11-24",
+    bookedBy: BOOKED_BY_ALL,
+    myStaffId: null,
+    includeCancelled: false,
+  }
+  assert.equal(dayListSearch(base).has("centerIds"), false)
+  assert.equal(
+    dayListSearch({ ...base, centerId: "c1" }).get("centerIds"),
+    "c1"
+  )
+})
+
+test("type badge: new, follow-up, or the therapy's service", () => {
+  assert.deepEqual(typeBadge(row({ isNewPatientType: true })), { kind: "new" })
+  assert.deepEqual(typeBadge(row({ isNewPatientType: false })), {
+    kind: "followUp",
+  })
+  assert.deepEqual(typeBadge(row({ kind: "service", serviceName: "Láser" })), {
+    kind: "therapy",
+    label: "Láser",
+  })
 })

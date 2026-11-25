@@ -1,32 +1,39 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import * as React from "react"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
 
-import { Badge } from "@/components/ui/badge";
-import { DataTable, type Column } from "@/components/kit/data-table";
-import { StatusBadge } from "@/components/kit/status-badge";
-import { DayRowActions } from "@/components/appointments-day/day-row-actions";
-import type { ResourceState } from "@/hooks/use-resource";
-import type { DayListRow } from "@/lib/api/appointments-day";
-import { rowStatus, todayGroup } from "@/lib/appointments-day/day-list";
+import { Badge } from "@/components/ui/badge"
+import { DataTable, type Column } from "@/components/kit/data-table"
+import { StatusBadge } from "@/components/kit/status-badge"
+import { DayRowActions } from "@/components/appointments-day/day-row-actions"
+import type { ResourceState } from "@/hooks/use-resource"
+import type { DayListRow } from "@/lib/api/appointments-day"
+import {
+  rowStatus,
+  todayGroup,
+  typeBadge,
+} from "@/lib/appointments-day/day-list"
 
 // The day's appointments of both kinds, one row each, in the backend's order (time, no-time last).
 // In today mode a row not arrived whose time has passed carries a "Late" mark next to its status.
 export function DayTable({
+  clinicNames,
   state,
   nowHHmm,
   onReload,
   onChanged,
 }: {
-  state: ResourceState<DayListRow[]>;
+  /** Shown as a Clinic column when the list covers several clinics; null = one clinic, no column. */
+  clinicNames: Map<string, string> | null
+  state: ResourceState<DayListRow[]>
   /** Center time (HH:mm) when the day shown is today; null for any other day. */
-  nowHHmm: string | null;
-  onReload: () => void;
-  onChanged: () => void;
+  nowHHmm: string | null
+  onReload: () => void
+  onChanged: () => void
 }) {
-  const t = useTranslations("appointmentsDay");
+  const t = useTranslations("appointmentsDay")
 
   const columns: Column<DayListRow>[] = [
     {
@@ -40,7 +47,10 @@ export function DayTable({
       key: "patient",
       header: t("col.patient"),
       cell: (r) => (
-        <Link href={`/patients/${encodeURIComponent(r.patient.id)}`} className="font-medium hover:underline">
+        <Link
+          href={`/patients/${encodeURIComponent(r.patient.id)}`}
+          className="font-medium hover:underline"
+        >
           {r.patient.name ?? "—"}
         </Link>
       ),
@@ -48,13 +58,30 @@ export function DayTable({
     {
       key: "type",
       header: t("col.type"),
-      cell: (r) => (
-        <span className="flex flex-wrap items-center gap-1.5">
-          <span>{r.typeLabel ?? r.serviceName ?? "—"}</span>
-          {r.kind === "medical" && r.isNewPatientType && <Badge variant="info">{t("type.new")}</Badge>}
-        </span>
-      ),
+      cell: (r) => {
+        const b = typeBadge(r)
+        if (b.kind === "therapy")
+          return <Badge variant="outline">{b.label ?? t("type.therapy")}</Badge>
+        return (
+          <Badge variant={b.kind === "new" ? "info" : "secondary"}>
+            {t(`type.${b.kind}`)}
+          </Badge>
+        )
+      },
     },
+    ...(clinicNames
+      ? [
+          {
+            key: "clinic",
+            header: t("col.clinic"),
+            cell: (r: DayListRow) => (
+              <span className="whitespace-nowrap">
+                {clinicNames.get(r.centerId) ?? "—"}
+              </span>
+            ),
+          },
+        ]
+      : []),
     {
       key: "bookedBy",
       header: t("col.bookedBy"),
@@ -80,7 +107,7 @@ export function DayTable({
       align: "right",
       cell: (r) => <DayRowActions row={r} onChanged={onChanged} />,
     },
-  ];
+  ]
 
   return (
     <DataTable
@@ -90,13 +117,19 @@ export function DayTable({
       onReload={onReload}
       labels={{ empty: t("empty") }}
     />
-  );
+  )
 }
 
-function DayStatusCell({ row, nowHHmm }: { row: DayListRow; nowHHmm: string | null }) {
-  const t = useTranslations("appointmentsDay.status");
-  const { stage, confirmation } = rowStatus(row);
-  const late = nowHHmm !== null && todayGroup(row, nowHHmm) === "late";
+function DayStatusCell({
+  row,
+  nowHHmm,
+}: {
+  row: DayListRow
+  nowHHmm: string | null
+}) {
+  const t = useTranslations("appointmentsDay.status")
+  const { stage, confirmation } = rowStatus(row)
+  const late = nowHHmm !== null && todayGroup(row, nowHHmm) === "late"
   return (
     <div className="flex flex-col items-start gap-1">
       <span className="flex flex-wrap items-center gap-1.5">
@@ -113,5 +146,5 @@ function DayStatusCell({ row, nowHHmm }: { row: DayListRow; nowHHmm: string | nu
         </span>
       )}
     </div>
-  );
+  )
 }

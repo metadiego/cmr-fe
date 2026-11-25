@@ -7357,13 +7357,17 @@
   },
   "appointmentsDay": {
     "title": "Appointments",
-    "live": "Live",
-    "offline": "Not live",
     "prevDay": "Previous day",
     "nextDay": "Next day",
     "today": "Today",
     "type": {
-      "new": "New"
+      "new": "New",
+      "followUp": "Follow-up",
+      "therapy": "Therapy"
+    },
+    "clinic": {
+      "label": "Clinic",
+      "all": "All"
     },
     "typeFilter": {
       "label": "Type",
@@ -7392,6 +7396,7 @@
     },
     "col": {
       "time": "Time",
+      "clinic": "Clinic",
       "patient": "Patient",
       "type": "Type",
       "bookedBy": "Booked by",
