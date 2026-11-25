@@ -322,6 +322,7 @@ export function ServiceSessionsTable({
                   onProgramar={onSchedule}
                   onEhrGate={onEhrGate}
                   onPackageGate={onPackageGate}
+                  drawFromAllowedActions
                 />
               ))}
             </tbody>

@@ -1505,7 +1505,7 @@
     "resources": "Resources",
     "center": "Center",
     "clientes": "Patients",
-    "citas": "Appointments",
+    "citas": "Book appointment",
     "alertas": "Alerts",
     "atencion": "Patient care",
     "therapyDay": "Plan therapies",
@@ -1619,7 +1619,8 @@
     "paymentMethods": "Payment methods",
     "inventory_daily_kardex": "Daily kardex",
     "inventory_adjustments": "Adjustments",
-    "inventoryBackdate": "Backdated adjustments"
+    "inventoryBackdate": "Backdated adjustments",
+    "appointmentsDay": "Appointments"
   },
   "admin": {
     "title": "Administration",
@@ -6938,7 +6939,7 @@
     }
   },
   "appointmentsBooking": {
-    "title": "Appointments",
+    "title": "Book appointment",
     "settings": "Settings",
     "loading": "Loading…",
     "loadFailed": "Could not load: {message}",
@@ -7300,9 +7301,11 @@
     "whyOverbook": "At {time} it does not all fit ({reason}). Booking it anyway is an overbooking.",
     "whyBlocked": "{time} cannot be booked ({reason}).",
     "useTime": "Use {time}, free",
-    "notThisDay": "Not on this day:"
+    "notThisDay": "Not on this day:",
+    "bornConfirmed": "Book as confirmed"
   },
   "lifecycle": {
+    "bookedUnconfirmed": "Appointment booked unconfirmed: you can't confirm in this center. It needs confirming before it shows on the care board.",
     "action": {
       "confirm": "Confirm",
       "unconfirm": "Unconfirm",
@@ -7335,6 +7338,94 @@
       "reasonRequired": "This action needs a reason.",
       "stale": "Someone else just changed this record. Reload and try again.",
       "futureDate": "A no-show can only be recorded for today or a past date ({fecha})."
+    },
+    "stage": {
+      "booked": "Booked",
+      "confirmed": "Confirmed",
+      "arrived": "Arrived",
+      "cancelled": "Cancelled",
+      "no_show": "No-show",
+      "rescheduled": "Rescheduled",
+      "waiting": "Waiting",
+      "triage": "Triage",
+      "in_consultation": "In consultation",
+      "called": "Called",
+      "in_therapy": "In therapy",
+      "done": "Done",
+      "not_served": "Left without being served"
+    }
+  },
+  "appointmentsDay": {
+    "title": "Appointments",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
+    "today": "Today",
+    "type": {
+      "new": "New",
+      "followUp": "Follow-up",
+      "therapy": "Therapy"
+    },
+    "clinic": {
+      "label": "Clinic",
+      "all": "All"
+    },
+    "typeFilter": {
+      "label": "Type",
+      "any": "All",
+      "count": "{count} types",
+      "medical": "Consultations",
+      "therapies": "Therapies",
+      "clear": "Clear filter",
+      "empty": "No types"
+    },
+    "bookedBy": {
+      "label": "Booked by",
+      "me": "Me",
+      "all": "Everyone"
+    },
+    "owner": {
+      "label": "Portfolio"
+    },
+    "showCancelled": "Show cancelled",
+    "kpi": {
+      "booked": "Booked",
+      "confirmed": "Confirmed",
+      "arrived": "Arrived",
+      "late": "Not arrived (late)",
+      "upcoming": "Upcoming"
+    },
+    "col": {
+      "time": "Time",
+      "clinic": "Clinic",
+      "patient": "Patient",
+      "type": "Type",
+      "bookedBy": "Booked by",
+      "status": "Status",
+      "confirm": "Confirm",
+      "actions": "Actions"
+    },
+    "empty": "No appointments for this day with these filters.",
+    "portfolio": "Portfolio: {name}",
+    "loadFailed": "Could not open the appointment: {message}",
+    "status": {
+      "late": "Late (not arrived)",
+      "confirmedBy": "Confirmed · by {name}",
+      "confirmedSheet": "Confirmed · call-center sheet",
+      "confirmedImport": "Confirmed · imported from the old system"
+    },
+    "actions": {
+      "menu": "Appointment actions",
+      "done": "Done.",
+      "change": "Change",
+      "bookAnother": "Book another appointment",
+      "openPatient": "Open patient"
+    },
+    "move": {
+      "title": "Move the therapy",
+      "date": "New day",
+      "time": "Time",
+      "timeHint": "Optional. Leave empty to keep the current time.",
+      "submit": "Move"
     }
   }
 }

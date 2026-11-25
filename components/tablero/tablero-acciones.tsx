@@ -9,7 +9,8 @@ import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { boardActionMissing } from "@/lib/board/board-action-missing";
-import { boardActionView, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
+import { availableTransitions } from "@/lib/board/available-transitions";
+import { refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 import { todayPR } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
@@ -36,9 +37,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Declarative action menu for a board row: buttons come from the tablero's
-// `transiciones` (filtered by state + permission), and the required payload
-// fields come from `transicion.requiere`. Executes via POST /tablero/accion.
+// Declarative action menu for a board row: buttons come from the tablero's `transiciones`, drawn from
+// the row's `allowedActions` when it carries them (cmr-be 4a) and by state + permission otherwise
+// (lib/board/available-transitions.ts). The required payload fields come from `formFields`. Executes
+// via POST /board/action with the transition's slug (the backend accepts slugs and action keys).
 export function TableroAcciones({
   tablero,
   entidadId,
@@ -46,6 +48,7 @@ export function TableroAcciones({
   estados,
   transiciones,
   centroId,
+  allowedActions,
   fecha,
   onDone,
 }: {
@@ -55,7 +58,9 @@ export function TableroAcciones({
   estados: EstadoCitaCatalogo[];
   transiciones: Transicion[];
   centroId?: string;
-  /** The row's day (YYYY-MM-DD): No-show is not offered for a day that has not come. */
+  /** The row's `allowedActions`; null/undefined when the row does not carry them. */
+  allowedActions?: readonly string[] | null;
+  /** The row's day (YYYY-MM-DD): without the list, No-show is not offered for a day that has not come. */
   fecha?: string;
   onDone: () => void;
 }) {
@@ -89,15 +94,14 @@ export function TableroAcciones({
   );
 
   const isTerminal = estados.find((e) => e.slug === estado)?.isTerminal ?? false;
-  const available = transiciones
-    .filter((tr) => tr.active !== false)
-    .filter((tr) => !tr.permissionSlug || can(tr.permissionSlug))
-    .filter((tr) => tr.fromStatuses.includes(estado) || (tr.fromStatuses.length === 0 && !isTerminal))
-    // Cancel and No-show follow the backend's catalogue (Cancel on an arrived row = "not served").
-    .map((tr) => ({ tr, view: boardActionView(tr.slug, tr.labelKey, estado, fecha, todayPR()) }))
-    .filter(({ view }) => view.visible)
-    .map(({ tr, view }) => ({ ...tr, labelKey: view.labelKey }))
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const available = availableTransitions(transiciones, {
+    status: estado,
+    isTerminal,
+    allowed: allowedActions ?? null,
+    can,
+    date: fecha,
+    today: todayPR(),
+  });
 
   if (available.length === 0) return null;
 

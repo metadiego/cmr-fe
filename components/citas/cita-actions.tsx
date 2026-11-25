@@ -7,6 +7,7 @@ import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import {
   confirmarCita,
+  unconfirmCita,
   presenteCita,
   noShowCita,
   cancelarCita,
@@ -14,7 +15,6 @@ import {
   getTiposCita,
   getHistorial,
   type Cita,
-  type EstadoCita,
   type TipoCita,
   type CitaEvento,
 } from "@/lib/api/citas";
@@ -26,8 +26,9 @@ import { slotAvailability } from "@/lib/agenda/slot-availability";
 import { cancelMissing } from "@/lib/citas/cancel-missing";
 import { rescheduleMissing, type RescheduleField } from "@/lib/citas/reschedule-missing";
 import { citaBlockingCode } from "@/lib/api/cita-errors";
-import { cancelMeaning, noShowAllowed, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
+import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 import { apiErrorLabel } from "@/lib/api/errors";
+import { appointmentMenuFor } from "@/lib/lifecycle/allowed-actions";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
@@ -62,27 +63,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-// Scheduling-flow actions allowed from each state (slice 2). Clinical states
-// (triage/en_consulta → vitals/consult) are handled in slice 3. Cancel and No-show are further narrowed by
-// the backend's catalogue (lib/lifecycle/board-action-rules.ts): Cancel on an arrived patient records
-// "not served", and the backend refuses it in consultation.
-const ACTIONS: Record<EstadoCita, string[]> = {
-  programada: ["confirmar", "reagendar", "noShow", "cancelar"],
-  confirmada: ["presente", "reagendar", "noShow", "cancelar"],
-  presente: ["cancelar"],
-  triage: ["cancelar"],
-  en_consulta: [],
-  atendida: [],
-  no_show: [],
-  cancelada: [],
-  reprogramada: [],
-};
-
 export function CitaActions({
   cita,
+  allowedActions,
   onChanged,
 }: {
   cita: Cita;
+  /** The row's `allowedActions` (cmr-be 4a) when the caller has them (a board or day-list row): the menu
+   * is drawn from them. Without them (an entity read: booking screen, calendar, day view, board modal),
+   * the status rules of piece 3 decide (lib/lifecycle/allowed-actions.ts `appointmentMenuFor`). */
+  allowedActions?: string[] | null;
   onChanged: () => void;
 }) {
   const t = useTranslations("appointments.actions");
@@ -123,13 +113,15 @@ export function CitaActions({
   );
 
   const tRoot = useTranslations();
-  const actions = (ACTIONS[cita.status] ?? []).filter(
-    (a) =>
-      (a !== "confirmar" || can("appointments.confirm")) &&
-      (a !== "noShow" || noShowAllowed(cita.status, cita.date, todayPR())),
-  );
+  const actions = appointmentMenuFor({
+    status: cita.status,
+    date: cita.date,
+    today: todayPR(),
+    allowed: allowedActions,
+    canConfirm: can("appointments.confirm"),
+  });
   // Cancel on an arrived patient is "arrived, not served": same dialog and reason, its own words.
-  const notServe = cancelMeaning(cita.status) === "not_serve";
+  const notServe = cancelMeaning(cita.status, allowedActions) === "not_serve";
   const cancelLabel = notServe ? tRoot("lifecycle.action.not_serve") : t("cancelar");
   // Show the menu whenever the user can act OR at least view history.
   if (!can("citas.update") && !can("citas.read")) return null;
@@ -157,6 +149,11 @@ export function CitaActions({
           {actions.includes("confirmar") && (
             <DropdownMenuItem onSelect={() => void run(() => confirmarCita(cita.id, centroId))}>
               {t("confirmar")}
+            </DropdownMenuItem>
+          )}
+          {actions.includes("unconfirm") && (
+            <DropdownMenuItem onSelect={() => void run(() => unconfirmCita(cita.id, centroId))}>
+              {tRoot("lifecycle.action.unconfirm")}
             </DropdownMenuItem>
           )}
           {actions.includes("presente") && (

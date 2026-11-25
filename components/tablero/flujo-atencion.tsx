@@ -13,6 +13,7 @@ import { resolveToggle } from "@/lib/tablero/toggle-hora";
 import { isEhrEnabled, getEhrReadiness, type EhrReadinessField } from "@/lib/api/ehr-integration";
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
+import { readAllowedActions } from "@/lib/lifecycle/allowed-actions";
 import { cn } from "@/lib/utils";
 
 export type PostAccionCtx = { fila: CitaFila; accion: string; render: Record<string, unknown> | null };
@@ -111,6 +112,8 @@ export function FlujoAtencion({
       estados,
       optimistic: opt[col.clave],
       busy: busy === col.clave,
+      // The row's allowedActions (cmr-be 4a), when it carries them: the backend's decision for this user.
+      allowed: readAllowedActions(fila),
     });
 
   // Orden de la cadena = orden del estado destino de cada etapa (dato, no la

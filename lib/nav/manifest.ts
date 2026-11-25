@@ -48,6 +48,10 @@ export type NavEntry = {
 
 export const NAV_MANIFEST: NavEntry[] = [
   // Scheduling
+  // Citas: what is already booked for a day (piece 4 of the appointment lifecycle,
+  // docs/specs/citas-day-screen.md). Seeded by the BE as `appointments-day` (hand-off); above "Agendar cita".
+  { clave: "appointments-day", route: "/scheduling/booked", group: "scheduling", order: 0.5 },
+  // "Agendar cita" (labelKey nav.citas): the booking screen. Its clave and route stay so every link works.
   { clave: "citas", route: "/scheduling/appointments", group: "scheduling", order: 1 },
   { clave: "cupos", route: "/scheduling/slots", group: "scheduling", order: 2 },
   { clave: "calendario", route: "/scheduling/calendar", group: "scheduling", order: 3 },

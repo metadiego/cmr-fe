@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
-import { cancelarSesion } from "@/lib/api/frontdesk";
+import { cancelarSesion, confirmSession, unconfirmSession } from "@/lib/api/frontdesk";
+import { confirmToggle } from "@/lib/lifecycle/allowed-actions";
 import { useCan } from "@/hooks/use-can";
 import { ChangeLogSheet } from "@/components/change-log/change-log-sheet";
 import { cancelPatientDay, reopenPatientDay, reopenSession } from "@/lib/api/frontdesk-day";
@@ -39,6 +40,7 @@ import {
 // actions, cancel and repair (admin). The BE decides which transitions apply; this only lists them
 // and confirms the ones that ask for it.
 export function RowMenu({
+  allowedActions,
   disabled,
   cancelada,
   canReparar,
@@ -54,6 +56,9 @@ export function RowMenu({
   onDone,
   onReparar,
 }: {
+  /** The row's `allowedActions` (live Patient desk, cmr-be 4a): Cancel / not-served and Confirm /
+   * Unconfirm follow it. null/undefined: today's rule (Cancel on any open session, no confirm). */
+  allowedActions?: readonly string[] | null;
   disabled: boolean;
   cancelada: boolean;
   canReparar: boolean;
@@ -112,10 +117,18 @@ export function RowMenu({
     },
   });
   const missing = sessionReasonMissing({ reason: motivo }).map(() => t("motivo"));
-  // The backend's catalogue: Cancel on an arrived, waiting session records "not served"; in therapy or
-  // attended it is refused (the way back is Unattend, then this).
-  const meaning = cancelMeaning(day.status);
+  // Cancel follows the row's list when it carries one (cmr-be 4a); without it, the piece-3 catalogue:
+  // on an arrived, waiting session it records "not served"; in therapy or attended it is refused (the
+  // way back is Unattend, then this).
+  const meaning = cancelMeaning(day.status, allowedActions);
+  const showCancel = (allowedActions ? true : !cancelada) && meaning !== null;
   const cancelLabel = meaning === "not_serve" ? tRoot("lifecycle.action.not_serve") : t("cancelar");
+  const toggle = confirmToggle(allowedActions);
+  const confirmMove = (move: "confirm" | "unconfirm") =>
+    act(async () => {
+      await (move === "confirm" ? confirmSession : unconfirmSession)(day.sessionId, day.centerId);
+      return tRoot("common.saved");
+    });
   const cancel = (mode: "one" | "all", reason: string) =>
     act(async () => {
       if (mode === "one") {
@@ -169,6 +182,11 @@ export function RowMenu({
               {t("reopenAll")}
             </DropdownMenuItem>
           )}
+          {toggle && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); confirmMove(toggle); }}>
+              {tRoot(`lifecycle.action.${toggle}`)}
+            </DropdownMenuItem>
+          )}
           {acciones.map((a) => (
             <DropdownMenuItem
               key={a.clave}
@@ -196,7 +214,7 @@ export function RowMenu({
               {tRoot("changeLog.title")}
             </DropdownMenuItem>
           )}
-          {!cancelada && meaning !== null && (
+          {showCancel && (
             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("one"); }}>
               {cancelLabel}
             </DropdownMenuItem>

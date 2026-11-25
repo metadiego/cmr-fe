@@ -1,7 +1,8 @@
 // What the backend's action catalogue (cmr-be piece 3) allows for Cancel and No-show, by the row's old
 // status. The backend is the gate (it answers LIFECYCLE_ACTION_NOT_ALLOWED); this only keeps the screens
-// from offering a button the backend refuses, and names Cancel for what it does. Piece 4 replaces it with
-// the row's `allowedActions`. Hand-off: docs/specs/appointment-actions-board.md.
+// from offering a button the backend refuses, and names Cancel for what it does. Piece 4a adds the row's
+// `allowedActions` (lib/lifecycle/allowed-actions.ts): a row that carries the list is drawn from it, and
+// these status rules only apply to a row without it. Hand-off: docs/specs/appointment-actions-board.md.
 //
 // The old statuses mean the same stage in both kinds (medical appointments and therapy sessions), so one
 // table serves both: `presente` is arrived and waiting (or called, therapy), `triage` is medical only.
@@ -26,8 +27,17 @@ const NO_CANCEL = new Set([
 /** Booked or confirmed, never arrived: the only statuses No-show starts from (medical). */
 const BEFORE_ARRIVAL = new Set(["programada", "confirmada"])
 
-/** Cancel's meaning for a row in `status`. An unknown status keeps the plain Cancel: the backend decides. */
-export function cancelMeaning(status: string): CancelMeaning {
+/**
+ * Cancel's meaning for a row in `status`. When the row carries its `allowedActions` (cmr-be 4a) the list
+ * decides; without it, the status table above does. An unknown status keeps the plain Cancel: the backend
+ * decides.
+ */
+export function cancelMeaning(status: string, allowed?: readonly string[] | null): CancelMeaning {
+  if (allowed) {
+    if (allowed.includes("not_serve")) return "not_serve"
+    if (allowed.includes("cancel")) return "cancel"
+    return null
+  }
   if (NO_CANCEL.has(status)) return null
   if (ARRIVED_WAITING.has(status)) return "not_serve"
   return "cancel"

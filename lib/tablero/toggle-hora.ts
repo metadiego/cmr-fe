@@ -1,4 +1,5 @@
 import type { Transicion } from "@/lib/api/tablero";
+import { slugOffered } from "../lifecycle/allowed-actions.ts";
 
 export type EstadoLite = { clave: string; orden: number };
 
@@ -25,8 +26,12 @@ export function resolveToggle(params: {
   estados: EstadoLite[];
   optimistic?: boolean;
   busy?: boolean;
+  // The row's `allowedActions` (cmr-be piece 4a). When the row carries it, a move is offered only if
+  // listed (date rules and the per-center permission included); without it, today's rule decides.
+  allowed?: readonly string[] | null;
 }): ToggleResuelto {
-  const { estado, forwardSlug, transiciones, estados, optimistic, busy } = params;
+  const { estado, forwardSlug, transiciones, estados, optimistic, busy, allowed } = params;
+  const listed = (slug: string | undefined) => !slug || slugOffered(slug, allowed) !== false;
   const ordenOf = (clave: string | null) =>
     estados.find((e) => e.clave === clave)?.orden ?? 0;
 
@@ -53,10 +58,11 @@ export function resolveToggle(params: {
   const canCheck =
     !checked &&
     !!forward &&
-    (forward.fromStatuses.length === 0 || forward.fromStatuses.includes(estado));
+    (forward.fromStatuses.length === 0 || forward.fromStatuses.includes(estado)) &&
+    listed(forward.slug);
   // LIFO: solo se desmarca la ÚLTIMA etapa activa (estado === destino de esta casilla).
   const isLast = !!forward && estado === destino;
-  const canUncheck = checked && isLast && !!back;
+  const canUncheck = checked && isLast && !!back && listed(back.slug);
   const disabled = !!busy || (!checked && !canCheck) || (checked && !canUncheck);
 
   // La acción se RECOMPUTA aquí (no "checked ? back : forward" a secas): una casilla que no puede ni
