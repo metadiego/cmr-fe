@@ -151,7 +151,7 @@ screen should read them right.
   confirmation by 428 + `X-Confirm-Action: frontdesk.undo_present`.
 - Undo answers `undone` (not `arrived`); rows it never targets are `skipped`, not `failed`.
 - Check-in `date` only as `YYYY-MM-DD`.
-- Menu key `appointments-day`, label `nav.appointmentsDay` (first seeded as `booked-appointments`).
+- Menu key `appointments-day`, label `nav.appointmentsDay` (the backend branch first named it `booked-appointments`; never seeded).
 - End of day: each day once, catch-up of missed days, `releasePresent` honoured, sheet seats kept.
 
 ## 7. Files to change (live screens only)
