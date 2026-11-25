@@ -114,9 +114,8 @@ export function DayTable({
     },
     {
       key: "actions",
-      header: <span className="sr-only">{t("col.actions")}</span>,
-      align: "right",
-      className: "w-12",
+      header: t("col.actions"),
+      className: "w-24",
       cell: (r) => <DayRowActions row={r} onChanged={onChanged} />,
     },
   ]
