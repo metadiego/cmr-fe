@@ -16,7 +16,9 @@ export type EmbeddedPatient = { id: string; medicalRecordNumber: string | null; 
 // Service session (frontdesk). Day-based (no hora/horaFin). `patient` viene adjunto (ver EmbeddedPatient),
 // opcional en el tipo porque el schema aún no lo declara, pero el API ya lo manda (verificado prod 29-sep).
 export type Sesion = components["schemas"]["FrontdeskSesionEntity"] & { patient?: EmbeddedPatient | null; clinicName?: string | null };
-export type CreateSesionPayload = components["schemas"]["CreateSesionDto"];
+// `confirmed` (cmr-be 4a, typed by hand until gen:api runs against 4a): born booked and confirmed; needs
+// `appointments.confirm` in the target center. Ignored by the backend for a session born present.
+export type CreateSesionPayload = components["schemas"]["CreateSesionDto"] & { confirmed?: boolean };
 export type EstadoSesion = Sesion["status"];
 
 function asArray<T>(res: unknown): T[] {
@@ -116,7 +118,7 @@ export async function agendarMultiple(
 export type BookMultipleResult = { creadas: Sesion[]; omitidas: number; aviso: unknown | null };
 export async function agendarVariosServicios(
   // Handoff citar-varios-servicios / citar-marcar-los-servicios-con-saldo.
-  payload: { patientId: string; serviceIds: string[]; dates: string[]; time?: string },
+  payload: { patientId: string; serviceIds: string[]; dates: string[]; time?: string; confirmed?: boolean },
   centroId?: string,
 ): Promise<ConWarnings<BookMultipleResult> & { advertencias: ApiWarning[] }> {
   const env = await apiFetchEnvelope<BookMultipleResultRaw<Sesion>>(`/frontdesk/sessions/book-multiple`, {
@@ -275,6 +277,15 @@ export function marcarTransicion(
     { method: "POST", body: JSON.stringify(payload) },
     centroId,
   );
+}
+
+// Confirm / unconfirm a therapy session (cmr-be 4a, permission `appointments.confirm` in the session's
+// center). No body; both answer the bare session.
+export function confirmSession(sessionId: string, centroId?: string): Promise<Sesion> {
+  return apiFetch<Sesion>(`/frontdesk/sessions/${sessionId}/confirm`, { method: "POST" }, centroId);
+}
+export function unconfirmSession(sessionId: string, centroId?: string): Promise<Sesion> {
+  return apiFetch<Sesion>(`/frontdesk/sessions/${sessionId}/unconfirm`, { method: "POST" }, centroId);
 }
 
 export function cancelarSesion(sesionId: string, motivo: string, centroId?: string): Promise<Sesion> {

@@ -2,6 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 
 import {
+  appointmentMenu,
   cancelMeaning,
   confirmToggle,
   readAllowedActions,
@@ -78,4 +79,17 @@ test("a stale or no-longer-allowed refusal refreshes the row; other errors do no
   assert.equal(refusalRefreshesRow({ code: "LIFECYCLE_REASON_REQUIRED" }), false)
   assert.equal(refusalRefreshesRow(new Error("x")), false)
   assert.equal(refusalRefreshesRow(null), false)
+})
+
+test("the appointment menu (CitaActions) is drawn from the list, in its own order", () => {
+  assert.deepEqual(appointmentMenu(["confirm", "check_in", "no_show", "cancel", "reschedule"]), [
+    "confirmar",
+    "presente",
+    "reagendar",
+    "noShow",
+    "cancelar",
+  ])
+  assert.deepEqual(appointmentMenu(["unconfirm", "check_in"]), ["unconfirm", "presente"])
+  assert.deepEqual(appointmentMenu(["not_serve", "start_triage"]), ["cancelar"])
+  assert.deepEqual(appointmentMenu([]), [])
 })

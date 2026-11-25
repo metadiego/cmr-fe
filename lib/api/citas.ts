@@ -18,7 +18,10 @@ export type Cita = components["schemas"]["CitaEntity"] & {
   doctorName?: string | null;
   clinicName?: string | null;
 };
-export type CreateCitaPayload = components["schemas"]["CreateCitaDto"];
+// `confirmed` (cmr-be piece 4a, hand-off appointment-lifecycle-switch-fe.md §4) is typed by hand until
+// `gen:api` runs against a backend with 4a: true = born confirmed, needs `appointments.confirm` in the
+// center the row is created in (403 otherwise). It replaces sending `status: "confirmada"`.
+export type CreateCitaPayload = components["schemas"]["CreateCitaDto"] & { confirmed?: boolean };
 export type TipoCita = components["schemas"]["TipoCitaEntity"];
 export type EstadoCita = Cita["status"];
 export type CanalCita = Cita["channel"];
@@ -316,6 +319,10 @@ function transition<T = Cita>(
 
 export const confirmarCita = (id: string, centroId?: string) =>
   transition(id, "confirm", undefined, centroId);
+// Back from confirmed to booked (cmr-be 4a, `appointments.confirm`). Answers the bare appointment,
+// unlike `confirm`, which answers `{ data, persistencia }`.
+export const unconfirmCita = (id: string, centroId?: string) =>
+  transition(id, "unconfirm", undefined, centroId);
 export const presenteCita = (id: string, centroId?: string) =>
   transition(id, "present", undefined, centroId);
 export const noShowCita = (id: string, centroId?: string) =>

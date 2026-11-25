@@ -14,6 +14,7 @@ export interface NavRoute {
 export const NAV_MANIFEST: NavRoute[] = [
   { path: "/dashboard", labelKey: "nav.dashboard" },
   // Citas → Scheduling (route-reorg Phase 1)
+  { path: "/scheduling/booked", labelKey: "nav.appointmentsDay" },
   { path: "/scheduling/appointments", labelKey: "nav.citas" },
   { path: "/configuration/staff", labelKey: "nav.personal" },
   { path: "/scheduling/calendar", labelKey: "nav.calendario" },

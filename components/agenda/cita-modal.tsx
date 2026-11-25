@@ -67,6 +67,7 @@ export function CitaModal({
   medicos: medicosProp,
   canal,
   estadoInicial,
+  allowedActions,
   onOpenChange,
   onSaved,
   onPatientDataClosed,
@@ -86,6 +87,8 @@ export function CitaModal({
   canal?: "frontdesk" | "callcenter";
   // Create only: the status the toggle starts on, over the channel's default (a board's walk-in: confirmada).
   estadoInicial?: "programada" | "confirmada";
+  // Edit only: the row's `allowedActions` when opened from a list that has them (CitaActions draws them).
+  allowedActions?: string[] | null;
   onOpenChange: (open: boolean) => void;
   // Gets the appointment just saved (create/edit) so the caller can show it at once.
   onSaved: (cita?: Cita) => void;
@@ -483,6 +486,7 @@ export function CitaModal({
         {isEdit && cita && (
           <CitaActions
             cita={cita}
+            allowedActions={allowedActions}
             onChanged={() => {
               onSaved();
               onOpenChange(false);

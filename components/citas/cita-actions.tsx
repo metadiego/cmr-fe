@@ -7,6 +7,7 @@ import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import {
   confirmarCita,
+  unconfirmCita,
   presenteCita,
   noShowCita,
   cancelarCita,
@@ -27,6 +28,7 @@ import { cancelMissing } from "@/lib/citas/cancel-missing";
 import { rescheduleMissing, type RescheduleField } from "@/lib/citas/reschedule-missing";
 import { citaBlockingCode } from "@/lib/api/cita-errors";
 import { apiErrorLabel } from "@/lib/api/errors";
+import { appointmentMenu, cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/allowed-actions";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
@@ -77,9 +79,13 @@ const ACTIONS: Record<EstadoCita, string[]> = {
 
 export function CitaActions({
   cita,
+  allowedActions,
   onChanged,
 }: {
   cita: Cita;
+  /** The row's `allowedActions` (cmr-be 4a) when the caller has them (a board or day-list row): the menu
+   * is drawn from them. Without them (an entity read), the status table above decides. */
+  allowedActions?: string[] | null;
   onChanged: () => void;
 }) {
   const t = useTranslations("appointments.actions");
@@ -108,10 +114,22 @@ export function CitaActions({
         after?.();
         onChanged();
       },
+      // The appointment moved under us: close the dialog and redraw (the toast still says why).
+      onError: (err) => {
+        if (refusalRefreshesRow(err)) {
+          setCancelOpen(false);
+          onChanged();
+        }
+        return false;
+      },
     },
   );
 
-  const actions = ACTIONS[cita.status] ?? [];
+  const actions: string[] = allowedActions ? appointmentMenu(allowedActions) : (ACTIONS[cita.status] ?? []);
+  // Cancel on an arrived patient is "arrived, not served" (same dialog and reason, its own name).
+  const notServe = cancelMeaning(allowedActions) === "not_serve";
+  const tRoot = useTranslations();
+  const cancelLabel = notServe ? tRoot("lifecycle.action.not_serve") : t("cancelar");
   // Show the menu whenever the user can act OR at least view history.
   if (!can("citas.update") && !can("citas.read")) return null;
 
@@ -140,6 +158,11 @@ export function CitaActions({
               {t("confirmar")}
             </DropdownMenuItem>
           )}
+          {actions.includes("unconfirm") && (
+            <DropdownMenuItem onSelect={() => void run(() => unconfirmCita(cita.id, centroId))}>
+              {tRoot("lifecycle.action.unconfirm")}
+            </DropdownMenuItem>
+          )}
           {actions.includes("presente") && (
             <DropdownMenuItem onSelect={() => void run(() => presenteCita(cita.id, centroId))}>
               {t("presente")}
@@ -163,7 +186,7 @@ export function CitaActions({
               variant="destructive"
               onSelect={() => setCancelOpen(true)}
             >
-              {t("cancelar")}
+              {cancelLabel}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -174,12 +197,12 @@ export function CitaActions({
         open={cancelOpen}
         onOpenChange={setCancelOpen}
         size="md"
-        title={t("cancelTitle")}
+        title={notServe ? cancelLabel : t("cancelTitle")}
         description={t("cancelHelp")}
         onSubmit={() => {}}
         actions={[
           {
-            label: t("cancelar"),
+            label: cancelLabel,
             variant: "destructive",
             onClick: () =>
               run(

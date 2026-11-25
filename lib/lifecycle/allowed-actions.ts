@@ -82,6 +82,23 @@ export function confirmToggle(allowed: readonly ActionKey[] | null | undefined):
   return null
 }
 
+/** An entry of the medical appointment's menu (components/citas/cita-actions.tsx), in menu order. */
+export type AppointmentMenuItem = "confirmar" | "unconfirm" | "presente" | "reagendar" | "noShow" | "cancelar"
+
+const APPOINTMENT_MENU: ReadonlyArray<[AppointmentMenuItem, readonly ActionKey[]]> = [
+  ["confirmar", ["confirm"]],
+  ["unconfirm", ["unconfirm"]],
+  ["presente", ["check_in"]],
+  ["reagendar", ["reschedule"]],
+  ["noShow", ["no_show"]],
+  ["cancelar", ["cancel", "not_serve"]],
+]
+
+/** The medical appointment's menu entries the row's list allows. */
+export function appointmentMenu(allowed: readonly ActionKey[]): AppointmentMenuItem[] {
+  return APPOINTMENT_MENU.filter(([, keys]) => keys.some((k) => allowed.includes(k))).map(([item]) => item)
+}
+
 /** Label key of an action. */
 export const actionLabelKey = (key: ActionKey) => `lifecycle.action.${key}`
 

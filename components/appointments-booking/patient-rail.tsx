@@ -256,10 +256,13 @@ export function EditAppointmentModal({
   patient,
   center,
   appointmentTypes,
+  allowedActions,
   onClose,
   onSaved,
 }: {
   cita: Cita;
+  /** The row's `allowedActions` when the caller has them (the Citas day list). */
+  allowedActions?: string[] | null;
   /** The patient on screen: the dialog needs it to save (edit mode locks the patient field). */
   patient: Paciente | null;
   center: string | undefined;
@@ -280,6 +283,7 @@ export function EditAppointmentModal({
       tipos={appointmentTypes}
       medicos={medicos}
       canal="callcenter"
+      allowedActions={allowedActions}
       onOpenChange={(open) => {
         if (!open) onClose();
       }}

@@ -1503,7 +1503,7 @@
     "resources": "Resources",
     "center": "Center",
     "clientes": "Patients",
-    "citas": "Appointments",
+    "citas": "Book appointment",
     "alertas": "Alerts",
     "atencion": "Patient care",
     "therapyDay": "Plan therapies",
@@ -1617,7 +1617,8 @@
     "paymentMethods": "Payment methods",
     "inventory_daily_kardex": "Daily kardex",
     "inventory_adjustments": "Adjustments",
-    "inventoryBackdate": "Backdated adjustments"
+    "inventoryBackdate": "Backdated adjustments",
+    "appointmentsDay": "Appointments"
   },
   "admin": {
     "title": "Administration",
@@ -6935,7 +6936,7 @@
     }
   },
   "appointmentsBooking": {
-    "title": "Appointments",
+    "title": "Book appointment",
     "settings": "Settings",
     "loading": "Loading…",
     "loadFailed": "Could not load: {message}",
@@ -7332,6 +7333,79 @@
       "reasonRequired": "This action needs a reason.",
       "stale": "Someone else just changed this record. Reload and try again.",
       "futureDate": "A no-show can only be recorded for today or a past date ({fecha})."
+    },
+    "stage": {
+      "booked": "Booked",
+      "confirmed": "Confirmed",
+      "arrived": "Arrived",
+      "cancelled": "Cancelled",
+      "no_show": "No-show",
+      "rescheduled": "Rescheduled",
+      "waiting": "Waiting",
+      "triage": "Triage",
+      "in_consultation": "In consultation",
+      "called": "Called",
+      "in_therapy": "In therapy",
+      "done": "Done",
+      "not_served": "Left without being served"
+    }
+  },
+  "appointmentsDay": {
+    "title": "Appointments",
+    "live": "Live",
+    "offline": "Not live",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
+    "today": "Today",
+    "type": {
+      "label": "Type",
+      "all": "All",
+      "new": "New",
+      "followUp": "Follow-up",
+      "therapies": "Therapies"
+    },
+    "bookedBy": {
+      "label": "Booked by",
+      "me": "Me",
+      "all": "Everyone"
+    },
+    "showCancelled": "Show cancelled",
+    "summary": {
+      "title": "Today",
+      "arrived": "Arrived",
+      "late": "Not arrived (late)",
+      "upcoming": "Upcoming"
+    },
+    "col": {
+      "time": "Time",
+      "patient": "Patient",
+      "type": "Type",
+      "bookedBy": "Booked by",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": "No appointments for this day with these filters.",
+    "portfolio": "Portfolio: {name}",
+    "loadFailed": "Could not open the appointment: {message}",
+    "status": {
+      "late": "Late (not arrived)",
+      "confirmedBy": "Confirmed · by {name}",
+      "confirmedSheet": "Confirmed · call-center sheet",
+      "confirmedImport": "Confirmed · imported from the old system"
+    },
+    "actions": {
+      "menu": "Appointment actions",
+      "done": "Done.",
+      "change": "Change",
+      "bookAnother": "Book another appointment",
+      "openPatient": "Open patient"
+    },
+    "move": {
+      "title": "Move the therapy",
+      "date": "New day",
+      "time": "Time",
+      "timeHint": "Optional. Without a time, the therapy has no time that day.",
+      "submit": "Move"
     }
   }
 }
