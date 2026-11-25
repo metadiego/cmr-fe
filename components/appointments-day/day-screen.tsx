@@ -71,12 +71,14 @@ export function AppointmentsDayScreen() {
                 .filter((p) => p.name)
                 .sort((a, b) => a.name.localeCompare(b.name)),
             )
-            .catch(() => [])
         : Promise.resolve([]),
     [centerId],
   );
   const staff = staffRes.state.kind === "ok" ? staffRes.state.data : null;
-  const [bookedBy, setBookedBy] = useBookedBy(staffId, staff?.map((s) => s.id) ?? null);
+  // A failed staff list counts as no options (never null): a remembered person falls back to Me / All
+  // and the day list still loads.
+  const staffOptions = staffRes.state.kind === "fail" ? [] : (staff?.map((s) => s.id) ?? null);
+  const [bookedBy, setBookedBy] = useBookedBy(staffId, staffOptions);
 
   const search =
     bookedBy === null ? null : dayListSearch({ ...params, centerId, bookedBy, myStaffId: staffId }).toString();

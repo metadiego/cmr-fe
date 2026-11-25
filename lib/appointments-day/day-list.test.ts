@@ -173,3 +173,9 @@ test("booked by: a remembered staff id waits for the options and falls back to M
   assert.equal(bookedByChoice("s9", "me1", ["s1"]), BOOKED_BY_ME)
   assert.equal(bookedByChoice("s9", null, ["s1"]), BOOKED_BY_ALL)
 })
+
+test("booked by: a failed staff list ([]) never blocks the day list; a remembered person falls back", () => {
+  assert.equal(bookedByChoice("s9", "me1", []), BOOKED_BY_ME)
+  assert.equal(bookedByChoice("s9", null, []), BOOKED_BY_ALL)
+  assert.equal(bookedByChoice(BOOKED_BY_ALL, "me1", []), BOOKED_BY_ALL)
+})
