@@ -11,7 +11,6 @@ import { SheetNotice } from "@/components/agenda/sheet-notice";
 import { SlotPicker, type Slot } from "@/components/agenda/slot-picker";
 import { useWeekFree } from "@/hooks/use-week-free";
 import { dayParts, shiftWeek, weekStrip } from "@/lib/agenda/appointment-when";
-import { slotTone } from "@/lib/agenda/appointment-form";
 import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 import type { SheetCheck } from "@/lib/agenda/sheet";
@@ -107,7 +106,7 @@ export function AppointmentWhenFields({
                   <span
                     className={cn(
                       "h-4 truncate text-[10.5px] font-medium tabular-nums",
-                      on ? "" : n != null && slotTone(n) !== "open" ? "text-warning-foreground" : "text-success-foreground",
+                      on ? "" : "text-muted-foreground",
                     )}
                   >
                     {n != null && !d.past ? tSlot("free", { n }) : ""}

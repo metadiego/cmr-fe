@@ -67,9 +67,9 @@ export function SlotPicker({
     );
   }
 
-  // chips: one button per hour. Only the chosen one is filled (with its end time); one place left is an
-  // amber note, never a coloured box that reads as chosen; full is dashed and faded but still pickable
-  // (the BE warns, it does not block).
+  // chips: one button per hour. Only the chosen one is filled (with its end time); an hour with places
+  // reads the same however few are left (a nearly full hour must not stand out over emptier ones); full
+  // is dashed and faded but still pickable (the BE warns, it does not block).
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1.5">
       {slots.map((s) => {
@@ -98,10 +98,9 @@ export function SlotPicker({
             <span
               className={cn(
                 "inline-flex items-center gap-1 text-xs tabular-nums",
-                sel ? "opacity-90" : tone === "low" ? "font-medium text-warning-foreground" : "text-muted-foreground",
+                sel ? "opacity-90" : "text-muted-foreground",
               )}
             >
-              {tone === "low" && !sel && <span aria-hidden className="size-1.5 rounded-full bg-current" />}
               {libresLabel(s)}
             </span>
           </button>
