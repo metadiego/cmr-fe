@@ -108,8 +108,8 @@ export function DayTable({
     },
     {
       key: "confirm",
-      header: <span className="sr-only">{t("col.confirm")}</span>,
-      align: "right",
+      header: t("col.confirm"),
+      className: "w-36",
       cell: (r) => <DayConfirmButton row={r} onChanged={onChanged} />,
     },
     {
