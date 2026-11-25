@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { deliveryObservationsText, groupDeliveryLines } from "./delivery-control.ts";
+import { deliveryObservationsText, groupDeliveryLines, visibleDeliveryWarnings } from "./delivery-control.ts";
 import type { KardexDeliveryLine } from "@/lib/api/inventory-kardex";
 
 const t = (k: string, v?: Record<string, string | number>) => (v ? `${k}(${Object.values(v).join(",")})` : k);
@@ -76,4 +76,19 @@ test("deliveryObservationsText: a direct sale never shows soldAs, even when it h
     t,
   );
   assert.equal(text, "");
+});
+
+test("visibleDeliveryWarnings: DOUBLE_DEDUCTION drops when systemStock already matches physical (prod case, 25-nov-2026: NANO AER PLUS, Caguas, both 43)", () => {
+  const warnings = [{ code: "DOUBLE_DEDUCTION", labelKey: "x", quantity: 6 }];
+  assert.deepEqual(visibleDeliveryWarnings(warnings, { systemStock: 43, physical: 43 }), []);
+});
+
+test("visibleDeliveryWarnings: DOUBLE_DEDUCTION stays when systemStock and physical actually differ", () => {
+  const warnings = [{ code: "DOUBLE_DEDUCTION", labelKey: "x", quantity: 6 }];
+  assert.deepEqual(visibleDeliveryWarnings(warnings, { systemStock: 43, physical: 37 }), warnings);
+});
+
+test("visibleDeliveryWarnings: other codes (e.g. NEGATIVE_STOCK) always stay, even when physical matches", () => {
+  const warnings = [{ code: "NEGATIVE_STOCK", labelKey: "x", quantity: 2 }];
+  assert.deepEqual(visibleDeliveryWarnings(warnings, { systemStock: 43, physical: 43 }), warnings);
 });

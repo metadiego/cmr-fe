@@ -2,7 +2,7 @@
 // delivery-control.test.ts. Grouping and translation live here so both the screen and its CSV export
 // (delivery-control-csv.ts) build the exact same rows from the exact same logic.
 
-import type { KardexDeliveryLine, KardexDeliveryMonth } from "@/lib/api/inventory-kardex";
+import type { KardexDeliveryLine, KardexDeliveryMonth, KardexDeliveryWarehouse, KardexDeliveryWarning } from "@/lib/api/inventory-kardex";
 
 type T = (key: string, values?: Record<string, string | number>) => string;
 
@@ -48,4 +48,18 @@ export function deliveryObservationsText(line: KardexDeliveryLine, t: T): string
   for (const n of line.refundNumbers) parts.push(t("delivery.refundNote", { number: n }));
   if (line.soldAs.channel !== "direct" && line.soldAs.name) parts.push(line.soldAs.name);
   return parts.join(" · ");
+}
+
+/**
+ * The warnings actually worth surfacing. `DOUBLE_DEDUCTION` flags a possible double count in the
+ * period's ledger, but when the physical count already matches the system's own stock there is
+ * nothing left to chase — the owner's own read, 25-nov-2026 (prod: NANO AER PLUS, Caguas, systemStock
+ * and physical both 43, yet the warning still fired). Every other warning (e.g. NEGATIVE_STOCK) stays:
+ * it names a real shortfall even when the physical count happens to match.
+ */
+export function visibleDeliveryWarnings(
+  warnings: readonly KardexDeliveryWarning[],
+  warehouse: Pick<KardexDeliveryWarehouse, "systemStock" | "physical">,
+): KardexDeliveryWarning[] {
+  return warnings.filter((w) => !(w.code === "DOUBLE_DEDUCTION" && warehouse.systemStock === warehouse.physical));
 }

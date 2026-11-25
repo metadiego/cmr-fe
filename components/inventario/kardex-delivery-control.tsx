@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 
 import type { KardexDeliveryControl } from "@/lib/api/inventory-kardex"
-import { deliveryObservationsText, groupDeliveryLines } from "@/lib/inventory/delivery-control"
+import { deliveryObservationsText, groupDeliveryLines, visibleDeliveryWarnings } from "@/lib/inventory/delivery-control"
 import { formatFechaSolo, parseDayUTC } from "@/lib/format/fecha"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Panel, StatGrid, Stat, EmptyState } from "@/components/kit/panel"
@@ -38,10 +38,11 @@ export function KardexDeliveryControlView({ data }: { data: KardexDeliveryContro
       : t("delivery.warning.unknown", { code: w.code, quantity: w.quantity })
 
   const groups = groupDeliveryLines(data.lines, data.months)
+  const warnings = visibleDeliveryWarnings(data.warnings, data.warehouse)
 
   return (
     <div className="space-y-4">
-      {data.warnings.map((w, i) => (
+      {warnings.map((w, i) => (
         <Alert key={i} variant="warning">
           <AlertDescription>{warningText(w)}</AlertDescription>
         </Alert>
