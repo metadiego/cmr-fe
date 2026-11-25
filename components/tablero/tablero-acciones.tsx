@@ -9,6 +9,8 @@ import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { boardActionMissing } from "@/lib/board/board-action-missing";
+import { boardActionView, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
+import { todayPR } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
@@ -44,6 +46,7 @@ export function TableroAcciones({
   estados,
   transiciones,
   centroId,
+  fecha,
   onDone,
 }: {
   tablero: string;
@@ -52,6 +55,8 @@ export function TableroAcciones({
   estados: EstadoCitaCatalogo[];
   transiciones: Transicion[];
   centroId?: string;
+  /** The row's day (YYYY-MM-DD): No-show is not offered for a day that has not come. */
+  fecha?: string;
   onDone: () => void;
 }) {
   const t = useTranslations("tableroBoard");
@@ -72,6 +77,14 @@ export function TableroAcciones({
         setPending(null);
         onDone();
       },
+      // The row moved under us: close the dialog and redraw the row (the toast still says why).
+      onError: (err) => {
+        if (refusalRefreshesRow(err)) {
+          setPending(null);
+          onDone();
+        }
+        return false;
+      },
     },
   );
 
@@ -80,6 +93,10 @@ export function TableroAcciones({
     .filter((tr) => tr.active !== false)
     .filter((tr) => !tr.permissionSlug || can(tr.permissionSlug))
     .filter((tr) => tr.fromStatuses.includes(estado) || (tr.fromStatuses.length === 0 && !isTerminal))
+    // Cancel and No-show follow the backend's catalogue (Cancel on an arrived row = "not served").
+    .map((tr) => ({ tr, view: boardActionView(tr.slug, tr.labelKey, estado, fecha, todayPR()) }))
+    .filter(({ view }) => view.visible)
+    .map(({ tr, view }) => ({ ...tr, labelKey: view.labelKey }))
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
   if (available.length === 0) return null;

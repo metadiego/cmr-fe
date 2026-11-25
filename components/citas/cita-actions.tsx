@@ -26,6 +26,7 @@ import { slotAvailability } from "@/lib/agenda/slot-availability";
 import { cancelMissing } from "@/lib/citas/cancel-missing";
 import { rescheduleMissing, type RescheduleField } from "@/lib/citas/reschedule-missing";
 import { citaBlockingCode } from "@/lib/api/cita-errors";
+import { cancelMeaning, noShowAllowed, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
@@ -62,13 +63,15 @@ import {
 } from "@/components/ui/dialog";
 
 // Scheduling-flow actions allowed from each state (slice 2). Clinical states
-// (triage/en_consulta → vitals/consult) are handled in slice 3.
+// (triage/en_consulta → vitals/consult) are handled in slice 3. Cancel and No-show are further narrowed by
+// the backend's catalogue (lib/lifecycle/board-action-rules.ts): Cancel on an arrived patient records
+// "not served", and the backend refuses it in consultation.
 const ACTIONS: Record<EstadoCita, string[]> = {
   programada: ["confirmar", "reagendar", "noShow", "cancelar"],
   confirmada: ["presente", "reagendar", "noShow", "cancelar"],
   presente: ["cancelar"],
   triage: ["cancelar"],
-  en_consulta: ["cancelar"],
+  en_consulta: [],
   atendida: [],
   no_show: [],
   cancelada: [],
@@ -108,10 +111,26 @@ export function CitaActions({
         after?.();
         onChanged();
       },
+      // The appointment moved under us: close the dialog and redraw (the toast still says why).
+      onError: (err) => {
+        if (refusalRefreshesRow(err)) {
+          setCancelOpen(false);
+          onChanged();
+        }
+        return false;
+      },
     },
   );
 
-  const actions = ACTIONS[cita.status] ?? [];
+  const tRoot = useTranslations();
+  const actions = (ACTIONS[cita.status] ?? []).filter(
+    (a) =>
+      (a !== "confirmar" || can("appointments.confirm")) &&
+      (a !== "noShow" || noShowAllowed(cita.status, cita.date, todayPR())),
+  );
+  // Cancel on an arrived patient is "arrived, not served": same dialog and reason, its own words.
+  const notServe = cancelMeaning(cita.status) === "not_serve";
+  const cancelLabel = notServe ? tRoot("lifecycle.action.not_serve") : t("cancelar");
   // Show the menu whenever the user can act OR at least view history.
   if (!can("citas.update") && !can("citas.read")) return null;
 
@@ -163,7 +182,7 @@ export function CitaActions({
               variant="destructive"
               onSelect={() => setCancelOpen(true)}
             >
-              {t("cancelar")}
+              {cancelLabel}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -174,12 +193,12 @@ export function CitaActions({
         open={cancelOpen}
         onOpenChange={setCancelOpen}
         size="md"
-        title={t("cancelTitle")}
-        description={t("cancelHelp")}
+        title={notServe ? cancelLabel : t("cancelTitle")}
+        description={notServe ? t("notServeHelp") : t("cancelHelp")}
         onSubmit={() => {}}
         actions={[
           {
-            label: t("cancelar"),
+            label: cancelLabel,
             variant: "destructive",
             onClick: () =>
               run(

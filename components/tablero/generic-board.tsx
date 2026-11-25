@@ -343,6 +343,7 @@ export function GenericBoard({
                 estados={def.statuses}
                 transiciones={def.transitions}
                 centroId={centroId}
+                fecha={fecha}
                 onDone={filasRes.refresh}
               />
             );
