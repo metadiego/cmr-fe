@@ -7,7 +7,10 @@ import { useTranslations } from "next-intl"
 import { Badge } from "@/components/ui/badge"
 import { DataTable, type Column } from "@/components/kit/data-table"
 import { StatusBadge } from "@/components/kit/status-badge"
-import { DayRowActions } from "@/components/appointments-day/day-row-actions"
+import {
+  DayConfirmButton,
+  DayRowActions,
+} from "@/components/appointments-day/day-row-actions"
 import type { ResourceState } from "@/hooks/use-resource"
 import type { DayListRow } from "@/lib/api/appointments-day"
 import {
@@ -61,7 +64,9 @@ export function DayTable({
       cell: (r) => {
         const b = typeBadge(r)
         if (b.kind === "therapy")
-          return <Badge variant="outline">{b.label ?? t("type.therapy")}</Badge>
+          return (
+            <Badge variant="secondary">{b.label ?? t("type.therapy")}</Badge>
+          )
         return (
           <Badge variant={b.kind === "new" ? "info" : "secondary"}>
             {t(`type.${b.kind}`)}
@@ -102,9 +107,16 @@ export function DayTable({
       cell: (r) => <DayStatusCell row={r} nowHHmm={nowHHmm} />,
     },
     {
+      key: "confirm",
+      header: <span className="sr-only">{t("col.confirm")}</span>,
+      align: "right",
+      cell: (r) => <DayConfirmButton row={r} onChanged={onChanged} />,
+    },
+    {
       key: "actions",
       header: <span className="sr-only">{t("col.actions")}</span>,
       align: "right",
+      className: "w-12",
       cell: (r) => <DayRowActions row={r} onChanged={onChanged} />,
     },
   ]

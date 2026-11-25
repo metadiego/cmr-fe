@@ -33,7 +33,45 @@ import {
 
 // A row's actions on the Citas screen, drawn ONLY from its `allowedActions` (the backend's decision for
 // this user in the row's center: stage, date rule and permission). Confirmar is the row's one primary
-// button (one click, no dialog; undone from the menu). Change, Book another and Cancel live in the ⋮ menu.
+// button (one click, no dialog; undone from the menu), in its own column (`DayConfirmButton`). Change,
+// Book another and Cancel live in the ⋮ menu, in the last column.
+export function DayConfirmButton({
+  row,
+  onChanged,
+}: {
+  row: DayListRow
+  onChanged: () => void
+}) {
+  const t = useTranslations("appointmentsDay.actions")
+  const tRoot = useTranslations()
+  const { submitting, submit } = useSubmit(
+    (fn: () => Promise<unknown>) => fn(),
+    {
+      successMessage: t("done"),
+      onSuccess: onChanged,
+      onError: (err) => {
+        if (refusalRefreshesRow(err)) onChanged()
+        return false
+      },
+    }
+  )
+  if (confirmToggle(row.allowedActions) !== "confirm") return null
+  return (
+    <Button
+      size="sm"
+      disabled={submitting}
+      onClick={() => void submit(() => confirmDayRow(row))}
+    >
+      <HugeiconsIcon
+        icon={Tick02Icon}
+        strokeWidth={2}
+        data-icon="inline-start"
+      />
+      {tRoot("lifecycle.action.confirm")}
+    </Button>
+  )
+}
+
 export function DayRowActions({
   row,
   onChanged,
@@ -77,20 +115,6 @@ export function DayRowActions({
 
   return (
     <div className="flex items-center justify-end gap-1">
-      {toggle === "confirm" && (
-        <Button
-          size="sm"
-          disabled={submitting}
-          onClick={() => void submit(() => confirmDayRow(row))}
-        >
-          <HugeiconsIcon
-            icon={Tick02Icon}
-            strokeWidth={2}
-            data-icon="inline-start"
-          />
-          {tRoot("lifecycle.action.confirm")}
-        </Button>
-      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

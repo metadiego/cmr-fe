@@ -7401,6 +7401,7 @@
       "type": "Type",
       "bookedBy": "Booked by",
       "status": "Status",
+      "confirm": "Confirm",
       "actions": "Actions"
     },
     "empty": "No appointments for this day with these filters.",
