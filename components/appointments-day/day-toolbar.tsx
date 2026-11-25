@@ -40,6 +40,7 @@ export function DayToolbar({
   canBeMe,
   includeCancelled,
   onIncludeCancelled,
+  kpis,
 }: {
   date: string;
   today: string;
@@ -61,6 +62,8 @@ export function DayToolbar({
   canBeMe: boolean;
   includeCancelled: boolean;
   onIncludeCancelled: (v: boolean) => void;
+  /** The numbers row: a full-width line between the date bar and the filters. */
+  kpis?: React.ReactNode;
 }) {
   const t = useTranslations("appointmentsDay");
   const cancelledId = React.useId();
@@ -78,6 +81,8 @@ export function DayToolbar({
           {t("today")}
         </Button>
       </div>
+
+      {kpis && <div className="w-full">{kpis}</div>}
 
       <SegmentedControl
         ariaLabel={t("type.label")}

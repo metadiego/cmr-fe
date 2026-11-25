@@ -79,9 +79,14 @@ export function Td({ children, className, colSpan }: { children?: React.ReactNod
 
 // Numbers divided by hairlines. Pulled 1px right/down under the Panel's `overflow-hidden` so the outer
 // cells' rules do not double the panel border.
-export function StatGrid({ children, cols = 4 }: { children: React.ReactNode; cols?: 3 | 4 }) {
+export function StatGrid({ children, cols = 4 }: { children: React.ReactNode; cols?: 3 | 4 | 5 }) {
   return (
-    <div className={cn("-mr-px -mb-px grid grid-cols-2", cols === 4 ? "sm:grid-cols-4" : "sm:grid-cols-3")}>
+    <div
+      className={cn(
+        "-mr-px -mb-px grid grid-cols-2",
+        cols === 4 ? "sm:grid-cols-4" : cols === 5 ? "sm:grid-cols-3 lg:grid-cols-5" : "sm:grid-cols-3",
+      )}
+    >
       {children}
     </div>
   );

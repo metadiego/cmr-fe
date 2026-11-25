@@ -310,6 +310,31 @@ export function todaySummary(rows: DayListRow[], nowHHmm: string): Record<TodayG
   return out
 }
 
+// ---- KPI cards ----------------------------------------------------------------------------------
+
+export interface DayKpis {
+  /** Not cancelled and not rescheduled (no-show and arrived included). */
+  booked: number
+  /** Of those: confirmed now, or confirmed before arriving (`confirmedAt`). */
+  confirmed: number
+  /** Of those: booking stage arrived (not served included: it is a care stage on an arrived row). */
+  arrived: number
+}
+
+const NOT_BOOKED = new Set<BookingStatus | null>(["cancelled", "rescheduled"])
+
+/** The Citados / Confirmados / Presentes counts of the rows on screen (they follow every filter). */
+export function dayKpis(rows: readonly DayListRow[]): DayKpis {
+  const out: DayKpis = { booked: 0, confirmed: 0, arrived: 0 }
+  for (const r of rows) {
+    if (NOT_BOOKED.has(r.bookingStatus)) continue
+    out.booked++
+    if (r.bookingStatus === "confirmed" || r.confirmedAt) out.confirmed++
+    if (r.bookingStatus === "arrived") out.arrived++
+  }
+  return out
+}
+
 // ---- URL ------------------------------------------------------------------------------------------
 
 export interface DayScreenParams {

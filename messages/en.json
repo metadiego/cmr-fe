@@ -7387,8 +7387,9 @@
       "label": "Portfolio"
     },
     "showCancelled": "Show cancelled",
-    "summary": {
-      "title": "Today",
+    "kpi": {
+      "booked": "Booked",
+      "confirmed": "Confirmed",
       "arrived": "Arrived",
       "late": "Not arrived (late)",
       "upcoming": "Upcoming"

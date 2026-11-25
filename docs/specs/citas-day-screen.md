@@ -25,7 +25,7 @@ Citas                                                     [● live]
 [◀] [ Mon 24 Nov 2026 ▾ ] [▶]  [Today]    Center [Bayamón ▾]
 Type [All | New | Follow-up | Therapies]   Type [All ▾]   Booked by [Me ▾]   Cartera [All ▾]
 
-Today:  12 arrived · 3 not arrived (late) · 9 upcoming
+[ Booked 24 | Confirmed 15 | Arrived 12 | Late 3 | Upcoming 9 ]   (Late / Upcoming only today)
 
 TIME   PATIENT          TYPE            BOOKED BY   STATUS                 ACTIONS
 08:30  Ana Pérez        Follow-up       Carla       ● Arrived · in consult  …
@@ -55,6 +55,11 @@ TIME   PATIENT          TYPE            BOOKED BY   STATUS                 ACTIO
   Sent as `portfolioOwnerIds` only when it is not All (backend PR `feat/day-list-portfolio-filter`); both
   filters together = AND. Fallbacks as Booked by: an unknown id or a failed staff list → All; Me waits
   for `me`. The column shows the creator, and "Cartera: <name>" beneath it when different.
+- **KPI cards** (owner, 2026-11-25): one `StatGrid` row under the date bar, above the filters: Citados
+  (rows not cancelled / rescheduled, no-show and arrived included, whatever "show cancelled" says),
+  Confirmados (of those, `confirmed` now or `confirmedAt` set), Presentes (of those, booking stage
+  `arrived`, not served included), plus Late / Upcoming only in today mode (it replaces the separate
+  today summary). Counted from the rows on screen, so they follow every filter. `dayKpis` in lib.
 - **Rows**: one per appointment of either kind, ordered by time (no-time rows last): time, patient (links
   to the patient), type label, booked by, status, actions. Cancelled / rescheduled rows hidden by default
   with a "show cancelled" toggle.

@@ -5,11 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import { Panel, Stat, StatGrid } from "@/components/kit/panel";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { LiveBadge } from "@/components/live-badge";
 import { DayToolbar, type StaffOption } from "@/components/appointments-day/day-toolbar";
 import { DayTable } from "@/components/appointments-day/day-table";
+import { DayKpis } from "@/components/appointments-day/day-kpis";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
@@ -27,7 +27,6 @@ import {
   parseDayScreenParams,
   pickedTypes,
   pruneTypes,
-  todaySummary,
   toDayScreenSearch,
   typeOptions as toTypeOptions,
   typeOptionsForBucket,
@@ -119,7 +118,6 @@ export function AppointmentsDayScreen() {
       : res.state.kind === "ok"
         ? { kind: "ok" as const, data: keepByBucket(res.state.data, params.bucket) }
         : res.state;
-  const summary = isToday && state.kind === "ok" ? todaySummary(state.data, zoneNow.hhmm) : null;
 
   return (
     <PageContainer>
@@ -150,17 +148,13 @@ export function AppointmentsDayScreen() {
         canBeMe={!!staffId}
         includeCancelled={params.includeCancelled}
         onIncludeCancelled={(includeCancelled) => setParams({ includeCancelled })}
+        kpis={
+          <DayKpis
+            rows={state.kind === "ok" ? state.data : state.kind === "fail" ? "fail" : null}
+            nowHHmm={isToday ? zoneNow.hhmm : null}
+          />
+        }
       />
-
-      {summary && (
-        <Panel title={t("summary.title")}>
-          <StatGrid cols={3}>
-            <Stat label={t("summary.arrived")} value={summary.arrived} tone="primary" />
-            <Stat label={t("summary.late")} value={summary.late} tone={summary.late > 0 ? "danger" : "muted"} />
-            <Stat label={t("summary.upcoming")} value={summary.upcoming} />
-          </StatGrid>
-        </Panel>
-      )}
 
       <DayTable state={state} nowHHmm={isToday ? zoneNow.hhmm : null} onReload={res.reload} onChanged={res.refresh} />
     </PageContainer>

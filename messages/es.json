@@ -7387,9 +7387,10 @@
       "label": "Cartera"
     },
     "showCancelled": "Ver canceladas",
-    "summary": {
-      "title": "Hoy",
-      "arrived": "Llegaron",
+    "kpi": {
+      "booked": "Citados",
+      "confirmed": "Confirmados",
+      "arrived": "Presentes",
       "late": "No han llegado (tarde)",
       "upcoming": "Por venir"
     },

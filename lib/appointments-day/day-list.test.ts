@@ -6,6 +6,7 @@ import {
   BOOKED_BY_ME,
   bookedByChoice,
   bookedByOrDefault,
+  dayKpis,
   dayListSearch,
   keepByBucket,
   ownerChoice,
@@ -295,4 +296,41 @@ test("the URL keeps the picked types (?types=a,b), deduplicated", () => {
     toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: ["tS", "sV"], owner: null }),
     "date=2026-11-24&types=tS,sV",
   )
+})
+
+// ---- KPI cards --------------------------------------------------------------------------------------
+
+test("KPIs: booked leaves out cancelled and rescheduled (no-show and arrived count), whatever the toggle", () => {
+  const rows = [
+    row({ bookingStatus: "booked" }),
+    row({ bookingStatus: "confirmed" }),
+    row({ bookingStatus: "arrived" }),
+    row({ bookingStatus: "no_show" }),
+    row({ bookingStatus: "cancelled" }),
+    row({ bookingStatus: "rescheduled" }),
+    row({ bookingStatus: null }),
+  ]
+  assert.equal(dayKpis(rows).booked, 5)
+})
+
+test("KPIs: confirmed = confirmed now, or confirmed before arriving (confirmedAt); cancelled never counts", () => {
+  const rows = [
+    row({ bookingStatus: "confirmed" }),
+    row({ bookingStatus: "arrived", confirmedAt: "2026-11-25T12:00:00Z" }),
+    row({ bookingStatus: "arrived" }),
+    row({ bookingStatus: "booked" }),
+    row({ bookingStatus: "cancelled", confirmedAt: "2026-11-25T12:00:00Z" }),
+  ]
+  assert.equal(dayKpis(rows).confirmed, 2)
+})
+
+test("KPIs: arrived = booking stage arrived (not served included); cancelled and no-show do not", () => {
+  const rows = [
+    row({ bookingStatus: "arrived", careStatus: "waiting" }),
+    row({ bookingStatus: "arrived", careStatus: "not_served" }),
+    row({ bookingStatus: "no_show" }),
+    row({ bookingStatus: "confirmed" }),
+  ]
+  assert.deepEqual(dayKpis(rows), { booked: 4, confirmed: 1, arrived: 2 })
+  assert.deepEqual(dayKpis([]), { booked: 0, confirmed: 0, arrived: 0 })
 })
