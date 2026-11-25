@@ -22,6 +22,7 @@ import {
   type DevolverPayload,
 } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
+import { compDefaultRefund, compKeyOf, type RefundableComp } from "@/lib/factura/component-refund";
 import { legacyRefundCheck, toleranceFrom } from "@/lib/factura/legacy-refund-rounding";
 import { toastError, isRateLimited } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,19 @@ import { ReturnFormSkeleton, ReturnSummarySkeleton } from "@/components/facturac
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
-type CompRow = { invoiceItemComponentId?: string | null; name?: string; quantity?: number; price?: number };
+// Ahead of the generated schema (cmr-be #705): DevolverComponenteDto still types
+// `invoiceItemComponentId` as the only, required id. A component with no id sends `productId`
+// instead; the BE accepts either (handoff .personal/handoff-devolucion-espejo-de-la-factura.md).
+type DevolverPayloadConProducto = Omit<DevolverPayload, "items"> & {
+  items: (Omit<DevolverPayload["items"][number], "componentes"> & {
+    componentes?: (
+      | { invoiceItemComponentId: string; quantity?: number; refundedPrice?: number }
+      | { productId: string; quantity?: number; refundedPrice?: number }
+    )[];
+  })[];
+};
+
+type CompRow = RefundableComp & { name?: string };
 
 // Helpers PUROS (módulo) para poder pre-llenar en los initializers de useState.
 // a_la_entrega se devuelve por SESIONES no entregadas; el resto por cantidad. Si a_la_entrega no trae
@@ -58,12 +71,8 @@ const exactRefund = (it: FacturaItem, q: number) => {
   const bq = billedQty(it);
   return bq > 0 ? (q / bq) * lineBilledTotal(it) : 0;
 };
-const compExactRefund = (c: CompRow, q: number) => {
-  const bq = n(c.quantity) || 0;
-  return bq > 0 ? (q / bq) * n(c.price) : 0;
-};
 const compsDe = (it: FacturaItem): CompRow[] => (it as { content?: CompRow[] }).content ?? [];
-const ck = (itemId: string, ficId: string) => `${itemId}::${ficId}`;
+const ck = (itemId: string, compKey: string) => `${itemId}::${compKey}`;
 
 // Devolución a PANTALLA COMPLETA (tipo factura). La lógica/estado vive en <DevolverForm>, remontado por
 // key={factura.id} → sus initializers PRE-LLENAN "como facturada" con la factura exacta (cantidades
@@ -252,11 +261,11 @@ function DevolverForm({
     }
   }
   function onCompQtyChange(it: FacturaItem, c: CompRow, val: string) {
-    const key = ck(it.id, String(c.invoiceItemComponentId));
+    const key = ck(it.id, compKeyOf(c));
     setCompCant((m) => ({ ...m, [key]: val }));
     if (politica === "como_facturada") {
       const q = Number(val || 0);
-      setCompPrecio((m) => ({ ...m, [key]: q > 0 ? compExactRefund(c, q).toFixed(2) : "" }));
+      setCompPrecio((m) => ({ ...m, [key]: q > 0 ? compDefaultRefund(c, q).toFixed(2) : "" }));
     }
   }
   function cambiarPolitica(v: "como_facturada" | "precio_base") {
@@ -273,9 +282,9 @@ function DevolverForm({
       setCompPrecio(() => {
         const next: Record<string, string> = {};
         items.forEach((it) => compsDe(it).forEach((c) => {
-          const key = ck(it.id, String(c.invoiceItemComponentId));
+          const key = ck(it.id, compKeyOf(c));
           const q = Number(compCant[key] || 0);
-          if (q > 0) next[key] = compExactRefund(c, q).toFixed(2);
+          if (q > 0) next[key] = compDefaultRefund(c, q).toFixed(2);
         }));
         return next;
       });
@@ -285,12 +294,11 @@ function DevolverForm({
     }
   }
 
-  const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => c.invoiceItemComponentId && Number(compCant[ck(it.id, String(c.invoiceItemComponentId))] || 0) > 0);
+  const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => Number(compCant[ck(it.id, compKeyOf(c))] || 0) > 0);
   const compRefund = (it: FacturaItem, c: CompRow) => {
-    const key = ck(it.id, String(c.invoiceItemComponentId));
+    const key = ck(it.id, compKeyOf(c));
     if (compPrecio[key]?.trim()) return Number(compPrecio[key]);
-    const total = n(c.quantity) || 1;
-    return total > 0 ? (Number(compCant[key] || 0) / total) * n(c.price) : 0;
+    return compDefaultRefund(c, Number(compCant[key] || 0));
   };
   const lineSel = (it: FacturaItem) => (esEntrega(it) ? Number(ses[it.id] || 0) > 0 : Number(cant[it.id] || 0) > 0);
   const seleccion = items.filter((it) => lineSel(it) || compSelDe(it).length > 0);
@@ -327,15 +335,19 @@ function DevolverForm({
     if (!motivo.trim() || seleccion.length === 0 || busy || excedeTotal) return;
     setBusy(true);
     try {
-      const payload: DevolverPayload = {
+      const payload: DevolverPayloadConProducto = {
         reason: motivo.trim(),
         policy: politica,
         ...(formaId ? { refundMethodId: formaId } : {}),
         items: seleccion.map((it) => {
           const comps = compSelDe(it).map((c) => {
-            const key = ck(it.id, String(c.invoiceItemComponentId));
+            const key = ck(it.id, compKeyOf(c));
             return {
-              invoiceItemComponentId: String(c.invoiceItemComponentId),
+              // With an id, as before. Without one (legacy kits — cmr-be #705), the BE freezes the
+              // line from what the invoice shows and matches it by product instead.
+              ...(c.invoiceItemComponentId
+                ? { invoiceItemComponentId: String(c.invoiceItemComponentId) }
+                : { productId: String(c.productId) }),
               quantity: Number(compCant[key]),
               ...(compPrecio[key]?.trim() ? { refundedPrice: Number(compPrecio[key]) } : {}),
             };
@@ -348,7 +360,7 @@ function DevolverForm({
           };
         }),
       };
-      const out = (await devolverFactura(id, payload, centro)) as { roundingAdjustment?: number };
+      const out = (await devolverFactura(id, payload as unknown as DevolverPayload, centro)) as { roundingAdjustment?: number };
       const adj = Number(out?.roundingAdjustment ?? 0);
       toast.success(adj > 0 ? t("returnDoneRounded", { amount: money(adj) }) : t("returnDone"));
       router.push(backHref);
@@ -414,21 +426,19 @@ function DevolverForm({
                     </td>
                   </tr>
                   {expanded[it.id] && comps.map((c, ci) => {
-                    const puede = !!c.invoiceItemComponentId;
-                    const key = ck(it.id, String(c.invoiceItemComponentId));
+                    const key = ck(it.id, compKeyOf(c));
                     return (
-                      <tr key={puede ? key : `${it.id}::c${ci}`} className="bg-muted/20 text-xs">
+                      <tr key={compKeyOf(c) || `${it.id}::c${ci}`} className="bg-muted/20 text-xs">
                         <td className="px-3 py-1.5 pl-8">
                           {n(c.quantity)} · {c.name}
-                          {!puede && <span className="ml-2 text-[10px] text-muted-foreground/70">({t("compNoReturnable")})</span>}
                         </td>
                         <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{money(c.price)}</td>
                         <td className="px-3 py-1.5 text-right tabular-nums">{n(c.quantity)}</td>
                         <td className="px-3 py-1.5 text-right">
-                          <Input type="number" min={0} max={n(c.quantity)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => onCompQtyChange(it, c, e.target.value)} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
+                          <Input type="number" min={0} max={n(c.quantity)} value={compCant[key] ?? ""} onChange={(e) => onCompQtyChange(it, c, e.target.value)} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
                         </td>
                         <td className="px-3 py-1.5 text-right">
-                          <Input type="number" min={0} disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => { const v = e.target.value; setCompPrecio((m) => ({ ...m, [key]: v.trim() !== "" && Number(v) < 0 ? "0" : v })); }} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.price)} />
+                          <Input type="number" min={0} value={compPrecio[key] ?? ""} onChange={(e) => { const v = e.target.value; setCompPrecio((m) => ({ ...m, [key]: v.trim() !== "" && Number(v) < 0 ? "0" : v })); }} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.price)} />
                         </td>
                       </tr>
                     );
