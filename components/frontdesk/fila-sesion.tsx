@@ -28,6 +28,7 @@ import { MedicionCell } from "@/components/frontdesk/medicion-cell";
 import { VialRemnantChips } from "@/components/frontdesk/vial-remnant-chip";
 import { isRemnantVisit } from "@/lib/frontdesk/vial-remnant";
 import { RowMenu } from "@/components/frontdesk/row-menu";
+import { readAllowedActions, slugOffered } from "@/lib/lifecycle/allowed-actions";
 import { FilaSesionModales } from "@/components/frontdesk/fila-sesion-modales";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,7 @@ export function FilaSesion({
   onProgramar,
   onEhrGate,
   onPackageGate,
+  drawFromAllowedActions = false,
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
@@ -97,6 +99,9 @@ export function FilaSesion({
   onProgramar: (ctx: { pacienteId: string; pacienteNombre?: string; servicioId?: string }) => void;
   onEhrGate?: (ctx: EhrGateCtx) => void;
   onPackageGate?: (ctx: PackageGateCtx) => void;
+  // Live Patient desk only (cmr-be 4a): steps and menu come from the row's `allowedActions` when it
+  // carries them. Off by default, so the deprecated /boards/frontdesk keeps its own rule.
+  drawFromAllowedActions?: boolean;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -128,6 +133,8 @@ export function FilaSesion({
   // deducía de los sellos y pintaba ASISTIDO en filas que estaban en terapia; ya no se deduce.
   const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.status ?? "");
   const cancelada = estadoActual === "cancelada";
+  const allowed = drawFromAllowedActions ? readAllowedActions(fila) : null;
+  const offered = (slug: string | null) => !slug || slugOffered(slug, allowed) !== false; // no list: today's rule
   const pacienteNombre = String(fila.paciente ?? fila.fd_paciente ?? fila.fac_paciente ?? "");
 
   // Devuelve true SOLO si la acción tuvo éxito, así quien encadena un postAccion (p. ej. abrir "Programar
@@ -501,8 +508,9 @@ export function FilaSesion({
         // asumir el shape del BE; evita el crash "Cannot read properties of null (reading 'length')").
         (tr.formFields?.length ?? 0) === 0 &&
         !pasoKeys.has(tr.slug) &&
-        ((tr.fromStatuses?.length ?? 0) === 0 || (tr.fromStatuses ?? []).includes(estadoActual)) &&
-        (!tr.permissionSlug || can(tr.permissionSlug)),
+        (slugOffered(tr.slug, allowed) ??
+          (((tr.fromStatuses?.length ?? 0) === 0 || (tr.fromStatuses ?? []).includes(estadoActual)) &&
+            (!tr.permissionSlug || can(tr.permissionSlug)))),
     )
     .map((tr) => ({
       clave: tr.slug,
@@ -539,12 +547,12 @@ export function FilaSesion({
     <div className="flex items-start gap-0">
       {pasos.map((paso, i) => {
         const hecho = !!paso.stamp;
-        const siguiente = i === nextIdx; // accionable ahora, según el estado del BE (nunca si cancelada)
+        const siguiente = i === nextIdx && offered(paso.key); // actionable now (never cancelled; listed, with allowedActions)
         const plan = siguiente ? planPara(paso.estado) : null;
         const faltan = plan ? plan.missing.map(etiquetaCampo) : [];
         const bloqueadoPorCampos = siguiente && faltan.length > 0;
         const esUltimoHecho = hecho && !(pasos[i + 1] && pasos[i + 1].stamp);
-        const reversa = esUltimoHecho ? paso.revert : null;
+        const reversa = esUltimoHecho && offered(paso.revert) ? paso.revert : null;
         const puedeDeshacer = !!reversa && !busy && !cancelada;
         const col = paso.color ?? undefined;
         const avanzar = () => {
@@ -615,6 +623,7 @@ export function FilaSesion({
       )}
       <td className="px-3 py-2 text-right">
         <RowMenu
+          allowedActions={allowed}
           disabled={busy}
           cancelada={cancelada}
           canReparar={canReparar}

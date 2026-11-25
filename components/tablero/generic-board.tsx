@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { TableroDinamico } from "@/components/agenda/tablero-dinamico";
 import { TableroAcciones } from "@/components/tablero/tablero-acciones";
+import { readAllowedActions } from "@/lib/lifecycle/allowed-actions";
 import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
 import { BoardAppointmentModal } from "@/components/tablero/board-appointment-modal";
 import { readDensity, type Density } from "@/hooks/use-board-prefs";
@@ -343,6 +344,7 @@ export function GenericBoard({
                 estados={def.statuses}
                 transiciones={def.transitions}
                 centroId={centroId}
+                allowedActions={readAllowedActions(fila)}
                 onDone={filasRes.refresh}
               />
             );
