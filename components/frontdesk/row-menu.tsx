@@ -14,6 +14,7 @@ import { ApiError } from "@/lib/api/types";
 import { todayISO } from "@/lib/agenda/calendar";
 import { canReopen, duplicatesReopen, REOPEN_ERROR_KEYS, skippedReasons } from "@/lib/frontdesk/reopen";
 import { sessionReasonMissing } from "@/lib/frontdesk/session-reason-missing";
+import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,12 +100,22 @@ export function RowMenu({
       onDone();
     },
     onError: (err) => {
+      // The session moved under us: close the dialog and redraw (the generic toast still says why).
+      if (refusalRefreshesRow(err)) {
+        setCancelOpen(false);
+        onDone();
+        return false;
+      }
       if (!(err instanceof ApiError && REOPEN_ERROR_KEYS[err.code])) return false;
       toast.error(say(err.code));
       return true;
     },
   });
   const missing = sessionReasonMissing({ reason: motivo }).map(() => t("motivo"));
+  // The backend's catalogue: Cancel on an arrived, waiting session records "not served"; in therapy or
+  // attended it is refused (the way back is Unattend, then this).
+  const meaning = cancelMeaning(day.status);
+  const cancelLabel = meaning === "not_serve" ? tRoot("lifecycle.action.not_serve") : t("cancelar");
   const cancel = (mode: "one" | "all", reason: string) =>
     act(async () => {
       if (mode === "one") {
@@ -185,9 +196,9 @@ export function RowMenu({
               {tRoot("changeLog.title")}
             </DropdownMenuItem>
           )}
-          {!cancelada && (
+          {!cancelada && meaning !== null && (
             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("one"); }}>
-              {t("cancelar")}
+              {cancelLabel}
             </DropdownMenuItem>
           )}
           {!cancelada && patientId && (
@@ -214,12 +225,12 @@ export function RowMenu({
         open={!!cancelOpen}
         onOpenChange={(v) => !v && setCancelOpen(false)}
         size="sm"
-        title={cancelOpen === "all" ? t("cancelAllTitle") : t("cancelarTitle")}
-        description={cancelOpen === "all" ? t("cancelAllHint") : undefined}
+        title={cancelOpen === "all" ? t("cancelAllTitle") : meaning === "not_serve" ? cancelLabel : t("cancelarTitle")}
+        description={cancelOpen === "all" ? t("cancelAllHint") : meaning === "not_serve" ? t("notServeHelp") : undefined}
         onSubmit={() => cancel(cancelOpen || "one", motivo.trim())}
         actions={[
           {
-            label: cancelOpen === "all" ? t("cancelAll") : t("cancelar"),
+            label: cancelOpen === "all" ? t("cancelAll") : cancelLabel,
             variant: "destructive",
             onClick: () => cancel(cancelOpen || "one", motivo.trim()),
           },

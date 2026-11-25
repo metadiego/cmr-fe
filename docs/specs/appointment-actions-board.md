@@ -164,3 +164,20 @@ Backend PR 3c changes what deleting a therapy session does:
 - `allowedActions`, `GET appointments/day`, check-in via visits, therapy confirm door, the new end of day
   job: piece 4 (backend), with the Citas screen.
 - Removing the board status / transition editors: piece 6.
+
+## Built in the frontend (25-nov-2026)
+
+- One rule, `lib/lifecycle/board-action-rules.ts` (tested), mirrors the backend's catalogue for Cancel and
+  No-show by the row's old status, for both kinds. Piece 4 replaces it with `allowedActions`.
+- **Cancel** on an arrived, waiting row (`presente`, `triage`) is labelled `lifecycle.action.not_serve`,
+  with its own help text, and keeps the required reason. It is hidden in consultation, in therapy,
+  attended or closed. Applies in the board menu (`TableroAcciones`), the medical menu (`CitaActions`) and
+  the Patient desk row menu (`RowMenu`).
+- **No-show** is hidden after arrival and for a day that has not come (board date / appointment date
+  against `todayPR()`).
+- **Confirm** in `CitaActions` needs `appointments.confirm`. The board's confirm rows already declare it
+  (backend migration `BoardConfirmPermission`), so `TableroAcciones` follows the data.
+- **`LIFECYCLE_ACTION_NOT_ALLOWED` / `LIFECYCLE_STALE`** close the dialog and refetch the row; the toast
+  still shows. `TABLERO_ACCION_DENEGADA` (board 403) is translated.
+- Not done here: a "call again" button on a called therapy row (item 6, optional), and nothing infers
+  "confirmed" from arrival today (item 7 needs no change).

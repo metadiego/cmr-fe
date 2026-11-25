@@ -815,7 +815,8 @@
     },
     "source": {
       "personal": "Personal por capacidades"
-    }
+    },
+    "accion_denegada": "No tienes permiso para esta acción en el centro de este registro."
   },
   "agenda": {
     "tabMedicas": "Citas Médicas",
@@ -1038,7 +1039,8 @@
         "reprogramada": "Reagendada",
         "reparada": "Reparada",
         "campo_editado": "Campo editado"
-      }
+      },
+      "notServeHelp": "El paciente llegó y se fue sin ser atendido. Indica el motivo: la cita queda cancelada y la llegada se conserva."
     },
     "filterState": "Estado",
     "filterDoctor": "Médico",
@@ -2694,7 +2696,8 @@
       "expires": "vence {day}",
       "expired": "Vial n.º {number} vencido: descartar",
       "remnantVisit": "Resto del vial"
-    }
+    },
+    "notServeHelp": "El paciente llegó y se fue sin ser atendido. Indica el motivo: la sesión queda cancelada y la llegada se conserva."
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -3965,7 +3968,8 @@
     "LIFECYCLE_ACTION_NOT_ALLOWED": "Esta acción ya no está disponible para este registro. Recarga para ver su estado actual.",
     "LIFECYCLE_UNKNOWN_ACTION": "Acción desconocida para este registro.",
     "LIFECYCLE_REASON_REQUIRED": "Esta acción necesita un motivo.",
-    "LIFECYCLE_STALE": "Otra persona acaba de cambiar este registro. Recarga y vuelve a intentarlo."
+    "LIFECYCLE_STALE": "Otra persona acaba de cambiar este registro. Recarga y vuelve a intentarlo.",
+    "TABLERO_ACCION_DENEGADA": "No tienes permiso para esta acción en el centro de este registro."
   },
   "transferencia": {
     "sesionesExcedenDisponible": "Pediste más sesiones de las que quedan pendientes en ese paquete.",

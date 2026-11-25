@@ -815,7 +815,8 @@
     },
     "source": {
       "personal": "Staff by capability"
-    }
+    },
+    "accion_denegada": "You don't have permission for this action in this record's center."
   },
   "agenda": {
     "tabMedicas": "Medical appointments",
@@ -1038,7 +1039,8 @@
         "reprogramada": "Rescheduled",
         "reparada": "Repaired",
         "campo_editado": "Field edited"
-      }
+      },
+      "notServeHelp": "The patient arrived and left without being seen. Give the reason: the appointment is cancelled and the arrival is kept."
     },
     "filterState": "Status",
     "filterDoctor": "Doctor",
@@ -2694,7 +2696,8 @@
       "expires": "expires {day}",
       "expired": "Vial no. {number} expired: discard",
       "remnantVisit": "Vial remnant"
-    }
+    },
+    "notServeHelp": "The patient arrived and left without being seen. Give the reason: the session is cancelled and the arrival is kept."
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -3965,7 +3968,8 @@
     "LIFECYCLE_ACTION_NOT_ALLOWED": "This action is no longer available for this record. Reload to see its current state.",
     "LIFECYCLE_UNKNOWN_ACTION": "Unknown action for this record.",
     "LIFECYCLE_REASON_REQUIRED": "This action needs a reason.",
-    "LIFECYCLE_STALE": "Someone else just changed this record. Reload and try again."
+    "LIFECYCLE_STALE": "Someone else just changed this record. Reload and try again.",
+    "TABLERO_ACCION_DENEGADA": "You don't have permission for this action in this record's center."
   },
   "transferencia": {
     "sesionesExcedenDisponible": "You asked for more sessions than are still pending on that package.",
