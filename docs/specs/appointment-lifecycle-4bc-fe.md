@@ -131,8 +131,10 @@ screen should read them right.
   no-show / not-served frees it, as today).
 - **Each day closes once.** A patient checked in after the cutoff (from `no_show` or not served: the
   recoveries of section 3) stays checked in; their visit stays `closed`, which the screen can ignore. A
-  patient with no visit that day gets a new one, which the next run (within 30 minutes) closes.
-- At deploy, a one-off cleanup closes every open visit before the switch date and voids empty ones.
+  patient with no visit that day gets a new one; it stays open the rest of that day and the first run
+  of the next day closes it (a visit of today is never closed by a sweep).
+- At deploy, a one-off cleanup closes every open visit of a past day before the switch date (never
+  one of today) and voids empty ones.
 - A day the server missed is closed later (up to a week back): rows of past days can change state the
   next morning.
 - A center with `endOfDay.releasePresent: false` keeps its waiting patients as they are.
