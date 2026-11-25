@@ -1,5 +1,5 @@
 // The Citas day screen (/scheduling/booked) without React: the row of `GET appointments/day`, the query
-// the filters send, the type buckets, the status shown, today's grouping and the URL state.
+// the filters send, the status shown, today's grouping and the URL state.
 // Specs: docs/specs/citas-day-screen.md (screen), docs/specs/appointment-lifecycle-switch-fe.md §5 (API).
 // No imports on purpose: Node runs this file's test on its own.
 
@@ -41,9 +41,6 @@ export interface DayListRow {
 }
 
 // ---- query ----------------------------------------------------------------------------------------
-
-export type TypeBucket = "all" | "new" | "followUp" | "therapies"
-export const TYPE_BUCKETS: readonly TypeBucket[] = ["all", "new", "followUp", "therapies"]
 
 /**
  * The query of `GET /api/v2/appointments/day`, typed by hand (not in schema.d.ts yet). Lists are comma
@@ -158,46 +155,17 @@ export function typeOptions(
   return [...medical, ...service]
 }
 
-function fitsBucket(o: TypeOption, bucket: TypeBucket): boolean {
-  switch (bucket) {
-    case "new":
-      return o.kind === "medical" && o.isNewPatientType
-    case "followUp":
-      return o.kind === "medical" && !o.isNewPatientType
-    case "therapies":
-      return o.kind === "service"
-    default:
-      return true
-  }
-}
-
-/** The entries the picker offers under a bucket (New: the new-patient type; Therapies: the services). */
-export function typeOptionsForBucket(options: readonly TypeOption[], bucket: TypeBucket): TypeOption[] {
-  return options.filter((o) => fitsBucket(o, bucket))
-}
-
-/** The picked ids that still fit `bucket`; while the options are unknown (null) the pick is kept as is. */
-export function pruneTypes(picked: readonly string[], options: readonly TypeOption[] | null, bucket: TypeBucket): string[] {
-  if (!options) return [...picked]
-  const fit = new Set(typeOptionsForBucket(options, bucket).map((o) => o.id))
-  return picked.filter((id) => fit.has(id))
-}
-
 /**
  * The picked entries the list is read with, or null while they cannot be told (a pick in the URL and the
  * options still loading: the list waits rather than reading unfiltered first). `options`: null while
  * loading, [] when their request failed (the pick is then dropped so the list always loads). Ids that
- * are not among the options, or do not fit the bucket, are left out.
+ * are not among the options are left out.
  */
-export function pickedTypes(
-  picked: readonly string[],
-  options: readonly TypeOption[] | null,
-  bucket: TypeBucket,
-): TypeOption[] | null {
+export function pickedTypes(picked: readonly string[], options: readonly TypeOption[] | null): TypeOption[] | null {
   if (picked.length === 0) return []
   if (!options) return null
   const ids = new Set(picked)
-  return typeOptionsForBucket(options, bucket).filter((o) => ids.has(o.id))
+  return options.filter((o) => ids.has(o.id))
 }
 
 /**
@@ -209,7 +177,6 @@ export function pickedTypes(
 export function dayListQuery(p: {
   date: string
   centerId?: string
-  bucket: TypeBucket
   bookedBy: string
   portfolioOwner?: string
   myStaffId: string | null | undefined
@@ -218,8 +185,6 @@ export function dayListQuery(p: {
 }): DayListQuery {
   const q: DayListQuery = { date: p.date }
   if (p.centerId) q.centerIds = p.centerId
-  if (p.bucket === "new" || p.bucket === "followUp") q.kind = "medical"
-  if (p.bucket === "therapies") q.kind = "service"
   const typeIds = (p.picked ?? []).filter((o) => o.kind === "medical").map((o) => o.id)
   const serviceIds = (p.picked ?? []).filter((o) => o.kind === "service").map((o) => o.id)
   if (typeIds.length) q.appointmentTypeIds = typeIds.join(",")
@@ -235,20 +200,6 @@ export function dayListQuery(p: {
 /** `dayListQuery` as a query string. */
 export function dayListSearch(p: Parameters<typeof dayListQuery>[0]): URLSearchParams {
   return new URLSearchParams(Object.entries(dayListQuery(p)) as [string, string][])
-}
-
-/** New / follow-up split the medical rows by the new-patient type; the backend already narrowed the kind. */
-export function keepByBucket(rows: DayListRow[], bucket: TypeBucket): DayListRow[] {
-  switch (bucket) {
-    case "new":
-      return rows.filter((r) => r.kind === "medical" && r.isNewPatientType)
-    case "followUp":
-      return rows.filter((r) => r.kind === "medical" && !r.isNewPatientType)
-    case "therapies":
-      return rows.filter((r) => r.kind === "service")
-    default:
-      return rows
-  }
 }
 
 // ---- status ---------------------------------------------------------------------------------------
@@ -339,7 +290,6 @@ export function dayKpis(rows: readonly DayListRow[]): DayKpis {
 
 export interface DayScreenParams {
   date: string
-  bucket: TypeBucket
   includeCancelled: boolean
   /** Picked appointment-type and service ids (the "Type" picker); [] = no type filter. */
   types: string[]
@@ -349,13 +299,11 @@ export interface DayScreenParams {
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 
-/** `?date=&type=&cancelled=1&types=a,b&owner=`; a missing or malformed day opens on `today`. */
+/** `?date=&cancelled=1&types=a,b&owner=`; a missing or malformed day opens on `today`. */
 export function parseDayScreenParams(sp: URLSearchParams, today: string): DayScreenParams {
   const date = sp.get("date") ?? ""
-  const type = sp.get("type") as TypeBucket | null
   return {
     date: DAY.test(date) ? date : today,
-    bucket: type && TYPE_BUCKETS.includes(type) ? type : "all",
     includeCancelled: sp.get("cancelled") === "1",
     types: [...new Set((sp.get("types") ?? "").split(",").filter(Boolean))],
     owner: sp.get("owner") || null,
@@ -364,7 +312,6 @@ export function parseDayScreenParams(sp: URLSearchParams, today: string): DayScr
 
 export function toDayScreenSearch(p: DayScreenParams): string {
   const parts = [`date=${p.date}`]
-  if (p.bucket !== "all") parts.push(`type=${p.bucket}`)
   if (p.includeCancelled) parts.push("cancelled=1")
   if (p.types.length) parts.push(`types=${p.types.map(encodeURIComponent).join(",")}`)
   if (p.owner && p.owner !== BOOKED_BY_ALL) parts.push(`owner=${encodeURIComponent(p.owner)}`)

@@ -22,14 +22,11 @@ import { getServicios } from "@/lib/api/servicios";
 import { myStaffId } from "@/lib/auth/who-did-it";
 import {
   dayListSearch,
-  keepByBucket,
   nowInZone,
   parseDayScreenParams,
   pickedTypes,
-  pruneTypes,
   toDayScreenSearch,
   typeOptions as toTypeOptions,
-  typeOptionsForBucket,
   type DayScreenParams,
   type TypeOption,
 } from "@/lib/appointments-day/day-list";
@@ -97,7 +94,7 @@ export function AppointmentsDayScreen() {
     [centerId],
   );
   const options = typesRes.state.kind === "ok" ? typesRes.state.data : typesRes.state.kind === "fail" ? [] : null;
-  const picked = pickedTypes(params.types, options, params.bucket);
+  const picked = pickedTypes(params.types, options);
 
   const search =
     bookedBy === null || owner === null || picked === null
@@ -115,9 +112,7 @@ export function AppointmentsDayScreen() {
   const state =
     (centro.cargando && !centerId) || (centerId && search === null)
       ? { kind: "loading" as const }
-      : res.state.kind === "ok"
-        ? { kind: "ok" as const, data: keepByBucket(res.state.data, params.bucket) }
-        : res.state;
+      : res.state;
 
   return (
     <PageContainer>
@@ -135,9 +130,7 @@ export function AppointmentsDayScreen() {
         date={params.date}
         today={zoneNow.day}
         onDate={(date) => setParams({ date })}
-        bucket={params.bucket}
-        onBucket={(bucket) => setParams({ bucket, types: pruneTypes(params.types, options, bucket) })}
-        typeOptions={options && typeOptionsForBucket(options, params.bucket)}
+        typeOptions={options}
         types={params.types}
         onTypes={(types) => setParams({ types })}
         bookedBy={bookedBy}

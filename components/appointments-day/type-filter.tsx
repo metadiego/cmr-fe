@@ -18,8 +18,7 @@ import {
 import type { TypeOption } from "@/lib/appointments-day/day-list";
 
 // The Citas screen's "Type" picker: several medical types and therapy services at once, grouped
-// (Consultations / Therapies). `options` are already narrowed to the current bucket
-// (lib/appointments-day/day-list.ts `typeOptionsForBucket`); nothing picked = no type filter.
+// (Consultations / Therapies); nothing picked = no type filter.
 export function TypeFilter({
   options,
   picked,

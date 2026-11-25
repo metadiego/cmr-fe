@@ -38,15 +38,13 @@ TIME   PATIENT          TYPE            BOOKED BY   STATUS                 ACTIO
   `BookingScreen`.
 - **Center**: same center selector as the booking screen (`CentroPantallaSelector`), respecting
   multi-center scope.
-- **Type filter**: All / New (medical type whose key is `nueva`, `esTipoNueva`) / Follow-up (other
-  medical types) / Therapies (any service).
-- **Type picker** (owner, 2026-11-25: "up top we need an appointment type filter"): a multi-select next
-  to "Booked by", grouped Consultations (the active `GET appointments/types`) / Therapies (the center's
-  `GET services`). It only offers what fits the bucket (New: `nueva`; Follow-up: the other medical
-  types; Therapies: services); changing the bucket drops picks that no longer fit. Nothing picked = no
-  type filter. Picks go to the day list as `appointmentTypeIds` / `serviceIds`; the backend leaves out
-  a kind with no list of its own (only services picked = only therapies). Kept in the URL (`?types=a,b`).
-  Logic: `lib/appointments-day/day-list.ts` (`typeOptions`, `pruneTypes`, `pickedTypes`).
+- **Type picker** (owner, 2026-11-25: "up top we need an appointment type filter"; the All / New /
+  Follow-up / Therapies tabs were removed the same day, owner: "lets remove this filter"): a
+  multi-select next to "Booked by", grouped Consultations (the active `GET appointments/types`) /
+  Therapies (the center's `GET services`). Nothing picked = no type filter. Picks go to the day list as
+  `appointmentTypeIds` / `serviceIds`; the backend leaves out a kind with no list of its own (only
+  services picked = only therapies). Kept in the URL (`?types=a,b`).
+  Logic: `lib/appointments-day/day-list.ts` (`typeOptions`, `pickedTypes`).
 - **Booked by**: staff picker. "Booked by" is **only** who created the appointment (call-center agent or
   reception) — owner, 2026-11-25 (it replaces the 2026-11-23 "created or portfolio" rule). Defaults to
   **Me**; options: Me, All, any staff member. Remembered per device. Sent as `staffIds`.
@@ -101,7 +99,7 @@ Week/month views; booking from this screen (that is "Agendar cita"); replacing t
 `StatusBadge` for every stage (new English stages get their tone once in `kit/status-badge.tsx`),
 `EmptyState`/`ErrorState`/skeletons. **Confirmar** is the row's one primary action; Change and Cancel go
 in the row's ⋮ menu, Cancel through `useConfirm()` + a reason (`FormDialog`). Filtering logic (type
-buckets, today grouping) lives in `lib/` with tests. Must work at 375px and in dark mode.
+picker, today grouping) lives in `lib/` with tests. Must work at 375px and in dark mode.
 
 ## Left to the builder
 

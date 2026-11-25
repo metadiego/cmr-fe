@@ -7363,11 +7363,7 @@
     "nextDay": "Next day",
     "today": "Today",
     "type": {
-      "label": "Type",
-      "all": "All",
-      "new": "New",
-      "followUp": "Follow-up",
-      "therapies": "Therapies"
+      "new": "New"
     },
     "typeFilter": {
       "label": "Type",

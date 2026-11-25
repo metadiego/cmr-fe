@@ -10,9 +10,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { SegmentedControl } from "@/components/kit/segmented-control";
 import { TypeFilter } from "@/components/appointments-day/type-filter";
-import { BOOKED_BY_ALL, BOOKED_BY_ME, TYPE_BUCKETS, type TypeBucket, type TypeOption } from "@/lib/appointments-day/day-list";
+import { BOOKED_BY_ALL, BOOKED_BY_ME, type TypeOption } from "@/lib/appointments-day/day-list";
 import { shiftDay } from "@/lib/agenda/appointment-form";
 
 export interface StaffOption {
@@ -20,15 +19,13 @@ export interface StaffOption {
   name: string;
 }
 
-// The Citas screen's filters (docs/specs/citas-day-screen.md): the day (‹ date › Today), the type bucket,
+// The Citas screen's filters (docs/specs/citas-day-screen.md): the day (‹ date › Today),
 // the appointment types / services picked, who created it ("Booked by"), whose
 // portfolio the patient is in ("Cartera"), and whether cancelled rows show. Everything wraps at 375px.
 export function DayToolbar({
   date,
   today,
   onDate,
-  bucket,
-  onBucket,
   typeOptions,
   types,
   onTypes,
@@ -45,9 +42,7 @@ export function DayToolbar({
   date: string;
   today: string;
   onDate: (d: string) => void;
-  bucket: TypeBucket;
-  onBucket: (b: TypeBucket) => void;
-  /** The picker's entries for the current bucket; null while they load. */
+  /** The picker's entries; null while they load. */
   typeOptions: TypeOption[] | null;
   types: string[];
   onTypes: (ids: string[]) => void;
@@ -83,13 +78,6 @@ export function DayToolbar({
       </div>
 
       {kpis && <div className="w-full">{kpis}</div>}
-
-      <SegmentedControl
-        ariaLabel={t("type.label")}
-        value={bucket}
-        onChange={onBucket}
-        options={TYPE_BUCKETS.map((b) => ({ value: b, label: t(`type.${b}`) }))}
-      />
 
       <TypeFilter options={typeOptions} picked={types} onChange={onTypes} />
 

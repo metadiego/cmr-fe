@@ -8,18 +8,15 @@ import {
   bookedByOrDefault,
   dayKpis,
   dayListSearch,
-  keepByBucket,
   ownerChoice,
   nowInZone,
   parseDayScreenParams,
   rowStatus,
   todayGroup,
   pickedTypes,
-  pruneTypes,
   todaySummary,
   toDayScreenSearch,
   typeOptions,
-  typeOptionsForBucket,
   type DayListRow,
   type TypeOption,
 } from "./day-list.ts"
@@ -50,7 +47,7 @@ function row(over: Partial<DayListRow> = {}): DayListRow {
 // ---- query --------------------------------------------------------------------------------------
 
 test("the query always names the day and the center", () => {
-  const sp = dayListSearch({ date: "2026-11-24", centerId: "c1", bucket: "all", bookedBy: BOOKED_BY_ALL, myStaffId: "me1", includeCancelled: false })
+  const sp = dayListSearch({ date: "2026-11-24", centerId: "c1", bookedBy: BOOKED_BY_ALL, myStaffId: "me1", includeCancelled: false })
   assert.equal(sp.get("date"), "2026-11-24")
   assert.equal(sp.get("centerIds"), "c1")
   assert.equal(sp.has("kind"), false)
@@ -58,23 +55,15 @@ test("the query always names the day and the center", () => {
   assert.equal(sp.has("includeCancelled"), false)
 })
 
-test("type buckets map to the kind (new and follow-up are medical, therapies are sessions)", () => {
-  const q = (bucket: "new" | "followUp" | "therapies") =>
-    dayListSearch({ date: "2026-11-24", bucket, bookedBy: BOOKED_BY_ALL, myStaffId: null, includeCancelled: false }).get("kind")
-  assert.equal(q("new"), "medical")
-  assert.equal(q("followUp"), "medical")
-  assert.equal(q("therapies"), "service")
-})
-
 test("booked by: me sends my staff id, a person sends theirs, all sends none", () => {
-  const base = { date: "2026-11-24", bucket: "all" as const, includeCancelled: false }
+  const base = { date: "2026-11-24", includeCancelled: false }
   assert.equal(dayListSearch({ ...base, bookedBy: BOOKED_BY_ME, myStaffId: "me1" }).get("staffIds"), "me1")
   assert.equal(dayListSearch({ ...base, bookedBy: "s9", myStaffId: "me1" }).get("staffIds"), "s9")
   assert.equal(dayListSearch({ ...base, bookedBy: BOOKED_BY_ALL, myStaffId: "me1" }).has("staffIds"), false)
 })
 
 test("cartera: sent as portfolioOwnerIds only when it is not All (me = my staff id); booked by stays creator-only", () => {
-  const base = { date: "2026-11-24", bucket: "all" as const, includeCancelled: false, bookedBy: BOOKED_BY_ME, myStaffId: "me1" }
+  const base = { date: "2026-11-24", includeCancelled: false, bookedBy: BOOKED_BY_ME, myStaffId: "me1" }
   const none = dayListSearch(base)
   assert.equal(none.has("portfolioOwnerIds"), false)
   assert.equal(dayListSearch({ ...base, portfolioOwner: BOOKED_BY_ALL }).has("portfolioOwnerIds"), false)
@@ -101,7 +90,7 @@ test("cartera: All never waits; Me waits for me and needs a staff record; a staf
 })
 
 test("the URL keeps the cartera (?owner=), All is left out", () => {
-  const base = { date: "2026-11-24", bucket: "all" as const, includeCancelled: false, types: [] }
+  const base = { date: "2026-11-24", includeCancelled: false, types: [] }
   assert.equal(parseDayScreenParams(new URLSearchParams("owner=s9"), "2026-11-25").owner, "s9")
   assert.equal(parseDayScreenParams(new URLSearchParams(""), "2026-11-25").owner, null)
   assert.equal(toDayScreenSearch({ ...base, owner: "s9" }), "date=2026-11-24&owner=s9")
@@ -110,7 +99,7 @@ test("the URL keeps the cartera (?owner=), All is left out", () => {
 })
 
 test("show cancelled asks the backend for cancelled and rescheduled rows", () => {
-  const sp = dayListSearch({ date: "2026-11-24", bucket: "all", bookedBy: BOOKED_BY_ALL, myStaffId: null, includeCancelled: true })
+  const sp = dayListSearch({ date: "2026-11-24", bookedBy: BOOKED_BY_ALL, myStaffId: null, includeCancelled: true })
   assert.equal(sp.get("includeCancelled"), "true")
 })
 
@@ -120,16 +109,6 @@ test("booked by defaults to me, falls back to all for someone with no staff reco
   assert.equal(bookedByOrDefault(null, null), BOOKED_BY_ALL)
   assert.equal(bookedByOrDefault(BOOKED_BY_ME, null), BOOKED_BY_ALL)
   assert.equal(bookedByOrDefault("", "me1"), BOOKED_BY_ME)
-})
-
-// ---- buckets --------------------------------------------------------------------------------------
-
-test("new and follow-up split the medical rows by the new-patient type", () => {
-  const rows = [row({ id: "n", isNewPatientType: true }), row({ id: "f" }), row({ id: "s", kind: "service", serviceName: "Laser", typeLabel: null })]
-  assert.deepEqual(keepByBucket(rows, "new").map((r) => r.id), ["n"])
-  assert.deepEqual(keepByBucket(rows, "followUp").map((r) => r.id), ["f"])
-  assert.deepEqual(keepByBucket(rows, "therapies").map((r) => r.id), ["s"])
-  assert.deepEqual(keepByBucket(rows, "all").map((r) => r.id), ["n", "f", "s"])
 })
 
 // ---- status --------------------------------------------------------------------------------------
@@ -193,15 +172,15 @@ test("the summary counts each group", () => {
 
 // ---- URL ------------------------------------------------------------------------------------------
 
-test("the URL keeps the day, the type and show-cancelled; a bad day falls back", () => {
-  const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&type=therapies&cancelled=1"), "2026-11-25")
-  assert.deepEqual(p, { date: "2026-11-24", bucket: "therapies", includeCancelled: true, types: [], owner: null })
-  const bad = parseDayScreenParams(new URLSearchParams("date=24-11&type=nope"), "2026-11-25")
-  assert.deepEqual(bad, { date: "2026-11-25", bucket: "all", includeCancelled: false, types: [], owner: null })
-  assert.equal(toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: [], owner: null }), "date=2026-11-24")
+test("the URL keeps the day and show-cancelled; a bad day falls back", () => {
+  const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&cancelled=1"), "2026-11-25")
+  assert.deepEqual(p, { date: "2026-11-24", includeCancelled: true, types: [], owner: null })
+  const bad = parseDayScreenParams(new URLSearchParams("date=24-11"), "2026-11-25")
+  assert.deepEqual(bad, { date: "2026-11-25", includeCancelled: false, types: [], owner: null })
+  assert.equal(toDayScreenSearch({ date: "2026-11-24", includeCancelled: false, types: [], owner: null }), "date=2026-11-24")
   assert.equal(
-    toDayScreenSearch({ date: "2026-11-24", bucket: "new", includeCancelled: true, types: [], owner: null }),
-    "date=2026-11-24&type=new&cancelled=1",
+    toDayScreenSearch({ date: "2026-11-24", includeCancelled: true, types: [], owner: null }),
+    "date=2026-11-24&cancelled=1",
   )
 })
 
@@ -251,40 +230,25 @@ test("type options: the active medical types, then the services, each group by n
   )
 })
 
-test("type options fit the bucket: new = the 'nueva' type, follow-up = the other medical types, therapies = services", () => {
-  const ids = (b: Parameters<typeof typeOptionsForBucket>[1]) => typeOptionsForBucket(OPTIONS, b).map((o) => o.id)
-  assert.deepEqual(ids("all"), ["tN", "tS", "sL", "sV"])
-  assert.deepEqual(ids("new"), ["tN"])
-  assert.deepEqual(ids("followUp"), ["tS"])
-  assert.deepEqual(ids("therapies"), ["sL", "sV"])
-})
-
-test("changing the bucket drops the picked types that no longer fit; unknown options keep the pick", () => {
-  assert.deepEqual(pruneTypes(["tN", "tS", "sL"], OPTIONS, "followUp"), ["tS"])
-  assert.deepEqual(pruneTypes(["tN", "sL"], OPTIONS, "therapies"), ["sL"])
-  assert.deepEqual(pruneTypes(["tN", "sL"], OPTIONS, "all"), ["tN", "sL"])
-  assert.deepEqual(pruneTypes(["tN", "sL"], null, "therapies"), ["tN", "sL"])
-})
-
 test("picked types: none picked never waits; a pick waits for the options; a failed list ([]) drops it", () => {
-  assert.deepEqual(pickedTypes([], null, "all"), [])
-  assert.equal(pickedTypes(["tN"], null, "all"), null)
-  assert.deepEqual(pickedTypes(["tN"], [], "all"), [])
+  assert.deepEqual(pickedTypes([], null), [])
+  assert.equal(pickedTypes(["tN"], null), null)
+  assert.deepEqual(pickedTypes(["tN"], []), [])
   assert.deepEqual(
-    pickedTypes(["sL", "gone", "tN"], OPTIONS, "therapies")?.map((o) => o.id),
-    ["sL"],
+    pickedTypes(["sL", "gone", "tN"], OPTIONS)?.map((o) => o.id),
+    ["tN", "sL"],
   )
 })
 
 test("the query sends the picked medical types and services as comma lists; none picked sends neither", () => {
-  const base = { date: "2026-11-24", bucket: "all" as const, bookedBy: BOOKED_BY_ALL, myStaffId: null, includeCancelled: false }
+  const base = { date: "2026-11-24", bookedBy: BOOKED_BY_ALL, myStaffId: null, includeCancelled: false }
   const none = dayListSearch({ ...base, picked: [] })
   assert.equal(none.has("appointmentTypeIds"), false)
   assert.equal(none.has("serviceIds"), false)
-  const onlyServices = dayListSearch({ ...base, picked: pickedTypes(["sL", "sV"], OPTIONS, "all") ?? [] })
+  const onlyServices = dayListSearch({ ...base, picked: pickedTypes(["sL", "sV"], OPTIONS) ?? [] })
   assert.equal(onlyServices.get("serviceIds"), "sL,sV")
   assert.equal(onlyServices.has("appointmentTypeIds"), false)
-  const mix = dayListSearch({ ...base, picked: pickedTypes(["tS", "sV"], OPTIONS, "all") ?? [] })
+  const mix = dayListSearch({ ...base, picked: pickedTypes(["tS", "sV"], OPTIONS) ?? [] })
   assert.equal(mix.get("appointmentTypeIds"), "tS")
   assert.equal(mix.get("serviceIds"), "sV")
 })
@@ -293,7 +257,7 @@ test("the URL keeps the picked types (?types=a,b), deduplicated", () => {
   const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&types=tS,sV,,tS"), "2026-11-25")
   assert.deepEqual(p.types, ["tS", "sV"])
   assert.equal(
-    toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: ["tS", "sV"], owner: null }),
+    toDayScreenSearch({ date: "2026-11-24", includeCancelled: false, types: ["tS", "sV"], owner: null }),
     "date=2026-11-24&types=tS,sV",
   )
 })

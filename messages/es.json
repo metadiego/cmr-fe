@@ -7363,11 +7363,7 @@
     "nextDay": "Día siguiente",
     "today": "Hoy",
     "type": {
-      "label": "Tipo",
-      "all": "Todas",
-      "new": "Nueva",
-      "followUp": "Seguimiento",
-      "therapies": "Terapias"
+      "new": "Nueva"
     },
     "typeFilter": {
       "label": "Tipo",
