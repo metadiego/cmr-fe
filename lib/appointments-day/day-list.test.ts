@@ -517,3 +517,34 @@ test("type badge: new, follow-up, or the therapy's service", () => {
     label: "Láser",
   })
 })
+
+test("a service both clinics have is one entry; picking it sends every clinic's id", () => {
+  const opts = typeOptions(
+    [],
+    [
+      { id: "sL1", name: "Láser" },
+      { id: "sV", name: "Vitamina C" },
+      { id: "sL2", name: "LÁSER " },
+    ]
+  )
+  assert.deepEqual(
+    opts.map((o) => [o.id, o.ids]),
+    [
+      ["sL1", ["sL1", "sL2"]],
+      ["sV", ["sV"]],
+    ]
+  )
+  const picked = pickedTypes(["sL2"], opts) ?? []
+  assert.deepEqual(
+    picked.map((o) => o.id),
+    ["sL1"]
+  )
+  const q = dayListSearch({
+    date: "2026-11-24",
+    bookedBy: BOOKED_BY_ALL,
+    myStaffId: null,
+    includeCancelled: false,
+    picked,
+  })
+  assert.equal(q.get("serviceIds"), "sL1,sL2")
+})

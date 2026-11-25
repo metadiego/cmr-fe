@@ -151,6 +151,8 @@ export const NEW_PATIENT_TYPE_SLUG = "nueva"
 /** One entry of the "Type" picker: a medical appointment type or a therapy service. */
 export interface TypeOption {
   id: string
+  /** Every id the entry stands for: one service per clinic shares one entry (same name). */
+  ids: string[]
   kind: DayKind
   label: string
   isNewPatientType: boolean
@@ -175,19 +177,29 @@ export function typeOptions(
     .filter((t) => t.active !== false)
     .map((t) => ({
       id: t.id,
+      ids: [t.id],
       kind: "medical" as const,
       label: t.name,
       isNewPatientType: t.slug === NEW_PATIENT_TYPE_SLUG,
     }))
     .sort(byLabel)
-  const service = services
-    .map((s) => ({
-      id: s.id,
-      kind: "service" as const,
-      label: s.name,
-      isNewPatientType: false,
-    }))
-    .sort(byLabel)
+  // Each clinic has its own copy of a service: one entry per name, carrying every clinic's id.
+  const byName = new Map<string, TypeOption>()
+  for (const s of services) {
+    const key = s.name.trim().toLocaleUpperCase()
+    const seen = byName.get(key)
+    if (seen) {
+      if (!seen.ids.includes(s.id)) seen.ids.push(s.id)
+    } else
+      byName.set(key, {
+        id: s.id,
+        ids: [s.id],
+        kind: "service",
+        label: s.name,
+        isNewPatientType: false,
+      })
+  }
+  const service = [...byName.values()].sort(byLabel)
   return [...medical, ...service]
 }
 
@@ -204,7 +216,7 @@ export function pickedTypes(
   if (picked.length === 0) return []
   if (!options) return null
   const ids = new Set(picked)
-  return options.filter((o) => ids.has(o.id))
+  return options.filter((o) => o.ids.some((id) => ids.has(id)))
 }
 
 /**
@@ -229,7 +241,7 @@ export function dayListQuery(p: {
     .map((o) => o.id)
   const serviceIds = (p.picked ?? [])
     .filter((o) => o.kind === "service")
-    .map((o) => o.id)
+    .flatMap((o) => o.ids)
   if (typeIds.length) q.appointmentTypeIds = typeIds.join(",")
   if (serviceIds.length) q.serviceIds = serviceIds.join(",")
   const creator = staffFor(p.bookedBy, p.myStaffId)

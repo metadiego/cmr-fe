@@ -32,15 +32,16 @@ export function TypeFilter({
   const t = useTranslations("appointmentsDay.typeFilter")
   const medical = options?.filter((o) => o.kind === "medical") ?? []
   const services = options?.filter((o) => o.kind === "service") ?? []
-  const shown = options?.filter((o) => picked.includes(o.id)) ?? []
+  const isPicked = (o: TypeOption) => o.ids.some((id) => picked.includes(id))
+  const shown = options?.filter(isPicked) ?? []
   const summary =
     shown.length === 0
       ? t("any")
       : shown.length === 1
         ? shown[0].label
         : t("count", { count: shown.length })
-  const toggle = (id: string, on: boolean) =>
-    onChange(on ? [...picked, id] : picked.filter((p) => p !== id))
+  const toggle = (o: TypeOption, on: boolean) =>
+    onChange(on ? [...picked, o.id] : picked.filter((p) => !o.ids.includes(p)))
 
   const group = (label: string, list: TypeOption[]) =>
     list.length > 0 && (
@@ -51,9 +52,9 @@ export function TypeFilter({
         {list.map((o) => (
           <DropdownMenuCheckboxItem
             key={o.id}
-            checked={picked.includes(o.id)}
+            checked={isPicked(o)}
             onSelect={(e) => e.preventDefault()}
-            onCheckedChange={(on) => toggle(o.id, on)}
+            onCheckedChange={(on) => toggle(o, on)}
           >
             <span className="truncate">{o.label}</span>
           </DropdownMenuCheckboxItem>
