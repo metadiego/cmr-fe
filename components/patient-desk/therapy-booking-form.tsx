@@ -13,10 +13,12 @@ import { useBookingResult } from "@/components/appointments-booking/booking-resu
 import { type PickableTherapy } from "@/components/patient-desk/therapy-picker-list";
 import { StepLabel, TherapyVisitPanel } from "@/components/patient-desk/therapy-visit-panel";
 import { TrainDayDetail, useWhyText } from "@/components/patient-desk/train-day-detail";
+import { PatientBookedList } from "@/components/patient-desk/patient-booked-list";
 import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { usePatientBookingRules } from "@/hooks/use-patient-booking-rules";
+import { usePatientAppointments } from "@/hooks/use-patient-appointments";
 import { useTrainSeriesAvailability } from "@/hooks/use-train-series-availability";
 import { buildSeriesRows, canBookSeries } from "@/lib/agenda/booking/series";
 import { overridesOf, setRowTime, dropRow, seriesHealth, seriesSpan } from "@/lib/agenda/booking/series-booking";
@@ -30,6 +32,8 @@ import {
   type EditableItem,
 } from "@/lib/agenda/booking/series-edit";
 import { trainBookingResult } from "@/lib/agenda/booking/booking-result";
+import { leftAfterEachDate, otherOnDay } from "@/lib/agenda/booking/train-booked";
+import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
 import { sameDaySessions, trainCap, trainOrder, trainRequest } from "@/lib/agenda/booking/train-rows";
 import {
   dayTherapies,
@@ -50,6 +54,7 @@ import { todayPR } from "@/lib/format/fecha";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { listResources, bookTrain, bookTrainSeries, type Resource } from "@/lib/api/resources";
 import { getCentrosDondePuedo, getMyCentros, type Centro } from "@/lib/api/centers";
+import { getTiposCita, type TipoCita } from "@/lib/api/citas";
 import { ApiError, type ApiWarning } from "@/lib/api/types";
 import { warningText } from "@/lib/frontdesk/avisos";
 import { patientName } from "@/lib/pacientes/display-name";
@@ -114,6 +119,14 @@ export function TherapyBookingForm({
     return ids;
   }, [resRes.state]);
   const serviceName = (id: string) => servById.get(id)?.name ?? "—";
+  // What the patient already has booked (the Citas rail's list): shown beside the dates, never overwritten.
+  const booked = usePatientAppointments(patient?.id, center);
+  const typesRes = useResource<TipoCita[]>(() => getTiposCita());
+  const appointmentName = (a: PatientAppointment) =>
+    a.kind === "service"
+      ? serviceName(a.typeId)
+      : ((typesRes.state.kind === "ok" ? typesRes.state.data.find((x) => x.id === a.typeId)?.name : undefined) ??
+        tRoot("appointmentsBooking.patient.kindMedical"));
   const whyText = useWhyText(serviceName);
 
   // ---- What is being booked.
@@ -193,6 +206,8 @@ export function TherapyBookingForm({
     holidays: avail.holidays,
     existingDates: avail.existingDates,
   });
+  // Each therapy's sessions left once each visit is booked (the balance counted down date by date).
+  const leftAfter = leftAfterEachDate(rows.map((r) => ({ date: r.date, serviceIds: therapiesOn(r.date) })), balance);
   const rowsLoaded = avail.ready && rowDates.every((d) => avail.days[d] !== undefined);
   const rowsFailed = avail.failed || rowDates.some((d) => avail.days[d] === "error");
   // The summary (visit length, minutes, turns) describes a date with every ticked therapy on it.
@@ -431,6 +446,7 @@ export function TherapyBookingForm({
         {/* lg:pt-4 matches the left panel's padding, so both step labels sit on one line. */}
         <div className="min-w-0 space-y-4 lg:pt-4">
           <StepLabel n={2}>{t("stepDates")}</StepLabel>
+          {patient && <PatientBookedList data={booked} nameOf={appointmentName} visitDates={new Set(rowDates)} />}
           <SeriesFrequency
             mode={mode}
             onMode={(m) => {
@@ -511,6 +527,11 @@ export function TherapyBookingForm({
                     disabled={busy}
                     why={slotWhy(avail.trains[r.date], r.time)}
                     freeAlt={nearestFree(loadedDays[r.date], r.time)}
+                    left={leftAfter[r.date]}
+                    others={otherOnDay(booked.upcoming, r.date, therapiesOn(r.date)).map((a) => ({
+                      time: a.time,
+                      name: appointmentName(a),
+                    }))}
                     onUseTime={(time) => editItems((list) => setRowTime(list, r.index, time, seriesTime))}
                     onRemove={(id) => editDayTherapies(r.date, removeOff(off, r.date, id, selected))}
                     onRestore={(id) => editDayTherapies(r.date, restoreOff(off, r.date, id))}

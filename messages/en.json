@@ -7296,7 +7296,11 @@
     "whyOverbook": "At {time} it does not all fit ({reason}). Booking it anyway is an overbooking.",
     "whyBlocked": "{time} cannot be booked ({reason}).",
     "useTime": "Use {time}, free",
-    "notThisDay": "Not on this day:"
+    "notThisDay": "Not on this day:",
+    "lastOne": "the last one",
+    "bookedTitle": "Already booked",
+    "sameDateAsVisit": "same date",
+    "sameDayOthers": "Already that day: {list}"
   },
   "lifecycle": {
     "action": {
