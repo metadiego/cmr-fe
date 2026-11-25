@@ -55,10 +55,13 @@ export function TrainDayDetail({
   sessions,
   serviceIds,
   removed,
+  runOut,
   serviceName,
   disabled,
   why,
   freeAlt,
+  left,
+  others,
   onUseTime,
   onRemove,
   onRestore,
@@ -70,12 +73,18 @@ export function TrainDayDetail({
   serviceIds: string[];
   /** Ticked therapies taken off that day. */
   removed: string[];
+  /** Ticked therapies left out of that day because their sessions ran out on earlier dates. */
+  runOut: string[];
   serviceName: (id: string) => string;
   disabled: boolean;
   /** What the plan says about the row's hour. */
   why: SlotWhy | null;
   /** The nearest free hour that day, to offer when the row's hour does not fit. */
   freeAlt: string | null;
+  /** Sessions of each therapy left once this visit is booked (absent while the balance loads). */
+  left?: Record<string, number>;
+  /** The patient's other appointments that day (another therapy, a medical one), by time. */
+  others: { time: string | null; name: string }[];
   onUseTime: (time: string) => void;
   onRemove: (id: string) => void;
   onRestore: (id: string) => void;
@@ -118,6 +127,12 @@ export function TrainDayDetail({
                 >
                   {serviceName(leg.serviceId)}
                   {(leg.parallel || leg.together) && <span className="font-normal text-muted-foreground"> · {t("alongside")}</span>}
+                  {left?.[leg.serviceId] !== undefined && (
+                    <span className={cn("font-normal", left[leg.serviceId] > 0 ? "text-success-foreground" : "text-warning-foreground")}>
+                      {" · "}
+                      {left[leg.serviceId] > 0 ? t("left", { n: left[leg.serviceId] }) : t("lastOne")}
+                    </span>
+                  )}
                 </span>
                 {had && (
                   <span className="truncate text-[11px] text-destructive/80">
@@ -150,6 +165,13 @@ export function TrainDayDetail({
           );
         })}
       </ol>
+      {others.length > 0 && (
+        <p className="rounded-lg bg-info/60 px-3 py-1.5 text-xs text-info-foreground tabular-nums">
+          {t("sameDayOthers", {
+            list: others.map((o) => (o.time ? `${shortTime(o.time)} ${o.name}` : o.name)).join(" · "),
+          })}
+        </p>
+      )}
       {stuck && row.reason !== "duplicate" && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-warning/40 px-3 py-2 text-xs text-warning-foreground">
           <span>
@@ -164,6 +186,9 @@ export function TrainDayDetail({
             </Button>
           )}
         </div>
+      )}
+      {runOut.length > 0 && (
+        <p className="text-xs text-muted-foreground">{t("runOutBefore", { list: runOut.map(serviceName).join(", ") })}</p>
       )}
       {removed.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">

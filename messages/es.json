@@ -7103,7 +7103,8 @@
       "overBalanceReason": "Solo le quedan {n, plural, one {# sesión} other {# sesiones}} por agendar.",
       "otherCenterWarning": "Este paquete se compró en {center}; estás agendando en {here}.",
       "fullShort": "lleno",
-      "perWeekSummary": "{n, plural, one {# vez por semana} other {# veces por semana}}"
+      "perWeekSummary": "{n, plural, one {# vez por semana} other {# veces por semana}}",
+      "pickADay": "Elige al menos un día"
     },
     "toasts": {
       "appointmentSaved": "Cita guardada",
@@ -7302,6 +7303,11 @@
     "whyBlocked": "A las {time} no se puede agendar ({reason}).",
     "useTime": "Usar {time}, libre",
     "notThisDay": "Sin estas este día:",
+    "runOutBefore": "Sin sesiones para este día: {list}",
+    "lastOne": "la última",
+    "bookedTitle": "Ya agendadas",
+    "sameDateAsVisit": "misma fecha",
+    "sameDayOthers": "Ese día ya tiene: {list}",
     "bornConfirmed": "Agendar ya confirmada"
   },
   "lifecycle": {

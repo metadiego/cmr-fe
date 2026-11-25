@@ -100,13 +100,20 @@ export function fitLoadedTimes(
 /**
  * The "Semanal" series: walks forward from `start` (inclusive) one day at a time and keeps the days
  * whose weekday is in `weekdays` (1..6 = Mon..Sat, `getUTCDay` numbering), until `count` rows. The
- * start's weekday always counts, so the first row is the start. Sundays never match; holidays are
- * not skipped.
+ * start's weekday always counts (unless `startCounts` is false), so the first row is the start.
+ * Sundays never match; holidays are not skipped.
  */
-export function generateWeeklyPattern(start: string, weekdays: readonly number[], count: number): EditableItem[] {
+export function generateWeeklyPattern(
+  start: string,
+  weekdays: readonly number[],
+  count: number,
+  opts: { startCounts?: boolean } = {},
+): EditableItem[] {
   const wanted = new Set(weekdays.filter((d) => d >= 1 && d <= 6));
-  wanted.add(weekdayOf(start));
+  // `startCounts: false` (patient desk therapy form): only the chosen weekdays, none chosen = no rows.
+  if (opts.startCounts !== false) wanted.add(weekdayOf(start));
   wanted.delete(0);
+  if (wanted.size === 0) return [];
   const items: EditableItem[] = [];
   let date = start;
   // The start's weekday is in `wanted` (a Sunday start is the only exception: step past it).
