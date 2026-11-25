@@ -26,6 +26,8 @@ export function useAppointmentSlots(clinicId: string, date: string, typeId: stri
   }, [data]);
   return {
     slots,
+    /** The day's hours have answered (or failed): an empty list then means the type has none. */
+    loaded: res.state.kind !== "loading",
     duration: data?.durationMinutes ?? null,
     // The picked day's holiday (BE handoff booking-availability-fixes §D): explains an empty picker
     // (`closedByHoliday`); the informative kind (not blocking) is shown too.

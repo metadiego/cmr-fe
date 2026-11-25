@@ -11,7 +11,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import type { SeriesDay } from "@/hooks/use-series-availability";
 import type { SeriesRow } from "@/lib/agenda/booking/series";
-import { rowTimeOptions } from "@/lib/agenda/booking/series-booking";
+import { rowTimeOptions, type TimeOption } from "@/lib/agenda/booking/series-booking";
+import type { DaySlots } from "@/lib/agenda/booking/availability";
 import { rejectDate, type DateRejection } from "@/lib/agenda/booking/series-edit";
 import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
@@ -39,6 +40,10 @@ export function SeriesRows({
   onDate,
   onSuggestion,
   onDrop,
+  optionHint,
+  rowDetail,
+  statusLabel,
+  timeOptions = rowTimeOptions,
 }: {
   rows: SeriesRow[];
   days: Record<string, SeriesDay>;
@@ -51,6 +56,14 @@ export function SeriesRows({
   onDate: (index: number, date: string) => void;
   onSuggestion: (index: number, s: { date: string; time: string }) => void;
   onDrop: (index: number) => void;
+  /** Replaces the "N left" text after each hour (the patient desk's train shows its end time). */
+  optionHint?: (date: string, time: string) => string | null;
+  /** A line under a checked row (the patient desk's train: each therapy's time, or what blocks it). */
+  rowDetail?: (row: SeriesRow) => React.ReactNode;
+  /** Replaces a checked row's status text (the train names how many of its therapies clash). */
+  statusLabel?: (row: SeriesRow) => string | null;
+  /** The hours a row offers (the train keeps the ones it cannot book, disabled, to say why). */
+  timeOptions?: (day: DaySlots | null, current: string) => TimeOption[];
 }) {
   const t = useTranslations("appointmentsBooking.series");
   const tDay = useTranslations("appointmentsBooking.day");
@@ -71,7 +84,7 @@ export function SeriesRows({
         const day = days[r.date];
         const loading = checking || day === undefined;
         const failed = day === "error";
-        const options = rowTimeOptions(day === "error" ? null : day, r.time);
+        const options = timeOptions(day === "error" ? null : day, r.time);
         const blocked = !loading && !failed && r.status === "blocked";
         // Free is the normal case: a quiet green dot. Only what needs a look gets a coloured pill.
         const chip = loading
@@ -94,6 +107,8 @@ export function SeriesRows({
                     ),
                     tone: "bg-destructive/10 text-destructive",
                   };
+        const custom = !loading && !failed ? statusLabel?.(r) : null;
+        if (custom) chip.label = custom;
         const s = !loading && !failed ? r.suggestion : null;
         return (
           <li
@@ -118,7 +133,11 @@ export function SeriesRows({
                 <SelectTrigger
                   size="sm"
                   aria-label={t("time")}
-                  className="w-40 border-transparent bg-transparent tabular-nums shadow-none hover:border-input hover:bg-muted/50"
+                  className={cn(
+                    "w-40 border-transparent bg-transparent tabular-nums shadow-none hover:border-input hover:bg-muted/50",
+                    // A given hint can be long (the train's reasons): the menu says it, the closed select only the hour.
+                    optionHint && "[&_[data-hint]]:hidden",
+                  )}
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -128,9 +147,14 @@ export function SeriesRows({
                       {/* Each hour with its free places, like the day panel, so another hour is chosen
                           knowing what is open that day. */}
                       <span className="tabular-nums">{shortTime(o.time)}</span>
-                      {!o.disabled && (
-                        <span className={cn("text-xs", o.full ? "text-warning-foreground" : "text-muted-foreground")}>
-                          {o.full ? t("fullShort") : tDay("left", { n: o.free })}
+                      {/* A given hint is also said for an hour that cannot be booked: it is why. */}
+                      {(optionHint || !o.disabled) && (
+                        <span data-hint className={cn("text-xs", o.full ? "text-warning-foreground" : "text-muted-foreground")}>
+                          {optionHint
+                            ? optionHint(r.date, o.time)
+                            : o.full
+                              ? t("fullShort")
+                              : tDay("left", { n: o.free })}
                         </span>
                       )}
                     </SelectItem>
@@ -165,6 +189,7 @@ export function SeriesRows({
                 </Button>
               )}
             </div>
+            {rowDetail && !loading && !failed && rowDetail(r)}
             {refused?.index === r.index && (
               <p role="alert" className="pl-7 text-xs text-destructive">
                 {t(refused.reason === "past" ? "datePast" : refused.reason === "sunday" ? "dateSunday" : "dateTaken")}

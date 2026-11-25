@@ -104,12 +104,13 @@ export function SeriesFrequency({
   );
 }
 
-function Stepper({
+export function Stepper({
   label,
   value,
   min,
   max,
   disabled,
+  compact,
   onChange,
 }: {
   label: string;
@@ -117,30 +118,36 @@ function Stepper({
   min: number;
   max: number;
   disabled?: boolean;
+  /** Inside a list row (the patient desk's laser areas): 28px tall instead of 36. */
+  compact?: boolean;
   onChange: (n: number) => void;
 }) {
   const t = useTranslations("appointmentsBooking.series");
   return (
-    <div className="flex h-9 w-fit items-center rounded-md border border-input" role="group" aria-label={label}>
+    <div
+      className={cn("flex w-fit items-center rounded-md border border-input", compact ? "h-7 bg-background" : "h-9")}
+      role="group"
+      aria-label={label}
+    >
       <Button
         type="button"
         variant="ghost"
         size="icon"
-        className="size-9"
+        className={compact ? "size-7" : "size-9"}
         aria-label={`${label}: ${t("fewer")}`}
         disabled={disabled || value <= min}
         onClick={() => onChange(Math.max(min, value - 1))}
       >
         <HugeiconsIcon icon={MinusSignIcon} className="size-4" />
       </Button>
-      <span className="w-8 text-center text-sm font-medium tabular-nums" aria-live="polite">
+      <span className={cn("text-center text-sm font-medium tabular-nums", compact ? "w-6" : "w-8")} aria-live="polite">
         {value}
       </span>
       <Button
         type="button"
         variant="ghost"
         size="icon"
-        className="size-9"
+        className={compact ? "size-7" : "size-9"}
         aria-label={`${label}: ${t("more")}`}
         disabled={disabled || value >= max}
         onClick={() => onChange(Math.min(max, value + 1))}

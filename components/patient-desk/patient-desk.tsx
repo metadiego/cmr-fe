@@ -34,7 +34,7 @@ import { UbicacionEnVivoWidget as LiveLocationWidget } from "@/components/frontd
 import { MedicosLibresWidget } from "@/components/frontdesk/medicos-libres-widget"
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button"
 import { TechnicianStatusButton } from "@/components/frontdesk/technician-status-button"
-import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler"
+import { TherapyBookingForm } from "@/components/patient-desk/therapy-booking-form"
 import { BoardAppointmentModal } from "@/components/tablero/board-appointment-modal"
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker"
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
@@ -49,12 +49,6 @@ import { PageContainer, PageHeader } from "@/components/ui/page"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DatePicker } from "@/components/ui/date-picker"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -524,35 +518,23 @@ export function PatientDesk() {
         />
       )}
 
-      <Dialog
-        open={schedule.open}
-        onOpenChange={(o) => !o && setSchedule({ open: false })}
-      >
-        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>{tRoot("programarCitas.title")}</DialogTitle>
-          </DialogHeader>
-          {schedule.open && (
-            <TherapyDayScheduler
-              defaultDate={date}
-              defaultServiceId={schedule.servicioId}
-              centro={gate.centro}
-              lockedPatient={
-                schedule.pacienteId
-                  ? {
-                      id: schedule.pacienteId,
-                      name: schedule.pacienteNombre ?? "",
-                    }
-                  : undefined
-              }
-              onBooked={({ close }) => {
-                data.refresh()
-                if (close) setSchedule({ open: false })
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {schedule.open && (
+        <TherapyBookingForm
+          patient={
+            schedule.pacienteId
+              ? { id: schedule.pacienteId, name: schedule.pacienteNombre ?? "" }
+              : undefined
+          }
+          center={gate.centro}
+          defaultDate={date}
+          defaultServiceId={schedule.servicioId}
+          onClose={() => setSchedule({ open: false })}
+          onBooked={() => {
+            data.refresh()
+            setSchedule({ open: false })
+          }}
+        />
+      )}
 
       {addingConsultation.open && (
         <BoardAppointmentModal

@@ -174,6 +174,7 @@ export function NotificarCell({
   centroId,
   optionsByCol,
   onRefresh,
+  inline = false,
 }: {
   col: ColumnaEfectiva;
   fila: CitaFila;
@@ -181,6 +182,8 @@ export function NotificarCell({
   centroId?: string;
   optionsByCol?: Record<string, Opcion[]>;
   onRefresh?: () => void;
+  /** Patient desk block headers: the assignee as a pill left of the bell, one line high. */
+  inline?: boolean;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -252,7 +255,7 @@ export function NotificarCell({
   const record = typeof fila.record === "string" ? fila.record : "";
 
   return (
-    <div className="flex flex-col items-start">
+    <div className={inline ? "flex flex-row-reverse items-center gap-1" : "flex flex-col items-start"}>
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -263,7 +266,10 @@ export function NotificarCell({
         <HugeiconsIcon icon={Notification03Icon} className="size-4" />
       </button>
       {render.mostrarAsignado && nombreAsignado && (
-        <div className="mt-0.5 max-w-[9rem] truncate text-[11px] leading-tight text-muted-foreground" title={nombreAsignado}>
+        <div
+          title={nombreAsignado}
+          className={cn("truncate text-[11px] text-muted-foreground", inline ? "max-w-[11rem] rounded-full bg-card px-2 py-0.5 font-medium ring-1 ring-foreground/10" : "mt-0.5 max-w-[9rem] leading-tight")}
+        >
           {nombreAsignado}
         </div>
       )}
@@ -492,19 +498,31 @@ export function TableroDinamico({
   return (
     <>
     <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+      {/* leadWidths (patient desk): headers and flow styled like its service blocks (small uppercase,
+          left-aligned, «FLUJO», no coloured dots; the flow from the left). The agenda board keeps its look. */}
       <table className="w-full text-sm">
-        <thead className="bg-muted/40 text-xs text-muted-foreground">
-          <tr>
+        <thead className={leadWidths ? undefined : "bg-muted/40 text-xs text-muted-foreground"}>
+          <tr className={cn(leadWidths && "border-b text-left text-[11px] tracking-wide text-muted-foreground uppercase")}>
             {loading && groups.length === 0 && <BoardHeadSkeleton />}
             {groups.map((g, gi) =>
               g.kind === "flow" ? (
-                <th key={`flow-${gi}`} className={cn("px-3 py-2 text-center font-medium whitespace-nowrap", leadWidths && "w-72")}>
-                  {tRoot("tableroBoard.flowTitle")}
+                <th
+                  key={`flow-${gi}`}
+                  className={cn("px-3 py-2 whitespace-nowrap", leadWidths ? "w-60 font-semibold" : "text-center font-medium")}
+                >
+                  {leadWidths ? tRoot("frontdesk.flujo") : tRoot("tableroBoard.flowTitle")}
                 </th>
               ) : (
-                <th key={g.col.clave} className={cn("px-3 py-2 text-left font-medium whitespace-nowrap", leadWidths && gi === 0 && "w-60")}>
+                <th
+                  key={g.col.clave}
+                  className={cn(
+                    "px-3 py-2 text-left whitespace-nowrap",
+                    leadWidths ? "font-semibold" : "font-medium",
+                    leadWidths && gi === 0 && "w-52",
+                  )}
+                >
                   {(() => {
-                    const c = colColor(g.col);
+                    const c = leadWidths ? null : colColor(g.col);
                     return (
                       <span className="inline-flex items-center gap-1.5" style={c ? { color: c } : undefined}>
                         {c && <span className="inline-block size-1.5 rounded-full" style={{ backgroundColor: c }} />}
@@ -533,7 +551,7 @@ export function TableroDinamico({
               <tr key={fila.id} className="border-t transition-colors hover:bg-muted/40">
                 {groups.map((g, gi) =>
                   g.kind === "flow" ? (
-                    <td key={`flow-${gi}`} className={"px-3 " + rowPad}>
+                    <td key={`flow-${gi}`} className={cn("px-3", rowPad, leadWidths && "[&>div]:justify-start")}>
                       <FlujoAtencion
                         tablero={tablero ?? ""}
                         fila={fila}
