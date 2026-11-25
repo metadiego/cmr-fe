@@ -20,13 +20,6 @@ export function trainDaySlots(train: PatientTrain): DaySlots {
   };
 }
 
-/** When the patient leaves if the train starts at `time` (HH:mm), or null when that time is not planned. */
-export function trainEndsAt(train: PatientTrain | null | undefined, time: string): string | null {
-  const t = normalizeTime(time);
-  const s = train?.slots.find((x) => normalizeTime(x.time) === t);
-  return s?.endsAt ? normalizeTime(s.endsAt) : null;
-}
-
 /**
  * How many visits one booking may hold: the ticked therapy with the fewest sessions left caps it (a
  * visit books every ticked therapy), and never more than 20. A ticked therapy missing from the balance

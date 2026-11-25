@@ -11,7 +11,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import type { SeriesDay } from "@/hooks/use-series-availability";
 import type { SeriesRow } from "@/lib/agenda/booking/series";
-import { rowTimeOptions } from "@/lib/agenda/booking/series-booking";
+import { rowTimeOptions, type TimeOption } from "@/lib/agenda/booking/series-booking";
+import type { DaySlots } from "@/lib/agenda/booking/availability";
 import { rejectDate, type DateRejection } from "@/lib/agenda/booking/series-edit";
 import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,7 @@ export function SeriesRows({
   optionHint,
   rowDetail,
   statusLabel,
+  timeOptions = rowTimeOptions,
 }: {
   rows: SeriesRow[];
   days: Record<string, SeriesDay>;
@@ -60,6 +62,8 @@ export function SeriesRows({
   rowDetail?: (row: SeriesRow) => React.ReactNode;
   /** Replaces a checked row's status text (the train names how many of its therapies clash). */
   statusLabel?: (row: SeriesRow) => string | null;
+  /** The hours a row offers (the train keeps the ones it cannot book, disabled, to say why). */
+  timeOptions?: (day: DaySlots | null, current: string) => TimeOption[];
 }) {
   const t = useTranslations("appointmentsBooking.series");
   const tDay = useTranslations("appointmentsBooking.day");
@@ -80,7 +84,7 @@ export function SeriesRows({
         const day = days[r.date];
         const loading = checking || day === undefined;
         const failed = day === "error";
-        const options = rowTimeOptions(day === "error" ? null : day, r.time);
+        const options = timeOptions(day === "error" ? null : day, r.time);
         const blocked = !loading && !failed && r.status === "blocked";
         // Free is the normal case: a quiet green dot. Only what needs a look gets a coloured pill.
         const chip = loading
@@ -139,7 +143,8 @@ export function SeriesRows({
                       {/* Each hour with its free places, like the day panel, so another hour is chosen
                           knowing what is open that day. */}
                       <span className="tabular-nums">{shortTime(o.time)}</span>
-                      {!o.disabled && (
+                      {/* A given hint is also said for an hour that cannot be booked: it is why. */}
+                      {(optionHint || !o.disabled) && (
                         <span className={cn("text-xs", o.full ? "text-warning-foreground" : "text-muted-foreground")}>
                           {optionHint
                             ? optionHint(r.date, o.time)

@@ -10,6 +10,7 @@ import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import type { PatientTrain } from "@/lib/api/resources";
 import type { SeriesRow } from "@/lib/agenda/booking/series";
 import { sameDaySessions, trainSchedule } from "@/lib/agenda/booking/train-rows";
+import { closingOf, type SlotWhy } from "@/lib/agenda/booking/train-why";
 import type { ExistingSession } from "@/hooks/use-train-series-availability";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,33 @@ import { cn } from "@/lib/utils";
 // (never the last one; the ✕ shows on hover from sm up) and put back from the chips below.
 
 const STATUS_KEYS = ["pendiente", "presente", "en_terapia", "asistido"] as const;
+const SHORT_REASONS: Record<string, "whyFull" | "whyNoStaff" | "whyOverMax" | "whyHoliday"> = {
+  "therapies.full": "whyFull",
+  "therapies.noStaff": "whyNoStaff",
+  "therapies.overMaxPerPatient": "whyOverMax",
+  "therapies.holiday": "whyHoliday",
+};
+
+/**
+ * One short line for an arrival hour, from the BE's plan: when the patient leaves if it is free, else
+ * which therapy does not fit and why (room full, no staff, over the per-patient limit, holiday), or by
+ * how many minutes the visit ends after closing. Overbookable hours start with «sobrecupo».
+ */
+export function useWhyText(serviceName: (id: string) => string): (why: SlotWhy, train: PatientTrain | undefined) => string {
+  const t = useTranslations("therapyBooking");
+  return (why, train) => {
+    if (why.kind === "free") return why.endsAt ? t("leaves", { time: shortTime(why.endsAt) }) : t("free");
+    const therapy = why.serviceId ? serviceName(why.serviceId) : t("theVisit");
+    const closing = closingOf(train);
+    const short =
+      why.lateBy !== null && why.endsAt && closing
+        ? t("whyPastClosing", { end: shortTime(why.endsAt), n: why.lateBy, closing: shortTime(closing) })
+        : SHORT_REASONS[why.reasons[0] ?? ""]
+          ? t(SHORT_REASONS[why.reasons[0]], { therapy })
+          : t("whyOther", { therapy });
+    return why.kind === "overbook" ? `${t("overbookShort")} · ${short}` : short;
+  };
+}
 
 export function TrainDayDetail({
   row,
@@ -29,6 +57,9 @@ export function TrainDayDetail({
   removed,
   serviceName,
   disabled,
+  why,
+  freeAlt,
+  onUseTime,
   onRemove,
   onRestore,
 }: {
@@ -41,6 +72,11 @@ export function TrainDayDetail({
   removed: string[];
   serviceName: (id: string) => string;
   disabled: boolean;
+  /** What the plan says about the row's hour. */
+  why: SlotWhy | null;
+  /** The nearest free hour that day, to offer when the row's hour does not fit. */
+  freeAlt: string | null;
+  onUseTime: (time: string) => void;
   onRemove: (id: string) => void;
   onRestore: (id: string) => void;
 }) {
@@ -54,6 +90,9 @@ export function TrainDayDetail({
     ? plan.legs
     : serviceIds.map((serviceId) => ({ serviceId, start: null, end: null, minutes: null, parallel: false, together: false }));
   const canRemove = serviceIds.length > 1;
+  const whyText = useWhyText(serviceName);
+  // The therapy that does not fit at this hour is marked on its line (overbooking or not bookable).
+  const stuck = why && why.kind !== "free" ? why : null;
 
   return (
     <div className="ml-7 flex flex-col gap-1.5">
@@ -70,7 +109,13 @@ export function TrainDayDetail({
                 {leg.start && leg.end ? `${shortTime(leg.start)} – ${shortTime(leg.end)}` : "—"}
               </span>
               <span className="flex min-w-0 flex-col py-1 leading-tight">
-                <span className={cn("truncate", had && "font-medium text-destructive")}>
+                <span
+                  className={cn(
+                    "truncate",
+                    stuck?.serviceId === leg.serviceId && "font-medium text-warning-foreground",
+                    had && "font-medium text-destructive",
+                  )}
+                >
                   {serviceName(leg.serviceId)}
                   {(leg.parallel || leg.together) && <span className="font-normal text-muted-foreground"> · {t("alongside")}</span>}
                 </span>
@@ -105,9 +150,24 @@ export function TrainDayDetail({
           );
         })}
       </ol>
+      {stuck && row.reason !== "duplicate" && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-warning/40 px-3 py-2 text-xs text-warning-foreground">
+          <span>
+            {t(stuck.kind === "overbook" ? "whyOverbook" : "whyBlocked", {
+              time: shortTime(row.time),
+              reason: whyText({ ...stuck, kind: "blocked" }, train),
+            })}
+          </span>
+          {freeAlt && freeAlt !== row.time && (
+            <Button type="button" size="xs" variant="outline" disabled={disabled} onClick={() => onUseTime(freeAlt)}>
+              {t("useTime", { time: shortTime(freeAlt) })}
+            </Button>
+          )}
+        </div>
+      )}
       {removed.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-          <span>{t("removedFromDay")}</span>
+          <span>{t("notThisDay")}</span>
           {removed.map((id) => (
             <Button
               key={id}

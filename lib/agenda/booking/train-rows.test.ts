@@ -7,7 +7,6 @@ import {
   sameDaySessions,
   trainCap,
   trainDaySlots,
-  trainEndsAt,
   trainOrder,
   trainRequest,
   trainSchedule,
@@ -64,14 +63,6 @@ test("trainDaySlots marks an unselectable misfit unavailable", () => {
 
 test("trainDaySlots normalizes the time to HH:mm", () => {
   assert.equal(trainDaySlots(train([slot({ time: "9:00:00" })])).slots[0].time, "09:00");
-});
-
-test("trainEndsAt returns the slot's end as HH:mm, null for an unknown time or no train", () => {
-  const t = train([slot({ time: "09:00", endsAt: "09:25:00" })]);
-  assert.equal(trainEndsAt(t, "9:00"), "09:25");
-  assert.equal(trainEndsAt(t, "10:00"), null);
-  assert.equal(trainEndsAt(null, "09:00"), null);
-  assert.equal(trainEndsAt(train([slot({ time: "09:00", endsAt: "" })]), "09:00"), null);
 });
 
 test("trainCap takes the smallest balance among the ticked therapies", () => {

@@ -5,16 +5,14 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { useSubmit } from "@/components/kit/use-submit";
-import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { SeriesRows, useDayLabel } from "@/components/appointments-booking/series-rows";
 import { SeriesFrequency, type SeriesMode } from "@/components/appointments-booking/series-frequency";
 import { useBookingResult } from "@/components/appointments-booking/booking-result-provider";
-import { TherapyPickerList, type PickableTherapy } from "@/components/patient-desk/therapy-picker-list";
-import { TrainDayDetail } from "@/components/patient-desk/train-day-detail";
+import { type PickableTherapy } from "@/components/patient-desk/therapy-picker-list";
+import { StepLabel, TherapyVisitPanel } from "@/components/patient-desk/therapy-visit-panel";
+import { TrainDayDetail, useWhyText } from "@/components/patient-desk/train-day-detail";
 import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
@@ -32,7 +30,7 @@ import {
   type EditableItem,
 } from "@/lib/agenda/booking/series-edit";
 import { trainBookingResult } from "@/lib/agenda/booking/booking-result";
-import { sameDaySessions, trainCap, trainEndsAt, trainOrder, trainRequest } from "@/lib/agenda/booking/train-rows";
+import { sameDaySessions, trainCap, trainOrder, trainRequest } from "@/lib/agenda/booking/train-rows";
 import {
   dayTherapies,
   forgetTherapy,
@@ -44,6 +42,7 @@ import {
   trainMaxRows,
   type DayOff,
 } from "@/lib/agenda/booking/train-days";
+import { nearestFree, slotWhy, trainTimeOptions } from "@/lib/agenda/booking/train-why";
 import { refitRows, seriesKey, trainFormReason, type TrainFormReason } from "@/lib/agenda/booking/train-form";
 import type { DaySlots } from "@/lib/agenda/booking/availability";
 import { weekdayOf } from "@/lib/agenda/recurring-plan";
@@ -82,7 +81,6 @@ export function TherapyBookingForm({
   const t = useTranslations("therapyBooking");
   const tSeries = useTranslations("appointmentsBooking.series");
   const tType = useTranslations("appointmentsBooking.typePicker");
-  const tPlanner = useTranslations("therapyPlanner");
   const tRoot = useTranslations();
   const { can, ready: permsReady } = useCan();
   const canBook = can("frontdesk.create");
@@ -116,6 +114,7 @@ export function TherapyBookingForm({
     return ids;
   }, [resRes.state]);
   const serviceName = (id: string) => servById.get(id)?.name ?? "—";
+  const whyText = useWhyText(serviceName);
 
   // ---- What is being booked.
   const [selected, setSelected] = React.useState<string[]>([]);
@@ -201,7 +200,8 @@ export function TherapyBookingForm({
     selected,
   );
   const firstTrain = summary.train;
-  const order = trainOrder(firstTrain, selected);
+  // The order shown is the one booked: yours once reordered, else the BE's (scarcest rooms first).
+  const order = keepOrder ? selected : trainOrder(firstTrain, selected);
   const addDate = nextDate(items, 1, todayPR());
   const single = items.length === 1;
   const health = seriesHealth(rows);
@@ -339,10 +339,7 @@ export function TherapyBookingForm({
     if (next) setEdits({ key: genKey, items: next, off: forgetTherapy(off, id) });
   };
 
-  const names = order.map(serviceName);
-  const title = selected.length
-    ? `${names.length > 2 ? t("titleMore", { name: names[0], n: names.length - 1 }) : names.join(" + ")} · ${dayLabel(rows[0]?.date ?? defaultDate)} · ${shortTime(rows[0]?.time ?? seriesTime)}`
-    : `${t("title")} · ${dayLabel(defaultDate)}`;
+  const title = t("title");
   const busy = submitting;
 
   return (
@@ -351,6 +348,7 @@ export function TherapyBookingForm({
       onOpenChange={(o) => !o && onClose()}
       size="2xl"
       title={title}
+      description={givenPatient?.name}
       onSubmit={() => submit()}
       submitLabel={single ? tSeries("book") : t("bookVisits", { n: items.length })}
       submitting={submitting}
@@ -358,121 +356,77 @@ export function TherapyBookingForm({
       blocked={!!reason}
       reason={reason}
     >
-      {/* Wide screens: who and what on the left, when on the right (as the old scheduler); one column below lg. */}
-      <div className="grid gap-x-8 gap-y-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <div className="min-w-0 space-y-4">
-          <Field label={tSeries("patient")} required>
-            {givenPatient ? (
-              <span className="block text-sm font-medium">{givenPatient.name}</span>
-            ) : (
+      {/* Wide screens: the visit (what) in a tinted panel on the left, the dates (when) on the right; one column below lg. */}
+      <div className="grid gap-x-6 gap-y-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div className="min-w-0 space-y-4 rounded-xl bg-muted/40 p-4 dark:bg-muted/20">
+          <StepLabel n={1}>{t("stepVisit")}</StepLabel>
+          {!givenPatient && (
+            <Field label={tSeries("patient")} required>
               <PatientPickerWithCreate
                 value={picked}
                 onChange={(p) => {
                   setPicked(p);
                   setSelected([]);
                   setAreas({});
+                  setKeepOrder(false);
                   setDefaultApplied(false);
                   setEdits(null);
                   setBaseTime("");
                 }}
                 centerIds={patientCentersRes.state.kind === "ok" ? patientCenterIds : undefined}
               />
-            )}
-          </Field>
-
-          <Field label={t("therapies")} required>
-            {!patient ? (
-              <p className="text-sm text-muted-foreground">{tSeries("pickPatient")}</p>
-            ) : catalogueFailed ? (
-              <div className="flex items-center gap-2 text-sm text-destructive">
-                <span>{t("catalogueFailed")}</span>
-                <Button
-                  type="button"
-                  size="xs"
-                  variant="outline"
-                  onClick={() => {
-                    if (servRes.state.kind === "fail") servRes.reload();
-                    if (resRes.state.kind === "fail") resRes.reload();
-                  }}
-                >
-                  {tRoot("appointmentsBooking.retry")}
-                </Button>
-              </div>
-            ) : rules.bookableHidden ? (
-              <p className="text-sm text-muted-foreground">{tType("noBookablePermission")}</p>
-            ) : balanceState === "fail" ? (
-              <div className="flex items-center gap-2 text-sm text-destructive">
-                <span>{tType("bookableFailed")}</span>
-                <Button type="button" size="xs" variant="outline" onClick={reloadBalance}>
-                  {tRoot("appointmentsBooking.retry")}
-                </Button>
-              </div>
-            ) : balanceState !== "ok" || servRes.state.kind === "loading" ? (
-              <div className="divide-y overflow-hidden rounded-xl border bg-card" aria-busy>
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="flex items-center gap-3 px-3 py-3">
-                    <Skeleton className="size-4 rounded" />
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="ml-auto h-5 w-24 rounded-full" />
-                  </div>
-                ))}
-              </div>
-            ) : pickable.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noneBookable")}</p>
-            ) : (
-              <>
-                <TherapyPickerList
-                  services={pickable}
-                  selected={selected}
-                  order={order}
-                  areas={areas}
-                  disabled={busy}
-                  onToggle={toggle}
-                  onAreas={(id, n) => {
-                    setAreas((a) => ({ ...a, [id]: n }));
-                    trainChanged();
-                  }}
-                />
-                {selected.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">{t("pickHint")}</span>
-                ) : (
-                  // The visit at a glance: how long the patient stays and who decides the order.
-                  <div className="divide-y rounded-xl border bg-muted/30 text-sm">
-                    <div className="flex items-baseline justify-between gap-3 px-3 py-2">
-                      <span className="text-muted-foreground">{t("visitLength")}</span>
-                      <span className="font-medium tabular-nums">
-                        {firstTrain
-                          ? t("minutes", { n: firstTrain.patientMinutes })
-                          : summary.pending
-                            ? tSeries("checking")
-                            : t("visitVaries")}
-                      </span>
-                    </div>
-                    {selected.length > 1 && (
-                      <label className="flex cursor-pointer items-start justify-between gap-3 px-3 py-2">
-                        <span className="flex min-w-0 flex-col">
-                          <span>{tPlanner("keepOrder")}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {keepOrder ? t("orderKept") : t("orderAuto")}
-                          </span>
-                        </span>
-                        <Switch
-                          checked={keepOrder}
-                          disabled={busy}
-                          onCheckedChange={(v) => {
-                            setKeepOrder(v);
-                            trainChanged();
-                          }}
-                        />
-                      </label>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </Field>
+            </Field>
+          )}
+          <TherapyVisitPanel
+            state={
+              !patient
+                ? "noPatient"
+                : catalogueFailed
+                  ? "catalogueFailed"
+                  : rules.bookableHidden
+                    ? "balanceHidden"
+                    : balanceState === "fail"
+                      ? "balanceFailed"
+                      : balanceState !== "ok" || servRes.state.kind === "loading"
+                        ? "loading"
+                        : "ready"
+            }
+            onRetryCatalogue={() => {
+              if (servRes.state.kind === "fail") servRes.reload();
+              if (resRes.state.kind === "fail") resRes.reload();
+            }}
+            onRetryBalance={reloadBalance}
+            pickable={pickable}
+            selected={selected}
+            order={order}
+            areas={areas}
+            keepOrder={keepOrder}
+            disabled={busy}
+            stay={
+              firstTrain
+                ? t("minutes", { n: firstTrain.patientMinutes })
+                : summary.pending
+                  ? tSeries("checking")
+                  : t("visitVaries")
+            }
+            onReorder={(ids) => {
+              setSelected(ids);
+              setKeepOrder(true);
+              trainChanged();
+            }}
+            onAutoOrder={() => {
+              setKeepOrder(false);
+              trainChanged();
+            }}
+            onToggle={toggle}
+            onAreas={(id, n) => {
+              setAreas((x) => ({ ...x, [id]: n }));
+              trainChanged();
+            }}
+          />
         </div>
         <div className="min-w-0 space-y-4">
+          <StepLabel n={2}>{t("stepDates")}</StepLabel>
           <SeriesFrequency
             mode={mode}
             onMode={(m) => {
@@ -532,9 +486,10 @@ export function TherapyBookingForm({
                 }
                 onSuggestion={() => {}}
                 onDrop={(index) => editItems((list) => dropRow(list, index), moveOff(off, items[index]?.date ?? "", null))}
+                timeOptions={trainTimeOptions}
                 optionHint={(date, time) => {
-                  const end = trainEndsAt(avail.trains[date], time);
-                  return end ? t("endsAt", { time: shortTime(end) }) : null;
+                  const why = slotWhy(avail.trains[date], time);
+                  return why ? whyText(why, avail.trains[date]) : null;
                 }}
                 statusLabel={(r) => {
               if (r.status !== "blocked" || r.reason !== "duplicate") return null;
@@ -550,6 +505,9 @@ export function TherapyBookingForm({
                     removed={selected.filter((id) => !therapiesOn(r.date).includes(id))}
                     serviceName={serviceName}
                     disabled={busy}
+                    why={slotWhy(avail.trains[r.date], r.time)}
+                    freeAlt={nearestFree(loadedDays[r.date], r.time)}
+                    onUseTime={(time) => editItems((list) => setRowTime(list, r.index, time, seriesTime))}
                     onRemove={(id) => editDayTherapies(r.date, removeOff(off, r.date, id, selected))}
                     onRestore={(id) => editDayTherapies(r.date, restoreOff(off, r.date, id))}
                   />
@@ -584,3 +542,4 @@ export function TherapyBookingForm({
     </FormDialog>
   );
 }
+
