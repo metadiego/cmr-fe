@@ -440,6 +440,11 @@ export type PendienteEntrega = {
   multiplicadores?: Record<string, number> | null; // NO en el mapa — dejado en español
   /** Laser areas each session covers (cmr-be #689); null when unknown or not an area product. */
   areasPerSession?: number | null;
+  /** The invoice this package came from; null for a legacy package with no invoice row. */
+  invoiceId?: string | null;
+  invoiceNumber?: string | null;
+  /** Legacy-import reference, shown when there is no invoiceNumber (handoff-transferir-tratamiento-completo). */
+  legacyReference?: string | null;
 };
 export function getPendientesEntrega(pacienteId: string, centroId?: string): Promise<PendienteEntrega[]> {
   return apiFetch<unknown>(

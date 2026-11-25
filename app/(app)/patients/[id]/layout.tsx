@@ -354,7 +354,7 @@ function PacienteDetail({
         )}
         {puedeTransferir && (
           <TabsContent value="transfer-treatment">
-            <FichaTransferirTratamiento pacienteId={p.id} pacienteNombre={fullName(p)} centro={centroId} />
+            <FichaTransferirTratamiento pacienteId={p.id} centro={centroId} />
           </TabsContent>
         )}
       </Tabs>

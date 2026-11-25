@@ -71,3 +71,38 @@ export function listTransfers(patientId: string, centroId?: string): Promise<Tre
     centroId,
   );
 }
+
+// POST /invoices/packages/transfer-many (cmr-be #710, handoff-transferir-tratamiento-completo): moves
+// several packages to one destination patient (and, when that destination is the SAME patient, to
+// another center) in a single all-or-nothing call. Field names are the handoff's own — Spanish,
+// unlike the English-named sibling `transferPackage` above — because this is a brand-new endpoint
+// (not yet deployed: a live POST returned ENTITY_NOT_FOUND / "Cannot POST" on 2026-11-25) with its own
+// contract; `almacenOrigenId`/`almacenDestinoId` follow the same Spanish-naming pattern as the rest of
+// this payload but are UNVERIFIED (the handoff's own payload example omits them) — confirm against the
+// real BE response once #710 ships.
+export type TransferManyItemPayload = {
+  paqueteId: string;
+  sesiones: number;
+};
+
+export type TransferManyPayload = {
+  items: TransferManyItemPayload[];
+  pacienteDestinoId: string;
+  clinicDestinoId?: string;
+  motivo: string;
+  modo?: "virtual" | "fisica";
+  almacenOrigenId?: string;
+  almacenDestinoId?: string;
+};
+
+export type TransferManyResult = {
+  transferencias: TreatmentTransfer[];
+};
+
+export function transferManyPackages(payload: TransferManyPayload, centroId?: string): Promise<TransferManyResult> {
+  return apiFetch<TransferManyResult>(
+    `/invoices/packages/transfer-many`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
