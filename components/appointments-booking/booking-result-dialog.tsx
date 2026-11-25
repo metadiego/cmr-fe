@@ -1,14 +1,14 @@
 "use client";
 
-import * as React from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert02Icon, CheckmarkCircle02Icon, Stethoscope02Icon } from "@hugeicons/core-free-icons";
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { FormFooter } from "@/components/kit/form-footer";
 import { parseDayUTC } from "@/lib/format/fecha";
-import { buildReportHtml } from "@/lib/reports/print-document";
+import { buildAppointmentSheetHtml } from "@/lib/agenda/booking/appointment-sheet";
+import { useSheetItems } from "@/hooks/use-sheet-items";
 import type { BookingResult, BookingResultItem } from "@/lib/agenda/booking/booking-result";
 import { shortTime } from "./booking-toolbar";
 import { DateTile } from "./date-tile";
@@ -52,77 +52,57 @@ function ItemCard({ item }: { item: BookingResultItem }) {
   );
 }
 
-/** The house logo, the same asset the reports print. */
-const PRINT_LOGO = "/img/logo_cmr.png";
+/** The black-and-white house logo: the sheet goes to the front desks' mono printers. */
+const PRINT_LOGO = "/img/logo_cmr_bw.png";
 
-/** The patient-facing printout's body: never shown on screen; «Imprimir» copies its HTML into its own
- *  window with the reports' letterhead (lib/reports/print-document.ts). Printing in place came out BLANK:
- *  the shell's print CSS isolates the thermal receipt and hides everything else. */
-const PrintSheet = React.forwardRef<HTMLDivElement, { result: BookingResult }>(function PrintSheet({ result }, ref) {
-  const t = useTranslations("appointmentsBooking.result");
-  const format = useFormatter();
-  const { patient } = result;
-  return (
-    <div ref={ref} hidden>
-      <div>
-        <h2 className="print-section">{t("printHeading")}</h2>
-        <p className="text-sm">
-          {patient.name}
-          {patient.record && ` · ${t("record", { n: patient.record })}`}
-        </p>
-      </div>
-      <table className="w-full border-collapse text-left text-sm">
-        <thead>
-          <tr className="border-b">
-            <th className="py-1.5 pr-4 font-semibold">{t("colDate")}</th>
-            <th className="py-1.5 pr-4 font-semibold">{t("colTime")}</th>
-            <th className="py-1.5 pr-4 font-semibold">{t("colService")}</th>
-            <th className="py-1.5 font-semibold">{t("colDoctor")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {result.items.map((i) => (
-            <tr key={`${i.date}|${i.time}|${i.typeName}`} className="border-b align-top">
-              <td className="py-1.5 pr-4 tabular-nums">
-                {formatDay(format, i.date)}
-                {i.from && <div className="text-xs">{movedFromText(t, format, i.from)}</div>}
-              </td>
-              <td className="py-1.5 pr-4 tabular-nums">{shortTime(i.time)}</td>
-              <td className="py-1.5 pr-4">{i.typeName}</td>
-              <td className="py-1.5">{i.kind === "medical" ? (i.doctor ?? "") : ""}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {result.center.phone && <p>{t("printCallUs", { phone: result.center.phone })}</p>}
-    </div>
-  );
-});
+/** The patient-facing sheet as a full HTML document, every string translated and formatted here. */
+function sheetHtml(result: BookingResult, items: BookingResultItem[], t: ReturnType<typeof useTranslations>, format: Format, locale: string): string {
+  const { patient, center } = result;
+  return buildAppointmentSheetHtml({
+    lang: locale,
+    logoUrl: `${window.location.origin}${PRINT_LOGO}`,
+    center,
+    heading: t("printHeading"),
+    patientName: patient.name,
+    record: patient.record ? t("record", { n: patient.record }) : null,
+    rows: items.map((i) => {
+      const d = parseDayUTC(i.date);
+      return {
+        weekday: d ? format.dateTime(d, "dayWeekdayOnly") : "",
+        day: d ? String(d.getUTCDate()) : "",
+        month: d ? format.dateTime(d, "monthShort") : "",
+        dateLong: d ? format.dateTime(d, "dayWeekdayLong") : i.date,
+        time: i.time ? shortTime(i.time) : "",
+        service: i.typeName,
+        doctor: i.kind === "medical" ? (i.doctor ?? null) : null,
+        movedFrom: i.from ? movedFromText(t, format, i.from) : null,
+      };
+    }),
+    callUs: center.phone ? t("printCallUs", { phone: center.phone }) : null,
+    printedOn: t("printPrintedOn", { date: format.dateTime(new Date(), "dateAndTime") }),
+  });
+}
 
 /**
  * What a booking or a move produced: a confirmation header, one card per appointment (date tile, time,
  * service, doctor; a moved one shows the old date struck through), what was skipped and why, and the
- * BE's warnings. «Imprimir» prints the patient-facing sheet; «Cerrar» closes.
+ * BE's warnings. «Imprimir» prints the patient-facing sheet, which also lists the patient's other
+ * appointments on those days (hooks/use-sheet-items.ts); «Cerrar» closes.
  */
 export function BookingResultDialog({ result, onClose }: { result: BookingResult; onClose: () => void }) {
   const t = useTranslations("appointmentsBooking.result");
   const format = useFormatter();
   const { patient, center } = result;
   const n = result.items.length;
-  const sheet = React.useRef<HTMLDivElement>(null);
-  const print = () => {
-    const el = sheet.current;
-    if (!el) return;
+  const locale = useLocale();
+  const sheetItems = useSheetItems(result);
+  const print = async () => {
+    // Opened before the await: a window opened after one is blocked as a popup.
     const w = window.open("", "_blank", "width=900,height=1100");
     if (!w) return; // popup blocked
-    w.document.write(
-      buildReportHtml({
-        title: center.name,
-        subtitle: [center.address, center.phone].filter(Boolean).join(" · ") || undefined,
-        bodyHtml: el.innerHTML,
-        logoUrl: `${window.location.origin}${PRINT_LOGO}`,
-      }),
-    );
+    const items = await sheetItems();
+    if (w.closed) return;
+    w.document.write(sheetHtml(result, items, t, format, locale));
     w.document.close();
     w.focus();
     // Wait for the logo so it is on the page, not a blank box.
@@ -189,7 +169,6 @@ export function BookingResultDialog({ result, onClose }: { result: BookingResult
           cancelLabel={t("close")}
         />
 
-        <PrintSheet ref={sheet} result={result} />
       </DialogContent>
     </Dialog>
   );
