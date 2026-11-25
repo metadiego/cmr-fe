@@ -7131,7 +7131,7 @@
     "resetOrder": "Back to automatic",
     "addTherapy": "Add therapy",
     "add": "Add",
-    "visitEmpty": "Add the visit's therapies below.",
+    "visitEmpty": "Add the visit's therapies above.",
     "removeFromVisit": "Remove {therapy} from the visit",
     "dragHandle": "Move {therapy} (also with ↑ ↓)",
     "moveUp": "Move {therapy} up",

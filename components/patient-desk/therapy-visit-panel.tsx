@@ -8,8 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TherapyAddList, TrainVisitList, type PickableTherapy } from "@/components/patient-desk/therapy-picker-list";
 
 // The left panel of the patient desk's therapy form, «1 · La visita»: what blocks listing the therapies
-// (no patient, a failed catalogue or balance, loading), else the visit in its order with who decides
-// that order, and the therapies that can still be added.
+// (no patient, a failed catalogue or balance, loading), else the therapies that can be added on top
+// and, under them, the visit in its order with who decides that order.
 
 export type VisitPanelState = "noPatient" | "catalogueFailed" | "balanceHidden" | "balanceFailed" | "loading" | "ready";
 
@@ -81,6 +81,12 @@ export function TherapyVisitPanel({
   const others = pickable.filter((p) => !selected.includes(p.id));
   return (
     <>
+      {others.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{t("addTherapy")}</p>
+          <TherapyAddList services={others} disabled={disabled} onAdd={onToggle} />
+        </div>
+      )}
       {selected.length === 0 ? (
         <p className="rounded-xl border border-dashed bg-card px-3 py-4 text-center text-sm text-muted-foreground">
           {t("visitEmpty")}
@@ -108,12 +114,6 @@ export function TherapyVisitPanel({
               )}
             </p>
           )}
-        </div>
-      )}
-      {others.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{t("addTherapy")}</p>
-          <TherapyAddList services={others} disabled={disabled} onAdd={onToggle} />
         </div>
       )}
     </>
