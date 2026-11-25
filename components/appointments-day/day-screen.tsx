@@ -85,8 +85,13 @@ export function AppointmentsDayScreen() {
     [centerId],
   );
 
+  // Until the screen's center is known, the list is loading (never an empty day that is not one).
   const state =
-    res.state.kind === "ok" ? { kind: "ok" as const, data: keepByBucket(res.state.data, params.bucket) } : res.state;
+    centro.cargando && !centerId
+      ? { kind: "loading" as const }
+      : res.state.kind === "ok"
+        ? { kind: "ok" as const, data: keepByBucket(res.state.data, params.bucket) }
+        : res.state;
   const summary = isToday && state.kind === "ok" ? todaySummary(state.data, zoneNow.hhmm) : null;
 
   return (

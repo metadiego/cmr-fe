@@ -88,3 +88,23 @@ Check-in por `POST visits/check-in` (4b), el nuevo fin de día (4c), regenerar `
 de desplegar 4a), sembrar el ítem de menú en el BE, `service-booking-form.tsx` /
 `recurring-booking-modal.tsx` / `therapy-day-scheduler.tsx` (altas de terapia sin casilla de
 confirmar: siguen naciendo sin confirmar, como hoy).
+
+## Cómo quedó (25-nov-2026)
+
+- Lógica en `lib/` con tests: `lib/lifecycle/allowed-actions.ts`, `lib/lifecycle/confirm-on-create.ts`,
+  `lib/board/available-transitions.ts`, `lib/appointments-day/day-list.ts`, y `allowed` en
+  `lib/tablero/toggle-hora.ts`. Tests: 1412 en `main` → 1449 en la rama, todos verdes.
+- Pantalla: `app/(app)/scheduling/booked/page.tsx` + `components/appointments-day/*`; reutiliza
+  `CancelAppointmentDialog` (con título/etiqueta opcionales) y `EditAppointmentModal`.
+- Tableros: `TableroAcciones`, `CeldaToggleHora`, `FlujoAtencion`. Patient desk: `FilaSesion` con
+  `drawFromAllowedActions` (solo lo pasa `ServiceSessionsTable`), `RowMenu` (Cancelar / no atendido,
+  Confirmar / Desconfirmar terapia).
+- Nota: `TableroDinamico` (y con él `CeldaToggleHora` / `FlujoAtencion`) lo comparten Atención, el
+  Patient desk y la pestaña Consulta del tablero deprecado; después de 4a esas casillas siguen la lista
+  en los tres. Solo puede ocultar movimientos que el BE ya rechaza. Las filas de terapia del tablero
+  deprecado no cambian.
+- `lib/lifecycle/board-action-rules.ts` (PR #154) no existe en `main`: si #154 se mezcla antes, hay que
+  borrarlo y quitar sus usos al integrar esta rama (los mismos ficheros: `tablero-acciones.tsx`,
+  `cita-actions.tsx`, `row-menu.tsx`, `generic-board.tsx`).
+- Hand-off al BE: `docs/specs/appointments-day-menu-handoff-be.md` (ítem de menú; orden de despliegue).
+- Sin verificar en navegador (la sesión no tiene uno): claro/oscuro, 375px, estados vacío/carga/error.
