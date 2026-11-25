@@ -507,15 +507,29 @@ test("every clinic sends no centerIds; one clinic sends it", () => {
   )
 })
 
-test("type badge: new, follow-up, or the therapy's service", () => {
-  assert.deepEqual(typeBadge(row({ isNewPatientType: true })), { kind: "new" })
-  assert.deepEqual(typeBadge(row({ isNewPatientType: false })), {
+test("type badge: the consultation type's or the therapy's own name, coloured by kind", () => {
+  assert.deepEqual(
+    typeBadge(row({ isNewPatientType: true, typeLabel: "CONSULTA NUEVA" })),
+    {
+      kind: "new",
+      label: "CONSULTA NUEVA",
+    }
+  )
+  assert.deepEqual(typeBadge(row({ typeLabel: "CONSULTA SEGUIMIENTO" })), {
     kind: "followUp",
+    label: "CONSULTA SEGUIMIENTO",
   })
-  assert.deepEqual(typeBadge(row({ kind: "service", serviceName: "Láser" })), {
-    kind: "therapy",
-    label: "Láser",
+  assert.deepEqual(typeBadge(row({ typeLabel: null })), {
+    kind: "followUp",
+    label: null,
   })
+  assert.deepEqual(
+    typeBadge(row({ kind: "service", serviceName: "Láser", typeLabel: null })),
+    {
+      kind: "therapy",
+      label: "Láser",
+    }
+  )
 })
 
 test("a service both clinics have is one entry; picking it sends every clinic's id", () => {

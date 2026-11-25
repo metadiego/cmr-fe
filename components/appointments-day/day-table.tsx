@@ -63,13 +63,9 @@ export function DayTable({
       header: t("col.type"),
       cell: (r) => {
         const b = typeBadge(r)
-        if (b.kind === "therapy")
-          return (
-            <Badge variant="secondary">{b.label ?? t("type.therapy")}</Badge>
-          )
         return (
           <Badge variant={b.kind === "new" ? "info" : "secondary"}>
-            {t(`type.${b.kind}`)}
+            {b.label ?? t(`type.${b.kind}`)}
           </Badge>
         )
       },

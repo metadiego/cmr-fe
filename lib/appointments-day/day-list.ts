@@ -261,12 +261,15 @@ export function dayListSearch(
   )
 }
 
-/** The Type column's one badge: new patient / follow-up for medical rows, the service for therapies. */
+/**
+ * The Type column's one badge: the row's own name (the consultation type, e.g. CONSULTA NUEVA, or the
+ * therapy's service); `kind` sets its colour. `label` null = the name is missing (fall back to the kind).
+ */
 export function typeBadge(
-  r: Pick<DayListRow, "kind" | "isNewPatientType" | "serviceName">
-): { kind: "new" | "followUp" } | { kind: "therapy"; label: string | null } {
+  r: Pick<DayListRow, "kind" | "isNewPatientType" | "serviceName" | "typeLabel">
+): { kind: "new" | "followUp" | "therapy"; label: string | null } {
   if (r.kind === "service") return { kind: "therapy", label: r.serviceName }
-  return { kind: r.isNewPatientType ? "new" : "followUp" }
+  return { kind: r.isNewPatientType ? "new" : "followUp", label: r.typeLabel }
 }
 
 // ---- status ---------------------------------------------------------------------------------------
