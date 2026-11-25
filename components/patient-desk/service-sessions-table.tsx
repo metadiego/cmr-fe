@@ -213,7 +213,7 @@ export function ServiceSessionsTable({
         concluded && !cancelledOnly && "ring-2 ring-success/60"
       )}
     >
-      <header className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
+      <header className="flex h-10 items-center gap-2 border-b bg-muted/40 px-3">
         <span
           className="size-2.5 rounded-full"
           style={{
@@ -221,7 +221,7 @@ export function ServiceSessionsTable({
           }}
           aria-hidden
         />
-        <h3 className="text-sm font-semibold tracking-wide uppercase">
+        <h3 className="text-sm font-semibold">
           {name}
         </h3>
         {concluded && !cancelledOnly && (
@@ -249,6 +249,7 @@ export function ServiceSessionsTable({
                 centroId={centerId}
                 optionsByCol={options}
                 onRefresh={onChanged}
+                inline
               />
             ))}
           </span>
@@ -259,7 +260,7 @@ export function ServiceSessionsTable({
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/20">
+            <thead>
               <tr className="border-b text-left text-[11px] tracking-wide text-muted-foreground uppercase">
                 {render.map((item, i) =>
                   // Fixed widths for the leading columns (staff, flow, session) so they line up across
@@ -267,7 +268,7 @@ export function ServiceSessionsTable({
                   item.kind === "flujo" ? (
                     <th
                       key={`flow-${i}`}
-                      className="w-72 px-3 py-2 font-semibold"
+                      className="w-60 px-3 py-2 font-semibold"
                     >
                       {tFrontdesk("flujo")}
                     </th>
@@ -276,8 +277,8 @@ export function ServiceSessionsTable({
                       key={item.col.clave}
                       className={cn(
                         "px-3 py-2 font-semibold",
-                        isStaffColumn(item.col) && "w-60",
-                        isSessionColumn(item.col) && "w-28"
+                        isStaffColumn(item.col) && "w-52",
+                        isSessionColumn(item.col) && "w-24"
                       )}
                     >
                       {item.col.label ??

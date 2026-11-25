@@ -307,8 +307,8 @@ export function PatientDetail({
               ? `· ${t("firstAt", { time: patient.earliestTime })}`
               : ""}
           </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+          {/* Status under the name (present or not, with its own fixes); actions sit on the right. */}
+          <div className="mt-2 flex flex-wrap items-center gap-1">
           {/* Un único botón para servicios Y consulta, indistinto de cuál tenga el paciente (13-oct-2026):
               antes solo aparecía con servicios, dejando a quien SOLO tiene consulta sin forma de llegar
               aquí salvo por su propia fila — justo la fila que acabamos de ocultar. */}
@@ -316,17 +316,19 @@ export function PatientDetail({
             patient.consultationIds.length > 0) &&
             (patient.presentAt ? (
               // Present = the word and the time in strong green, as the staff are used to (owner, 14-oct-2026).
-              // Not the `success` token: it is a pale tint (oklch 0.95) that barely showed.
-              <div className="flex items-center gap-1 rounded-md bg-emerald-600 py-1 pr-1 pl-2.5 text-sm text-white shadow-sm">
-                <span className="inline-flex items-center gap-1 font-semibold">
-                  <HugeiconsIcon icon={Tick02Icon} className="size-4" />
+              // Not the `success` token: it is a pale tint (oklch 0.95) that barely showed. Only the STATE
+              // is green; its actions sit beside it as ordinary quiet buttons (a yellow button inside the
+              // green bar made the header loud and read as two states).
+              <div className="flex items-center gap-1">
+                <span className="inline-flex h-7 items-center gap-1 rounded-full bg-emerald-600 px-2.5 text-xs font-semibold text-white tabular-nums">
+                  <HugeiconsIcon icon={Tick02Icon} className="size-3.5" />
                   {t("presentAt", { time: fmtHora(patient.presentAt) })}
                 </span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-xs text-white hover:bg-white/20 hover:text-white"
+                  className="h-7 px-2 text-xs text-muted-foreground"
                   disabled={presenceBusy}
                   onClick={handleUndoPresent}
                 >
@@ -336,8 +338,9 @@ export function PatientDetail({
                 {kind !== "consultation" && pendingArrivals(patient) > 0 && (
                   <Button
                     type="button"
+                    variant="outline"
                     size="sm"
-                    className="h-6 bg-amber-400 px-2 text-xs text-black hover:bg-amber-300"
+                    className="h-7 text-xs"
                     disabled={presenceBusy}
                     onClick={handlePresent}
                   >
@@ -351,7 +354,7 @@ export function PatientDetail({
               <Button
                 size="sm"
                 variant="outline"
-                className="border-dashed border-muted-foreground text-muted-foreground hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                className="h-7 border-dashed border-muted-foreground text-muted-foreground hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                 title={t("markPresentHint")}
                 disabled={presenceBusy}
                 onClick={handlePresent}
@@ -359,6 +362,9 @@ export function PatientDetail({
                 {t("markPresent")}
               </Button>
             ))}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
           <PatientDayChangesButton patientId={patient.patientId} date={date} centerId={centerId} patientName={patient.name} onUndone={data.refresh} />
           {/* «Citar» aquí sigue al mismo paciente, no al toggle de arriba (10-13-oct-2026): si SOLO
               tiene servicio va directo al cupo del servicio, si SOLO tiene consulta a agregar
@@ -369,7 +375,7 @@ export function PatientDetail({
           {patient.services.length > 0 && patient.consultationIds.length > 0 ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm">
+                <Button size="sm" variant="outline">
                   <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
                   {t("book")}
                   <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
@@ -401,6 +407,7 @@ export function PatientDetail({
           ) : (
             <Button
               size="sm"
+              variant="outline"
               onClick={() =>
                 patient.consultationIds.length > 0
                   ? onScheduleConsultation({

@@ -72,7 +72,7 @@ function PatientItemSkeleton({ i }: { i: number }) {
 function ServiceSectionSkeleton() {
   return (
     <section className="overflow-hidden rounded-lg ring-1 ring-foreground/10">
-      <header className="flex h-[37px] items-center gap-2 border-b bg-muted/40 px-3 py-2">
+      <header className="flex h-10 items-center gap-2 border-b bg-muted/40 px-3">
         <Skeleton className="size-2.5 rounded-full" />
         <Skeleton className="h-3.5 w-28" />
         <Skeleton className="h-3 w-16" />

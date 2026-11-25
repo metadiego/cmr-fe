@@ -89,13 +89,13 @@ export function ConsultationRows({
 
   return (
     <section className="overflow-hidden rounded-lg ring-1 ring-foreground/10">
-      <header className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
+      <header className="flex h-10 items-center gap-2 border-b bg-muted/40 px-3">
         <span
           className="size-2.5 rounded-full"
           style={{ backgroundColor: color ?? "var(--muted-foreground)" }}
           aria-hidden
         />
-        <h3 className="text-sm font-semibold tracking-wide uppercase">
+        <h3 className="text-sm font-semibold">
           {label}
         </h3>
         <span className="text-xs text-muted-foreground">
