@@ -166,3 +166,13 @@ test("toggleWeekday: the start day is locked; other days toggle in the order add
   assert.deepEqual(toggleWeekday([3, 5], 1, 3), [3, 5, 1]);
   assert.deepEqual(toggleWeekday([3, 5], 5, 3), [3]);
 });
+
+test("generateWeeklyPattern startCounts:false: only the chosen weekdays, from the start on", () => {
+  // 2026-11-26 is a Thursday; only Tuesday chosen: the first row is the next Tuesday.
+  assert.deepEqual(dates(generateWeeklyPattern("2026-11-26", [2], 2, { startCounts: false })), ["2026-12-01", "2026-12-08"]);
+  assert.deepEqual(dates(generateWeeklyPattern("2026-11-26", [4, 2], 2, { startCounts: false })), ["2026-11-26", "2026-12-01"]);
+});
+
+test("generateWeeklyPattern startCounts:false with no weekday chosen gives no rows", () => {
+  assert.deepEqual(generateWeeklyPattern("2026-11-26", [], 6, { startCounts: false }), []);
+});

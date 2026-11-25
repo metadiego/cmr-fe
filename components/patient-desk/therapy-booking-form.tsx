@@ -163,7 +163,7 @@ export function TherapyBookingForm({
   const baseItems: EditableItem[] = edited
     ? edits.items
     : weekly
-      ? generateWeeklyPattern(startDate, days, total).map((i) => ({ ...i, fitTime: true }))
+      ? generateWeeklyPattern(startDate, days, total, { startCounts: false }).map((i) => ({ ...i, fitTime: true }))
       : [{ date: startDate, fitTime: true }];
   // A therapy whose sessions ran out on earlier dates is left out of the later ones on its own.
   const handOn = (date: string) => dayTherapies(selected, off, date);
@@ -228,13 +228,16 @@ export function TherapyBookingForm({
   const span = seriesSpan(rows.map((r) => r.date));
 
   // ---- What blocks «Agendar».
+  // Semanal with every day unticked: no dates until a day is picked.
+  const noDays = weekly && days.length === 0;
   const missing = [
     ...(patient ? [] : [tSeries("patient")]),
     ...(selected.length ? [] : [t("therapies")]),
+    ...(noDays ? [tSeries("days")] : []),
   ];
   // Without a patient there is no balance to judge yet: «Paciente» is the missing field, no reason.
   const catalogueFailed = servRes.state.kind === "fail" || resRes.state.kind === "fail";
-  const why = !patient ? null : trainFormReason({
+  const why = !patient || noDays ? null : trainFormReason({
     permsReady,
     canBook,
     catalogueFailed,
@@ -246,7 +249,7 @@ export function TherapyBookingForm({
       balance,
       selected,
     ),
-    startsSunday: weekly && startDay === 0,
+    startsSunday: false, // Semanal starts on the first ticked day, never on the start's Sunday
     rowsLoaded,
     rowsFailed,
     rowsBlocked: !canBookSeries(rows),
@@ -458,6 +461,7 @@ export function TherapyBookingForm({
             }}
             days={days}
             startDay={startDay}
+            lockStartDay={false}
             onDays={(next) => {
               setDays(next);
               setEdits(null);
@@ -469,10 +473,10 @@ export function TherapyBookingForm({
               setTotalChoice(n);
               setEdits(null);
             }}
-            disabled={busy || (weekly && startDay === 0)}
+            disabled={busy}
           />
 
-          {selected.length > 0 && !(weekly && startDay === 0) && (
+          {selected.length > 0 && !noDays && (
             <div className="flex flex-col gap-2 text-sm">
               {weekly && edited && <p className="text-xs text-muted-foreground">{tSeries("resetsEdits")}</p>}
               {span && (

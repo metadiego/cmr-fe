@@ -7098,7 +7098,8 @@
       "overBalanceReason": "Only {n, plural, one {# session} other {# sessions}} left to book.",
       "otherCenterWarning": "This package was bought at {center}; you are booking at {here}.",
       "fullShort": "full",
-      "perWeekSummary": "{n, plural, one {# time a week} other {# times a week}}"
+      "perWeekSummary": "{n, plural, one {# time a week} other {# times a week}}",
+      "pickADay": "Pick at least one day"
     },
     "toasts": {
       "appointmentSaved": "Appointment saved",

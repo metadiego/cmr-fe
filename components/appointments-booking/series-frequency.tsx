@@ -22,13 +22,15 @@ const sampleDay = (d: number) => parseDayUTC(`2024-01-0${d}`);
  * How a service series is built: Manual (the picked date, plus any dates added by hand) or Semanal
  * (which weekdays and how many in total; the dates fill in). The times per week ARE the days chosen, so
  * they are only shown, never set separately (owner, 2026-11-23). The picked date's weekday is selected
- * and locked. Controls only: the form owns the state and the rows.
+ * and locked, unless `lockStartDay` is false (the patient desk's therapy form: any day can be unticked,
+ * none ticked asks for one). Controls only: the form owns the state and the rows.
  */
 export function SeriesFrequency({
   mode,
   onMode,
   days,
   startDay,
+  lockStartDay = true,
   onDays,
   total,
   maxTotal,
@@ -41,6 +43,8 @@ export function SeriesFrequency({
   days: number[];
   /** The picked date's weekday (getUTCDay numbering). */
   startDay: number;
+  /** The start's weekday cannot be unticked (default). */
+  lockStartDay?: boolean;
   onDays: (days: number[]) => void;
   total: number;
   maxTotal: number;
@@ -51,6 +55,8 @@ export function SeriesFrequency({
 }) {
   const t = useTranslations("appointmentsBooking.series");
   const format = useFormatter();
+  // No weekday is locked when the start does not have to be one of them.
+  const lockedDay = lockStartDay ? startDay : -1;
 
   return (
     <div className="flex flex-col gap-4">
@@ -68,11 +74,11 @@ export function SeriesFrequency({
       </Field>
       {mode === "weekly" && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
-          <Field label={t("days")} hint={t("perWeekSummary", { n: days.length })}>
+          <Field label={t("days")} hint={days.length ? t("perWeekSummary", { n: days.length }) : t("pickADay")}>
             <div className="flex flex-wrap gap-1.5" role="group" aria-label={t("days")}>
               {WEEKDAYS.map((d) => {
                 const on = days.includes(d);
-                const locked = d === startDay;
+                const locked = d === lockedDay;
                 const day = sampleDay(d);
                 return (
                   <button
@@ -80,7 +86,7 @@ export function SeriesFrequency({
                     type="button"
                     aria-pressed={on}
                     disabled={disabled || locked}
-                    onClick={() => onDays(toggleWeekday(days, d, startDay))}
+                    onClick={() => onDays(toggleWeekday(days, d, lockedDay))}
                     className={cn(
                       "h-9 min-w-11 rounded-full border px-3 text-sm font-medium capitalize transition-colors",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

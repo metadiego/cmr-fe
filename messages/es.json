@@ -7098,7 +7098,8 @@
       "overBalanceReason": "Solo le quedan {n, plural, one {# sesión} other {# sesiones}} por agendar.",
       "otherCenterWarning": "Este paquete se compró en {center}; estás agendando en {here}.",
       "fullShort": "lleno",
-      "perWeekSummary": "{n, plural, one {# vez por semana} other {# veces por semana}}"
+      "perWeekSummary": "{n, plural, one {# vez por semana} other {# veces por semana}}",
+      "pickADay": "Elige al menos un día"
     },
     "toasts": {
       "appointmentSaved": "Cita guardada",
