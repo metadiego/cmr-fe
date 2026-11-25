@@ -55,6 +55,7 @@ export function TrainDayDetail({
   sessions,
   serviceIds,
   removed,
+  runOut,
   serviceName,
   disabled,
   why,
@@ -72,6 +73,8 @@ export function TrainDayDetail({
   serviceIds: string[];
   /** Ticked therapies taken off that day. */
   removed: string[];
+  /** Ticked therapies left out of that day because their sessions ran out on earlier dates. */
+  runOut: string[];
   serviceName: (id: string) => string;
   disabled: boolean;
   /** What the plan says about the row's hour. */
@@ -183,6 +186,9 @@ export function TrainDayDetail({
             </Button>
           )}
         </div>
+      )}
+      {runOut.length > 0 && (
+        <p className="text-xs text-muted-foreground">{t("runOutBefore", { list: runOut.map(serviceName).join(", ") })}</p>
       )}
       {removed.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">

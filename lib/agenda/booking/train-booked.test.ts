@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 import type { BookableService } from "../../api/frontdesk.ts";
 import type { PatientAppointment } from "./patient-appointments.ts";
-import { leftAfterEachDate, otherOnDay } from "./train-booked.ts";
+import { exhaustedOff, leftAfterEachDate, otherOnDay } from "./train-booked.ts";
 
 function bookable(entries: Record<string, number>): Map<string, BookableService> {
   return new Map(
@@ -52,4 +52,25 @@ test("otherOnDay lists that day's other live appointments by time, not the visit
 test("otherOnDay keeps a medical appointment whose type id matches a therapy id", () => {
   const upcoming = [appt({ date: "2026-11-26", typeId: "laser", kind: "medical", time: "10:00" })];
   assert.equal(otherOnDay(upcoming, "2026-11-26", ["laser"]).length, 1);
+});
+
+test("exhaustedOff leaves a therapy out of the dates after its last session, in date order", () => {
+  const days = [
+    { date: "2026-12-17", serviceIds: ["laser", "iv", "emtt"] },
+    { date: "2026-12-03", serviceIds: ["laser", "iv", "emtt"] },
+    { date: "2026-12-10", serviceIds: ["laser", "iv", "emtt"] },
+  ];
+  assert.deepEqual(exhaustedOff(days, bookable({ laser: 2, iv: 6, emtt: 1 })), {
+    "2026-12-10": ["emtt"],
+    "2026-12-17": ["laser", "emtt"],
+  });
+});
+
+test("exhaustedOff never empties a date and drops nothing without a balance", () => {
+  const days = [
+    { date: "2026-12-03", serviceIds: ["laser"] },
+    { date: "2026-12-10", serviceIds: ["laser"] },
+  ];
+  assert.deepEqual(exhaustedOff(days, bookable({ laser: 1 })), {});
+  assert.deepEqual(exhaustedOff(days, undefined), {});
 });

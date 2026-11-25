@@ -32,7 +32,7 @@ import {
   type EditableItem,
 } from "@/lib/agenda/booking/series-edit";
 import { trainBookingResult } from "@/lib/agenda/booking/booking-result";
-import { leftAfterEachDate, otherOnDay } from "@/lib/agenda/booking/train-booked";
+import { exhaustedOff, leftAfterEachDate, otherOnDay } from "@/lib/agenda/booking/train-booked";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
 import { sameDaySessions, trainCap, trainOrder, trainRequest } from "@/lib/agenda/booking/train-rows";
 import {
@@ -159,13 +159,16 @@ export function TherapyBookingForm({
   const [edits, setEdits] = React.useState<{ key: string; items: EditableItem[]; off: DayOff } | null>(null);
   const edited = !!edits && edits.key === genKey;
   const off: DayOff = edited ? edits.off : {};
-  const therapiesOn = (date: string) => dayTherapies(selected, off, date);
   // Generated rows fit their own day: the series time when the train fits there, else that day's first.
   const baseItems: EditableItem[] = edited
     ? edits.items
     : weekly
       ? generateWeeklyPattern(startDate, days, total).map((i) => ({ ...i, fitTime: true }))
       : [{ date: startDate, fitTime: true }];
+  // A therapy whose sessions ran out on earlier dates is left out of the later ones on its own.
+  const handOn = (date: string) => dayTherapies(selected, off, date);
+  const exhausted = exhaustedOff(baseItems.map((i) => ({ date: i.date, serviceIds: handOn(i.date) })), balance);
+  const therapiesOn = (date: string) => handOn(date).filter((id) => !(exhausted[date] ?? []).includes(id));
 
   const avail = useTrainSeriesAvailability({
     center,
@@ -522,7 +525,8 @@ export function TherapyBookingForm({
                     train={avail.trains[r.date]}
                     sessions={avail.sessions}
                     serviceIds={therapiesOn(r.date)}
-                    removed={selected.filter((id) => !therapiesOn(r.date).includes(id))}
+                    removed={selected.filter((id) => !handOn(r.date).includes(id))}
+                    runOut={exhausted[r.date] ?? []}
                     serviceName={serviceName}
                     disabled={busy}
                     why={slotWhy(avail.trains[r.date], r.time)}

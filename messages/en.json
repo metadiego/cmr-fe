@@ -7297,6 +7297,7 @@
     "whyBlocked": "{time} cannot be booked ({reason}).",
     "useTime": "Use {time}, free",
     "notThisDay": "Not on this day:",
+    "runOutBefore": "No sessions left for this day: {list}",
     "lastOne": "the last one",
     "bookedTitle": "Already booked",
     "sameDateAsVisit": "same date",

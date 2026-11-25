@@ -43,3 +43,26 @@ export function otherOnDay(
     .filter((a) => a.isLive && a.date.slice(0, 10) === date && !(a.kind === "service" && visit.has(a.typeId)))
     .sort((a, b) => (a.time ?? "99:99").localeCompare(b.time ?? "99:99"));
 }
+
+/**
+ * Per date, the therapies whose sessions ran out on earlier dates (counted in date order): they are
+ * left out of that date on their own, so adding a date never repeats a therapy with nothing left. A
+ * date never ends up empty this way: if every one of its therapies ran out, it keeps them all (and the
+ * form's over-cap reason says so). Without a balance nothing is dropped.
+ */
+export function exhaustedOff(
+  days: ReadonlyArray<{ date: string; serviceIds: readonly string[] }>,
+  bookable: ReadonlyMap<string, BookableService> | undefined,
+): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  if (!bookable) return out;
+  const used = new Map<string, number>();
+  for (const d of [...days].sort((a, b) => a.date.localeCompare(b.date))) {
+    const runOut = d.serviceIds.filter((id) => (used.get(id) ?? 0) >= Math.max(0, Math.floor(bookable.get(id)?.bookable ?? 0)));
+    // Every therapy of the date ran out: the date keeps them all (never empty).
+    const gone = runOut.length === d.serviceIds.length ? [] : runOut;
+    for (const id of d.serviceIds) if (!gone.includes(id)) used.set(id, (used.get(id) ?? 0) + 1);
+    if (gone.length) out[d.date] = gone;
+  }
+  return out;
+}
