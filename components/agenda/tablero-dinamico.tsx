@@ -174,6 +174,7 @@ export function NotificarCell({
   centroId,
   optionsByCol,
   onRefresh,
+  inline = false,
 }: {
   col: ColumnaEfectiva;
   fila: CitaFila;
@@ -181,6 +182,8 @@ export function NotificarCell({
   centroId?: string;
   optionsByCol?: Record<string, Opcion[]>;
   onRefresh?: () => void;
+  /** Patient desk block headers: the assignee as a pill left of the bell, one line high. */
+  inline?: boolean;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -252,7 +255,7 @@ export function NotificarCell({
   const record = typeof fila.record === "string" ? fila.record : "";
 
   return (
-    <div className="flex flex-col items-start">
+    <div className={inline ? "flex flex-row-reverse items-center gap-1" : "flex flex-col items-start"}>
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -263,7 +266,14 @@ export function NotificarCell({
         <HugeiconsIcon icon={Notification03Icon} className="size-4" />
       </button>
       {render.mostrarAsignado && nombreAsignado && (
-        <div className="mt-0.5 max-w-[9rem] truncate text-[11px] leading-tight text-muted-foreground" title={nombreAsignado}>
+        <div
+          className={
+            inline
+              ? "max-w-[11rem] truncate rounded-full bg-card px-2 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-foreground/10"
+              : "mt-0.5 max-w-[9rem] truncate text-[11px] leading-tight text-muted-foreground"
+          }
+          title={nombreAsignado}
+        >
           {nombreAsignado}
         </div>
       )}
@@ -495,7 +505,7 @@ export function TableroDinamico({
       {/* leadWidths (patient desk): headers and flow styled like its service blocks (small uppercase,
           left-aligned, «FLUJO», no coloured dots; the flow from the left). The agenda board keeps its look. */}
       <table className="w-full text-sm">
-        <thead className={leadWidths ? "bg-muted/20" : "bg-muted/40 text-xs text-muted-foreground"}>
+        <thead className={leadWidths ? undefined : "bg-muted/40 text-xs text-muted-foreground"}>
           <tr className={cn(leadWidths && "border-b text-left text-[11px] tracking-wide text-muted-foreground uppercase")}>
             {loading && groups.length === 0 && <BoardHeadSkeleton />}
             {groups.map((g, gi) =>
