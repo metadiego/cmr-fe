@@ -316,9 +316,11 @@ export function PatientDetail({
             patient.consultationIds.length > 0) &&
             (patient.presentAt ? (
               // Present = the word and the time in strong green, as the staff are used to (owner, 14-oct-2026).
-              // Not the `success` token: it is a pale tint (oklch 0.95) that barely showed.
-              <div className="flex items-center gap-1 rounded-md bg-emerald-600 py-1 pr-1 pl-2.5 text-sm text-white shadow-sm">
-                <span className="inline-flex items-center gap-1 font-semibold">
+              // Not the `success` token: it is a pale tint (oklch 0.95) that barely showed. Only the STATE
+              // is green; its actions sit beside it as ordinary quiet buttons (a yellow button inside the
+              // green bar made the header loud and read as two states).
+              <div className="flex items-center gap-1">
+                <span className="inline-flex h-8 items-center gap-1 rounded-md bg-emerald-600 px-2.5 text-sm font-semibold text-white tabular-nums">
                   <HugeiconsIcon icon={Tick02Icon} className="size-4" />
                   {t("presentAt", { time: fmtHora(patient.presentAt) })}
                 </span>
@@ -326,7 +328,7 @@ export function PatientDetail({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-xs text-white hover:bg-white/20 hover:text-white"
+                  className="text-muted-foreground"
                   disabled={presenceBusy}
                   onClick={handleUndoPresent}
                 >
@@ -336,8 +338,8 @@ export function PatientDetail({
                 {kind !== "consultation" && pendingArrivals(patient) > 0 && (
                   <Button
                     type="button"
+                    variant="outline"
                     size="sm"
-                    className="h-6 bg-amber-400 px-2 text-xs text-black hover:bg-amber-300"
                     disabled={presenceBusy}
                     onClick={handlePresent}
                   >
