@@ -39,7 +39,8 @@ export function DayToolbar({
   onDate: (d: string) => void;
   bucket: TypeBucket;
   onBucket: (b: TypeBucket) => void;
-  bookedBy: string;
+  /** null while it cannot be told yet (the person or the staff list still loading). */
+  bookedBy: string | null;
   onBookedBy: (v: string) => void;
   staff: StaffOption[];
   /** The person has a staff record, so "Me" means something. */
@@ -73,7 +74,7 @@ export function DayToolbar({
 
       <div className="flex items-center gap-2">
         <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{t("bookedBy.label")}</span>
-        <Select value={bookedBy} onValueChange={onBookedBy}>
+        <Select value={bookedBy ?? ""} onValueChange={onBookedBy} disabled={bookedBy === null}>
           <SelectTrigger size="sm" className="w-44" aria-label={t("bookedBy.label")}>
             <SelectValue />
           </SelectTrigger>

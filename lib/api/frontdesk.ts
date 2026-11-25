@@ -176,13 +176,20 @@ export interface FrontdeskTab {
 export function getFrontdeskTabs(centroId?: string): Promise<FrontdeskTab[]> {
   return apiFetch<FrontdeskTab[]>(`/frontdesk/tabs`, {}, centroId).then((r) => (Array.isArray(r) ? r : []));
 }
-// Reagendar una sesión a otra fecha (fechas flexibles).
-export function reagendarSesion(sesionId: string, fecha: string, centroId?: string, time?: string): Promise<Sesion> {
-  return apiFetch<Sesion>(
+// Move a session to another day (flexible dates). Without `time` the backend keeps the session's current
+// one. Answers the session plus the new day's slot `warnings` (non-blocking, meta.warnings).
+export async function reagendarSesion(
+  sesionId: string,
+  fecha: string,
+  centroId?: string,
+  time?: string,
+): Promise<ConWarnings<Sesion>> {
+  const env = await apiFetchEnvelope<Sesion>(
     `/frontdesk/sesiones/${sesionId}/agenda`,
     { method: "PATCH", body: JSON.stringify(time ? { date: fecha, time } : { date: fecha }) },
     centroId,
   );
+  return { data: env.data, warnings: env.meta.warnings ?? [] };
 }
 
 // Calendario del paciente (coloreado por tipo de servicio) para un rango.

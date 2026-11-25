@@ -7306,6 +7306,7 @@
     "bornConfirmed": "Book as confirmed"
   },
   "lifecycle": {
+    "bookedUnconfirmed": "Appointment booked unconfirmed: you can't confirm in this center. It needs confirming before it shows on the care board.",
     "action": {
       "confirm": "Confirm",
       "unconfirm": "Unconfirm",
@@ -7409,7 +7410,7 @@
       "title": "Move the therapy",
       "date": "New day",
       "time": "Time",
-      "timeHint": "Optional. Without a time, the therapy has no time that day.",
+      "timeHint": "Optional. Leave empty to keep the current time.",
       "submit": "Move"
     }
   }

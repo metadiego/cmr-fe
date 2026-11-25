@@ -7306,6 +7306,7 @@
     "bornConfirmed": "Agendar ya confirmada"
   },
   "lifecycle": {
+    "bookedUnconfirmed": "Cita agendada sin confirmar: no tienes permiso para confirmar en este centro. Hay que confirmarla para que aparezca en el tablero de atención.",
     "action": {
       "confirm": "Confirmar",
       "unconfirm": "Quitar confirmación",
@@ -7409,7 +7410,7 @@
       "title": "Mover la terapia",
       "date": "Nuevo día",
       "time": "Hora",
-      "timeHint": "Opcional. Sin hora, la terapia queda sin hora ese día.",
+      "timeHint": "Opcional. Déjala vacía para conservar la hora actual.",
       "submit": "Mover"
     }
   }

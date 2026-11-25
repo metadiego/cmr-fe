@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSubmit } from "@/components/kit/use-submit";
+import { useCan } from "@/hooks/use-can";
 import { CancelAppointmentDialog } from "@/components/appointments-booking/cancel-appointment-dialog";
 import { MoveSessionDialog } from "@/components/appointments-day/move-session-dialog";
 import { EditMedicalRow } from "@/components/appointments-day/edit-medical-row";
@@ -33,6 +34,7 @@ import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action
 export function DayRowActions({ row, onChanged }: { row: DayListRow; onChanged: () => void }) {
   const t = useTranslations("appointmentsDay.actions");
   const tRoot = useTranslations();
+  const { can } = useCan();
   const [dialog, setDialog] = React.useState<"cancel" | "move" | "edit" | null>(null);
 
   const { submitting, submit } = useSubmit((fn: () => Promise<unknown>) => fn(), {
@@ -77,9 +79,14 @@ export function DayRowActions({ row, onChanged }: { row: DayListRow; onChanged: 
               {t("change")}
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem asChild>
-            <Link href={`/scheduling/appointments?patient=${encodeURIComponent(row.patient.id)}`}>{t("bookAnother")}</Link>
-          </DropdownMenuItem>
+          {can("citas.create") && (
+            <DropdownMenuItem asChild>
+              {/* In the row's center, like the other links into the booking screen (`?centro=`). */}
+              <Link href={`/scheduling/appointments?${new URLSearchParams({ patient: row.patient.id, centro: row.centerId })}`}>
+                {t("bookAnother")}
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem asChild>
             <Link href={`/patients/${encodeURIComponent(row.patient.id)}`}>{t("openPatient")}</Link>
           </DropdownMenuItem>

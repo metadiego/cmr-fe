@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations, useFormatter } from "next-intl";
+import { toast } from "sonner";
 
 import type { CitaFila } from "@/lib/api/agenda-dia";
 import {
@@ -20,7 +21,7 @@ import { nextAppointmentMissing } from "@/lib/board/next-appointment-missing";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
 import { useCanInCenter } from "@/hooks/use-can-in-center";
-import { CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
+import { bookedUnconfirmedNotice, CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
 import {
   Dialog,
   DialogContent,
@@ -92,6 +93,7 @@ export function NuevaCitaModal({
   onSaved?: () => void;
 }) {
   const t = useTranslations("nuevaCita");
+  const tRoot = useTranslations();
   const format = useFormatter();
   const { can } = useCan();
   const canConfirmHere = useCanInCenter(CONFIRM_PERMISSION, centroId);
@@ -222,6 +224,8 @@ export function NuevaCitaModal({
       } as Parameters<typeof createCita>[0],
       centroId,
     );
+    // Born booked because appointments.confirm is missing here: say so, or the patient never reaches the board.
+    if (bookedUnconfirmedNotice(true, canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
     onSaved?.();
     onClose();
   }

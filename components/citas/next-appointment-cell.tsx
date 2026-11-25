@@ -27,7 +27,7 @@ import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { ReturnDatePicker } from "@/components/citas/return-date-picker";
 import { SlotAvailabilityHint } from "@/components/citas/slot-availability-hint";
 import { useCanInCenter } from "@/hooks/use-can-in-center";
-import { CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
+import { bookedUnconfirmedNotice, CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
 
 // "Next appt" board column (render.kind = "nextAppointment"): the date, clickable. The popover shows the
 // patient's current next appointment and moves it with the same shortcuts + calendar as the post-visit
@@ -142,6 +142,7 @@ export function NextAppointmentCell({
           centroId,
         );
         toast.success(t("booked", { date: fmtDay(day, "dayWeekdayShort") }));
+        if (bookedUnconfirmedNotice(true, canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
       }
       setOpen(false);
       onChanged?.();

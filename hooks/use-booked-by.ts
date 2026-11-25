@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { BOOKED_BY_STORAGE_KEY, bookedByOrDefault } from "@/lib/appointments-day/day-list";
+import { BOOKED_BY_STORAGE_KEY, bookedByChoice } from "@/lib/appointments-day/day-list";
 
 function readStored(): string | null {
   if (typeof window === "undefined") return null;
@@ -16,9 +16,13 @@ function readStored(): string | null {
 /**
  * The Citas screen's "Booked by" choice (me / all / a staff id), remembered on this device only. A
  * convenience, never shared state: without storage it starts on the default (Me). Same pattern as
- * hooks/use-agenda-center.ts (read once on mount, written on pick).
+ * hooks/use-agenda-center.ts (read once on mount, written on pick). null while it cannot be told yet
+ * (`me` or the staff options still loading): see lib/appointments-day/day-list.ts `bookedByChoice`.
  */
-export function useBookedBy(myStaffId: string | null): [string, (v: string) => void] {
+export function useBookedBy(
+  myStaffId: string | null | undefined,
+  staffOptions: readonly string[] | null,
+): [string | null, (v: string) => void] {
   const [stored, setStored] = React.useState<string | null>(readStored);
   const set = React.useCallback((v: string) => {
     setStored(v);
@@ -28,5 +32,5 @@ export function useBookedBy(myStaffId: string | null): [string, (v: string) => v
       // not remembered; the choice still applies on this page
     }
   }, []);
-  return [bookedByOrDefault(stored, myStaffId), set];
+  return [bookedByChoice(stored, myStaffId, staffOptions), set];
 }

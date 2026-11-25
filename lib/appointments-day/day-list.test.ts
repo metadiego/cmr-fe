@@ -4,6 +4,7 @@ import assert from "node:assert/strict"
 import {
   BOOKED_BY_ALL,
   BOOKED_BY_ME,
+  bookedByChoice,
   bookedByOrDefault,
   dayListSearch,
   keepByBucket,
@@ -156,4 +157,19 @@ test("the URL keeps the day, the type and show-cancelled; a bad day falls back",
   assert.deepEqual(bad, { date: "2026-11-25", bucket: "all", includeCancelled: false })
   assert.equal(toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false }), "date=2026-11-24")
   assert.equal(toDayScreenSearch({ date: "2026-11-24", bucket: "new", includeCancelled: true }), "date=2026-11-24&type=new&cancelled=1")
+})
+
+test("booked by waits for me: nothing is read (no All first) until the person is known", () => {
+  assert.equal(bookedByChoice(null, undefined, []), null)
+  assert.equal(bookedByChoice(BOOKED_BY_ME, undefined, ["s1"]), null)
+  assert.equal(bookedByChoice(null, "me1", null), BOOKED_BY_ME)
+  assert.equal(bookedByChoice(null, null, null), BOOKED_BY_ALL)
+  assert.equal(bookedByChoice(BOOKED_BY_ALL, "me1", null), BOOKED_BY_ALL)
+})
+
+test("booked by: a remembered staff id waits for the options and falls back to Me when it is gone", () => {
+  assert.equal(bookedByChoice("s9", "me1", null), null)
+  assert.equal(bookedByChoice("s9", "me1", ["s1", "s9"]), "s9")
+  assert.equal(bookedByChoice("s9", "me1", ["s1"]), BOOKED_BY_ME)
+  assert.equal(bookedByChoice("s9", null, ["s1"]), BOOKED_BY_ALL)
 })

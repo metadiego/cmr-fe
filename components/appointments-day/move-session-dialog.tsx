@@ -12,9 +12,12 @@ import { useSubmit } from "@/components/kit/use-submit";
 import { moveSession, type DayListRow } from "@/lib/api/appointments-day";
 import { missingFields } from "@/lib/forms/missing";
 import { refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 
 // Moving a therapy session in place (`move`, PATCH frontdesk/sessions/:id/agenda): a new day and,
-// optionally, a time. Moving is an outward change (rule 8): only the button fires it, never Enter.
+// optionally, a time (empty keeps the current one: the backend's `hora ?? sesion.hora`). The new day's
+// slot warnings show as toasts, as on the other booking screens. Moving is an outward change (rule 8):
+// only the button fires it, never Enter.
 export function MoveSessionDialog({
   row,
   open,
@@ -28,12 +31,14 @@ export function MoveSessionDialog({
 }) {
   const t = useTranslations("appointmentsDay.move");
   const tc = useTranslations("common");
+  const tRoot = useTranslations();
   const [f, set] = useDialogForm(() => ({ date: "", time: row.time ?? "" }), open, row.id);
   const dateId = `move-date-${row.id}`;
   const timeId = `move-time-${row.id}`;
   const { submitting, submit } = useSubmit(() => moveSession(row, f.date, f.time || undefined), {
     successMessage: tc("saved"),
-    onSuccess: () => {
+    onSuccess: (res) => {
+      mostrarAvisos(res.warnings, tRoot);
       onClose();
       onMoved();
     },

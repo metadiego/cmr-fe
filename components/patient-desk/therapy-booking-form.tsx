@@ -54,7 +54,7 @@ import { ApiError, type ApiWarning } from "@/lib/api/types";
 import { warningText } from "@/lib/frontdesk/avisos";
 import { patientName } from "@/lib/pacientes/display-name";
 import type { Paciente } from "@/lib/api/pacientes";
-import { CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
+import { CONFIRM_PERMISSION, confirmToggleShown, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
 import { useCanInCenter } from "@/hooks/use-can-in-center";
 import { Switch } from "@/components/ui/switch";
 
@@ -123,8 +123,8 @@ export function TherapyBookingForm({
   const [selected, setSelected] = React.useState<string[]>([]);
   const [areas, setAreas] = React.useState<Record<string, number>>({});
   const [keepOrder, setKeepOrder] = React.useState(false);
-  // Born confirmed (cmr-be 4a `confirmed` on book-train; the series door takes none): only with
-  // appointments.confirm in this center.
+  // Born confirmed (cmr-be 4a `confirmed` on book-train; the series door takes none): the toggle shows
+  // unless appointments.confirm is known to be missing in this center (same rule as CitaModal).
   const canConfirmHere = useCanInCenter(CONFIRM_PERMISSION, center);
   const [confirmed, setConfirmed] = React.useState(false);
   // The desk's service starts ticked once the balance says the patient has sessions of it left.
@@ -368,7 +368,7 @@ export function TherapyBookingForm({
       blocked={!!reason}
       reason={reason}
       extra={
-        single && canConfirmHere ? (
+        single && confirmToggleShown(canConfirmHere) ? (
           <label className="flex items-center gap-2 text-sm">
             <Switch checked={confirmed} onCheckedChange={setConfirmed} disabled={busy} />
             {t("bornConfirmed")}

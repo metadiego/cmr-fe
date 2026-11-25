@@ -63,7 +63,7 @@ export function StatusField({
   estadoDef: EstadoCitaCatalogo | undefined;
   estadosMap: Map<string, EstadoCitaCatalogo>;
   estadoCrear: "programada" | "confirmada";
-  /** Create: the person may confirm in this clinic (appointments.confirm). Without it, no toggle: born booked. */
+  /** Create: false when appointments.confirm is known missing in this clinic (no toggle: born booked). */
   canConfirm?: boolean;
   onChange: (v: "programada" | "confirmada") => void;
 }) {

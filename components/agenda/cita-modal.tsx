@@ -55,7 +55,7 @@ import {
 import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { CitaActions } from "@/components/citas/cita-actions";
 import { useCanInCenter } from "@/hooks/use-can-in-center";
-import { CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
+import { bookedUnconfirmedNotice, CONFIRM_PERMISSION, confirmToggleShown, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
 
 export function CitaModal({
   open,
@@ -122,7 +122,7 @@ export function CitaModal({
   const effectiveCentro = formCreateClinic({
     picked: centroSel, given: cita?.clinicId || centroId, active: getActiveCentro(), centers: centros.map((c) => c.id), viewAll,
   });
-  // Born confirmed needs appointments.confirm in the clinic it is created in (cmr-be 4a): no toggle without it.
+  // Born confirmed needs appointments.confirm in the clinic it is created in (cmr-be 4a): known missing = no toggle, born booked, and a toast says so.
   const canConfirmHere = useCanInCenter(CONFIRM_PERMISSION, effectiveCentro || undefined);
   // `medicos` are the clinic the caller opened it in; a clinic picked here lists its own doctors.
   const otherClinic = !!effectiveCentro && effectiveCentro !== centroId;
@@ -366,6 +366,7 @@ export function CitaModal({
         mostrarAvisos(r.advertencias, tRoot);
       } else {
         // Every create shows the booking success dialog (spec §1); "moved" when the BE moved the live one.
+        if (bookedUnconfirmedNotice(estadoCrear === "confirmada", canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
         void showResult(r.saved, r.advertencias, {
           patient: r.patient, asked: { date: fechaSel, time: hora }, typeName: tipo?.name ?? "", types: tipos,
           doctor: medicos.find((m) => m.id === medicoId), center: centros.find((c) => c.id === effectiveCentro),
@@ -406,7 +407,7 @@ export function CitaModal({
       estadoDef={estadoDef}
       estadosMap={estadosMap}
       estadoCrear={canConfirmHere === false ? "programada" : estadoCrear}
-      canConfirm={canConfirmHere !== false}
+      canConfirm={confirmToggleShown(canConfirmHere)}
       onChange={setEstadoElegido}
     />
   );

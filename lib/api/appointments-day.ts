@@ -1,6 +1,6 @@
 import { apiFetch } from "./client";
 import { cancelarCita, confirmarCita, unconfirmCita } from "./citas";
-import { cancelarSesion, confirmSession, reagendarSesion, unconfirmSession } from "./frontdesk";
+import { cancelarSesion, confirmSession, reagendarSesion, unconfirmSession, type ConWarnings } from "./frontdesk";
 import type { DayListRow } from "@/lib/appointments-day/day-list";
 
 export type { DayListRow } from "@/lib/appointments-day/day-list";
@@ -35,7 +35,10 @@ export function cancelDayRow(row: Row, reason: string): Promise<unknown> {
     : cancelarSesion(row.id, reason, row.centerId);
 }
 
-/** Move a therapy session in place (`move`): `PATCH frontdesk/sessions/:id/agenda`. */
-export function moveSession(row: Row, date: string, time?: string): Promise<unknown> {
+/**
+ * Move a therapy session in place (`move`): `PATCH frontdesk/sessions/:id/agenda`. Without `time` the
+ * backend keeps the current one. Answers the new day's slot warnings.
+ */
+export function moveSession(row: Row, date: string, time?: string): Promise<ConWarnings<unknown>> {
   return reagendarSesion(row.id, date, row.centerId, time);
 }

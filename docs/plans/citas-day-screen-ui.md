@@ -103,8 +103,25 @@ confirmar: siguen naciendo sin confirmar, como hoy).
   Patient desk y la pestaña Consulta del tablero deprecado; después de 4a esas casillas siguen la lista
   en los tres. Solo puede ocultar movimientos que el BE ya rechaza. Las filas de terapia del tablero
   deprecado no cambian.
-- `lib/lifecycle/board-action-rules.ts` (PR #154) no existe en `main`: si #154 se mezcla antes, hay que
-  borrarlo y quitar sus usos al integrar esta rama (los mismos ficheros: `tablero-acciones.tsx`,
-  `cita-actions.tsx`, `row-menu.tsx`, `generic-board.tsx`).
+- PR #154 (`lib/lifecycle/board-action-rules.ts`) se mezcló en esta rama (merge, sin rebase). Regla
+  única: una fila CON `allowedActions` se dibuja de la lista; una SIN lista (lecturas de entidad:
+  pantalla de agendar, calendario, vista día, modal del tablero, cita-board; o un BE antes de 4a) sigue
+  las reglas de pieza 3 de #154. Un helper por regla: `cancelMeaning(status, allowed?)` y
+  `refusalRefreshesRow` viven solo en `board-action-rules.ts`; `availableTransitions` aplica
+  `boardActionView` a filas sin lista; el menú de `CitaActions` es `appointmentMenuFor` (lib, con tests).
 - Hand-off al BE: `docs/specs/appointments-day-menu-handoff-be.md` (ítem de menú; orden de despliegue).
 - Sin verificar en navegador (la sesión no tiene uno): claro/oscuro, 375px, estados vacío/carga/error.
+
+## Arreglos tras la revisión (25-nov-2026)
+
+- Crear sin interruptor visible (Nueva cita del tablero, celda de próxima cita, walk-in del tablero):
+  `confirmed: canConfirmHere !== false` (sin saber → true, como el flujo por estado; falta sabida →
+  false) y un toast (`lifecycle.bookedUnconfirmed`) cuando nace sin confirmar por falta del permiso. El
+  interruptor explícito se muestra salvo falta sabida, igual en `CitaModal` y `TherapyBookingForm`
+  (`confirmToggleShown`). Todo en `lib/lifecycle/confirm-on-create.ts`, con tests.
+- Mover sesión: sin hora el BE conserva la actual (`hora ?? sesion.hora`); la ayuda lo dice, y los
+  `warnings` de cupo del endpoint salen como en las otras pantallas (`reagendarSesion` lee el sobre con
+  `apiFetchEnvelope`; `mostrarAvisos`).
+- Menores: `LiveBadge` en la cabecera; «Agendar otra cita» conserva el centro de la fila (`?centro=`) y
+  solo aparece con `citas.create`; «Agendado por» no lee «Todos» antes de cargar `me`, y un personal
+  recordado que ya no está entre las opciones vuelve a «Yo» (`bookedByChoice`, con tests).

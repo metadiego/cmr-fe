@@ -59,6 +59,25 @@ export function bookedByOrDefault(stored: string | null | undefined, myStaffId: 
   return choice
 }
 
+/**
+ * The "booked by" the list is read with, or null while it cannot be told yet (so the screen never reads
+ * All first and then flips to Me). `myStaffId`: undefined while `me` loads, null when the person has no
+ * staff record. `staffOptions`: the picker's staff ids, null while they load. A remembered staff id waits
+ * for the options; one that is no longer among them falls back to the default (Me).
+ */
+export function bookedByChoice(
+  stored: string | null | undefined,
+  myStaffId: string | null | undefined,
+  staffOptions: readonly string[] | null,
+): string | null {
+  if (myStaffId === undefined) return null
+  if (stored && stored !== BOOKED_BY_ME && stored !== BOOKED_BY_ALL) {
+    if (!staffOptions) return null
+    if (!staffOptions.includes(stored)) return bookedByOrDefault(null, myStaffId)
+  }
+  return bookedByOrDefault(stored, myStaffId)
+}
+
 /** The query string of the day list for the screen's filters. */
 export function dayListSearch(p: {
   date: string

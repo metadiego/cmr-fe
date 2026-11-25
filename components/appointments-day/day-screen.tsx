@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Panel, Stat, StatGrid } from "@/components/kit/panel";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
+import { LiveBadge } from "@/components/live-badge";
 import { DayToolbar, type StaffOption } from "@/components/appointments-day/day-toolbar";
 import { DayTable } from "@/components/appointments-day/day-table";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
@@ -27,7 +28,6 @@ import {
   type DayScreenParams,
 } from "@/lib/appointments-day/day-list";
 import { BUSINESS_TIME_ZONE } from "@/i18n/formats";
-import { cn } from "@/lib/utils";
 
 /** How often "now" moves on (late / upcoming), in ms. */
 const MINUTE = 60_000;
@@ -58,17 +58,8 @@ export function AppointmentsDayScreen() {
   const centro = useCentroPantalla("citas.read", "citas.update", sp.get("centro"));
   const centerId = centro.centroActivo || undefined;
   const me = useMe();
-  const staffId = me.kind === "ok" ? myStaffId(me.me) : null;
-  const [bookedBy, setBookedBy] = useBookedBy(staffId);
-
-  const search = dayListSearch({ ...params, centerId, bookedBy, myStaffId: staffId }).toString();
-  const res = useResource<DayListRow[]>(
-    () => (centerId ? getAppointmentsDay(new URLSearchParams(search), centerId) : Promise.resolve([])),
-    [search, centerId],
-  );
-  // Arrivals, confirmations and moves from other screens: the appointment and session events of this
-  // center refetch the list (the events carry no allowedActions, so a refetch, never a patch).
-  const { live } = useCitaStream({ centroId: centerId ?? null, enabled: !!centerId, onInvalidate: res.refresh });
+  // undefined while `me` loads (the list waits: never All first, then Me); null = no staff record.
+  const staffId = me.kind === "loading" ? undefined : me.kind === "ok" ? myStaffId(me.me) : null;
 
   const staffRes = useResource<StaffOption[]>(
     () =>
@@ -84,10 +75,22 @@ export function AppointmentsDayScreen() {
         : Promise.resolve([]),
     [centerId],
   );
+  const staff = staffRes.state.kind === "ok" ? staffRes.state.data : null;
+  const [bookedBy, setBookedBy] = useBookedBy(staffId, staff?.map((s) => s.id) ?? null);
+
+  const search =
+    bookedBy === null ? null : dayListSearch({ ...params, centerId, bookedBy, myStaffId: staffId }).toString();
+  const res = useResource<DayListRow[]>(
+    () => (centerId && search !== null ? getAppointmentsDay(new URLSearchParams(search), centerId) : Promise.resolve([])),
+    [search, centerId],
+  );
+  // Arrivals, confirmations and moves from other screens: the appointment and session events of this
+  // center refetch the list (the events carry no allowedActions, so a refetch, never a patch).
+  const { live } = useCitaStream({ centroId: centerId ?? null, enabled: !!centerId, onInvalidate: res.refresh });
 
   // Until the screen's center is known, the list is loading (never an empty day that is not one).
   const state =
-    centro.cargando && !centerId
+    (centro.cargando && !centerId) || (centerId && search === null)
       ? { kind: "loading" as const }
       : res.state.kind === "ok"
         ? { kind: "ok" as const, data: keepByBucket(res.state.data, params.bucket) }
@@ -100,10 +103,7 @@ export function AppointmentsDayScreen() {
         title={t("title")}
         actions={
           <>
-            <span className={cn("flex items-center gap-1.5 text-xs", live ? "text-success" : "text-muted-foreground")}>
-              <span className={cn("size-2 rounded-full", live ? "bg-success" : "bg-muted-foreground")} aria-hidden />
-              {live ? t("live") : t("offline")}
-            </span>
+            {live ? <LiveBadge label={t("live")} /> : <span className="text-xs text-muted-foreground">{t("offline")}</span>}
             <CentroPantallaSelector estado={centro} />
           </>
         }
@@ -117,7 +117,7 @@ export function AppointmentsDayScreen() {
         onBucket={(bucket) => setParams({ bucket })}
         bookedBy={bookedBy}
         onBookedBy={setBookedBy}
-        staff={staffRes.state.kind === "ok" ? staffRes.state.data : []}
+        staff={staff ?? []}
         canBeMe={!!staffId}
         includeCancelled={params.includeCancelled}
         onIncludeCancelled={(includeCancelled) => setParams({ includeCancelled })}
