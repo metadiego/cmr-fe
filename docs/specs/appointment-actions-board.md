@@ -115,8 +115,11 @@ enough for a toast; the table says what each means and what the screen should al
 | `FORBIDDEN` (403) | 403 | (none) | The user lacks the action's permission in the record's center | Toast "You do not have permission for this action in this center"; do not retry |
 
 Other existing errors still apply and are unchanged: for example `TRANSICION_REQUISITO` when a required field
-(doctor, nurse, technician) is missing, or `CITA_MEDICO_REQUERIDO`. (Known backend leftover: a missing
-doctor on consult or attend currently answers the generic `TRANSICION_REQUISITO`.)
+(nurse, technician) is missing. A missing doctor on consult or attend answers `CITA_MEDICO_REQUERIDO` with
+labelKey `citas.medico_requerido_en_consulta`, the same error the consult lock already gave.
+
+**Timing:** these strings must ship before or together with backend PR 3b. If 3b reaches production first,
+staff see the backend's English message in the toast.
 
 New label keys to translate, in total: `lifecycle.action.<key>` (one per action above),
 `lifecycle.action.notAllowed`, `lifecycle.action.unknown`, `lifecycle.action.reasonRequired`,
