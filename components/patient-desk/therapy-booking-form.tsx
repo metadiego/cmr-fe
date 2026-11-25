@@ -428,7 +428,8 @@ export function TherapyBookingForm({
             }}
           />
         </div>
-        <div className="min-w-0 space-y-4">
+        {/* lg:pt-4 matches the left panel's padding, so both step labels sit on one line. */}
+        <div className="min-w-0 space-y-4 lg:pt-4">
           <StepLabel n={2}>{t("stepDates")}</StepLabel>
           <SeriesFrequency
             mode={mode}
