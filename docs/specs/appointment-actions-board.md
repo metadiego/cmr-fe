@@ -125,6 +125,25 @@ New label keys to translate, in total: `lifecycle.action.<key>` (one per action 
 `lifecycle.action.notAllowed`, `lifecycle.action.unknown`, `lifecycle.action.reasonRequired`,
 `lifecycle.action.stale`, `lifecycle.action.futureDate`. Add `errores.LIFECYCLE_*` as the fallback by code.
 
+## After 3c: deleted sessions stay
+
+Backend PR 3c changes what deleting a therapy session does:
+
+- **A deleted session stays, as a cancelled row.** `DELETE sesiones/:id` no longer removes the row: it is
+  cancelled (status `cancelada`, no arrival, call or therapy stamp) and its history row carries
+  `details.entryError = true` (action `remove_entry_error`). The row, its events and its forms are kept,
+  and undoing the deletion from the change log brings it back where it was.
+- **The Patient desk shows it as cancelled.** The day's sessions include it, so
+  `components/patient-desk/service-sessions-table.tsx` draws it with the "cancelled only" mark
+  (`cancelledOnly`, from `serviceCancelledOnly` in `lib/frontdesk/patient-day.ts`) when every row of that service that day is cancelled.
+- **It counts as a cancellation** in every count and list until pieces 4/5 hide entry errors. Nothing in
+  the frontend should try to hide it before the backend exposes the mark.
+- **Train-booking rollback legs stay too.** When booking a train fails half way, the legs already created
+  are now cancelled rows (entry errors), not removed; they show as cancelled on the desk.
+- **MCP `appointment_transition` no longer accepts `confirmar`.** Confirming goes through
+  `confirm_appointment` (permission `appointments.confirm`). Any prompt or agent that used
+  `accion: confirmar` must switch.
+
 ## Files to change (live screens only)
 
 - `components/tablero/tablero-acciones.tsx`: the declarative action menu of a board row (filters by
