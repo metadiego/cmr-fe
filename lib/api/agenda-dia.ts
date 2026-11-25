@@ -30,7 +30,10 @@ export interface ColumnaEfectiva {
 }
 
 // A projected appointment row: values keyed by column clave (+ id/estado).
-export type CitaFila = { id: string; estado?: string } & Record<string, unknown>;
+// `allowedActions` (cmr-be 4a): the lifecycle actions this user may take on the row now, in the row's
+// center. Absent before 4a and on boards that do not send it; read it with
+// lib/lifecycle/allowed-actions.ts `readAllowedActions`.
+export type CitaFila = { id: string; estado?: string; allowedActions?: string[] } & Record<string, unknown>;
 
 // Una nota del día (dentro del contenedor español `notasDia`; el contenido SÍ se traduce).
 export interface NotaDia {

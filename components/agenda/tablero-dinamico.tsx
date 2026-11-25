@@ -29,6 +29,7 @@ import { EhrGateHost } from "@/components/tablero/ehr-readiness-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
 import { NextAppointmentCell } from "@/components/citas/next-appointment-cell";
 import { BoardHeadSkeleton, BoardRowsSkeleton } from "@/components/agenda/tablero-dinamico-skeleton";
+import { readAllowedActions } from "@/lib/lifecycle/allowed-actions";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
 // labelKey, cell per column `tipo`; the "accion" column becomes CitaActions.
@@ -429,6 +430,7 @@ export function TableroDinamico({
           estados={estados ?? []}
           centroId={centroId}
           pacienteId={(fila as { pacienteId?: unknown }).pacienteId != null ? String((fila as { pacienteId?: unknown }).pacienteId) : undefined}
+          allowedActions={readAllowedActions(fila)}
           onSaved={onRefresh}
           onEhrGate={setEhrGate}
         />

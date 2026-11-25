@@ -54,6 +54,8 @@ import {
 } from "@/components/ui/select";
 import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { CitaActions } from "@/components/citas/cita-actions";
+import { useCanInCenter } from "@/hooks/use-can-in-center";
+import { bookedUnconfirmedNotice, CONFIRM_PERMISSION, confirmToggleShown, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
 
 export function CitaModal({
   open,
@@ -67,6 +69,7 @@ export function CitaModal({
   medicos: medicosProp,
   canal,
   estadoInicial,
+  allowedActions,
   onOpenChange,
   onSaved,
   onPatientDataClosed,
@@ -86,6 +89,8 @@ export function CitaModal({
   canal?: "frontdesk" | "callcenter";
   // Create only: the status the toggle starts on, over the channel's default (a board's walk-in: confirmada).
   estadoInicial?: "programada" | "confirmada";
+  // Edit only: the row's `allowedActions` when opened from a list that has them (CitaActions draws them).
+  allowedActions?: string[] | null;
   onOpenChange: (open: boolean) => void;
   // Gets the appointment just saved (create/edit) so the caller can show it at once.
   onSaved: (cita?: Cita) => void;
@@ -117,6 +122,8 @@ export function CitaModal({
   const effectiveCentro = formCreateClinic({
     picked: centroSel, given: cita?.clinicId || centroId, active: getActiveCentro(), centers: centros.map((c) => c.id), viewAll,
   });
+  // Born confirmed needs appointments.confirm in the clinic it is created in (cmr-be 4a): known missing = no toggle, born booked, and a toast says so.
+  const canConfirmHere = useCanInCenter(CONFIRM_PERMISSION, effectiveCentro || undefined);
   // `medicos` are the clinic the caller opened it in; a clinic picked here lists its own doctors.
   const otherClinic = !!effectiveCentro && effectiveCentro !== centroId;
   const medicosRes = useResource<Personal[] | null>(
@@ -339,7 +346,10 @@ export function CitaModal({
     };
     const { cita: saved, advertencias } = isEdit
       ? await actualizarCitaAgenda(cita!.id, editPayload ?? {}, effectiveCentro || undefined)
-      : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
+      : await crearCitaAgenda(
+          { ...payload, confirmed: createConfirmed(estadoCrear === "confirmada", canConfirmHere), bookedByStaffId: callcenterId },
+          effectiveCentro || undefined,
+        );
     return { kind: "saved", saved, advertencias, patient: paciente };
   }
 
@@ -356,6 +366,7 @@ export function CitaModal({
         mostrarAvisos(r.advertencias, tRoot);
       } else {
         // Every create shows the booking success dialog (spec §1); "moved" when the BE moved the live one.
+        if (bookedUnconfirmedNotice(estadoCrear === "confirmada", canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
         void showResult(r.saved, r.advertencias, {
           patient: r.patient, asked: { date: fechaSel, time: hora }, typeName: tipo?.name ?? "", types: tipos,
           doctor: medicos.find((m) => m.id === medicoId), center: centros.find((c) => c.id === effectiveCentro),
@@ -395,7 +406,8 @@ export function CitaModal({
       isEdit={isEdit}
       estadoDef={estadoDef}
       estadosMap={estadosMap}
-      estadoCrear={estadoCrear}
+      estadoCrear={canConfirmHere === false ? "programada" : estadoCrear}
+      canConfirm={confirmToggleShown(canConfirmHere)}
       onChange={setEstadoElegido}
     />
   );
@@ -483,6 +495,7 @@ export function CitaModal({
         {isEdit && cita && (
           <CitaActions
             cita={cita}
+            allowedActions={allowedActions}
             onChanged={() => {
               onSaved();
               onOpenChange(false);

@@ -16,6 +16,8 @@ export function CancelAppointmentDialog({
   open,
   appointmentId,
   description,
+  title,
+  confirmLabel,
   onKeep,
   onCancel,
 }: {
@@ -23,6 +25,9 @@ export function CancelAppointmentDialog({
   appointmentId: string;
   /** What is being cancelled: "Láser · Mon, Nov 23 · 10:00". */
   description: string;
+  /** Overrides for a cancel that means something else (an arrived patient: "not served"). */
+  title?: string;
+  confirmLabel?: string;
   onKeep: () => void;
   onCancel: (reason: string) => Promise<void>;
 }) {
@@ -40,10 +45,10 @@ export function CancelAppointmentDialog({
         if (!o) onKeep();
       }}
       size="sm"
-      title={t("cancelTitle")}
+      title={title ?? t("cancelTitle")}
       description={description}
       onSubmit={() => {}}
-      actions={[{ label: t("confirmCancel"), variant: "destructive", onClick: () => submit() }]}
+      actions={[{ label: confirmLabel ?? t("confirmCancel"), variant: "destructive", onClick: () => submit() }]}
       cancelLabel={t("keep")}
       submitting={submitting}
       missing={missing}

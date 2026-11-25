@@ -7,6 +7,7 @@ import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import {
   confirmarCita,
+  unconfirmCita,
   presenteCita,
   noShowCita,
   cancelarCita,
@@ -14,7 +15,6 @@ import {
   getTiposCita,
   getHistorial,
   type Cita,
-  type EstadoCita,
   type TipoCita,
   type CitaEvento,
 } from "@/lib/api/citas";
@@ -26,7 +26,9 @@ import { slotAvailability } from "@/lib/agenda/slot-availability";
 import { cancelMissing } from "@/lib/citas/cancel-missing";
 import { rescheduleMissing, type RescheduleField } from "@/lib/citas/reschedule-missing";
 import { citaBlockingCode } from "@/lib/api/cita-errors";
+import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 import { apiErrorLabel } from "@/lib/api/errors";
+import { appointmentMenuFor } from "@/lib/lifecycle/allowed-actions";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
@@ -61,25 +63,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-// Scheduling-flow actions allowed from each state (slice 2). Clinical states
-// (triage/en_consulta → vitals/consult) are handled in slice 3.
-const ACTIONS: Record<EstadoCita, string[]> = {
-  programada: ["confirmar", "reagendar", "noShow", "cancelar"],
-  confirmada: ["presente", "reagendar", "noShow", "cancelar"],
-  presente: ["cancelar"],
-  triage: ["cancelar"],
-  en_consulta: ["cancelar"],
-  atendida: [],
-  no_show: [],
-  cancelada: [],
-  reprogramada: [],
-};
-
 export function CitaActions({
   cita,
+  allowedActions,
   onChanged,
 }: {
   cita: Cita;
+  /** The row's `allowedActions` (cmr-be 4a) when the caller has them (a board or day-list row): the menu
+   * is drawn from them. Without them (an entity read: booking screen, calendar, day view, board modal),
+   * the status rules of piece 3 decide (lib/lifecycle/allowed-actions.ts `appointmentMenuFor`). */
+  allowedActions?: string[] | null;
   onChanged: () => void;
 }) {
   const t = useTranslations("appointments.actions");
@@ -108,10 +101,28 @@ export function CitaActions({
         after?.();
         onChanged();
       },
+      // The appointment moved under us: close the dialog and redraw (the toast still says why).
+      onError: (err) => {
+        if (refusalRefreshesRow(err)) {
+          setCancelOpen(false);
+          onChanged();
+        }
+        return false;
+      },
     },
   );
 
-  const actions = ACTIONS[cita.status] ?? [];
+  const tRoot = useTranslations();
+  const actions = appointmentMenuFor({
+    status: cita.status,
+    date: cita.date,
+    today: todayPR(),
+    allowed: allowedActions,
+    canConfirm: can("appointments.confirm"),
+  });
+  // Cancel on an arrived patient is "arrived, not served": same dialog and reason, its own words.
+  const notServe = cancelMeaning(cita.status, allowedActions) === "not_serve";
+  const cancelLabel = notServe ? tRoot("lifecycle.action.not_serve") : t("cancelar");
   // Show the menu whenever the user can act OR at least view history.
   if (!can("citas.update") && !can("citas.read")) return null;
 
@@ -140,6 +151,11 @@ export function CitaActions({
               {t("confirmar")}
             </DropdownMenuItem>
           )}
+          {actions.includes("unconfirm") && (
+            <DropdownMenuItem onSelect={() => void run(() => unconfirmCita(cita.id, centroId))}>
+              {tRoot("lifecycle.action.unconfirm")}
+            </DropdownMenuItem>
+          )}
           {actions.includes("presente") && (
             <DropdownMenuItem onSelect={() => void run(() => presenteCita(cita.id, centroId))}>
               {t("presente")}
@@ -163,7 +179,7 @@ export function CitaActions({
               variant="destructive"
               onSelect={() => setCancelOpen(true)}
             >
-              {t("cancelar")}
+              {cancelLabel}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -174,12 +190,12 @@ export function CitaActions({
         open={cancelOpen}
         onOpenChange={setCancelOpen}
         size="md"
-        title={t("cancelTitle")}
-        description={t("cancelHelp")}
+        title={notServe ? cancelLabel : t("cancelTitle")}
+        description={notServe ? t("notServeHelp") : t("cancelHelp")}
         onSubmit={() => {}}
         actions={[
           {
-            label: t("cancelar"),
+            label: cancelLabel,
             variant: "destructive",
             onClick: () =>
               run(

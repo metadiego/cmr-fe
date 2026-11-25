@@ -81,3 +81,27 @@ test("«En consulta» marcada (fila en en_consulta) se desmarca a presente, no a
   assert.equal(r.canUncheck, true);
   assert.equal(r.action, "volver_presente");
 });
+
+// Piece 4a: the row's `allowedActions` narrows what the box may do (the backend's own decision).
+test("allowedActions: the box advances only when its action is listed", () => {
+  const listed = resolveToggle({ ...base, estado: "confirmada", forwardSlug: "presente", allowed: ["check_in"] });
+  assert.equal(listed.action, "presente");
+  assert.equal(listed.disabled, false);
+  // a future-dated row: the backend leaves check_in out → the box is a no-op
+  const notListed = resolveToggle({ ...base, estado: "confirmada", forwardSlug: "presente", allowed: ["cancel"] });
+  assert.equal(notListed.action, null);
+  assert.equal(notListed.disabled, true);
+});
+
+test("allowedActions: the box undoes only when its reverse is listed", () => {
+  const r = resolveToggle({ ...base, estado: "presente", forwardSlug: "presente", allowed: ["undo_check_in"] });
+  assert.equal(r.action, "volver_confirmada");
+  const refused = resolveToggle({ ...base, estado: "presente", forwardSlug: "presente", allowed: ["start_triage"] });
+  assert.equal(refused.action, null);
+  assert.equal(refused.checked, true);
+});
+
+test("allowedActions: no list on the row keeps today's rule", () => {
+  const r = resolveToggle({ ...base, estado: "confirmada", forwardSlug: "presente", allowed: null });
+  assert.equal(r.action, "presente");
+});

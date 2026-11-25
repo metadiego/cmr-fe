@@ -815,7 +815,8 @@
     },
     "source": {
       "personal": "Personal por capacidades"
-    }
+    },
+    "accion_denegada": "No tienes permiso para esta acción en el centro de este registro."
   },
   "agenda": {
     "tabMedicas": "Citas Médicas",
@@ -1038,7 +1039,8 @@
         "reprogramada": "Reagendada",
         "reparada": "Reparada",
         "campo_editado": "Campo editado"
-      }
+      },
+      "notServeHelp": "El paciente llegó y se fue sin ser atendido. Indica el motivo: la cita queda cancelada y la llegada se conserva."
     },
     "filterState": "Estado",
     "filterDoctor": "Médico",
@@ -1503,7 +1505,7 @@
     "resources": "Recursos",
     "center": "Centro",
     "clientes": "Pacientes",
-    "citas": "Citas",
+    "citas": "Agendar cita",
     "alertas": "Alertas",
     "atencion": "Atención",
     "therapyDay": "Programar terapias",
@@ -1617,7 +1619,8 @@
     "paymentMethods": "Formas de pago",
     "inventory_daily_kardex": "Kardex diario",
     "inventory_adjustments": "Ajustes",
-    "inventoryBackdate": "Ajustes con fecha pasada"
+    "inventoryBackdate": "Ajustes con fecha pasada",
+    "appointmentsDay": "Citas"
   },
   "admin": {
     "title": "Administración",
@@ -2694,7 +2697,8 @@
       "expires": "vence {day}",
       "expired": "Vial n.º {number} vencido: descartar",
       "remnantVisit": "Resto del vial"
-    }
+    },
+    "notServeHelp": "El paciente llegó y se fue sin ser atendido. Indica el motivo: la sesión queda cancelada y la llegada se conserva."
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -3964,7 +3968,8 @@
     "LIFECYCLE_ACTION_NOT_ALLOWED": "Esta acción ya no está disponible para este registro. Recarga para ver su estado actual.",
     "LIFECYCLE_UNKNOWN_ACTION": "Acción desconocida para este registro.",
     "LIFECYCLE_REASON_REQUIRED": "Esta acción necesita un motivo.",
-    "LIFECYCLE_STALE": "Otra persona acaba de cambiar este registro. Recarga y vuelve a intentarlo."
+    "LIFECYCLE_STALE": "Otra persona acaba de cambiar este registro. Recarga y vuelve a intentarlo.",
+    "TABLERO_ACCION_DENEGADA": "No tienes permiso para esta acción en el centro de este registro."
   },
   "transferencia": {
     "sesionesExcedenDisponible": "Pediste más sesiones de las que quedan pendientes en ese paquete.",
@@ -6934,7 +6939,7 @@
     }
   },
   "appointmentsBooking": {
-    "title": "Citas",
+    "title": "Agendar cita",
     "settings": "Configuración",
     "loading": "Cargando…",
     "loadFailed": "No se pudo cargar: {message}",
@@ -7302,9 +7307,11 @@
     "lastOne": "la última",
     "bookedTitle": "Ya agendadas",
     "sameDateAsVisit": "misma fecha",
-    "sameDayOthers": "Ese día ya tiene: {list}"
+    "sameDayOthers": "Ese día ya tiene: {list}",
+    "bornConfirmed": "Agendar ya confirmada"
   },
   "lifecycle": {
+    "bookedUnconfirmed": "Cita agendada sin confirmar: no tienes permiso para confirmar en este centro. Hay que confirmarla para que aparezca en el tablero de atención.",
     "action": {
       "confirm": "Confirmar",
       "unconfirm": "Quitar confirmación",
@@ -7337,6 +7344,94 @@
       "reasonRequired": "Esta acción necesita un motivo.",
       "stale": "Otra persona acaba de cambiar este registro. Recarga y vuelve a intentarlo.",
       "futureDate": "Un no-show solo se puede registrar para hoy o una fecha pasada ({fecha})."
+    },
+    "stage": {
+      "booked": "Agendada",
+      "confirmed": "Confirmada",
+      "arrived": "Llegó",
+      "cancelled": "Cancelada",
+      "no_show": "No se presentó",
+      "rescheduled": "Reprogramada",
+      "waiting": "En espera",
+      "triage": "Triage",
+      "in_consultation": "En consulta",
+      "called": "Llamado",
+      "in_therapy": "En terapia",
+      "done": "Atendido",
+      "not_served": "Se fue sin ser atendido"
+    }
+  },
+  "appointmentsDay": {
+    "title": "Citas",
+    "prevDay": "Día anterior",
+    "nextDay": "Día siguiente",
+    "today": "Hoy",
+    "type": {
+      "new": "Nueva",
+      "followUp": "Seguimiento",
+      "therapy": "Terapia"
+    },
+    "clinic": {
+      "label": "Clínica",
+      "all": "Todas"
+    },
+    "typeFilter": {
+      "label": "Tipo",
+      "any": "Todos",
+      "count": "{count} tipos",
+      "medical": "Consultas",
+      "therapies": "Terapias",
+      "clear": "Quitar filtro",
+      "empty": "No hay tipos"
+    },
+    "bookedBy": {
+      "label": "Agendada por",
+      "me": "Yo",
+      "all": "Todos"
+    },
+    "owner": {
+      "label": "Cartera"
+    },
+    "showCancelled": "Ver canceladas",
+    "kpi": {
+      "booked": "Citados",
+      "confirmed": "Confirmados",
+      "arrived": "Presentes",
+      "late": "No han llegado (tarde)",
+      "upcoming": "Por venir"
+    },
+    "col": {
+      "time": "Hora",
+      "clinic": "Clínica",
+      "patient": "Paciente",
+      "type": "Tipo",
+      "bookedBy": "Agendada por",
+      "status": "Estado",
+      "confirm": "Confirmar",
+      "actions": "Acciones"
+    },
+    "empty": "No hay citas para este día con estos filtros.",
+    "portfolio": "Cartera: {name}",
+    "loadFailed": "No se pudo abrir la cita: {message}",
+    "status": {
+      "late": "Tarde (no ha llegado)",
+      "confirmedBy": "Confirmada · por {name}",
+      "confirmedSheet": "Confirmada · hoja del call center",
+      "confirmedImport": "Confirmada · importada del sistema anterior"
+    },
+    "actions": {
+      "menu": "Acciones de la cita",
+      "done": "Listo.",
+      "change": "Cambiar",
+      "bookAnother": "Agendar otra cita",
+      "openPatient": "Abrir paciente"
+    },
+    "move": {
+      "title": "Mover la terapia",
+      "date": "Nuevo día",
+      "time": "Hora",
+      "timeHint": "Opcional. Déjala vacía para conservar la hora actual.",
+      "submit": "Mover"
     }
   }
 }

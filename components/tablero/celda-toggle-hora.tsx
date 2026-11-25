@@ -45,6 +45,7 @@ export function CeldaToggleHora({
   estados,
   centroId,
   pacienteId,
+  allowedActions,
   onSaved,
   onEhrGate,
 }: {
@@ -57,6 +58,8 @@ export function CeldaToggleHora({
   estados: EstadoLite[];
   centroId?: string;
   pacienteId?: string;
+  /** The row's `allowedActions` (cmr-be 4a); null when the row does not carry them (today's rule). */
+  allowedActions?: readonly string[] | null;
   onSaved?: () => void;
   // Si el BE rechaza por PACIENTE_DATOS_REQUERIDOS, el gate se abre en el PADRE (no aquí): esta
   // celda puede desmontarse al refrescar si la fila sale del filtro activo, y con ella se perdería
@@ -81,6 +84,7 @@ export function CeldaToggleHora({
     estados,
     optimistic,
     busy,
+    allowed: allowedActions,
   });
   const hora = checked ? fmtHora(value) : null; // la hora sellada es el BENEFICIO
 

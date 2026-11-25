@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
-import { cancelarSesion } from "@/lib/api/frontdesk";
+import { cancelarSesion, confirmSession, unconfirmSession } from "@/lib/api/frontdesk";
+import { confirmToggle } from "@/lib/lifecycle/allowed-actions";
 import { useCan } from "@/hooks/use-can";
 import { ChangeLogSheet } from "@/components/change-log/change-log-sheet";
 import { cancelPatientDay, reopenPatientDay, reopenSession } from "@/lib/api/frontdesk-day";
@@ -14,6 +15,7 @@ import { ApiError } from "@/lib/api/types";
 import { todayISO } from "@/lib/agenda/calendar";
 import { canReopen, duplicatesReopen, REOPEN_ERROR_KEYS, skippedReasons } from "@/lib/frontdesk/reopen";
 import { sessionReasonMissing } from "@/lib/frontdesk/session-reason-missing";
+import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +40,7 @@ import {
 // actions, cancel and repair (admin). The BE decides which transitions apply; this only lists them
 // and confirms the ones that ask for it.
 export function RowMenu({
+  allowedActions,
   disabled,
   cancelada,
   canReparar,
@@ -53,6 +56,9 @@ export function RowMenu({
   onDone,
   onReparar,
 }: {
+  /** The row's `allowedActions` (live Patient desk, cmr-be 4a): Cancel / not-served and Confirm /
+   * Unconfirm follow it. null/undefined: today's rule (Cancel on any open session, no confirm). */
+  allowedActions?: readonly string[] | null;
   disabled: boolean;
   cancelada: boolean;
   canReparar: boolean;
@@ -99,12 +105,30 @@ export function RowMenu({
       onDone();
     },
     onError: (err) => {
+      // The session moved under us: close the dialog and redraw (the generic toast still says why).
+      if (refusalRefreshesRow(err)) {
+        setCancelOpen(false);
+        onDone();
+        return false;
+      }
       if (!(err instanceof ApiError && REOPEN_ERROR_KEYS[err.code])) return false;
       toast.error(say(err.code));
       return true;
     },
   });
   const missing = sessionReasonMissing({ reason: motivo }).map(() => t("motivo"));
+  // Cancel follows the row's list when it carries one (cmr-be 4a); without it, the piece-3 catalogue:
+  // on an arrived, waiting session it records "not served"; in therapy or attended it is refused (the
+  // way back is Unattend, then this).
+  const meaning = cancelMeaning(day.status, allowedActions);
+  const showCancel = (allowedActions ? true : !cancelada) && meaning !== null;
+  const cancelLabel = meaning === "not_serve" ? tRoot("lifecycle.action.not_serve") : t("cancelar");
+  const toggle = confirmToggle(allowedActions);
+  const confirmMove = (move: "confirm" | "unconfirm") =>
+    act(async () => {
+      await (move === "confirm" ? confirmSession : unconfirmSession)(day.sessionId, day.centerId);
+      return tRoot("common.saved");
+    });
   const cancel = (mode: "one" | "all", reason: string) =>
     act(async () => {
       if (mode === "one") {
@@ -158,6 +182,11 @@ export function RowMenu({
               {t("reopenAll")}
             </DropdownMenuItem>
           )}
+          {toggle && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); confirmMove(toggle); }}>
+              {tRoot(`lifecycle.action.${toggle}`)}
+            </DropdownMenuItem>
+          )}
           {acciones.map((a) => (
             <DropdownMenuItem
               key={a.clave}
@@ -185,9 +214,9 @@ export function RowMenu({
               {tRoot("changeLog.title")}
             </DropdownMenuItem>
           )}
-          {!cancelada && (
+          {showCancel && (
             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("one"); }}>
-              {t("cancelar")}
+              {cancelLabel}
             </DropdownMenuItem>
           )}
           {!cancelada && patientId && (
@@ -214,12 +243,12 @@ export function RowMenu({
         open={!!cancelOpen}
         onOpenChange={(v) => !v && setCancelOpen(false)}
         size="sm"
-        title={cancelOpen === "all" ? t("cancelAllTitle") : t("cancelarTitle")}
-        description={cancelOpen === "all" ? t("cancelAllHint") : undefined}
+        title={cancelOpen === "all" ? t("cancelAllTitle") : meaning === "not_serve" ? cancelLabel : t("cancelarTitle")}
+        description={cancelOpen === "all" ? t("cancelAllHint") : meaning === "not_serve" ? t("notServeHelp") : undefined}
         onSubmit={() => cancel(cancelOpen || "one", motivo.trim())}
         actions={[
           {
-            label: cancelOpen === "all" ? t("cancelAll") : t("cancelar"),
+            label: cancelOpen === "all" ? t("cancelAll") : cancelLabel,
             variant: "destructive",
             onClick: () => cancel(cancelOpen || "one", motivo.trim()),
           },

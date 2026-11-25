@@ -24,6 +24,18 @@ const TONE: Record<string, Tone> = {
   asistido: "success",
   en_terapia: "info",
   pendiente: "secondary",
+  // appointment lifecycle stages (cmr-be piece 4a: bookingStatus / careStatus, both kinds)
+  booked: "info",
+  confirmed: "info",
+  arrived: "info",
+  waiting: "info",
+  called: "info",
+  in_consultation: "info",
+  in_therapy: "info",
+  done: "success",
+  not_served: "warning",
+  cancelled: "destructive",
+  rescheduled: "secondary",
   // invoices
   emitida: "success",
   borrador: "secondary",
@@ -52,6 +64,7 @@ const LABEL_NS = {
   session: "auditSessions.status",
   sheet: "formSheet.home",
   apiKey: "admin.apiKeys.status",
+  lifecycle: "lifecycle.stage",
 } as const;
 
 export function StatusBadge({ kind, value }: { kind: keyof typeof LABEL_NS; value?: string | null }) {

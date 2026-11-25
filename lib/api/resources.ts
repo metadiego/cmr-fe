@@ -235,7 +235,8 @@ export type BookTrainResult = { sessions: Sesion[]; train: TrainSlot };
 // paso, pasa del cierre…) trae `meta.advertencias` (BOOKING_RULE_BROKEN / THERAPY_TRAIN_OVERBOOKED).
 // La reserva YA se hizo: mostrar con mostrarAvisos, nunca como error.
 export function bookTrain(
-  payload: { patientId: string; date: string; time: string; serviceIds: string[]; areas?: Record<string, number>; keepOrder?: boolean },
+  // `confirmed` (cmr-be 4a): every leg is born confirmed; needs `appointments.confirm` in the center.
+  payload: { patientId: string; date: string; time: string; serviceIds: string[]; areas?: Record<string, number>; keepOrder?: boolean; confirmed?: boolean },
   centroId?: string,
 ): Promise<ConWarnings<BookTrainResult> & { advertencias: ApiWarning[] }> {
   return apiFetchEnvelope<BookTrainResult>(

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations, useFormatter } from "next-intl";
+import { toast } from "sonner";
 
 import type { CitaFila } from "@/lib/api/agenda-dia";
 import {
@@ -19,6 +20,8 @@ import { asignarRecord } from "@/lib/api/pacientes";
 import { nextAppointmentMissing } from "@/lib/board/next-appointment-missing";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
+import { useCanInCenter } from "@/hooks/use-can-in-center";
+import { bookedUnconfirmedNotice, CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
 import {
   Dialog,
   DialogContent,
@@ -90,8 +93,10 @@ export function NuevaCitaModal({
   onSaved?: () => void;
 }) {
   const t = useTranslations("nuevaCita");
+  const tRoot = useTranslations();
   const format = useFormatter();
   const { can } = useCan();
+  const canConfirmHere = useCanInCenter(CONFIRM_PERMISSION, centroId);
 
   const agendarEnabled = render?.agendar_cita !== false; // módulo de agendamiento (plugged por config)
 
@@ -212,13 +217,15 @@ export function NuevaCitaModal({
         date: f,
         ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
         ...(notas.trim() ? { notes: notas.trim() } : {}),
-        // An appointment given in ATENCIÓN is made directly with the person present at the clinic (no
-        // call-center), so it is born CONFIRMED for any date — not `programada`, which is the call-center's —
-        // and that is why it shows on its day's Atención board. See POST /citas.
-        status: "confirmada",
+        // An appointment given at the desk is made with the person present (no call center), so it is born
+        // CONFIRMED for any date, which is why it shows on its day's board. `confirmed` (cmr-be 4a) needs
+        // appointments.confirm in this clinic; without it the appointment is born booked, never a 403.
+        confirmed: createConfirmed(true, canConfirmHere),
       } as Parameters<typeof createCita>[0],
       centroId,
     );
+    // Born booked because appointments.confirm is missing here: say so, or the patient never reaches the board.
+    if (bookedUnconfirmedNotice(true, canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
     onSaved?.();
     onClose();
   }
