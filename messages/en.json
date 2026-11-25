@@ -1575,6 +1575,7 @@
     "gruposFacturacion": "Billing groups",
     "panelEnfermeria": "Nursing panel",
     "panelEnfermeriaConfig": "Nursing panel settings",
+    "nurseStatusTypes": "Nurse statuses",
     "datosPaciente": "Required patient data",
     "requeridos": "Required fields",
     "requisitos_servicio": "Service requirements",
@@ -5524,6 +5525,10 @@
       "panelEnfermeria": {
         "title": "Nursing panel",
         "desc": "Nursing panel settings."
+      },
+      "nurseStatusTypes": {
+        "title": "Nurse statuses",
+        "desc": "Add or retire catalogue statuses (Break, In triage…)."
       }
     }
   },
@@ -7427,5 +7432,30 @@
       "timeHint": "Optional. Leave empty to keep the current time.",
       "submit": "Move"
     }
+  },
+  "nurseStatusTypes": {
+    "title": "Nurse statuses",
+    "help": "Catalogue of statuses a nurse can be set to in the Nursing panel (Break, In triage…). Changes what the whole team sees.",
+    "sinCentro": "Choose a center to view and manage its nurse statuses.",
+    "new": "New status",
+    "edit": "Edit",
+    "name": "Name",
+    "namePlaceholder": "E.g. Break",
+    "slugPreview": "Internal key: {slug}",
+    "slugTaken": "A status with that name already exists.",
+    "color": "Color",
+    "colorHint": "The color the status button shows.",
+    "durations": "Durations (minutes)",
+    "durationsHint": "Optional. Comma-separated, 1 to 720 minutes (e.g. 10, 15, 30, 45, 60). Empty = applies without asking for a duration.",
+    "durationsInvalid": "There's a number outside 1–720 minutes.",
+    "durationsN": "Durations: {list} min",
+    "countsAsAvailable": "Counts as available",
+    "countsAsAvailableHint": "When on, a nurse with this status still counts as available in reports.",
+    "countsAsAvailableYes": "Counts as available",
+    "countsAsAvailableNo": "Doesn't count as available",
+    "active": "Active",
+    "created": "Status created.",
+    "updated": "Status updated.",
+    "empty": "No statuses in the catalogue yet."
   }
 }

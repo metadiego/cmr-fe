@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   PaintBoardIcon, Menu01Icon, DashboardSquare01Icon, InvoiceIcon, ListSettingIcon,
-  PrinterIcon, UserAccountIcon, CheckListIcon, StethoscopeIcon, ArrowRight01Icon,
+  PrinterIcon, UserAccountIcon, CheckListIcon, StethoscopeIcon, Pulse01Icon, ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 
 import { useMenu } from "@/hooks/use-menu";
@@ -26,6 +26,7 @@ const SECCIONES = [
   { href: "/configuration/patient-fields", icon: UserAccountIcon, key: "datosPaciente" },
   { href: "/configuration/required-fields", icon: CheckListIcon, key: "requeridos" },
   { href: "/configuration/nursing-panel", icon: StethoscopeIcon, key: "panelEnfermeria" },
+  { href: "/configuration/nursing-statuses", icon: Pulse01Icon, key: "nurseStatusTypes" },
 ] as const;
 
 export default function ConfiguracionIndexPage() {

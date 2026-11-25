@@ -507,6 +507,33 @@ export type NurseStatusActual = {
 export function getNurseStatusTipos(centroId?: string): Promise<NurseStatusTipo[]> {
   return apiFetch<NurseStatusTipo[]>(`/frontdesk/nurse-status/tipos`, {}, centroId);
 }
+
+// The controller takes an inline body, not a class-validator DTO (confirmed by a peer session,
+// 25-nov-2026): the generated schema shows these two as requestBody: never, and nothing server-side
+// validates `color`/`icon` — enforce shape client-side instead. `slug`/`labelKey` are NOT
+// server-generated (unlike this catalog's sibling, priority-flag-types): send both on create, and
+// `slug` is fixed afterward (its own unique index — a duplicate is a raw DB error, not a clean
+// VALIDATION_ERROR). The server always creates with `active: true`; there is no DELETE — a type
+// already referenced by history retires via `active: false` on the update call instead.
+export type CreateNurseStatusTipoPayload = {
+  slug: string;
+  labelKey: string;
+  name: string;
+  color?: string | null;
+  icon?: string | null;
+  sortOrder?: number;
+  countsAsAvailable?: boolean;
+  durationOptions?: number[] | null;
+};
+export type UpdateNurseStatusTipoPayload = Partial<
+  Pick<NurseStatusTipo, "labelKey" | "name" | "color" | "icon" | "sortOrder" | "active" | "countsAsAvailable" | "durationOptions">
+>;
+export function createNurseStatusTipo(payload: CreateNurseStatusTipoPayload, centroId?: string): Promise<NurseStatusTipo> {
+  return apiFetch<NurseStatusTipo>(`/frontdesk/nurse-status/tipos`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+export function updateNurseStatusTipo(id: string, payload: UpdateNurseStatusTipoPayload, centroId?: string): Promise<NurseStatusTipo> {
+  return apiFetch<NurseStatusTipo>(`/frontdesk/nurse-status/tipos/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(payload) }, centroId);
+}
 export function getNurseStatusActuales(fecha: string, centroId?: string): Promise<NurseStatusActual[]> {
   return apiFetch<NurseStatusActual[]>(`/frontdesk/nurse-status?date=${fecha}`, {}, centroId);
 }

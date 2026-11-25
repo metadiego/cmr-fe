@@ -1575,6 +1575,7 @@
     "gruposFacturacion": "Grupos de facturación",
     "panelEnfermeria": "Panel de Enfermería",
     "panelEnfermeriaConfig": "Config. Panel de Enfermería",
+    "nurseStatusTypes": "Estatus de enfermería",
     "datosPaciente": "Datos obligatorios del paciente",
     "requeridos": "Campos requeridos",
     "requisitos_servicio": "Requisitos por servicio",
@@ -5524,6 +5525,10 @@
       "panelEnfermeria": {
         "title": "Panel de enfermería",
         "desc": "Configuración del panel de enfermería."
+      },
+      "nurseStatusTypes": {
+        "title": "Estatus de enfermería",
+        "desc": "Agregar o retirar estatus del catálogo (Descanso, En triage…)."
       }
     }
   },
@@ -7427,5 +7432,30 @@
       "timeHint": "Opcional. Déjala vacía para conservar la hora actual.",
       "submit": "Mover"
     }
+  },
+  "nurseStatusTypes": {
+    "title": "Estatus de enfermería",
+    "help": "Catálogo de estatus que se le puede poner a una enfermera en el panel de Enfermería (Descanso, En triage…). Cambia lo que ve todo el equipo.",
+    "sinCentro": "Elige un centro para ver y administrar sus estatus de enfermería.",
+    "new": "Nuevo estatus",
+    "edit": "Editar",
+    "name": "Nombre",
+    "namePlaceholder": "Ej. Descanso",
+    "slugPreview": "Clave interna: {slug}",
+    "slugTaken": "Ya existe un estatus con ese nombre.",
+    "color": "Color",
+    "colorHint": "El color con el que se ve el botón del estatus.",
+    "durations": "Duraciones (minutos)",
+    "durationsHint": "Opcional. Separadas por coma, de 1 a 720 minutos (ej. 10, 15, 30, 45, 60). Vacío = se aplica sin pedir duración.",
+    "durationsInvalid": "Hay un número fuera de 1–720 minutos.",
+    "durationsN": "Duraciones: {list} min",
+    "countsAsAvailable": "Cuenta como disponible",
+    "countsAsAvailableHint": "Si está activo, una enfermera con este estatus sigue contando como disponible en los reportes.",
+    "countsAsAvailableYes": "Cuenta como disponible",
+    "countsAsAvailableNo": "No cuenta como disponible",
+    "active": "Activo",
+    "created": "Estatus creado.",
+    "updated": "Estatus actualizado.",
+    "empty": "Sin estatus en el catálogo todavía."
   }
 }
