@@ -267,12 +267,8 @@ export function NotificarCell({
       </button>
       {render.mostrarAsignado && nombreAsignado && (
         <div
-          className={
-            inline
-              ? "max-w-[11rem] truncate rounded-full bg-card px-2 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-foreground/10"
-              : "mt-0.5 max-w-[9rem] truncate text-[11px] leading-tight text-muted-foreground"
-          }
           title={nombreAsignado}
+          className={cn("truncate text-[11px] text-muted-foreground", inline ? "max-w-[11rem] rounded-full bg-card px-2 py-0.5 font-medium ring-1 ring-foreground/10" : "mt-0.5 max-w-[9rem] leading-tight")}
         >
           {nombreAsignado}
         </div>
