@@ -14,7 +14,7 @@ import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
-import { useBookedBy } from "@/hooks/use-booked-by";
+import { useBookedBy, usePortfolioOwner } from "@/hooks/use-booked-by";
 import { getAppointmentsDay, type DayListRow } from "@/lib/api/appointments-day";
 import { listPersonalAll } from "@/lib/api/personal";
 import { getTiposCita } from "@/lib/api/citas";
@@ -86,6 +86,7 @@ export function AppointmentsDayScreen() {
   // and the day list still loads.
   const staffOptions = staffRes.state.kind === "fail" ? [] : (staff?.map((s) => s.id) ?? null);
   const [bookedBy, setBookedBy] = useBookedBy(staffId, staffOptions);
+  const [owner, setOwner] = usePortfolioOwner(params.owner, (v) => setParams({ owner: v }), staffId, staffOptions);
 
   // The "Type" picker: the medical types and this center's services. A failed read counts as no options
   // (never null): a type picked in the URL is dropped and the day list still loads.
@@ -100,9 +101,9 @@ export function AppointmentsDayScreen() {
   const picked = pickedTypes(params.types, options, params.bucket);
 
   const search =
-    bookedBy === null || picked === null
+    bookedBy === null || owner === null || picked === null
       ? null
-      : dayListSearch({ ...params, centerId, bookedBy, myStaffId: staffId, picked }).toString();
+      : dayListSearch({ ...params, centerId, bookedBy, portfolioOwner: owner, myStaffId: staffId, picked }).toString();
   const res = useResource<DayListRow[]>(
     () => (centerId && search !== null ? getAppointmentsDay(new URLSearchParams(search), centerId) : Promise.resolve([])),
     [search, centerId],
@@ -143,6 +144,8 @@ export function AppointmentsDayScreen() {
         onTypes={(types) => setParams({ types })}
         bookedBy={bookedBy}
         onBookedBy={setBookedBy}
+        owner={owner}
+        onOwner={setOwner}
         staff={staff ?? []}
         canBeMe={!!staffId}
         includeCancelled={params.includeCancelled}

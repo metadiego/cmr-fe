@@ -7383,6 +7383,9 @@
       "me": "Me",
       "all": "Everyone"
     },
+    "owner": {
+      "label": "Portfolio"
+    },
     "showCancelled": "Show cancelled",
     "summary": {
       "title": "Today",

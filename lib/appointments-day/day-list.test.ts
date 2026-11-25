@@ -8,6 +8,7 @@ import {
   bookedByOrDefault,
   dayListSearch,
   keepByBucket,
+  ownerChoice,
   nowInZone,
   parseDayScreenParams,
   rowStatus,
@@ -69,6 +70,42 @@ test("booked by: me sends my staff id, a person sends theirs, all sends none", (
   assert.equal(dayListSearch({ ...base, bookedBy: BOOKED_BY_ME, myStaffId: "me1" }).get("staffIds"), "me1")
   assert.equal(dayListSearch({ ...base, bookedBy: "s9", myStaffId: "me1" }).get("staffIds"), "s9")
   assert.equal(dayListSearch({ ...base, bookedBy: BOOKED_BY_ALL, myStaffId: "me1" }).has("staffIds"), false)
+})
+
+test("cartera: sent as portfolioOwnerIds only when it is not All (me = my staff id); booked by stays creator-only", () => {
+  const base = { date: "2026-11-24", bucket: "all" as const, includeCancelled: false, bookedBy: BOOKED_BY_ME, myStaffId: "me1" }
+  const none = dayListSearch(base)
+  assert.equal(none.has("portfolioOwnerIds"), false)
+  assert.equal(dayListSearch({ ...base, portfolioOwner: BOOKED_BY_ALL }).has("portfolioOwnerIds"), false)
+  assert.equal(dayListSearch({ ...base, portfolioOwner: BOOKED_BY_ME }).get("portfolioOwnerIds"), "me1")
+  const both = dayListSearch({ ...base, portfolioOwner: "s9" })
+  assert.equal(both.get("portfolioOwnerIds"), "s9")
+  assert.equal(both.get("staffIds"), "me1")
+})
+
+test("cartera: the URL wins over the device, then the default (All)", () => {
+  assert.equal(ownerChoice(null, null, "me1", ["s1"]), BOOKED_BY_ALL)
+  assert.equal(ownerChoice(null, BOOKED_BY_ME, "me1", ["s1"]), BOOKED_BY_ME)
+  assert.equal(ownerChoice("s1", BOOKED_BY_ME, "me1", ["s1"]), "s1")
+})
+
+test("cartera: All never waits; Me waits for me and needs a staff record; a staff id waits for the options", () => {
+  assert.equal(ownerChoice(null, null, undefined, null), BOOKED_BY_ALL)
+  assert.equal(ownerChoice(BOOKED_BY_ME, null, undefined, null), null)
+  assert.equal(ownerChoice(BOOKED_BY_ME, null, null, null), BOOKED_BY_ALL)
+  assert.equal(ownerChoice("s9", null, "me1", null), null)
+  assert.equal(ownerChoice("s9", null, "me1", ["s1"]), BOOKED_BY_ALL)
+  assert.equal(ownerChoice("s9", null, "me1", []), BOOKED_BY_ALL)
+  assert.equal(ownerChoice("s9", null, undefined, ["s9"]), "s9")
+})
+
+test("the URL keeps the cartera (?owner=), All is left out", () => {
+  const base = { date: "2026-11-24", bucket: "all" as const, includeCancelled: false, types: [] }
+  assert.equal(parseDayScreenParams(new URLSearchParams("owner=s9"), "2026-11-25").owner, "s9")
+  assert.equal(parseDayScreenParams(new URLSearchParams(""), "2026-11-25").owner, null)
+  assert.equal(toDayScreenSearch({ ...base, owner: "s9" }), "date=2026-11-24&owner=s9")
+  assert.equal(toDayScreenSearch({ ...base, owner: BOOKED_BY_ALL }), "date=2026-11-24")
+  assert.equal(toDayScreenSearch({ ...base, owner: null }), "date=2026-11-24")
 })
 
 test("show cancelled asks the backend for cancelled and rescheduled rows", () => {
@@ -157,12 +194,12 @@ test("the summary counts each group", () => {
 
 test("the URL keeps the day, the type and show-cancelled; a bad day falls back", () => {
   const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&type=therapies&cancelled=1"), "2026-11-25")
-  assert.deepEqual(p, { date: "2026-11-24", bucket: "therapies", includeCancelled: true, types: [] })
+  assert.deepEqual(p, { date: "2026-11-24", bucket: "therapies", includeCancelled: true, types: [], owner: null })
   const bad = parseDayScreenParams(new URLSearchParams("date=24-11&type=nope"), "2026-11-25")
-  assert.deepEqual(bad, { date: "2026-11-25", bucket: "all", includeCancelled: false, types: [] })
-  assert.equal(toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: [] }), "date=2026-11-24")
+  assert.deepEqual(bad, { date: "2026-11-25", bucket: "all", includeCancelled: false, types: [], owner: null })
+  assert.equal(toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: [], owner: null }), "date=2026-11-24")
   assert.equal(
-    toDayScreenSearch({ date: "2026-11-24", bucket: "new", includeCancelled: true, types: [] }),
+    toDayScreenSearch({ date: "2026-11-24", bucket: "new", includeCancelled: true, types: [], owner: null }),
     "date=2026-11-24&type=new&cancelled=1",
   )
 })
@@ -255,7 +292,7 @@ test("the URL keeps the picked types (?types=a,b), deduplicated", () => {
   const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&types=tS,sV,,tS"), "2026-11-25")
   assert.deepEqual(p.types, ["tS", "sV"])
   assert.equal(
-    toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: ["tS", "sV"] }),
+    toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: ["tS", "sV"], owner: null }),
     "date=2026-11-24&types=tS,sV",
   )
 })

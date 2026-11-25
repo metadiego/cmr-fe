@@ -23,7 +23,7 @@ their own bookings, and — for today — see who has arrived.
 ```
 Citas                                                     [● live]
 [◀] [ Mon 24 Nov 2026 ▾ ] [▶]  [Today]    Center [Bayamón ▾]
-Type [All | New | Follow-up | Therapies]   Type [All ▾]   Booked by [Me ▾]
+Type [All | New | Follow-up | Therapies]   Type [All ▾]   Booked by [Me ▾]   Cartera [All ▾]
 
 Today:  12 arrived · 3 not arrived (late) · 9 upcoming
 
@@ -47,10 +47,14 @@ TIME   PATIENT          TYPE            BOOKED BY   STATUS                 ACTIO
   type filter. Picks go to the day list as `appointmentTypeIds` / `serviceIds`; the backend leaves out
   a kind with no list of its own (only services picked = only therapies). Kept in the URL (`?types=a,b`).
   Logic: `lib/appointments-day/day-list.ts` (`typeOptions`, `pruneTypes`, `pickedTypes`).
-- **Booked by**: staff picker. "Booked by" is who created the appointment (call-center agent or
-  reception). Selecting a person shows the rows they created **or** whose patient they own (portfolio
-  agent) — Diego, 2026-11-23. Defaults to **Me**; options: Me, All, any staff member. Remembered per
-  device. The column shows the creator, and the portfolio agent beneath it when different.
+- **Booked by**: staff picker. "Booked by" is **only** who created the appointment (call-center agent or
+  reception) — owner, 2026-11-25 (it replaces the 2026-11-23 "created or portfolio" rule). Defaults to
+  **Me**; options: Me, All, any staff member. Remembered per device. Sent as `staffIds`.
+- **Cartera** (owner, 2026-11-25): the patient's portfolio owner (`booked_by_staff_id`). Same options as
+  Booked by, default **All**; remembered per device (its own key) and in the URL (`?owner=`, which wins).
+  Sent as `portfolioOwnerIds` only when it is not All (backend PR `feat/day-list-portfolio-filter`); both
+  filters together = AND. Fallbacks as Booked by: an unknown id or a failed staff list → All; Me waits
+  for `me`. The column shows the creator, and "Cartera: <name>" beneath it when different.
 - **Rows**: one per appointment of either kind, ordered by time (no-time rows last): time, patient (links
   to the patient), type label, booked by, status, actions. Cancelled / rescheduled rows hidden by default
   with a "show cancelled" toggle.
@@ -77,7 +81,7 @@ TIME   PATIENT          TYPE            BOOKED BY   STATUS                 ACTIO
 
 ## Data
 
-One call: `GET /api/v2/appointments/day?date&centerIds&kind&appointmentTypeIds&serviceIds&staffIds`
+One call: `GET /api/v2/appointments/day?date&centerIds&kind&appointmentTypeIds&serviceIds&staffIds&portfolioOwnerIds`
 (see BE spec). Actions call `POST …/appointments/:id/confirm|unconfirm|cancel` and
 `POST …/sessions/:id/confirm|unconfirm|cancel`, with the row's center as `X-Tenant-ID`.
 

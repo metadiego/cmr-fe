@@ -171,7 +171,8 @@ the modal maps to the boolean. Legacy status editing in the edit modal is unchan
 | `kind` | `medical` or `service` | both | One kind only. `service` = therapy sessions. |
 | `appointmentTypeIds` | comma-separated uuids | none | Keep only these medical types. |
 | `serviceIds` | comma-separated uuids | none | Keep only these services (sessions). |
-| `staffIds` | comma-separated uuids | none | "Booked by": rows **created by** any of them **or** whose **portfolio owner** (`booked_by_staff_id`) is any of them. Staff ids, not profile ids. |
+| `staffIds` | comma-separated uuids | none | "Booked by": rows **created by** any of them (creator only since the backend cartera PR `feat/day-list-portfolio-filter`; before it, also rows whose portfolio owner is any of them). Staff ids, not profile ids. |
+| `portfolioOwnerIds` | comma-separated uuids | none | "Cartera": rows whose patient's portfolio owner (`booked_by_staff_id`) is any of them. With `staffIds`: AND. Needs the backend cartera PR. |
 | `includeCancelled` | boolean | `false` | `true` also returns `cancelled` and `rescheduled` rows. No-show and not-served rows are always returned. |
 
 **Types and services are one picker.** Sending `appointmentTypeIds` or `serviceIds` drops every kind that

@@ -21,7 +21,8 @@ export interface StaffOption {
 }
 
 // The Citas screen's filters (docs/specs/citas-day-screen.md): the day (‹ date › Today), the type bucket,
-// the appointment types / services picked, who booked it, and whether cancelled rows show. Everything wraps at 375px.
+// the appointment types / services picked, who created it ("Booked by"), whose
+// portfolio the patient is in ("Cartera"), and whether cancelled rows show. Everything wraps at 375px.
 export function DayToolbar({
   date,
   today,
@@ -33,6 +34,8 @@ export function DayToolbar({
   onTypes,
   bookedBy,
   onBookedBy,
+  owner,
+  onOwner,
   staff,
   canBeMe,
   includeCancelled,
@@ -50,6 +53,9 @@ export function DayToolbar({
   /** null while it cannot be told yet (the person or the staff list still loading). */
   bookedBy: string | null;
   onBookedBy: (v: string) => void;
+  /** "Cartera" (the patient's portfolio owner); null while it cannot be told yet. */
+  owner: string | null;
+  onOwner: (v: string) => void;
   staff: StaffOption[];
   /** The person has a staff record, so "Me" means something. */
   canBeMe: boolean;
@@ -82,24 +88,8 @@ export function DayToolbar({
 
       <TypeFilter options={typeOptions} picked={types} onChange={onTypes} />
 
-      <div className="flex items-center gap-2">
-        <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{t("bookedBy.label")}</span>
-        <Select value={bookedBy ?? ""} onValueChange={onBookedBy} disabled={bookedBy === null}>
-          <SelectTrigger size="sm" className="w-44" aria-label={t("bookedBy.label")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {canBeMe && <SelectItem value={BOOKED_BY_ME}>{t("bookedBy.me")}</SelectItem>}
-            <SelectItem value={BOOKED_BY_ALL}>{t("bookedBy.all")}</SelectItem>
-            {staff.length > 0 && <SelectSeparator />}
-            {staff.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <StaffSelect label={t("bookedBy.label")} value={bookedBy} onChange={onBookedBy} staff={staff} canBeMe={canBeMe} />
+      <StaffSelect label={t("owner.label")} value={owner} onChange={onOwner} staff={staff} canBeMe={canBeMe} />
 
       <div className="flex items-center gap-2">
         <Switch id={cancelledId} checked={includeCancelled} onCheckedChange={onIncludeCancelled} />
@@ -107,6 +97,43 @@ export function DayToolbar({
           {t("showCancelled")}
         </Label>
       </div>
+    </div>
+  );
+}
+
+/** A "me / everyone / a staff member" select ("Booked by", "Cartera"). */
+function StaffSelect({
+  label,
+  value,
+  onChange,
+  staff,
+  canBeMe,
+}: {
+  label: string;
+  value: string | null;
+  onChange: (v: string) => void;
+  staff: StaffOption[];
+  canBeMe: boolean;
+}) {
+  const t = useTranslations("appointmentsDay");
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{label}</span>
+      <Select value={value ?? ""} onValueChange={onChange} disabled={value === null}>
+        <SelectTrigger size="sm" className="w-44" aria-label={label}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {canBeMe && <SelectItem value={BOOKED_BY_ME}>{t("bookedBy.me")}</SelectItem>}
+          <SelectItem value={BOOKED_BY_ALL}>{t("bookedBy.all")}</SelectItem>
+          {staff.length > 0 && <SelectSeparator />}
+          {staff.map((s) => (
+            <SelectItem key={s.id} value={s.id}>
+              {s.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

@@ -3,14 +3,15 @@ import { cancelarCita, confirmarCita, unconfirmCita } from "./citas";
 import { cancelarSesion, confirmSession, reagendarSesion, unconfirmSession, type ConWarnings } from "./frontdesk";
 import type { DayListRow } from "@/lib/appointments-day/day-list";
 
-export type { DayListRow } from "@/lib/appointments-day/day-list";
+export type { DayListQuery, DayListRow } from "@/lib/appointments-day/day-list";
 
 // `GET /api/v2/appointments/day` (cmr-be piece 4a): one day's medical appointments and therapy sessions
 // in one list, each row with its `allowedActions`. Permission: `appointments.read` or `frontdesk.read`;
 // each kind is read only where its own one is held. Hand-off:
 // docs/specs/appointment-lifecycle-switch-fe.md §5. Not in schema.d.ts until gen:api runs against 4a.
 //
-// `search` comes from lib/appointments-day/day-list.ts `dayListSearch`. X-Tenant-ID is the picked center,
+// `search` comes from lib/appointments-day/day-list.ts `dayListSearch` (its keys: the hand-typed
+// `DayListQuery`, incl. `portfolioOwnerIds`, sent only when "Cartera" is not All). X-Tenant-ID is the picked center,
 // so the guard checks a center where the person reads.
 export async function getAppointmentsDay(search: URLSearchParams, centerId?: string): Promise<DayListRow[]> {
   const res = await apiFetch<unknown>(`/appointments/day?${search.toString()}`, {}, centerId);

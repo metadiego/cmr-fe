@@ -45,12 +45,31 @@ export interface DayListRow {
 export type TypeBucket = "all" | "new" | "followUp" | "therapies"
 export const TYPE_BUCKETS: readonly TypeBucket[] = ["all", "new", "followUp", "therapies"]
 
-/** "Booked by": me, everyone, or a staff id. */
+/**
+ * The query of `GET /api/v2/appointments/day`, typed by hand (not in schema.d.ts yet). Lists are comma
+ * separated. `staffIds` = who CREATED the row ("Booked by"); `portfolioOwnerIds` = the patient's
+ * portfolio owner (`booked_by_staff_id`, "Cartera"); both sent = AND. `portfolioOwnerIds` needs the
+ * backend cartera PR (feat/day-list-portfolio-filter): before it, `staffIds` also matched the owner.
+ */
+export interface DayListQuery {
+  date: string
+  centerIds?: string
+  kind?: DayKind
+  appointmentTypeIds?: string
+  serviceIds?: string
+  staffIds?: string
+  portfolioOwnerIds?: string
+  includeCancelled?: "true"
+}
+
+/** "Booked by" and "Cartera": me, everyone, or a staff id. */
 export const BOOKED_BY_ME = "me"
 export const BOOKED_BY_ALL = "all"
 
 /** Where "booked by" is remembered on this device (per-viewer convenience, never shared state). */
 export const BOOKED_BY_STORAGE_KEY = "cmr.appointmentsDay.bookedBy"
+/** Where "Cartera" is remembered on this device. */
+export const OWNER_STORAGE_KEY = "cmr.appointmentsDay.portfolioOwner"
 
 /** The remembered choice, or the default (Me). Someone with no staff record cannot be "me": All. */
 export function bookedByOrDefault(stored: string | null | undefined, myStaffId: string | null | undefined): string {
@@ -77,6 +96,34 @@ export function bookedByChoice(
     if (!staffOptions.includes(stored)) return bookedByOrDefault(null, myStaffId)
   }
   return bookedByOrDefault(stored, myStaffId)
+}
+
+/**
+ * The "Cartera" (portfolio owner) the list is read with, or null while it cannot be told yet. The URL
+ * (`?owner=`) wins over the device, then the default: All. All never waits; Me waits for `me` and falls
+ * back to All without a staff record; a staff id waits for the options and falls back to All when it is
+ * not among them (gone, or the staff list failed: []). Same inputs as `bookedByChoice`.
+ */
+export function ownerChoice(
+  fromUrl: string | null | undefined,
+  stored: string | null | undefined,
+  myStaffId: string | null | undefined,
+  staffOptions: readonly string[] | null,
+): string | null {
+  const choice = fromUrl || stored || BOOKED_BY_ALL
+  if (choice === BOOKED_BY_ALL) return BOOKED_BY_ALL
+  if (choice === BOOKED_BY_ME) {
+    if (myStaffId === undefined) return null
+    return myStaffId ? BOOKED_BY_ME : BOOKED_BY_ALL
+  }
+  if (!staffOptions) return null
+  return staffOptions.includes(choice) ? choice : BOOKED_BY_ALL
+}
+
+/** The staff id a "me / all / id" choice stands for; null = no filter. */
+function staffFor(choice: string | undefined, myStaffId: string | null | undefined): string | null {
+  if (!choice || choice === BOOKED_BY_ALL) return null
+  return choice === BOOKED_BY_ME ? (myStaffId ?? null) : choice
 }
 
 // ---- appointment-type picker ----------------------------------------------------------------------
@@ -154,31 +201,40 @@ export function pickedTypes(
 }
 
 /**
- * The query string of the day list for the screen's filters. `picked` sends `appointmentTypeIds` and/or
+ * The query of the day list for the screen's filters. `picked` sends `appointmentTypeIds` and/or
  * `serviceIds`; the backend then leaves out a kind with no list of its own (only services picked = only
- * therapies).
+ * therapies). `bookedBy` → `staffIds` (creator); `portfolioOwner` → `portfolioOwnerIds`, sent only when it
+ * is not All, so the default asks nothing a backend without the cartera PR does not know.
  */
-export function dayListSearch(p: {
+export function dayListQuery(p: {
   date: string
   centerId?: string
   bucket: TypeBucket
   bookedBy: string
+  portfolioOwner?: string
   myStaffId: string | null | undefined
   includeCancelled: boolean
   picked?: readonly TypeOption[]
-}): URLSearchParams {
-  const sp = new URLSearchParams({ date: p.date })
-  if (p.centerId) sp.set("centerIds", p.centerId)
-  if (p.bucket === "new" || p.bucket === "followUp") sp.set("kind", "medical")
-  if (p.bucket === "therapies") sp.set("kind", "service")
+}): DayListQuery {
+  const q: DayListQuery = { date: p.date }
+  if (p.centerId) q.centerIds = p.centerId
+  if (p.bucket === "new" || p.bucket === "followUp") q.kind = "medical"
+  if (p.bucket === "therapies") q.kind = "service"
   const typeIds = (p.picked ?? []).filter((o) => o.kind === "medical").map((o) => o.id)
   const serviceIds = (p.picked ?? []).filter((o) => o.kind === "service").map((o) => o.id)
-  if (typeIds.length) sp.set("appointmentTypeIds", typeIds.join(","))
-  if (serviceIds.length) sp.set("serviceIds", serviceIds.join(","))
-  const staffId = p.bookedBy === BOOKED_BY_ME ? p.myStaffId : p.bookedBy === BOOKED_BY_ALL ? null : p.bookedBy
-  if (staffId) sp.set("staffIds", staffId)
-  if (p.includeCancelled) sp.set("includeCancelled", "true")
-  return sp
+  if (typeIds.length) q.appointmentTypeIds = typeIds.join(",")
+  if (serviceIds.length) q.serviceIds = serviceIds.join(",")
+  const creator = staffFor(p.bookedBy, p.myStaffId)
+  if (creator) q.staffIds = creator
+  const owner = staffFor(p.portfolioOwner, p.myStaffId)
+  if (owner) q.portfolioOwnerIds = owner
+  if (p.includeCancelled) q.includeCancelled = "true"
+  return q
+}
+
+/** `dayListQuery` as a query string. */
+export function dayListSearch(p: Parameters<typeof dayListQuery>[0]): URLSearchParams {
+  return new URLSearchParams(Object.entries(dayListQuery(p)) as [string, string][])
 }
 
 /** New / follow-up split the medical rows by the new-patient type; the backend already narrowed the kind. */
@@ -262,11 +318,13 @@ export interface DayScreenParams {
   includeCancelled: boolean
   /** Picked appointment-type and service ids (the "Type" picker); [] = no type filter. */
   types: string[]
+  /** "Cartera" from the URL (`?owner=`): me, a staff id, or null (not in the URL; the device decides). */
+  owner: string | null
 }
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 
-/** `?date=&type=&cancelled=1&types=a,b`; a missing or malformed day opens on `today`. */
+/** `?date=&type=&cancelled=1&types=a,b&owner=`; a missing or malformed day opens on `today`. */
 export function parseDayScreenParams(sp: URLSearchParams, today: string): DayScreenParams {
   const date = sp.get("date") ?? ""
   const type = sp.get("type") as TypeBucket | null
@@ -275,6 +333,7 @@ export function parseDayScreenParams(sp: URLSearchParams, today: string): DayScr
     bucket: type && TYPE_BUCKETS.includes(type) ? type : "all",
     includeCancelled: sp.get("cancelled") === "1",
     types: [...new Set((sp.get("types") ?? "").split(",").filter(Boolean))],
+    owner: sp.get("owner") || null,
   }
 }
 
@@ -283,5 +342,6 @@ export function toDayScreenSearch(p: DayScreenParams): string {
   if (p.bucket !== "all") parts.push(`type=${p.bucket}`)
   if (p.includeCancelled) parts.push("cancelled=1")
   if (p.types.length) parts.push(`types=${p.types.map(encodeURIComponent).join(",")}`)
+  if (p.owner && p.owner !== BOOKED_BY_ALL) parts.push(`owner=${encodeURIComponent(p.owner)}`)
   return parts.join("&")
 }

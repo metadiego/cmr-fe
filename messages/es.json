@@ -7383,6 +7383,9 @@
       "me": "Yo",
       "all": "Todos"
     },
+    "owner": {
+      "label": "Cartera"
+    },
     "showCancelled": "Ver canceladas",
     "summary": {
       "title": "Hoy",
