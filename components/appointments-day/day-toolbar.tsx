@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { SegmentedControl } from "@/components/kit/segmented-control";
-import { BOOKED_BY_ALL, BOOKED_BY_ME, TYPE_BUCKETS, type TypeBucket } from "@/lib/appointments-day/day-list";
+import { TypeFilter } from "@/components/appointments-day/type-filter";
+import { BOOKED_BY_ALL, BOOKED_BY_ME, TYPE_BUCKETS, type TypeBucket, type TypeOption } from "@/lib/appointments-day/day-list";
 import { shiftDay } from "@/lib/agenda/appointment-form";
 
 export interface StaffOption {
@@ -20,13 +21,16 @@ export interface StaffOption {
 }
 
 // The Citas screen's filters (docs/specs/citas-day-screen.md): the day (‹ date › Today), the type bucket,
-// who booked it, and whether cancelled rows show. Everything wraps at 375px.
+// the appointment types / services picked, who booked it, and whether cancelled rows show. Everything wraps at 375px.
 export function DayToolbar({
   date,
   today,
   onDate,
   bucket,
   onBucket,
+  typeOptions,
+  types,
+  onTypes,
   bookedBy,
   onBookedBy,
   staff,
@@ -39,6 +43,10 @@ export function DayToolbar({
   onDate: (d: string) => void;
   bucket: TypeBucket;
   onBucket: (b: TypeBucket) => void;
+  /** The picker's entries for the current bucket; null while they load. */
+  typeOptions: TypeOption[] | null;
+  types: string[];
+  onTypes: (ids: string[]) => void;
   /** null while it cannot be told yet (the person or the staff list still loading). */
   bookedBy: string | null;
   onBookedBy: (v: string) => void;
@@ -71,6 +79,8 @@ export function DayToolbar({
         onChange={onBucket}
         options={TYPE_BUCKETS.map((b) => ({ value: b, label: t(`type.${b}`) }))}
       />
+
+      <TypeFilter options={typeOptions} picked={types} onChange={onTypes} />
 
       <div className="flex items-center gap-2">
         <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{t("bookedBy.label")}</span>

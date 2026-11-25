@@ -12,9 +12,14 @@ import {
   parseDayScreenParams,
   rowStatus,
   todayGroup,
+  pickedTypes,
+  pruneTypes,
   todaySummary,
   toDayScreenSearch,
+  typeOptions,
+  typeOptionsForBucket,
   type DayListRow,
+  type TypeOption,
 } from "./day-list.ts"
 
 function row(over: Partial<DayListRow> = {}): DayListRow {
@@ -152,11 +157,14 @@ test("the summary counts each group", () => {
 
 test("the URL keeps the day, the type and show-cancelled; a bad day falls back", () => {
   const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&type=therapies&cancelled=1"), "2026-11-25")
-  assert.deepEqual(p, { date: "2026-11-24", bucket: "therapies", includeCancelled: true })
+  assert.deepEqual(p, { date: "2026-11-24", bucket: "therapies", includeCancelled: true, types: [] })
   const bad = parseDayScreenParams(new URLSearchParams("date=24-11&type=nope"), "2026-11-25")
-  assert.deepEqual(bad, { date: "2026-11-25", bucket: "all", includeCancelled: false })
-  assert.equal(toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false }), "date=2026-11-24")
-  assert.equal(toDayScreenSearch({ date: "2026-11-24", bucket: "new", includeCancelled: true }), "date=2026-11-24&type=new&cancelled=1")
+  assert.deepEqual(bad, { date: "2026-11-25", bucket: "all", includeCancelled: false, types: [] })
+  assert.equal(toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: [] }), "date=2026-11-24")
+  assert.equal(
+    toDayScreenSearch({ date: "2026-11-24", bucket: "new", includeCancelled: true, types: [] }),
+    "date=2026-11-24&type=new&cancelled=1",
+  )
 })
 
 test("booked by waits for me: nothing is read (no All first) until the person is known", () => {
@@ -178,4 +186,76 @@ test("booked by: a failed staff list ([]) never blocks the day list; a remembere
   assert.equal(bookedByChoice("s9", "me1", []), BOOKED_BY_ME)
   assert.equal(bookedByChoice("s9", null, []), BOOKED_BY_ALL)
   assert.equal(bookedByChoice(BOOKED_BY_ALL, "me1", []), BOOKED_BY_ALL)
+})
+
+// ---- appointment-type picker --------------------------------------------------------------------
+
+const TYPES = [
+  { id: "tS", slug: "seguimiento", name: "Seguimiento", active: true },
+  { id: "tN", slug: "nueva", name: "Consulta (Nueva)", active: true },
+  { id: "tOld", slug: "vieja", name: "Vieja", active: false },
+]
+const SERVICES = [
+  { id: "sV", name: "Vitamina C" },
+  { id: "sL", name: "Láser" },
+]
+const OPTIONS: TypeOption[] = typeOptions(TYPES, SERVICES)
+
+test("type options: the active medical types, then the services, each group by name", () => {
+  assert.deepEqual(
+    OPTIONS.map((o) => [o.kind, o.id, o.label, o.isNewPatientType]),
+    [
+      ["medical", "tN", "Consulta (Nueva)", true],
+      ["medical", "tS", "Seguimiento", false],
+      ["service", "sL", "Láser", false],
+      ["service", "sV", "Vitamina C", false],
+    ],
+  )
+})
+
+test("type options fit the bucket: new = the 'nueva' type, follow-up = the other medical types, therapies = services", () => {
+  const ids = (b: Parameters<typeof typeOptionsForBucket>[1]) => typeOptionsForBucket(OPTIONS, b).map((o) => o.id)
+  assert.deepEqual(ids("all"), ["tN", "tS", "sL", "sV"])
+  assert.deepEqual(ids("new"), ["tN"])
+  assert.deepEqual(ids("followUp"), ["tS"])
+  assert.deepEqual(ids("therapies"), ["sL", "sV"])
+})
+
+test("changing the bucket drops the picked types that no longer fit; unknown options keep the pick", () => {
+  assert.deepEqual(pruneTypes(["tN", "tS", "sL"], OPTIONS, "followUp"), ["tS"])
+  assert.deepEqual(pruneTypes(["tN", "sL"], OPTIONS, "therapies"), ["sL"])
+  assert.deepEqual(pruneTypes(["tN", "sL"], OPTIONS, "all"), ["tN", "sL"])
+  assert.deepEqual(pruneTypes(["tN", "sL"], null, "therapies"), ["tN", "sL"])
+})
+
+test("picked types: none picked never waits; a pick waits for the options; a failed list ([]) drops it", () => {
+  assert.deepEqual(pickedTypes([], null, "all"), [])
+  assert.equal(pickedTypes(["tN"], null, "all"), null)
+  assert.deepEqual(pickedTypes(["tN"], [], "all"), [])
+  assert.deepEqual(
+    pickedTypes(["sL", "gone", "tN"], OPTIONS, "therapies")?.map((o) => o.id),
+    ["sL"],
+  )
+})
+
+test("the query sends the picked medical types and services as comma lists; none picked sends neither", () => {
+  const base = { date: "2026-11-24", bucket: "all" as const, bookedBy: BOOKED_BY_ALL, myStaffId: null, includeCancelled: false }
+  const none = dayListSearch({ ...base, picked: [] })
+  assert.equal(none.has("appointmentTypeIds"), false)
+  assert.equal(none.has("serviceIds"), false)
+  const onlyServices = dayListSearch({ ...base, picked: pickedTypes(["sL", "sV"], OPTIONS, "all") ?? [] })
+  assert.equal(onlyServices.get("serviceIds"), "sL,sV")
+  assert.equal(onlyServices.has("appointmentTypeIds"), false)
+  const mix = dayListSearch({ ...base, picked: pickedTypes(["tS", "sV"], OPTIONS, "all") ?? [] })
+  assert.equal(mix.get("appointmentTypeIds"), "tS")
+  assert.equal(mix.get("serviceIds"), "sV")
+})
+
+test("the URL keeps the picked types (?types=a,b), deduplicated", () => {
+  const p = parseDayScreenParams(new URLSearchParams("date=2026-11-24&types=tS,sV,,tS"), "2026-11-25")
+  assert.deepEqual(p.types, ["tS", "sV"])
+  assert.equal(
+    toDayScreenSearch({ date: "2026-11-24", bucket: "all", includeCancelled: false, types: ["tS", "sV"] }),
+    "date=2026-11-24&types=tS,sV",
+  )
 })

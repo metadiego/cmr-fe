@@ -17,15 +17,22 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useBookedBy } from "@/hooks/use-booked-by";
 import { getAppointmentsDay, type DayListRow } from "@/lib/api/appointments-day";
 import { listPersonalAll } from "@/lib/api/personal";
+import { getTiposCita } from "@/lib/api/citas";
+import { getServicios } from "@/lib/api/servicios";
 import { myStaffId } from "@/lib/auth/who-did-it";
 import {
   dayListSearch,
   keepByBucket,
   nowInZone,
   parseDayScreenParams,
+  pickedTypes,
+  pruneTypes,
   todaySummary,
   toDayScreenSearch,
+  typeOptions as toTypeOptions,
+  typeOptionsForBucket,
   type DayScreenParams,
+  type TypeOption,
 } from "@/lib/appointments-day/day-list";
 import { BUSINESS_TIME_ZONE } from "@/i18n/formats";
 
@@ -80,8 +87,22 @@ export function AppointmentsDayScreen() {
   const staffOptions = staffRes.state.kind === "fail" ? [] : (staff?.map((s) => s.id) ?? null);
   const [bookedBy, setBookedBy] = useBookedBy(staffId, staffOptions);
 
+  // The "Type" picker: the medical types and this center's services. A failed read counts as no options
+  // (never null): a type picked in the URL is dropped and the day list still loads.
+  const typesRes = useResource<TypeOption[]>(
+    () =>
+      centerId
+        ? Promise.all([getTiposCita(), getServicios(centerId)]).then(([types, services]) => toTypeOptions(types, services))
+        : Promise.resolve([]),
+    [centerId],
+  );
+  const options = typesRes.state.kind === "ok" ? typesRes.state.data : typesRes.state.kind === "fail" ? [] : null;
+  const picked = pickedTypes(params.types, options, params.bucket);
+
   const search =
-    bookedBy === null ? null : dayListSearch({ ...params, centerId, bookedBy, myStaffId: staffId }).toString();
+    bookedBy === null || picked === null
+      ? null
+      : dayListSearch({ ...params, centerId, bookedBy, myStaffId: staffId, picked }).toString();
   const res = useResource<DayListRow[]>(
     () => (centerId && search !== null ? getAppointmentsDay(new URLSearchParams(search), centerId) : Promise.resolve([])),
     [search, centerId],
@@ -116,7 +137,10 @@ export function AppointmentsDayScreen() {
         today={zoneNow.day}
         onDate={(date) => setParams({ date })}
         bucket={params.bucket}
-        onBucket={(bucket) => setParams({ bucket })}
+        onBucket={(bucket) => setParams({ bucket, types: pruneTypes(params.types, options, bucket) })}
+        typeOptions={options && typeOptionsForBucket(options, params.bucket)}
+        types={params.types}
+        onTypes={(types) => setParams({ types })}
         bookedBy={bookedBy}
         onBookedBy={setBookedBy}
         staff={staff ?? []}

@@ -7369,6 +7369,15 @@
       "followUp": "Seguimiento",
       "therapies": "Terapias"
     },
+    "typeFilter": {
+      "label": "Tipo",
+      "any": "Todos",
+      "count": "{count} tipos",
+      "medical": "Consultas",
+      "therapies": "Terapias",
+      "clear": "Quitar filtro",
+      "empty": "No hay tipos"
+    },
     "bookedBy": {
       "label": "Agendada por",
       "me": "Yo",

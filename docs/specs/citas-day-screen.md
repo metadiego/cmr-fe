@@ -23,7 +23,7 @@ their own bookings, and — for today — see who has arrived.
 ```
 Citas                                                     [● live]
 [◀] [ Mon 24 Nov 2026 ▾ ] [▶]  [Today]    Center [Bayamón ▾]
-Type [All | New | Follow-up | Therapies]   Booked by [Me ▾]
+Type [All | New | Follow-up | Therapies]   Type [All ▾]   Booked by [Me ▾]
 
 Today:  12 arrived · 3 not arrived (late) · 9 upcoming
 
@@ -40,6 +40,13 @@ TIME   PATIENT          TYPE            BOOKED BY   STATUS                 ACTIO
   multi-center scope.
 - **Type filter**: All / New (medical type whose key is `nueva`, `esTipoNueva`) / Follow-up (other
   medical types) / Therapies (any service).
+- **Type picker** (owner, 2026-11-25: "up top we need an appointment type filter"): a multi-select next
+  to "Booked by", grouped Consultations (the active `GET appointments/types`) / Therapies (the center's
+  `GET services`). It only offers what fits the bucket (New: `nueva`; Follow-up: the other medical
+  types; Therapies: services); changing the bucket drops picks that no longer fit. Nothing picked = no
+  type filter. Picks go to the day list as `appointmentTypeIds` / `serviceIds`; the backend leaves out
+  a kind with no list of its own (only services picked = only therapies). Kept in the URL (`?types=a,b`).
+  Logic: `lib/appointments-day/day-list.ts` (`typeOptions`, `pruneTypes`, `pickedTypes`).
 - **Booked by**: staff picker. "Booked by" is who created the appointment (call-center agent or
   reception). Selecting a person shows the rows they created **or** whose patient they own (portfolio
   agent) — Diego, 2026-11-23. Defaults to **Me**; options: Me, All, any staff member. Remembered per

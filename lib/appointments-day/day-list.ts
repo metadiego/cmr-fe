@@ -79,7 +79,85 @@ export function bookedByChoice(
   return bookedByOrDefault(stored, myStaffId)
 }
 
-/** The query string of the day list for the screen's filters. */
+// ---- appointment-type picker ----------------------------------------------------------------------
+
+/** The slug of the new-patient medical type; the backend sets `isNewPatientType` from the same slug. */
+export const NEW_PATIENT_TYPE_SLUG = "nueva"
+
+/** One entry of the "Type" picker: a medical appointment type or a therapy service. */
+export interface TypeOption {
+  id: string
+  kind: DayKind
+  label: string
+  isNewPatientType: boolean
+}
+
+/**
+ * The picker's entries: the active medical types (`GET appointments/types`), then the center's services
+ * (`GET services`, active only by default), each group sorted by name.
+ */
+export function typeOptions(
+  types: readonly { id: string; slug: string; name: string; active?: boolean }[],
+  services: readonly { id: string; name: string }[],
+): TypeOption[] {
+  const byLabel = (a: TypeOption, b: TypeOption) => a.label.localeCompare(b.label)
+  const medical = types
+    .filter((t) => t.active !== false)
+    .map((t) => ({ id: t.id, kind: "medical" as const, label: t.name, isNewPatientType: t.slug === NEW_PATIENT_TYPE_SLUG }))
+    .sort(byLabel)
+  const service = services
+    .map((s) => ({ id: s.id, kind: "service" as const, label: s.name, isNewPatientType: false }))
+    .sort(byLabel)
+  return [...medical, ...service]
+}
+
+function fitsBucket(o: TypeOption, bucket: TypeBucket): boolean {
+  switch (bucket) {
+    case "new":
+      return o.kind === "medical" && o.isNewPatientType
+    case "followUp":
+      return o.kind === "medical" && !o.isNewPatientType
+    case "therapies":
+      return o.kind === "service"
+    default:
+      return true
+  }
+}
+
+/** The entries the picker offers under a bucket (New: the new-patient type; Therapies: the services). */
+export function typeOptionsForBucket(options: readonly TypeOption[], bucket: TypeBucket): TypeOption[] {
+  return options.filter((o) => fitsBucket(o, bucket))
+}
+
+/** The picked ids that still fit `bucket`; while the options are unknown (null) the pick is kept as is. */
+export function pruneTypes(picked: readonly string[], options: readonly TypeOption[] | null, bucket: TypeBucket): string[] {
+  if (!options) return [...picked]
+  const fit = new Set(typeOptionsForBucket(options, bucket).map((o) => o.id))
+  return picked.filter((id) => fit.has(id))
+}
+
+/**
+ * The picked entries the list is read with, or null while they cannot be told (a pick in the URL and the
+ * options still loading: the list waits rather than reading unfiltered first). `options`: null while
+ * loading, [] when their request failed (the pick is then dropped so the list always loads). Ids that
+ * are not among the options, or do not fit the bucket, are left out.
+ */
+export function pickedTypes(
+  picked: readonly string[],
+  options: readonly TypeOption[] | null,
+  bucket: TypeBucket,
+): TypeOption[] | null {
+  if (picked.length === 0) return []
+  if (!options) return null
+  const ids = new Set(picked)
+  return typeOptionsForBucket(options, bucket).filter((o) => ids.has(o.id))
+}
+
+/**
+ * The query string of the day list for the screen's filters. `picked` sends `appointmentTypeIds` and/or
+ * `serviceIds`; the backend then leaves out a kind with no list of its own (only services picked = only
+ * therapies).
+ */
 export function dayListSearch(p: {
   date: string
   centerId?: string
@@ -87,11 +165,16 @@ export function dayListSearch(p: {
   bookedBy: string
   myStaffId: string | null | undefined
   includeCancelled: boolean
+  picked?: readonly TypeOption[]
 }): URLSearchParams {
   const sp = new URLSearchParams({ date: p.date })
   if (p.centerId) sp.set("centerIds", p.centerId)
   if (p.bucket === "new" || p.bucket === "followUp") sp.set("kind", "medical")
   if (p.bucket === "therapies") sp.set("kind", "service")
+  const typeIds = (p.picked ?? []).filter((o) => o.kind === "medical").map((o) => o.id)
+  const serviceIds = (p.picked ?? []).filter((o) => o.kind === "service").map((o) => o.id)
+  if (typeIds.length) sp.set("appointmentTypeIds", typeIds.join(","))
+  if (serviceIds.length) sp.set("serviceIds", serviceIds.join(","))
   const staffId = p.bookedBy === BOOKED_BY_ME ? p.myStaffId : p.bookedBy === BOOKED_BY_ALL ? null : p.bookedBy
   if (staffId) sp.set("staffIds", staffId)
   if (p.includeCancelled) sp.set("includeCancelled", "true")
@@ -177,11 +260,13 @@ export interface DayScreenParams {
   date: string
   bucket: TypeBucket
   includeCancelled: boolean
+  /** Picked appointment-type and service ids (the "Type" picker); [] = no type filter. */
+  types: string[]
 }
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 
-/** `?date=&type=&cancelled=1`; a missing or malformed day opens on `today`. */
+/** `?date=&type=&cancelled=1&types=a,b`; a missing or malformed day opens on `today`. */
 export function parseDayScreenParams(sp: URLSearchParams, today: string): DayScreenParams {
   const date = sp.get("date") ?? ""
   const type = sp.get("type") as TypeBucket | null
@@ -189,6 +274,7 @@ export function parseDayScreenParams(sp: URLSearchParams, today: string): DayScr
     date: DAY.test(date) ? date : today,
     bucket: type && TYPE_BUCKETS.includes(type) ? type : "all",
     includeCancelled: sp.get("cancelled") === "1",
+    types: [...new Set((sp.get("types") ?? "").split(",").filter(Boolean))],
   }
 }
 
@@ -196,5 +282,6 @@ export function toDayScreenSearch(p: DayScreenParams): string {
   const parts = [`date=${p.date}`]
   if (p.bucket !== "all") parts.push(`type=${p.bucket}`)
   if (p.includeCancelled) parts.push("cancelled=1")
+  if (p.types.length) parts.push(`types=${p.types.map(encodeURIComponent).join(",")}`)
   return parts.join("&")
 }

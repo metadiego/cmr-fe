@@ -7369,6 +7369,15 @@
       "followUp": "Follow-up",
       "therapies": "Therapies"
     },
+    "typeFilter": {
+      "label": "Type",
+      "any": "All",
+      "count": "{count} types",
+      "medical": "Consultations",
+      "therapies": "Therapies",
+      "clear": "Clear filter",
+      "empty": "No types"
+    },
     "bookedBy": {
       "label": "Booked by",
       "me": "Me",
