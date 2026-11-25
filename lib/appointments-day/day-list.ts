@@ -29,8 +29,8 @@ export interface DayPerson {
 
 /**
  * One row of `GET /api/v2/appointments/day`. Typed by hand from the backend 4a hand-off (and its DTO,
- * cmr-be `day-list.dto.ts`) because 4a is not deployed yet: replace with the generated type once
- * `npm run gen:api` runs against a backend with 4a.
+ * cmr-be `day-list.dto.ts`): the backend's OpenAPI document does not describe this response body (checked
+ * after `gen:api` against production, 25-nov-2026), so there is no generated type to use yet.
  */
 export interface DayListRow {
   id: string

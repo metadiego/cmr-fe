@@ -3,8 +3,13 @@
 // propiedad de lib/api/schema.d.ts al inglés que la v2 devuelve de verdad, para que
 // tsc avise de cada campo mal leído. Reutilizable tras `gen:api`.
 import fs from "node:fs";
+import path from "node:path";
 
-const BE = "/Applications/MAMP/htdocs/cmr-be/src/core/api-ingles/campos.ts";
+// The backend's field dictionary. Default: the cmr-be checkout next to this repo; override with
+// CMR_BE_CAMPOS=<path to campos.ts> (e.g. a copy taken from cmr-be's main).
+const BE =
+  process.env.CMR_BE_CAMPOS ??
+  path.resolve(import.meta.dirname, "../../cmr-be/src/core/api-ingles/campos.ts");
 const SCHEMA = "lib/api/schema.d.ts";
 
 const src = fs.readFileSync(BE, "utf8");
