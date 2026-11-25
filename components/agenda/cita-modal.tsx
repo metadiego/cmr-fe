@@ -532,7 +532,6 @@ export function CitaModal({
               min={isEdit ? undefined : todayPR()}
               slots={slots}
               time={hora}
-              endTime={horaFin}
               clinicId={effectiveCentro}
               typeId={tipoCitaId}
               onTimeChange={onHoraChange}

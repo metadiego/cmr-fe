@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import { slotTone, timeRange } from "@/lib/agenda/appointment-form";
+import { slotTone } from "@/lib/agenda/appointment-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Selector de UNA hora a partir de los CUPOS del día (una franja = una hora con sus huecos libres). Sustituye
@@ -20,14 +20,11 @@ export function SlotPicker({
   value,
   onChange,
   variant,
-  selectedEnd,
 }: {
   slots: Slot[];
   value: string;
   onChange: (time: string) => void;
   variant: SlotVariant;
-  /** End time of the chosen hour: the chosen chip reads "07:00–08:00" instead of a separate line. */
-  selectedEnd?: string;
 }) {
   const t = useTranslations("agenda.slot");
   const fullLabel = (s: Slot) => (s.enHoja ? t("fullInSheet") : t("full"));
@@ -67,7 +64,8 @@ export function SlotPicker({
     );
   }
 
-  // chips: one button per hour. Only the chosen one is filled (with its end time); an hour with places
+  // chips: one button per hour, all the same size. Only the chosen one is filled (its end time is in
+  // the dialog's footer, not here: it made the chosen button grow); an hour with places
   // reads the same however few are left (a nearly full hour must not stand out over emptier ones); full
   // is dashed and faded but still pickable (the BE warns, it does not block).
   return (
@@ -81,7 +79,6 @@ export function SlotPicker({
             type="button"
             onClick={() => onChange(s.time)}
             aria-pressed={sel}
-            title={libresLabel(s)}
             className={cn(
               "flex flex-col items-start rounded-lg border px-2.5 py-1.5 text-left text-sm transition-colors",
               "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
@@ -93,7 +90,7 @@ export function SlotPicker({
             )}
           >
             <span className={cn("tabular-nums", tone === "full" && !sel ? "font-normal" : "font-semibold")}>
-              {sel && selectedEnd ? timeRange(s.time, selectedEnd) : s.time}
+              {s.time}
             </span>
             <span
               className={cn(

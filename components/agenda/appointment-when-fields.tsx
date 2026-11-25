@@ -28,7 +28,6 @@ export function AppointmentWhenFields({
   min,
   slots,
   time,
-  endTime,
   onTimeChange,
   holiday,
   sheet,
@@ -43,7 +42,6 @@ export function AppointmentWhenFields({
   min?: string;
   slots: Slot[];
   time: string;
-  endTime: string;
   onTimeChange: (time: string) => void;
   holiday?: Holiday | null;
   sheet?: SheetCheck | null;
@@ -161,7 +159,7 @@ export function AppointmentWhenFields({
         )}
         <SheetNotice sheet={sheet ?? null} className="mb-2" />
         {slots.length === 0 ? (
-          <SlotPicker slots={slots} value={time} onChange={onTimeChange} variant="chips" selectedEnd={endTime} />
+          <SlotPicker slots={slots} value={time} onChange={onTimeChange} variant="chips" />
         ) : (
           <div className="space-y-3">
             {(
@@ -174,7 +172,7 @@ export function AppointmentWhenFields({
               .map(([part, list]) => (
                 <div key={part} className="space-y-1.5">
                   <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">{t(part)}</p>
-                  <SlotPicker slots={list} value={time} onChange={onTimeChange} variant="chips" selectedEnd={endTime} />
+                  <SlotPicker slots={list} value={time} onChange={onTimeChange} variant="chips" />
                 </div>
               ))}
           </div>
