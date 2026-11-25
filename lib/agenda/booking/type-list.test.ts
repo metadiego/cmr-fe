@@ -15,6 +15,7 @@ import {
   patientServicesView,
   scanDates,
   typeListGroups,
+  visitTypeId,
 } from "./type-list.ts";
 
 test("foldText: no accents, lower case, trimmed", () => {
@@ -176,4 +177,17 @@ test("patientServicesView: no permission is a note (never an error), else by the
   assert.equal(patientServicesView({ hidden: false, bookableState: "loading" }), "loading");
   assert.equal(patientServicesView({ hidden: false, bookableState: "fail" }), "fail");
   assert.equal(patientServicesView({ hidden: false, bookableState: "ok" }), "list");
+});
+
+test("visitTypeId picks follow-up for a patient attended before and first visit otherwise", () => {
+  const types = [
+    { id: "n", slug: "nueva" },
+    { id: "s", slug: "seguimiento" },
+    { id: "c", slug: "control" },
+  ];
+  assert.equal(visitTypeId(types, { attendedBefore: true }), "s");
+  assert.equal(visitTypeId(types, { attendedBefore: false }), "n");
+  // Not known yet (loading or failed): nothing is picked rather than a guess.
+  assert.equal(visitTypeId(types, undefined), "");
+  assert.equal(visitTypeId([{ id: "c", slug: "control" }], { attendedBefore: true }), "");
 });

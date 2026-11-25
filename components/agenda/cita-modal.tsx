@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import {
   validarCita,
   crearCitaAgenda,
+  getVisitKind,
   actualizarCitaAgenda,
   type Cita,
   type TipoCita,
@@ -18,6 +19,7 @@ import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { AppointmentWhenFields } from "@/components/agenda/appointment-when-fields";
 import { chosenTime } from "@/lib/agenda/appointment-when";
+import { visitTypeId } from "@/lib/agenda/booking/type-list";
 import { BookingFooterSummary, ClinicField, DoctorField, StatusField } from "@/components/agenda/cita-modal-fields";
 import { StepLabel } from "@/components/kit/step-label";
 import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
@@ -202,23 +204,22 @@ export function CitaModal({
   const [notesOpen, setNotesOpen] = React.useState(!!cita?.notes);
 
   const tipo = tipos.find((x) => x.id === tipoCitaId);
-  // El TIPO y "primera vez" son un HECHO del historial, no una preferencia: asistido ALGUNA vez ⇒ Seguimiento;
-  // si no ⇒ Nueva. Se decide SOLO, sin casilla (regla del dueño, repetida). La señal es `attendedBy` (clave v2;
-  // antes el FE leía `atendidoPor` y por eso nunca casaba) con `atendidoPor` de respaldo (v1/filas del board).
-  const yaSeguimiento = !!(
-    (paciente as { attendedBy?: string | null; atendidoPor?: string | null } | null)?.attendedBy ??
-    (paciente as { atendidoPor?: string | null } | null)?.atendidoPor
+  // New or follow-up is a FACT of the patient's history, decided by the BE (owner's rule, 7-nov-2026):
+  // follow-up only after an earlier ATTENDED medical appointment; therapies, a record number or an
+  // assigned doctor prove nothing. Asked of the same endpoint as the Citas booking screen. (It used to
+  // read the patient's `attendedBy`, which is the call-center operator, so a patient with no operator
+  // always came up as «nueva».) Unknown while loading or on failure: nothing is guessed, the BE still
+  // corrects the type on save.
+  const visitRes = useResource(
+    () => (paciente && !isEdit ? getVisitKind(paciente.id, effectiveCentro || undefined).catch(() => null) : Promise.resolve(null)),
+    [paciente?.id, isEdit, effectiveCentro],
   );
-  const esPrimeraVezEff = !yaSeguimiento;
-  // El tipo se autoselecciona al elegir paciente (seguimiento/nueva), salvo que el usuario lo cambie a mano.
-  // A type passed in by the caller is an explicit choice (the booking screen's "What are we booking?"):
-  // it counts as touched, so the history-based auto-pick never overrides it.
+  const visitKind = visitRes.state.kind === "ok" ? (visitRes.state.data ?? undefined) : undefined;
+  const esPrimeraVezEff = visitKind ? !visitKind.attendedBefore : undefined;
+  // The type follows it once known, unless the user changed it by hand. A type passed in by the caller
+  // (the booking screen's "What are we booking?") counts as touched, so it is never overridden.
   const [tipoTouched, setTipoTouched] = React.useState(!!tipoCitaIdInicial);
-  const tipoAutoId = React.useMemo(() => {
-    if (!paciente) return "";
-    const slug = yaSeguimiento ? "seguimiento" : "nueva";
-    return tipos.find((x) => (x as { slug?: string | null }).slug === slug)?.id ?? "";
-  }, [paciente, yaSeguimiento, tipos]);
+  const tipoAutoId = visitTypeId(tipos as Array<TipoCita & { slug?: string | null }>, visitKind);
   const [autoPid, setAutoPid] = React.useState<string | null>(null);
   if (!cita && paciente && tipoAutoId && !tipoTouched && autoPid !== paciente.id) {
     setAutoPid(paciente.id);

@@ -41,6 +41,17 @@ export function filterMedicalTypes<T extends { slug: string }>(types: T[], kind:
 }
 
 /**
+ * The medical type a new appointment starts on, from the BE's answer: «seguimiento» for a patient
+ * attended before, «nueva» otherwise (the owner's rule: only an earlier ATTENDED medical appointment
+ * makes a follow-up). "" while not known, or when the catalogue has no such type: nothing is guessed.
+ */
+export function visitTypeId<T extends { id: string; slug?: string | null }>(types: T[], kind: VisitKind | undefined): string {
+  if (!kind) return "";
+  const slug = kind.attendedBefore ? "seguimiento" : "nueva";
+  return types.find((x) => x.slug === slug)?.id ?? "";
+}
+
+/**
  * The services a patient can still book: only those with bookable sessions left (bought − attended −
  * already booked), most bookable first. `undefined` while the balance is unknown (loading or failed):
  * there is no fallback to every service once a patient is chosen.
