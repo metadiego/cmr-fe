@@ -17,7 +17,9 @@ import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { AppointmentWhenFields } from "@/components/agenda/appointment-when-fields";
-import { DoctorField, StatusField } from "@/components/agenda/cita-modal-fields";
+import { chosenTime } from "@/lib/agenda/appointment-when";
+import { BookingFooterSummary, ClinicField, DoctorField, StatusField } from "@/components/agenda/cita-modal-fields";
+import { StepLabel } from "@/components/kit/step-label";
 import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
 import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
@@ -35,7 +37,6 @@ import { addMinutes } from "@/lib/agenda/calendar";
 import { appointmentMissing, type AppointmentField } from "@/lib/agenda/appointment-missing";
 import { citaEditPayload } from "@/lib/agenda/cita-edit-payload";
 import { bookingSummary, clinicIsFixed, startsWithChoiceMade, timeRange } from "@/lib/agenda/appointment-form";
-import { SegmentedControl } from "@/components/kit/segmented-control";
 import { Button } from "@/components/ui/button";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Textarea } from "@/components/ui/textarea";
@@ -135,8 +136,8 @@ export function CitaModal({
   // Vacío = "Sin médico" (opción nula, nunca un registro comodín). Handoff agenda-estado-y-el-medico-comodin.
   const medicoDelPaciente = (p: Paciente | null) => (p as { doctorId?: string | null } | null)?.doctorId ?? "";
   const [medicoId, setMedicoId] = React.useState(cita?.doctorId ?? medicoDelPaciente(pacienteInicial ?? null));
-  const [hora, setHora] = React.useState(cita?.time ?? horaInicial ?? "09:00");
-  const [horaFin, setHoraFin] = React.useState(() => {
+  const [horaSet, setHora] = React.useState(cita?.time ?? horaInicial ?? "09:00");
+  const [horaFinSet, setHoraFin] = React.useState(() => {
     if (cita?.endTime) return cita.endTime;
     const tp = tipos.find((x) => x.id === (cita?.appointmentTypeId ?? tipoCitaIdInicial));
     const start = cita?.time ?? horaInicial ?? "09:00";
@@ -147,7 +148,16 @@ export function CitaModal({
   });
 
   // One time, from the type's SLOTS that day; never blocking (hooks/use-appointment-slots.ts).
-  const { slots, duration: slotDuration, holiday: festivoHoy, sheet } = useAppointmentSlots(effectiveCentro, fechaSel, tipoCitaId);
+  const { slots, loaded: slotsLoaded, duration: slotDuration, holiday: festivoHoy, sheet } = useAppointmentSlots(effectiveCentro, fechaSel, tipoCitaId);
+  // The hour really booked: a preset hour the day does not offer is dropped (lib/agenda/appointment-when.ts),
+  // kept on edit and when it was picked on a calendar.
+  const hora = chosenTime({
+    time: horaSet,
+    slots,
+    loaded: slotsLoaded,
+    keep: isEdit || startsWithChoiceMade({ isEdit, typeId: tipoCitaIdInicial, time: horaInicial }),
+  });
+  const horaFin = hora ? horaFinSet : "";
   // La hora elegida ya no tiene cupo → aviso NO bloqueante (el BE deja agendar igual).
   const slotLleno = !!hora && slots.some((s) => s.time === hora && s.vacios <= 0);
 
@@ -268,7 +278,8 @@ export function CitaModal({
   const dayLabel = pickedDay ? format.dateTime(pickedDay, "dayWeekdayShort") : "";
   const clinicName = centros.length > 1 ? centros.find((c) => c.id === effectiveCentro)?.name : undefined;
   const choiceSummary = bookingSummary([tipo?.name, dayLabel, timeRange(hora, horaFin), clinicName]);
-  const footerSummary = bookingSummary([tipo?.name, dayLabel, timeRange(hora, horaFin), clinicName]);
+  const medico = medicos.find((m) => m.id === medicoId);
+  const footerRest = bookingSummary([tipo?.name, medico ? [medico.name, medico.lastName].filter(Boolean).join(" ") : null, clinicName]);
 
   const showResult = useShowAppointmentResult();
   // Either the overlap check found conflicts (shown; a second «Guardar» confirms) or the appointment
@@ -388,64 +399,8 @@ export function CitaModal({
     />
   );
 
-  return (
+  const patientField = (
     <>
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      size="xl"
-      title={isEdit ? t("editTitle") : t("title")}
-      // Booking over an overlap is a deliberate override: once the warning shows, only the button does it.
-      onSubmit={warn ? () => {} : () => submit()}
-      submitLabel={t("save")}
-      actions={warn ? [{ label: t("saveAnyway"), onClick: () => submit() }] : undefined}
-      submitting={submitting}
-      missing={missing}
-      blocked={clinicPending || !!blockError}
-      reason={clinicReason ?? blockError}
-      extra={footerSummary ? <p className="truncate text-sm text-muted-foreground tabular-nums sm:mr-auto">{footerSummary}</p> : undefined}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <RequiredLegend />
-        {/* On edit, the desk ACTIONS (confirm/reschedule/cancel/no-show), the same component as the
-            board. A status change reloads and closes. Handoff agenda-abrir-la-cita. */}
-        {isEdit && cita && (
-          <CitaActions
-            cita={cita}
-            onChanged={() => {
-              onSaved();
-              onOpenChange(false);
-            }}
-          />
-        )}
-      </div>
-
-      {needsCentro && (
-        <Field label={t("centro")} required>
-          {centros.length <= 3 ? (
-            <SegmentedControl
-              ariaLabel={t("centro")}
-              options={centros.map((c) => ({ value: c.id, label: c.name }))}
-              value={effectiveCentro}
-              onChange={pickClinic}
-            />
-          ) : (
-            <Select value={effectiveCentro || undefined} onValueChange={pickClinic}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={t("centroPlaceholder")} />
-              </SelectTrigger>
-              <SelectContent>
-                {centros.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </Field>
-      )}
-
-      {isEdit && <p className="text-xs text-muted-foreground">{t("editLocked")}</p>}
-
       {/* The patient comes first: choosing them picks the type (Nueva/Seguimiento, from their history)
           and their doctor, and the type decides which hours are free. */}
       <Field label={t("patient")} required>
@@ -465,10 +420,86 @@ export function CitaModal({
           />
         )}
       </Field>
+    </>
+  );
+  const notesFields = (
+    <>
+      <Field label={t("reason")}>
+        <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} />
+      </Field>
+      {notesOpen ? (
+        <Field label={t("notes")}>
+          <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} autoFocus={!cita?.notes} />
+        </Field>
+      ) : (
+        <Button type="button" variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => setNotesOpen(true)}>
+          {t("addNote")}
+        </Button>
+      )}
+    </>
+  );
+  // Who is free that day and the overlap warning: under the pickers, or under the summary.
+  const notices = (
+    <>
+      {/* Aviso de disponibilidad: si el médico no está ese día, lo advierte con el motivo (la fecha
+          aquí viene del slot del día, así que solo informa; el usuario decide). */}
+      <AvisoDisponibilidad doctorId={medicoId || undefined} date={fechaSel} centro={effectiveCentro || undefined} />
+
+      {warn && (
+        <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm">
+          <p className="font-medium text-warning-foreground">{t("overlapWarn")}</p>
+          <ul className="mt-1 text-xs text-muted-foreground">
+            {warn.map((c) => (
+              <li key={c.appointmentId}>· {c.time}–{c.endTime}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      size={showChoice ? "2xl" : "xl"}
+      title={isEdit ? t("editTitle") : t("title")}
+      // Booking over an overlap is a deliberate override: once the warning shows, only the button does it.
+      onSubmit={warn ? () => {} : () => submit()}
+      submitLabel={t("save")}
+      actions={warn ? [{ label: t("saveAnyway"), onClick: () => submit() }] : undefined}
+      submitting={submitting}
+      missing={missing}
+      blocked={clinicPending || !!blockError}
+      reason={clinicReason ?? blockError}
+      extra={<BookingFooterSummary when={hora ? bookingSummary([dayLabel, timeRange(hora, horaFin)]) : null} rest={footerRest} />}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <RequiredLegend />
+        {/* On edit, the desk ACTIONS (confirm/reschedule/cancel/no-show), the same component as the
+            board. A status change reloads and closes. Handoff agenda-abrir-la-cita. */}
+        {isEdit && cita && (
+          <CitaActions
+            cita={cita}
+            onChanged={() => {
+              onSaved();
+              onOpenChange(false);
+            }}
+          />
+        )}
+      </div>
+
+      {needsCentro && <ClinicField centros={centros} value={effectiveCentro} onChange={pickClinic} />}
+
+      {isEdit && <p className="text-xs text-muted-foreground">{t("editLocked")}</p>}
 
       {showChoice ? (
-        <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        // Picking the day and hour: what on a tinted panel, when beside it (one column below lg).
+        <div className="grid gap-x-6 gap-y-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <div className="min-w-0 space-y-4 rounded-xl bg-muted/40 p-4 dark:bg-muted/20">
+            <StepLabel n={1}>{t("stepAppointment")}</StepLabel>
+            {patientField}
             <Field label={t("type")} required>
               <Select value={tipoCitaId || undefined} onValueChange={onTipoChange} disabled={isEdit}>
                 <SelectTrigger className="w-full">
@@ -487,23 +518,31 @@ export function CitaModal({
               </Select>
             </Field>
             {doctorField}
+            {statusField}
+            {notesFields}
           </div>
-          <AppointmentWhenFields
-            date={fechaSel}
-            onDateChange={setFechaSel}
-            dateLocked={isEdit}
-            min={isEdit ? undefined : todayPR()}
-            slots={slots}
-            time={hora}
-            endTime={horaFin}
-            onTimeChange={onHoraChange}
-            holiday={festivoHoy}
-            sheet={sheet}
-          />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{statusField}</div>
-        </>
+          <div className="min-w-0 space-y-4">
+            <StepLabel n={2}>{t("stepWhen")}</StepLabel>
+            <AppointmentWhenFields
+              date={fechaSel}
+              onDateChange={setFechaSel}
+              dateLocked={isEdit}
+              min={isEdit ? undefined : todayPR()}
+              slots={slots}
+              time={hora}
+              endTime={horaFin}
+              clinicId={effectiveCentro}
+              typeId={tipoCitaId}
+              onTimeChange={onHoraChange}
+              holiday={festivoHoy}
+              sheet={sheet}
+            />
+            {notices}
+          </div>
+        </div>
       ) : (
         <>
+          {patientField}
           <Field label={t("chosen")} required>
             <div className="flex items-center gap-3 rounded-md border border-input bg-muted/40 px-3 py-2">
               {tipo && <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: tipo.color }} />}
@@ -522,38 +561,9 @@ export function CitaModal({
             {doctorField}
             {statusField}
           </div>
+          {notesFields}
+          {notices}
         </>
-      )}
-
-      {/* No "first visit" checkbox (owner's rule): the type says it (Nueva/Seguimiento), decided by
-          whether the patient was ever attended (`attendedBy`). */}
-
-      <Field label={t("reason")}>
-        <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} />
-      </Field>
-      {notesOpen ? (
-        <Field label={t("notes")}>
-          <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} autoFocus={!cita?.notes} />
-        </Field>
-      ) : (
-        <Button type="button" variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => setNotesOpen(true)}>
-          {t("addNote")}
-        </Button>
-      )}
-
-      {/* Aviso de disponibilidad: si el médico no está ese día, lo advierte con el motivo (la fecha
-          aquí viene del slot del día, así que solo informa; el usuario decide). */}
-      <AvisoDisponibilidad doctorId={medicoId || undefined} date={fechaSel} centro={effectiveCentro || undefined} />
-
-      {warn && (
-        <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm">
-          <p className="font-medium text-warning-foreground">{t("overlapWarn")}</p>
-          <ul className="mt-1 text-xs text-muted-foreground">
-            {warn.map((c) => (
-              <li key={c.appointmentId}>· {c.time}–{c.endTime}</li>
-            ))}
-          </ul>
-        </div>
       )}
     </FormDialog>
     {ehrGate && paciente && (

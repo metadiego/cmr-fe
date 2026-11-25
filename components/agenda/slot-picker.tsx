@@ -67,8 +67,9 @@ export function SlotPicker({
     );
   }
 
-  // chips: one button per hour. Amber = one place left, dashed and faded = full (still pickable: the
-  // BE warns, it does not block).
+  // chips: one button per hour. Only the chosen one is filled (with its end time); one place left is an
+  // amber note, never a coloured box that reads as chosen; full is dashed and faded but still pickable
+  // (the BE warns, it does not block).
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1.5">
       {slots.map((s) => {
@@ -82,24 +83,25 @@ export function SlotPicker({
             aria-pressed={sel}
             title={libresLabel(s)}
             className={cn(
-              "flex flex-col items-center rounded-md border px-2 py-1.5 text-sm transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "flex flex-col items-start rounded-lg border px-2.5 py-1.5 text-left text-sm transition-colors",
+              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
               sel
-                ? "border-primary bg-primary text-primary-foreground"
+                ? "border-primary bg-primary text-primary-foreground ring-3 ring-primary/20"
                 : tone === "full"
-                  ? "border-dashed border-muted-foreground/30 text-muted-foreground/60 hover:border-muted-foreground/60"
-                  : tone === "low"
-                    ? "border-warning/60 bg-warning/10 hover:border-primary"
-                    : "border-input hover:border-primary hover:text-primary",
+                  ? "border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/60"
+                  : "bg-card hover:border-primary",
             )}
           >
-            <span className="font-medium tabular-nums">{sel && selectedEnd ? timeRange(s.time, selectedEnd) : s.time}</span>
+            <span className={cn("tabular-nums", tone === "full" && !sel ? "font-normal" : "font-semibold")}>
+              {sel && selectedEnd ? timeRange(s.time, selectedEnd) : s.time}
+            </span>
             <span
               className={cn(
-                "text-xs tabular-nums",
-                sel ? "opacity-90" : tone === "low" ? "text-warning-foreground" : "text-muted-foreground",
+                "inline-flex items-center gap-1 text-xs tabular-nums",
+                sel ? "opacity-90" : tone === "low" ? "font-medium text-warning-foreground" : "text-muted-foreground",
               )}
             >
+              {tone === "low" && !sel && <span aria-hidden className="size-1.5 rounded-full bg-current" />}
               {libresLabel(s)}
             </span>
           </button>

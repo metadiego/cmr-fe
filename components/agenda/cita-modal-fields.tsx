@@ -91,3 +91,57 @@ export function StatusField({
     </Field>
   );
 }
+
+/** Several clinics on create: which one books (a toggle up to three, else a list). */
+export function ClinicField({
+  centros,
+  value,
+  onChange,
+}: {
+  centros: { id: string; name: string }[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const t = useTranslations("agenda.modal");
+  return (
+    <Field label={t("centro")} required>
+      {centros.length <= 3 ? (
+        <SegmentedControl
+          ariaLabel={t("centro")}
+          options={centros.map((c) => ({ value: c.id, label: c.name }))}
+          value={value}
+          onChange={onChange}
+        />
+      ) : (
+        <Select value={value || undefined} onValueChange={onChange}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={t("centroPlaceholder")} />
+          </SelectTrigger>
+          <SelectContent>
+            {centros.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </Field>
+  );
+}
+
+/**
+ * The footer's line: what «Guardar» books. The day and hour in bold (or «Elige una hora» while none is
+ * chosen, never a preset hour nobody picked), then the type, doctor and clinic.
+ */
+export function BookingFooterSummary({ when, rest }: { when: string | null; rest: string }) {
+  const t = useTranslations("agenda.modal");
+  return (
+    <div className="min-w-0 sm:mr-auto">
+      <p className={when ? "truncate text-sm font-semibold tabular-nums" : "truncate text-sm text-muted-foreground"}>
+        {when ?? t("pickTime")}
+      </p>
+      {rest && <p className="truncate text-xs text-muted-foreground">{rest}</p>}
+    </div>
+  );
+}

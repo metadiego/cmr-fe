@@ -958,7 +958,16 @@
       "change": "Change",
       "addNote": "+ Add note",
       "previousDay": "Previous day",
-      "nextDay": "Next day"
+      "nextDay": "Next day",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "otherDate": "Pick another date",
+      "otherDateHint": "Another date: opens the calendar",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "stepAppointment": "The appointment",
+      "stepWhen": "When",
+      "pickTime": "Pick a time"
     },
     "fecha": "Date",
     "prevDay": "Previous day",
@@ -966,10 +975,10 @@
     "time": "Time",
     "endAuto": "Ends {time} · automatic",
     "slot": {
-      "free": "{n} free",
+      "free": "{n, plural, one {# left} other {# free}}",
       "full": "full",
       "placeholder": "Pick an available time",
-      "fullInSheet": "Full on the sheet"
+      "fullInSheet": "full on the sheet"
     },
     "rule": {
       "capacity": "No room (stations or staff)",

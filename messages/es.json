@@ -958,7 +958,16 @@
       "change": "Cambiar",
       "addNote": "+ Añadir nota",
       "previousDay": "Día anterior",
-      "nextDay": "Día siguiente"
+      "nextDay": "Día siguiente",
+      "previousWeek": "Semana anterior",
+      "nextWeek": "Semana siguiente",
+      "otherDate": "Elegir otra fecha",
+      "otherDateHint": "Otra fecha: abre el calendario",
+      "morning": "Mañana",
+      "afternoon": "Tarde",
+      "stepAppointment": "La cita",
+      "stepWhen": "Cuándo",
+      "pickTime": "Elige una hora"
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",
@@ -966,10 +975,10 @@
     "time": "Hora",
     "endAuto": "Termina {time} · automático",
     "slot": {
-      "free": "{n} libres",
+      "free": "{n, plural, one {# libre} other {# libres}}",
       "full": "lleno",
       "placeholder": "Elige una hora disponible",
-      "fullInSheet": "Lleno en la hoja"
+      "fullInSheet": "lleno en la hoja"
     },
     "rule": {
       "capacity": "Sin cupo (puestos o personal)",
