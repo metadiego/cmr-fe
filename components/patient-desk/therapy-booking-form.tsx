@@ -360,7 +360,8 @@ export function TherapyBookingForm({
     >
       {/* Wide screens: the visit (what) in a tinted panel on the left, the dates (when) on the right; one column below lg. */}
       <div className="grid gap-x-6 gap-y-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <div className="min-w-0 space-y-4 rounded-xl bg-muted/40 p-4 dark:bg-muted/20">
+        {/* Wide screens: the visit stays in view while the dates scroll (its own scroll if taller). */}
+        <div className="min-w-0 space-y-4 rounded-xl bg-muted/40 p-4 lg:sticky lg:top-0 lg:max-h-[calc(90dvh-11rem)] lg:self-start lg:overflow-y-auto dark:bg-muted/20">
           <StepLabel n={1}>{t("stepVisit")}</StepLabel>
           {!givenPatient && (
             <Field label={tSeries("patient")} required>
