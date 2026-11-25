@@ -10,7 +10,8 @@ import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { boardActionMissing } from "@/lib/board/board-action-missing";
 import { availableTransitions } from "@/lib/board/available-transitions";
-import { refusalRefreshesRow } from "@/lib/lifecycle/allowed-actions";
+import { refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
+import { todayPR } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ export function TableroAcciones({
   transiciones,
   centroId,
   allowedActions,
+  fecha,
   onDone,
 }: {
   tablero: string;
@@ -58,6 +60,8 @@ export function TableroAcciones({
   centroId?: string;
   /** The row's `allowedActions`; null/undefined when the row does not carry them. */
   allowedActions?: readonly string[] | null;
+  /** The row's day (YYYY-MM-DD): without the list, No-show is not offered for a day that has not come. */
+  fecha?: string;
   onDone: () => void;
 }) {
   const t = useTranslations("tableroBoard");
@@ -95,6 +99,8 @@ export function TableroAcciones({
     isTerminal,
     allowed: allowedActions ?? null,
     can,
+    date: fecha,
+    today: todayPR(),
   });
 
   if (available.length === 0) return null;

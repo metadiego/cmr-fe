@@ -3,12 +3,12 @@ import assert from "node:assert/strict"
 
 import {
   appointmentMenu,
-  cancelMeaning,
+  appointmentMenuFor,
   confirmToggle,
   readAllowedActions,
-  refusalRefreshesRow,
   slugOffered,
 } from "./allowed-actions.ts"
+import { cancelMeaning, noShowAllowed } from "./board-action-rules.ts"
 
 test("a row without the list (backend before 4a, or a board that does not send it) reads as null", () => {
   assert.equal(readAllowedActions({ id: "r1" }), null)
@@ -59,11 +59,15 @@ test("a slug outside the lifecycle stays with the board's own rule (null)", () =
   assert.equal(slugOffered("enviar_recordatorio", ["confirm"]), null)
 })
 
-test("cancel meaning comes from the list", () => {
-  assert.equal(cancelMeaning(["confirm", "cancel"]), "cancel")
-  assert.equal(cancelMeaning(["not_serve", "call"]), "not_serve")
-  assert.equal(cancelMeaning(["finish"]), null)
-  assert.equal(cancelMeaning(null), undefined)
+test("cancel meaning comes from the list when the row carries one, whatever the stored status", () => {
+  assert.equal(cancelMeaning("presente", ["confirm", "cancel"]), "cancel")
+  assert.equal(cancelMeaning("programada", ["not_serve", "call"]), "not_serve")
+  assert.equal(cancelMeaning("programada", ["finish"]), null)
+  assert.equal(cancelMeaning("programada", []), null)
+  // no list: the status rule (piece 3) decides
+  assert.equal(cancelMeaning("programada", null), "cancel")
+  assert.equal(cancelMeaning("presente", undefined), "not_serve")
+  assert.equal(cancelMeaning("en_consulta", null), null)
 })
 
 test("the confirm toggle offers confirm, unconfirm or nothing", () => {
@@ -73,12 +77,12 @@ test("the confirm toggle offers confirm, unconfirm or nothing", () => {
   assert.equal(confirmToggle(null), null)
 })
 
-test("a stale or no-longer-allowed refusal refreshes the row; other errors do not", () => {
-  assert.equal(refusalRefreshesRow({ code: "LIFECYCLE_ACTION_NOT_ALLOWED" }), true)
-  assert.equal(refusalRefreshesRow({ code: "LIFECYCLE_STALE" }), true)
-  assert.equal(refusalRefreshesRow({ code: "LIFECYCLE_REASON_REQUIRED" }), false)
-  assert.equal(refusalRefreshesRow(new Error("x")), false)
-  assert.equal(refusalRefreshesRow(null), false)
+test("the list and the status rules agree on a row the backend has not moved", () => {
+  // the same row seen by a backend with and without 4a: arrived and waiting = "not served"
+  assert.equal(cancelMeaning("presente", ["not_serve", "start_triage"]), cancelMeaning("presente"))
+  // before arrival, today: both offer No-show (the list holds it; the status rule allows it)
+  assert.ok(appointmentMenu(["no_show"]).includes("noShow"))
+  assert.equal(noShowAllowed("confirmada", "2026-11-25", "2026-11-25"), true)
 })
 
 test("the appointment menu (CitaActions) is drawn from the list, in its own order", () => {
@@ -92,4 +96,23 @@ test("the appointment menu (CitaActions) is drawn from the list, in its own orde
   assert.deepEqual(appointmentMenu(["unconfirm", "check_in"]), ["unconfirm", "presente"])
   assert.deepEqual(appointmentMenu(["not_serve", "start_triage"]), ["cancelar"])
   assert.deepEqual(appointmentMenu([]), [])
+})
+
+const TODAY = "2026-11-25"
+const menu = (status: string, allowed: string[] | null, extra: { date?: string; canConfirm?: boolean } = {}) =>
+  appointmentMenuFor({ status, date: extra.date ?? TODAY, today: TODAY, allowed, canConfirm: extra.canConfirm ?? true })
+
+test("menu without a list: the status table, Confirm gated on the permission, No-show by date", () => {
+  assert.deepEqual(menu("programada", null), ["confirmar", "reagendar", "noShow", "cancelar"])
+  assert.deepEqual(menu("programada", null, { canConfirm: false }), ["reagendar", "noShow", "cancelar"])
+  assert.deepEqual(menu("confirmada", null, { date: "2026-11-30" }), ["presente", "reagendar", "cancelar"])
+  assert.deepEqual(menu("presente", null), ["cancelar"])
+  assert.deepEqual(menu("en_consulta", null), [])
+  assert.deepEqual(menu("atendida", null), [])
+})
+
+test("menu with a list: the list decides, not the stored status, the date or the flat permission", () => {
+  assert.deepEqual(menu("en_consulta", ["cancel"]), ["cancelar"])
+  assert.deepEqual(menu("programada", ["confirm", "no_show"], { date: "2026-11-30", canConfirm: false }), ["confirmar", "noShow"])
+  assert.deepEqual(menu("programada", []), [])
 })

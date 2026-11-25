@@ -7,7 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import { cancelarSesion, confirmSession, unconfirmSession } from "@/lib/api/frontdesk";
-import { cancelMeaning, confirmToggle, refusalRefreshesRow } from "@/lib/lifecycle/allowed-actions";
+import { confirmToggle } from "@/lib/lifecycle/allowed-actions";
 import { useCan } from "@/hooks/use-can";
 import { ChangeLogSheet } from "@/components/change-log/change-log-sheet";
 import { cancelPatientDay, reopenPatientDay, reopenSession } from "@/lib/api/frontdesk-day";
@@ -15,6 +15,7 @@ import { ApiError } from "@/lib/api/types";
 import { todayISO } from "@/lib/agenda/calendar";
 import { canReopen, duplicatesReopen, REOPEN_ERROR_KEYS, skippedReasons } from "@/lib/frontdesk/reopen";
 import { sessionReasonMissing } from "@/lib/frontdesk/session-reason-missing";
+import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,9 +117,11 @@ export function RowMenu({
     },
   });
   const missing = sessionReasonMissing({ reason: motivo }).map(() => t("motivo"));
-  // With the row's list: Cancel shows only when listed, as "not served" on an arrived session.
-  const meaning = cancelMeaning(allowedActions);
-  const showCancel = meaning === undefined ? !cancelada : meaning !== null;
+  // Cancel follows the row's list when it carries one (cmr-be 4a); without it, the piece-3 catalogue:
+  // on an arrived, waiting session it records "not served"; in therapy or attended it is refused (the
+  // way back is Unattend, then this).
+  const meaning = cancelMeaning(day.status, allowedActions);
+  const showCancel = (allowedActions ? true : !cancelada) && meaning !== null;
   const cancelLabel = meaning === "not_serve" ? tRoot("lifecycle.action.not_serve") : t("cancelar");
   const toggle = confirmToggle(allowedActions);
   const confirmMove = (move: "confirm" | "unconfirm") =>
@@ -241,7 +244,7 @@ export function RowMenu({
         onOpenChange={(v) => !v && setCancelOpen(false)}
         size="sm"
         title={cancelOpen === "all" ? t("cancelAllTitle") : meaning === "not_serve" ? cancelLabel : t("cancelarTitle")}
-        description={cancelOpen === "all" ? t("cancelAllHint") : undefined}
+        description={cancelOpen === "all" ? t("cancelAllHint") : meaning === "not_serve" ? t("notServeHelp") : undefined}
         onSubmit={() => cancel(cancelOpen || "one", motivo.trim())}
         actions={[
           {

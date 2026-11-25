@@ -24,7 +24,8 @@ import {
   unconfirmDayRow,
   type DayListRow,
 } from "@/lib/api/appointments-day";
-import { cancelMeaning, confirmToggle, refusalRefreshesRow } from "@/lib/lifecycle/allowed-actions";
+import { confirmToggle } from "@/lib/lifecycle/allowed-actions";
+import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 
 // A row's actions on the Citas screen, drawn ONLY from its `allowedActions` (the backend's decision for
 // this user in the row's center: stage, date rule and permission). Confirmar is the row's one primary
@@ -45,7 +46,8 @@ export function DayRowActions({ row, onChanged }: { row: DayListRow; onChanged: 
   });
 
   const toggle = confirmToggle(row.allowedActions);
-  const cancel = cancelMeaning(row.allowedActions);
+  // Every day-list row carries its list, so the stored-status fallback never applies here.
+  const cancel = cancelMeaning("", row.allowedActions);
   const canChange = row.allowedActions.includes(row.kind === "medical" ? "reschedule" : "move");
   const cancelLabel = cancel === "not_serve" ? tRoot("lifecycle.action.not_serve") : tRoot("lifecycle.action.cancel");
   const what = [row.time, row.typeLabel ?? row.serviceName, row.patient.name].filter(Boolean).join(" · ");

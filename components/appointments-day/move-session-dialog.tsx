@@ -11,7 +11,7 @@ import { useDialogForm } from "@/components/kit/use-dialog-form";
 import { useSubmit } from "@/components/kit/use-submit";
 import { moveSession, type DayListRow } from "@/lib/api/appointments-day";
 import { missingFields } from "@/lib/forms/missing";
-import { refusalRefreshesRow } from "@/lib/lifecycle/allowed-actions";
+import { refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 
 // Moving a therapy session in place (`move`, PATCH frontdesk/sessions/:id/agenda): a new day and,
 // optionally, a time. Moving is an outward change (rule 8): only the button fires it, never Enter.

@@ -6,6 +6,8 @@
 // screen's previous rule (functions answer `null` / `undefined`); a row WITH it (empty included) is
 // drawn from it.
 
+import { noShowAllowed } from "./board-action-rules.ts"
+
 /** A catalogue action key (`lifecycle.action.<key>` is its label). */
 export type ActionKey = string
 
@@ -64,16 +66,8 @@ export function slugOffered(slug: string, allowed: readonly ActionKey[] | null |
   return actions.some((a) => allowed.includes(a))
 }
 
-/**
- * What Cancel does on the row: a plain cancel, "arrived, not served" (same dialog and reason, its own
- * label), or nothing (`null`: hide it). `undefined` when the row has no list (old rule).
- */
-export function cancelMeaning(allowed: readonly ActionKey[] | null | undefined): "cancel" | "not_serve" | null | undefined {
-  if (!allowed) return undefined
-  if (allowed.includes("not_serve")) return "not_serve"
-  if (allowed.includes("cancel")) return "cancel"
-  return null
-}
+// Cancel's meaning ("cancel" / "not served" / hidden) and the refusal that refreshes a row live in
+// ./board-action-rules.ts, one helper each for rows with and without the list.
 
 /** The confirmation move the row offers now, if any. */
 export function confirmToggle(allowed: readonly ActionKey[] | null | undefined): "confirm" | "unconfirm" | null {
@@ -99,15 +93,35 @@ export function appointmentMenu(allowed: readonly ActionKey[]): AppointmentMenuI
   return APPOINTMENT_MENU.filter(([, keys]) => keys.some((k) => allowed.includes(k))).map(([item]) => item)
 }
 
-/** Label key of an action. */
-export const actionLabelKey = (key: ActionKey) => `lifecycle.action.${key}`
+// A row WITHOUT the list (an entity read, or a backend before 4a): the scheduling-flow entries each old
+// status allows, further narrowed by the piece-3 catalogue (./board-action-rules.ts). Cancel on an
+// arrived patient is "not served" (same entry, its own label); in consultation it is refused.
+const STATUS_MENU: Record<string, readonly AppointmentMenuItem[]> = {
+  programada: ["confirmar", "reagendar", "noShow", "cancelar"],
+  confirmada: ["presente", "reagendar", "noShow", "cancelar"],
+  presente: ["cancelar"],
+  triage: ["cancelar"],
+}
 
 /**
- * The backend refused because the row is not where this screen thinks it is (the action no longer
- * applies, or someone else moved it a moment ago): the screen refetches the row so its buttons redraw.
- * The toast still shows; nothing is retried.
+ * The medical appointment's menu: from the row's list when it carries one (stage, date and per-center
+ * permission are already in it); otherwise from the status table, with Confirm gated on
+ * `appointments.confirm` and No-show only before arrival, today or earlier.
  */
-export function refusalRefreshesRow(err: unknown): boolean {
-  const code = (err as { code?: unknown } | null)?.code
-  return code === "LIFECYCLE_ACTION_NOT_ALLOWED" || code === "LIFECYCLE_STALE"
+export function appointmentMenuFor(row: {
+  status: string
+  date: string | null | undefined
+  today: string
+  allowed: readonly ActionKey[] | null | undefined
+  canConfirm: boolean
+}): AppointmentMenuItem[] {
+  if (row.allowed) return appointmentMenu(row.allowed)
+  return (STATUS_MENU[row.status] ?? []).filter(
+    (a) =>
+      (a !== "confirmar" || row.canConfirm) &&
+      (a !== "noShow" || noShowAllowed(row.status, row.date, row.today)),
+  )
 }
+
+/** Label key of an action. */
+export const actionLabelKey = (key: ActionKey) => `lifecycle.action.${key}`

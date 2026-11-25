@@ -345,6 +345,7 @@ export function GenericBoard({
                 transiciones={def.transitions}
                 centroId={centroId}
                 allowedActions={readAllowedActions(fila)}
+                fecha={fecha}
                 onDone={filasRes.refresh}
               />
             );
