@@ -7298,7 +7298,8 @@
     "whyOverbook": "At {time} it does not all fit ({reason}). Booking it anyway is an overbooking.",
     "whyBlocked": "{time} cannot be booked ({reason}).",
     "useTime": "Use {time}, free",
-    "notThisDay": "Not on this day:"
+    "notThisDay": "Not on this day:",
+    "bornConfirmed": "Book as confirmed"
   },
   "lifecycle": {
     "action": {

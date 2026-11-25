@@ -56,25 +56,29 @@ export function StatusField({
   estadoDef,
   estadosMap,
   estadoCrear,
+  canConfirm = true,
   onChange,
 }: {
   isEdit: boolean;
   estadoDef: EstadoCitaCatalogo | undefined;
   estadosMap: Map<string, EstadoCitaCatalogo>;
   estadoCrear: "programada" | "confirmada";
+  /** Create: the person may confirm in this clinic (appointments.confirm). Without it, no toggle: born booked. */
+  canConfirm?: boolean;
   onChange: (v: "programada" | "confirmada") => void;
 }) {
   const t = useTranslations("agenda.modal");
   const tRoot = useTranslations();
+  const shown = isEdit ? estadoDef : estadosMap.get("programada");
   return (
     <Field label={t("status")}>
-      {isEdit ? (
+      {isEdit || !canConfirm ? (
         <div className="flex h-9 items-center">
           <Badge
             variant="secondary"
-            style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
+            style={shown ? { backgroundColor: `${shown.color}20`, color: shown.color } : undefined}
           >
-            {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
+            {shown ? tRoot(shown.labelKey) : t("statusScheduled")}
           </Badge>
         </div>
       ) : (

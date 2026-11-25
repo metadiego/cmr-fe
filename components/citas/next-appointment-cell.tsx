@@ -26,6 +26,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { ReturnDatePicker } from "@/components/citas/return-date-picker";
 import { SlotAvailabilityHint } from "@/components/citas/slot-availability-hint";
+import { useCanInCenter } from "@/hooks/use-can-in-center";
+import { CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
 
 // "Next appt" board column (render.kind = "nextAppointment"): the date, clickable. The popover shows the
 // patient's current next appointment and moves it with the same shortcuts + calendar as the post-visit
@@ -47,6 +49,7 @@ export function NextAppointmentCell({
   const t = useTranslations("nextAppointment");
   const tNueva = useTranslations("nuevaCita");
   const tRoot = useTranslations();
+  const canConfirmHere = useCanInCenter(CONFIRM_PERMISSION, centroId);
   const format = useFormatter();
   const { can } = useCan();
   const me = useMe();
@@ -132,8 +135,9 @@ export function NextAppointmentCell({
             date: day,
             ...(doctorId ? { doctorId } : {}),
             ...(reason.trim() ? { notes: reason.trim() } : {}),
-            // Booked at the desk with the patient present: confirmed, as in Nueva cita.
-            status: "confirmada",
+            // Booked at the desk with the patient present: confirmed, as in Nueva cita (cmr-be 4a
+            // `confirmed`; born booked when appointments.confirm is not held in this clinic).
+            confirmed: createConfirmed(true, canConfirmHere),
           } as Parameters<typeof createCita>[0],
           centroId,
         );

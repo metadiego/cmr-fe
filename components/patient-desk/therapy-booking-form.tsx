@@ -54,6 +54,9 @@ import { ApiError, type ApiWarning } from "@/lib/api/types";
 import { warningText } from "@/lib/frontdesk/avisos";
 import { patientName } from "@/lib/pacientes/display-name";
 import type { Paciente } from "@/lib/api/pacientes";
+import { CONFIRM_PERMISSION, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
+import { useCanInCenter } from "@/hooks/use-can-in-center";
+import { Switch } from "@/components/ui/switch";
 
 // «Cita de servicio» on the patient desk: the Citas service form (patient, Frecuencia, one row per date,
 // the success dialog) with a «Terapias» field where several are ticked. Each visit is the WHOLE train at
@@ -120,6 +123,10 @@ export function TherapyBookingForm({
   const [selected, setSelected] = React.useState<string[]>([]);
   const [areas, setAreas] = React.useState<Record<string, number>>({});
   const [keepOrder, setKeepOrder] = React.useState(false);
+  // Born confirmed (cmr-be 4a `confirmed` on book-train; the series door takes none): only with
+  // appointments.confirm in this center.
+  const canConfirmHere = useCanInCenter(CONFIRM_PERMISSION, center);
+  const [confirmed, setConfirmed] = React.useState(false);
   // The desk's service starts ticked once the balance says the patient has sessions of it left.
   const [defaultApplied, setDefaultApplied] = React.useState(false);
   if (!defaultApplied && balanceState === "ok" && rules.bookable) {
@@ -270,7 +277,10 @@ export function TherapyBookingForm({
     if (single) {
       const r = rows[0];
       const res = await bookTrain(
-        { patientId: patient.id, date: r.date, time: r.time, serviceIds: idsOn(r.date), areas: areaMap, keepOrder },
+        {
+          patientId: patient.id, date: r.date, time: r.time, serviceIds: idsOn(r.date), areas: areaMap, keepOrder,
+          ...(confirmed ? { confirmed: createConfirmed(true, canConfirmHere) } : {}),
+        },
         center,
       );
       return { sessions: res.data.sessions, warnings: [...res.warnings, ...res.advertencias], timeOf };
@@ -357,6 +367,14 @@ export function TherapyBookingForm({
       missing={missing}
       blocked={!!reason}
       reason={reason}
+      extra={
+        single && canConfirmHere ? (
+          <label className="flex items-center gap-2 text-sm">
+            <Switch checked={confirmed} onCheckedChange={setConfirmed} disabled={busy} />
+            {t("bornConfirmed")}
+          </label>
+        ) : undefined
+      }
     >
       {/* Wide screens: the visit (what) in a tinted panel on the left, the dates (when) on the right; one column below lg. */}
       <div className="grid gap-x-6 gap-y-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">

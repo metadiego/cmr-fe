@@ -7298,7 +7298,8 @@
     "whyOverbook": "A las {time} no cabe entera ({reason}). Si la agendas igual, es un sobrecupo.",
     "whyBlocked": "A las {time} no se puede agendar ({reason}).",
     "useTime": "Usar {time}, libre",
-    "notThisDay": "Sin estas este día:"
+    "notThisDay": "Sin estas este día:",
+    "bornConfirmed": "Agendar ya confirmada"
   },
   "lifecycle": {
     "action": {
