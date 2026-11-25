@@ -268,7 +268,7 @@ export function ServiceSessionsTable({
                   item.kind === "flujo" ? (
                     <th
                       key={`flow-${i}`}
-                      className="w-72 px-3 py-2 font-semibold"
+                      className="w-60 px-3 py-2 font-semibold"
                     >
                       {tFrontdesk("flujo")}
                     </th>
@@ -277,8 +277,8 @@ export function ServiceSessionsTable({
                       key={item.col.clave}
                       className={cn(
                         "px-3 py-2 font-semibold",
-                        isStaffColumn(item.col) && "w-60",
-                        isSessionColumn(item.col) && "w-28"
+                        isStaffColumn(item.col) && "w-52",
+                        isSessionColumn(item.col) && "w-24"
                       )}
                     >
                       {item.col.label ??

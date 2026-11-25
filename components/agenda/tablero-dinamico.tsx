@@ -508,7 +508,7 @@ export function TableroDinamico({
               g.kind === "flow" ? (
                 <th
                   key={`flow-${gi}`}
-                  className={cn("px-3 py-2 whitespace-nowrap", leadWidths ? "w-72 font-semibold" : "text-center font-medium")}
+                  className={cn("px-3 py-2 whitespace-nowrap", leadWidths ? "w-60 font-semibold" : "text-center font-medium")}
                 >
                   {leadWidths ? tRoot("frontdesk.flujo") : tRoot("tableroBoard.flowTitle")}
                 </th>
@@ -518,7 +518,7 @@ export function TableroDinamico({
                   className={cn(
                     "px-3 py-2 text-left whitespace-nowrap",
                     leadWidths ? "font-semibold" : "font-medium",
-                    leadWidths && gi === 0 && "w-60",
+                    leadWidths && gi === 0 && "w-52",
                   )}
                 >
                   {(() => {
