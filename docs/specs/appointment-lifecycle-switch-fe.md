@@ -16,8 +16,10 @@ Backend only, no schema change, no behaviour change for existing screens:
 |---|---|---|
 | 1 | `allowedActions` on every row of four board reads | 2 |
 | 2 | Confirm / unconfirm doors for therapy sessions, unconfirm door for appointments | 3 |
-| 3 | `confirmed: boolean` on every creation path | 4 |
+| 3 | `confirmed: boolean` on every creation path (needs `appointments.confirm`) | 4 |
 | 4 | `GET appointments/day`: one list of both kinds | 5 |
+
+Known behaviours worth knowing before building on 4a are collected in section 6.
 
 **Nothing breaks on current screens.** Every new field is additive, every old route, slug and body key
 still works, `estado: 'confirmada'` is still accepted. The boards keep working unchanged until the FE
@@ -39,10 +41,10 @@ Other boards (any other `tablero` key) get no `allowedActions`. A row with no st
 | Fact | Detail |
 |---|---|
 | Type | `allowedActions: string[]`, catalogue action keys in catalogue order. Labels: `lifecycle.action.<key>` (already in `messages/{es,en}.json`). |
-| Computed | Per row, in the **row's own center**, for the **calling user**: the action is open from the row's stored stage (`booking_status` / `care_status`) AND the user holds the action's permission in that center. A cross-center board therefore shows `confirm` only on the rows of the center where the user holds `appointments.confirm`. |
+| Computed | Per row, in the **row's own center**, for the **calling user**: the action is open from the row's stored stage (`booking_status` / `care_status`), its date rule holds (next line), AND the user holds the action's permission in that center. A cross-center board therefore shows `confirm` only on the rows of the center where the user holds `appointments.confirm`. The list and the click share one rule, so they cannot disagree on stage or date. |
 | Lag | Computed from the stored stages, which the reconciler can lag by up to about 1 minute. It is a convenience, not the gate: the backend re-checks on the click and answers `LIFECYCLE_ACTION_NOT_ALLOWED` (400) or `LIFECYCLE_STALE` (409). Handle both as in `appointment-actions-board.md` (toast, refetch the row). |
 | Never listed | `repair` and `remove_entry_error` (admin and delete paths keep their own doors). |
-| Dates are not applied | The list ignores the date rules of `check_in` (not future) and `no_show` (today or past). `no_show` is listed on a future row and the backend then refuses it (`VALIDATION_ERROR`, labelKey `lifecycle.action.futureDate`). **The screen must still hide No-show for a future date, and Check-in for a future date.** |
+| Dates applied | `check_in` (not future) and `no_show` (today or past) are left out of a row whose date is after **today in the row's center time zone** (a center with no or an unknown zone reads `America/Puerto_Rico`). Today's and past rows list them; a row with no date lists them (the click accepts it too). The screen needs no date check of its own. |
 | API keys | A non-admin API key gets `[]` on every row (it has no working centers; same answer as the click check). Admin keys get everything except the two above. Screens are people, so this only matters for tooling. |
 | Realtime | SSE payloads do **not** carry `allowedActions` (they are broadcast per center). Refetch the row on an event. |
 
@@ -54,7 +56,7 @@ Entity responses (`GET appointments`, `GET frontdesk/sessions`, ...) also expose
 | Today | After |
 |---|---|
 | `components/tablero/tablero-acciones.tsx`: filters `definicion.transiciones` by `fromStatuses` and `permissionSlug` (`can(...)`) | Draw buttons from `row.allowedActions`; keep the form fields / confirmations / reasons the transition declares, keyed by action key. |
-| `lib/lifecycle/board-action-rules.ts` (`cancelMeaning`, `noShowAllowed`; exists on branch `feat/lifecycle-actions-screens` of `cmr-fe`, not on `main`) | Delete. `cancel` vs `not_serve` is already two different keys in `allowedActions`. Keep only the future-date check on `no_show` / `check_in`. |
+| `lib/lifecycle/board-action-rules.ts` (`cancelMeaning`, `noShowAllowed`; exists on branch `feat/lifecycle-actions-screens` of `cmr-fe`, not on `main`) | Delete. `cancel` vs `not_serve` is already two different keys in `allowedActions`, and `no_show` / `check_in` are already left out of future rows. |
 | `can("appointments.confirm")` gates on confirm / unconfirm buttons | Not needed for drawing; the list already holds the per-center permission. Keep `can()` only for non-row UI. |
 
 ### Action key to door (what each button calls today)
@@ -131,14 +133,23 @@ No body.
 
 Rules:
 
+- **Permission:** `confirmed: true` needs **`appointments.confirm` in the center the row is created
+  in** (the body's `centerId` / `centroId` when sent, else the active center). Without it the whole
+  request is **403 `FORBIDDEN`** (`labelKey: auth.permiso_faltante`, `faltan: ["appointments.confirm"]`)
+  and nothing is created. Same rule on the MCP tools `create_appointment`, `create_session`,
+  `book_multiple`, `book_therapy_train`. Show the confirm toggle only to users who hold
+  `appointments.confirm` in the target center. The legacy medical `estado` / `status: 'confirmada'` is
+  **not** checked (today's screens send it); it is retired when the FE moves to `confirmed`.
 - Medical: `confirmed` and the old status are read as one statement. `confirmed: true` with a status
   other than `confirmada`, or `confirmed: false` with `confirmada`, is **400 `VALIDATION_ERROR`**.
   Sending only one of them is fine.
 - A row born **present** (walk-in: "bring to today" on a same-day booking, or a center with auto-present
   for same-day booking) is **never confirmed**: for a session `confirmed` is ignored when it is born
   present. Do not show "Confirmed" for a walk-in.
-- The scheduling bridge and the call-center repair job use the same path; their rows carry
-  `confirmedVia: 'bridge'` (section 5).
+- The scheduling bridge cron and the call-center repair job create or confirm with no request
+  principal, so the permission check does not apply to them. Rows the bridge creates carry
+  `confirmedVia: 'bridge'` once confirmed (section 5).
+- v2 English bodies carry `confirmed` as is (no translation); v1 Spanish bodies too.
 
 **FE change:** the add-appointment modals send `confirmed` instead of a status:
 `components/tablero/nueva-cita-modal.tsx` (today `status: "confirmada"`), `components/agenda/cita-modal.tsx`
@@ -155,7 +166,7 @@ the modal maps to the boolean. Legacy status editing in the edit modal is unchan
 
 | Param | Type | Default | Meaning |
 |---|---|---|---|
-| `date` | `YYYY-MM-DD` | required | The day. |
+| `date` | `YYYY-MM-DD` | required | The day; must be a real calendar date (400 otherwise; the MCP tool refuses it as an argument error). |
 | `centerIds` | comma-separated uuids | every center where the kind is readable | Narrow to these centers. |
 | `kind` | `medical` or `service` | both | One kind only. `service` = therapy sessions. |
 | `appointmentTypeIds` | comma-separated uuids | none | Keep only these medical types. |
@@ -206,7 +217,7 @@ exists; else `null`):
 | Value | Meaning |
 |---|---|
 | `person` | A staff member is stamped as the confirmer (`confirmedBy` is set). |
-| `bridge` | **Created by the scheduling bridge** (call-center sheet), with no staff confirmer. It means "the row came from the sheet", not proof of who confirmed: a bridge row later confirmed by an API key or the system also reads `bridge`. Show "Confirmed · call-center sheet". |
+| `bridge` | **Created by the scheduling bridge** (call-center sheet; the row's legacy origin is `scheduling-server`), with no staff confirmer. It means "the row came from the sheet", not proof of who confirmed: a bridge row later confirmed by an API key or the system also reads `bridge`. A medical row sent with channel `webhook` by any other caller is **not** `bridge`. Show "Confirmed · call-center sheet". |
 | `import` | Came from the legacy import (legacy origin or an import history row). |
 | `null` | Confirmed by an API key or the system, which cannot be told apart. |
 
@@ -224,7 +235,22 @@ only if the key holds that kind's permission.
 MCP `list_day_appointments`: same service and same filters; a caller with no clinic chosen must name one
 through `centerIds`.
 
-## 6. Coming next, not in 4a
+## 6. Known behaviours
+
+Read from the code of 4a after the final review fixes:
+
+| Behaviour | Detail |
+|---|---|
+| Confirm / unconfirm responses differ | The new doors (`appointments/:id/unconfirm`, `frontdesk/sessions/:id/confirm`, `frontdesk/sessions/:id/unconfirm`) return the **bare entity**; the older `appointments/:id/confirm` returns `{ data, persistencia }`. Both inside the usual `{ data, meta }` envelope. |
+| `allowedActions` honours date rules | No `check_in` / `no_show` on a row dated after today in its center's zone. The FE does not filter by date. |
+| `confirmedVia = 'bridge'` | Means **created by the scheduling bridge**. It also shows when such a row was later confirmed by an API key or a job (no staff confirmer). |
+| Narrowed `centerIds` in the day list | When `centerIds` leaves a kind with no readable center, that kind is skipped: **200 with fewer rows**. **403** only when every requested kind is refused. |
+| Not yet reconciled rows | A row written outside the API (clinic Mac import, raw SQL) may show for up to about 1 minute with `bookingStatus` / `careStatus` `null` and `allowedActions: []`, until the reconciler catches up. Refetch rather than treat it as an error. |
+| MCP boards | The MCP board tools do **not** carry `allowedActions`. Only the REST boards of section 2 and `list_day_appointments` (and `GET appointments/day`) do. |
+| API keys | A non-admin API key gets `allowedActions: []` on every row. |
+| Creating confirmed | `confirmed: true` on any creation door (REST or MCP) needs `appointments.confirm` in the target center (403 otherwise); the legacy `estado: 'confirmada'` is not checked yet. |
+
+## 7. Coming next, not in 4a
 
 None of this exists in 4a. Do not build against it yet; it lands with releases 4b and 4c.
 
@@ -275,5 +301,5 @@ switch date. Screens need no change, but a "late" therapy row never turns into a
 
 ## Out of scope here
 
-Check-in through the visit and the new end of day (sections 6); removing the board status / transition
+Check-in through the visit and the new end of day (section 7); removing the board status / transition
 editors and the old doors (piece 6); the history reader on `status_changes` (piece 5).
