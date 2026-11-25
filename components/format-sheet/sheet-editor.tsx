@@ -16,6 +16,7 @@ import { Field } from "@/components/kit/field";
 import { Panel, ErrorState, LoadingPanel } from "@/components/kit/panel";
 import { StatusBadge } from "@/components/kit/status-badge";
 import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
+import { FORMAT_PRINTED_EVENT } from "@/components/frontdesk/formato-parts";
 import { SheetQuestions } from "@/components/format-sheet/sheet-questions";
 import { VoidSheetDialog } from "@/components/format-sheet/void-sheet-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -125,6 +126,13 @@ function SheetForm({ slug, sessionId, data }: { slug: string; sessionId: string;
   const [savedJson, setSavedJson] = React.useState(() => payloadJson);
   const dirty = payloadJson !== savedJson;
   const [printing, setPrinting] = React.useState(false);
+  // The print preview closes once the print window is done (formato-parts, owner 25-nov-2026).
+  React.useEffect(() => {
+    if (!printing) return;
+    const close = () => setPrinting(false);
+    window.addEventListener(FORMAT_PRINTED_EVENT, close);
+    return () => window.removeEventListener(FORMAT_PRINTED_EVENT, close);
+  }, [printing]);
   const [voiding, setVoiding] = React.useState(false);
   const { can } = useCan();
 

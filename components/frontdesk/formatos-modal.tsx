@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { FORMAT_PRINTED_EVENT } from "@/components/frontdesk/formato-parts";
 
 import type { LaserTipo } from "@/lib/api/laser";
 import { getDisponibilidadServicio, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
@@ -119,6 +120,13 @@ export function FormatosModal({
   }
   // Reset al abrir/cerrar (patrón ajustar-en-render). Al abrir con un report preseleccionado (desde el
   // menú de Acciones), se elige directo y se salta la lista.
+  // A sheet printed from here closes the dialog once the print window is done (formato-parts).
+  React.useEffect(() => {
+    if (!open) return;
+    const close = () => onOpenChange(false);
+    window.addEventListener(FORMAT_PRINTED_EVENT, close);
+    return () => window.removeEventListener(FORMAT_PRINTED_EVENT, close);
+  }, [open, onOpenChange]);
   const [prevOpen, setPrevOpen] = React.useState(open);
   if (open !== prevOpen) {
     setPrevOpen(open);

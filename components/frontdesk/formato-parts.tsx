@@ -45,6 +45,8 @@ section, .region { break-inside: avoid; }
 .formato-grid th { padding: 5px 8px; }
 `;
 
+export const FORMAT_PRINTED_EVENT = "cmr:format-printed";
+
 // Imprime un elemento en una VENTANA propia (evita el recorte del Dialog/Radix que dejaba la hoja en
 // blanco). Clona el nodo, convierte cualquier <canvas> (firma) en <img> para que sí salga impreso.
 // `extraCss` goes after the base sheet (e.g. the landscape, margin-less pages of layout "paginas").
@@ -65,6 +67,13 @@ export function imprimirFormato(el: HTMLElement | null, titulo: string, extraCss
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title><style>${PRINT_CSS}${extraCss}</style></head><body>${clone.innerHTML}</body></html>`);
   w.document.close();
   w.focus();
+  // Done printing (owner, 25-nov-2026: «que se cierren cuando se imprime»): the print window closes, like
+  // the legacy print.php, and FORMAT_PRINTED_EVENT lets the formats dialog close too. Browsers do not say
+  // whether the dialog was printed or cancelled, so both close.
+  w.onafterprint = () => {
+    try { w.close(); } catch { /* a window the browser will not let a script close stays open */ }
+    window.dispatchEvent(new Event(FORMAT_PRINTED_EVENT));
+  };
   const go = () => { w.print(); };
   // Espera a que carguen imágenes (logo/firma) antes de imprimir.
   if (w.document.images.length) setTimeout(go, 400); else setTimeout(go, 150);
