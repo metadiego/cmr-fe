@@ -316,8 +316,8 @@ export function TherapyBookingForm({
     onSuccess: ({ sessions, warnings, timeOf }) => {
       showResult(
         trainBookingResult({
-          patient: { name: patient?.name ?? "", record: patient?.record ?? null },
-          center: { name: centerInfo?.name ?? "", phone: centerInfo?.phone ?? null, address: centerInfo?.address ?? null },
+          patient: { id: patient?.id, name: patient?.name ?? "", record: patient?.record ?? null },
+          center: { id: centerInfo?.id, name: centerInfo?.name ?? "", phone: centerInfo?.phone ?? null, address: centerInfo?.address ?? null },
           sessions: sessions.map((s) => ({ serviceId: s.serviceId, date: String(s.date), time: s.time })),
           serviceName,
           fallbackTime: (date) => timeOf.get(date) ?? seriesTime,

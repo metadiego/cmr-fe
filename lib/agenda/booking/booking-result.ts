@@ -12,8 +12,9 @@ export interface BookingResultItem {
 
 export interface BookingResult {
   mode: "booked" | "moved";
-  patient: { name: string; record?: string | null };
-  center: { name: string; phone?: string | null; address?: string | null };
+  /** `id` lets the printed sheet add the patient's other appointments on the same days. */
+  patient: { id?: string; name: string; record?: string | null };
+  center: { id?: string; name: string; phone?: string | null; address?: string | null };
   items: BookingResultItem[];
   skipped: { date: string; reason: string }[];
   warnings: string[];
@@ -52,16 +53,16 @@ export function resultTime(time: string): string {
 
 /** The patient as the result names them: display name and record (none = null, never invented). */
 export function resultPatient(
-  p: { firstName: string; lastName: string | null; displayName?: string | null; medicalRecordNumber?: string | null },
+  p: { id?: string; firstName: string; lastName: string | null; displayName?: string | null; medicalRecordNumber?: string | null },
 ): BookingResult["patient"] {
-  return { name: patientName(p), record: p.medicalRecordNumber ?? null };
+  return { ...(p.id ? { id: p.id } : {}), name: patientName(p), record: p.medicalRecordNumber ?? null };
 }
 
 /** The booking center's printout header; a missing field is null (omitted), an unknown center blank. */
 export function resultCenter(
-  c: { name: string; phone?: string | null; address?: string | null } | undefined,
+  c: { id?: string; name: string; phone?: string | null; address?: string | null } | undefined,
 ): BookingResult["center"] {
-  return { name: c?.name ?? "", phone: c?.phone ?? null, address: c?.address ?? null };
+  return { ...(c?.id ? { id: c.id } : {}), name: c?.name ?? "", phone: c?.phone ?? null, address: c?.address ?? null };
 }
 
 /** What a service booking (one session or a series) created, skipped and was warned about. */

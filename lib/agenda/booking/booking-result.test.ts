@@ -73,6 +73,11 @@ test("resultPatient: display name and record; no record stays null", () => {
   });
 });
 
+test("resultPatient / resultCenter: the id travels when there is one (the sheet's same-day read)", () => {
+  assert.equal(resultPatient({ id: "p1", firstName: "Ana", lastName: null }).id, "p1");
+  assert.equal(resultCenter({ id: "c1", name: "CMR Caguas" }).id, "c1");
+});
+
 test("resultCenter: name, phone and address; missing ones are null, an unknown center is blank", () => {
   assert.deepEqual(resultCenter({ name: "CMR Caguas", phone: "787-000-0000" }), {
     name: "CMR Caguas",
