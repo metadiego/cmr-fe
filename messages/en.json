@@ -3961,7 +3961,11 @@
     "AJUSTE_SIN_LINEAS": "The adjustment needs at least one product.",
     "AJUSTE_CANTIDAD_INVALIDA": "A quantity in the adjustment is not valid.",
     "AJUSTE_SIGNO_INVALIDO": "A line is missing «Out» or «In».",
-    "AJUSTE_PRODUCTO_INEXISTENTE": "A product in the adjustment no longer exists."
+    "AJUSTE_PRODUCTO_INEXISTENTE": "A product in the adjustment no longer exists.",
+    "LIFECYCLE_ACTION_NOT_ALLOWED": "This action is no longer available for this record. Reload to see its current state.",
+    "LIFECYCLE_UNKNOWN_ACTION": "Unknown action for this record.",
+    "LIFECYCLE_REASON_REQUIRED": "This action needs a reason.",
+    "LIFECYCLE_STALE": "Someone else just changed this record. Reload and try again."
   },
   "transferencia": {
     "sesionesExcedenDisponible": "You asked for more sessions than are still pending on that package.",
@@ -7294,5 +7298,40 @@
     "whyBlocked": "{time} cannot be booked ({reason}).",
     "useTime": "Use {time}, free",
     "notThisDay": "Not on this day:"
+  },
+  "lifecycle": {
+    "action": {
+      "confirm": "Confirm",
+      "unconfirm": "Unconfirm",
+      "check_in": "Check in",
+      "undo_check_in": "Undo check-in",
+      "undo_check_in_clear_vitals": "Undo check-in and clear vitals",
+      "undo_check_in_keep_vitals": "Undo check-in and keep vitals",
+      "start_triage": "Start triage",
+      "start_consultation": "Start consultation",
+      "call": "Call",
+      "uncall": "Undo call",
+      "start_therapy": "Start therapy",
+      "finish": "Attend",
+      "back_to_consultation": "Back to consultation",
+      "back_to_triage": "Back to triage",
+      "back_to_waiting": "Back to waiting",
+      "unattend": "Unattend",
+      "undo_attendance": "Undo attendance",
+      "not_serve": "Arrived, not served",
+      "cancel": "Cancel",
+      "no_show": "No-show",
+      "reschedule": "Reschedule",
+      "move": "Move",
+      "reopen": "Reopen",
+      "reactivate": "Reactivate",
+      "repair": "Fix status",
+      "remove_entry_error": "Remove (entry error)",
+      "notAllowed": "This action is no longer available for this record. Reload to see its current state.",
+      "unknown": "Unknown action for this record.",
+      "reasonRequired": "This action needs a reason.",
+      "stale": "Someone else just changed this record. Reload and try again.",
+      "futureDate": "A no-show can only be recorded for today or a past date ({fecha})."
+    }
   }
 }

@@ -3961,7 +3961,11 @@
     "AJUSTE_SIN_LINEAS": "El ajuste necesita al menos un producto.",
     "AJUSTE_CANTIDAD_INVALIDA": "Hay una cantidad que no es válida en el ajuste.",
     "AJUSTE_SIGNO_INVALIDO": "Hay una línea sin «Sale» o «Entra».",
-    "AJUSTE_PRODUCTO_INEXISTENTE": "Hay un producto que ya no existe en el ajuste."
+    "AJUSTE_PRODUCTO_INEXISTENTE": "Hay un producto que ya no existe en el ajuste.",
+    "LIFECYCLE_ACTION_NOT_ALLOWED": "Esta acción ya no está disponible para este registro. Recarga para ver su estado actual.",
+    "LIFECYCLE_UNKNOWN_ACTION": "Acción desconocida para este registro.",
+    "LIFECYCLE_REASON_REQUIRED": "Esta acción necesita un motivo.",
+    "LIFECYCLE_STALE": "Otra persona acaba de cambiar este registro. Recarga y vuelve a intentarlo."
   },
   "transferencia": {
     "sesionesExcedenDisponible": "Pediste más sesiones de las que quedan pendientes en ese paquete.",
@@ -7294,5 +7298,40 @@
     "whyBlocked": "A las {time} no se puede agendar ({reason}).",
     "useTime": "Usar {time}, libre",
     "notThisDay": "Sin estas este día:"
+  },
+  "lifecycle": {
+    "action": {
+      "confirm": "Confirmar",
+      "unconfirm": "Quitar confirmación",
+      "check_in": "Registrar llegada",
+      "undo_check_in": "Deshacer llegada",
+      "undo_check_in_clear_vitals": "Deshacer llegada y borrar signos vitales",
+      "undo_check_in_keep_vitals": "Deshacer llegada y conservar signos vitales",
+      "start_triage": "Pasar a triage",
+      "start_consultation": "Pasar a consulta",
+      "call": "Llamar",
+      "uncall": "Deshacer llamada",
+      "start_therapy": "Pasar a terapia",
+      "finish": "Atender",
+      "back_to_consultation": "Volver a consulta",
+      "back_to_triage": "Volver a triage",
+      "back_to_waiting": "Volver a espera",
+      "unattend": "Desasistir",
+      "undo_attendance": "Deshacer atención",
+      "not_serve": "Llegó y no se atendió",
+      "cancel": "Cancelar",
+      "no_show": "No se presentó",
+      "reschedule": "Reprogramar",
+      "move": "Mover",
+      "reopen": "Reabrir",
+      "reactivate": "Reactivar",
+      "repair": "Corregir estado",
+      "remove_entry_error": "Eliminar (error de captura)",
+      "notAllowed": "Esta acción ya no está disponible para este registro. Recarga para ver su estado actual.",
+      "unknown": "Acción desconocida para este registro.",
+      "reasonRequired": "Esta acción necesita un motivo.",
+      "stale": "Otra persona acaba de cambiar este registro. Recarga y vuelve a intentarlo.",
+      "futureDate": "Un no-show solo se puede registrar para hoy o una fecha pasada ({fecha})."
+    }
   }
 }
