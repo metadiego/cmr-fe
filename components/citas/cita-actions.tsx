@@ -25,6 +25,8 @@ import { todayPR } from "@/lib/format/fecha";
 import { slotAvailability } from "@/lib/agenda/slot-availability";
 import { cancelMissing } from "@/lib/citas/cancel-missing";
 import { rescheduleMissing, type RescheduleField } from "@/lib/citas/reschedule-missing";
+import { citaBlockingCode } from "@/lib/api/cita-errors";
+import { apiErrorLabel } from "@/lib/api/errors";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
@@ -232,6 +234,7 @@ function RescheduleDialog({
 }) {
   const t = useTranslations("appointments.actions");
   const tc = useTranslations("common");
+  const tRoot = useTranslations();
   const { can } = useCan();
   const me = useMe();
   const actorId = me.kind === "ok" ? me.me.staffId ?? undefined : undefined;
@@ -249,6 +252,10 @@ function RescheduleDialog({
   const [hora, setHora] = React.useState(cita.time ?? "");
   const [medico, setMedico] = React.useState(cita.doctorId ?? "");
   const [motivo, setMotivo] = React.useState("");
+  // VISIT_IN_PROGRESS / APPOINTMENT_DATE_IN_PAST (cmr-be #696/#697): a hard block discovered only on
+  // submit, shown inline (never a toast) until the next attempt — handoff
+  // .personal/handoff-citas-en-curso-y-fecha-pasada.md.
+  const [blockError, setBlockError] = React.useState<string | null>(null);
 
   const canMulti = can("citas.multicentro");
   const crossCentro = !!centro && centro !== cita.clinicId;
@@ -298,8 +305,9 @@ function RescheduleDialog({
       : tc("loading");
 
   const { submitting, submit } = useSubmit(
-    () =>
-      reagendarCita(
+    () => {
+      setBlockError(null);
+      return reagendarCita(
         cita.id,
         {
           date: fecha,
@@ -310,8 +318,17 @@ function RescheduleDialog({
           actorId,
         },
         cita.clinicId ?? undefined,
-      ),
-    { successMessage: t("done"), onSuccess: () => onDone() },
+      );
+    },
+    {
+      successMessage: t("done"),
+      onSuccess: () => onDone(),
+      onError: (err) => {
+        if (!citaBlockingCode(err)) return false;
+        setBlockError(apiErrorLabel(err, tRoot));
+        return true;
+      },
+    },
   );
 
   return (
@@ -324,8 +341,8 @@ function RescheduleDialog({
       submitLabel={crossCentro ? t("move") : t("reagendar")}
       submitting={submitting}
       missing={missing}
-      blocked={typesPending}
-      reason={typesReason}
+      blocked={typesPending || !!blockError}
+      reason={typesReason ?? blockError}
     >
       {centros.length > 1 && canMulti && (
         <Field label={t("centro")} htmlFor={`${id}-centro`}>

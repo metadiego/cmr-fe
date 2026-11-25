@@ -37,6 +37,7 @@ export function useBookingMove({
   onMoved: (dates: string[]) => void;
 }): CalendarMoving | undefined {
   const t = useTranslations("appointmentsBooking");
+  const tRoot = useTranslations();
   const { show: showResult } = useBookingResult();
   return (
     movingItem && {
@@ -57,7 +58,9 @@ export function useBookingMove({
             await reagendarSesion(a.id, to.date, tenant, to.time);
           }
         } catch (err) {
-          toast.error(t("toasts.moveFailed", { message: apiErrorLabel(err) }));
+          // labelKey-aware (citas.error.visit_in_progress, etc.): the raw translator here was dropping
+          // every BE labelKey to its CODE · message fallback. cmr-be #696/#697.
+          toast.error(t("toasts.moveFailed", { message: apiErrorLabel(err, tRoot) }));
           return false;
         }
         showResult(

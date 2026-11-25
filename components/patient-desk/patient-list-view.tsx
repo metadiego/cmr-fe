@@ -6,10 +6,10 @@ import { useTranslations } from "next-intl"
 import type { PatientDay, PatientKind } from "@/lib/frontdesk/patient-day"
 import type { PatientDayData } from "@/hooks/use-patient-day"
 import {
-  PatientChips,
   PatientDetail,
   type ScheduleRequest,
 } from "@/components/patient-desk/patient-detail"
+import { PatientChips } from "@/components/patient-desk/patient-chips"
 import { cn } from "@/lib/utils"
 import { Tooltip } from "@/components/ui/tooltip"
 import { usePatientsPriorityFlags } from "@/hooks/use-patients-priority-flags"

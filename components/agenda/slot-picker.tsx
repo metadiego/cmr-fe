@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import { slotTone, timeRange } from "@/lib/agenda/appointment-form";
+import { slotTone } from "@/lib/agenda/appointment-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Selector de UNA hora a partir de los CUPOS del día (una franja = una hora con sus huecos libres). Sustituye
@@ -20,14 +20,11 @@ export function SlotPicker({
   value,
   onChange,
   variant,
-  selectedEnd,
 }: {
   slots: Slot[];
   value: string;
   onChange: (time: string) => void;
   variant: SlotVariant;
-  /** End time of the chosen hour: the chosen chip reads "07:00–08:00" instead of a separate line. */
-  selectedEnd?: string;
 }) {
   const t = useTranslations("agenda.slot");
   const fullLabel = (s: Slot) => (s.enHoja ? t("fullInSheet") : t("full"));
@@ -67,8 +64,10 @@ export function SlotPicker({
     );
   }
 
-  // chips: one button per hour. Amber = one place left, dashed and faded = full (still pickable: the
-  // BE warns, it does not block).
+  // chips: one button per hour, all the same size. Only the chosen one is filled (its end time is in
+  // the dialog's footer, not here: it made the chosen button grow); an hour with places
+  // reads the same however few are left (a nearly full hour must not stand out over emptier ones); full
+  // is dashed and faded but still pickable (the BE warns, it does not block).
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1.5">
       {slots.map((s) => {
@@ -80,24 +79,23 @@ export function SlotPicker({
             type="button"
             onClick={() => onChange(s.time)}
             aria-pressed={sel}
-            title={libresLabel(s)}
             className={cn(
-              "flex flex-col items-center rounded-md border px-2 py-1.5 text-sm transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "flex flex-col items-start rounded-lg border px-2.5 py-1.5 text-left text-sm transition-colors",
+              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
               sel
-                ? "border-primary bg-primary text-primary-foreground"
+                ? "border-primary bg-primary text-primary-foreground ring-3 ring-primary/20"
                 : tone === "full"
-                  ? "border-dashed border-muted-foreground/30 text-muted-foreground/60 hover:border-muted-foreground/60"
-                  : tone === "low"
-                    ? "border-warning/60 bg-warning/10 hover:border-primary"
-                    : "border-input hover:border-primary hover:text-primary",
+                  ? "border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/60"
+                  : "bg-card hover:border-primary",
             )}
           >
-            <span className="font-medium tabular-nums">{sel && selectedEnd ? timeRange(s.time, selectedEnd) : s.time}</span>
+            <span className={cn("tabular-nums", tone === "full" && !sel ? "font-normal" : "font-semibold")}>
+              {s.time}
+            </span>
             <span
               className={cn(
-                "text-xs tabular-nums",
-                sel ? "opacity-90" : tone === "low" ? "text-warning-foreground" : "text-muted-foreground",
+                "inline-flex items-center gap-1 text-xs tabular-nums",
+                sel ? "opacity-90" : "text-muted-foreground",
               )}
             >
               {libresLabel(s)}

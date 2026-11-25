@@ -91,6 +91,110 @@ export function getKardexSummary(p: { productId: string; from: string; to: strin
   );
 }
 
+// ---- Delivery control of one product (BE: cmr-be #688/#690, docs/specs/control-de-entregas-por-producto.md) ----
+// Generic for any product sold and delivered later at patient-desk, modeled on the owner's paper sheet for
+// Nano Aer Plus; which product/center/range is up to the caller, same as the other kardex reports.
+
+export type KardexDeliveryProduct = { id: string; sku: string; name: string; deductionMode: string };
+export type KardexDeliverySoldAs = { productId: string; sku: string | null; name: string; channel: "direct" | "kit" | "protocol" };
+export type KardexDeliveryLine = {
+  patientId: string;
+  recordNumber: string | null;
+  patientName: string | null;
+  invoiceDate: string | null;
+  invoiceNumber: string | null;
+  /** "YYYY-MM", or null for legacy purchases with no recorded invoice date. */
+  month: string | null;
+  sold: number;
+  delivered: number;
+  deliveryDates: string[];
+  refunded: number;
+  refundNumbers: string[];
+  pending: number;
+  notes: string | null;
+  legacy: boolean;
+  soldAs: KardexDeliverySoldAs;
+  packageIds: string[];
+};
+export type KardexDeliveryMonth = { month: string | null; sold: number; delivered: number; pending: number };
+export type KardexDeliveryProtocols = {
+  total: number;
+  byProtocol: Array<{ protocol: string; quantity: number }>;
+  detail: Array<{ recordNumber: string | null; patientName: string | null; date: string; quantity: number; protocol: string }>;
+};
+export type KardexDeliveryWarehouse = {
+  deductionMode: string;
+  soldInPeriod: number;
+  protocols: number;
+  systemStock: number;
+  pending: number;
+  freeStock: number;
+  physical: number;
+};
+export type KardexDeliveryWarning = { code: string; labelKey: string; quantity: number };
+export type KardexDeliveryControl = {
+  product: KardexDeliveryProduct;
+  from: string;
+  to: string;
+  lines: KardexDeliveryLine[];
+  months: KardexDeliveryMonth[];
+  protocols: KardexDeliveryProtocols;
+  warehouse: KardexDeliveryWarehouse;
+  warnings: KardexDeliveryWarning[];
+};
+
+export function getKardexDeliveryControl(p: { productId: string; from: string; to: string }, centerId?: string | null) {
+  return apiFetch<KardexDeliveryControl>(
+    `/inventory/reports/delivery-control?${query({ productoId: p.productId, desde: p.from, hasta: p.to }, centerId)}`,
+    {},
+    centerId ?? undefined,
+  );
+}
+
+// ---- Kardex overview of ALL products (BE: cmr-be #699, docs/specs/kardex-resumen-de-todos-los-productos.md) ----
+// One call for the whole catalog in a center and range, split by deduction mode so the owner can see
+// "a la venta" and "a la entrega" products together or apart without picking one product at a time.
+
+export type KardexOverviewTotals = {
+  opening: number;
+  inbound: number;
+  applied: number;
+  manualOutputs: number;
+  adjustments: number;
+  closing: number;
+  pending: number;
+  physical: number;
+  freeStock: number;
+};
+export type KardexOverviewProduct = KardexOverviewTotals & {
+  productId: string;
+  sku: string;
+  name: string;
+  deductionMode: string;
+};
+export type KardexOverviewGroup = {
+  deductionMode: string;
+  totals: KardexOverviewTotals;
+  productIds: string[];
+};
+export type KardexOverview = {
+  from: string;
+  to: string;
+  products: KardexOverviewProduct[];
+  groups: KardexOverviewGroup[];
+  totals: KardexOverviewTotals;
+};
+
+export function getKardexOverview(p: { from: string; to: string; deductionMode?: string }, centerId?: string | null) {
+  const params: Record<string, string> = { desde: p.from, hasta: p.to };
+  if (p.deductionMode) params.modoDescarga = p.deductionMode;
+  return apiFetch<KardexOverview>(
+    `/inventory/reports/kardex-overview?${query(params, centerId)}`,
+    {},
+    centerId ?? undefined,
+  );
+}
+
 /** The management summary in the owner's sheet layout (cmr-be #626): classified by the BE, painted here. */
 export type KardexOwnerFormat = {
   opening: number;

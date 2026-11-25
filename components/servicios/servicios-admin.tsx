@@ -20,7 +20,7 @@ import {
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { payloadBulkDirty } from "@/lib/servicios/bulk-diff";
-import { ColorField, Toggle, GrupoSelect, StartStepField, PrimaryPackageRuleSelect } from "@/components/servicios/servicio-form-fields";
+import { ColorField, Toggle, GrupoSelect, StartStepField, PrimaryPackageRuleSelect, SessionUnitSelect } from "@/components/servicios/servicio-form-fields";
 import { FormSheet } from "@/components/kit/form-sheet";
 import { Field } from "@/components/kit/field";
 import { useConfirm } from "@/components/kit/confirm-host";
@@ -386,6 +386,7 @@ type FormState = {
   badge: boolean;
   allowSessionFixWithoutPackage: boolean;
   primaryPackageRule: "row" | "most_delivered";
+  sessionUnit: "visit" | "vial";
   activo: boolean;
   startStep: string; // startStepMinutes as typed ("" = every slot)
 };
@@ -402,6 +403,7 @@ const EMPTY: FormState = {
   badge: true,
   allowSessionFixWithoutPackage: false,
   primaryPackageRule: "row",
+  sessionUnit: "visit",
   activo: true,
   startStep: "",
 };
@@ -421,6 +423,7 @@ function toForm(servicio: Servicio | null): FormState {
     badge: servicio.badge,
     allowSessionFixWithoutPackage: servicio.allowSessionFixWithoutPackage,
     primaryPackageRule: servicio.primaryPackageRule ?? "row",
+    sessionUnit: servicio.sessionUnit ?? "visit",
     activo: servicio.active,
     startStep: servicio.startStepMinutes != null ? String(servicio.startStepMinutes) : "",
   };
@@ -478,6 +481,7 @@ function ServicioForm({
       badge: form.badge,
       allowSessionFixWithoutPackage: form.allowSessionFixWithoutPackage,
       primaryPackageRule: form.primaryPackageRule,
+      sessionUnit: form.sessionUnit,
       startStepMinutes: Number(form.startStep) > 0 ? Number(form.startStep) : null,
     };
   }
@@ -595,17 +599,13 @@ function ServicioForm({
       <Toggle label={t("field.badge")} checked={form.badge} onChange={(v) => set("badge", v)} />
       {/* Igual que Activo: es por centro (cada fila Láser Bayamón/Caguas es su propio servicio),
           no se edita en "aplicar a todos los centros". Handoff HANDOFF-sesiones-sin-paquete-listo.md. */}
+      {/* So are the primary package rule and the session unit (vial = the dose decides, cmr-be #700). */}
       {!editandoTodos && (
-        <Toggle
-          label={t("field.allowSessionFixWithoutPackage")}
-          hint={t("field.allowSessionFixWithoutPackageHint")}
-          checked={form.allowSessionFixWithoutPackage}
-          onChange={(v) => set("allowSessionFixWithoutPackage", v)}
-        />
-      )}
-      {/* Igual que allowSessionFixWithoutPackage: es por centro, no entra en "aplicar a todos". */}
-      {!editandoTodos && (
-        <PrimaryPackageRuleSelect id="service-primary-rule" value={form.primaryPackageRule} onChange={(v) => set("primaryPackageRule", v)} />
+        <>
+          <Toggle label={t("field.allowSessionFixWithoutPackage")} hint={t("field.allowSessionFixWithoutPackageHint")} checked={form.allowSessionFixWithoutPackage} onChange={(v) => set("allowSessionFixWithoutPackage", v)} />
+          <PrimaryPackageRuleSelect id="service-primary-rule" value={form.primaryPackageRule} onChange={(v) => set("primaryPackageRule", v)} />
+          <SessionUnitSelect id="service-session-unit" value={form.sessionUnit} onChange={(v) => set("sessionUnit", v)} />
+        </>
       )}
       {/* Activo NO se edita en multicentro (es por centro); sí en un-centro. */}
       {isEdit && !editandoTodos && <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />}

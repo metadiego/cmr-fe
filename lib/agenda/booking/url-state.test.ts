@@ -27,11 +27,11 @@ test("parseBookingParams ignores malformed type and date", () => {
   assert.deepEqual(parseBookingParams(new URLSearchParams("type=medical:")), {});
 });
 
-test("view: day and week round-trip; month (the default) and junk stay out of the URL", () => {
+test("view: week round-trips; month (the default), an old view=day and junk stay out of the URL", () => {
   const s = { kind: "medical" as const, typeId: "t1", period: "week" as const };
   assert.equal(toBookingSearch(s), "?type=medical:t1&view=week");
   assert.deepEqual(parseBookingParams(new URLSearchParams("type=medical:t1&view=week")), s);
-  assert.deepEqual(parseBookingParams(new URLSearchParams("view=day")), { period: "day" });
+  assert.deepEqual(parseBookingParams(new URLSearchParams("view=day")), {});
   assert.equal(toBookingSearch({ period: "month" }), "");
   assert.deepEqual(parseBookingParams(new URLSearchParams("view=month")), {});
   assert.deepEqual(parseBookingParams(new URLSearchParams("view=year")), {});

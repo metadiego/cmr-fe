@@ -519,7 +519,11 @@
     },
     "medico_requerido_en_consulta": "To enter consultation the appointment needs an assigned doctor.",
     "datos_requeridos_para_presente": "The patient is missing required data to be marked present.",
-    "closedByHoliday": "Holiday: the schedule is closed"
+    "closedByHoliday": "Holiday: the schedule is closed",
+    "error": {
+      "visit_in_progress": "The patient is already in the center with this visit in progress: it cannot be rescheduled. Book the next one once this one is done.",
+      "date_in_past": "You can't book a date in the past ({fecha})."
+    }
   },
   "tableroBoard": {
     "live": "Live",
@@ -954,7 +958,16 @@
       "change": "Change",
       "addNote": "+ Add note",
       "previousDay": "Previous day",
-      "nextDay": "Next day"
+      "nextDay": "Next day",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "otherDate": "Pick another date",
+      "otherDateHint": "Another date: opens the calendar",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "stepAppointment": "The appointment",
+      "stepWhen": "When",
+      "pickTime": "Pick a time"
     },
     "fecha": "Date",
     "prevDay": "Previous day",
@@ -962,10 +975,10 @@
     "time": "Time",
     "endAuto": "Ends {time} · automatic",
     "slot": {
-      "free": "{n} free",
+      "free": "{n, plural, one {# left} other {# free}}",
       "full": "full",
       "placeholder": "Pick an available time",
-      "fullInSheet": "Full on the sheet"
+      "fullInSheet": "full on the sheet"
     },
     "rule": {
       "capacity": "No room (stations or staff)",
@@ -2603,7 +2616,27 @@
       "reopenNotCancelled": "The session is not cancelled",
       "sessionSameDay": "There is already another session of this service today",
       "sheetSlotTaken": "The sheet has no seat at that time",
-      "sessionDeleteBlocked": "This visit cannot be deleted: it already has a saved clinical sheet. You can cancel it instead."
+      "sessionDeleteBlocked": "This visit cannot be deleted: it already has a saved clinical sheet. You can cancel it instead.",
+      "no_package_to_attend": "Can't attend: the patient has no available {service} sessions.",
+      "invalid_dose": "The dose must be a number greater than 0 (or empty for a whole vial).",
+      "vial_used_by_another_visit": "A later visit of this patient already used that vial. Fix that other visit first."
+    },
+    "no_package": {
+      "title": "No sessions available",
+      "invoice": "Invoice",
+      "loadLegacy": "Load legacy purchase",
+      "exceptional": "Grant exceptional availability"
+    },
+    "exceptional_availability": {
+      "title": "Exceptional availability",
+      "product": "Product",
+      "sessions": "Sessions",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why it's granted with no purchase",
+      "reasonTooShort": "The reason needs at least 10 characters.",
+      "notice": "Exceptional: sessions with no purchase, not a sale; who and why is recorded.",
+      "save": "Grant availability",
+      "saved": "Exceptional availability recorded"
     },
     "evento": {
       "reopened": "Reopened"
@@ -2652,6 +2685,15 @@
     "legacyLabel": {
       "invalid": "The session goes from 1 to the total.",
       "notMigrated": "This session is numbered by its package; fix it from the package."
+    },
+    "sinAsistirTerapia": "Therapy",
+    "sinAsistirConsulta": "Consultation",
+    "sinAsistirAbrir": "Open that day →",
+    "vial": {
+      "remnant": "Vial no. {number} remnant · {remaining} left",
+      "expires": "expires {day}",
+      "expired": "Vial no. {number} expired: discard",
+      "remnantVisit": "Vial remnant"
     }
   },
   "programarCitas": {
@@ -2696,7 +2738,8 @@
       "enfermera": "Nurse",
       "cantidad": "Quantity",
       "protocolo": "Protocol",
-      "compras": "Purchases"
+      "compras": "Purchases",
+      "dosis_mg": "Dose (mg)"
     },
     "binding": {
       "dosis": "Dose (applied product)",
@@ -3089,7 +3132,10 @@
         "sesionesPorUnidadHelp": "Sessions each unit sold covers; does not change the price.",
         "grupoNinguno": "No group (supply)",
         "grupoFacturacionHelpSin": "Decides which frontdesk column the patient appears in; with no group, the product is a supply that gets consumed (opens no column).",
-        "grupoFacturacionHelpCon": "The patient will appear in this group’s service column ({division}) at the front desk."
+        "grupoFacturacionHelpCon": "The patient will appear in this group’s service column ({division}) at the front desk.",
+        "diasVialAbierto": "Days it lasts once opened",
+        "diasVialAbiertoHelp": "Empty = never expires. After that, the patient's vial remnant is not used.",
+        "diasVialAbiertoInvalid": "Days once opened must be a whole number, 1 or more."
       },
       "proveedorMas": "+{n}",
       "noResults": "No results for “{q}”",
@@ -3804,7 +3850,9 @@
       "activo": "Active",
       "startStep": "Minutes between start times",
       "startStepHint": "60 = on the hour only, like the call-center sheet. Empty = any slot of the day. It does not change the duration.",
-      "startStepAny": "Any time"
+      "startStepAny": "Any time",
+      "sessionUnit": "What a session is",
+      "sessionUnitHint": "Vial: each visit's dose decides. Opening a vial spends a session; using the patient's remnant spends none."
     },
     "primaryPackageRuleRow": "Per row (each package counts its own session)",
     "primaryPackageRuleMostDelivered": "The one with the most delivered (e.g. MLS over the HILT anchor)",
@@ -3824,7 +3872,9 @@
     "multiSinCambios": "No changes (all centers were already the same)",
     "cargaParcial": "Could not load services from: {centros}. The view may be incomplete.",
     "ordenArrastrar": "Drag to reorder the tabs",
-    "sortOrderInvalid": "The order must be a number."
+    "sortOrderInvalid": "The order must be a number.",
+    "sessionUnitVisit": "A visit",
+    "sessionUnitVial": "A vial (dose per visit)"
   },
   "transferencias": {
     "title": "Transfers",
@@ -4982,7 +5032,30 @@
       "cambioResumen": "{cerrados} closed · {creados} new",
       "nuevoTitulo": "New change",
       "sessionsAtLeastOne": "Sessions must be 1 or more.",
-      "areasPending": "{perSession} areas per session · {pending} areas pending"
+      "areasPending": "{perSession} areas per session · {pending} areas pending",
+      "descartar": "Discard",
+      "priceInvalid": "The price per unit must be a number equal to or greater than 0.",
+      "valuation": "Agreed: closed {closed} · created {created} · difference {difference}",
+      "sim": {
+        "title": "Simulation",
+        "hint": "Type the agreed price per unit. Empty uses what was charged (what closes) or the list price (what is created). Nothing is saved until you apply.",
+        "empty": "Tick what is replaced and add what replaces it to see whether it balances.",
+        "error": "The change could not be simulated.",
+        "closes": "Closes",
+        "creates": "Created",
+        "product": "Product",
+        "units": "Units",
+        "unitPrice": "Price per unit",
+        "value": "Value",
+        "charged": "charged {amount}",
+        "list": "list {amount}",
+        "totalClosed": "Closes {amount}",
+        "totalCreated": "Created {amount}",
+        "difference": "Difference {amount}",
+        "withExisting": "already has {existing} · would have {total}"
+      },
+      "historialVer": "Show previous changes ({n})",
+      "historialOcultar": "Hide previous changes"
     }
   },
   "perfiles": {
@@ -6558,6 +6631,11 @@
     "center": "Center",
     "product": "Product",
     "pickProduct": "Pick a product",
+    "mode": {
+      "label": "Mode",
+      "product": "One product",
+      "allProducts": "All products"
+    },
     "from": "From",
     "to": "To",
     "badRange": "«From» must be on or before «To».",
@@ -6631,7 +6709,74 @@
     },
     "tabOwner": "Management summary",
     "printOwner": "Include management summary",
-    "printOwnerHint": "Printed below the daily kardex; if it does not fit on the same sheet, it moves whole to the next one."
+    "printOwnerHint": "Printed below the daily kardex; if it does not fit on the same sheet, it moves whole to the next one.",
+    "tabDelivery": "Delivery control",
+    "delivery": {
+      "legacyMonth": "Legacy, no date",
+      "empty": "No purchases of this product in the period.",
+      "totalPending": "Total pending delivery",
+      "refundNote": "Refund #{number}",
+      "protocolsTitle": "Injectables applied / Infiltration protocol",
+      "protocolsTotal": "Total: {n}",
+      "warehouseTitle": "Warehouse",
+      "col": {
+        "record": "Record",
+        "patient": "Patient",
+        "date": "Date",
+        "invoice": "Invoice",
+        "sold": "Sold qty.",
+        "delivered": "Delivered qty.",
+        "deliveryDates": "Delivery dates",
+        "pending": "Pending",
+        "notes": "Notes"
+      },
+      "protocolsCol": {
+        "protocol": "Protocol"
+      },
+      "warehouse": {
+        "freeStock": "Free stock",
+        "pending": "Pending delivery",
+        "physical": "In warehouse (physical)",
+        "soldInPeriod": "Sold in period",
+        "protocols": "Protocols",
+        "systemStock": "System stock"
+      },
+      "warning": {
+        "NEGATIVE_STOCK": "Free stock went negative: {quantity} units below zero.",
+        "DOUBLE_DEDUCTION": "{quantity} units may have been deducted from stock twice.",
+        "unknown": "System warning ({code}): {quantity} units."
+      }
+    },
+    "overview": {
+      "title": "All products",
+      "viewLabel": "View",
+      "view": {
+        "together": "Together",
+        "separated": "Separated",
+        "saleOnly": "Sale only",
+        "deliveryOnly": "Delivery only"
+      },
+      "search": "Search by SKU or name…",
+      "empty": "No products moved in the period.",
+      "groupTotal": "Total",
+      "group": {
+        "a_la_venta": "Sale",
+        "a_la_entrega": "Delivery"
+      },
+      "col": {
+        "sku": "SKU",
+        "name": "Product",
+        "opening": "Opening",
+        "inbound": "Inbound",
+        "applied": "Applied",
+        "manualOutputs": "Outputs",
+        "adjustments": "Adjustments",
+        "closing": "Closing",
+        "pending": "Pending",
+        "physical": "In warehouse",
+        "freeStock": "Free"
+      }
+    }
   },
   "inventoryReceipts": {
     "tabReceive": "Receive",
@@ -6699,7 +6844,8 @@
       "noWarehouse": "Warehouse missing",
       "noReason": "Reason missing",
       "noNotes": "Note missing",
-      "noLines": "Add at least one product"
+      "noLines": "Add at least one product",
+      "noQuantity": "Quantity missing on {n, plural, one {# product} other {# products}}"
     },
     "from": "From",
     "to": "To",
@@ -6740,7 +6886,10 @@
         "before": "Before",
         "after": "After"
       }
-    }
+    },
+    "addProduct": "Add product",
+    "emptyLines": "Search for a product above to add it. Each one lands here, newest first.",
+    "alreadyAdded": "{name} is already on the list; you were taken to its line."
   },
   "legacyLabel": {
     "correct": "Fix numbering",
@@ -6784,7 +6933,6 @@
   "appointmentsBooking": {
     "title": "Appointments",
     "settings": "Settings",
-    "live": "Live",
     "loading": "Loading…",
     "loadFailed": "Could not load: {message}",
     "retry": "Retry",
@@ -6860,8 +7008,7 @@
       "changeType": "Change type",
       "viewLabel": "Show",
       "free": "Free",
-      "booked": "Booked",
-      "today": "Today"
+      "booked": "Booked"
     },
     "month": {
       "free": "free",
@@ -6961,17 +7108,14 @@
     "period": {
       "menuLabel": "Calendar view: {view}",
       "views": {
-        "day": "Day",
         "week": "Week",
         "month": "Month"
       },
       "prev": {
-        "day": "Previous day",
         "week": "Previous week",
         "month": "Previous month"
       },
       "next": {
-        "day": "Next day",
         "week": "Next week",
         "month": "Next month"
       }

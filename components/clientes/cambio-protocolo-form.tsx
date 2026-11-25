@@ -11,6 +11,8 @@ import { aplicarCambioProtocolo, type CambioProtocaloNuevo } from "@/lib/api/pro
 import { getCatalogoFacturacion, type Producto } from "@/lib/api/facturas";
 import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
 import { pendingAreas, toggleSealedUnits } from "@/lib/pacientes/protocol-change-origin";
+import { originPrices, priceInvalid, priceOf } from "@/lib/pacientes/protocol-change-simulation";
+import { ProtocolChangeSimulation } from "@/components/clientes/protocol-change-simulation";
 import { isUsableLine, protocolChangeInvalid, protocolChangeMissing } from "@/lib/pacientes/protocol-change-missing";
 import { callIfPermitted } from "@/lib/rbac/call-if-permitted";
 import { useResource } from "@/hooks/use-resource";
@@ -71,16 +73,25 @@ export function CambioProtocoloForm({
   const [medicoId, setMedicoId] = React.useState<string>("");
   const [motivo, setMotivo] = React.useState<string>("");
   const [reintegros, setReintegros] = React.useState<Record<string, string>>({});
+  // Agreed prices per unit for the simulation (cmr-be #691): by package id (closes) and by line key (creates).
+  const [closePrices, setClosePrices] = React.useState<Record<string, string>>({});
+  const [createPrices, setCreatePrices] = React.useState<Record<number, string>>({});
 
-  // Al cambiar de paciente, limpiar la selección/borrador.
-  const [prevPid, setPrevPid] = React.useState(pacienteId);
-  if (pacienteId !== prevPid) {
-    setPrevPid(pacienteId);
+  function resetForm() {
     setOrigenSel(new Set());
     setLineas([nuevaLinea()]);
     setMedicoId("");
     setMotivo("");
     setReintegros({});
+    setClosePrices({});
+    setCreatePrices({});
+  }
+
+  // Al cambiar de paciente, limpiar la selección/borrador.
+  const [prevPid, setPrevPid] = React.useState(pacienteId);
+  if (pacienteId !== prevPid) {
+    setPrevPid(pacienteId);
+    resetForm();
   }
 
   function toggleOrigen(id: string, pendiente: number | null | undefined) {
@@ -93,19 +104,29 @@ export function CambioProtocoloForm({
     setLineas((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)));
   }
 
-  const nuevosValidos: CambioProtocaloNuevo[] = lineas
-    .filter(isUsableLine)
+  const usableLines = lineas.filter(isUsableLine);
+  const nuevosValidos: CambioProtocaloNuevo[] = usableLines
     .map((l) => ({
       productId: l.productoId,
       totalSessions: Math.max(1, Math.floor(Number(l.sesiones) || 0)),
       ...(l.cantidad.trim() ? { quantity: Number(l.cantidad) } : {}),
       ...(l.areas.trim() ? { areas: Number(l.areas) } : {}),
       ...(l.dosis.trim() ? { dose: Number(l.dosis) } : {}),
+      ...(priceOf(createPrices[l.key]) !== undefined ? { precioUnitario: priceOf(createPrices[l.key]) } : {}),
     }));
+  const ticked = [...origenSel];
+  const preciosOrigen = originPrices(ticked, closePrices);
+  const priceBad =
+    ticked.some((id) => priceInvalid(closePrices[id])) || usableLines.some((l) => priceInvalid(createPrices[l.key]));
+  // The simulation body: the same as apply's, without the reason. Null until both sides exist.
+  const simBody =
+    ticked.length > 0 && nuevosValidos.length > 0 && !priceBad
+      ? { paqueteOrigenIds: ticked, newOnes: nuevosValidos, ...(preciosOrigen.length ? { preciosOrigen } : {}) }
+      : null;
 
   const missingLabel = { origin: t("paso1"), product: t("producto"), sessions: t("sesiones"), reason: t("motivo") };
   const missing = protocolChangeMissing({ originCount: origenSel.size, lines: lineas, reason: motivo }).map((k) => missingLabel[k]);
-  const invalid = protocolChangeInvalid(lineas);
+  const invalid = protocolChangeInvalid(lineas) ?? (priceBad ? "priceInvalid" : null);
 
   const { submitting, submit } = useSubmit(
     async () => {
@@ -122,8 +143,9 @@ export function CambioProtocoloForm({
       return aplicarCambioProtocolo(
         pacienteId,
         {
-          paqueteOrigenIds: [...origenSel],
+          paqueteOrigenIds: ticked,
           newOnes: nuevosValidos,
+          ...(preciosOrigen.length ? { preciosOrigen } : {}),
           reason: motivo.trim(),
           ...(medicoId ? { doctorId: medicoId } : {}),
           ...(reint.length ? { reintegros: reint } : {}),
@@ -135,10 +157,7 @@ export function CambioProtocoloForm({
       successMessage: t("aplicado"),
       onSuccess: (res) => {
         (res.avisos ?? []).forEach((a) => toast.warning(a.labelKey && tRoot.has(a.labelKey) ? tRoot(a.labelKey) : (a.message ?? "")));
-        setOrigenSel(new Set());
-        setLineas([nuevaLinea()]);
-        setMotivo("");
-        setReintegros({});
+        resetForm();
         pendRes.refresh(); // silent: the list updates in place, no skeleton after applying
         onApplied?.();
       },
@@ -267,16 +286,31 @@ export function CambioProtocoloForm({
           <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
           {t("aviso")}
         </p>
+      </section>
 
+      {/* Simulacro, then apply or discard (owner, 24-nov-2026): full width under both steps. */}
+      <div className="space-y-4 lg:col-span-2">
+        <ProtocolChangeSimulation
+          pacienteId={pacienteId ?? ""}
+          centro={centro}
+          body={pacienteId ? simBody : null}
+          closePrices={closePrices}
+          onClosePrice={(id, v) => setClosePrices((m) => ({ ...m, [id]: v }))}
+          createKeys={usableLines.map((l) => l.key)}
+          createPrices={createPrices}
+          onCreatePrice={(k, v) => setCreatePrices((m) => ({ ...m, [k]: v }))}
+        />
         <FormFooter
           primary={{ label: t("aplicar"), onClick: () => submit() }}
           missing={missing}
           reason={invalid ? t(invalid) : null}
           blocked={!!invalid}
           submitting={submitting}
+          onCancel={resetForm}
+          cancelLabel={t("descartar")}
           extra={<RequiredLegend className="text-xs text-muted-foreground sm:mr-auto" />}
         />
-      </section>
+      </div>
     </div>
   );
 }

@@ -33,7 +33,8 @@ import { ApiError } from "@/lib/api/types"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
 import { EhrGateHost, EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal"
-import type { EhrGateCtx } from "@/components/tablero/flujo-atencion"
+import type { EhrGateCtx, PackageGateCtx } from "@/components/tablero/flujo-atencion"
+import { PackageGateHost } from "@/components/frontdesk/package-gate-dialog"
 import type { EhrReadinessField } from "@/lib/api/ehr-integration"
 import { PacienteFormSheet as PatientFormSheet } from "@/components/clientes/paciente-form-sheet"
 import { Button } from "@/components/ui/button"
@@ -56,100 +57,6 @@ export type ScheduleRequest = {
 // presente). Ni "presente" en sí (ya está) ni nada más adelante (triage/en_consulta/atendida) ni
 // terminal (cancelada/no_show/reprogramada) — evita reabrir algo que ya avanzó.
 const CONSULT_PENDING_STATUSES = new Set(["programada", "confirmada"])
-
-// The chips that summarise a patient's day: one per service (its color + the status of its sessions)
-// and one for the consultation. Shared by the list and the table views.
-export function PatientChips({
-  patient,
-  data,
-  compact,
-}: {
-  patient: PatientDay
-  data: PatientDayData
-  compact?: boolean
-}) {
-  const t = useTranslations("patientDesk")
-  const tRoot = useTranslations()
-  const statusLabel = (slug: string, consult = false) => {
-    const def = consult ? data.consultationDefinition : data.serviceDefinition
-    const s = def?.statuses.find((x) => x.slug === slug)
-    return s ? tRoot(s.labelKey) : slug
-  }
-  const statusColor = (slug: string, consult = false) =>
-    (consult
-      ? data.consultationDefinition
-      : data.serviceDefinition
-    )?.statuses.find((x) => x.slug === slug)?.color ?? null
-  const consultLabel = data.consultationTab
-    ? tRoot.has(data.consultationTab.labelKey)
-      ? tRoot(data.consultationTab.labelKey)
-      : data.consultationTab.name
-    : t("consultation")
-  // A concluded service (every session attended) keeps its color and gets a green check.
-  const chip = (
-    key: string,
-    color: string | null,
-    name: string,
-    status: string,
-    consult = false,
-    concluded = false
-  ) => (
-    <span
-      key={key}
-      className={
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
-        (concluded ? "border-success/50 bg-success/10" : "bg-background")
-      }
-    >
-      <span
-        className="size-2 rounded-full"
-        style={{
-          backgroundColor: color || "var(--muted-foreground)",
-        }}
-        aria-hidden
-      />
-      <span className="uppercase">{name}</span>
-      {concluded && (
-        <span className="text-success-foreground" aria-label={t("serviceDone")}>
-          ✓
-        </span>
-      )}
-      {!compact && status && (
-        <span
-          className="rounded-full px-1.5 text-[10px]"
-          style={{
-            backgroundColor: `${statusColor(status, consult) ?? "#94a3b8"}22`,
-            color: statusColor(status, consult) ?? undefined,
-          }}
-        >
-          {statusLabel(status, consult)}
-        </span>
-      )}
-    </span>
-  )
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {patientSections(patient).map((x) =>
-        x.kind === "service"
-          ? chip(
-              x.service.serviceId,
-              x.service.color,
-              x.service.name,
-              x.service.statuses[0] ?? "",
-              false,
-              serviceConcluded(x.service)
-            )
-          : chip(
-              "consult",
-              data.consultationTab?.color ?? null,
-              consultLabel,
-              patient.consultationStatuses[0] ?? "",
-              true
-            )
-      )}
-    </div>
-  )
-}
 
 // Everything a patient has today: each service with its own columns and the consultation, editable in
 // place with the same cells and flow as the frontdesk board.
@@ -197,6 +104,9 @@ export function PatientDetail({
   // aquí, no en ServiceSessionsTable/FilaSesion, porque la fila puede desmontarse a mitad de la acción
   // (la sesión sale del tablero al refrescar) y este panel del paciente sí es estable mientras se ve.
   const [serviceEhrGate, setServiceEhrGate] = React.useState<EhrGateCtx | null>(null)
+  // NO_PACKAGE_TO_ATTEND (cmr-be #693): same reasoning as serviceEhrGate above — lives in this stable
+  // panel, not in the row that can unmount mid-action.
+  const [packageGate, setPackageGate] = React.useState<PackageGateCtx | null>(null)
 
   // Récord: "Generar #" asigna el siguiente de la secuencia del centro (mismo botón/endpoint que
   // nueva-cita-modal.tsx cuando el paciente llega sin uno). El lápiz abre el MISMO formulario de
@@ -541,6 +451,7 @@ export function PatientDetail({
                   })
                 }
                 onEhrGate={setServiceEhrGate}
+                onPackageGate={setPackageGate}
               />
             )
           : kind !== "services" &&
@@ -576,6 +487,13 @@ export function PatientDetail({
         gate={serviceEhrGate}
         centroId={centerId}
         onClose={() => setServiceEhrGate(null)}
+      />
+
+      <PackageGateHost
+        gate={packageGate}
+        patient={patient}
+        centerId={centerId}
+        onClose={() => setPackageGate(null)}
       />
 
       {editingPatient && (

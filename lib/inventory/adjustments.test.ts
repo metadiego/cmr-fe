@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { adjustmentPayload, draftNet, draftProblems, type DraftLine, quantityInput } from "./adjustments.ts";
+import { addProductLine, adjustmentPayload, draftNet, draftProblems, type DraftLine, quantityInput } from "./adjustments.ts";
 
 const line = (o: Partial<DraftLine> = {}): DraftLine => ({ key: "k", productId: "p1", productName: "A", quantity: "2", sign: "negativo", notes: "", ...o });
 
@@ -32,4 +32,16 @@ test("quantityInput strips the minus (the toggle gives the direction) and keeps 
   assert.deepEqual(quantityInput("12.5.3a"), { quantity: "12.53", hadMinus: false });
   assert.deepEqual(quantityInput("-"), { quantity: "", hadMinus: true });
   assert.deepEqual(quantityInput("0"), { quantity: "0", hadMinus: false });
+});
+
+test("adding a product: appended in pick order, never twice (the existing line is pointed at)", () => {
+  const a = addProductLine([], { id: "p1", name: "BPC" }, "k1");
+  assert.equal(a.existed, false);
+  assert.deepEqual(a.lines.map((l) => [l.key, l.productId, l.productName, l.quantity, l.sign]), [["k1", "p1", "BPC", "", "negativo"]]);
+  const b = addProductLine(a.lines, { id: "p2", name: "GLP" }, "k2");
+  assert.deepEqual(b.lines.map((l) => l.productId), ["p1", "p2"]);
+  const again = addProductLine(b.lines, { id: "p1", name: "BPC" }, "k3");
+  assert.equal(again.existed, true);
+  assert.equal(again.key, "k1");
+  assert.equal(again.lines.length, 2);
 });

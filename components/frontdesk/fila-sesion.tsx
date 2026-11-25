@@ -20,16 +20,15 @@ import { useCan } from "@/hooks/use-can";
 import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { toastError } from "@/lib/api/errors";
 import { datosFaltantesDe } from "@/lib/api/ehr-gate";
-import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
-import { FormatosModal } from "@/components/frontdesk/formatos-modal";
-import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
+import { packageGateFrom } from "@/lib/frontdesk/package-gate";
+import type { EhrGateCtx, PackageGateCtx } from "@/components/tablero/flujo-atencion";
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import { SesionesCell } from "@/components/frontdesk/sesiones-cell";
 import { MedicionCell } from "@/components/frontdesk/medicion-cell";
+import { VialRemnantChips } from "@/components/frontdesk/vial-remnant-chip";
+import { isRemnantVisit } from "@/lib/frontdesk/vial-remnant";
 import { RowMenu } from "@/components/frontdesk/row-menu";
-import { HistorialModal } from "@/components/frontdesk/historial-modal";
-import { ComprasModal } from "@/components/frontdesk/compras-modal";
-import { DosisAvisoDialog } from "@/components/frontdesk/dosis-aviso-dialog";
+import { FilaSesionModales } from "@/components/frontdesk/fila-sesion-modales";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +74,7 @@ export function FilaSesion({
   onChanged,
   onProgramar,
   onEhrGate,
+  onPackageGate,
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
@@ -96,6 +96,7 @@ export function FilaSesion({
   onChanged: () => void;
   onProgramar: (ctx: { pacienteId: string; pacienteNombre?: string; servicioId?: string }) => void;
   onEhrGate?: (ctx: EhrGateCtx) => void;
+  onPackageGate?: (ctx: PackageGateCtx) => void;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -144,6 +145,8 @@ export function FilaSesion({
         onEhrGate({ pacienteId: sesion.patientId, faltantes, onCompleted: () => void run(fn) });
         return false;
       }
+      const gate = sesion?.patientId ? packageGateFrom(err, colsRender, optionsByCol, sesion.patientId, () => void run(fn)) : null;
+      if (gate && onPackageGate) { onPackageGate(gate); return false; }
       toastError(err, tRoot);
       return false;
     } finally {
@@ -231,13 +234,22 @@ export function FilaSesion({
       );
     }
     if (c.clave === "fd_sesiones") {
+      // Vial services (cmr-be #700): a visit on the patient's remnant has no session number, and the row
+      // shows what is left of the vial opened in their name. The unit comes from the dose column's render.
+      const vial = servicio?.sessionUnit === "vial";
+      const doseUnit = colsRender.map((x) => (x.kind === "col" ? (x.col.render as { writeBinding?: string; unidad?: string } | null) : null)).find((r) => r?.writeBinding === "sesion.doseAmount")?.unidad;
       return (
-        <SesionesCell
-          display={v == null || v === "" ? "—" : String(v)}
-          servicio={servicio}
-          pacienteId={sesion?.patientId}
-          centro={centro}
-        />
+        <span className="inline-flex flex-wrap items-center gap-1.5">
+          <SesionesCell
+            display={isRemnantVisit(sesion, servicio?.sessionUnit) ? t("vial.remnantVisit") : v == null || v === "" ? "—" : String(v)}
+            servicio={servicio}
+            pacienteId={sesion?.patientId}
+            centro={centro}
+          />
+          {vial && sesion?.patientId && (
+            <VialRemnantChips patientId={sesion.patientId} productId={servicio?.productId} unit={doseUnit} centro={centro} refreshKey={`${sesion.status}-${sesion.quantity}-${sesion.doseAmount}`} />
+          )}
+        </span>
       );
     }
     // Select editable (p. ej. DOSIS): opciones data-driven del grupo del servicio; escribe vía
@@ -356,7 +368,7 @@ export function FilaSesion({
     if (c.tipo === "medicion" && c.render) {
       return (
         <MedicionCell
-          col={c} sesion={sesion}
+          col={c} sesion={sesion} rowValue={v}
           sessionId={sesion?.id} centroId={centro}
           disabled={busy || cancelada}
           onSave={(valor) => run(() => guardarCelda(c.clave, valor, etiquetaCol(c)))}
@@ -618,95 +630,28 @@ export function FilaSesion({
           onDone={onChanged}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />
-        {sesion?.patientId && (
-          <HistorialModal
-            open={historialOpen}
-            onOpenChange={setHistorialOpen}
-            pacienteId={sesion.patientId}
-            pacienteNombre={pacienteNombre}
-            servicioId={servicio?.id}
-            servicioNombre={servicio?.name}
-            centro={centro}
-          />
-        )}
-        {sesion?.patientId && (
-          <ComprasModal
-            open={comprasOpen}
-            onOpenChange={setComprasOpen}
-            pacienteId={sesion.patientId}
-            pacienteNombre={pacienteNombre}
-            servicioId={servicio?.id}
-            servicioNombre={servicio?.name}
-            fecha={fecha}
-            centro={centro}
-          />
-        )}
-        {sesion?.patientId && servicio && (
-          <FormatosModal
-            open={!!formatoReport}
-            onOpenChange={(o) => !o && setFormatoReport(null)}
-            initialReport={formatoReport ?? undefined}
-            servicioNombre={servicio.name}
-            formAcciones={servicio.formActions}
-            pacienteNombre={pacienteNombre}
-            sesionNN={fila["fd_sesiones"] != null ? String(fila["fd_sesiones"]) : undefined} servicioId={servicio?.id} pacienteId={sesion?.patientId}
-            record={fila.fd_record != null ? String(fila.fd_record) : undefined}
-            sesionId={fila.id} fecha={fecha}
-            centro={centro}
-            onHistorial={() => setHistorialOpen(true)} onApplied={onChanged}
-          />
-        )}
-        {notificarCfg && sesion?.patientId && (
-          <PanelNotificarModal
-            open={!!notificarCfg}
-            onOpenChange={(o) => !o && setNotificarCfg(null)}
-            panelClave={notificarCfg.panel}
-            seccion={notificarCfg.seccion}
-            sesionId={fila.id}
-            servicioNombre={servicio?.name ?? ""}
-            pacienteNombre={pacienteNombre}
-            enfermeras={optionsByCol["fd_enfermera"] ?? []}
-            enfermeraActual={(() => { const raw = fila["fd_enfermera"]; const ops = optionsByCol["fd_enfermera"] ?? []; return ops.find((o) => o.value === raw || o.label === raw)?.value; })()}
-            onAsignarEnfermera={(pid) => run(() => guardarCelda("fd_enfermera", pid, tRoot.has("tb.col.enfermera") ? tRoot("tb.col.enfermera") : t("enfermera")))}
-            centro={centro}
-          />
-        )}
-        {/* Cartel CENTRADO: dosis no comprada. No bloquea; dos salidas claras (§1 del handoff). */}
-        <DosisAvisoDialog
-          aviso={dosisAviso}
-          onClose={() => setDosisAviso(null)}
-          onUsarComprada={() => {
-            // Volver a lo comprado: revierte el reflejo a lo que había y no escribe nada.
-            const prev = dosisAviso?.prev ?? "";
-            const clave = dosisAviso?.clave;
-            if (clave) {
-              setPendSelect((p) => {
-                const n = { ...p };
-                if (prev) n[clave] = prev;
-                else delete n[clave];
-                return n;
-              });
-            }
-            setDosisAviso(null);
-          }}
-          onAplicarIgual={() => {
-            const a = dosisAviso;
-            setDosisAviso(null);
-            if (!a) return;
-            // El BE registra el descuido `dosis_no_comprada` al asistir y sale en la lista.
-            run(async () => {
-              try {
-                return await guardarCelda(a.clave, a.valor, a.etiqueta);
-              } catch (e) {
-                setPendSelect((p) => {
-                  const n = { ...p };
-                  delete n[a.clave];
-                  return n;
-                });
-                throw e;
-              }
-            });
-          }}
+        <FilaSesionModales
+          fila={fila}
+          sesion={sesion}
+          servicio={servicio}
+          centro={centro}
+          fecha={fecha}
+          pacienteNombre={pacienteNombre}
+          optionsByCol={optionsByCol}
+          run={run}
+          guardarCelda={guardarCelda}
+          onApplied={onChanged}
+          historialOpen={historialOpen}
+          setHistorialOpen={setHistorialOpen}
+          comprasOpen={comprasOpen}
+          setComprasOpen={setComprasOpen}
+          formatoReport={formatoReport}
+          setFormatoReport={setFormatoReport}
+          notificarCfg={notificarCfg}
+          setNotificarCfg={setNotificarCfg}
+          dosisAviso={dosisAviso}
+          setDosisAviso={setDosisAviso}
+          setPendSelect={setPendSelect}
         />
       </td>
     </tr>

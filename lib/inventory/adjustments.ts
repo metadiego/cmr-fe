@@ -78,3 +78,23 @@ export function quantityInput(raw: string): { quantity: string; hadMinus: boolea
     .join("");
   return { quantity, hadMinus };
 }
+
+/**
+ * Adds a picked product to the draft (owner, 24-nov-2026: a long list pushed the empty row off screen).
+ * The picker sits fixed above the lines, so adding is always one pick away; a product already in the
+ * draft is not added twice — its line is returned so the form can take the person there instead.
+ * Lines keep the order they were added in (the payload's order, which the BE's refused `index` uses).
+ */
+export function addProductLine(
+  lines: readonly DraftLine[],
+  product: { id: string; name: string },
+  key: string,
+): { lines: DraftLine[]; key: string; existed: boolean } {
+  const found = lines.find((l) => l.productId === product.id);
+  if (found) return { lines: [...lines], key: found.key, existed: true };
+  return {
+    lines: [...lines, { key, productId: product.id, productName: product.name, quantity: "", sign: "negativo", notes: "" }],
+    key,
+    existed: false,
+  };
+}
