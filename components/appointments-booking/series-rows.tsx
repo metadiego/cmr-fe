@@ -133,7 +133,11 @@ export function SeriesRows({
                 <SelectTrigger
                   size="sm"
                   aria-label={t("time")}
-                  className="w-40 border-transparent bg-transparent tabular-nums shadow-none hover:border-input hover:bg-muted/50"
+                  className={cn(
+                    "w-40 border-transparent bg-transparent tabular-nums shadow-none hover:border-input hover:bg-muted/50",
+                    // A given hint can be long (the train's reasons): the menu says it, the closed select only the hour.
+                    optionHint && "[&_[data-hint]]:hidden",
+                  )}
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -145,7 +149,7 @@ export function SeriesRows({
                       <span className="tabular-nums">{shortTime(o.time)}</span>
                       {/* A given hint is also said for an hour that cannot be booked: it is why. */}
                       {(optionHint || !o.disabled) && (
-                        <span className={cn("text-xs", o.full ? "text-warning-foreground" : "text-muted-foreground")}>
+                        <span data-hint className={cn("text-xs", o.full ? "text-warning-foreground" : "text-muted-foreground")}>
                           {optionHint
                             ? optionHint(r.date, o.time)
                             : o.full

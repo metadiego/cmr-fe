@@ -1,3 +1,5 @@
+import { addDays, weekdayOf } from "../recurring-plan.ts";
+
 // What keeps «Agendar» grey on the patient desk's therapy form, beyond the missing «Terapias» field
 // (forms kit: a missing field is `missing`, anything else is a `reason` said above the button). The
 // first cause that applies wins, in the order a receptionist can act on it: permissions, the balance,
@@ -69,4 +71,14 @@ export function seriesKey(mode: "manual" | "weekly", days: readonly number[], to
 export function refitRows<T extends { date: string; fitTime?: boolean }>(edited: boolean, items: T[], date?: string): T[] | null {
   if (!edited) return null;
   return items.map((i) => (date === undefined || i.date === date ? { ...i, fitTime: true } : i));
+}
+
+/**
+ * The first visit's date: the day the desk is showing when it is still to come, else tomorrow (a visit
+ * is booked ahead; today is mostly gone by then), a Sunday moving to Monday since the clinic is closed.
+ */
+export function firstVisitDate(deskDate: string, today: string): string {
+  if (deskDate > today) return deskDate;
+  const tomorrow = addDays(today, 1);
+  return weekdayOf(tomorrow) === 0 ? addDays(tomorrow, 1) : tomorrow;
 }

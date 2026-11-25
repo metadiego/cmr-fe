@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { refitRows, seriesKey, trainFormReason, type TrainFormState } from "./train-form.ts";
+import { firstVisitDate, refitRows, seriesKey, trainFormReason, type TrainFormState } from "./train-form.ts";
 
 const ok: TrainFormState = {
   permsReady: true,
@@ -79,4 +79,11 @@ test("refitRows re-fits every edited row, or only the one date given", () => {
     { date: "2026-12-01", fitTime: true },
   ]);
   assert.deepEqual(refitRows(true, items, "2026-12-01"), [{ date: "2026-11-24", time: "09:00" }, { date: "2026-12-01", fitTime: true }]);
+});
+
+test("firstVisitDate starts tomorrow, not today, unless the desk is on a later day", () => {
+  assert.equal(firstVisitDate("2026-11-24", "2026-11-24"), "2026-11-25"); // Tue → Wed
+  assert.equal(firstVisitDate("2026-11-20", "2026-11-24"), "2026-11-25"); // a past desk day too
+  assert.equal(firstVisitDate("2026-12-01", "2026-11-24"), "2026-12-01"); // the day the desk shows
+  assert.equal(firstVisitDate("2026-11-28", "2026-11-28"), "2026-11-30"); // Sat → Mon (closed Sunday)
 });

@@ -43,7 +43,7 @@ import {
   type DayOff,
 } from "@/lib/agenda/booking/train-days";
 import { nearestFree, slotWhy, trainTimeOptions } from "@/lib/agenda/booking/train-why";
-import { refitRows, seriesKey, trainFormReason, type TrainFormReason } from "@/lib/agenda/booking/train-form";
+import { firstVisitDate, refitRows, seriesKey, trainFormReason, type TrainFormReason } from "@/lib/agenda/booking/train-form";
 import type { DaySlots } from "@/lib/agenda/booking/availability";
 import { weekdayOf } from "@/lib/agenda/recurring-plan";
 import { todayPR } from "@/lib/format/fecha";
@@ -128,7 +128,9 @@ export function TherapyBookingForm({
   }
 
   // ---- The rows: the Citas series model (generated unless edited for this mode/days/total).
-  const startDay = weekdayOf(defaultDate);
+  // The first visit: the desk's day when still to come, else tomorrow (fixed once the form opens).
+  const [startDate] = React.useState(() => firstVisitDate(defaultDate, todayPR()));
+  const startDay = weekdayOf(startDate);
   const [mode, setMode] = React.useState<SeriesMode>("manual");
   const [days, setDays] = React.useState<number[]>(() => (startDay === 0 ? [] : [startDay]));
   const [totalChoice, setTotalChoice] = React.useState<number | null>(null);
@@ -149,8 +151,8 @@ export function TherapyBookingForm({
   const baseItems: EditableItem[] = edited
     ? edits.items
     : weekly
-      ? generateWeeklyPattern(defaultDate, days, total).map((i) => ({ ...i, fitTime: true }))
-      : [{ date: defaultDate, fitTime: true }];
+      ? generateWeeklyPattern(startDate, days, total).map((i) => ({ ...i, fitTime: true }))
+      : [{ date: startDate, fitTime: true }];
 
   const avail = useTrainSeriesAvailability({
     center,
