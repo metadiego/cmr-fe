@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { Tooltip } from "@/components/ui/tooltip";
 
 export type SegmentedOption<V extends string> = {
   value: V;
@@ -71,7 +72,11 @@ export function SegmentedControl<V extends string>({
             )}
           >
             {o.dot && <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: o.dot }} />}
-            <span className="truncate">{o.label}</span>
+            {/* Narrow options (4+ in a tray) truncate with an ellipsis — the tooltip is the only way
+                to read the rest, so it's never conditional on measuring overflow. */}
+            <Tooltip content={o.label} className="min-w-0 flex-1">
+              <span className="block min-w-0 truncate">{o.label}</span>
+            </Tooltip>
           </button>
         );
       })}
