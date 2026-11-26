@@ -5,27 +5,21 @@ import { useTranslations } from "next-intl"
 
 import type { Perfil } from "@/lib/api/profiles"
 import {
-  getRoles,
   getProfileAccess,
   getProfileMenu,
-  assignRoleToProfile,
-  removeRoleFromProfile,
   setProfileOverride,
   removeProfileOverride,
   setPermisoCentros,
-  type Rol,
   type ProfileAccess,
   type AccessPermiso,
   type CentroRef,
 } from "@/lib/api/rbac"
 import { getCenters, type Centro } from "@/lib/api/centers"
-import { AccessPorCentroTab } from "@/components/admin/access-por-centro-tab"
 import { toastError } from "@/lib/api/errors"
 import { cn } from "@/lib/utils"
 import { useResource } from "@/hooks/use-resource"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import {
   Sheet,
@@ -45,8 +39,9 @@ import {
 
 const GLOBAL = "__global__"
 
-// "Accesos del usuario": per-profile roles + permission exceptions + menu
-// preview, scoped to a center or global. Opened from the users list.
+// A login's access sheet: permission exceptions and the menu preview, scoped to a center or global.
+// Roles and centers are no longer here: they are the person's positions, edited on the staff record
+// (docs/specs/positions-and-centers.md).
 export function AccessDialog({
   profile,
   onOpenChange,
@@ -95,7 +90,6 @@ function AccessPanel({ profile }: { profile: Perfil }) {
     () => getProfileAccess(profile.id, centroId),
     [profile.id, centro]
   )
-  const roles = useResource<Rol[]>(() => getRoles())
 
   return (
     <div className="mt-4 space-y-4">
@@ -117,29 +111,11 @@ function AccessPanel({ profile }: { profile: Perfil }) {
         </Select>
       </div>
 
-      <Tabs defaultValue="roles">
+      <Tabs defaultValue="exceptions">
         <TabsList>
-          <TabsTrigger value="roles">{t("tabs.roles")}</TabsTrigger>
-          <TabsTrigger value="porCentro">{t("tabs.porCentro")}</TabsTrigger>
           <TabsTrigger value="exceptions">{t("tabs.exceptions")}</TabsTrigger>
           <TabsTrigger value="menu">{t("tabs.menu")}</TabsTrigger>
         </TabsList>
-
-        {/* Un rol distinto por centro (perfil+rol+centro): tabla por centro + roles globales. Handoff
-            roles-por-centro-en-la-ui. No depende del selector de ámbito de arriba: gestiona todos los centros. */}
-        <TabsContent value="porCentro" className="mt-4">
-          <AccessPorCentroTab profile={profile} />
-        </TabsContent>
-
-        <TabsContent value="roles" className="mt-4">
-          <RolesTab
-            profile={profile}
-            centroId={centroId}
-            roles={roles.state}
-            access={access.state}
-            onChanged={access.reload}
-          />
-        </TabsContent>
 
         <TabsContent value="exceptions" className="mt-4">
           <ExceptionsTab
@@ -158,70 +134,6 @@ function AccessPanel({ profile }: { profile: Perfil }) {
           />
         </TabsContent>
       </Tabs>
-    </div>
-  )
-}
-
-function RolesTab({
-  profile,
-  centroId,
-  roles,
-  access,
-  onChanged,
-}: {
-  profile: Perfil
-  centroId?: string
-  roles: ReturnType<typeof useResource<Rol[]>>["state"]
-  access: ReturnType<typeof useResource<ProfileAccess>>["state"]
-  onChanged: () => void
-}) {
-  const t = useTranslations("admin.access")
-  const [busy, setBusy] = React.useState<string | null>(null)
-
-  if (roles.kind === "loading" || access.kind === "loading") return <Loading />
-  if (roles.kind === "fail") return <Fail message={roles.message} />
-  if (access.kind === "fail") return <Fail message={access.message} />
-
-  const assigned = new Map(access.data.roles.map((r) => [r.slug, r]))
-
-  async function toggle(role: Rol, on: boolean) {
-    setBusy(role.slug)
-    try {
-      if (on) {
-        // El rol se asigna GLOBAL (sin centroId): el centro vive en las asignaciones de centro del perfil,
-        // y un rol multi-centro rechaza centroId. Handoff rol-multicentro-y-preparacion-legado.
-        await assignRoleToProfile(profile.id, role.slug)
-      } else {
-        const a = assigned.get(role.slug)
-        if (a) await removeRoleFromProfile(profile.id, a.roleId, centroId)
-      }
-      toast.success(t("saved"))
-      onChanged()
-    } catch (err) {
-      toastError(err)
-    } finally {
-      setBusy(null)
-    }
-  }
-
-  return (
-    <div className="space-y-2">
-      {roles.data.map((role) => (
-        <label
-          key={role.id}
-          className="flex items-center gap-3 rounded-md bg-card px-3 py-2 text-sm shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
-        >
-          <Checkbox
-            checked={assigned.has(role.slug)}
-            disabled={busy === role.slug}
-            onCheckedChange={(v) => toggle(role, v === true)}
-          />
-          <span className="font-medium">{role.name}</span>
-          <span className="font-mono text-xs text-muted-foreground">
-            {role.slug}
-          </span>
-        </label>
-      ))}
     </div>
   )
 }
