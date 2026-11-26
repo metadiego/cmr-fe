@@ -501,7 +501,8 @@
     },
     "tipo": {
       "nueva": "Consulta (Nueva)",
-      "seguimiento": "Seguimiento"
+      "seguimiento": "Seguimiento",
+      "exonerada": "Exonerada"
     },
     "paciente_ya_es_seguimiento": "Este paciente ya fue atendido: es de seguimiento, no puede agendarse como nuevo.",
     "datos_no_verificables": "No se pudieron comprobar los datos del paciente, inténtalo de nuevo.",
@@ -6002,7 +6003,8 @@
     "serviceDone": "Atendido",
     "subtypeShort": {
       "nueva": "Nuevo",
-      "seguimiento": "Seguimiento"
+      "seguimiento": "Seguimiento",
+      "exonerada": "Exonerada"
     },
     "daySummary": {
       "open": "Ver el resumen del día",
