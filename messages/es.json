@@ -5523,6 +5523,10 @@
       "nurseStatusTypes": {
         "title": "Estatus de enfermería",
         "desc": "Agregar o retirar estatus del catálogo (Descanso, En triage…)."
+      },
+      "callcenter": {
+        "title": "Call Center",
+        "desc": "Líneas por canal y horario de la alerta de atraso."
       }
     }
   },
@@ -7548,5 +7552,48 @@
       "desconocido": "Desconocido"
     },
     "push_behind": "La central {pbx} no manda llamadas desde hace {minutesBehind} min."
+  },
+  "callcenterConfig": {
+    "title": "Call Center — configuración",
+    "help": "Líneas por canal y el horario/umbral que usa la alerta de atraso.",
+    "sinCentro": "No tienes centros asignados.",
+    "channelsTitle": "Líneas por canal",
+    "channelsEmpty": "Sin líneas configuradas todavía.",
+    "newChannel": "Nueva línea",
+    "editChannel": "Editar línea",
+    "edit": "Editar",
+    "active": "Activa",
+    "number": "Número",
+    "channelValue": "Canal",
+    "channelValueHint": "La clave que usa el call center (ej. facebook, tv).",
+    "channelName": {
+      "facebook": "Facebook",
+      "tv": "TV"
+    },
+    "labelKeyOptional": "Clave de texto (opcional)",
+    "channelCreated": "Línea creada.",
+    "channelUpdated": "Línea actualizada.",
+    "settingsTitle": "Horario y alerta de atraso",
+    "hours": "Días que opera",
+    "weekday": {
+      "monday": "Lun",
+      "tuesday": "Mar",
+      "wednesday": "Mié",
+      "thursday": "Jue",
+      "friday": "Vie",
+      "saturday": "Sáb",
+      "sunday": "Dom"
+    },
+    "startHour": "Hora de apertura",
+    "endHour": "Hora de cierre",
+    "timeInvalid": "Hora inválida.",
+    "rangeInvalid": "La hora de apertura debe ser antes que la de cierre.",
+    "lagAlertMinutes": "Avisar si no hay llamadas por (min)",
+    "lagAlertMinutesHint": "Entre 5 y 720 minutos.",
+    "lagInvalid": "Pon un número entre 5 y 720.",
+    "timeZone": "Zona horaria",
+    "timeZoneHint": "Ej. America/Puerto_Rico.",
+    "save": "Guardar",
+    "settingsSaved": "Configuración guardada."
   }
 }

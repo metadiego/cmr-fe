@@ -147,3 +147,58 @@ export type CallStreamStatus = {
   patientId: string | null;
   startedAt: string | null;
 };
+
+// --- Configuration (callcenter.admin), handoff §7 — PER CENTER, unlike the dashboard reads above:
+// an exception to "un solo call center" because lines and hours are configured per clinic.
+
+export type CallcenterChannel = {
+  id: string;
+  number: string;
+  channel: string;
+  labelKey: string | null;
+  active: boolean;
+  clinicName?: string | null;
+};
+
+export type CallcenterChannelPayload = {
+  number: string;
+  channel: string;
+  labelKey?: string;
+  active?: boolean;
+};
+
+export function listCallcenterChannels(centroId?: string | null): Promise<CallcenterChannel[]> {
+  return apiFetch<CallcenterChannel[]>(`/callcenter/channels`, {}, centroId);
+}
+export function createCallcenterChannel(payload: CallcenterChannelPayload, centroId?: string | null): Promise<CallcenterChannel> {
+  return apiFetch<CallcenterChannel>(`/callcenter/channels`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+export function updateCallcenterChannel(
+  id: string,
+  payload: Partial<CallcenterChannelPayload>,
+  centroId?: string | null,
+): Promise<CallcenterChannel> {
+  return apiFetch<CallcenterChannel>(`/callcenter/channels/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
+}
+export function deleteCallcenterChannel(id: string, centroId?: string | null): Promise<void> {
+  return apiFetch<void>(`/callcenter/channels/${encodeURIComponent(id)}`, { method: "DELETE" }, centroId);
+}
+
+export type CallcenterSettings = {
+  centerId: string;
+  timeZone: string;
+  hours: { days: number[]; start: string; end: string };
+  lagAlertMinutes: number;
+};
+
+export type CallcenterSettingsPayload = Partial<Pick<CallcenterSettings, "timeZone" | "hours" | "lagAlertMinutes">>;
+
+export function getCallcenterSettings(centerId: string): Promise<CallcenterSettings> {
+  return apiFetch<CallcenterSettings>(`/callcenter/settings?centerId=${encodeURIComponent(centerId)}`);
+}
+export function updateCallcenterSettings(centerId: string, payload: CallcenterSettingsPayload): Promise<CallcenterSettings> {
+  return apiFetch<CallcenterSettings>(`/callcenter/settings?centerId=${encodeURIComponent(centerId)}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}

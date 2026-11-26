@@ -5523,6 +5523,10 @@
       "nurseStatusTypes": {
         "title": "Nurse statuses",
         "desc": "Add or retire catalogue statuses (Break, In triage…)."
+      },
+      "callcenter": {
+        "title": "Call Center",
+        "desc": "Lines by channel and the lag-alert hours."
       }
     }
   },
@@ -7548,5 +7552,48 @@
       "desconocido": "Unknown"
     },
     "push_behind": "PBX {pbx} hasn't sent calls in {minutesBehind} min."
+  },
+  "callcenterConfig": {
+    "title": "Call Center — settings",
+    "help": "Lines by channel and the hours/threshold the lag alert uses.",
+    "sinCentro": "You have no centers assigned.",
+    "channelsTitle": "Lines by channel",
+    "channelsEmpty": "No lines configured yet.",
+    "newChannel": "New line",
+    "editChannel": "Edit line",
+    "edit": "Edit",
+    "active": "Active",
+    "number": "Number",
+    "channelValue": "Channel",
+    "channelValueHint": "The key the call center uses (e.g. facebook, tv).",
+    "channelName": {
+      "facebook": "Facebook",
+      "tv": "TV"
+    },
+    "labelKeyOptional": "Text key (optional)",
+    "channelCreated": "Line created.",
+    "channelUpdated": "Line updated.",
+    "settingsTitle": "Hours and lag alert",
+    "hours": "Days it operates",
+    "weekday": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "startHour": "Opening time",
+    "endHour": "Closing time",
+    "timeInvalid": "Invalid time.",
+    "rangeInvalid": "Opening time must be before closing time.",
+    "lagAlertMinutes": "Alert if no calls for (min)",
+    "lagAlertMinutesHint": "Between 5 and 720 minutes.",
+    "lagInvalid": "Enter a number between 5 and 720.",
+    "timeZone": "Time zone",
+    "timeZoneHint": "E.g. America/Puerto_Rico.",
+    "save": "Save",
+    "settingsSaved": "Settings saved."
   }
 }
