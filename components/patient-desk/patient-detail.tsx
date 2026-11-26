@@ -46,8 +46,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
-import { groupIn } from "@/lib/frontdesk/row-stages"
-import { BEFORE_ARRIVAL } from "@/lib/lifecycle/stage-groups"
+import { BEFORE_ARRIVAL, groupIn } from "@/lib/lifecycle/stage-groups"
 
 export type ScheduleRequest = {
   pacienteId: string
@@ -163,7 +162,7 @@ export function PatientDetail({
           : await presentPatient(patient.patientId, date, centerId)
       const warnings = res.failed.map((f) => f.reason)
       const pendingConsultIds = patient.consultationIds.filter((_, i) =>
-        groupIn(patient.consultationGroups[i], CONSULT_PENDING_GROUPS)
+        groupIn("medical", patient.consultationGroups[i], CONSULT_PENDING_GROUPS)
       )
       if (pendingConsultIds.length > 0) {
         const results = await Promise.allSettled(
@@ -229,7 +228,7 @@ export function PatientDetail({
       // Symmetric: only the consultation the present above could have marked (still exactly waiting),
       // never one that moved on to triage / in consultation / done on its own.
       const presentConsultIds = patient.consultationIds.filter((_, i) =>
-        groupIn(patient.consultationGroups[i], ["waiting"])
+        groupIn("medical", patient.consultationGroups[i], ["waiting"])
       )
       if (presentConsultIds.length > 0) {
         await Promise.allSettled(

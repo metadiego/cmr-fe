@@ -11,11 +11,14 @@ import {
   SHOWED_UP,
   SHOWN_IN_LIST,
   THERAPY_GROUPS,
+  groupIn,
   groupOf,
   groupsExcept,
   inGroups,
   isNotCancelled,
+  rowGroup,
   rowInGroups,
+  sessionStageFields,
   stagesInGroup,
   stagesOf,
   type AppointmentKind,
@@ -300,4 +303,46 @@ test("syncedStatus present but null means not synced: derive from the old value;
       care: null,
     }
   )
+})
+
+test("rowGroup: a row's group, by its stages or derived from its old value; null when unknown", () => {
+  assert.equal(rowGroup("therapy", { status: "presente", calledAt: AT }), "waiting")
+  assert.equal(rowGroup("therapy", { status: "cancelada", presentAt: AT }), "cancelled_or_not_served")
+  assert.equal(rowGroup("therapy", { bookingStatus: "arrived", careStatus: "called" }), "waiting")
+  assert.equal(rowGroup("therapy", { status: "otro" }), null)
+  assert.equal(rowGroup("medical", { estado: "en_consulta" }), "in_consultation")
+  assert.equal(rowGroup("medical", { estado: "cancelada", arrivedAt: AT }), "cancelled_or_not_served")
+})
+
+test("groupIn: a stored group against a list of the kind's groups; null is in none; a group of the other kind throws", () => {
+  assert.equal(groupIn("therapy", "waiting", ["waiting", "in_therapy"]), true)
+  assert.equal(groupIn("therapy", "done", ["waiting"]), false)
+  assert.equal(groupIn("therapy", null, ["waiting"]), false)
+  assert.equal(groupIn("medical", "in_consultation", IN_CARE.medical), true)
+  assert.throws(() => groupIn("therapy", "waiting", ["in_consultation"]), /therapy has no stage group in_consultation/)
+  assert.throws(() => groupIn("medical", null, ["upcoming"]), /medical has no stage group upcoming/)
+})
+
+test("sessionStageFields: picks the session's stage fields and stamps, nothing else", () => {
+  const session = {
+    id: "s1",
+    status: "presente",
+    bookingStatus: "arrived",
+    careStatus: "called",
+    syncedStatus: "presente",
+    confirmedAt: null,
+    calledAt: AT,
+    presentAt: AT,
+    serviceId: "x",
+  } as const
+  assert.deepEqual(sessionStageFields(session), {
+    bookingStatus: "arrived",
+    careStatus: "called",
+    syncedStatus: "presente",
+    confirmedAt: null,
+    calledAt: AT,
+    presentAt: AT,
+  })
+  // With the row's status beside it, the picked fields keep the row's group (a called session waits).
+  assert.equal(rowGroup("therapy", { status: session.status, ...sessionStageFields(session) }), "waiting")
 })

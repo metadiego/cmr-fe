@@ -5,8 +5,7 @@
 // Met when ANY source says the state was reached — session stamp, row stamp, or a row whose stage
 // group is at or past the required step in the flow order.
 
-import type { StagedRow, StageGroup } from "../lifecycle/stage-groups.ts";
-import { rowGroup } from "./row-stages.ts";
+import { rowGroup, type StagedRow, type StageGroup } from "../lifecycle/stage-groups.ts";
 
 // The service flow's steps in order: the catalogue slug a column names in `render.requiereEstado`
 // (board_statuses, Ruling 3) and the stage group a row is in once it reached that step.

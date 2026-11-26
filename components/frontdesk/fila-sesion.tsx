@@ -27,8 +27,8 @@ import { SesionesCell } from "@/components/frontdesk/sesiones-cell";
 import { MedicionCell } from "@/components/frontdesk/medicion-cell";
 import { VialRemnantChips } from "@/components/frontdesk/vial-remnant-chip";
 import { isRemnantVisit } from "@/lib/frontdesk/vial-remnant";
-import { groupIn, rowGroup, sessionRowStaged } from "@/lib/frontdesk/row-stages";
-import { BEFORE_ARRIVAL } from "@/lib/lifecycle/stage-groups";
+import { sessionRowStaged } from "@/lib/frontdesk/row-stages";
+import { BEFORE_ARRIVAL, groupIn, rowGroup } from "@/lib/lifecycle/stage-groups";
 import { RowMenu } from "@/components/frontdesk/row-menu";
 import { readAllowedActions, slugOffered } from "@/lib/lifecycle/allowed-actions";
 import { FilaSesionModales } from "@/components/frontdesk/fila-sesion-modales";
@@ -137,7 +137,7 @@ export function FilaSesion({
   // Decisions read the row's stage group (lifecycle 5d): the row's status with its session's stages.
   const filaStaged = sessionRowStaged(estadoActual, sesion);
   const grupoActual = rowGroup("therapy", filaStaged);
-  const cancelada = groupIn(grupoActual, ["cancelled_or_not_served"]);
+  const cancelada = groupIn("therapy", grupoActual, ["cancelled_or_not_served"]);
   const allowed = drawFromAllowedActions ? readAllowedActions(fila) : null;
   const offered = (slug: string | null) => !slug || slugOffered(slug, allowed) !== false; // no list: today's rule
   const pacienteNombre = String(fila.paciente ?? fila.fd_paciente ?? fila.fac_paciente ?? "");
@@ -544,7 +544,7 @@ export function FilaSesion({
   //   upcoming/'' (pre-flujo) → primer paso · asistido (último) → ninguno · cancelada → ninguno ·
   //   estado fuera del flujo (terminal desconocido) → ninguno (no ofrece 'Presente' por error).
   const curIdx = flujo.findIndex((f) => f.clave === estadoActual);
-  const preFlujo = curIdx === -1 && (estadoActual === "" || groupIn(grupoActual, BEFORE_ARRIVAL.therapy));
+  const preFlujo = curIdx === -1 && (estadoActual === "" || groupIn("therapy", grupoActual, BEFORE_ARRIVAL.therapy));
   const nextPos = cancelada ? -1 : preFlujo ? 0 : curIdx >= 0 && curIdx + 1 < flujo.length ? curIdx + 1 : -1;
   // Solo si la posición cae dentro de `pasos` (guarda ante un eventual desajuste flujo/columnas del BE).
   const nextIdx = nextPos >= 0 && nextPos < pasos.length ? nextPos : -1;

@@ -2,7 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 
 import { pendingArrivals, sortByArrival } from "./patient-day.ts"
-import { rowGroup } from "./row-stages.ts"
+import { rowGroup } from "../lifecycle/stage-groups.ts"
 
 // Hand-built patients carry the stage group of each status, as groupByPatient fills it.
 const therapyGroups = (statuses: string[]) => statuses.map((status) => rowGroup("therapy", { status }))
@@ -13,8 +13,8 @@ test("consultation view: every present patient together by arrival, finished or 
     record: "",
     services: [],
     consultationIds: ["c"],
-    consultationStatuses: ["asistido"],
-    consultationGroups: [null],
+    consultationStatuses: ["atendida"],
+    consultationGroups: consultGroups(["atendida"]),
     consultationSubtypes: [""],
     doctorName: "",
     allCancelled: false,

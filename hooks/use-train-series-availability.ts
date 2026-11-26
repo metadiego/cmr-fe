@@ -10,7 +10,7 @@ import { listSesionesRango } from "@/lib/api/frontdesk";
 import { getBookingHolidays } from "@/lib/api/festivos";
 import { nowTimePR, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
-import type { StagedRow } from "@/lib/lifecycle/stage-groups";
+import { sessionStageFields, type SessionStageFields } from "@/lib/lifecycle/stage-groups";
 import type { SeriesDay } from "@/hooks/use-series-availability";
 
 // What the patient desk's therapy form needs for its rows, the train counterpart of
@@ -23,10 +23,7 @@ import type { SeriesDay } from "@/hooks/use-series-availability";
 const CONCURRENCY = 4;
 
 /** An existing session, with its stage fields so `sameDaySessions` reads its stage group. */
-export type ExistingSession = Pick<
-  StagedRow,
-  "bookingStatus" | "careStatus" | "syncedStatus" | "confirmedAt" | "calledAt" | "presentAt"
-> & { serviceId: string; date: string; time: string | null; status: string };
+export type ExistingSession = SessionStageFields & { serviceId: string; date: string; time: string | null; status: string };
 
 export function useTrainSeriesAvailability(p: {
   center: string | undefined;
@@ -134,12 +131,7 @@ export function useTrainSeriesAvailability(p: {
               date: String(s.date),
               time: s.time ?? null,
               status: s.status,
-              bookingStatus: s.bookingStatus,
-              careStatus: s.careStatus,
-              syncedStatus: s.syncedStatus,
-              confirmedAt: s.confirmedAt,
-              calledAt: s.calledAt,
-              presentAt: s.presentAt,
+              ...sessionStageFields(s),
             })),
           )
         : Promise.resolve([]),

@@ -1,8 +1,7 @@
 // Split vials (cmr-be #700, owner 24-nov-2026: Plaquex 50 mg shared across visits). Pure rules for the
 // patient-desk row of a service whose `sessionUnit` is 'vial'.
 
-import type { StagedRow } from "../lifecycle/stage-groups.ts";
-import { groupIn, rowGroup } from "./row-stages.ts";
+import { rowInGroups, type StagedRow } from "../lifecycle/stage-groups.ts";
 
 /** An attended (done) visit that used the patient's remnant (quantity 0) spends no session: no number. */
 export function isRemnantVisit(
@@ -12,7 +11,7 @@ export function isRemnantVisit(
   return (
     sessionUnit === "vial" &&
     !!session &&
-    groupIn(rowGroup("therapy", session), ["done"]) &&
+    rowInGroups("therapy", session, ["done"]) &&
     session.quantity === 0
   );
 }

@@ -1,7 +1,7 @@
 // «Medidas sin vincular» (BE #509, handoff docs/specs/medidas-glp1-hub-y-bascula-por-imagen-handoff.md):
 // scale / tape readings the BE could not attach to a GLP-1 visit on its own. Pure helpers for the hub.
 
-import { isNotCancelled, type StagedRow } from "../lifecycle/stage-groups.ts";
+import { isNotCancelled, type SessionStageFields } from "../lifecycle/stage-groups.ts";
 
 export type MeasurementKind = "scale" | "tape";
 
@@ -68,7 +68,7 @@ export function valueEntries(r: Pick<UnlinkedReading, "kind" | "values">): Array
  * session's stage fields so "cancelled" is read by its stage group.
  */
 export interface LinkCandidate
-  extends Pick<StagedRow, "bookingStatus" | "careStatus" | "syncedStatus" | "confirmedAt" | "calledAt" | "presentAt"> {
+  extends SessionStageFields {
   id: string;
   patientId: string | null;
   patientName: string | null;

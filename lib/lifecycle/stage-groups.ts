@@ -295,6 +295,28 @@ export function stagesOf(kind: AppointmentKind, row: StagedRow): Stages | null {
   return deriveStages(kind, row)
 }
 
+/** The group a row is in, or null for a status the mapping does not know (or no status at all). */
+export function rowGroup(
+  kind: AppointmentKind,
+  row: StagedRow
+): StageGroup | null {
+  const stages = stagesOf(kind, row)
+  return stages ? groupOf(kind, stages) : null
+}
+
+/**
+ * Whether a group kept from `rowGroup` is one of the list. A null group (unknown status) is in none.
+ * With the row at hand, `rowInGroups` says the same in one call; this is for a stored group.
+ */
+export function groupIn(
+  kind: AppointmentKind,
+  group: StageGroup | null,
+  groups: readonly StageGroup[]
+): boolean {
+  for (const g of groups) stagesInGroupOrThrow(kind, g) // a group of the other kind is a bug
+  return group !== null && groups.includes(group)
+}
+
 /**
  * Whether a row is in any of the groups: by its stored stages when synced, else derived from its old
  * value. False for a status the mapping does not know.
@@ -318,4 +340,27 @@ export function isNotCancelled(
   alsoOff: readonly StageGroup[] = []
 ): boolean {
   return !rowInGroups(kind, row, ["cancelled_or_not_served", ...alsoOff])
+}
+
+/** The stage fields and stamps a session entity (`FrontdeskSesionEntity`) carries. */
+export type SessionStageFields = Pick<
+  StagedRow,
+  | "bookingStatus"
+  | "careStatus"
+  | "syncedStatus"
+  | "confirmedAt"
+  | "calledAt"
+  | "presentAt"
+>
+
+/** A session's stage fields, to carry next to its status into a reader's row shape. */
+export function sessionStageFields(s: SessionStageFields): SessionStageFields {
+  return {
+    bookingStatus: s.bookingStatus,
+    careStatus: s.careStatus,
+    syncedStatus: s.syncedStatus,
+    confirmedAt: s.confirmedAt,
+    calledAt: s.calledAt,
+    presentAt: s.presentAt,
+  }
 }

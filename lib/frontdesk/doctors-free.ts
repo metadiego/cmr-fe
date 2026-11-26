@@ -4,7 +4,8 @@
 
 import type { CitaFila } from "../api/agenda-dia.ts"
 import { text } from "./patient-day.ts"
-import { consultationRowStaged, groupIn, rowGroup } from "./row-stages.ts"
+import { rowInGroups } from "../lifecycle/stage-groups.ts"
+import { consultationRowStaged } from "./row-stages.ts"
 
 export interface DoctorStatus {
   id: string
@@ -27,7 +28,7 @@ export function doctorsStatus(
     const name = text(r.medico)
     const cur = byId.get(id) ?? { name: "", busy: false }
     if (!cur.name && name) cur.name = name
-    if (groupIn(rowGroup("medical", consultationRowStaged(r)), ["in_consultation"])) cur.busy = true
+    if (rowInGroups("medical", consultationRowStaged(r), ["in_consultation"])) cur.busy = true
     byId.set(id, cur)
   }
   return [...byId.entries()]
