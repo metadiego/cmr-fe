@@ -56,7 +56,7 @@ Use positive group lists, not negations of a stage predicate (a row with no stag
 - A status label is `stageLabel(kind, row)` (`lib/lifecycle/stage-labels.ts`): the stage group, with `cancelled` and
   `not_served` told apart. Texts: `lifecycle.label.<kind>.<label>`, equal to the old `citas.estado` /
   `servicios.estado` text for every old value (pinned by `stage-labels.test.ts`); not served reads as
-  `lifecycle.stage.not_served`.
+  `lifecycle.label.<kind>.not_served`. A not-served row's badge is amber (warning, `StatusBadge` tone) instead of red.
 - Without `allowedActions`, Cancel / No-show / the appointment menu read the stage group (`board-action-rules.ts`,
   `allowed-actions.ts`), by kind.
 - `lib/lifecycle/old-status-readers.test.ts` blocks any old value outside `lib/lifecycle/` except the files in

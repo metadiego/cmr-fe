@@ -3,7 +3,7 @@
 // Board rows (/board/rows, /frontdesk/tablero) carry only the old status and its stamps, so their stages
 // are derived; a session entity (FrontdeskSesionEntity) adds its stored stages, trusted while synced.
 
-import type { SessionStageFields, StagedRow } from "../lifecycle/stage-groups.ts"
+import { sessionStageFields, type SessionStageFields, type StagedRow } from "../lifecycle/stage-groups.ts"
 
 /**
  * A service-board row as a staged row: the row's own status (the fresh truth, PR #195) plus its
@@ -15,15 +15,7 @@ export function sessionRowStaged(
   rowStatus: string,
   session: SessionStageFields | null | undefined
 ): StagedRow {
-  return {
-    status: rowStatus,
-    bookingStatus: session?.bookingStatus ?? null,
-    careStatus: session?.careStatus ?? null,
-    syncedStatus: session?.syncedStatus ?? null,
-    confirmedAt: session?.confirmedAt ?? null,
-    calledAt: session?.calledAt ?? null,
-    presentAt: session?.presentAt ?? null,
-  }
+  return { status: rowStatus, ...sessionStageFields(session ?? {}), syncedStatus: session?.syncedStatus ?? null }
 }
 
 const str = (v: unknown) => (typeof v === "string" ? v : v == null ? "" : String(v))

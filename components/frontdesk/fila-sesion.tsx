@@ -28,7 +28,7 @@ import { MedicionCell } from "@/components/frontdesk/medicion-cell";
 import { VialRemnantChips } from "@/components/frontdesk/vial-remnant-chip";
 import { isRemnantVisit } from "@/lib/frontdesk/vial-remnant";
 import { sessionRowStaged } from "@/lib/frontdesk/row-stages";
-import { BEFORE_ARRIVAL, groupIn, rowGroup } from "@/lib/lifecycle/stage-groups";
+import { BEFORE_ARRIVAL, CANCELLED, groupIn, rowGroup } from "@/lib/lifecycle/stage-groups";
 import { RowMenu } from "@/components/frontdesk/row-menu";
 import { readAllowedActions, slugOffered } from "@/lib/lifecycle/allowed-actions";
 import { FilaSesionModales } from "@/components/frontdesk/fila-sesion-modales";
@@ -137,7 +137,7 @@ export function FilaSesion({
   // Decisions read the row's stage group (lifecycle 5d): the row's status with its session's stages.
   const filaStaged = sessionRowStaged(estadoActual, sesion);
   const grupoActual = rowGroup("therapy", filaStaged);
-  const cancelada = groupIn("therapy", grupoActual, ["cancelled_or_not_served"]);
+  const cancelada = groupIn("therapy", grupoActual, CANCELLED);
   const allowed = drawFromAllowedActions ? readAllowedActions(fila) : null;
   const offered = (slug: string | null) => !slug || slugOffered(slug, allowed) !== false; // no list: today's rule
   const pacienteNombre = String(fila.paciente ?? fila.fd_paciente ?? fila.fac_paciente ?? "");

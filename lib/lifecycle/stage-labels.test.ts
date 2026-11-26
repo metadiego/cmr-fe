@@ -2,7 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 
-import { STAGE_LABELS, stageLabel, stageLabelKey } from "./stage-labels.ts"
+import { STAGE_LABELS, labelText, stageLabel, stageLabelKey, stageLabelText } from "./stage-labels.ts"
 import type { AppointmentKind } from "./stage-groups.ts"
 
 const AT = "2026-11-26T13:00:00Z"
@@ -68,4 +68,14 @@ test("every label of each kind has its text in every language, the same as the o
   for (const dict of [es, en])
     for (const kind of ["medical", "therapy"] as const)
       assert.equal(at(dict, stageLabelKey(kind, "not_served")), at(dict, "lifecycle.stage.not_served"))
+})
+
+test("stageLabelText: the label text, or the raw status for an unknown one", () => {
+  const t = (k: string) => `T(${k})`
+  assert.equal(stageLabelText(t, "therapy", { status: "asistido" }), "T(lifecycle.label.therapy.done)")
+  assert.equal(stageLabelText(t, "medical", { estado: "cancelada", arrivedAt: AT }, "x"), "T(lifecycle.label.medical.not_served)")
+  assert.equal(stageLabelText(t, "therapy", { status: "raro" }), "raro")
+  assert.equal(stageLabelText(t, "therapy", {}), "")
+  assert.equal(labelText(t, "medical", "booked", "p"), "T(lifecycle.label.medical.booked)")
+  assert.equal(labelText(t, "medical", null, "p"), "p")
 })

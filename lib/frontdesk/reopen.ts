@@ -2,10 +2,10 @@
 // docs/specs/reabrir-sesion-el-mismo-dia-handoff.md). Pure rules the row menu and the boards share; the
 // BE enforces every one of them again (409), these only decide what the screen offers.
 
-import { rowInGroups, type StagedRow } from "../lifecycle/stage-groups.ts";
+import { isCancelledRow, type StagedRow } from "../lifecycle/stage-groups.ts";
 
 /** Cancelled or not served (stage group): the only rows «Reabrir» and «hide cancelled» look at. */
-const isCancelled = (row: StagedRow) => rowInGroups("therapy", row, ["cancelled_or_not_served"]);
+const isCancelled = (row: StagedRow) => isCancelledRow("therapy", row);
 
 /** A session date ("YYYY-MM-DD", or an ISO instant) falls on `today` ("YYYY-MM-DD"). */
 export function isSessionToday(date: string | null | undefined, today: string): boolean {

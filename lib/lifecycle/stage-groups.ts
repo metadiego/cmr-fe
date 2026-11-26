@@ -138,6 +138,12 @@ export const NOT_OCCUPYING_THE_DAY: readonly StageGroup[] = [
   "rescheduled",
 ]
 
+/** Cancelled or not served (one group, both kinds). */
+export const CANCELLED: readonly StageGroup[] = ["cancelled_or_not_served"]
+
+/** Finished one way or the other: done, or cancelled / not served (therapy). */
+export const CLOSED: readonly StageGroup[] = ["done", "cancelled_or_not_served"]
+
 /** Medical only: closed without the patient being seen (no-show, cancelled or not served). */
 export const NEVER_SEEN: readonly StageGroup[] = [
   "no_show",
@@ -333,6 +339,11 @@ export function rowInGroups(
   groups: readonly StageGroup[]
 ): boolean {
   return inGroups(kind, stagesOf(kind, row), groups)
+}
+
+/** Whether a row is cancelled or not served. False for a status the mapping does not know. */
+export function isCancelledRow(kind: AppointmentKind, row: StagedRow): boolean {
+  return rowInGroups(kind, row, CANCELLED)
 }
 
 /**

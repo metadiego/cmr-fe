@@ -5,6 +5,9 @@ import {
   BEFORE_ARRIVAL,
   IN_CARE,
   LIVE,
+  CANCELLED,
+  CLOSED,
+  isCancelledRow,
   MEDICAL_GROUPS,
   NEVER_SEEN,
   NOT_CANCELLED,
@@ -353,4 +356,14 @@ test("NEVER_SEEN: medical rows closed without the patient being seen; not served
   assert.equal(rowInGroups("medical", { estado: "cancelada", arrivedAt: AT }, NEVER_SEEN), true)
   assert.equal(rowInGroups("medical", { estado: "atendida" }, NEVER_SEEN), false)
   assert.equal(rowInGroups("medical", { estado: "presente" }, NEVER_SEEN), false)
+})
+
+test("isCancelledRow: cancelled or not served, per kind; unknown status is not cancelled", () => {
+  assert.deepEqual([...CANCELLED], ["cancelled_or_not_served"])
+  assert.deepEqual([...CLOSED], ["done", "cancelled_or_not_served"])
+  assert.equal(isCancelledRow("therapy", { status: "cancelada" }), true)
+  assert.equal(isCancelledRow("therapy", { status: "cancelada", presentAt: "2026-11-26T13:00:00Z" }), true)
+  assert.equal(isCancelledRow("medical", { estado: "cancelada" }), true)
+  assert.equal(isCancelledRow("medical", { estado: "atendida" }), false)
+  assert.equal(isCancelledRow("therapy", { status: "raro" }), false)
 })

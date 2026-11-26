@@ -5,6 +5,8 @@
 import { coincide as matches } from "./search.ts"
 import {
   BEFORE_ARRIVAL,
+  CANCELLED,
+  CLOSED,
   IN_CARE,
   NEVER_SEEN,
   groupIn,
@@ -98,9 +100,7 @@ const minIso = (a: string | null, b: string | null | undefined) =>
   !b ? a : !a || b < a ? b : a
 
 // Groups readers here share (lib/lifecycle/stage-groups.ts): a cancelled or not-served row is not live.
-const CANCELLED: readonly StageGroup[] = ["cancelled_or_not_served"]
 const DONE: readonly StageGroup[] = ["done"]
-const CLOSED: readonly StageGroup[] = ["done", "cancelled_or_not_served"]
 
 // The Consulta view speaks only of the consultation: arrival is the consultation's own, and a
 // patient who came for therapies but not the doctor reads «No presente» there (owner, 04-nov-2026).

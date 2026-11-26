@@ -1,4 +1,4 @@
-import { rowInGroups, type StagedRow } from "../../lifecycle/stage-groups.ts";
+import { isCancelledRow, rowInGroups, type StagedRow } from "../../lifecycle/stage-groups.ts";
 
 // How the booking screens read a patient's existing therapy sessions, by stage group.
 
@@ -12,5 +12,5 @@ export function holdsTheBooking(s: StagedRow): boolean {
 
 /** The session was cancelled (or the patient arrived and was not served). */
 export function sessionCancelled(s: StagedRow): boolean {
-  return rowInGroups("therapy", s, ["cancelled_or_not_served"]);
+  return isCancelledRow("therapy", s);
 }

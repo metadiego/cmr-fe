@@ -42,6 +42,29 @@ export function stageLabel(kind: AppointmentKind, row: StagedRow): StageLabel | 
   return group === "cancelled_or_not_served" ? "cancelled" : group
 }
 
+/**
+ * The text a row's status shows: its stage label (`lifecycle.label.*`), or, for a status the mapping
+ * does not know, the raw value (`fallback`, the row's `status`, "" when none). `t` is the root translator.
+ */
+export function stageLabelText(
+  t: (key: string) => string,
+  kind: AppointmentKind,
+  row: StagedRow & { status?: string | null },
+  fallback: string | null | undefined = row.status
+): string {
+  return labelText(t, kind, stageLabel(kind, row), fallback)
+}
+
+/** The same for a label already worked out (a derived appointment carries it): text, or `raw`. */
+export function labelText(
+  t: (key: string) => string,
+  kind: AppointmentKind,
+  label: StageLabel | null,
+  raw: string | null | undefined
+): string {
+  return label ? t(stageLabelKey(kind, label)) : (raw ?? "")
+}
+
 /** The message key of a label. */
 export const stageLabelKey = (kind: AppointmentKind, label: StageLabel): string =>
   `lifecycle.label.${kind}.${label}`

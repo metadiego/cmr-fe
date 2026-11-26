@@ -16,7 +16,7 @@ import { useResource } from "@/hooks/use-resource";
 import type { PatientAppointments } from "@/hooks/use-patient-appointments";
 import { railActions, type PatientAppointment, type RailActions } from "@/lib/agenda/booking/patient-appointments";
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
-import { stageLabelKey } from "@/lib/lifecycle/stage-labels";
+import { labelText } from "@/lib/lifecycle/stage-labels";
 import { cancelarCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { cancelarSesion } from "@/lib/api/frontdesk";
 import { apiErrorLabel } from "@/lib/api/errors";
@@ -170,9 +170,7 @@ function AppointmentCard({
   const tRoot = useTranslations();
   const label = useAppointmentLabel();
   const kindLabel = t(a.kind === "medical" ? "kindMedical" : "kindService");
-  const status = a.stageLabel
-    ? tRoot(stageLabelKey(a.kind === "medical" ? "medical" : "therapy", a.stageLabel))
-    : a.status;
+  const status = labelText(tRoot, a.kind === "medical" ? "medical" : "therapy", a.stageLabel, a.status);
 
   return (
     <div

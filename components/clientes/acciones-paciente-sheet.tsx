@@ -13,12 +13,11 @@ import { listCitasEveryCenter, getTiposCita, type Cita, type TipoCita } from "@/
 import { listSesionesRango, type Sesion } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getMedicos, type Personal } from "@/lib/api/personal";
-import { stageLabel, stageLabelKey } from "@/lib/lifecycle/stage-labels";
-import type { AppointmentKind, StagedRow } from "@/lib/lifecycle/stage-groups";
+import { stageLabel } from "@/lib/lifecycle/stage-labels";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/kit/status-badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -148,7 +147,6 @@ function Compras({ pid, centro }: { pid: string; centro?: string }) {
 
 function Servicios({ pid, centro }: { pid: string; centro?: string }) {
   const t = useTranslations("acciones");
-  const tRoot = useTranslations();
   const res = useResource<Sesion[]>(
     () => listSesionesRango({ pacienteId: pid, desde: `${AÑO}-01-01`, hasta: `${AÑO}-12-31`, centroId: centro }),
     [pid, centro],
@@ -166,7 +164,7 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
           <span className="min-w-0 truncate">{servName.get(s.serviceId) ?? s.serviceId}</span>
           <span className="flex shrink-0 items-center gap-2 text-xs">
             <span className="text-muted-foreground tabular-nums">{s.date}</span>
-            <Badge variant="outline">{statusText(tRoot, "therapy", s)}</Badge>
+            <StatusBadge kind="therapyStatus" value={stageLabel("therapy", s) ?? s.status} />
           </span>
         </li>
       ))}
@@ -174,21 +172,9 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
   );
 }
 
-// The status a row shows, named by its stage (`lifecycle.label.*`); a status the mapping does not
-// know shows raw.
-function statusText(
-  tRoot: ReturnType<typeof useTranslations>,
-  kind: AppointmentKind,
-  row: StagedRow & { status?: string | null },
-): string {
-  const label = stageLabel(kind, row);
-  return label ? tRoot(stageLabelKey(kind, label)) : (row.status ?? "");
-}
-
 // The patient's appointments in every clinic the person can read, each with its clinic.
 function Citas({ pid }: { pid: string }) {
   const t = useTranslations("acciones");
-  const tRoot = useTranslations();
   const res = useResource<Cita[]>(() => listCitasEveryCenter({ patientId: pid, limit: 100 }).then((r) => r.items), [pid]);
   if (res.state.kind === "loading") return <Cargando />;
   if (res.state.kind === "fail") return <Alert variant="destructive"><AlertDescription>{res.state.message}</AlertDescription></Alert>;
@@ -201,7 +187,7 @@ function Citas({ pid }: { pid: string }) {
           <span className="tabular-nums">{c.date}{c.time ? ` · ${c.time}` : ""}</span>
           <span className="flex shrink-0 items-center gap-2 text-xs">
             <span className="text-muted-foreground">{c.clinicName ?? "—"}</span>
-            <Badge variant="outline">{statusText(tRoot, "medical", c)}</Badge>
+            <StatusBadge kind="medicalStatus" value={stageLabel("medical", c) ?? c.status} />
           </span>
         </li>
       ))}
