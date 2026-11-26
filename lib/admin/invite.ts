@@ -1,6 +1,7 @@
 // Pure helpers for the "Invite user" dialog (components/admin/invite-dialog.tsx).
 
 /** Value of the "Center" select that means every center. */
+import { centersOf, type PositionGrid } from "../personal/positions.ts";
 export const ALL_CENTERS = "__all__";
 
 /** Lowercase, without accents and with single spaces: "  José  Pérez" → "jose perez". */
@@ -77,4 +78,19 @@ export function planInvite(
     : centerIds;
   const [firstCenter, ...others] = ordered;
   return { inviteCenterId: firstCenter, extraCenterIds: others, globalRole: role };
+}
+
+/**
+ * The center an invite carries now that access is positions (docs/specs/positions-and-centers.md):
+ * a linked staff record goes without one (cmr-be then skips its "serves in that center" check, and
+ * its positions are saved right after); a new person is created at the first center they hold a
+ * position in. Only the admin switch → no center (the BE uses the inviter's base center).
+ */
+export function inviteCenterFor(grid: PositionGrid, linked: boolean): string | undefined {
+  return linked ? undefined : centersOf(grid)[0];
+}
+
+/** An invite needs at least one position: one at a center, or full access. */
+export function hasAnyPosition(grid: PositionGrid): boolean {
+  return grid.admin || centersOf(grid).length > 0;
 }

@@ -4,50 +4,56 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { Personal } from "@/lib/api/personal";
-import type { Rol } from "@/lib/api/rbac";
 import { inviteUser } from "@/lib/api/profiles";
+import { setStaffPositions } from "@/lib/api/positions";
 import { missingFields } from "@/lib/forms/missing";
+import { hasAnyPosition } from "@/lib/admin/invite";
+import { buildPositionsBody, chipState } from "@/lib/personal/positions";
 import { staffFullName as nombreDe } from "@/lib/personal/staff-name";
+import { useMe, isAdmin } from "@/hooks/use-me";
 import { EmailInput } from "@/components/email-input";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { useSubmit } from "@/components/kit/use-submit";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usePositionsDraft } from "@/components/personal/use-positions-draft";
+import { PositionsPicker } from "@/components/personal/positions-picker";
 
-// "Give system access" to a staff record. `centro` is the person's home clinic: the account is
-// assigned there as its base clinic.
+// "Give system access" to a staff record: an email and the person's positions (what they do and
+// where; docs/specs/positions-and-centers.md). It starts from the positions the record already holds,
+// since the save sends the complete list. `centro` is the person's home clinic.
 export function DarAccesoDialog({
-  persona, roles, centro, onClose, onDone,
+  persona, centro, onClose, onDone,
 }: {
   persona: Personal;
-  roles: Rol[];
   centro?: string;
   onClose: () => void;
   onDone: () => void;
 }) {
   const t = useTranslations("personalFicha");
+  const tp = useTranslations("staffPositions");
+  const tRoot = useTranslations();
+  const me = useMe();
+  const viewerIsAdmin = me.kind === "ok" && isAdmin(me.me);
   const [email, setEmail] = React.useState(persona.email ?? "");
-  const [rolClave, setRolClave] = React.useState("");
+  const draft = usePositionsDraft(persona.id, true, centro);
 
   const missing = missingFields([
     [t("correo"), !!email.trim()],
-    [t("rol"), !!rolClave],
+    [tp("inviteMissing"), hasAnyPosition(draft.grid)],
   ]);
 
-  // PERSONAL_YA_TIENE_CUENTA / PERSONAL_DE_OTRO_CENTRO / PERSONAL_NO_EXISTE → the BE message (labelKey),
-  // via useSubmit's default error toast.
+  // PERSONAL_YA_TIENE_CUENTA / PERSONAL_NO_EXISTE → the BE message (labelKey), via useSubmit's toast.
   const { submitting, submit } = useSubmit(
     async () => {
-      // ONE call: creates the account, links it to the staff record (staffId), grants the role and assigns the clinic.
+      // No center on the invite: cmr-be then skips its "serves in that center" check, and the positions
+      // saved right after say where the person works.
       await inviteUser({
         email: email.trim(),
         name: persona.name,
         lastName: persona.lastName ?? undefined,
         staffId: persona.id,
-        rolClave,
-        centerId: centro,
-        tipoAsignacion: "base",
         redirectTo: `${window.location.origin}/auth/set-password`,
       });
+      await setStaffPositions(persona.id, buildPositionsBody(draft.grid, draft.primary, draft.catalog), centro);
     },
     { successMessage: t("accesoDado", { nombre: nombreDe(persona) }), onSuccess: onDone },
   );
@@ -57,10 +63,12 @@ export function DarAccesoDialog({
     <FormDialog
       open
       onOpenChange={(o) => !o && onClose()}
-      size="md"
+      size="lg"
       title={t("darAccesoTitulo", { nombre: nombreDe(persona) })}
       description={t("darAccesoDesc")}
       missing={missing}
+      blocked={!draft.ready}
+      reason={draft.failure ?? (draft.ready ? undefined : tRoot("common.loading"))}
       submitting={submitting}
       submittingLabel={t("dando")}
       onSubmit={() => {}}
@@ -74,15 +82,22 @@ export function DarAccesoDialog({
           placeholder="persona@correo.com"
         />
       </Field>
-      <Field label={t("rol")} htmlFor="give-access-role" required>
-        <Select value={rolClave || undefined} onValueChange={setRolClave}>
-          <SelectTrigger id="give-access-role" className="w-full">
-            <SelectValue placeholder={t("rolPlaceholder")} />
-          </SelectTrigger>
-          <SelectContent>
-            {roles.map((r) => <SelectItem key={r.id} value={r.slug}>{r.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
+      <Field label={tp("inviteTitle")} hint={tp("inviteHelp")}>
+        {draft.ready && (
+          <PositionsPicker
+            idPrefix={`give-access-${persona.id}`}
+            catalog={draft.catalog}
+            centers={draft.centers}
+            grid={draft.grid}
+            onChange={draft.setGrid}
+            primary={draft.primary}
+            onPrimaryChange={draft.setPrimary}
+            viewerIsAdmin={viewerIsAdmin}
+            blockOf={(position, centerId) =>
+              chipState({ position, centerId, grid: draft.grid, viewerIsAdmin, hasLogin: false, canEditCenter: true })
+            }
+          />
+        )}
       </Field>
     </FormDialog>
   );

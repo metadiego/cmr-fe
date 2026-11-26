@@ -14,7 +14,6 @@ import { StaffList } from "@/components/personal/staff-list";
 import { FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
 import { StaffPositionsSection } from "@/components/personal/staff-positions-section";
 import { DarAccesoDialog } from "@/components/personal/give-access-dialog";
-import { getRoles, type Rol } from "@/lib/api/rbac";
 import { getPositions, type Position } from "@/lib/api/positions";
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { InviteDialog } from "@/components/admin/invite-dialog";
@@ -71,8 +70,6 @@ export function StaffPanel() {
     () => (listRes.state.kind === "ok" ? listRes.state.data : []),
     [listRes.state],
   );
-  const rolesRes = useResource<Rol[]>(() => getRoles());
-  const roles = rolesRes.state.kind === "ok" ? rolesRes.state.data : [];
   // Catálogo de cargos del BE: one closed list, the same in every clinic.
   const positionsRes = useResource<Position[]>(() => getPositions());
   const positions = positionsRes.state.kind === "ok" ? positionsRes.state.data : [];
@@ -186,7 +183,6 @@ export function StaffPanel() {
               key={sel.id}
               persona={sel}
               positions={positions}
-              roles={roles}
               ehrRoles={ehrRoles}
               ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
               profile={admin && sel.profileId ? profilesById.get(sel.profileId) : undefined}
@@ -240,7 +236,7 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, positions, roles, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
+  persona, positions, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
 }: {
   /** The person's login, when the viewer is an admin (only an admin manages access). */
   profile: Perfil | undefined;
@@ -248,7 +244,6 @@ function FichaPersonal({
   persona: Personal;
   /** The position catalog (`GET /positions`). */
   positions: Position[];
-  roles: Rol[];
   ehrRoles: EhrRole[];
   ehrLink: EhrStaffLink | undefined;
   ehrCenterIds: string[] | undefined;
@@ -342,7 +337,6 @@ function FichaPersonal({
       {darAcceso && (
         <DarAccesoDialog
           persona={persona}
-          roles={roles}
           centro={centro}
           onClose={() => setDarAcceso(false)}
           onDone={() => { setDarAcceso(false); onChanged(); onProfileChanged(); }}
