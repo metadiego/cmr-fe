@@ -277,17 +277,14 @@ function deriveStages(kind: AppointmentKind, row: StagedRow): Stages | null {
 
 /**
  * The stages a reader should judge a row by. The stored `bookingStatus` / `careStatus` are trusted
- * when `bookingStatus` is present and the row is not known to be stale (it carries no `syncedStatus`,
+ * when `bookingStatus` is present and the row is not known to be stale (the response carries no `syncedStatus` key,
  * or `syncedStatus` equals its old status) and the pair is a stage of the kind. Otherwise they are
  * derived from the old value (and its stamps), so a row a bypassing writer just changed, or one with
  * no stage yet, is never judged stale. Null for a status the mapping does not know.
  */
 export function stagesOf(kind: AppointmentKind, row: StagedRow): Stages | null {
   const old = oldStatusOf(row)
-  const synced =
-    row.syncedStatus === undefined ||
-    row.syncedStatus === null ||
-    row.syncedStatus === old
+  const synced = !("syncedStatus" in row) || row.syncedStatus === old
   if (row.bookingStatus && synced) {
     const stored: Stages = {
       booking: row.bookingStatus,

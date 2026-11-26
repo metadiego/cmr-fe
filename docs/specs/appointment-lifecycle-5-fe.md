@@ -28,7 +28,7 @@ Repeated or comma separated, accepted on REST v1 and v2:
 ## The FE groups (`lib/lifecycle/stage-groups.ts`)
 
 Same names and unions as the backend module. `stagesOf(kind, row)` trusts `bookingStatus` / `careStatus` when
-`bookingStatus` is present and the row has no `syncedStatus` or it equals the row's old status; otherwise it derives the stages from the
+`bookingStatus` is present and the row has no `syncedStatus` key (a present null counts as not synced) or it equals the row's old status; otherwise it derives the stages from the
 old value (a copy of the backend mapping, kept only in `lib/lifecycle/`). A status it does not know gives `null` stages
 (`isNotCancelled` counts it as not cancelled, as the old read did).
 

@@ -278,3 +278,26 @@ test("rowInGroups / isNotCancelled", () => {
   )
   assert.equal(isNotCancelled("therapy", { status: "asistido" }), true)
 })
+
+test("syncedStatus present but null means not synced: derive from the old value; key absent: trust the columns", () => {
+  assert.deepEqual(
+    stagesOf("medical", {
+      estado: "presente",
+      bookingStatus: "booked",
+      careStatus: null,
+      syncedStatus: null,
+    }),
+    { booking: "arrived", care: "waiting" }
+  )
+  assert.deepEqual(
+    stagesOf("medical", {
+      estado: "presente",
+      bookingStatus: "booked",
+      careStatus: null,
+    }),
+    {
+      booking: "booked",
+      care: null,
+    }
+  )
+})
