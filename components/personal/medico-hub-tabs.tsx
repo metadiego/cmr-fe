@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { citasReadableCenterIds, listCitasEveryCenter, listCitasRango, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
+import { rowInGroups } from "@/lib/lifecycle/stage-groups";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { Badge } from "@/components/ui/badge";
 
@@ -115,7 +116,7 @@ export function MedicoProduccion({ doctorId, centro }: { doctorId: string; centr
   );
   const totalPac = pacRes.state.kind === "ok" ? pacRes.state.data.pagination.total : 0;
   const citas = citasRes.state.kind === "ok" ? citasRes.state.data : [];
-  const atendidas = citas.filter((c) => c.status === "atendida").length;
+  const atendidas = citas.filter((c) => rowInGroups("medical", c, ["done"])).length;
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">{t("productionYear", { year: new Date().getFullYear() })}</p>
