@@ -2,6 +2,8 @@
 
 Guidance for Claude Code (claude.ai/code) when working in this repository.
 
+**Pending work:** what is left for later (dated checks, keys or files to delete, parked findings, follow-ups) goes in `../todo/README.md` (the `cmr-app/todo/` folder, outside git); read it at session start. Rules: the root `../CLAUDE.md`, section "Pending work goes in `todo/README.md`".
+
 Complements [`AGENTS.md`](./AGENTS.md) (gstack and browser-based QA), which still applies.
 The Next 16 rules that open that file override any memory of earlier versions: **read
 `node_modules/next/dist/docs/` before writing framework code.**
