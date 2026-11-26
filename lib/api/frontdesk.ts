@@ -19,7 +19,6 @@ export type Sesion = components["schemas"]["FrontdeskSesionEntity"] & { patient?
 // `confirmed` (cmr-be 4a, typed by hand until gen:api runs against 4a): born booked and confirmed; needs
 // `appointments.confirm` in the target center. Ignored by the backend for a session born present.
 export type CreateSesionPayload = components["schemas"]["CreateSesionDto"] & { confirmed?: boolean };
-export type EstadoSesion = Sesion["status"];
 
 function asArray<T>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];

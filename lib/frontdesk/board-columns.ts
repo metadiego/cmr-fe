@@ -4,6 +4,8 @@
 // Grouped toggles (render.group, e.g. "flujo_servicio") COLLAPSE into a single "flow" cell placed where
 // the group was — never painted again as loose columns. The actions column is drawn apart.
 
+import { IN_CARE, groupIn, rowGroup, type StagedRow } from "../lifecycle/stage-groups.ts";
+
 export interface BoardColumnLike {
   clave: string;
   tipo?: string;
@@ -50,34 +52,36 @@ export function renderColumns<C extends BoardColumnLike>(cols: C[]): RenderItem<
 const stampRank = (a: string | null | undefined, b: string | null | undefined) =>
   a && b ? a.localeCompare(b) : a ? -1 : b ? 1 : 0;
 
-// Natural order of a service board (no column clicked): here NOW (presente/en_terapia) by first
-// arrival, then pendiente by its appointment time, then asistido by when it FINISHED, cancelada
-// last. Found live 12-oct-2026 (owner, Vit C): sorting everyone by `presente` alone put an asistido
-// row — stamped with its own morning arrival — above people still actually in the room, because
-// finishing a therapy does not erase that old stamp. Shared by the frontdesk board and the patient
-// desk's service rows so neither has to re-derive this.
+// Natural order of a service board (no column clicked): here NOW (in care: waiting, called, in
+// therapy) by first arrival, then upcoming by its appointment time, then done by when it FINISHED,
+// cancelled or not served last (an unknown status ranks with upcoming). Found live 12-oct-2026
+// (owner, Vit C): sorting everyone by `presente` alone put an asistido row — stamped with its own
+// morning arrival — above people still actually in the room, because finishing a therapy does not
+// erase that old stamp. Shared by the frontdesk board and the patient desk's service rows so neither
+// has to re-derive this.
+// Service boards (therapy sessions) only: rows are read as the therapy kind.
 export function sortBoardRowsNatural<R>(
   rows: R[],
   opts: {
-    estadoOf: (row: R) => string;
+    stagedOf: (row: R) => StagedRow;
     presenteOf: (row: R) => string | null | undefined;
     asistidoOf: (row: R) => string | null | undefined;
     scheduledTimeOf: (row: R) => string | null | undefined;
   }
 ): R[] {
-  const rankOf = (estado: string) =>
-    estado === "presente" || estado === "en_terapia"
+  const rankOf = (row: R) => {
+    const group = rowGroup("therapy", opts.stagedOf(row));
+    return groupIn("therapy", group, IN_CARE.therapy)
       ? 0
-      : estado === "pendiente"
-        ? 1
-        : estado === "asistido"
-          ? 2
-          : estado === "cancelada"
-            ? 3
-            : 1;
+      : groupIn("therapy", group, ["done"])
+        ? 2
+        : groupIn("therapy", group, ["cancelled_or_not_served"])
+          ? 3
+          : 1;
+  };
   return [...rows].sort((a, b) => {
-    const ra = rankOf(opts.estadoOf(a));
-    const rb = rankOf(opts.estadoOf(b));
+    const ra = rankOf(a);
+    const rb = rankOf(b);
     if (ra !== rb) return ra - rb;
     if (ra === 0) return stampRank(opts.presenteOf(a), opts.presenteOf(b));
     if (ra === 1) return stampRank(opts.scheduledTimeOf(a), opts.scheduledTimeOf(b));

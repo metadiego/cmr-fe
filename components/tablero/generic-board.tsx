@@ -336,11 +336,14 @@ export function GenericBoard({
             if (registro?.entity === "cita" || actions) {
               return <AccionesModal actions={actions ?? []} fila={fila} centroId={centroId} volverHref={volverHref} />;
             }
+            // El registro aún carga: no se sabe si es un tablero de citas; no se pinta nada (no juzgar como terapia).
+            if (regRes.state.kind === "loading") return null;
             return (
               <TableroAcciones
                 tablero={tablero}
                 entidadId={fila.id}
                 estado={String(fila.estado ?? fila["estado"] ?? "")}
+                kind="therapy" // las citas (medical) ya salieron arriba con AccionesModal; aquí solo terapia/servicios
                 estados={def.statuses}
                 transiciones={def.transitions}
                 centroId={centroId}

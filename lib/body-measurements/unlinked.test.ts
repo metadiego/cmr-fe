@@ -54,3 +54,13 @@ test("rankCandidates: the search matches name, record or service, without accent
   assert.deepEqual(rankCandidates(list, { query: "perez" }).map((x) => x.id), ["a"]);
   assert.deepEqual(rankCandidates(list, { query: "16041" }).map((x) => x.id), ["b"]);
 });
+
+test("rankCandidates reads the stage group: not served is out like cancelled; a called visit stays; stage columns alone count", () => {
+  const list = [
+    c("ns", { serviceName: "GLP-1", time: "08:00", status: "cancelada", presentAt: "2026-11-26T12:00:00Z" }),
+    c("called", { serviceName: "GLP-1", time: "09:00", status: "presente", calledAt: "2026-11-26T13:00:00Z" }),
+    c("stage", { serviceName: "GLP-1", time: "10:00", status: "", bookingStatus: "cancelled", careStatus: null }),
+    c("odd", { serviceName: "GLP-1", time: "11:00", status: "rara" }),
+  ];
+  assert.deepEqual(rankCandidates(list, {}).map((x) => x.id), ["called", "odd"], "an unknown status stays, as before");
+});

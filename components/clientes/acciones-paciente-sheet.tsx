@@ -13,10 +13,11 @@ import { listCitasEveryCenter, getTiposCita, type Cita, type TipoCita } from "@/
 import { listSesionesRango, type Sesion } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getMedicos, type Personal } from "@/lib/api/personal";
+import { stageLabel } from "@/lib/lifecycle/stage-labels";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/kit/status-badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -146,7 +147,6 @@ function Compras({ pid, centro }: { pid: string; centro?: string }) {
 
 function Servicios({ pid, centro }: { pid: string; centro?: string }) {
   const t = useTranslations("acciones");
-  const tRoot = useTranslations();
   const res = useResource<Sesion[]>(
     () => listSesionesRango({ pacienteId: pid, desde: `${AÑO}-01-01`, hasta: `${AÑO}-12-31`, centroId: centro }),
     [pid, centro],
@@ -164,7 +164,7 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
           <span className="min-w-0 truncate">{servName.get(s.serviceId) ?? s.serviceId}</span>
           <span className="flex shrink-0 items-center gap-2 text-xs">
             <span className="text-muted-foreground tabular-nums">{s.date}</span>
-            <Badge variant="outline">{tRoot.has(`estado.${s.status}`) ? tRoot(`estado.${s.status}`) : s.status}</Badge>
+            <StatusBadge kind="therapyStatus" value={stageLabel("therapy", s) ?? s.status} />
           </span>
         </li>
       ))}
@@ -187,7 +187,7 @@ function Citas({ pid }: { pid: string }) {
           <span className="tabular-nums">{c.date}{c.time ? ` · ${c.time}` : ""}</span>
           <span className="flex shrink-0 items-center gap-2 text-xs">
             <span className="text-muted-foreground">{c.clinicName ?? "—"}</span>
-            <Badge variant="outline">{c.status}</Badge>
+            <StatusBadge kind="medicalStatus" value={stageLabel("medical", c) ?? c.status} />
           </span>
         </li>
       ))}

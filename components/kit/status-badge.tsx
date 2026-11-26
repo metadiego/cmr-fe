@@ -10,22 +10,12 @@ import { Badge } from "@/components/ui/badge";
 // A new status value gets its tone HERE, once, never a per-screen className.
 type Tone = "success" | "info" | "warning" | "destructive" | "secondary";
 const TONE: Record<string, Tone> = {
-  // appointments
-  atendida: "success",
-  programada: "info",
-  confirmada: "info",
-  presente: "info",
-  triage: "info",
-  en_consulta: "info",
-  no_show: "warning",
-  reprogramada: "secondary",
-  cancelada: "destructive",
-  // therapy sessions
-  asistido: "success",
-  en_terapia: "info",
-  pendiente: "secondary",
-  // appointment lifecycle stages (cmr-be piece 4a: bookingStatus / careStatus, both kinds)
+  // appointment lifecycle stages (cmr-be piece 4a: bookingStatus / careStatus, both kinds) and the
+  // labels named after them (lib/lifecycle/stage-labels.ts)
   booked: "info",
+  upcoming: "secondary",
+  triage: "info",
+  no_show: "warning",
   confirmed: "info",
   arrived: "info",
   waiting: "info",
@@ -63,8 +53,8 @@ const TONE: Record<string, Tone> = {
   desconocido: "secondary",
 };
 const LABEL_NS = {
-  appointment: "citas.estado",
-  therapy: "servicios.estado",
+  medicalStatus: "lifecycle.label.medical",
+  therapyStatus: "lifecycle.label.therapy",
   invoice: "facturacionList.estado",
   transfer: "patients.transferTreatment.status",
   session: "auditSessions.status",

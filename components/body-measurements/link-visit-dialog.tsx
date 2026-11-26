@@ -7,6 +7,7 @@ import { listSesionesRango } from "@/lib/api/frontdesk";
 import { getServicios } from "@/lib/api/servicios";
 import { linkMeasurement } from "@/lib/api/body-measurements";
 import { rankCandidates, type LinkCandidate, type UnlinkedReading } from "@/lib/body-measurements/unlinked";
+import { sessionStageFields } from "@/lib/lifecycle/stage-groups";
 import { missingFields } from "@/lib/forms/missing";
 import { FormDialog } from "@/components/kit/form-dialog";
 import { useSubmit } from "@/components/kit/use-submit";
@@ -52,6 +53,7 @@ export function LinkVisitDialog({
             serviceName: names.get(s.serviceId) ?? null,
             time: s.time ?? null,
             status: s.status,
+            ...sessionStageFields(s),
           })),
         );
       })

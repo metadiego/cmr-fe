@@ -43,3 +43,15 @@ test("a doctor with no row en_consulta but on an active absence never counts as 
   ])
   assert.deepEqual(freeDoctors(rows, new Set(["d1"])), [])
 })
+
+test("only the in-consultation group keeps a doctor busy: waiting or not served (cancelada + arrival) leave them free", () => {
+  const rows = [
+    { id: "r1", medico: "Ana", medico__valor: "d1", estado: "presente", presente: "2026-11-26T13:00:00Z" },
+    { id: "r2", medico: "Ana", medico__valor: "d1", estado: "cancelada", presente: "2026-11-26T12:00:00Z" },
+    { id: "r3", medico: "Beto", medico__valor: "d2", estado: "en_consulta", presente: "2026-11-26T12:00:00Z" },
+  ]
+  assert.deepEqual(doctorsStatus(rows), [
+    { id: "d1", name: "Ana", free: true },
+    { id: "d2", name: "Beto", free: false },
+  ])
+})

@@ -18,44 +18,44 @@ const canAll = () => true
 const today = "2026-11-25"
 
 test("without allowedActions: today's rule (status, permission, active)", () => {
-  const out = availableTransitions(transitions, { status: "programada", isTerminal: false, today, allowed: null, can: (p) => p !== "appointments.confirm" })
+  const out = availableTransitions(transitions, { kind: "medical", status: "programada", isTerminal: false, today, allowed: null, can: (p) => p !== "appointments.confirm" })
   assert.deepEqual(out.map((t) => t.slug), ["presente", "recordatorio", "cancelar"])
 })
 
 test("with allowedActions: the lifecycle moves come from the list, not from status or permission", () => {
   // stored status says programada, but the list (the backend) says only check-in and cancel today
-  const out = availableTransitions(transitions, { status: "programada", isTerminal: false, today, allowed: ["check_in", "cancel"], can: () => false })
+  const out = availableTransitions(transitions, { kind: "medical", status: "programada", isTerminal: false, today, allowed: ["check_in", "cancel"], can: () => false })
   assert.deepEqual(out.map((t) => t.slug), ["presente", "recordatorio", "cancelar"])
 })
 
 test("with allowedActions: a move the list leaves out is hidden", () => {
-  const out = availableTransitions(transitions, { status: "confirmada", isTerminal: false, today, allowed: ["confirm"], can: canAll })
+  const out = availableTransitions(transitions, { kind: "medical", status: "confirmada", isTerminal: false, today, allowed: ["confirm"], can: canAll })
   assert.deepEqual(out.map((t) => t.slug), ["confirmar", "recordatorio"])
 })
 
 test("cancel on an arrived row is relabelled not-served", () => {
-  const out = availableTransitions(transitions, { status: "presente", isTerminal: false, today, allowed: ["not_serve"], can: canAll })
+  const out = availableTransitions(transitions, { kind: "medical", status: "presente", isTerminal: false, today, allowed: ["not_serve"], can: canAll })
   const cancel = out.find((t) => t.slug === "cancelar")
   assert.equal(cancel?.labelKey, "lifecycle.action.not_serve")
 })
 
 test("an empty list hides every lifecycle move; a board's own transition keeps its rule", () => {
-  const out = availableTransitions(transitions, { status: "programada", isTerminal: false, today, allowed: [], can: canAll })
+  const out = availableTransitions(transitions, { kind: "medical", status: "programada", isTerminal: false, today, allowed: [], can: canAll })
   assert.deepEqual(out.map((t) => t.slug), ["recordatorio"])
 })
 
 test("without allowedActions: piece-3 rules hide Cancel in consultation and relabel it on arrival", () => {
   const ts = [tr("cancelar", ["presente", "en_consulta"])]
-  const arrived = availableTransitions(ts, { status: "presente", isTerminal: false, today, allowed: null, can: canAll })
+  const arrived = availableTransitions(ts, { kind: "medical", status: "presente", isTerminal: false, today, allowed: null, can: canAll })
   assert.equal(arrived[0]?.labelKey, "lifecycle.action.not_serve")
-  const inConsult = availableTransitions(ts, { status: "en_consulta", isTerminal: false, today, allowed: null, can: canAll })
+  const inConsult = availableTransitions(ts, { kind: "medical", status: "en_consulta", isTerminal: false, today, allowed: null, can: canAll })
   assert.deepEqual(inConsult, [])
 })
 
 test("without allowedActions: No-show hidden on a future day and after arrival", () => {
   const ts = [tr("no_show", ["confirmada", "presente"])]
   const run = (status: string, date: string) =>
-    availableTransitions(ts, { status, isTerminal: false, today, date, allowed: null, can: canAll }).map((t) => t.slug)
+    availableTransitions(ts, { kind: "medical", status, isTerminal: false, today, date, allowed: null, can: canAll }).map((t) => t.slug)
   assert.deepEqual(run("confirmada", today), ["no_show"])
   assert.deepEqual(run("confirmada", "2026-12-01"), [])
   assert.deepEqual(run("presente", today), [])
@@ -63,6 +63,15 @@ test("without allowedActions: No-show hidden on a future day and after arrival",
 
 test("with allowedActions: the list wins over the piece-3 rules (No-show listed on a future day stays)", () => {
   const ts = [tr("no_show", ["confirmada"])]
-  const out = availableTransitions(ts, { status: "confirmada", isTerminal: false, today, date: "2026-12-01", allowed: ["no_show"], can: canAll })
+  const out = availableTransitions(ts, { kind: "medical", status: "confirmada", isTerminal: false, today, date: "2026-12-01", allowed: ["no_show"], can: canAll })
   assert.deepEqual(out.map((t) => t.slug), ["no_show"])
+})
+
+test("without allowedActions: a session board reads the therapy stages (Cancel on a waiting session is not served; no No-show)", () => {
+  const ts = [tr("cancelar", ["pendiente", "presente", "en_terapia"]), tr("no_show", ["pendiente"])]
+  const run = (status: string) =>
+    availableTransitions(ts, { kind: "therapy", status, isTerminal: false, today, date: today, allowed: null, can: canAll })
+  assert.deepEqual(run("pendiente").map((t) => t.slug), ["cancelar"])
+  assert.equal(run("presente")[0]?.labelKey, "lifecycle.action.not_serve")
+  assert.deepEqual(run("en_terapia"), [])
 })

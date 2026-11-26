@@ -10,6 +10,7 @@ import { listSesionesRango } from "@/lib/api/frontdesk";
 import { getBookingHolidays } from "@/lib/api/festivos";
 import { nowTimePR, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
+import { sessionStageFields, type SessionStageFields } from "@/lib/lifecycle/stage-groups";
 import type { SeriesDay } from "@/hooks/use-series-availability";
 
 // What the patient desk's therapy form needs for its rows, the train counterpart of
@@ -21,7 +22,8 @@ import type { SeriesDay } from "@/hooks/use-series-availability";
 
 const CONCURRENCY = 4;
 
-export type ExistingSession = { serviceId: string; date: string; time: string | null; status: string };
+/** An existing session, with its stage fields so `sameDaySessions` reads its stage group. */
+export type ExistingSession = SessionStageFields & { serviceId: string; date: string; time: string | null; status: string };
 
 export function useTrainSeriesAvailability(p: {
   center: string | undefined;
@@ -124,7 +126,13 @@ export function useTrainSeriesAvailability(p: {
     () =>
       scope && from && to
         ? listSesionesRango({ desde: from, hasta: to, pacienteId: patientId, centroId: center }).then((list) =>
-            list.map((s) => ({ serviceId: s.serviceId, date: String(s.date), time: s.time ?? null, status: s.status })),
+            list.map((s) => ({
+              serviceId: s.serviceId,
+              date: String(s.date),
+              time: s.time ?? null,
+              status: s.status,
+              ...sessionStageFields(s),
+            })),
           )
         : Promise.resolve([]),
     [scope, from, to],

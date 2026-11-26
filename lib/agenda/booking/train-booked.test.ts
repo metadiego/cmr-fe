@@ -12,7 +12,7 @@ function bookable(entries: Record<string, number>): Map<string, BookableService>
 }
 
 function appt(p: Partial<PatientAppointment> & Pick<PatientAppointment, "date" | "typeId">): PatientAppointment {
-  return { id: `${p.date}-${p.typeId}-${p.time}`, kind: "service", time: null, status: "pendiente", withLabel: null, isLive: true, ...p };
+  return { id: `${p.date}-${p.typeId}-${p.time}`, kind: "service", time: null, status: "pendiente", withLabel: null, isLive: true, rescheduled: false, stageLabel: "upcoming", ...p };
 }
 
 test("leftAfterEachDate counts each therapy down visit by visit, in date order", () => {

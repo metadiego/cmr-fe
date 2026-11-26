@@ -9,6 +9,7 @@ import { buildRecurringPlan, weekdayOf, type AvailabilityLookup } from "@/lib/ag
 import { getAvailability, type Availability } from "@/lib/api/resources";
 import { listSesionesRango } from "@/lib/api/frontdesk";
 import { getBookingHolidays } from "@/lib/api/festivos";
+import { sessionCancelled } from "@/lib/agenda/booking/session-booked";
 import { nowTimePR, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 
@@ -135,7 +136,7 @@ export function useSeriesAvailability(p: {
             // Every status counts: the BE skips a date the patient has ANY session of the service on.
             list
               .filter((s) => !s.serviceId || s.serviceId === serviceId)
-              .map((s) => ({ date: String(s.date).slice(0, 10), cancelled: s.status === "cancelada" })),
+              .map((s) => ({ date: String(s.date).slice(0, 10), cancelled: sessionCancelled(s) })),
           )
         : Promise.resolve([]),
     [scope, range?.from, range?.to, nonce],

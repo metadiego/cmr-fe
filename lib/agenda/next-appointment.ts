@@ -3,25 +3,30 @@
 // not cancelled, a no-show or already rescheduled. The column only carries the date; the cell needs the
 // appointment itself (id, time, doctor) to move it, so it applies the same rule to GET /appointments.
 
-export type NextAppointmentCandidate = {
+import {
+  BEFORE_ARRIVAL,
+  NOT_OCCUPYING_THE_DAY,
+  rowInGroups,
+  type StagedRow,
+} from "../lifecycle/stage-groups.ts";
+
+/** A medical appointment: its old status and/or its stage columns (read through `stagesOf`). */
+export type NextAppointmentCandidate = StagedRow & {
   id: string;
   date: string; // YYYY-MM-DD
   time?: string | null; // HH:mm[:ss]
-  status?: string | null;
 };
 
-// States that are no longer a pending visit — the same exclusion list as the BE.
-const NOT_PENDING = new Set(["cancelada", "no_show", "reprogramada"]);
-
-// States an appointment can be rescheduled FROM (components/citas/cita-actions.tsx, ACTIONS map).
-const RESCHEDULABLE = new Set(["programada", "confirmada"]);
+// No longer a pending visit (no-show, cancelled or not served, rescheduled): the same exclusion as
+// the BE. A negative read, so a status the mapping does not know stays pending, as it did.
+const isPending = (a: NextAppointmentCandidate) => !rowInGroups("medical", a, NOT_OCCUPYING_THE_DAY);
 
 export function pickNextAppointment<T extends NextAppointmentCandidate>(
   appointments: T[],
   afterDate: string,
 ): T | null {
   const pending = appointments.filter(
-    (a) => a.date > afterDate && !NOT_PENDING.has(String(a.status ?? "")),
+    (a) => a.date > afterDate && isPending(a),
   );
   pending.sort(
     (a, b) => a.date.localeCompare(b.date) || String(a.time ?? "").localeCompare(String(b.time ?? "")),
@@ -30,7 +35,8 @@ export function pickNextAppointment<T extends NextAppointmentCandidate>(
 }
 
 export function canReschedule(a: NextAppointmentCandidate | null): boolean {
-  return !!a && RESCHEDULABLE.has(String(a.status ?? ""));
+  // Only before arrival (booked or confirmed), like the appointment menu.
+  return !!a && rowInGroups("medical", a, BEFORE_ARRIVAL.medical);
 }
 
 // "When is the patient back?" shortcuts, in days from TODAY (not from the current appointment: the

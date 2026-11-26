@@ -3,6 +3,8 @@
 // etiqueta de mensajes/frontdesk.json pintar para la combinación location×status que llegó.
 // Ver docs/specs/ubicacion-en-vivo-del-paciente.md (BE) y HANDOFF-ubicacion-en-vivo-del-paciente.md.
 
+import { rowInGroups, type StagedRow } from "../lifecycle/stage-groups.ts";
+
 export type UbicacionClave =
   | "enVitales"
   | "enConsultaEsperando"
@@ -10,10 +12,14 @@ export type UbicacionClave =
   | "enServicioEsperando"
   | "enServicio";
 
-export function claveUbicacion(p: { location: string; status: string }): UbicacionClave {
+// The location decides the kind (consultation = medical, service = therapy); the row's stage group
+// decides whether the patient is being seen (in_consultation / in_therapy) or still waiting. The
+// live-location row carries only the old status, so its stages are derived from it.
+export function claveUbicacion(p: StagedRow & { location: string; status: string }): UbicacionClave {
   if (p.location === "vitales") return "enVitales";
-  if (p.location === "consulta") return p.status === "en_consulta" ? "enConsulta" : "enConsultaEsperando";
-  return p.status === "en_terapia" ? "enServicio" : "enServicioEsperando";
+  if (p.location === "consulta")
+    return rowInGroups("medical", p, ["in_consultation"]) ? "enConsulta" : "enConsultaEsperando";
+  return rowInGroups("therapy", p, ["in_therapy"]) ? "enServicio" : "enServicioEsperando";
 }
 
 // `from` sucio conocido (citas viejas de un bug ya corregido en el BE que nunca tuvieron hora real

@@ -15,6 +15,7 @@ import { useCan } from "@/hooks/use-can";
 import { LegacyLabelDialog } from "@/components/clientes/legacy-label-dialog";
 import { LegacyRenumberDialog } from "@/components/clientes/legacy-renumber-dialog";
 import { parseDayUTC } from "@/lib/format/fecha";
+import { stageLabel } from "@/lib/lifecycle/stage-labels";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,7 +90,7 @@ export function FichaCitas({ pacienteId }: { pacienteId: string }) {
                 <TabsTrigger value="past">{t("appointmentsPast")} <Count n={past.length} /></TabsTrigger>
               </TabsList>
             </Tabs>
-            {/* The reschedule trail is NOT listed here (the BE no longer returns `reprogramada`): it sits
+            {/* The reschedule trail is NOT listed here (the BE leaves rescheduled rows out of the list): it sits
                 behind this button. Handoff be-citas-el-rastro-va-detras-de-un-boton. */}
             <Button variant="ghost" size="sm" onClick={() => setHistOpen(true)}>
               <HugeiconsIcon icon={Clock01Icon} className="size-4" />
@@ -124,7 +125,7 @@ export function FichaCitas({ pacienteId }: { pacienteId: string }) {
                 <Td className="font-medium">{tipoNombre(c.appointmentTypeId)}</Td>
                 <Td className="text-muted-foreground">{medicoNombre(c)}</Td>
                 <Td className="text-muted-foreground">{c.clinicName ?? "—"}</Td>
-                <Td><StatusBadge kind="appointment" value={c.status} /></Td>
+                <Td><StatusBadge kind="medicalStatus" value={stageLabel("medical", c) ?? c.status} /></Td>
               </tr>
             ))}
           </RecordTable>
@@ -140,13 +141,13 @@ function Count({ n }: { n: number }) {
 }
 
 // Modal with the patient's RESCHEDULED appointments (date, time, reason). Each opens its full
-// before→after trail through HistorialDialog. GET /appointments?patientId&status=reprogramada.
+// before→after trail through HistorialDialog. GET /appointments?patientId&bookingStatus=rescheduled.
 function ReagendamientosDialog({ pacienteId, onClose }: { pacienteId: string; onClose: () => void }) {
   const t = useTranslations("patients.hub");
   const tc = useTranslations("common");
   const dia = useDia();
   const res = useResource<{ items: Cita[] }>(
-    () => listCitasEveryCenter({ patientId: pacienteId, status: "reprogramada", limit: 100 }),
+    () => listCitasEveryCenter({ patientId: pacienteId, bookingStatus: ["rescheduled"], limit: 100 }),
     [pacienteId],
   );
   const [trace, setTrace] = React.useState<Cita | null>(null);
@@ -288,7 +289,7 @@ export function FichaTerapias({
                   </div>
                 </Td>
                 <Td className="text-muted-foreground">{s.staffNombre ?? "—"}</Td>
-                <Td><StatusBadge kind="therapy" value={s.status} /></Td>
+                <Td><StatusBadge kind="therapyStatus" value={stageLabel("therapy", s) ?? s.status} /></Td>
                 <Td className="text-right">
                   {reports.length > 0 ? (
                     <Button variant="outline" size="sm" onClick={() => setFormatRow(s)}>{t("formats")}</Button>
@@ -384,7 +385,7 @@ export function FichaUltimaVisita({ pacienteId }: { pacienteId: string }) {
         <div className="space-y-1.5 px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium">{typeName(last.appointmentTypeId)}</span>
-            <StatusBadge kind="appointment" value={last.status} />
+            <StatusBadge kind="medicalStatus" value={stageLabel("medical", last) ?? last.status} />
           </div>
           <div className="text-sm text-muted-foreground tabular-nums">
             {dia(last.date)}{last.time ? ` · ${last.time}` : ""}

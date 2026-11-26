@@ -33,6 +33,7 @@ import { useRouter } from "next/navigation";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
 import { hideCancelledRow } from "@/lib/frontdesk/reopen";
+import { sessionRowStaged } from "@/lib/frontdesk/row-stages";
 import { flowColumns, plainColumns, renderColumns, sortBoardRowsNatural } from "@/lib/frontdesk/board-columns";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
@@ -405,22 +406,21 @@ export function FrontdeskBoard() {
     });
     const conVisibilidad =
       ocultarCanceladas && estadoFiltro !== "cancelada"
-        ? conBusqueda.filter((f) => !hideCancelledRow(estadoFila(f), sesiones.get(f.id)?.date, todayISO()))
+        ? conBusqueda.filter((f) => !hideCancelledRow(sessionRowStaged(estadoFila(f), sesiones.get(f.id)), sesiones.get(f.id)?.date, todayISO()))
         : conBusqueda;
     return estadoFiltro
       ? conVisibilidad.filter((f) => estadoFila(f) === estadoFiltro)
       : conVisibilidad;
   }, [board, columnas, q, pacienteFiltroId, pacienteIds, sesiones, estadoFiltro, ocultarCanceladas, estadoFila]);
 
-  // Orden del board. Natural (sort=null): aquí AHORA (presente/en_terapia) por llegada, pendiente por
-  // su hora, asistido por cuándo TERMINÓ, cancelada al final — ver sortBoardRowsNatural (handoff
-  // orden-de-fila-del-tablero-12-oct). Clic en un encabezado ordena por esa columna (asc/desc). Clic en
-  // el encabezado del Flujo vuelve al orden natural. Todo del lado del cliente sobre la página cargada.
+  // Board order. Natural (sort=null): by stage group, see sortBoardRowsNatural (handoff
+  // orden-de-fila-del-tablero-12-oct). A header click sorts by that column (asc/desc); the Flow header
+  // goes back to the natural order. All client-side, over the loaded page.
   const [sort, setSort] = React.useState<{ col: string; dir: "asc" | "desc" } | null>(null);
   const ordenadas = React.useMemo(() => {
     if (!sort) {
       return sortBoardRowsNatural(visibles, {
-        estadoOf: estadoFila,
+        stagedOf: (f) => sessionRowStaged(estadoFila(f), sesiones.get(f.id)),
         presenteOf: (f) => f["presente"] as string | undefined,
         asistidoOf: (f) => f["asistido"] as string | undefined,
         scheduledTimeOf: (f) => sesiones.get(f.id)?.time ?? null,
@@ -450,7 +450,7 @@ export function FrontdeskBoard() {
     }
     // "Todos" refleja lo VISIBLE: si se ocultan canceladas, no las cuenta (evita "Todos: 25" con 22 filas).
     // Los `counts` quedan completos para que la ficha "Cancelada" siga mostrando su número y poder revelarlas.
-    const ocultas = ocultarCanceladas && estadoFiltro !== "cancelada" ? filas.filter((f) => hideCancelledRow(estadoFila(f), sesiones.get(f.id)?.date, todayISO())).length : 0;
+    const ocultas = ocultarCanceladas && estadoFiltro !== "cancelada" ? filas.filter((f) => hideCancelledRow(sessionRowStaged(estadoFila(f), sesiones.get(f.id)), sesiones.get(f.id)?.date, todayISO())).length : 0;
     return { counts, total: filas.length - ocultas };
   }, [board, estadoFila, ocultarCanceladas, estadoFiltro, sesiones]);
 

@@ -1,5 +1,7 @@
 import type { Cita } from "../../api/citas.ts";
 import type { Sesion } from "../../api/frontdesk.ts";
+import { LIVE, rowInGroups } from "../../lifecycle/stage-groups.ts";
+import { stageLabel, type StageLabel } from "../../lifecycle/stage-labels.ts";
 import { normalizeTime } from "./availability.ts";
 
 // One shape for a patient's medical appointments (citas) and service sessions (sesiones).
@@ -12,13 +14,15 @@ export interface PatientAppointment {
   time: string | null; // HH:mm
   status: string;
   withLabel: string | null;
+  /** Not finished, cancelled or moved: the `LIVE` stage groups. */
   isLive: boolean;
+  /** A medical row moved to another date (group `rescheduled`): its successor carries it forward. */
+  rescheduled: boolean;
+  /** The status label, from the stage (`lifecycle.label.*`); null for an unknown status, shown raw. */
+  stageLabel: StageLabel | null;
   /** The appointment's own center: the tenant (X-Tenant-ID) for its cancel and move. */
   centerId?: string | null;
 }
-
-export const MEDICAL_LIVE = ["programada", "confirmada", "presente", "triage", "en_consulta"];
-export const SERVICE_LIVE = ["pendiente", "presente", "en_terapia"];
 
 export function fromCita(c: Cita): PatientAppointment {
   return {
@@ -29,7 +33,9 @@ export function fromCita(c: Cita): PatientAppointment {
     time: c.time ? normalizeTime(c.time) : null,
     status: c.status,
     withLabel: c.doctorName ?? null,
-    isLive: MEDICAL_LIVE.includes(c.status),
+    isLive: rowInGroups("medical", c, LIVE.medical),
+    rescheduled: rowInGroups("medical", c, ["rescheduled"]),
+    stageLabel: stageLabel("medical", c),
     centerId: c.clinicId ?? null,
   };
 }
@@ -45,7 +51,9 @@ export function fromSesion(s: Sesion): PatientAppointment {
     time: s.time ? normalizeTime(s.time) : null,
     status: s.status,
     withLabel: null,
-    isLive: SERVICE_LIVE.includes(s.status),
+    isLive: rowInGroups("therapy", s, LIVE.therapy),
+    rescheduled: false, // therapy has no rescheduled stage
+    stageLabel: stageLabel("therapy", s),
     centerId: s.clinicId ?? null,
   };
 }
@@ -63,8 +71,8 @@ export function splitUpcomingPast(
   todayIso: string,
   pastLimit = 5,
 ): { upcoming: PatientAppointment[]; past: PatientAppointment[] } {
-  // `reprogramada` has a successor row that carries the appointment forward.
-  const kept = items.filter((i) => i.status !== "reprogramada");
+  // A rescheduled row has a successor row that carries the appointment forward.
+  const kept = items.filter((i) => !i.rescheduled);
   const isUpcoming = (i: PatientAppointment) => i.isLive && i.date >= todayIso;
   const upcoming = kept.filter(isUpcoming).sort(cmp);
   const past = kept

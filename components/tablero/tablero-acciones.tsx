@@ -11,6 +11,7 @@ import { listPersonal, type Personal } from "@/lib/api/personal";
 import { boardActionMissing } from "@/lib/board/board-action-missing";
 import { availableTransitions } from "@/lib/board/available-transitions";
 import { refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
+import type { AppointmentKind } from "@/lib/lifecycle/stage-groups";
 import { todayPR } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
@@ -45,6 +46,7 @@ export function TableroAcciones({
   tablero,
   entidadId,
   estado,
+  kind,
   estados,
   transiciones,
   centroId,
@@ -55,6 +57,8 @@ export function TableroAcciones({
   tablero: string;
   entidadId: string;
   estado: string;
+  /** The board's rows: medical appointments or therapy sessions (Cancel / No-show read their stages). */
+  kind: AppointmentKind;
   estados: EstadoCitaCatalogo[];
   transiciones: Transicion[];
   centroId?: string;
@@ -95,6 +99,7 @@ export function TableroAcciones({
 
   const isTerminal = estados.find((e) => e.slug === estado)?.isTerminal ?? false;
   const available = availableTransitions(transiciones, {
+    kind,
     status: estado,
     isTerminal,
     allowed: allowedActions ?? null,

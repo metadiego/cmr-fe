@@ -28,3 +28,14 @@ test("fechaDesdeValida: acepta una fecha real", () => {
 test("fechaDesdeValida: rechaza texto inválido sin tirar", () => {
   assert.equal(fechaDesdeValida("no-es-fecha"), false);
 });
+
+test("claveUbicacion reads the stage group: a called therapy is still waiting; triage or an unknown status waits", () => {
+  assert.equal(claveUbicacion({ location: "servicio", status: "presente", calledAt: "2026-11-26T13:00:00Z" }), "enServicioEsperando");
+  assert.equal(claveUbicacion({ location: "consulta", status: "triage" }), "enConsultaEsperando");
+  assert.equal(claveUbicacion({ location: "servicio", status: "rara" }), "enServicioEsperando");
+});
+
+test("claveUbicacion: not served (cancelled with an arrival stamp) is never in care", () => {
+  assert.equal(claveUbicacion({ location: "consulta", status: "cancelada", arrivedAt: "2026-11-26T13:00:00Z" }), "enConsultaEsperando");
+  assert.equal(claveUbicacion({ location: "servicio", status: "cancelada", presentAt: "2026-11-26T13:00:00Z" }), "enServicioEsperando");
+});

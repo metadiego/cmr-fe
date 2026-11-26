@@ -2404,13 +2404,6 @@
     "histStaff": "Staff",
     "histSesion": "Sesión",
     "histAreas": "Áreas",
-    "histEstadoVal": {
-      "asistido": "Asistido",
-      "presente": "Presente",
-      "en_terapia": "En terapia",
-      "pendiente": "Pendiente",
-      "cancelada": "Cancelada"
-    },
     "hasta": "Hasta (rango)",
     "rangoHint": "Rango de fechas (gerencia): deja vacío para ver un solo día.",
     "elegir": "Elegir…",
@@ -7259,10 +7252,10 @@
     "catalogueFailed": "No se pudieron cargar las terapias.",
     "alongside": "a la vez",
     "sessionStatus": {
-      "pendiente": "agendada",
-      "presente": "presente",
-      "en_terapia": "en terapia",
-      "asistido": "asistida"
+      "upcoming": "agendada",
+      "waiting": "presente",
+      "in_therapy": "en terapia",
+      "done": "asistida"
     },
     "daySchedule": "Horario del día",
     "overCapDays": "{therapy} está en {used} fechas y solo le quedan {n, plural, one {# sesión} other {# sesiones}}: quítala de alguna.",
@@ -7356,6 +7349,28 @@
       "in_therapy": "En terapia",
       "done": "Atendido",
       "not_served": "Se fue sin ser atendido"
+    },
+    "label": {
+      "medical": {
+        "booked": "Agendada",
+        "confirmed": "Confirmada",
+        "waiting": "Presente",
+        "triage": "Triage",
+        "in_consultation": "En consulta",
+        "done": "Asistida",
+        "no_show": "No asistió",
+        "cancelled": "Cancelada",
+        "not_served": "Se fue sin ser atendido",
+        "rescheduled": "Reagendada"
+      },
+      "therapy": {
+        "upcoming": "Pendiente",
+        "waiting": "Presente",
+        "in_therapy": "En terapia",
+        "done": "Asistido",
+        "cancelled": "Cancelada",
+        "not_served": "Se fue sin ser atendido"
+      }
     }
   },
   "appointmentsDay": {

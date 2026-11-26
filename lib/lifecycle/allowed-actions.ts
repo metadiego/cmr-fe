@@ -7,6 +7,7 @@
 // drawn from it.
 
 import { noShowAllowed } from "./board-action-rules.ts"
+import { rowGroup, type StagedRow, type StageGroup } from "./stage-groups.ts"
 
 /** A catalogue action key (`lifecycle.action.<key>` is its label). */
 export type ActionKey = string
@@ -93,33 +94,35 @@ export function appointmentMenu(allowed: readonly ActionKey[]): AppointmentMenuI
   return APPOINTMENT_MENU.filter(([, keys]) => keys.some((k) => allowed.includes(k))).map(([item]) => item)
 }
 
-// A row WITHOUT the list (an entity read, or a backend before 4a): the scheduling-flow entries each old
-// status allows, further narrowed by the piece-3 catalogue (./board-action-rules.ts). Cancel on an
-// arrived patient is "not served" (same entry, its own label); in consultation it is refused.
-const STATUS_MENU: Record<string, readonly AppointmentMenuItem[]> = {
-  programada: ["confirmar", "reagendar", "noShow", "cancelar"],
-  confirmada: ["presente", "reagendar", "noShow", "cancelar"],
-  presente: ["cancelar"],
+// A row WITHOUT the list (an entity read, or a backend before 4a): the scheduling-flow entries each
+// medical stage group allows, further narrowed by the piece-3 catalogue (./board-action-rules.ts).
+// Cancel on an arrived patient is "not served" (same entry, its own label); in consultation, done or
+// closed (not served included) nothing is offered.
+const GROUP_MENU: Partial<Record<StageGroup, readonly AppointmentMenuItem[]>> = {
+  booked: ["confirmar", "reagendar", "noShow", "cancelar"],
+  confirmed: ["presente", "reagendar", "noShow", "cancelar"],
+  waiting: ["cancelar"],
   triage: ["cancelar"],
 }
 
 /**
  * The medical appointment's menu: from the row's list when it carries one (stage, date and per-center
- * permission are already in it); otherwise from the status table, with Confirm gated on
+ * permission are already in it); otherwise from the row's stage group, with Confirm gated on
  * `appointments.confirm` and No-show only before arrival, today or earlier.
  */
-export function appointmentMenuFor(row: {
-  status: string
+export function appointmentMenuFor(p: {
+  row: StagedRow
   date: string | null | undefined
   today: string
   allowed: readonly ActionKey[] | null | undefined
   canConfirm: boolean
 }): AppointmentMenuItem[] {
-  if (row.allowed) return appointmentMenu(row.allowed)
-  return (STATUS_MENU[row.status] ?? []).filter(
+  if (p.allowed) return appointmentMenu(p.allowed)
+  const group = rowGroup("medical", p.row)
+  return ((group && GROUP_MENU[group]) || []).filter(
     (a) =>
-      (a !== "confirmar" || row.canConfirm) &&
-      (a !== "noShow" || noShowAllowed(row.status, row.date, row.today)),
+      (a !== "confirmar" || p.canConfirm) &&
+      (a !== "noShow" || noShowAllowed("medical", p.row, p.date, p.today)),
   )
 }
 

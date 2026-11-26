@@ -21,3 +21,9 @@ test("remnants to show: the product's, usable before expired, empty ones dropped
   assert.deepEqual(remnantsToShow(vials, "plaquex").map((v) => v.id), ["ok", "old"]);
   assert.deepEqual(remnantsToShow(vials).map((v) => v.id), ["ok", "other", "old"]);
 });
+
+test("a remnant visit is a done session: not served or called never is; stage columns alone count", () => {
+  assert.equal(isRemnantVisit({ status: "cancelada", presentAt: "2026-11-26T13:00:00Z", quantity: 0 }, "vial"), false);
+  assert.equal(isRemnantVisit({ status: "presente", calledAt: "2026-11-26T13:00:00Z", quantity: 0 }, "vial"), false);
+  assert.equal(isRemnantVisit({ bookingStatus: "arrived", careStatus: "done", quantity: 0 }, "vial"), true);
+});

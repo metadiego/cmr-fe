@@ -20,6 +20,9 @@ export function PatientChips({
 }) {
   const t = useTranslations("patientDesk")
   const tRoot = useTranslations()
+  // Label and colour of a status come from the board's own catalogue (board_statuses: slug → labelKey,
+  // color, both set per board by an admin), so they stay keyed by the catalogue slug until piece 6
+  // replaces the catalogue. Decisions about the day read stage groups (lib/frontdesk/patient-day.ts).
   const statusLabel = (slug: string, consult = false) => {
     const def = consult ? data.consultationDefinition : data.serviceDefinition
     const s = def?.statuses.find((x) => x.slug === slug)

@@ -43,6 +43,8 @@ function item(over: Partial<PatientAppointment>): PatientAppointment {
     status: "programada",
     withLabel: null,
     isLive: true,
+    rescheduled: false,
+    stageLabel: "booked",
     ...over,
   };
 }
@@ -90,11 +92,11 @@ test("a cancelled future item goes to past", () => {
   assert.deepEqual(past.map((i) => i.id), ["a"]);
 });
 
-test("reprogramada is dropped everywhere", () => {
+test("a rescheduled item (stage group rescheduled) is dropped from upcoming and past", () => {
   const r = splitUpcomingPast(
     [
-      item({ id: "a", date: "2026-11-12", status: "reprogramada", isLive: false }),
-      item({ id: "b", date: "2026-10-01", status: "reprogramada", isLive: false }),
+      item({ id: "a", date: "2026-11-12", status: "reprogramada", rescheduled: true, isLive: false }),
+      item({ id: "b", date: "2026-10-01", status: "reprogramada", rescheduled: true, isLive: false }),
     ],
     "2026-11-04",
   );
@@ -142,6 +144,8 @@ const appt = (over: Partial<PatientAppointment> = {}): PatientAppointment => ({
   status: "programada",
   withLabel: null,
   isLive: true,
+  rescheduled: false,
+  stageLabel: "booked",
   ...over,
 });
 const only = (...perms: string[]) => (p: string) => perms.includes(p);
@@ -193,4 +197,47 @@ test("railActions: past ones and today's already started offer nothing", () => {
     edit: true,
     cancel: true,
   });
+});
+
+test("fromCita reads the stage group: not served is not live; a row read by its stage columns alone counts", () => {
+  // Not served: stored as `cancelada` with an arrival stamp (derived), or by its stages.
+  assert.equal(fromCita(cita({ status: "cancelada", arrivedAt: "2026-11-10T13:00:00Z" })).isLive, false);
+  assert.equal(
+    fromCita(cita({ status: "cancelada", bookingStatus: "arrived", careStatus: "not_served", syncedStatus: "cancelada" })).isLive,
+    false,
+  );
+  // No old value: the stage columns decide.
+  assert.equal(fromCita(cita({ status: undefined, bookingStatus: "confirmed", careStatus: null })).isLive, true);
+  assert.equal(fromCita(cita({ status: undefined, bookingStatus: "arrived", careStatus: "done" })).isLive, false);
+  // A status the mapping does not know is not live, as before.
+  assert.equal(fromCita(cita({ status: "rara" })).isLive, false);
+});
+
+test("fromSesion reads the stage group: a called session is live; not served is not", () => {
+  assert.equal(fromSesion(sesion({ status: "presente", calledAt: "2026-11-10T13:00:00Z" })).isLive, true);
+  assert.equal(
+    fromSesion(sesion({ status: "presente", bookingStatus: "arrived", careStatus: "called", syncedStatus: "presente" })).isLive,
+    true,
+  );
+  assert.equal(fromSesion(sesion({ status: "cancelada", presentAt: "2026-11-10T13:00:00Z" })).isLive, false);
+  assert.equal(fromSesion(sesion({ status: undefined, bookingStatus: "arrived", careStatus: "in_therapy" })).isLive, true);
+});
+
+test("a rescheduled appointment is dropped by its stage group, also when read by its stage columns alone", () => {
+  const moved = fromCita(cita({ id: "m", status: undefined, bookingStatus: "rescheduled", date: "2026-11-12" }));
+  const old = fromCita(cita({ id: "o", status: "reprogramada", date: "2026-10-01" }));
+  const kept = fromCita(cita({ id: "k", status: "cancelada", arrivedAt: "2026-11-10T13:00:00Z", date: "2026-11-12" }));
+  const r = splitUpcomingPast([moved, old, kept], "2026-11-04");
+  assert.deepEqual([...r.upcoming, ...r.past].map((i) => i.id), ["k"]);
+});
+
+test("the status label comes from the stage: not served is told apart, a called session waits, unknown has none", () => {
+  assert.equal(fromCita(cita({ status: "atendida" })).stageLabel, "done");
+  assert.equal(fromCita(cita({ status: "cancelada" })).stageLabel, "cancelled");
+  assert.equal(fromCita(cita({ status: "cancelada", arrivedAt: "2026-11-10T13:00:00Z" })).stageLabel, "not_served");
+  assert.equal(fromCita(cita({ status: undefined, bookingStatus: "arrived", careStatus: "triage" })).stageLabel, "triage");
+  assert.equal(fromSesion(sesion({ status: "presente", calledAt: "2026-11-10T13:00:00Z" })).stageLabel, "waiting");
+  assert.equal(fromSesion(sesion({ status: "cancelada", presentAt: "2026-11-10T13:00:00Z" })).stageLabel, "not_served");
+  assert.equal(fromSesion(sesion({ status: "pendiente" })).stageLabel, "upcoming");
+  assert.equal(fromSesion(sesion({ status: "rara" })).stageLabel, null);
 });

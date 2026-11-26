@@ -172,8 +172,22 @@ test("sameDaySessions lists the live sessions of ticked therapies that day, by t
     { serviceId: "laser", date: "2026-11-24", time: null, status: "pendiente" },
   ];
   assert.deepEqual(sameDaySessions(sessions, "2026-11-24", ["emtt", "laser"]), [
-    { serviceId: "laser", time: "09:00", status: "asistido" },
-    { serviceId: "emtt", time: "10:30", status: "pendiente" },
-    { serviceId: "laser", time: null, status: "pendiente" },
+    { serviceId: "laser", time: "09:00", label: "done" },
+    { serviceId: "emtt", time: "10:30", label: "upcoming" },
+    { serviceId: "laser", time: null, label: "upcoming" },
+  ]);
+});
+
+test("sameDaySessions reads the stage group: not served is out, a called session is in, stage columns alone count", () => {
+  const sessions = [
+    { serviceId: "emtt", date: "2026-11-24", time: "08:00", status: "cancelada", presentAt: "2026-11-24T12:00:00Z" },
+    { serviceId: "emtt", date: "2026-11-24", time: "09:00", status: "presente", calledAt: "2026-11-24T13:00:00Z" },
+    { serviceId: "laser", date: "2026-11-24", time: "10:00", status: "", bookingStatus: "cancelled" as const, careStatus: null },
+    { serviceId: "laser", date: "2026-11-24", time: "11:00", status: "rara" },
+  ];
+  assert.deepEqual(sameDaySessions(sessions, "2026-11-24", ["emtt", "laser"]), [
+    // A called session is labelled as waiting; an unknown status has no label (nothing is shown).
+    { serviceId: "emtt", time: "09:00", label: "waiting" },
+    { serviceId: "laser", time: "11:00", label: null },
   ]);
 });

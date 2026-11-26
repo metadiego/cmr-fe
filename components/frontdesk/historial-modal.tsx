@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/patient-therapy-history";
 import { formatFechaSolo } from "@/lib/format/fecha";
+import { stageLabel, stageLabelText } from "@/lib/lifecycle/stage-labels";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -35,6 +36,7 @@ export function HistorialModal({
 }) {
   const t = useTranslations("frontdesk");
   const tc = useTranslations("common");
+  const tRoot = useTranslations();
   // Estado atado a la petición (key): evita setState síncrono en el efecto (solo se setea en el async).
   const key = open ? `${pacienteId}|${servicioId ?? ""}|${centro ?? ""}` : "";
   const [data, setData] = React.useState<{ key: string; rows: HistorialSesion[] } | null>(null);
@@ -83,15 +85,17 @@ export function HistorialModal({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {rows.map((r) => (
+                {rows.map((r) => {
+                  const label = stageLabel("therapy", r);
+                  return (
                   <tr key={r.id} className="hover:bg-muted/30">
                     <td className="whitespace-nowrap px-5 py-2.5 tabular-nums">{formatFechaSolo(r.date) || "—"}</td>
                     <td className="px-3 py-2.5">
                       <Badge
                         variant="secondary"
-                        className={r.status === "asistido" ? "bg-success text-success-foreground" : undefined}
+                        className={label === "done" ? "bg-success text-success-foreground" : undefined}
                       >
-                        {t.has(`histEstadoVal.${r.status}`) ? t(`histEstadoVal.${r.status}`) : (r.status || "—")}
+                        {stageLabelText(tRoot, "therapy", r) || "—"}
                       </Badge>
                     </td>
                     <td className="px-3 py-2.5">
@@ -109,7 +113,8 @@ export function HistorialModal({
                       )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           )}

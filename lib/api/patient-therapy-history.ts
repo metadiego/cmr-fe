@@ -1,4 +1,5 @@
 import { apiFetch } from "./client";
+import type { BookingStatus, CareStatus } from "@/lib/lifecycle/stage-groups";
 
 // A patient's therapy history per service (PR #148): feeds the «Historial de terapias» modal and the
 // record's Therapies tab. Everything (X/Y, areas, staff) is projected by the BE; the FE only paints it.
@@ -9,6 +10,13 @@ export type HistorialSesion = {
   id: string;
   date: string;
   status: string;
+  /**
+   * The row's stages, already judged by the backend's stagesOf (cmr-be: la-historia-del-paciente.ts).
+   * They tell «not served» from «cancelled» (both `status: cancelada`). Absent from an older backend:
+   * the label then reads from `status`.
+   */
+  bookingStatus?: BookingStatus | null;
+  careStatus?: CareStatus | null;
   serviceId: string;
   serviceName: string | null;
   sesionNumero: number | null;
