@@ -640,7 +640,7 @@ export function FilaSesion({
           accionesMenu={accionesMenu}
           onAccion={(clave) => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: clave }, centro))}
           onProgramar={sesion?.patientId ? () => onProgramar({ pacienteId: sesion.patientId!, pacienteNombre, servicioId: servicio?.id }) : undefined}
-          day={{ sessionId: fila.id, status: estadoActual, row: filaStaged, patientId: sesion?.patientId, date: sesion?.date, centerId: centro }}
+          day={{ sessionId: fila.id, row: filaStaged, patientId: sesion?.patientId, date: sesion?.date, centerId: centro }}
           onDone={onChanged}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />

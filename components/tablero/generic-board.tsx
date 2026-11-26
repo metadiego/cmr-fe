@@ -341,6 +341,7 @@ export function GenericBoard({
                 tablero={tablero}
                 entidadId={fila.id}
                 estado={String(fila.estado ?? fila["estado"] ?? "")}
+                kind={registro?.entity === "cita" ? "medical" : "therapy"}
                 estados={def.statuses}
                 transiciones={def.transitions}
                 centroId={centroId}

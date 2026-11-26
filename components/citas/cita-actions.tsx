@@ -114,14 +114,14 @@ export function CitaActions({
 
   const tRoot = useTranslations();
   const actions = appointmentMenuFor({
-    status: cita.status,
+    row: cita,
     date: cita.date,
     today: todayPR(),
     allowed: allowedActions,
     canConfirm: can("appointments.confirm"),
   });
   // Cancel on an arrived patient is "arrived, not served": same dialog and reason, its own words.
-  const notServe = cancelMeaning(cita.status, allowedActions) === "not_serve";
+  const notServe = cancelMeaning("medical", cita, allowedActions) === "not_serve";
   const cancelLabel = notServe ? tRoot("lifecycle.action.not_serve") : t("cancelar");
   // Show the menu whenever the user can act OR at least view history.
   if (!can("citas.update") && !can("citas.read")) return null;

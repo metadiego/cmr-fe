@@ -4,11 +4,12 @@
 // rule and the per-center permission are already in it), so the stored status and the flat permission
 // list are not consulted for those. A transition that is not a lifecycle move (a board's own) keeps the
 // board's rule. A row WITHOUT the list (backend before 4a) keeps the status + permission rule, with Cancel
-// and No-show narrowed by the piece-3 catalogue (lib/lifecycle/board-action-rules.ts `boardActionView`).
+// and No-show narrowed by the piece-3 catalogue on the row's stage group (lib/lifecycle/board-action-rules.ts `boardActionView`).
 // Cancel on an arrived row is "not served": same transition, its own label.
 
 import { slugOffered } from "../lifecycle/allowed-actions.ts"
-import { boardActionView, cancelMeaning, CANCEL_SLUG, NOT_SERVE_LABEL_KEY } from "../lifecycle/board-action-rules.ts"
+import { boardActionView, cancelMeaningFromList, CANCEL_SLUG, NOT_SERVE_LABEL_KEY } from "../lifecycle/board-action-rules.ts"
+import type { AppointmentKind } from "../lifecycle/stage-groups.ts"
 
 export interface TransitionLite {
   slug: string
@@ -22,6 +23,9 @@ export interface TransitionLite {
 export function availableTransitions<T extends TransitionLite>(
   transitions: readonly T[],
   row: {
+    /** The board's entity: a `cita` board holds medical rows, a session board therapy rows. */
+    kind: AppointmentKind
+    /** The row's board status: a catalogue slug for `fromStatuses`, and the old value its stages derive from. */
     status: string
     isTerminal: boolean
     allowed: readonly string[] | null
@@ -34,7 +38,7 @@ export function availableTransitions<T extends TransitionLite>(
   const oldRule = (tr: T) =>
     (!tr.permissionSlug || row.can(tr.permissionSlug)) &&
     ((tr.fromStatuses ?? []).includes(row.status) || ((tr.fromStatuses?.length ?? 0) === 0 && !row.isTerminal))
-  const notServe = row.allowed !== null && cancelMeaning(row.status, row.allowed) === "not_serve"
+  const notServe = row.allowed !== null && cancelMeaningFromList(row.allowed) === "not_serve"
   return transitions
     .filter((tr) => tr.active !== false)
     .flatMap((tr): T[] => {
@@ -43,7 +47,7 @@ export function availableTransitions<T extends TransitionLite>(
       if (listed === true) return [notServe && tr.slug === CANCEL_SLUG ? { ...tr, labelKey: NOT_SERVE_LABEL_KEY } : tr]
       if (!oldRule(tr)) return []
       // No list (or a board's own slug): Cancel and No-show follow the piece-3 catalogue.
-      const view = boardActionView(tr.slug, tr.labelKey, row.status, row.date, row.today)
+      const view = boardActionView(tr.slug, tr.labelKey, row.kind, { status: row.status }, row.date, row.today)
       return view.visible ? [view.labelKey === tr.labelKey ? tr : { ...tr, labelKey: view.labelKey }] : []
     })
     .sort((a, b) => a.sortOrder - b.sortOrder)

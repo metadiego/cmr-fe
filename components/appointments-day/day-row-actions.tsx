@@ -27,7 +27,7 @@ import {
 } from "@/lib/api/appointments-day"
 import { confirmToggle } from "@/lib/lifecycle/allowed-actions"
 import {
-  cancelMeaning,
+  cancelMeaningFromList,
   refusalRefreshesRow,
 } from "@/lib/lifecycle/board-action-rules"
 
@@ -100,8 +100,8 @@ export function DayRowActions({
   )
 
   const toggle = confirmToggle(row.allowedActions)
-  // Every day-list row carries its list, so the stored-status fallback never applies here.
-  const cancel = cancelMeaning("", row.allowedActions)
+  // Every day-list row carries its list, so the stage fallback never applies here.
+  const cancel = cancelMeaningFromList(row.allowedActions)
   const canChange = row.allowedActions.includes(
     row.kind === "medical" ? "reschedule" : "move"
   )
