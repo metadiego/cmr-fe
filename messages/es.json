@@ -2403,13 +2403,6 @@
     "histStaff": "Staff",
     "histSesion": "Sesión",
     "histAreas": "Áreas",
-    "histEstadoVal": {
-      "asistido": "Asistido",
-      "presente": "Presente",
-      "en_terapia": "En terapia",
-      "pendiente": "Pendiente",
-      "cancelada": "Cancelada"
-    },
     "hasta": "Hasta (rango)",
     "rangoHint": "Rango de fechas (gerencia): deja vacío para ver un solo día.",
     "elegir": "Elegir…",

@@ -24,7 +24,6 @@ export type Cita = components["schemas"]["CitaEntity"] & {
 // center the row is created in (403 otherwise). It replaces sending `status: "confirmada"`.
 export type CreateCitaPayload = components["schemas"]["CreateCitaDto"] & { confirmed?: boolean };
 export type TipoCita = components["schemas"]["TipoCitaEntity"];
-export type EstadoCita = Cita["status"];
 type ListQuery = NonNullable<operations["CitasController_list[2]_v2"]["parameters"]["query"]>;
 export type StageBookingStatus = NonNullable<ListQuery["bookingStatus"]>[number];
 export type StageCareStatus = NonNullable<ListQuery["careStatus"]>[number];
@@ -58,18 +57,6 @@ export interface ValidarCitaResult {
   advertencias: Array<{ code: string; labelKey?: string }>;
   conflictos: CitaConflicto[];
 }
-
-export const ESTADOS: EstadoCita[] = [
-  "programada",
-  "confirmada",
-  "presente",
-  "triage",
-  "en_consulta",
-  "atendida",
-  "no_show",
-  "cancelada",
-  "reprogramada",
-];
 
 export interface ListCitasParams {
   page?: number;

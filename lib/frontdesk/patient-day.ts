@@ -6,6 +6,7 @@ import { coincide as matches } from "./search.ts"
 import {
   BEFORE_ARRIVAL,
   IN_CARE,
+  NEVER_SEEN,
   groupIn,
   rowGroup,
   type SessionStageFields,
@@ -230,9 +231,8 @@ export function serviceConcluded(s: PatientService): boolean {
   return live.length > 0 && live.every((g) => groupIn("therapy", g, DONE))
 }
 
-// Terminal consultation groups that mean the patient was NOT seen (no-show, cancelled or not served).
-// Terminal comes from the board's status catalog (isTerminal); these only tell "finished" from "never seen".
-const CONSULTATION_NOT_SEEN: readonly StageGroup[] = ["no_show", "cancelled_or_not_served"]
+// Terminal comes from the board's status catalog (isTerminal); NEVER_SEEN only tells "finished" from
+// "never seen" (no-show, cancelled or not served).
 
 // Which consultation statuses are final, from the consultation board's definition. Empty = none known,
 // so every consultation counts as still open.
@@ -251,7 +251,7 @@ export function patientConcluded(
   if (p.consultationStatuses.some((x) => !isTerminal(x))) return false
   return (
     sessions.some((g) => groupIn("therapy", g, DONE)) ||
-    p.consultationGroups.some((g) => !groupIn("medical", g, CONSULTATION_NOT_SEEN))
+    p.consultationGroups.some((g) => !groupIn("medical", g, NEVER_SEEN))
   )
 }
 

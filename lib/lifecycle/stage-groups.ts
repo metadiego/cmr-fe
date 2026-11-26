@@ -138,6 +138,12 @@ export const NOT_OCCUPYING_THE_DAY: readonly StageGroup[] = [
   "rescheduled",
 ]
 
+/** Medical only: closed without the patient being seen (no-show, cancelled or not served). */
+export const NEVER_SEEN: readonly StageGroup[] = [
+  "no_show",
+  "cancelled_or_not_served",
+]
+
 function stagesInGroupOrThrow(
   kind: AppointmentKind,
   group: StageGroup

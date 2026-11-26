@@ -1,24 +1,12 @@
 // The Citas day screen (/scheduling/booked) without React: the row of `GET appointments/day`, the query
 // the filters send, the status shown, today's grouping and the URL state.
 // Specs: docs/specs/citas-day-screen.md (screen), docs/specs/appointment-lifecycle-switch-fe.md §5 (API).
-// No imports on purpose: Node runs this file's test on its own.
+// Type-only imports: Node runs this file's test on its own (they are erased).
 
+import type { BookingStatus, CareStatus } from "../lifecycle/stage-groups.ts"
+
+export type { BookingStatus, CareStatus }
 export type DayKind = "medical" | "service"
-export type BookingStatus =
-  | "booked"
-  | "confirmed"
-  | "arrived"
-  | "cancelled"
-  | "no_show"
-  | "rescheduled"
-export type CareStatus =
-  | "waiting"
-  | "triage"
-  | "in_consultation"
-  | "called"
-  | "in_therapy"
-  | "done"
-  | "not_served"
 export type ConfirmedVia = "person" | "bridge" | "import"
 
 /** A staff member named on a row; `name` is null when the id is not a staff row (old rows). */

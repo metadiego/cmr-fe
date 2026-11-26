@@ -6,6 +6,7 @@ import {
   IN_CARE,
   LIVE,
   MEDICAL_GROUPS,
+  NEVER_SEEN,
   NOT_CANCELLED,
   NOT_OCCUPYING_THE_DAY,
   SHOWED_UP,
@@ -345,4 +346,11 @@ test("sessionStageFields: picks the session's stage fields and stamps, nothing e
   })
   // With the row's status beside it, the picked fields keep the row's group (a called session waits).
   assert.equal(rowGroup("therapy", { status: session.status, ...sessionStageFields(session) }), "waiting")
+})
+
+test("NEVER_SEEN: medical rows closed without the patient being seen; not served counts, done does not", () => {
+  assert.equal(rowInGroups("medical", { estado: "no_show" }, NEVER_SEEN), true)
+  assert.equal(rowInGroups("medical", { estado: "cancelada", arrivedAt: AT }, NEVER_SEEN), true)
+  assert.equal(rowInGroups("medical", { estado: "atendida" }, NEVER_SEEN), false)
+  assert.equal(rowInGroups("medical", { estado: "presente" }, NEVER_SEEN), false)
 })
