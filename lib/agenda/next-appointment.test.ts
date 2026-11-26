@@ -52,3 +52,24 @@ test("addDaysToDay crosses months and years without a timezone shift", () => {
   assert.equal(addDaysToDay("2026-12-25", 7), "2027-01-01");
   assert.equal(addDaysToDay("2026-03-01", -1), "2026-02-28");
 });
+
+test("next appointment reads the stage group: not served is skipped like cancelled; stage columns alone count", () => {
+  const got = pickNextAppointment(
+    [
+      { id: "ns", date: "2026-11-10", status: "cancelada", arrivedAt: "2026-11-10T13:00:00Z" },
+      { id: "rs", date: "2026-11-11", status: null, bookingStatus: "rescheduled" },
+      { id: "nw", date: "2026-11-12", status: null, bookingStatus: "no_show" },
+      { id: "ok", date: "2026-11-13", status: null, bookingStatus: "confirmed" },
+    ],
+    "2026-11-04",
+  );
+  assert.equal(got?.id, "ok");
+  // A status the mapping does not know stays a pending visit, as the old exclusion list kept it.
+  assert.equal(pickNextAppointment([{ id: "u", date: "2026-11-10", status: "rara" }], "2026-11-04")?.id, "u");
+});
+
+test("canReschedule reads the stage group: before arrival only; not served never", () => {
+  assert.equal(canReschedule({ id: "a", date: "2026-11-10", status: null, bookingStatus: "booked" }), true);
+  assert.equal(canReschedule({ id: "a", date: "2026-11-10", status: "cancelada", arrivedAt: "2026-11-10T13:00:00Z" }), false);
+  assert.equal(canReschedule({ id: "a", date: "2026-11-10", status: null, bookingStatus: "arrived", careStatus: "waiting" }), false);
+});

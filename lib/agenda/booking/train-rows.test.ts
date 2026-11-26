@@ -177,3 +177,16 @@ test("sameDaySessions lists the live sessions of ticked therapies that day, by t
     { serviceId: "laser", time: null, status: "pendiente" },
   ]);
 });
+
+test("sameDaySessions reads the stage group: not served is out, a called session is in, stage columns alone count", () => {
+  const sessions = [
+    { serviceId: "emtt", date: "2026-11-24", time: "08:00", status: "cancelada", presentAt: "2026-11-24T12:00:00Z" },
+    { serviceId: "emtt", date: "2026-11-24", time: "09:00", status: "presente", calledAt: "2026-11-24T13:00:00Z" },
+    { serviceId: "laser", date: "2026-11-24", time: "10:00", status: "", bookingStatus: "cancelled" as const, careStatus: null },
+    { serviceId: "laser", date: "2026-11-24", time: "11:00", status: "rara" },
+  ];
+  assert.deepEqual(sameDaySessions(sessions, "2026-11-24", ["emtt", "laser"]), [
+    { serviceId: "emtt", time: "09:00", status: "presente" },
+    { serviceId: "laser", time: "11:00", status: "rara" },
+  ]);
+});

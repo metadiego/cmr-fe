@@ -1,6 +1,7 @@
 // Type-only imports: the test runner must never load app code (see recurring-plan.ts).
 import type { BookableService } from "../../api/frontdesk.ts";
 import type { PatientTrain } from "../../api/resources.ts";
+import { isNotCancelled, type StagedRow } from "../../lifecycle/stage-groups.ts";
 import { normalizeTime, type DaySlots } from "./availability.ts";
 import { MAX_SESSIONS } from "./series-booking.ts";
 
@@ -113,13 +114,13 @@ export function trainSchedule(
  * those without a time last: what a row blocked as a same-day duplicate names.
  */
 export function sameDaySessions(
-  sessions: ReadonlyArray<{ serviceId: string; date: string; time: string | null; status: string }>,
+  sessions: ReadonlyArray<StagedRow & { serviceId: string; date: string; time: string | null; status: string }>,
   date: string,
   serviceIds: readonly string[],
 ): { serviceId: string; time: string | null; status: string }[] {
   const ticked = new Set(serviceIds);
   return sessions
-    .filter((s) => ticked.has(s.serviceId) && s.status !== "cancelada" && s.date.slice(0, 10) === date)
+    .filter((s) => ticked.has(s.serviceId) && isNotCancelled("therapy", s) && s.date.slice(0, 10) === date)
     .map((s) => ({ serviceId: s.serviceId, time: s.time ? normalizeTime(s.time) : null, status: s.status }))
     .sort((a, b) => (a.time ?? "99:99").localeCompare(b.time ?? "99:99"));
 }
