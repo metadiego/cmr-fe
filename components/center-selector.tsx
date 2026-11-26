@@ -10,21 +10,14 @@ import { getMyPreferences } from "@/lib/api/preferences";
 import { getActiveCentro, isClinicViewAll, setActiveCentro, setClinicViewAll } from "@/lib/tenant";
 import { urlAfterCenterSwitch } from "@/lib/navigation/after-center-switch";
 import { apiErrorMessage } from "@/lib/api/errors";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { shortCenterNames } from "@/lib/centers/short-names";
+import { cn } from "@/lib/utils";
 
-// Active-center picker del NAV = «qué centro estoy viendo y en cuál trabajo»: Bayamón / Caguas / Ambos
-// (docs/specs/selector-de-centros-arriba.md). Un centro fija la cookie X-Tenant-ID; «Ambos» deja ese centro
-// de trabajo y hace que las lecturas abarquen todos los centros de la persona. Recarga para que todo pida
-// de nuevo. Ofrece
-// SOLO los centros OPERATIVOS (donde la persona tiene un rol), no todos los asignados: un acceso puntual
-// (p.ej. leer el calendario ajeno) no debe invitar a mudarse allí. Uno solo → no se enseña. Handoff
-// calendario-selector-de-centro §«El selector del NAV es OTRA cosa».
+// The top bar's active-center picker: «which center am I looking at, and which one do I work in»,
+// as a segmented control (Bayamón | Caguas | Ambos). A center sets the X-Tenant-ID cookie; «Ambos»
+// keeps that working center and widens reads to every center of the person
+// (docs/specs/selector-de-centros-arriba.md). The page reloads so everything refetches. It offers only
+// the OPERATIONAL centers (where the person holds a role), and hides itself with only one.
 const ALL = "__all__";
 
 export function CenterSelector() {
@@ -99,29 +92,66 @@ export function CenterSelector() {
     else window.location.assign(next);
   }
 
+  const labels = shortCenterNames(centros.map((c) => c.name));
+  const options = [
+    ...centros.map((c, i) => ({ id: c.id, label: labels[i], title: c.name, mark: dot(c.id) })),
+    { id: ALL, label: t("bothCenters"), title: t("bothCenters"), mark: allDot },
+  ];
+
+  return <CenterSegments options={options} current={current} label={t("center")} onSelect={onChange} />;
+}
+
+export interface CenterSegment {
+  id: string;
+  label: string;
+  title: string;
+  mark: React.ReactNode;
+}
+
+/** The segmented control itself, without data loading: one radio per center plus «Ambos». */
+export function CenterSegments({
+  options,
+  current,
+  label,
+  onSelect,
+}: {
+  options: CenterSegment[];
+  current: string;
+  label: string;
+  onSelect: (id: string) => void;
+}) {
   return (
-    <Select value={current} onValueChange={onChange}>
-      <SelectTrigger className="h-9 w-44 gap-2" aria-label={t("center")}>
-        {/* No pintamos el punto aquí: SelectValue ya replica el contenido de la opción activa
-            (que incluye su punto). Pintarlo también duplicaría el acento en el trigger. */}
-        <SelectValue placeholder={t("center")} />
-      </SelectTrigger>
-      <SelectContent>
-        {centros.map((c) => (
-          <SelectItem key={c.id} value={c.id}>
-            <span className="flex min-w-0 items-center gap-2">
-              {dot(c.id)}
-              <span className="truncate">{c.name}</span>
-            </span>
-          </SelectItem>
-        ))}
-        <SelectItem value={ALL}>
-          <span className="flex min-w-0 items-center gap-2">
-            {allDot}
-            <span className="truncate">{t("bothCenters")}</span>
-          </span>
-        </SelectItem>
-      </SelectContent>
-    </Select>
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className="inline-flex h-9 shrink-0 overflow-hidden rounded-md border bg-background"
+    >
+      {options.map((o, i) => {
+        const selected = o.id === current;
+        return (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            title={o.title}
+            onClick={() => !selected && onSelect(o.id)}
+            className={cn(
+              "flex items-center gap-1.5 px-2 text-sm sm:px-3 whitespace-nowrap transition-colors",
+              "focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              i > 0 && "border-l",
+              selected
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground hover:bg-muted",
+            )}
+          >
+            {o.mark}
+            {/* Phone width: the top bar also holds search, alerts and the user menu. */}
+            <span className="sm:hidden">{o.label.slice(0, 3)}</span>
+            <span className="hidden sm:inline">{o.label}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
