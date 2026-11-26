@@ -55,6 +55,12 @@ const TONE: Record<string, Tone> = {
   neverUsed: "warning",
   expired: "secondary",
   revoked: "destructive",
+  // call center calls (cmr-be #717): "Atendida" = contestada (the handoff's own words)
+  contestada: "success",
+  perdida: "destructive",
+  fallida: "destructive",
+  ocupada: "warning",
+  desconocido: "secondary",
 };
 const LABEL_NS = {
   appointment: "citas.estado",
@@ -65,6 +71,7 @@ const LABEL_NS = {
   sheet: "formSheet.home",
   apiKey: "admin.apiKeys.status",
   lifecycle: "lifecycle.stage",
+  call: "callcenter.status",
 } as const;
 
 export function StatusBadge({ kind, value }: { kind: keyof typeof LABEL_NS; value?: string | null }) {

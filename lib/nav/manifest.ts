@@ -124,6 +124,9 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "consumo-insumos", route: "/reports/supply-consumption", group: "inventory", order: 11 },
   // Communications
   { clave: "comunicaciones", route: "/communications", group: "communications", order: 1 },
+  // BE slug "callcenter" (cmr-be #717, handoff-callcenter-en-comunicaciones): its own `path` is the
+  // pre-route-reorg "/comunicaciones/callcenter", which 404s today — this is the FE-owned fix.
+  { clave: "callcenter", route: "/communications/callcenter", group: "communications", order: 2 },
   // Admin (top-level, decision #1)
   { clave: "admin", route: "/admin", group: "admin", order: 1 },
   // Configuration (+ staff decision #5, + audit)

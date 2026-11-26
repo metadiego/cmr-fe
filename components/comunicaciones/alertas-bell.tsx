@@ -55,6 +55,7 @@ const COLOR: Record<string, { dot: string; border: string; text: string }> = {
 // acciones (resolver/descartar) y deep-link por metadata (ej. transferencia).
 export function AlertasBell() {
   const t = useTranslations("comunicaciones");
+  const tRoot = useTranslations();
   const router = useRouter();
   const { can } = useCan();
   const puedeResolver = can("alertas.resolver"); // el BE es la autoridad; esto solo evita el click a error
@@ -72,6 +73,21 @@ export function AlertasBell() {
   const colorDe = (a: Alerta) => {
     const c = tipoDe(a)?.color;
     return c ? COLOR[c] ?? null : null;
+  };
+  // Prefer the catalog's own labelKey (translated, with the alert's own metadata values — same
+  // pattern as apiErrorLabel) over the BE's raw, always-English title/body. A type with no labelKey,
+  // or a key this catalogue misses, falls back to the raw text — never a blank card.
+  const labelOf = (a: Alerta): { title: string; body: string | null } => {
+    const labelKey = tipoDe(a)?.labelKey;
+    if (labelKey) {
+      const values: Record<string, string | number> = {};
+      for (const [k, v] of Object.entries(a.metadata ?? {})) {
+        if (typeof v === "string" || typeof v === "number") values[k] = v;
+      }
+      const translated = tRoot.has(labelKey) ? tRoot(labelKey, values) : null;
+      if (translated) return { title: translated, body: null };
+    }
+    return { title: a.title, body: a.body };
   };
   // Agrupar por DOMINIO (el color ya lo insinúa). Sin dominio → "otras", al final. Orden estable.
   const grupos: Array<{ dominio: string; label: string; alertas: Alerta[] }> = [];
@@ -202,6 +218,7 @@ export function AlertasBell() {
                     {g.alertas.map((a) => {
                       const c = colorDe(a);
                       const clickable = !!alertaHref(a);
+                      const lab = labelOf(a);
                       return (
                         <div
                           key={a.id}
@@ -213,8 +230,8 @@ export function AlertasBell() {
                             onClick={() => onOpen(a)}
                             className={cn("min-w-0 flex-1 text-left", clickable && "cursor-pointer")}
                           >
-                            <p className="truncate text-sm font-medium">{a.title}</p>
-                            {a.body && <p className="line-clamp-2 text-xs text-muted-foreground">{a.body}</p>}
+                            <p className="truncate text-sm font-medium">{lab.title}</p>
+                            {lab.body && <p className="line-clamp-2 text-xs text-muted-foreground">{lab.body}</p>}
                             {clinics.showColumn && (a.clinicName || clinics.nameOf(a.clinicId)) && (
                               <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
                                 {a.clinicName || clinics.nameOf(a.clinicId)}
