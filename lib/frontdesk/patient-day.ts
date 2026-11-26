@@ -3,8 +3,20 @@
 // today. This module does the grouping — pure, so it is tested.
 
 import { coincide as matches } from "./search.ts"
+import {
+  BEFORE_ARRIVAL,
+  IN_CARE,
+  type StagedRow,
+  type StageGroup,
+} from "../lifecycle/stage-groups.ts"
+import { consultationRowStaged, groupIn, rowGroup } from "./row-stages.ts"
 
-export interface DaySession {
+// A therapy session of the day (FrontdeskSesionEntity): old status, its stamps and stage columns.
+export interface DaySession
+  extends Pick<
+    StagedRow,
+    "bookingStatus" | "careStatus" | "syncedStatus" | "confirmedAt" | "calledAt"
+  > {
   id: string
   patientId: string
   serviceId: string
@@ -46,7 +58,8 @@ export interface PatientService {
   color: string | null
   staffGroup: StaffGroup
   sessionIds: string[]
-  statuses: string[]
+  statuses: string[] // board catalogue slugs, for labels and colours only
+  groups: (StageGroup | null)[] // parallel to statuses: the stage group each session is in
 }
 
 // Who performs a service, in the order the filtered view groups the rest: technician only, nurse
@@ -66,7 +79,8 @@ export interface PatientDay {
   record: string
   services: PatientService[]
   consultationIds: string[]
-  consultationStatuses: string[]
+  consultationStatuses: string[] // board catalogue slugs (labels, isTerminal)
+  consultationGroups: (StageGroup | null)[] // parallel: the stage group of each consultation
   consultationSubtypes: string[] // parallel to consultationIds/consultationStatuses
   doctorName: string // the consultation's attending doctor (board's "medico" column), "" if none yet
   // The order the patient's sections (services + consultation) are drawn in, set by orderSections.
@@ -83,8 +97,10 @@ export const text = (v: unknown) =>
 const minIso = (a: string | null, b: string | null | undefined) =>
   !b ? a : !a || b < a ? b : a
 
-// Consultation statuses still waiting for the patient to arrive.
-const CONSULTATION_AWAITING = new Set(["programada", "confirmada"])
+// Groups readers here share (lib/lifecycle/stage-groups.ts): a cancelled or not-served row is not live.
+const CANCELLED: readonly StageGroup[] = ["cancelled_or_not_served"]
+const DONE: readonly StageGroup[] = ["done"]
+const CLOSED: readonly StageGroup[] = ["done", "cancelled_or_not_served"]
 
 // The Consulta view speaks only of the consultation: arrival is the consultation's own, and a
 // patient who came for therapies but not the doctor reads «No presente» there (owner, 04-nov-2026).
@@ -110,6 +126,7 @@ export function groupByPatient(
         services: [],
         consultationIds: [],
         consultationStatuses: [],
+        consultationGroups: [],
         consultationSubtypes: [],
         doctorName: "",
         earliestTime: null,
@@ -142,12 +159,15 @@ export function groupByPatient(
         staffGroup: staffGroup(meta),
         sessionIds: [],
         statuses: [],
+        groups: [],
       }
       p.services.push(ps)
     }
     ps.sessionIds.push(s.id)
     ps.statuses.push(text(s.status))
-    const cancelled = s.status === "cancelada"
+    const group = rowGroup("therapy", s)
+    ps.groups.push(group)
+    const cancelled = groupIn(group, CANCELLED)
     if (!cancelled) p.allCancelled = false
     p.earliestTime = minIso(p.earliestTime, s.time ? s.time.slice(0, 5) : null)
     // A cancelled session keeps its OWN presentAt stamp (history), but it must not make the PATIENT
@@ -161,16 +181,17 @@ export function groupByPatient(
     if (!id) continue
     const p = get(id, text(c.paciente), text(c.record))
     p.consultationIds.push(c.id)
-    const status = text(c.estado)
-    p.consultationStatuses.push(status)
+    p.consultationStatuses.push(text(c.estado))
+    const group = rowGroup("medical", consultationRowStaged(c))
+    p.consultationGroups.push(group)
     p.consultationSubtypes.push(text(c.subtipo))
     const doctor = text(c.medico)
     if (doctor) p.doctorName = doctor
-    const cancelled = status === "cancelada"
+    const cancelled = groupIn(group, CANCELLED)
     if (!cancelled) p.allCancelled = false
     if (!cancelled) p.presentAt = minIso(p.presentAt, text(c.presente) || null)
-    // Only a consultation that actually reached «presente» (or beyond) counts as arrived to see the doctor.
-    if (!cancelled && !CONSULTATION_AWAITING.has(status))
+    // Only a consultation that actually arrived (waiting or beyond) counts as arrived to see the doctor.
+    if (!cancelled && !groupIn(group, BEFORE_ARRIVAL.medical))
       p.consultationPresentAt = minIso(p.consultationPresentAt, text(c.presente) || null)
   }
 
@@ -179,12 +200,13 @@ export function groupByPatient(
   // not in the chips. Only a service with nothing but cancelled rows keeps them, for a discreet mark.
   for (const p of map.values())
     for (const ps of p.services) {
-      const live = ps.statuses
-        .map((x, i) => (x === "cancelada" ? -1 : i))
+      const live = ps.groups
+        .map((g, i) => (groupIn(g, CANCELLED) ? -1 : i))
         .filter((i) => i >= 0)
-      if (live.length === 0 || live.length === ps.statuses.length) continue
+      if (live.length === 0 || live.length === ps.groups.length) continue
       ps.sessionIds = live.map((i) => ps.sessionIds[i])
       ps.statuses = live.map((i) => ps.statuses[i])
+      ps.groups = live.map((i) => ps.groups[i])
     }
 
   // Services in the configured order (the order of `services`), not in arrival order.
@@ -197,21 +219,21 @@ export function groupByPatient(
   return sortPatients([...map.values()], isConsultationTerminal)
 }
 
-// A service is concluded when every session of it is attended ('asistido'); cancelled sessions are
+// A service is concluded when every session of it is done (attended); cancelled sessions are
 // not pending, so they do not hold it open — but at least one must have been attended.
 // Every session of the service that day was cancelled (the rows were kept only for a discreet mark).
 export function serviceCancelledOnly(s: PatientService): boolean {
-  return s.statuses.length > 0 && s.statuses.every((x) => x === "cancelada")
+  return s.groups.length > 0 && s.groups.every((g) => groupIn(g, CANCELLED))
 }
 
 export function serviceConcluded(s: PatientService): boolean {
-  const live = s.statuses.filter((x) => x !== "cancelada")
-  return live.length > 0 && live.every((x) => x === "asistido")
+  const live = s.groups.filter((g) => !groupIn(g, CANCELLED))
+  return live.length > 0 && live.every((g) => groupIn(g, DONE))
 }
 
-// Terminal consultation statuses that mean the patient was NOT seen (left, cancelled). Terminal comes
-// from the board's status catalog (isTerminal); these two only tell "finished" from "never seen".
-const CONSULTATION_NOT_SEEN = new Set(["cancelada", "no_show"])
+// Terminal consultation groups that mean the patient was NOT seen (no-show, cancelled or not served).
+// Terminal comes from the board's status catalog (isTerminal); these only tell "finished" from "never seen".
+const CONSULTATION_NOT_SEEN: readonly StageGroup[] = ["no_show", "cancelled_or_not_served"]
 
 // Which consultation statuses are final, from the consultation board's definition. Empty = none known,
 // so every consultation counts as still open.
@@ -225,12 +247,12 @@ export function patientConcluded(
   p: PatientDay,
   isTerminal: IsTerminal = noneTerminal
 ): boolean {
-  const sessions = p.services.flatMap((s) => s.statuses)
-  if (sessions.some((x) => x !== "asistido" && x !== "cancelada")) return false
+  const sessions = p.services.flatMap((s) => s.groups)
+  if (sessions.some((g) => !groupIn(g, CLOSED))) return false
   if (p.consultationStatuses.some((x) => !isTerminal(x))) return false
   return (
-    sessions.includes("asistido") ||
-    p.consultationStatuses.some((x) => !CONSULTATION_NOT_SEEN.has(x))
+    sessions.some((g) => groupIn(g, DONE)) ||
+    p.consultationGroups.some((g) => !groupIn(g, CONSULTATION_NOT_SEEN))
   )
 }
 
@@ -260,16 +282,16 @@ export function sortPatients(
 }
 
 // Present patient with something still waiting to be marked present: a service session still
-// 'pendiente' (added after arrival, or created by the scheduling bridge the day before) or a
-// consultation still programada/confirmada. Per-row «presente» is hidden on purpose (one arrival per
+// upcoming (added after arrival, or created by the scheduling bridge the day before) or a
+// consultation still booked/confirmed. Per-row «presente» is hidden on purpose (one arrival per
 // patient), so the header must offer it again or those rows stay locked (BE, 04-nov-2026: records
 // 14497, 11643, 4604).
 export function pendingArrivals(p: PatientDay): number {
   const sessions = p.services
-    .flatMap((s) => s.statuses)
-    .filter((x) => x === "pendiente").length
-  const consults = p.consultationStatuses.filter((x) =>
-    CONSULTATION_AWAITING.has(x)
+    .flatMap((s) => s.groups)
+    .filter((g) => groupIn(g, BEFORE_ARRIVAL.therapy)).length
+  const consults = p.consultationGroups.filter((g) =>
+    groupIn(g, BEFORE_ARRIVAL.medical)
   ).length
   return sessions + consults
 }
@@ -356,8 +378,8 @@ export function filterByConsultationSubtype(
 
 // The services actually present today, in first-seen order, for the "Servicios" sub-filter — never
 // a static catalog: a service nobody has today does not clutter the dropdown. `arrived`/`attended`
-// (owner, 06-nov-2026): sessions that showed up (status not 'pendiente'/'cancelada') vs. sessions
-// closed ('asistido') — by end of day they should match; the gap is exactly what's left to close.
+// (owner, 06-nov-2026): sessions that showed up (not upcoming, not cancelled) vs. sessions
+// closed (done) — by end of day they should match; the gap is exactly what's left to close.
 export function servicesOfTheDay(list: PatientDay[]): {
   serviceId: string
   name: string
@@ -376,10 +398,10 @@ export function servicesOfTheDay(list: PatientDay[]): {
         counts.set(s.serviceId, { arrived: 0, attended: 0 })
       }
       const c = counts.get(s.serviceId)!
-      for (const status of s.statuses) {
-        if (status === "cancelada") continue
-        if (status !== "pendiente") c.arrived++
-        if (status === "asistido") c.attended++
+      for (const g of s.groups) {
+        if (groupIn(g, CANCELLED)) continue
+        if (!groupIn(g, BEFORE_ARRIVAL.therapy)) c.arrived++
+        if (groupIn(g, DONE)) c.attended++
       }
     }
   }
@@ -390,8 +412,8 @@ export function servicesOfTheDay(list: PatientDay[]): {
   }))
 }
 
-// Patients still owed a close for this service TODAY: arrived (presente/en_terapia) but not yet
-// 'asistido' — the gap between servicesOfTheDay's `arrived` and `attended` counts, made clickable.
+// Patients still owed a close for this service TODAY: in care (waiting, called or in therapy) but not
+// yet done — the gap between servicesOfTheDay's `arrived` and `attended` counts, made clickable.
 export function filterByServiceArrivedPending(
   list: PatientDay[],
   serviceId: string
@@ -400,7 +422,7 @@ export function filterByServiceArrivedPending(
     p.services.some(
       (s) =>
         s.serviceId === serviceId &&
-        s.statuses.some((x) => x === "presente" || x === "en_terapia")
+        s.groups.some((g) => groupIn(g, IN_CARE.therapy))
     )
   )
 }
@@ -415,7 +437,7 @@ export type PatientSection =
 
 // Something of the service is still to do: a live session that is not attended.
 export function servicePending(s: PatientService): boolean {
-  return s.statuses.some((x) => x !== "asistido" && x !== "cancelada")
+  return s.groups.some((g) => !groupIn(g, CLOSED))
 }
 
 // The consultation is still to do while any of its statuses is not terminal (board catalog).

@@ -46,6 +46,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
+import { groupIn } from "@/lib/frontdesk/row-stages"
+import { BEFORE_ARRIVAL } from "@/lib/lifecycle/stage-groups"
 
 export type ScheduleRequest = {
   pacienteId: string
@@ -53,10 +55,10 @@ export type ScheduleRequest = {
   servicioId?: string
 }
 
-// Estados de la consulta donde "presente" todavía aplica (board atencion: programada/confirmada ->
-// presente). Ni "presente" en sí (ya está) ni nada más adelante (triage/en_consulta/atendida) ni
-// terminal (cancelada/no_show/reprogramada) — evita reabrir algo que ya avanzó.
-const CONSULT_PENDING_STATUSES = new Set(["programada", "confirmada"])
+// Consultation groups where marking present still applies: booked or confirmed (before arrival). Not
+// waiting itself (already here), nothing further on (triage, in consultation, done) and nothing final
+// (no-show, cancelled or not served, rescheduled): never reopen something that moved on.
+const CONSULT_PENDING_GROUPS = BEFORE_ARRIVAL.medical
 
 // Everything a patient has today: each service with its own columns and the consultation, editable in
 // place with the same cells and flow as the frontdesk board.
@@ -161,7 +163,7 @@ export function PatientDetail({
           : await presentPatient(patient.patientId, date, centerId)
       const warnings = res.failed.map((f) => f.reason)
       const pendingConsultIds = patient.consultationIds.filter((_, i) =>
-        CONSULT_PENDING_STATUSES.has(patient.consultationStatuses[i])
+        groupIn(patient.consultationGroups[i], CONSULT_PENDING_GROUPS)
       )
       if (pendingConsultIds.length > 0) {
         const results = await Promise.allSettled(
@@ -224,10 +226,10 @@ export function PatientDetail({
       // Consulta view: undo only the consultation's arrival; the therapies keep theirs.
       if (kind !== "consultation")
         await undoPresentPatient(patient.patientId, centerId)
-      // Simétrico: solo la consulta que el present de arriba pudo haber marcado (sigue en "presente"
-      // exacto) — nunca una que ya avanzó a triage/en_consulta/atendida por su cuenta.
-      const presentConsultIds = patient.consultationIds.filter(
-        (_, i) => patient.consultationStatuses[i] === "presente"
+      // Symmetric: only the consultation the present above could have marked (still exactly waiting),
+      // never one that moved on to triage / in consultation / done on its own.
+      const presentConsultIds = patient.consultationIds.filter((_, i) =>
+        groupIn(patient.consultationGroups[i], ["waiting"])
       )
       if (presentConsultIds.length > 0) {
         await Promise.allSettled(
