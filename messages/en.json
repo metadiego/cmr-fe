@@ -7375,6 +7375,9 @@
         "cancelled": "Cancelled",
         "not_served": "Left without being served"
       }
+    },
+    "repair": {
+      "stagesInvalid": "That status does not match the row’s times (for example, “booked” with a confirmation time). Fix the times first."
     }
   },
   "appointmentsDay": {

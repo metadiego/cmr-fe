@@ -7375,6 +7375,9 @@
         "cancelled": "Cancelada",
         "not_served": "Se fue sin ser atendido"
       }
+    },
+    "repair": {
+      "stagesInvalid": "Ese estado no cuadra con las horas que tiene la fila (por ejemplo, «agendada» con hora de confirmación). Corrige las horas primero."
     }
   },
   "appointmentsDay": {
