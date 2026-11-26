@@ -46265,11 +46265,11 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Llamadas terminadas (CDR) de un rango.
+         * A page of finished calls (CDR), newest first, with operator and patient by name.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/llamadas`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     El dato estable del callcenter: efectivas contra perdidas. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo.
+         *     Filters: desde/hasta (days on the center clock, hasta whole), tab (answered | missed | all), channel, extension, staffId, number (digits, either end), direction; page and limit (max 500). One call center for the whole organization: callcenter.read in any center (those of centerIds) shows every call.
          */
         get: operations["CallcenterController_llamadas[0]_v1"];
         put?: never;
@@ -46288,11 +46288,11 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Llamadas terminadas (CDR) de un rango.
+         * A page of finished calls (CDR), newest first, with operator and patient by name.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/calls`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     El dato estable del callcenter: efectivas contra perdidas. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo.
+         *     Filters: desde/hasta (days on the center clock, hasta whole), tab (answered | missed | all), channel, extension, staffId, number (digits, either end), direction; page and limit (max 500). One call center for the whole organization: callcenter.read in any center (those of centerIds) shows every call.
          */
         get: operations["CallcenterController_llamadas[1]_v1"];
         put?: never;
@@ -46311,8 +46311,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Llamadas terminadas (CDR) de un rango.
-         * @description El dato estable del callcenter: efectivas contra perdidas. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo.
+         * A page of finished calls (CDR), newest first, with operator and patient by name.
+         * @description Filters: desde/hasta (days on the center clock, hasta whole), tab (answered | missed | all), channel, extension, staffId, number (digits, either end), direction; page and limit (max 500). One call center for the whole organization: callcenter.read in any center (those of centerIds) shows every call.
          */
         get: operations["CallcenterController_llamadas[2]_v2"];
         put?: never;
@@ -46331,10 +46331,300 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Llamadas terminadas (CDR) de un rango.
-         * @description El dato estable del callcenter: efectivas contra perdidas. Un solo call center para toda la organización: con callcenter.read en algún centro (los de centerIds, si vienen) se ve todo.
+         * A page of finished calls (CDR), newest first, with operator and patient by name.
+         * @description Filters: desde/hasta (days on the center clock, hasta whole), tab (answered | missed | all), channel, extension, staffId, number (digits, either end), direction; page and limit (max 500). One call center for the whole organization: callcenter.read in any center (those of centerIds) shows every call.
          */
         get: operations["CallcenterController_llamadas[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/estadisticas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Call-center numbers of a range: totals, by direction, channel, operator and hour.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/estadisticas`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Days on the center clock (preference callcenter.timeZone, Puerto Rico by default); no dates = today, one date = that day; at most 93 days. answered = contestada; missed = perdida, ocupada or fallida; answerRate in percent; avgTalkSeconds over answered calls.
+         */
+        get: operations["CallcenterController_statistics[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Call-center numbers of a range: totals, by direction, channel, operator and hour.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/statistics`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Days on the center clock (preference callcenter.timeZone, Puerto Rico by default); no dates = today, one date = that day; at most 93 days. answered = contestada; missed = perdida, ocupada or fallida; answerRate in percent; avgTalkSeconds over answered calls.
+         */
+        get: operations["CallcenterController_statistics[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/estadisticas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Call-center numbers of a range: totals, by direction, channel, operator and hour.
+         * @description Days on the center clock (preference callcenter.timeZone, Puerto Rico by default); no dates = today, one date = that day; at most 93 days. answered = contestada; missed = perdida, ocupada or fallida; answerRate in percent; avgTalkSeconds over answered calls.
+         */
+        get: operations["CallcenterController_statistics[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Call-center numbers of a range: totals, by direction, channel, operator and hour.
+         * @description Days on the center clock (preference callcenter.timeZone, Puerto Rico by default); no dates = today, one date = that day; at most 93 days. answered = contestada; missed = perdida, ocupada or fallida; answerRate in percent; avgTalkSeconds over answered calls.
+         */
+        get: operations["CallcenterController_statistics[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/reporte-de-perdidas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Missed calls of a range by hour and by extension, with the peak hour and the worst extension.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/reporte-de-perdidas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CallcenterController_missedReport[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/missed-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Missed calls of a range by hour and by extension, with the peak hour and the worst extension.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/missed-report`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CallcenterController_missedReport[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/reporte-de-perdidas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Missed calls of a range by hour and by extension, with the peak hour and the worst extension. */
+        get: operations["CallcenterController_missedReport[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/missed-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Missed calls of a range by hour and by extension, with the peak hour and the worst extension. */
+        get: operations["CallcenterController_missedReport[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/salud-del-envio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Is each PBX still pushing? Last call and minutes of silence inside opening hours.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/salud-del-envio`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     `behind` = silent longer than lagAlertMinutes inside the hours of its center (preferences callcenter.hours {days, start, end} and callcenter.lagAlertMinutes; Mon–Sat 08:00–18:00 and 30 by default). Never blocks anything.
+         */
+        get: operations["CallcenterController_pushHealth[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/push-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Is each PBX still pushing? Last call and minutes of silence inside opening hours.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/push-health`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     `behind` = silent longer than lagAlertMinutes inside the hours of its center (preferences callcenter.hours {days, start, end} and callcenter.lagAlertMinutes; Mon–Sat 08:00–18:00 and 30 by default). Never blocks anything.
+         */
+        get: operations["CallcenterController_pushHealth[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/salud-del-envio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Is each PBX still pushing? Last call and minutes of silence inside opening hours.
+         * @description `behind` = silent longer than lagAlertMinutes inside the hours of its center (preferences callcenter.hours {days, start, end} and callcenter.lagAlertMinutes; Mon–Sat 08:00–18:00 and 30 by default). Never blocks anything.
+         */
+        get: operations["CallcenterController_pushHealth[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/push-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Is each PBX still pushing? Last call and minutes of silence inside opening hours.
+         * @description `behind` = silent longer than lagAlertMinutes inside the hours of its center (preferences callcenter.hours {days, start, end} and callcenter.lagAlertMinutes; Mon–Sat 08:00–18:00 and 30 by default). Never blocks anything.
+         */
+        get: operations["CallcenterController_pushHealth[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SSE of the ONE call center: `llamada` for every call that entered or changed, and
+         *     `{ tipo: 'heartbeat' }` every 15 s. An organization topic, never a center channel.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/stream`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CallcenterController_stream_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * SSE of the ONE call center: `llamada` for every call that entered or changed, and
+         *     `{ tipo: 'heartbeat' }` every 15 s. An organization topic, never a center channel.
+         */
+        get: operations["CallcenterController_stream_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -68227,7 +68517,7 @@ export interface components {
              * Format: uuid
              * @description Another patient receives the sessions. Omitted = the same patient (then a center is needed).
              */
-            destinationPatientId?: string;
+            pacienteDestinoId?: string;
             /**
              * Format: uuid
              * @description Omitted = the same center.
@@ -68251,7 +68541,7 @@ export interface components {
              * Format: uuid
              * @description Another patient receives the sessions (v2 destinationPatientId). Omitted = the same patient.
              */
-            destinationPatientId?: string;
+            pacienteDestinoId?: string;
             sessions?: number;
             /** @enum {string} */
             mode?: "virtual" | "fisica";
@@ -68274,7 +68564,7 @@ export interface components {
             clinicDestinoIdRef?: Record<string, never>;
             patientId: string;
             pacienteIdRef?: Record<string, never>;
-            destinationPatientId: string | null;
+            pacienteDestinoId: string | null;
             pacienteDestinoIdRef?: Record<string, never>;
             productId: string;
             productoIdRef?: Record<string, never>;
@@ -68907,8 +69197,8 @@ export interface components {
             notes: string | null;
             reference: string | null;
             /** Format: date-time */
-            cancelledAt: string | null;
-            cancelledBy: string | null;
+            anuladoEn: string | null;
+            anuladoPor: string | null;
             anuladoPorRef?: Record<string, never>;
             cancellationReason: string | null;
             replacesId: string | null;
@@ -69307,9 +69597,9 @@ export interface components {
              */
             refundMethodId?: string | null;
             /** @description Por dónde salió el dinero, si se corrige a la vez. Sin él, los reembolsos se quedan y la respuesta trae el hueco. */
-            reimbursements?: components["schemas"]["ReimbursementLineDto"][];
+            reembolsos?: components["schemas"]["ReimbursementLineDto"][];
             /** @description Por qué se edita (queda en los reembolsos que se reemplazan). */
-            changeReason?: string;
+            motivoCambio?: string;
         };
         ChangeLogEntryEntity: {
             clinicRef?: Record<string, never>;
@@ -69344,7 +69634,7 @@ export interface components {
             updatedAt: string;
         };
         ReplaceRefundReimbursementsDto: {
-            reimbursements: components["schemas"]["ReimbursementLineDto"][];
+            reembolsos: components["schemas"]["ReimbursementLineDto"][];
             /** @description Por qué se corrige (queda en los reembolsos anulados). */
             reason: string;
         };
@@ -70075,7 +70365,7 @@ export interface components {
             /** @description Por qué se fusionan (queda en el registro de cambios). / Why both records are the same person. */
             reason: string;
             /** @description true = se acepta que cambien los conteos de PERSONAS de periodos pasados (pacientes distintos, nuevo vs seguimiento) que la simulación avisa. El dinero no cambia nunca. / Accept the past patient-count changes the simulation reports; money never changes. */
-            acceptPastReportImpact?: boolean;
+            aceptarCambioEnReportesPasados?: boolean;
         };
         StaffPhoneExtensionDto: {
             /**
@@ -70090,7 +70380,7 @@ export interface components {
             extension: string;
         };
         SetStaffPhoneExtensionsDto: {
-            extensions: components["schemas"]["StaffPhoneExtensionDto"][];
+            extensiones: components["schemas"]["StaffPhoneExtensionDto"][];
         };
         CreatePersonalDto: {
             /**
@@ -134547,6 +134837,10 @@ export interface operations {
     "CitasController_list[0]_v1": {
         parameters: {
             query: {
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
@@ -134559,7 +134853,10 @@ export interface operations {
                 doctorId?: string;
                 /** @description Filtra por paciente */
                 patientId?: string;
-                /** @description Filtra por estado (programada, confirmada, …) */
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 /** @description Filter by channel (frontdesk, callcenter, webhook, ia; atencion = frontdesk) */
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
@@ -134630,6 +134927,10 @@ export interface operations {
     "CitasController_list[1]_v1": {
         parameters: {
             query: {
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
@@ -134642,7 +134943,10 @@ export interface operations {
                 doctorId?: string;
                 /** @description Filtra por paciente */
                 patientId?: string;
-                /** @description Filtra por estado (programada, confirmada, …) */
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 /** @description Filter by channel (frontdesk, callcenter, webhook, ia; atencion = frontdesk) */
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
@@ -134713,6 +135017,10 @@ export interface operations {
     "CitasController_list[2]_v2": {
         parameters: {
             query: {
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
@@ -134725,7 +135033,10 @@ export interface operations {
                 doctorId?: string;
                 /** @description Filtra por paciente */
                 patientId?: string;
-                /** @description Filtra por estado (programada, confirmada, …) */
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 /** @description Filter by channel (frontdesk, callcenter, webhook, ia; atencion = frontdesk) */
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
@@ -134796,6 +135107,10 @@ export interface operations {
     "CitasController_list[3]_v2": {
         parameters: {
             query: {
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
@@ -134808,7 +135123,10 @@ export interface operations {
                 doctorId?: string;
                 /** @description Filtra por paciente */
                 patientId?: string;
-                /** @description Filtra por estado (programada, confirmada, …) */
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
                 status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 /** @description Filter by channel (frontdesk, callcenter, webhook, ia; atencion = frontdesk) */
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
@@ -135735,12 +136053,20 @@ export interface operations {
     "CitasController_countByDay[0]_v1": {
         parameters: {
             query: {
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
-                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
@@ -135762,12 +136088,20 @@ export interface operations {
     "CitasController_countByDay[1]_v1": {
         parameters: {
             query: {
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
-                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
@@ -135789,12 +136123,20 @@ export interface operations {
     "CitasController_countByDay[2]_v1": {
         parameters: {
             query: {
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
-                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
@@ -135816,12 +136158,20 @@ export interface operations {
     "CitasController_countByDay[3]_v1": {
         parameters: {
             query: {
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
-                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
@@ -135843,12 +136193,20 @@ export interface operations {
     "CitasController_countByDay[4]_v2": {
         parameters: {
             query: {
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
-                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
@@ -135870,12 +136228,20 @@ export interface operations {
     "CitasController_countByDay[5]_v2": {
         parameters: {
             query: {
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
-                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
@@ -135897,12 +136263,20 @@ export interface operations {
     "CitasController_countByDay[6]_v2": {
         parameters: {
             query: {
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
-                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
@@ -135924,12 +136298,20 @@ export interface operations {
     "CitasController_countByDay[7]_v2": {
         parameters: {
             query: {
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. The old status, read as its stage group.
+                 */
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "no_show" | "cancelled" | "rescheduled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "triage" | "in_consultation" | "done" | "not_served")[];
                 /** @description Centros a los que acotar, separados por coma; sin él, todos donde se tiene citas.read. / Centers to narrow to; without it, every center with citas.read. */
                 centerIds?: string[];
                 from: string;
                 to: string;
                 doctorId?: string;
-                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 channel?: "frontdesk" | "callcenter" | "webhook" | "ia";
             };
             header?: never;
@@ -144391,6 +144773,20 @@ export interface operations {
                 to?: string;
                 /** @description Extensión. / Extension. */
                 extension?: string;
+                /** @description answered = contestada; missed = perdida, ocupada or fallida. */
+                tab?: "answered" | "missed" | "all";
+                /** @description Channel key (normal, facebook, tv…). */
+                channel?: string;
+                /** @description Operator (staff id). */
+                staffId?: string;
+                /** @description Phone number, any format: matched by digits on either end. */
+                number?: string;
+                /** @description Direction, as the PBX reports it. */
+                direction?: string;
+                /** @description Page (from 1). */
+                page?: number;
+                /** @description Rows per page (max 500). */
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -144419,6 +144815,20 @@ export interface operations {
                 to?: string;
                 /** @description Extensión. / Extension. */
                 extension?: string;
+                /** @description answered = contestada; missed = perdida, ocupada or fallida. */
+                tab?: "answered" | "missed" | "all";
+                /** @description Channel key (normal, facebook, tv…). */
+                channel?: string;
+                /** @description Operator (staff id). */
+                staffId?: string;
+                /** @description Phone number, any format: matched by digits on either end. */
+                number?: string;
+                /** @description Direction, as the PBX reports it. */
+                direction?: string;
+                /** @description Page (from 1). */
+                page?: number;
+                /** @description Rows per page (max 500). */
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -144447,6 +144857,20 @@ export interface operations {
                 to?: string;
                 /** @description Extensión. / Extension. */
                 extension?: string;
+                /** @description answered = contestada; missed = perdida, ocupada or fallida. */
+                tab?: "answered" | "missed" | "all";
+                /** @description Channel key (normal, facebook, tv…). */
+                channel?: string;
+                /** @description Operator (staff id). */
+                staffId?: string;
+                /** @description Phone number, any format: matched by digits on either end. */
+                number?: string;
+                /** @description Direction, as the PBX reports it. */
+                direction?: string;
+                /** @description Page (from 1). */
+                page?: number;
+                /** @description Rows per page (max 500). */
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -144475,6 +144899,20 @@ export interface operations {
                 to?: string;
                 /** @description Extensión. / Extension. */
                 extension?: string;
+                /** @description answered = contestada; missed = perdida, ocupada or fallida. */
+                tab?: "answered" | "missed" | "all";
+                /** @description Channel key (normal, facebook, tv…). */
+                channel?: string;
+                /** @description Operator (staff id). */
+                staffId?: string;
+                /** @description Phone number, any format: matched by digits on either end. */
+                number?: string;
+                /** @description Direction, as the PBX reports it. */
+                direction?: string;
+                /** @description Page (from 1). */
+                page?: number;
+                /** @description Rows per page (max 500). */
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -144488,6 +144926,332 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LlamadaEntity"][];
+                };
+            };
+        };
+    };
+    "CallcenterController_statistics[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_statistics[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_statistics[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_statistics[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_missedReport[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
+                to?: string;
+                /** @description Only missed calls of this direction (as the PBX reports it). */
+                direction?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_missedReport[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
+                to?: string;
+                /** @description Only missed calls of this direction (as the PBX reports it). */
+                direction?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_missedReport[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
+                to?: string;
+                /** @description Only missed calls of this direction (as the PBX reports it). */
+                direction?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_missedReport[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde (YYYY-MM-DD). / From. */
+                from?: string;
+                /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
+                to?: string;
+                /** @description Only missed calls of this direction (as the PBX reports it). */
+                direction?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "CallcenterController_pushHealth[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CallcenterController_pushHealth[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CallcenterController_pushHealth[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CallcenterController_pushHealth[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    CallcenterController_stream_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    CallcenterController_stream_v2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -152280,8 +153044,15 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Filtra las sesiones de un paciente (historial). */
                 patientId?: string;
-                /** @description Estado(s) de la sesión. Admite uno suelto o varios (repetido o separado por comas). */
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. Old status(es) of the session, one or several (repeated or comma separated).
+                 */
                 status?: components["schemas"]["Object"];
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "cancelled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "called" | "in_therapy" | "done" | "not_served")[];
                 /** @description Quién la atiende: enfermera. */
                 nurseId?: string;
                 /** @description Quién la atiende: médico. */
@@ -152351,8 +153122,15 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Filtra las sesiones de un paciente (historial). */
                 patientId?: string;
-                /** @description Estado(s) de la sesión. Admite uno suelto o varios (repetido o separado por comas). */
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. Old status(es) of the session, one or several (repeated or comma separated).
+                 */
                 status?: components["schemas"]["Object"];
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "cancelled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "called" | "in_therapy" | "done" | "not_served")[];
                 /** @description Quién la atiende: enfermera. */
                 nurseId?: string;
                 /** @description Quién la atiende: médico. */
@@ -152422,8 +153200,15 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Filtra las sesiones de un paciente (historial). */
                 patientId?: string;
-                /** @description Estado(s) de la sesión. Admite uno suelto o varios (repetido o separado por comas). */
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. Old status(es) of the session, one or several (repeated or comma separated).
+                 */
                 status?: components["schemas"]["Object"];
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "cancelled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "called" | "in_therapy" | "done" | "not_served")[];
                 /** @description Quién la atiende: enfermera. */
                 nurseId?: string;
                 /** @description Quién la atiende: médico. */
@@ -152493,8 +153278,15 @@ export interface operations {
                 centerIds?: string[];
                 /** @description Filtra las sesiones de un paciente (historial). */
                 patientId?: string;
-                /** @description Estado(s) de la sesión. Admite uno suelto o varios (repetido o separado por comas). */
+                /**
+                 * @deprecated
+                 * @description Deprecated: use bookingStatus / careStatus. Old status(es) of the session, one or several (repeated or comma separated).
+                 */
                 status?: components["schemas"]["Object"];
+                /** @description Booking stage(s), comma separated or repeated. */
+                bookingStatus?: ("booked" | "confirmed" | "arrived" | "cancelled")[];
+                /** @description Care stage(s) once the patient arrived, comma separated or repeated. */
+                careStatus?: ("waiting" | "called" | "in_therapy" | "done" | "not_served")[];
                 /** @description Quién la atiende: enfermera. */
                 nurseId?: string;
                 /** @description Quién la atiende: médico. */
