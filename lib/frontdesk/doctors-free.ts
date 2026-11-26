@@ -4,6 +4,7 @@
 
 import type { CitaFila } from "../api/agenda-dia.ts"
 import { text } from "./patient-day.ts"
+import { consultationRowStaged, groupIn, rowGroup } from "./row-stages.ts"
 
 export interface DoctorStatus {
   id: string
@@ -12,7 +13,7 @@ export interface DoctorStatus {
 }
 
 // Only doctors with at least one row TODAY are reported — an unscheduled doctor is unknown, not free.
-// `free` = none of their rows today is actively `en_consulta` (with a patient right now) AND they are
+// `free` = none of their rows today is in consultation (with a patient right now) AND they are
 // not on an active vacation/leave covering today (`absentIds` — owner, 06-nov-2026: a doctor on
 // vacation must never show as free just because nothing is booked under them).
 export function doctorsStatus(
@@ -26,7 +27,7 @@ export function doctorsStatus(
     const name = text(r.medico)
     const cur = byId.get(id) ?? { name: "", busy: false }
     if (!cur.name && name) cur.name = name
-    if (r.estado === "en_consulta") cur.busy = true
+    if (groupIn(rowGroup("medical", consultationRowStaged(r)), ["in_consultation"])) cur.busy = true
     byId.set(id, cur)
   }
   return [...byId.entries()]

@@ -2,27 +2,34 @@
 // docs/specs/reabrir-sesion-el-mismo-dia-handoff.md). Pure rules the row menu and the boards share; the
 // BE enforces every one of them again (409), these only decide what the screen offers.
 
+import type { StagedRow } from "../lifecycle/stage-groups.ts";
+import { groupIn, rowGroup } from "./row-stages.ts";
+
+/** Cancelled or not served (stage group): the only rows «Reabrir» and «hide cancelled» look at. */
+const isCancelled = (row: StagedRow) => groupIn(rowGroup("therapy", row), ["cancelled_or_not_served"]);
+
 /** A session date ("YYYY-MM-DD", or an ISO instant) falls on `today` ("YYYY-MM-DD"). */
 export function isSessionToday(date: string | null | undefined, today: string): boolean {
   return typeof date === "string" && date.slice(0, 10) === today;
 }
 
-/** «Reabrir» is offered only on a cancelled session of TODAY; another day is never offered. */
-export function canReopen(status: string, date: string | null | undefined, today: string): boolean {
-  return status === "cancelada" && isSessionToday(date, today);
+/** «Reabrir» is offered only on a cancelled (or not served) session of TODAY; another day never. */
+export function canReopen(row: StagedRow, date: string | null | undefined, today: string): boolean {
+  return isCancelled(row) && isSessionToday(date, today);
 }
 
 /**
  * Hide a row under «hide cancelled»? Only cancelled rows of OTHER days: today's stay visible (dimmed,
  * sorted last) so they can be reopened without filtering by the «Cancelada» KPI.
  */
-export function hideCancelledRow(status: string, date: string | null | undefined, today: string): boolean {
-  return status === "cancelada" && !isSessionToday(date, today);
+export function hideCancelledRow(row: StagedRow, date: string | null | undefined, today: string): boolean {
+  return isCancelled(row) && !isSessionToday(date, today);
 }
 
 /**
  * Data-driven menu actions that would duplicate «Reabrir»: transitions that start ONLY from 'cancelada'
  * (today: `reactivar`, which the BE now routes through the same rule). Hidden while «Reabrir» shows.
+ * `fromStatuses` are the board catalogue's transition slugs (board_statuses), not a row's status.
  */
 export function duplicatesReopen(fromStatuses: readonly string[] | null | undefined): boolean {
   const from = fromStatuses ?? [];

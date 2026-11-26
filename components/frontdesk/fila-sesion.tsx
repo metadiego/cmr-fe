@@ -27,6 +27,8 @@ import { SesionesCell } from "@/components/frontdesk/sesiones-cell";
 import { MedicionCell } from "@/components/frontdesk/medicion-cell";
 import { VialRemnantChips } from "@/components/frontdesk/vial-remnant-chip";
 import { isRemnantVisit } from "@/lib/frontdesk/vial-remnant";
+import { groupIn, rowGroup, sessionRowStaged } from "@/lib/frontdesk/row-stages";
+import { BEFORE_ARRIVAL } from "@/lib/lifecycle/stage-groups";
 import { RowMenu } from "@/components/frontdesk/row-menu";
 import { readAllowedActions, slugOffered } from "@/lib/lifecycle/allowed-actions";
 import { FilaSesionModales } from "@/components/frontdesk/fila-sesion-modales";
@@ -132,7 +134,10 @@ export function FilaSesion({
   // Verdad del flujo: el `estado` top-level que ahora manda el BE en cada fila (PR #195). Antes el FE lo
   // deducía de los sellos y pintaba ASISTIDO en filas que estaban en terapia; ya no se deduce.
   const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.status ?? "");
-  const cancelada = estadoActual === "cancelada";
+  // Decisions read the row's stage group (lifecycle 5d): the row's status with its session's stages.
+  const filaStaged = sessionRowStaged(estadoActual, sesion);
+  const grupoActual = rowGroup("therapy", filaStaged);
+  const cancelada = groupIn(grupoActual, ["cancelled_or_not_served"]);
   const allowed = drawFromAllowedActions ? readAllowedActions(fila) : null;
   const offered = (slug: string | null) => !slug || slugOffered(slug, allowed) !== false; // no list: today's rule
   const pacienteNombre = String(fila.paciente ?? fila.fd_paciente ?? fila.fac_paciente ?? "");
@@ -298,7 +303,7 @@ export function FilaSesion({
       const shownOpt = ops.find((o) => o.value === shown);
       const label = shownOpt ? (esDosis ? etiquetaDosis(shownOpt) : shownOpt.label) : (raw || undefined);
       const reqEstado = (c.render as { requiereEstado?: string } | null)?.requiereEstado; // data-driven gate (lib/frontdesk/required-state.ts)
-      const estadoNoCumplido = !requiredStateMet({ required: reqEstado, sessionStamp: reqEstado && STAMP_FIELD[reqEstado] ? sesion?.[STAMP_FIELD[reqEstado]] : null, rowState: estadoActual, rowStamp: reqEstado ? fila[reqEstado] : null });
+      const estadoNoCumplido = !requiredStateMet({ required: reqEstado, sessionStamp: reqEstado && STAMP_FIELD[reqEstado] ? sesion?.[STAMP_FIELD[reqEstado]] : null, row: filaStaged, rowStamp: reqEstado ? fila[reqEstado] : null });
       return (
         <Select
           value={shown}
@@ -536,10 +541,10 @@ export function FilaSesion({
   // posición sirve de índice de `pasos`. NO se usa la clave de transición de la columna para decidir el
   // siguiente: en frontdesk esas claves son reusadas de Atención ('consulta'/'atender') y no casan con las
   // claves de la definición ('en_terapia'/'asistido'); la posición por estado es la señal fiable.
-  //   pendiente/'' (pre-flujo) → primer paso · asistido (último) → ninguno · cancelada → ninguno ·
+  //   upcoming/'' (pre-flujo) → primer paso · asistido (último) → ninguno · cancelada → ninguno ·
   //   estado fuera del flujo (terminal desconocido) → ninguno (no ofrece 'Presente' por error).
   const curIdx = flujo.findIndex((f) => f.clave === estadoActual);
-  const preFlujo = curIdx === -1 && (estadoActual === "" || estadoActual === "pendiente");
+  const preFlujo = curIdx === -1 && (estadoActual === "" || groupIn(grupoActual, BEFORE_ARRIVAL.therapy));
   const nextPos = cancelada ? -1 : preFlujo ? 0 : curIdx >= 0 && curIdx + 1 < flujo.length ? curIdx + 1 : -1;
   // Solo si la posición cae dentro de `pasos` (guarda ante un eventual desajuste flujo/columnas del BE).
   const nextIdx = nextPos >= 0 && nextPos < pasos.length ? nextPos : -1;
@@ -635,7 +640,7 @@ export function FilaSesion({
           accionesMenu={accionesMenu}
           onAccion={(clave) => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: clave }, centro))}
           onProgramar={sesion?.patientId ? () => onProgramar({ pacienteId: sesion.patientId!, pacienteNombre, servicioId: servicio?.id }) : undefined}
-          day={{ sessionId: fila.id, status: estadoActual, patientId: sesion?.patientId, date: sesion?.date, centerId: centro }}
+          day={{ sessionId: fila.id, status: estadoActual, row: filaStaged, patientId: sesion?.patientId, date: sesion?.date, centerId: centro }}
           onDone={onChanged}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />

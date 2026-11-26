@@ -9,6 +9,7 @@ import { listCitasEnConsultaSinCerrar } from "@/lib/api/citas";
 import { listPersonal } from "@/lib/api/personal";
 import { inDaysPR, parseDayUTC } from "@/lib/format/fecha";
 import { groupOverdue, type OverdueVisit } from "@/lib/frontdesk/overdue-visits";
+import { rowInGroups } from "@/lib/lifecycle/stage-groups";
 import { useResource } from "@/hooks/use-resource";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert02Icon, ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons";
@@ -40,7 +41,8 @@ export function EnTerapiaSinAsistirBanner({ centro, onOpenVisit }: { centro?: st
         listPersonal({ limit: 100 }, centro),
         listCitasEnConsultaSinCerrar({ days: 30, centroId: centro }),
       ]);
-      const atrasadas = sesiones.filter((s) => s.status === "en_terapia");
+      // Left in therapy (stage group in_therapy); the history event type below is another enum.
+      const atrasadas = sesiones.filter((s) => rowInGroups("therapy", s, ["in_therapy"]));
       const actoresTerapia = await Promise.all(atrasadas.map((s) => quienLaDejoAsi(s, centro)));
       return { atrasadas, actoresTerapia, personal: personal.items, consultaSinCerrar };
     },

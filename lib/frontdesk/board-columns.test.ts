@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { flowColumns, plainColumns, renderColumns, sortBoardRowsNatural } from "./board-columns.ts";
+import type { StagedRow } from "../lifecycle/stage-groups.ts";
 
 const col = (clave: string, orden: number, tipo = "text", group?: string) => ({ clave, orden, tipo, render: group ? { group } : null });
 
@@ -35,7 +36,7 @@ test("loose toggles already carry the flow: no extra cell", () => {
 
 type Row = { id: string; estado: string; presente?: string | null; asistido?: string | null; time?: string | null };
 const opts = {
-  estadoOf: (r: Row) => r.estado,
+  stagedOf: (r: Row) => ({ status: r.estado }),
   presenteOf: (r: Row) => r.presente,
   asistidoOf: (r: Row) => r.asistido,
   scheduledTimeOf: (r: Row) => r.time,
@@ -73,4 +74,31 @@ test("sortBoardRowsNatural: cancelada always sinks to the very end", () => {
     { id: "p", estado: "pendiente", time: "08:00" },
   ];
   assert.deepEqual(sortBoardRowsNatural(rows, opts).map((r) => r.id), ["p", "done", "c"]);
+});
+
+// Task 10a (lifecycle 5d): the natural order ranks by stage group, read from the row's staged form.
+type StagedTestRow = { id: string; staged: StagedRow; presente?: string; asistido?: string; time?: string };
+const stagedOpts = {
+  stagedOf: (r: StagedTestRow) => r.staged,
+  presenteOf: (r: StagedTestRow) => r.presente,
+  asistidoOf: (r: StagedTestRow) => r.asistido,
+  scheduledTimeOf: (r: StagedTestRow) => r.time,
+};
+
+test("sortBoardRowsNatural: a called therapy is here now; a not-served one sinks with the cancelled", () => {
+  const rows: StagedTestRow[] = [
+    { id: "ns", staged: { status: "cancelada", presentAt: "2026-11-26T09:00:00Z" }, presente: "2026-11-26T09:00:00Z" },
+    { id: "p", staged: { status: "pendiente" }, time: "08:00" },
+    { id: "called", staged: { status: "presente", calledAt: "2026-11-26T10:05:00Z" }, presente: "2026-11-26T10:00:00Z" },
+  ];
+  assert.deepEqual(sortBoardRowsNatural(rows, stagedOpts).map((r) => r.id), ["called", "p", "ns"]);
+});
+
+test("sortBoardRowsNatural: a row read by its stage columns alone ranks by its group", () => {
+  const rows: StagedTestRow[] = [
+    { id: "done", staged: { bookingStatus: "arrived", careStatus: "done" }, asistido: "2026-11-26T09:00:00Z" },
+    { id: "here", staged: { bookingStatus: "arrived", careStatus: "called" }, presente: "2026-11-26T10:00:00Z" },
+    { id: "unknown", staged: { status: "otro" }, time: "07:00" },
+  ];
+  assert.deepEqual(sortBoardRowsNatural(rows, stagedOpts).map((r) => r.id), ["here", "unknown", "done"]);
 });

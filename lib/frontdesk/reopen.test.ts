@@ -14,16 +14,16 @@ test("isSessionToday: a day or an instant on today; anything else is not", () =>
 });
 
 test("canReopen: only a cancelled session of today", () => {
-  assert.equal(canReopen("cancelada", "2026-11-07", TODAY), true);
-  assert.equal(canReopen("cancelada", "2026-11-06", TODAY), false, "yesterday is never offered");
-  assert.equal(canReopen("presente", "2026-11-07", TODAY), false, "an open session has nothing to reopen");
-  assert.equal(canReopen("cancelada", null, TODAY), false, "no date = not offered");
+  assert.equal(canReopen({ status: "cancelada" }, "2026-11-07", TODAY), true);
+  assert.equal(canReopen({ status: "cancelada" }, "2026-11-06", TODAY), false, "yesterday is never offered");
+  assert.equal(canReopen({ status: "presente" }, "2026-11-07", TODAY), false, "an open session has nothing to reopen");
+  assert.equal(canReopen({ status: "cancelada" }, null, TODAY), false, "no date = not offered");
 });
 
 test("hideCancelledRow: today's cancelled stay visible, other days' hide, open rows never hide", () => {
-  assert.equal(hideCancelledRow("cancelada", "2026-11-07", TODAY), false);
-  assert.equal(hideCancelledRow("cancelada", "2026-11-05", TODAY), true);
-  assert.equal(hideCancelledRow("asistido", "2026-11-05", TODAY), false);
+  assert.equal(hideCancelledRow({ status: "cancelada" }, "2026-11-07", TODAY), false);
+  assert.equal(hideCancelledRow({ status: "cancelada" }, "2026-11-05", TODAY), true);
+  assert.equal(hideCancelledRow({ status: "asistido" }, "2026-11-05", TODAY), false);
 });
 
 test("duplicatesReopen: only transitions that start solely from cancelada", () => {
@@ -44,4 +44,15 @@ test("skippedReasons: grouped by code, known codes get their key, unknown ones k
     { code: "SOMETHING_NEW", key: null, n: 1 },
   ]);
   assert.deepEqual(skippedReasons(undefined), []);
+});
+
+test("canReopen / hideCancelledRow read the cancelled group: not served counts, a called session does not", () => {
+  const notServed = { status: "cancelada", presentAt: "2026-11-07T13:00:00Z" };
+  const called = { status: "presente", calledAt: "2026-11-07T13:00:00Z" };
+  assert.equal(canReopen(notServed, "2026-11-07", TODAY), true);
+  assert.equal(canReopen(called, "2026-11-07", TODAY), false);
+  assert.equal(hideCancelledRow(notServed, "2026-11-05", TODAY), true);
+  assert.equal(hideCancelledRow(called, "2026-11-05", TODAY), false);
+  // By the stage columns alone.
+  assert.equal(canReopen({ bookingStatus: "cancelled" }, "2026-11-07", TODAY), true);
 });

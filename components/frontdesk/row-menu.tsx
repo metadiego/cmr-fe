@@ -14,6 +14,7 @@ import { cancelPatientDay, reopenPatientDay, reopenSession } from "@/lib/api/fro
 import { ApiError } from "@/lib/api/types";
 import { todayISO } from "@/lib/agenda/calendar";
 import { canReopen, duplicatesReopen, REOPEN_ERROR_KEYS, skippedReasons } from "@/lib/frontdesk/reopen";
+import type { StagedRow } from "@/lib/lifecycle/stage-groups";
 import { sessionReasonMissing } from "@/lib/frontdesk/session-reason-missing";
 import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 
@@ -73,7 +74,8 @@ export function RowMenu({
   onAccion?: (clave: string) => void;
   onProgramar?: () => void; // abrir "Programar citas" desde la fila (agendar la próxima aunque ya esté asistido)
   // The row's session and its patient's day: Cancelar, Cancelar todas, Reabrir, Reabrir todas (BE #508).
-  day: { sessionId: string; status: string; patientId?: string | null; date?: string | null; centerId?: string };
+  // `row`: the row as a staged row (its stage group decides Reabrir); `status` still feeds cancelMeaning.
+  day: { sessionId: string; status: string; row: StagedRow; patientId?: string | null; date?: string | null; centerId?: string };
   onDone: () => void;
   onReparar: (payload: { reason: string; status?: string }) => void;
 }) {
@@ -88,7 +90,7 @@ export function RowMenu({
   const [changesOpen, setChangesOpen] = React.useState(false); // «Historial de cambios» of this session
 
   // Reopen is offered only on a cancelled session of TODAY; the BE re-checks it (409 otherwise).
-  const reopenable = canReopen(day.status, day.date, todayISO());
+  const reopenable = canReopen(day.row, day.date, todayISO());
   const patientId = day.patientId ?? null;
   const acciones = reopenable ? (accionesMenu ?? []).filter((a) => !duplicatesReopen(a.from)) : (accionesMenu ?? []);
 
