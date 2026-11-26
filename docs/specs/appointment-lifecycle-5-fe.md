@@ -46,6 +46,18 @@ old value (a copy of the backend mapping, kept only in `lib/lifecycle/`). A stat
 | `cancelled_or_not_served` | cancelled, arrived / not_served (`cancelada`) | cancelled, arrived / not_served (`cancelada`) |
 | `rescheduled` | rescheduled (`reprogramada`) | - |
 
-Named unions: `LIVE`, `IN_CARE`, `SHOWED_UP`, `BEFORE_ARRIVAL`, `NOT_OCCUPYING_THE_DAY` (medical), `SHOWN_IN_LIST`,
-`NOT_CANCELLED`; helpers `groupsExcept`, `inGroups`, `groupOf`, `stagesInGroup`, `rowInGroups`, `isNotCancelled`.
+Named unions: `LIVE`, `IN_CARE`, `SHOWED_UP`, `BEFORE_ARRIVAL`, `NOT_OCCUPYING_THE_DAY` and `NEVER_SEEN` (medical),
+`SHOWN_IN_LIST`, `NOT_CANCELLED`; helpers `groupsExcept`, `inGroups`, `groupOf`, `stagesInGroup`, `rowInGroups`,
+`rowGroup`, `groupIn` (a stored group, kind-checked), `isNotCancelled`, `sessionStageFields`.
 Use positive group lists, not negations of a stage predicate (a row with no stage would fall out of both).
+
+## Labels and the scan (release 5d, Task 10c)
+
+- A status label is `stageLabel(kind, row)` (`lib/lifecycle/stage-labels.ts`): the stage group, with `cancelled` and
+  `not_served` told apart. Texts: `lifecycle.label.<kind>.<label>`, equal to the old `citas.estado` /
+  `servicios.estado` text for every old value (pinned by `stage-labels.test.ts`); not served reads as
+  `lifecycle.stage.not_served`.
+- Without `allowedActions`, Cancel / No-show / the appointment menu read the stage group (`board-action-rules.ts`,
+  `allowed-actions.ts`), by kind.
+- `lib/lifecycle/old-status-readers.test.ts` blocks any old value outside `lib/lifecycle/` except the files in
+  `old-status-allowlist.ts` (piece-6 reasons, hit counts pinned) and the unrelated enums it pins. The list only shrinks.
