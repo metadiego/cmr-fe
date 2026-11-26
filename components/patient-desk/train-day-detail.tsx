@@ -20,7 +20,8 @@ import { cn } from "@/lib/utils";
 // status of what is booked, so it can be taken off right there. Each therapy can be taken off that date
 // (never the last one; the ✕ shows on hover from sm up) and put back from the chips below.
 
-const STATUS_KEYS = ["pendiente", "presente", "en_terapia", "asistido"] as const;
+// The stage labels a booked session names (`therapyBooking.sessionStatus.*`); cancelled ones never show.
+const STATUS_KEYS = ["upcoming", "waiting", "in_therapy", "done"] as const;
 const SHORT_REASONS: Record<string, "whyFull" | "whyNoStaff" | "whyOverMax" | "whyHoliday"> = {
   "therapies.full": "whyFull",
   "therapies.noStaff": "whyNoStaff",
@@ -91,7 +92,7 @@ export function TrainDayDetail({
 }) {
   const t = useTranslations("therapyBooking");
   const tStatus = useTranslations("therapyBooking.sessionStatus");
-  const booked = new Map<string, ExistingSession | { time: string | null; status: string }>();
+  const booked = new Map<string, ReturnType<typeof sameDaySessions>[number]>();
   for (const s of sameDaySessions(sessions, row.date, serviceIds)) if (!booked.has(s.serviceId)) booked.set(s.serviceId, s);
   const plan = trainSchedule(train, row.time);
   // Without a plan for that hour (closed, holiday) the therapies are still listed, without times.
@@ -111,7 +112,8 @@ export function TrainDayDetail({
       >
         {lines.map((leg) => {
           const had = booked.get(leg.serviceId);
-          const status = had && (STATUS_KEYS as readonly string[]).includes(had.status) ? tStatus(had.status as (typeof STATUS_KEYS)[number]) : null;
+          const label = had?.label;
+          const status = label && (STATUS_KEYS as readonly string[]).includes(label) ? tStatus(label as (typeof STATUS_KEYS)[number]) : null;
           return (
             <li key={leg.serviceId} className="group grid min-h-7 grid-cols-[5.75rem_minmax(0,1fr)_auto_1.5rem] items-center gap-x-3">
               <span className={cn("font-medium", !leg.start && "text-muted-foreground")}>

@@ -15,6 +15,7 @@ import { useCan } from "@/hooks/use-can";
 import { LegacyLabelDialog } from "@/components/clientes/legacy-label-dialog";
 import { LegacyRenumberDialog } from "@/components/clientes/legacy-renumber-dialog";
 import { parseDayUTC } from "@/lib/format/fecha";
+import { stageLabel } from "@/lib/lifecycle/stage-labels";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -124,7 +125,7 @@ export function FichaCitas({ pacienteId }: { pacienteId: string }) {
                 <Td className="font-medium">{tipoNombre(c.appointmentTypeId)}</Td>
                 <Td className="text-muted-foreground">{medicoNombre(c)}</Td>
                 <Td className="text-muted-foreground">{c.clinicName ?? "—"}</Td>
-                <Td><StatusBadge kind="appointment" value={c.status} /></Td>
+                <Td><StatusBadge kind="medicalStatus" value={stageLabel("medical", c) ?? c.status} /></Td>
               </tr>
             ))}
           </RecordTable>
@@ -288,7 +289,7 @@ export function FichaTerapias({
                   </div>
                 </Td>
                 <Td className="text-muted-foreground">{s.staffNombre ?? "—"}</Td>
-                <Td><StatusBadge kind="therapy" value={s.status} /></Td>
+                <Td><StatusBadge kind="therapyStatus" value={stageLabel("therapy", s) ?? s.status} /></Td>
                 <Td className="text-right">
                   {reports.length > 0 ? (
                     <Button variant="outline" size="sm" onClick={() => setFormatRow(s)}>{t("formats")}</Button>
@@ -384,7 +385,7 @@ export function FichaUltimaVisita({ pacienteId }: { pacienteId: string }) {
         <div className="space-y-1.5 px-5 py-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium">{typeName(last.appointmentTypeId)}</span>
-            <StatusBadge kind="appointment" value={last.status} />
+            <StatusBadge kind="medicalStatus" value={stageLabel("medical", last) ?? last.status} />
           </div>
           <div className="text-sm text-muted-foreground tabular-nums">
             {dia(last.date)}{last.time ? ` · ${last.time}` : ""}

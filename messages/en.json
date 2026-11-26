@@ -7258,10 +7258,10 @@
     "catalogueFailed": "Could not load the therapies.",
     "alongside": "alongside",
     "sessionStatus": {
-      "pendiente": "booked",
-      "presente": "checked in",
-      "en_terapia": "in therapy",
-      "asistido": "attended"
+      "upcoming": "booked",
+      "waiting": "checked in",
+      "in_therapy": "in therapy",
+      "done": "attended"
     },
     "daySchedule": "The day's schedule",
     "overCapDays": "{therapy} is on {used} dates but only {n, plural, one {# session} other {# sessions}} left: take it off some.",
@@ -7355,6 +7355,28 @@
       "in_therapy": "In therapy",
       "done": "Done",
       "not_served": "Left without being served"
+    },
+    "label": {
+      "medical": {
+        "booked": "Scheduled",
+        "confirmed": "Confirmed",
+        "waiting": "Checked in",
+        "triage": "Triage",
+        "in_consultation": "In consultation",
+        "done": "Seen",
+        "no_show": "No-show",
+        "cancelled": "Cancelled",
+        "not_served": "Left without being served",
+        "rescheduled": "Rescheduled"
+      },
+      "therapy": {
+        "upcoming": "Pending",
+        "waiting": "Present",
+        "in_therapy": "In therapy",
+        "done": "Attended",
+        "cancelled": "Cancelled",
+        "not_served": "Left without being served"
+      }
     }
   },
   "appointmentsDay": {

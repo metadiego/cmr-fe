@@ -1,6 +1,7 @@
 import type { Cita } from "../../api/citas.ts";
 import type { Sesion } from "../../api/frontdesk.ts";
 import { LIVE, rowInGroups } from "../../lifecycle/stage-groups.ts";
+import { stageLabel, type StageLabel } from "../../lifecycle/stage-labels.ts";
 import { normalizeTime } from "./availability.ts";
 
 // One shape for a patient's medical appointments (citas) and service sessions (sesiones).
@@ -17,6 +18,8 @@ export interface PatientAppointment {
   isLive: boolean;
   /** A medical row moved to another date (group `rescheduled`): its successor carries it forward. */
   rescheduled: boolean;
+  /** The status label, from the stage (`lifecycle.label.*`); null for an unknown status, shown raw. */
+  stageLabel: StageLabel | null;
   /** The appointment's own center: the tenant (X-Tenant-ID) for its cancel and move. */
   centerId?: string | null;
 }
@@ -32,6 +35,7 @@ export function fromCita(c: Cita): PatientAppointment {
     withLabel: c.doctorName ?? null,
     isLive: rowInGroups("medical", c, LIVE.medical),
     rescheduled: rowInGroups("medical", c, ["rescheduled"]),
+    stageLabel: stageLabel("medical", c),
     centerId: c.clinicId ?? null,
   };
 }
@@ -49,6 +53,7 @@ export function fromSesion(s: Sesion): PatientAppointment {
     withLabel: null,
     isLive: rowInGroups("therapy", s, LIVE.therapy),
     rescheduled: false, // therapy has no rescheduled stage
+    stageLabel: stageLabel("therapy", s),
     centerId: s.clinicId ?? null,
   };
 }

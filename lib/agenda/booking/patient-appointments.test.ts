@@ -44,6 +44,7 @@ function item(over: Partial<PatientAppointment>): PatientAppointment {
     withLabel: null,
     isLive: true,
     rescheduled: false,
+    stageLabel: "booked",
     ...over,
   };
 }
@@ -91,7 +92,7 @@ test("a cancelled future item goes to past", () => {
   assert.deepEqual(past.map((i) => i.id), ["a"]);
 });
 
-test("reprogramada is dropped everywhere", () => {
+test("a rescheduled item (stage group rescheduled) is dropped from upcoming and past", () => {
   const r = splitUpcomingPast(
     [
       item({ id: "a", date: "2026-11-12", status: "reprogramada", rescheduled: true, isLive: false }),
@@ -144,6 +145,7 @@ const appt = (over: Partial<PatientAppointment> = {}): PatientAppointment => ({
   withLabel: null,
   isLive: true,
   rescheduled: false,
+  stageLabel: "booked",
   ...over,
 });
 const only = (...perms: string[]) => (p: string) => perms.includes(p);
@@ -227,4 +229,15 @@ test("a rescheduled appointment is dropped by its stage group, also when read by
   const kept = fromCita(cita({ id: "k", status: "cancelada", arrivedAt: "2026-11-10T13:00:00Z", date: "2026-11-12" }));
   const r = splitUpcomingPast([moved, old, kept], "2026-11-04");
   assert.deepEqual([...r.upcoming, ...r.past].map((i) => i.id), ["k"]);
+});
+
+test("the status label comes from the stage: not served is told apart, a called session waits, unknown has none", () => {
+  assert.equal(fromCita(cita({ status: "atendida" })).stageLabel, "done");
+  assert.equal(fromCita(cita({ status: "cancelada" })).stageLabel, "cancelled");
+  assert.equal(fromCita(cita({ status: "cancelada", arrivedAt: "2026-11-10T13:00:00Z" })).stageLabel, "not_served");
+  assert.equal(fromCita(cita({ status: undefined, bookingStatus: "arrived", careStatus: "triage" })).stageLabel, "triage");
+  assert.equal(fromSesion(sesion({ status: "presente", calledAt: "2026-11-10T13:00:00Z" })).stageLabel, "waiting");
+  assert.equal(fromSesion(sesion({ status: "cancelada", presentAt: "2026-11-10T13:00:00Z" })).stageLabel, "not_served");
+  assert.equal(fromSesion(sesion({ status: "pendiente" })).stageLabel, "upcoming");
+  assert.equal(fromSesion(sesion({ status: "rara" })).stageLabel, null);
 });

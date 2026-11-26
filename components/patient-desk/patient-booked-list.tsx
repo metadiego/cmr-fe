@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useAppointmentLabel } from "@/components/appointments-booking/patient-rail";
 import type { PatientAppointments } from "@/hooks/use-patient-appointments";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
+import { stageLabelKey } from "@/lib/lifecycle/stage-labels";
 import { cn } from "@/lib/utils";
 
 // «Ya agendadas» in the patient desk's therapy form: the patient's upcoming appointments (therapies and
@@ -42,7 +43,9 @@ export function PatientBookedList({
         <ul className="max-h-44 overflow-y-auto rounded-lg border text-xs tabular-nums">
           {data.upcoming.map((a) => {
             const clash = visitDates.has(a.date.slice(0, 10));
-            const statusKey = `${a.kind === "medical" ? "citas.estado" : "servicios.estado"}.${a.status}`;
+            const status = a.stageLabel
+              ? tRoot(stageLabelKey(a.kind === "medical" ? "medical" : "therapy", a.stageLabel))
+              : a.status;
             return (
               <li
                 key={a.id}
@@ -54,7 +57,7 @@ export function PatientBookedList({
                 <span className="truncate font-medium first-letter:uppercase">{label(a.date, a.time)}</span>
                 <span className="truncate">{nameOf(a)}</span>
                 <span className={cn("shrink-0", !clash && "text-muted-foreground")}>
-                  {clash ? t("sameDateAsVisit") : tRoot.has(statusKey) ? tRoot(statusKey) : a.status}
+                  {clash ? t("sameDateAsVisit") : status}
                 </span>
               </li>
             );
