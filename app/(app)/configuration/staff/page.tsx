@@ -14,6 +14,7 @@ import { StaffList } from "@/components/personal/staff-list";
 import { CentrosDePersona, FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
 import { DarAccesoDialog } from "@/components/personal/give-access-dialog";
 import { getRoles, type Rol } from "@/lib/api/rbac";
+import { getPositions, type Position } from "@/lib/api/positions";
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { InviteDialog } from "@/components/admin/invite-dialog";
 import { UserAccessPanel } from "@/components/admin/user-access-panel";
@@ -72,6 +73,8 @@ export function StaffPanel() {
   const rolesRes = useResource<Rol[]>(() => getRoles());
   const roles = rolesRes.state.kind === "ok" ? rolesRes.state.data : [];
   // Catálogo de cargos del BE: one closed list, the same in every clinic.
+  const positionsRes = useResource<Position[]>(() => getPositions());
+  const positions = positionsRes.state.kind === "ok" ? positionsRes.state.data : [];
   const cargosRes = useResource<CargoCatalogo[]>(() => getCargos());
   const cargoCatalogo = cargosRes.state.kind === "ok" ? cargosRes.state.data : [];
   // La cuenta del EHR no es por centro (una persona, una cuenta) pero el BE la guarda contra el centro
@@ -166,6 +169,7 @@ export function StaffPanel() {
           <StaffList
             isSuspended={(p) => accessOf(p, profilesById) === "suspended"}
             people={filtrados}
+            positions={positions}
             selectedId={selId}
             onSelect={setSelId}
             q={q}

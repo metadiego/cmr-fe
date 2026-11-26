@@ -7595,5 +7595,49 @@
     "timeZoneHint": "E.g. America/Puerto_Rico.",
     "save": "Save",
     "settingsSaved": "Settings saved."
+  },
+  "positions": {
+    "admin": "Administrator",
+    "manager": "Manager",
+    "appointments": "Operator",
+    "frontdesk": "Front desk",
+    "billing": "Billing",
+    "inventory": "Inventory",
+    "doctor": "Doctor",
+    "nurse": "Nurse",
+    "technician": "Technician",
+    "cashier": "Cashier",
+    "accounting": "Accounting",
+    "other": "Other",
+    "nursing": "Nursing",
+    "nursing_panel": "Nursing panel",
+    "facturacion-inventario": "Billing and inventory",
+    "read_only": "Read only",
+    "accessChangeNeedsAdmin": "Only an administrator can change positions that carry permissions, or the centers of someone with system access.",
+    "centersRequired": "Each position needs at least one center.",
+    "primaryNotHeld": "The primary position must be one the person holds.",
+    "unknown": "That position does not exist.",
+    "noDateWindows": "Positions have no end date: the access was given without one."
+  },
+  "staffPositions": {
+    "title": "Positions",
+    "help": "What the person does at each center. Their centers are those with at least one position.",
+    "primary": "Primary",
+    "makePrimary": "Make primary position",
+    "primaryHelp": "The primary one is the person's label in lists and reports.",
+    "carriesPermissions": "Gives system access",
+    "adminSwitch": "Administrator (full access in every center)",
+    "adminSwitchHelp": "Asks for confirmation on save.",
+    "none": "No positions at this center.",
+    "noneAtAll": "No positions: the person shows up at no center.",
+    "blocked": {
+      "carriesPermissions": "Positions with a lock give system access: only an administrator changes them.",
+      "loginCenterNeedsAdmin": "This person has system access: adding them to a center, or removing the last position at a center, is done by an administrator.",
+      "noCenterAccess": "You cannot edit staff at this center."
+    },
+    "inviteTitle": "Positions",
+    "inviteHelp": "Choose at least one position at a center.",
+    "inviteMissing": "a position",
+    "positionsFailed": "The account was created, but the positions were not saved. Open it and assign them from its record."
   }
 }

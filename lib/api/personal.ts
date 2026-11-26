@@ -14,6 +14,8 @@ export type Personal = components["schemas"]["PersonalEntity"];
 export type PersonalEnAlcance = Personal & {
   clinicName?: string | null;
   servesInCenters?: { clinicId: string; clinicName: string | null }[];
+  /** The id (in `GET /positions`) of the position shown as the person's label. Not in schema.d.ts yet. */
+  primaryPositionId?: string | null;
 };
 
 // `frontdeskStartsOnConsultation` (BE PR #386, EN REVISIÓN — sin desplegar a esta fecha): dato de la

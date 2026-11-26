@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { positionLabel } from "@/lib/personal/positions";
 import { toast } from "sonner";
 
 import {
@@ -312,7 +313,7 @@ export function InviteDialog({
             {sinCuenta.map((p) => (
               <SelectItem key={p.id} value={p.id}>
                 {p.name} {p.lastName ?? ""}
-                {p.jobTitle ? ` · ${p.jobTitle}` : ""}
+                {p.jobTitle ? ` · ${positionLabel(p.jobTitle, tRoot)}` : ""}
               </SelectItem>
             ))}
           </SelectContent>
