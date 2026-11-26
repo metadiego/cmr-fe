@@ -1,10 +1,11 @@
 import type { CitaEditPayload } from "@/lib/agenda/cita-edit-payload";
-import type { components } from "./schema";
+import type { components, operations } from "./schema";
 import type { SheetCheck } from "@/lib/agenda/sheet";
 import { apiFetch, apiFetchPaged, apiFetchEnvelope, oneCenterPath } from "./client";
 import type { Paginated } from "./types";
 import { getCentrosDondePuedo } from "./centers";
 import { readChoice, tenantOf, type CenterChoice } from "@/lib/clinic-read-scope";
+import { readQuery } from "./read-query";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
 //
@@ -24,6 +25,9 @@ export type Cita = components["schemas"]["CitaEntity"] & {
 export type CreateCitaPayload = components["schemas"]["CreateCitaDto"] & { confirmed?: boolean };
 export type TipoCita = components["schemas"]["TipoCitaEntity"];
 export type EstadoCita = Cita["status"];
+type ListQuery = NonNullable<operations["CitasController_list[2]_v2"]["parameters"]["query"]>;
+export type StageBookingStatus = NonNullable<ListQuery["bookingStatus"]>[number];
+export type StageCareStatus = NonNullable<ListQuery["careStatus"]>[number];
 export type CanalCita = Cita["channel"];
 
 // State catalog (GET /appointments/statuses): labelKey/color/sortOrder/flags. Drive UI
@@ -75,23 +79,19 @@ export interface ListCitasParams {
   to?: string;
   doctorId?: string;
   patientId?: string;
-  status?: EstadoCita;
+  /** Booking stage(s). Replaces the deprecated old `status` filter, which readers no longer send. */
+  bookingStatus?: StageBookingStatus[];
+  /** Care stage(s) once the patient arrived. */
+  careStatus?: StageCareStatus[];
   channel?: CanalCita;
   onlyCare?: boolean; // only states visible to the Atención board
   centerIds?: string[]; // the centers to read; each needs citas.read THERE
 }
 
-// Query string of a read: the filters only. Its clinics go as `centerIds` through `oneCenterPath`
+// Query string of a read (`readQuery`): the filters only. Its clinics go as `centerIds` through `oneCenterPath`
 // (lib/clinic-read-scope.ts `readChoice`): explicit `centerIds`, else the screen's picked center
 // (`centroId`), else the top bar's clinic (nothing on «Ambos»). Never by X-Tenant-ID alone: the BE reads
 // every clinic in scope when none is named. docs/specs/selector-de-centros-arriba.md.
-function readQuery(filters: object): URLSearchParams {
-  const sp = new URLSearchParams();
-  for (const [k, v] of Object.entries(filters)) {
-    if (v) sp.set(k, String(v));
-  }
-  return sp;
-}
 
 // `path` with the read's clinics, and the X-Tenant-ID that goes with them (a clinic of the read).
 async function scopedRead(path: string, centroId?: string, centerIds?: string[]): Promise<[string, string | undefined]> {
@@ -132,7 +132,6 @@ export async function listCitasRango(params: {
   from: string;
   to: string;
   doctorId?: string;
-  status?: EstadoCita;
   centroId?: string; // the center picked on the screen
   centerIds?: string[];
 }): Promise<Cita[]> {
@@ -164,7 +163,6 @@ export async function countByDay(params: {
   from: string;
   to: string;
   doctorId?: string;
-  status?: EstadoCita;
   channel?: CanalCita;
   centroId?: string;
   centerIds?: string[];

@@ -89,7 +89,7 @@ export function FichaCitas({ pacienteId }: { pacienteId: string }) {
                 <TabsTrigger value="past">{t("appointmentsPast")} <Count n={past.length} /></TabsTrigger>
               </TabsList>
             </Tabs>
-            {/* The reschedule trail is NOT listed here (the BE no longer returns `reprogramada`): it sits
+            {/* The reschedule trail is NOT listed here (the BE leaves rescheduled rows out of the list): it sits
                 behind this button. Handoff be-citas-el-rastro-va-detras-de-un-boton. */}
             <Button variant="ghost" size="sm" onClick={() => setHistOpen(true)}>
               <HugeiconsIcon icon={Clock01Icon} className="size-4" />
@@ -140,13 +140,13 @@ function Count({ n }: { n: number }) {
 }
 
 // Modal with the patient's RESCHEDULED appointments (date, time, reason). Each opens its full
-// before→after trail through HistorialDialog. GET /appointments?patientId&status=reprogramada.
+// before→after trail through HistorialDialog. GET /appointments?patientId&bookingStatus=rescheduled.
 function ReagendamientosDialog({ pacienteId, onClose }: { pacienteId: string; onClose: () => void }) {
   const t = useTranslations("patients.hub");
   const tc = useTranslations("common");
   const dia = useDia();
   const res = useResource<{ items: Cita[] }>(
-    () => listCitasEveryCenter({ patientId: pacienteId, status: "reprogramada", limit: 100 }),
+    () => listCitasEveryCenter({ patientId: pacienteId, bookingStatus: ["rescheduled"], limit: 100 }),
     [pacienteId],
   );
   const [trace, setTrace] = React.useState<Cita | null>(null);
