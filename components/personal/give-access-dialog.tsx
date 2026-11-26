@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import type { Personal } from "@/lib/api/personal";
 import { inviteUser } from "@/lib/api/profiles";
 import { setStaffPositions } from "@/lib/api/positions";
+import { toastError } from "@/lib/api/errors";
 import { missingFields } from "@/lib/forms/missing";
 import { hasAnyPosition } from "@/lib/admin/invite";
 import { buildPositionsBody, chipState } from "@/lib/personal/positions";
@@ -53,7 +55,14 @@ export function DarAccesoDialog({
         staffId: persona.id,
         redirectTo: `${window.location.origin}/auth/set-password`,
       });
-      await setStaffPositions(persona.id, buildPositionsBody(draft.grid, draft.primary, draft.catalog), centro);
+      // The account exists now: a failed positions save must not keep the dialog open (a retry would
+      // fail with "already has an account"). Warn and close; they are assigned from the record.
+      try {
+        await setStaffPositions(persona.id, buildPositionsBody(draft.grid, draft.primary, draft.catalog), centro);
+      } catch (e) {
+        toastError(e, tRoot);
+        toast.warning(tp("positionsFailed"));
+      }
     },
     { successMessage: t("accesoDado", { nombre: nombreDe(persona) }), onSuccess: onDone },
   );
@@ -67,7 +76,7 @@ export function DarAccesoDialog({
       title={t("darAccesoTitulo", { nombre: nombreDe(persona) })}
       description={t("darAccesoDesc")}
       missing={missing}
-      blocked={!draft.ready}
+      blocked={!draft.ready || !!draft.failure}
       reason={draft.failure ?? (draft.ready ? undefined : tRoot("common.loading"))}
       submitting={submitting}
       submittingLabel={t("dando")}
@@ -94,7 +103,8 @@ export function DarAccesoDialog({
             onPrimaryChange={draft.setPrimary}
             viewerIsAdmin={viewerIsAdmin}
             blockOf={(position, centerId) =>
-              chipState({ position, centerId, grid: draft.grid, viewerIsAdmin, hasLogin: false, canEditCenter: true })
+              // The positions are saved after the invite, when the record already has its login.
+              chipState({ position, centerId, grid: draft.grid, viewerIsAdmin, hasLogin: true, canEditCenter: true })
             }
           />
         )}

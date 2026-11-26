@@ -275,6 +275,9 @@ export function InviteDialog({
       actions={[{ label: t("submit"), onClick: () => submit() }]}
       submitting={submitting}
       missing={missing}
+      // Never submit over a draft that is still loading or failed: the save sends the complete list.
+      blocked={!draft.ready || !!draft.failure}
+      reason={draft.failure ?? (draft.ready ? undefined : tRoot("common.loading"))}
       submittingLabel={t("submitting")}
       cancelLabel={tc("cancel")}
     >
@@ -365,7 +368,7 @@ export function InviteDialog({
             onPrimaryChange={draft.setPrimary}
             viewerIsAdmin={viewerIsAdmin}
             blockOf={(position, centerId) =>
-              chipState({ position, centerId, grid: draft.grid, viewerIsAdmin, hasLogin: false, canEditCenter: true })
+              chipState({ position, centerId, grid: draft.grid, viewerIsAdmin, hasLogin: true, canEditCenter: true })
             }
           />
         ) : (

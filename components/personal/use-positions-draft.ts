@@ -4,14 +4,16 @@ import * as React from "react";
 
 import { getPositions, getStaffPositions, type Position, type StaffPositions } from "@/lib/api/positions";
 import { getCenters, type Centro } from "@/lib/api/centers";
-import { effectivePrimary, gridFromStaff, type PositionGrid } from "@/lib/personal/positions";
+import { effectivePrimary, type PositionGrid } from "@/lib/personal/positions";
+import { draftOnLoad, withoutPermissionPositions, type PositionsDraft } from "@/lib/personal/positions-draft";
 import { useResource } from "@/hooks/use-resource";
 
 const EMPTY: PositionGrid = { admin: false, byCenter: {} };
 
 /**
  * The positions an invite will give. It starts from what the linked staff record already holds
- * (`staffId`), because the save sends the COMPLETE list: starting empty would wipe them. No staffId
+ * (`staffId`) minus the permission positions cmr-be drops on linking, because the save sends the
+ * COMPLETE list: starting empty would wipe them. No staffId
  * (a new person) → empty. `enabled` is the dialog's `open`: nothing loads while it is closed.
  */
 export function usePositionsDraft(staffId: string | null, enabled: boolean, centro?: string) {
@@ -25,17 +27,17 @@ export function usePositionsDraft(staffId: string | null, enabled: boolean, cent
   const centers = React.useMemo(() => (centersRes.state.kind === "ok" ? centersRes.state.data : []), [centersRes.state]);
   const held = heldRes.state.kind === "ok" ? heldRes.state.data : undefined;
 
-  const [loadedFrom, setLoadedFrom] = React.useState<StaffPositions | null | undefined>(undefined);
-  const [grid, setGrid] = React.useState<PositionGrid>(EMPTY);
-  const [primary, setPrimary] = React.useState<string | null>(null);
-  const ready = held !== undefined && catalogRes.state.kind === "ok" && centersRes.state.kind === "ok";
-  // Adjusted during render (no effect): another linked record, or a fresh load, replaces the draft.
-  if (ready && held !== loadedFrom) {
-    const g = held ? gridFromStaff(held, catalog, centers.map((c) => c.id)) : EMPTY;
-    setLoadedFrom(held);
-    setGrid(g);
-    setPrimary(held ? effectivePrimary(held.primary, g, catalog) : null);
+  // cmr-be drops the positions that carry permissions when the record gets its login, so the draft
+  // starts without them (memoized: a new object every render would re-seed forever).
+  const source = React.useMemo(() => (held ? withoutPermissionPositions(held) : held), [held]);
+  const [draft, setDraft] = React.useState<PositionsDraft | null>(null);
+  const ready = source !== undefined && catalogRes.state.kind === "ok" && centersRes.state.kind === "ok";
+  // Seeded during render (no effect): another linked record, or a fresh load, replaces the draft.
+  if (ready) {
+    const next = draftOnLoad(draft, source, catalog, centers.map((c) => c.id));
+    if (next !== draft) setDraft(next);
   }
+  const grid = draft?.grid ?? EMPTY;
 
   const failure =
     catalogRes.state.kind === "fail" ? catalogRes.state.message
@@ -47,10 +49,11 @@ export function usePositionsDraft(staffId: string | null, enabled: boolean, cent
     catalog,
     centers: centers.map((c) => ({ id: c.id, name: c.name })),
     grid,
-    setGrid,
-    primary: effectivePrimary(primary, grid, catalog),
-    setPrimary,
-    ready,
+    setGrid: (g: PositionGrid) => setDraft((d) => (d ? { ...d, grid: g } : d)),
+    primary: effectivePrimary(draft?.primary ?? null, grid, catalog),
+    setPrimary: (p: string) => setDraft((d) => (d ? { ...d, primary: p } : d)),
+    // Not ready while another record's positions load: submitting then would save the wrong list.
+    ready: ready && draft?.source === source,
     failure,
   };
 }

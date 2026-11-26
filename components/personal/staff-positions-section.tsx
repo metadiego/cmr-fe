@@ -6,15 +6,8 @@ import { useTranslations } from "next-intl";
 import type { Personal } from "@/lib/api/personal";
 import { getStaffPositions, setStaffPositions, type Position, type StaffPositions } from "@/lib/api/positions";
 import { getCenters, getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
-import {
-  buildPositionsBody,
-  centersOf,
-  chipState,
-  effectivePrimary,
-  gridFromStaff,
-  sameGrid,
-  type PositionGrid,
-} from "@/lib/personal/positions";
+import { buildPositionsBody, centersOf, chipState, effectivePrimary } from "@/lib/personal/positions";
+import { draftOnLoad, draftOnSave, isDraftDirty, type PositionsDraft } from "@/lib/personal/positions-draft";
 import { useResource } from "@/hooks/use-resource";
 import { useMe, isAdmin } from "@/hooks/use-me";
 import { Label } from "@/components/ui/label";
@@ -49,32 +42,21 @@ export function StaffPositionsSection({
   const centerIds = React.useMemo(() => centers.map((c) => c.id), [centers]);
   const held = heldRes.state.kind === "ok" ? heldRes.state.data : null;
 
-  // Saved state and the edit over it; a fresh load replaces the edit (adjusted during render, no effect).
-  const [prevHeld, setPrevHeld] = React.useState<StaffPositions | null>(null);
-  const [saved, setSaved] = React.useState<{ grid: PositionGrid; primary: string | null } | null>(null);
-  const [grid, setGrid] = React.useState<PositionGrid | null>(null);
-  const [primary, setPrimary] = React.useState<string | null>(null);
+  // Loaded / saved / edited state (lib/personal/positions-draft): a save's result is never overwritten
+  // by the pre-save load the fetcher still holds. Seeded during render (no effect).
+  const [draft, setDraft] = React.useState<PositionsDraft | null>(null);
   const ready = held !== null && centersRes.state.kind === "ok" && catalog.length > 0;
-  if (ready && held !== prevHeld) {
-    const g = gridFromStaff(held, catalog, centerIds);
-    const p = effectivePrimary(held.primary, g, catalog);
-    setPrevHeld(held);
-    setSaved({ grid: g, primary: p });
-    setGrid(g);
-    setPrimary(p);
+  if (ready) {
+    const next = draftOnLoad(draft, held, catalog, centerIds);
+    if (next !== draft) setDraft(next);
   }
+  const grid = draft?.grid ?? null;
+  const shownPrimary = draft ? effectivePrimary(draft.primary, draft.grid, catalog) : null;
 
-  const shownPrimary = grid ? effectivePrimary(primary, grid, catalog) : null;
-  const dirty = !!grid && !!saved && (!sameGrid(grid, saved.grid) || shownPrimary !== saved.primary);
-  useSaveSection("positions", dirty, async () => {
-    if (!grid) throw new Error("positions are not loaded");
-    const result = await setStaffPositions(persona.id, buildPositionsBody(grid, primary, catalog), centro);
-    const g = gridFromStaff(result, catalog, centerIds);
-    const p = effectivePrimary(result.primary, g, catalog);
-    setPrevHeld(result);
-    setSaved({ grid: g, primary: p });
-    setGrid(g);
-    setPrimary(p);
+  useSaveSection("positions", !!draft && isDraftDirty(draft, catalog), async () => {
+    if (!draft) throw new Error("positions are not loaded");
+    const result = await setStaffPositions(persona.id, buildPositionsBody(draft.grid, draft.primary, catalog), centro);
+    setDraft(draftOnSave(draft, result, catalog, centerIds));
   });
 
   // Rows: every center the viewer can edit staff in, plus every center where the person already holds
@@ -104,9 +86,9 @@ export function StaffPositionsSection({
             catalog={catalog}
             centers={rows}
             grid={grid}
-            onChange={setGrid}
+            onChange={(g) => setDraft((d) => (d ? { ...d, grid: g } : d))}
             primary={shownPrimary}
-            onPrimaryChange={setPrimary}
+            onPrimaryChange={(p) => setDraft((d) => (d ? { ...d, primary: p } : d))}
             viewerIsAdmin={viewerIsAdmin}
             blockOf={(position, centerId) =>
               chipState({
