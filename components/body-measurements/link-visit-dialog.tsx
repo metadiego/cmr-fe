@@ -52,6 +52,12 @@ export function LinkVisitDialog({
             serviceName: names.get(s.serviceId) ?? null,
             time: s.time ?? null,
             status: s.status,
+            bookingStatus: s.bookingStatus,
+            careStatus: s.careStatus,
+            syncedStatus: s.syncedStatus,
+            confirmedAt: s.confirmedAt,
+            calledAt: s.calledAt,
+            presentAt: s.presentAt,
           })),
         );
       })

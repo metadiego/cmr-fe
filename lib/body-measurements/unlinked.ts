@@ -1,6 +1,8 @@
 // «Medidas sin vincular» (BE #509, handoff docs/specs/medidas-glp1-hub-y-bascula-por-imagen-handoff.md):
 // scale / tape readings the BE could not attach to a GLP-1 visit on its own. Pure helpers for the hub.
 
+import { isNotCancelled, type StagedRow } from "../lifecycle/stage-groups.ts";
+
 export type MeasurementKind = "scale" | "tape";
 
 /** One row of GET /body-measurements/unlinked, as the screen uses it. */
@@ -61,8 +63,12 @@ export function valueEntries(r: Pick<UnlinkedReading, "kind" | "values">): Array
   return [...first, ...rest].map((k) => [k, r.values[k]]);
 }
 
-/** A visit the reading can be linked to (a frontdesk session of that day and center). */
-export interface LinkCandidate {
+/**
+ * A visit the reading can be linked to (a frontdesk session of that day and center), with the
+ * session's stage fields so "cancelled" is read by its stage group.
+ */
+export interface LinkCandidate
+  extends Pick<StagedRow, "bookingStatus" | "careStatus" | "syncedStatus" | "confirmedAt" | "calledAt" | "presentAt"> {
   id: string;
   patientId: string | null;
   patientName: string | null;
@@ -86,7 +92,7 @@ export function rankCandidates(
   const q = fold(opts.query?.trim() ?? "");
   const own = (c: LinkCandidate) => (opts.patientId && c.patientId === opts.patientId ? 0 : 1);
   return list
-    .filter((c) => c.status !== "cancelada")
+    .filter((c) => isNotCancelled("therapy", c))
     .filter((c) => c.serviceName && /glp/i.test(c.serviceName))
     .filter((c) => !q || [c.patientName, c.record, c.serviceName].some((x) => x && fold(x).includes(q)))
     .slice()
