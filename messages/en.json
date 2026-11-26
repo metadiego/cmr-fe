@@ -501,7 +501,8 @@
     },
     "tipo": {
       "nueva": "Consultation (New)",
-      "seguimiento": "Follow-up"
+      "seguimiento": "Follow-up",
+      "exonerada": "Free (Exonerada)"
     },
     "paciente_ya_es_seguimiento": "This patient has already been seen: they are a follow-up, cannot be booked as new.",
     "datos_no_verificables": "The patient's data could not be verified, please try again.",
@@ -6002,7 +6003,8 @@
     "serviceDone": "Done",
     "subtypeShort": {
       "nueva": "New",
-      "seguimiento": "Follow-up"
+      "seguimiento": "Follow-up",
+      "exonerada": "Free"
     },
     "daySummary": {
       "open": "Open the day's summary",
