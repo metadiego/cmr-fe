@@ -5,13 +5,14 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { UserAccountIcon, UserAdd01Icon } from "@hugeicons/core-free-icons";
 
-import { listPersonalAll, getCargos, type Personal, type PersonalEnAlcance, type CargoCatalogo } from "@/lib/api/personal";
+import { listPersonalAll, type Personal, type PersonalEnAlcance } from "@/lib/api/personal";
 import { FichaEditor, StaffActiveButton } from "@/components/personal/ficha-editor";
 import { SaveGroup } from "@/components/personal/save-group";
-import { normalizeResponsibilities, responsibilityOptions, showsConsultaPreferences } from "@/lib/personal/responsibilities";
+import { normalizeResponsibilities, showsConsultaPreferences } from "@/lib/personal/responsibilities";
 import { NuevoPersonalDialog } from "@/components/personal/nuevo-personal-dialog";
 import { StaffList } from "@/components/personal/staff-list";
-import { CentrosDePersona, FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
+import { FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
+import { StaffPositionsSection } from "@/components/personal/staff-positions-section";
 import { DarAccesoDialog } from "@/components/personal/give-access-dialog";
 import { getRoles, type Rol } from "@/lib/api/rbac";
 import { getPositions, type Position } from "@/lib/api/positions";
@@ -75,8 +76,6 @@ export function StaffPanel() {
   // Catálogo de cargos del BE: one closed list, the same in every clinic.
   const positionsRes = useResource<Position[]>(() => getPositions());
   const positions = positionsRes.state.kind === "ok" ? positionsRes.state.data : [];
-  const cargosRes = useResource<CargoCatalogo[]>(() => getCargos());
-  const cargoCatalogo = cargosRes.state.kind === "ok" ? cargosRes.state.data : [];
   // La cuenta del EHR no es por centro (una persona, una cuenta) pero el BE la guarda contra el centro
   // donde se creó: se piden TODOS los centros donde el que mira tiene ehr-integration.read (verificado
   // en vivo 2026-10-01). Tolerante al fallo: sin BE, sencillamente no hay vínculos que mostrar.
@@ -100,7 +99,6 @@ export function StaffPanel() {
   const fillHeight = useFillViewportHeight(gridRef);
 
   // Responsibilities offered: every tag in use by real staff (there is no separate catalogue).
-  const capacidadOpciones = React.useMemo(() => responsibilityOptions(personal), [personal]);
 
   const accessCounts = countByAccess(personal, profilesById);
   const filtrados = filterByAccess(personal, access, profilesById)
@@ -187,8 +185,7 @@ export function StaffPanel() {
             <FichaPersonal
               key={sel.id}
               persona={sel}
-              cargoCatalogo={cargoCatalogo}
-              capacidadOpciones={capacidadOpciones}
+              positions={positions}
               roles={roles}
               ehrRoles={ehrRoles}
               ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
@@ -243,14 +240,14 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
+  persona, positions, roles, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
 }: {
   /** The person's login, when the viewer is an admin (only an admin manages access). */
   profile: Perfil | undefined;
   onProfileChanged: () => void;
   persona: Personal;
-  cargoCatalogo: CargoCatalogo[];
-  capacidadOpciones: string[];
+  /** The position catalog (`GET /positions`). */
+  positions: Position[];
   roles: Rol[];
   ehrRoles: EhrRole[];
   ehrLink: EhrStaffLink | undefined;
@@ -302,10 +299,10 @@ function FichaPersonal({
           {/* One "Save" for every section below (save-group.tsx); deactivate is its own action. */}
           <SaveGroup onSaved={onChanged} footerStart={<StaffActiveButton persona={persona} centro={centro} onChanged={onChanged} />}>
             <div className="space-y-6">
-              <FichaEditor persona={persona} cargoCatalogo={cargoCatalogo} capacidadOpciones={capacidadOpciones} centro={centro} />
+              <FichaEditor persona={persona} centro={centro} />
 
-              {/* Service centers: where the person appears in the dropdowns. */}
-              <CentrosDePersona persona={persona} centro={centro} />
+              {/* What the person does at each center; their centers are the rows with a position. */}
+              <StaffPositionsSection persona={persona} catalog={positions} centro={centro} />
 
               {/* Front-desk preferences, only for front-desk staff (or whoever already has one set). */}
               {showsConsultaPreferences(persona) && <FrontdeskConsultaPreferencia persona={persona} centro={centro} />}

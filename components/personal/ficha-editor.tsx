@@ -9,69 +9,46 @@ import {
   getStaffExtensions,
   setStaffExtensions,
   type Personal,
-  type CargoCatalogo,
   type StaffEditable,
   type StaffExtension,
 } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { EmailInput } from "@/components/email-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { useSaveSection } from "@/components/personal/save-group";
-import { normalizeResponsibilities, sameResponsibilities, showsSpecialty } from "@/lib/personal/responsibilities";
+import { normalizeResponsibilities, showsSpecialty } from "@/lib/personal/responsibilities";
 
-// The editable fields of a staff record: identity, job title and responsibilities. Saved by the record's
-// single "Save" (save-group.tsx). Phone, sex and color are not shown: nothing reads them and nobody
-// filled them (production, 14-nov-2026); the API still accepts them. Specialty only for doctors.
-// `initials` is not edited: the BE recomputes it. Centers have their own section (own endpoint).
-const NO_CARGO = "__none__";
+// The editable identity fields of a staff record. Saved by the record's single "Save" (save-group.tsx).
+// Phone, sex and color are not shown: nothing reads them and nobody filled them (production,
+// 14-nov-2026); the API still accepts them. Specialty only for doctors. `initials` is not edited: the
+// BE recomputes it. What the person does and where is the «Puestos» section (staff-positions-section);
+// the BE keeps job title and responsibilities in step with it, so they are read here, never edited.
 
 export function FichaEditor({
   persona,
-  cargoCatalogo,
-  capacidadOpciones,
   centro,
 }: {
   persona: Personal;
-  cargoCatalogo: CargoCatalogo[];
-  capacidadOpciones: string[];
   centro?: string;
 }) {
   const t = useTranslations("personalFicha");
-  const tRoot = useTranslations();
   const [name, setName] = React.useState(persona.name ?? "");
   const [lastName, setLastName] = React.useState(persona.lastName ?? "");
   const [specialty, setSpecialty] = React.useState(persona.specialty ?? "");
   const [email, setEmail] = React.useState(persona.email ?? "");
-  const [cargo, setCargo] = React.useState(persona.jobTitle ?? "");
-  const [caps, setCaps] = React.useState<string[]>(() => normalizeResponsibilities(persona.capabilities));
-
-  const label = (slug: string) => {
-    const c = cargoCatalogo.find((x) => x.slug === slug);
-    const key = c?.labelKey || `personal.cargo.${slug}`;
-    if (tRoot.has(key)) return tRoot(key);
-    return c?.name ?? slug;
-  };
-  const claves = cargoCatalogo.map((c) => c.slug);
-  const cargos = cargo && !claves.includes(cargo) ? [...claves, cargo] : claves;
-  const options = [...new Set([...capacidadOpciones, ...caps])];
-  const toggleCap = (c: string) => setCaps((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
-  const withSpecialty = showsSpecialty(cargo, caps, persona.specialty);
+  const withSpecialty = showsSpecialty(persona.jobTitle, normalizeResponsibilities(persona.capabilities), persona.specialty);
 
   const norm = (s: string) => s.trim();
   const dirty =
     norm(name) !== (persona.name ?? "") ||
     norm(lastName) !== (persona.lastName ?? "") ||
     norm(specialty) !== (persona.specialty ?? "") ||
-    norm(email) !== (persona.email ?? "") ||
-    cargo !== (persona.jobTitle ?? "") ||
-    !sameResponsibilities(caps, persona.capabilities);
+    norm(email) !== (persona.email ?? "");
 
   useSaveSection("fields", dirty, async () => {
     if (!norm(name)) throw new Error(t("nameRequired"));
@@ -80,8 +57,6 @@ export function FichaEditor({
       lastName: norm(lastName) || null,
       specialty: norm(specialty) || null,
       email: norm(email) || null,
-      jobTitle: cargo || null,
-      capabilities: caps,
     };
     await updatePersonal(persona.id, payload, centro);
   });
@@ -92,36 +67,9 @@ export function FichaEditor({
         <Campo label={t("nombre")}><Input value={name} onChange={(e) => setName(e.target.value)} /></Campo>
         <Campo label={t("apellido")}><Input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Campo>
         <Campo label={t("email")}><EmailInput value={email} onValueChange={setEmail} /></Campo>
-        <Campo label={t("cargo")}>
-          <Select value={cargo || undefined} onValueChange={(v) => setCargo(v === NO_CARGO ? "" : v)}>
-            <SelectTrigger className="w-full"><SelectValue placeholder={t("cargoPlaceholder")} /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NO_CARGO}>{t("cargoPlaceholder")}</SelectItem>
-              {cargos.map((c) => <SelectItem key={c} value={c}>{label(c)}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </Campo>
         {withSpecialty && (
           <Campo label={t("especialidad")}><Input value={specialty} onChange={(e) => setSpecialty(e.target.value)} /></Campo>
         )}
-      </div>
-
-      <div className="grid gap-2">
-        <div className="space-y-0.5">
-          <Label>{t("responsibilities")}</Label>
-          <p className="text-xs text-muted-foreground">{t("responsibilitiesHelp")}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {options.map((c) => {
-            const on = caps.includes(c);
-            return (
-              <button key={c} type="button" aria-pressed={on} onClick={() => toggleCap(c)} className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
-              )}>{on ? "✓ " : ""}{label(c)}</button>
-            );
-          })}
-        </div>
       </div>
 
       <StaffExtensionsSection staffId={persona.id} centro={centro} />

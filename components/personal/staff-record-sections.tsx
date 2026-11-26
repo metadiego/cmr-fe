@@ -4,13 +4,12 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import {
-  getPersonalCentros, updatePersonalCentros, updateFrontdeskStartsOnConsultation,
+  updateFrontdeskStartsOnConsultation,
   updateConsultationBoardInitialTab,
-  type Personal, type CentroDePersonal, type PersonalConPreferenciaFrontdesk,
+  type Personal, type PersonalConPreferenciaFrontdesk,
 } from "@/lib/api/personal";
 import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
 import { useResource } from "@/hooks/use-resource";
-import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,59 +18,6 @@ import { useSaveSection } from "@/components/personal/save-group";
 
 // Sections of a staff record (app/(app)/configuration/staff/page.tsx). `centro` is the PERSON's home
 // clinic (`persona.clinicId`), never a screen clinic: every read and write here runs in that clinic.
-
-export function CentrosDePersona({ persona, centro }: { persona: Personal; centro?: string }) {
-  const t = useTranslations("personalFicha");
-  const res = useResource<CentroDePersonal[]>(() => getPersonalCentros(persona.id, centro), [persona.id, centro]);
-  const base = res.state.kind === "ok" ? res.state.data : [];
-  // Local selection over what the BE returned; saving sends the list of centers switched on.
-  const [activos, setActivos] = React.useState<Set<string> | null>(null);
-  const marcados = activos ?? new Set(base.filter((c) => c.active).map((c) => c.id));
-  const original = new Set(base.filter((c) => c.active).map((c) => c.id));
-  const dirty = base.length > 0 && (marcados.size !== original.size || [...marcados].some((id) => !original.has(id)));
-
-  useSaveSection("centers", dirty, async () => {
-    await updatePersonalCentros(persona.id, [...marcados], centro);
-    setActivos(null);
-    res.refresh();
-  });
-
-  function toggle(id: string) {
-    setActivos(() => {
-      const next = new Set(marcados);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }
-
-  return (
-    <div className="border-t pt-4">
-      <Label className="mb-1 block">{t("centros")}</Label>
-      <p className="mb-2 text-xs text-muted-foreground">{t("centrosAyuda")}</p>
-      {res.state.kind === "loading" && <p className="text-sm text-muted-foreground">{t("cargando")}</p>}
-      {res.state.kind === "fail" && <p className="text-sm text-destructive">{res.state.message}</p>}
-      <div className="flex flex-wrap gap-2">
-        {base.map((c) => {
-          const on = marcados.has(c.id);
-          return (
-            <button
-              key={c.id}
-              type="button"
-              aria-pressed={on}
-              onClick={() => toggle(c.id)}
-              className={cn(
-                "rounded-full border px-3 py-1 text-sm font-medium transition-colors",
-                on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
-              )}
-            >
-              {on ? "✓ " : ""}{c.name}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 // Front-desk preferences: land on Consulta when opening Frontdesk, and which status tab Consulta opens
 // with. Each is its own PUT (a failure in one never touches the rest of the record); both save with the
