@@ -88,12 +88,11 @@ export interface ListCitasParams {
   centerIds?: string[]; // the centers to read; each needs citas.read THERE
 }
 
-// Query string of a read (`readQuery`): the filters only. Its clinics go as `centerIds` through `oneCenterPath`
-// (lib/clinic-read-scope.ts `readChoice`): explicit `centerIds`, else the screen's picked center
-// (`centroId`), else the top bar's clinic (nothing on «Ambos»). Never by X-Tenant-ID alone: the BE reads
-// every clinic in scope when none is named. docs/specs/selector-de-centros-arriba.md.
-
-// `path` with the read's clinics, and the X-Tenant-ID that goes with them (a clinic of the read).
+// `path` with the read's clinics, and the X-Tenant-ID that goes with them (a clinic of the read). The
+// query string (`readQuery`) holds the filters only; the clinics go as `centerIds` through
+// `oneCenterPath` (lib/clinic-read-scope.ts `readChoice`): explicit `centerIds`, else the screen's picked
+// center (`centroId`), else the top bar's clinic (nothing on «Ambos»). Never by X-Tenant-ID alone: the BE
+// reads every clinic in scope when none is named. docs/specs/selector-de-centros-arriba.md.
 async function scopedRead(path: string, centroId?: string, centerIds?: string[]): Promise<[string, string | undefined]> {
   const choice: CenterChoice = readChoice(centroId, centerIds);
   return [await oneCenterPath(path, choice), tenantOf(choice)];

@@ -17,7 +17,7 @@ import { type Paciente } from "@/lib/api/pacientes";
 import { SheetNotice } from "@/components/agenda/sheet-notice";
 import { isSheetSlotTaken } from "@/lib/agenda/sheet";
 import { useResource } from "@/hooks/use-resource";
-import { rowInGroups } from "@/lib/lifecycle/stage-groups";
+import { holdsTheBooking } from "@/lib/agenda/booking/session-booked";
 import { RecurringBookingModal } from "@/components/agenda/recurring-booking-modal";
 import { TrainSeriesModal } from "@/components/agenda/train-series-modal";
 import { TherapyTrainGrid } from "@/components/agenda/therapy-train-grid";
@@ -140,7 +140,7 @@ export function TherapyDayScheduler({
     if (upcomingRes.state.kind === "ok") {
       for (const s of upcomingRes.state.data) {
         // Cancelled (or not served) and done sessions are not "already booked".
-        if (rowInGroups("therapy", s, ["cancelled_or_not_served", "done"])) continue;
+        if (!holdsTheBooking(s)) continue;
         const arr = m.get(s.serviceId) ?? [];
         arr.push(s);
         m.set(s.serviceId, arr);
