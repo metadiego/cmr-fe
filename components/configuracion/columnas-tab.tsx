@@ -10,6 +10,7 @@ import {
   getColumnasCatalogo,
   getColumnasEfectivas,
   getDefinicion,
+  getTableros,
   crearColumna,
   actualizarColumna,
   colorColumna,
@@ -17,7 +18,7 @@ import {
   personalizarColumna,
   type ColumnaCatalogo,
   type TableroDefinicion,
-  type Transicion,
+  type TableroRegistro,
 } from "@/lib/api/tablero";
 import type { ColumnaEfectiva } from "@/lib/api/agenda-dia";
 import { toastError } from "@/lib/api/errors";
@@ -28,6 +29,8 @@ import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { RequiredLegend } from "@/components/kit/required-mark";
 import { useSubmit } from "@/components/kit/use-submit";
 import { useConfirm } from "@/components/kit/confirm-host";
+import { boardKind } from "@/lib/lifecycle/board-catalogue";
+import type { AppointmentKind } from "@/lib/lifecycle/stage-groups";
 import { ColumnConfigDialog } from "@/components/configuracion/column-config-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +49,9 @@ export function ColumnasTab({ clave }: { clave: string }) {
     catRes.state.kind === "loading" || effRes.state.kind === "loading" || defRes.state.kind === "loading";
   const catalog = (catRes.state.kind === "ok" ? catRes.state.data : []).filter((c) => c.active);
   const efectivas = effRes.state.kind === "ok" ? effRes.state.data : [];
-  const transiciones = defRes.state.kind === "ok" ? defRes.state.data.transitions : [];
+  const definition = defRes.state.kind === "ok" ? defRes.state.data : null;
+  const regRes = useResource<TableroRegistro[]>(() => getTableros());
+  const kind = boardKind((regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.slug === clave)?.entity);
 
   function reloadAll() {
     catRes.reload();
@@ -68,7 +73,8 @@ export function ColumnasTab({ clave }: { clave: string }) {
       clave={clave}
       catalog={catalog}
       efectivas={efectivas}
-      transiciones={transiciones}
+      definition={definition}
+      kind={kind}
       onChanged={reloadAll}
     />
   );
@@ -119,13 +125,15 @@ function ColumnasEditor({
   clave,
   catalog,
   efectivas,
-  transiciones,
+  definition,
+  kind,
   onChanged,
 }: {
   clave: string;
   catalog: ColumnaCatalogo[];
   efectivas: ColumnaEfectiva[];
-  transiciones: Transicion[];
+  definition: TableroDefinicion | null;
+  kind: AppointmentKind | null;
   onChanged: () => void;
 }) {
   const t = useTranslations("configuracion.tableros");
@@ -393,7 +401,8 @@ function ColumnasEditor({
             tablero={clave}
             renderEfectivo={(ef?.render as Record<string, unknown> | null) ?? (configCol.render as Record<string, unknown> | null)}
             labelActual={ef?.label ?? ""}
-            transiciones={transiciones}
+            definition={definition}
+            kind={kind}
             onClose={() => setConfigCol(null)}
             onSaved={onChanged}
           />

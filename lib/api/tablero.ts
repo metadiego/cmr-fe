@@ -283,10 +283,6 @@ export type CreateTableroInput = components["schemas"]["CreateTableroDto"];
 export type UpdateTableroInput = components["schemas"]["UpdateTableroDto"];
 export type CreateColumnaInput = components["schemas"]["CreateColumnaDto"];
 export type UpdateColumnaInput = components["schemas"]["UpdateColumnaDto"];
-export type CreateEstadoInput = components["schemas"]["CreateEstadoDto"];
-export type UpdateEstadoInput = components["schemas"]["UpdateEstadoDto"];
-export type CreateTransicionInput = components["schemas"]["CreateTransicionDto"];
-export type UpdateTransicionInput = components["schemas"]["UpdateTransicionDto"];
 export type CreateSubTipoInput = components["schemas"]["CreateSubtipoDto"];
 export type UpdateSubTipoInput = components["schemas"]["UpdateSubtipoDto"];
 
@@ -310,34 +306,6 @@ export function crearColumna(body: CreateColumnaInput): Promise<ColumnaCatalogo>
 }
 export function actualizarColumna(id: string, body: UpdateColumnaInput): Promise<ColumnaCatalogo> {
   return apiFetch(`/board/columns/${id}`, { method: "PUT", body: JSON.stringify(body) });
-}
-
-// Estados
-export function getEstadosAdmin(tablero: string, all = true): Promise<EstadoCitaCatalogo[]> {
-  return apiFetch(`/board/statuses${q(tablero, all)}`);
-}
-export function crearEstado(body: CreateEstadoInput): Promise<EstadoCitaCatalogo> {
-  return apiFetch(`/board/statuses`, { method: "POST", body: JSON.stringify(body) });
-}
-export function actualizarEstado(id: string, body: UpdateEstadoInput): Promise<EstadoCitaCatalogo> {
-  return apiFetch(`/board/statuses/${id}`, { method: "PUT", body: JSON.stringify(body) });
-}
-export function borrarEstado(id: string): Promise<void> {
-  return apiFetch(`/board/statuses/${id}`, { method: "DELETE" });
-}
-
-// Transiciones
-export function getTransicionesAdmin(tablero: string, all = true): Promise<Transicion[]> {
-  return apiFetch(`/board/transitions${q(tablero, all)}`);
-}
-export function crearTransicion(body: CreateTransicionInput): Promise<Transicion> {
-  return apiFetch(`/board/transitions`, { method: "POST", body: JSON.stringify(body) });
-}
-export function actualizarTransicion(id: string, body: UpdateTransicionInput): Promise<Transicion> {
-  return apiFetch(`/board/transitions/${id}`, { method: "PUT", body: JSON.stringify(body) });
-}
-export function borrarTransicion(id: string): Promise<void> {
-  return apiFetch(`/board/transitions/${id}`, { method: "DELETE" });
 }
 
 // SubTipos
