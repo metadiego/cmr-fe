@@ -55,6 +55,7 @@ import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-
 import { CitaActions } from "@/components/citas/cita-actions";
 import { useCanInCenter } from "@/hooks/use-can-in-center";
 import { bookedUnconfirmedNotice, bornConfirmedByDefault, CONFIRM_PERMISSION, confirmToggleShown, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
+import { useStatusColours } from "@/hooks/use-status-colours";
 import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board";
 
@@ -106,9 +107,7 @@ export function CitaModal({
 
   const me = useMe();
   const callcenterId = me.kind === "ok" ? me.me.staffId ?? undefined : undefined;
-  // The status field's colours: the consultation board's statuses (both backends serve production's).
-  const statusDefRes = useResource<TableroDefinicion>(() => getDefinicion(CONSULTATION_BOARD));
-  const boardStatuses = statusDefRes.state.kind === "ok" ? statusDefRes.state.data.statuses : [];
+  const boardStatuses = useStatusColours(isEdit);
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];

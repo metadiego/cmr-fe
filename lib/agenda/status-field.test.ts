@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 
-import { statusBadge, statusOptions } from "./status-field.ts"
+import { colourStatuses, statusBadge, statusOptions } from "./status-field.ts"
 
 // The consultation board's statuses (frontdesk_consultation, production colours), as 6a and 6b serve them.
 const C6A = [
@@ -42,4 +42,20 @@ for (const [shape, statuses] of [["6a", C6A], ["6b", C6B]] as const) {
 test("no catalogue yet: options and badge without colour", () => {
   assert.equal(statusOptions([])[0].dot, undefined)
   assert.equal(statusBadge([], null).color, null)
+})
+
+test("colourStatuses: create reads the call center board, edit the consultation board", () => {
+  const cc = [{ slug: "programada", color: "#111111" }]
+  const consultation = [{ slug: "programada", color: "#222222" }]
+  assert.deepEqual(colourStatuses(false, consultation, cc), cc)
+  assert.deepEqual(colourStatuses(false, null, cc), cc)
+  assert.deepEqual(colourStatuses(true, consultation, cc), consultation)
+})
+
+test("colourStatuses: edit falls back to the call center board when the consultation board is missing or empty", () => {
+  const cc = [{ slug: "programada", color: "#111111" }]
+  assert.deepEqual(colourStatuses(true, null, cc), cc)
+  assert.deepEqual(colourStatuses(true, [], cc), cc)
+  assert.deepEqual(colourStatuses(true, null, null), [])
+  assert.deepEqual(colourStatuses(false, null, null), [])
 })

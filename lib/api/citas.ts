@@ -60,7 +60,6 @@ export interface ListCitasParams {
   /** Care stage(s) once the patient arrived. */
   careStatus?: StageCareStatus[];
   channel?: CanalCita;
-  onlyCare?: boolean; // only states visible to the Atención board
   centerIds?: string[]; // the centers to read; each needs citas.read THERE
 }
 
@@ -348,7 +347,7 @@ export interface CitaEvento {
   action?: string;
   channel?: string;
   occurredAt?: string;
-  changes?: { level: string; fromStatus: string | null; toStatus: string }[];
+  changes?: { level: string; fromStatus: string | null; toStatus: string | null }[];
 }
 
 export function getHistorial(id: string, centroId?: string): Promise<CitaEvento[]> {

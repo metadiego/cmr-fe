@@ -4,6 +4,7 @@
 // visit sheet, or a number typed whose debounced save has not landed) also counts: it is saved first and
 // the transition runs after. Only a field with neither blocks (cmr-fe docs/specs/asistir-con-areas-sugeridas.md).
 // The moment (`en`) is read under its old or its new name (lib/lifecycle/requirement-moments.ts).
+import { momentStep } from "../lifecycle/requirement-moments.ts";
 
 export type TransitionField = { clave: string; labelKey?: string; en?: string; requerido?: boolean };
 
@@ -17,7 +18,6 @@ export type TransitionFieldsPlan = {
   missing: TransitionField[];
 };
 
-import { momentStep } from "../lifecycle/requirement-moments.ts";
 
 const hasValue = (v: unknown) => v != null && v !== "" && v !== "—";
 

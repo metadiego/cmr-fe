@@ -638,8 +638,6 @@
       "cfgCapacidades": "Capacidades",
       "cfgCapacidadesHelp": "Quién puede llenar este select: la unión del personal con cualquiera de estas capacidades. Sin ninguna marcada, la lista sale vacía, a propósito.",
       "cfgTransition": "Transición",
-      "cfgRequiereEstado": "Etapa requerida",
-      "cfgRequiereEstadoHint": "Etapa que debe haberse alcanzado para usar la celda (vacío = ninguna).",
       "cfgEstampa": "Sella hora en",
       "cfgEstampaHint": "Campo de la hora sellada, ej. llegadaEn.",
       "cfgGroup": "Grupo (cadena)",
@@ -982,8 +980,6 @@
     "empty": "No hay citas para este día.",
     "viewList": "Lista",
     "viewBoard": "Tablero",
-    "boardClosed": "Cerradas",
-    "boardEmpty": "—",
     "actions": {
       "menu": "Acciones",
       "done": "Listo.",

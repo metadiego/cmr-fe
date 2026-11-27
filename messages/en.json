@@ -638,8 +638,6 @@
       "cfgCapacidades": "Capabilities",
       "cfgCapacidadesHelp": "Who can fill this select: the union of staff with any of these capabilities. None checked, the list comes out empty, on purpose.",
       "cfgTransition": "Transition",
-      "cfgRequiereEstado": "Required stage",
-      "cfgRequiereEstadoHint": "Stage the row must have reached to use the cell (empty = none).",
       "cfgEstampa": "Stamps time in",
       "cfgEstampaHint": "Sealed-time field, e.g. llegadaEn.",
       "cfgGroup": "Group (chain)",
@@ -982,8 +980,6 @@
     "empty": "No appointments for this day.",
     "viewList": "List",
     "viewBoard": "Board",
-    "boardClosed": "Closed",
-    "boardEmpty": "—",
     "actions": {
       "menu": "Actions",
       "done": "Done.",

@@ -56,6 +56,11 @@ test("statusGroup: the served group wins; without it the old slug is mapped (bot
   assert.equal(statusGroup("therapy", { slug: "pendiente", group: "booked" }), "upcoming")
 })
 
+test("statusGroup: a served group that disagrees with the slug wins", () => {
+  assert.equal(statusGroup("medical", { slug: "programada", group: "confirmed" }), "confirmed")
+  assert.equal(statusGroup("therapy", { slug: "presente", group: "in_therapy" }), "in_therapy")
+})
+
 test("rowStatus: a not-served row sits in the board's cancelled status, under both shapes", () => {
   assert.equal(rowStatus("medical", MEDICAL_6A, notServed)?.slug, "cancelada")
   assert.equal(rowStatus("medical", MEDICAL_6B, notServed)?.slug, "cancelada")

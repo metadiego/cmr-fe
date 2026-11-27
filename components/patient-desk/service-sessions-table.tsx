@@ -127,10 +127,10 @@ export function ServiceSessionsTable({
       stepStatuses.map((s) => ({ clave: s.slug, labelKey: s.labelKey, color: s.color, group: s.group })),
     [stepStatuses]
   )
-  // "Presente" ya no se marca por terapia aquí: es una sola llegada por paciente, en la cabecera
-  // (regla del dueño, 10-oct-2026 — ver BE PR #424). Se oculta el paso de llegada (grupo "waiting") SIN
-  // sacarlo de `steps`: la posición en el flujo sigue intacta para que `FilaSesion` ubique el estado
-  // actual — solo deja de pintarse como un pill más en la fila.
+  // "Present" is no longer marked per therapy here: it is a single arrival per patient, in the header
+  // (owner rule, 10 Oct 2026, see BE PR #424). The arrival step (group "waiting") is hidden WITHOUT
+  // removing it from `steps`: the flow position stays intact so `FilaSesion` can locate the current
+  // state, it just stops being drawn as one more pill in the row.
   const pasosOcultos = React.useMemo(() => hiddenStepSlugs(stepStatuses), [stepStatuses])
 
   const ids = React.useMemo(() => new Set(sessionIds), [sessionIds])

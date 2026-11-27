@@ -10,8 +10,7 @@ import {
   type UpdateColumnaInput,
   type TableroDefinicion,
 } from "@/lib/api/tablero";
-import { doorSlugOptions, requiredStageOptions } from "@/lib/tablero/column-pickers";
-import type { AppointmentKind } from "@/lib/lifecycle/stage-groups";
+import { doorSlugOptions } from "@/lib/tablero/column-pickers";
 import { listProductos, type Producto } from "@/lib/api/inventario";
 import { listGruposFacturacion } from "@/lib/api/grupos-facturacion";
 import { listPersonalAll, type PersonalEnAlcance } from "@/lib/api/personal";
@@ -38,9 +37,6 @@ import {
 const TIPOS = ["texto", "select", "toggle", "hora", "fecha", "badge", "accion", "derivado"];
 const OPTION_SOURCES = ["medicos", "enfermeras", "tipos_cita", "estados", "personal"];
 
-// Select value standing for "no required stage" (a Select item cannot have an empty value).
-const NO_STAGE = "__none__";
-
 interface AccionRow {
   key: string;
   labelKey: string;
@@ -57,7 +53,6 @@ export function ColumnConfigDialog({
   renderEfectivo,
   labelActual,
   definition,
-  kind,
   onClose,
   onSaved,
 }: {
@@ -68,10 +63,8 @@ export function ColumnConfigDialog({
   // sobre la que se guarda el label para no perder min/dato/group/transition. null = sin override.
   renderEfectivo?: Record<string, unknown> | null;
   labelActual?: string; // nombre propio actual en este tablero (composición), "" si no tiene
-  // The board definition (statuses + transitions): the door and stage pickers list from it.
+  // The board definition (statuses + transitions): the door picker lists from it.
   definition: TableroDefinicion | null;
-  // Lifecycle kind of the board's rows (medical / therapy); null for a board with no stages.
-  kind: AppointmentKind | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -102,13 +95,7 @@ export function ColumnConfigDialog({
     Array.isArray(r.capacidades) ? (r.capacidades as string[]).map(String) : [],
   );
   const [transition, setTransition] = React.useState((r.transition as string) ?? "");
-  // Stored value is an OLD status word (both backends); the picker lists stages and writes that word.
-  const [requiereEstado, setRequiereEstado] = React.useState((r.requiereEstado as string) ?? "");
   const doors = React.useMemo(() => doorSlugOptions(definition?.transitions ?? []), [definition]);
-  const stages = React.useMemo(
-    () => (kind ? requiredStageOptions(kind, definition?.statuses ?? []) : []),
-    [kind, definition],
-  );
   const [estampa, setEstampa] = React.useState((r.estampa as string) ?? "");
   const [group, setGroup] = React.useState((r.group as string) ?? "");
   const [compute, setCompute] = React.useState((r.compute as string) ?? "");
@@ -136,7 +123,6 @@ export function ColumnConfigDialog({
       else delete base.capacidades;
     } else if (tipo === "toggle") {
       setOrDel("transition", transition);
-      setOrDel("requiereEstado", requiereEstado);
       setOrDel("estampa", estampa);
       setOrDel("group", group); // encadenamiento: mismo group → se encadenan
     } else if (tipo === "derivado") {
@@ -279,22 +265,6 @@ export function ColumnConfigDialog({
               </SelectContent>
             </Select>
           </Field>
-          {kind && (
-            <Field label={t("cfgRequiereEstado")} hint={t("cfgRequiereEstadoHint")}>
-              <Select value={requiereEstado || NO_STAGE} onValueChange={(v) => setRequiereEstado(v === NO_STAGE ? "" : v)}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NO_STAGE}>—</SelectItem>
-                  {requiereEstado && !stages.some((o) => o.value === requiereEstado) && (
-                    <SelectItem value={requiereEstado}>{requiereEstado}</SelectItem>
-                  )}
-                  {stages.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.labelKey ? tRoot(o.labelKey) : o.value}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
           <Field label={t("cfgEstampa")} hint={t("cfgEstampaHint")}>
             <Input value={estampa} onChange={(e) => setEstampa(e.target.value)} placeholder="llegadaEn" />
           </Field>

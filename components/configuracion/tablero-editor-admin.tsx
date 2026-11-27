@@ -90,7 +90,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
           ) : (
             <>
               <IntroCard title={t("introColumnasTitle")} body={t("introColumnasBody")} />
-              <ColumnasTab clave={clave} entity={registro?.entity} />
+              <ColumnasTab clave={clave} />
             </>
           )}
         </TabsContent>
@@ -105,7 +105,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
           {esServicios && (
             <Seccion titulo={t("colDefaultsTitle")}>
               <p className="mb-3 text-sm text-muted-foreground">{t("colDefaultsHint")}</p>
-              <ColumnasTab clave={clave} entity={registro?.entity} />
+              <ColumnasTab clave={clave} />
             </Seccion>
           )}
 
@@ -162,7 +162,7 @@ function IntroCard({ title, body, warning }: { title: string; body: string; warn
   );
 }
 
-// Sección apilada dentro de "Avanzado" (Subtipos/Publicar/… dejan de ser pestañas sueltas).
+// Section stacked inside "Advanced" (Subtypes/Publish/... are no longer separate tabs).
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section className="mb-8 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
