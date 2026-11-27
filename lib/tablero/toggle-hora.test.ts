@@ -102,24 +102,34 @@ test("allowedActions: no list on the row keeps today's rule", () => {
 const GROUP: Record<string, string> = {
   programada: "booked", confirmada: "confirmed", presente: "waiting", triage: "triage", en_consulta: "in_consultation",
   atendida: "done", pendiente: "upcoming", en_terapia: "in_therapy", asistido: "done", cancelada: "cancelled_or_not_served",
+  no_show: "no_show", reprogramada: "rescheduled",
 };
 const with6b = (ts: Transicion[]): Transicion[] =>
   ts.map((t) => ({ ...t, fromGroups: t.fromStatuses.map((w) => GROUP[w]), toGroup: t.toStatus ? GROUP[t.toStatus] : null }));
-const medical6b = with6b([...transiciones, tr("cancelar", ["presente", "triage"], "cancelada")]);
+const medical6a = [...transiciones, tr("cancelar", ["presente", "triage"], "cancelada")];
+const medical6b = with6b(medical6a);
 
+// Closed rows rank past every step, as the board's status order did (cancelada / no_show / reprogramada
+// sort after atendida): every box checked and disabled, nothing to send.
 const notServed = { estado: "cancelada", bookingStatus: "arrived", careStatus: "not_served" } as const;
+const closedMedical = [
+  ["not served", notServed],
+  ["cancelled", { estado: "cancelada", bookingStatus: "cancelled", careStatus: null }],
+  ["no-show", { estado: "no_show", bookingStatus: "no_show", careStatus: null }],
+  ["rescheduled", { estado: "reprogramada", bookingStatus: "rescheduled", careStatus: null }],
+] as const;
 
-for (const [shape, ts] of [["6a", [...transiciones, tr("cancelar", ["presente", "triage"], "cancelada")]], ["6b", medical6b]] as const) {
-  test(`not served (${shape}): «Presente» stays checked (the patient came), «En consulta» and «Asistido» do not`, () => {
-    const presente = resolveToggle({ kind: "medical", transiciones: ts, row: notServed, forwardSlug: "presente" });
-    assert.equal(presente.checked, true);
-    assert.equal(presente.action, null); // closed: nothing to undo from here
-    for (const slug of ["consulta", "atender"]) {
-      const r = resolveToggle({ kind: "medical", transiciones: ts, row: notServed, forwardSlug: slug });
-      assert.equal(r.checked, false, slug);
-      assert.equal(r.action, null, slug);
-    }
-  });
+for (const [shape, ts] of [["6a", medical6a], ["6b", medical6b]] as const) {
+  for (const [name, row] of closedMedical) {
+    test(`medical ${name} (${shape}): every box checked and disabled, no action`, () => {
+      for (const slug of ["presente", "triage", "consulta", "atender"]) {
+        const r = resolveToggle({ kind: "medical", transiciones: ts, row, forwardSlug: slug, allowed: ["reactivate"] });
+        assert.equal(r.checked, true, slug);
+        assert.equal(r.disabled, true, slug);
+        assert.equal(r.action, null, slug);
+      }
+    });
+  }
 
   test(`cancel is never a box's back (${shape}): it leaves the flow`, () => {
     const r = resolveToggle({ kind: "medical", transiciones: ts, row: { estado: "presente" }, forwardSlug: "presente" });
@@ -135,6 +145,10 @@ const therapy = [
   tr("volver_presente", ["en_terapia"], "presente"),
 ];
 const called = { estado: "presente", bookingStatus: "arrived", careStatus: "called" } as const;
+const closedTherapy = [
+  ["not served", { estado: "cancelada", bookingStatus: "arrived", careStatus: "not_served" }],
+  ["cancelled", { estado: "cancelada", bookingStatus: "cancelled", careStatus: null }],
+] as const;
 
 for (const [shape, ts] of [["6a", therapy], ["6b", with6b(therapy)]] as const) {
   test(`therapy called (${shape}): «Presente» is checked and last, «En terapia» advances`, () => {
@@ -145,6 +159,17 @@ for (const [shape, ts] of [["6a", therapy], ["6b", with6b(therapy)]] as const) {
     assert.equal(terapia.checked, false);
     assert.equal(terapia.action, "en_terapia");
   });
+
+  for (const [name, row] of closedTherapy) {
+    test(`therapy ${name} (${shape}): every box checked and disabled, no action`, () => {
+      for (const slug of ["presente", "en_terapia", "asistido"]) {
+        const r = resolveToggle({ kind: "therapy", transiciones: ts, row, forwardSlug: slug, allowed: ["reactivate"] });
+        assert.equal(r.checked, true, slug);
+        assert.equal(r.disabled, true, slug);
+        assert.equal(r.action, null, slug);
+      }
+    });
+  }
 }
 
 test("a board of no lifecycle kind leaves the box inert", () => {

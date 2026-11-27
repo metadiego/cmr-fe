@@ -21,8 +21,8 @@ for (const [shape, estados] of [["6a", MED_6A], ["6b", MED_6B]] as const) {
   test(`row colour (${shape}): a not-served row takes the cancelled status colour`, () => {
     assert.equal(rowColour("medical", estados, { estado: "cancelada", bookingStatus: "arrived", careStatus: "not_served" }), "#red")
   })
-  test(`row colour (${shape}): the row's stages decide over its old word`, () => {
-    assert.equal(rowColour("medical", estados, { estado: "presente", bookingStatus: "arrived", careStatus: "in_consultation" }), "#blue")
+  test(`row colour (${shape}): stages that disagree with the old word are stale, the word decides`, () => {
+    assert.equal(rowColour("medical", estados, { estado: "en_consulta", bookingStatus: "arrived", careStatus: "waiting" }), "#blue")
   })
 }
 

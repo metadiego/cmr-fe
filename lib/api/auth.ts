@@ -12,8 +12,8 @@ export type PerfilEstado =
 export interface Me {
   id: string;
   profileId: string | null;
-  // personal.id of the logged-in operator (call-center/atención). Used as
-  // bookedByStaffId on create and actorId on reschedule for the audit trail.
+  // personal.id of the logged-in operator (call-center/atención). Sent as bookedByStaffId on
+  // create; a reschedule sends no actor (the backend takes the login, 6b).
   staffId?: string | null;
   email: string | null;
   // Nombre/apellido del perfil enlazado (cmr-be PR #221). null si el login no tiene perfil

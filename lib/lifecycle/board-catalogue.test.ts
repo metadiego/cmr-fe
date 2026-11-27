@@ -67,10 +67,10 @@ test("rowStatus: a called therapy row sits in the waiting status, under both sha
   assert.equal(rowStatus("therapy", THERAPY_6B, called)?.slug, "presente")
 })
 
-test("rowStatus: the row's stages decide, not a stale old word", () => {
-  // A row whose stored stages moved on (6b serves fresh stages); its group decides.
+test("rowStatus: stored stages that disagree with the old word are stale; the old word decides", () => {
+  // No syncedStatus on a board row: columns of another group than its word are not trusted (6b review).
   const row = { estado: "presente", bookingStatus: "arrived", careStatus: "in_consultation" } as const
-  assert.equal(rowStatus("medical", MEDICAL_6B, row)?.slug, "en_consulta")
+  assert.equal(rowStatus("medical", MEDICAL_6B, row)?.slug, "presente")
   // A row with no status at all is in none.
   assert.equal(rowStatus("medical", MEDICAL_6B, {}), undefined)
 })
@@ -97,10 +97,15 @@ test("storedStatus: an old-word preference and a group-name preference reach the
   assert.equal(storedStatus("medical", MEDICAL_6B, null), undefined)
 })
 
-test("rowReach: a not-served row reached the waiting room; a called row is waiting; a cancelled one reached nothing", () => {
-  assert.equal(rowReach("medical", notServed), flowRank("medical", "waiting"))
+test("rowReach: closed rows (not served, cancelled, no-show, rescheduled) rank past every step; a called row is waiting", () => {
+  const past = flowRank("medical", "done") + 1
+  assert.equal(rowReach("medical", notServed), past)
+  assert.equal(rowReach("medical", { estado: "cancelada" }), past)
+  assert.equal(rowReach("medical", { estado: "no_show" }), past)
+  assert.equal(rowReach("medical", { estado: "reprogramada" }), past)
+  assert.equal(rowReach("therapy", { ...notServed, status: "cancelada" }), flowRank("therapy", "done") + 1)
   assert.equal(rowReach("therapy", { ...called, status: "presente" }), flowRank("therapy", "waiting"))
-  assert.equal(rowReach("medical", { estado: "cancelada" }), -1)
+  assert.equal(rowReach("medical", {}), -1)
   assert.equal(oldWordGroup("medical", "cancelada"), "cancelled_or_not_served")
   assert.equal(flowRank("medical", "no_show"), -1)
 })

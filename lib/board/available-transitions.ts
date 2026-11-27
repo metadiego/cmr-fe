@@ -34,6 +34,7 @@ export function availableTransitions<T extends TransitionLite>(
   return transitions
     .filter((tr) => tr.active !== false)
     .flatMap((tr): T[] => {
+      // Not a lifecycle move (a board's own): offered by permission only; its fromStatuses are no longer read.
       if (!isLifecycleMove(tr.slug)) return !tr.permissionSlug || row.can(tr.permissionSlug) ? [tr] : []
       if (slugOffered(tr.slug, row.allowed) !== true) return []
       return [notServe && tr.slug === CANCEL_SLUG ? { ...tr, labelKey: NOT_SERVE_LABEL_KEY } : tr]

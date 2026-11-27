@@ -13,7 +13,6 @@ import {
   MEDICAL_GROUPS,
   THERAPY_GROUPS,
   rowGroup,
-  stagesOf,
   type AppointmentKind,
   type StagedRow,
   type StageGroup,
@@ -112,9 +111,10 @@ export function storedStatus<S extends CatalogueStatus>(
 }
 
 /**
- * Progress along the care flow, per kind: how far a row got. A row closed after arriving (not served)
- * reached the waiting room and no further; a row closed before (cancelled, no-show, rescheduled) reached
- * nothing. A group off the flow has no rank (-1).
+ * Progress along the care flow, per kind: how far a row got. A CLOSED row (cancelled or not served,
+ * no-show, rescheduled) ranks past every step, as the board's status order always placed those statuses
+ * after the last step: a care-flow box reads it as reached (checked) and, not being its last step, never
+ * undoes it. A row with no known group reached nothing (-1).
  */
 const FLOW: Readonly<Record<AppointmentKind, readonly StageGroup[]>> = {
   medical: ["booked", "confirmed", "waiting", "triage", "in_consultation", "done"],
@@ -126,9 +126,10 @@ export function flowRank(kind: AppointmentKind, group: StageGroup | null): numbe
   return group === null ? -1 : FLOW[kind].indexOf(group)
 }
 
-/** How far a row got on the care flow (see FLOW): a not-served row counts as arrived. */
+/** How far a row got on the care flow (see FLOW): a closed row ranks past every step. */
 export function rowReach(kind: AppointmentKind, row: StagedRow): number {
-  const stages = stagesOf(kind, row)
-  if (stages?.care === "not_served") return flowRank(kind, "waiting")
-  return flowRank(kind, rowGroup(kind, row))
+  const group = rowGroup(kind, row)
+  if (group === null) return -1
+  const rank = flowRank(kind, group)
+  return rank >= 0 ? rank : FLOW[kind].length
 }
