@@ -20005,7 +20005,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/tablero/definicion`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         *     Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. On a cita / sesion board, `estados` and `transiciones` are served from code with production's values (board_statuses / board_transitions do not apply): `clave`, `desdeEstados`, `aEstado` keep the old words (deprecated) and each carries its stage group (`group`, `fromGroups`, `toGroup`). `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
          */
         get: operations["TablerosController_definicion[0]_v1"];
         put?: never;
@@ -20028,7 +20028,7 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/board/definition`, que devuelve lo mismo con los nombres en inglés.
          *
-         *     Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         *     Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. On a cita / sesion board, `estados` and `transiciones` are served from code with production's values (board_statuses / board_transitions do not apply): `clave`, `desdeEstados`, `aEstado` keep the old words (deprecated) and each carries its stage group (`group`, `fromGroups`, `toGroup`). `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
          */
         get: operations["TablerosController_definicion[1]_v1"];
         put?: never;
@@ -20048,7 +20048,7 @@ export interface paths {
         };
         /**
          * Definición efectiva de un tablero
-         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. On a cita / sesion board, `estados` and `transiciones` are served from code with production's values (board_statuses / board_transitions do not apply): `clave`, `desdeEstados`, `aEstado` keep the old words (deprecated) and each carries its stage group (`group`, `fromGroups`, `toGroup`). `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
          */
         get: operations["TablerosController_definicion[2]_v2"];
         put?: never;
@@ -20068,7 +20068,7 @@ export interface paths {
         };
         /**
          * Definición efectiva de un tablero
-         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. On a cita / sesion board, `estados` and `transiciones` are served from code with production's values (board_statuses / board_transitions do not apply): `clave`, `desdeEstados`, `aEstado` keep the old words (deprecated) and each carries its stage group (`group`, `fromGroups`, `toGroup`). `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `board.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
          */
         get: operations["TablerosController_definicion[3]_v2"];
         put?: never;
@@ -45994,6 +45994,114 @@ export interface paths {
         post?: never;
         /** Remove a line (its past calls keep the channel they got). */
         delete: operations["CallcenterController_removeChannel[3]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/configuracion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A center's call-center settings: time zone, opening hours and silence threshold.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/configuracion`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Effective values (system, center and override layers, then the defaults).
+         */
+        get: operations["CallcenterController_getSettings[0]_v1"];
+        /**
+         * Change a center's call-center settings (only what is sent).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/configuracion`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merged into the center preferences under `callcenter` on the server: no other module setting is touched. Needs callcenter.admin in that center.
+         */
+        put: operations["CallcenterController_setSettings[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A center's call-center settings: time zone, opening hours and silence threshold.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/settings`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Effective values (system, center and override layers, then the defaults).
+         */
+        get: operations["CallcenterController_getSettings[1]_v1"];
+        /**
+         * Change a center's call-center settings (only what is sent).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/settings`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merged into the center preferences under `callcenter` on the server: no other module setting is touched. Needs callcenter.admin in that center.
+         */
+        put: operations["CallcenterController_setSettings[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/configuracion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A center's call-center settings: time zone, opening hours and silence threshold.
+         * @description Effective values (system, center and override layers, then the defaults).
+         */
+        get: operations["CallcenterController_getSettings[2]_v2"];
+        /**
+         * Change a center's call-center settings (only what is sent).
+         * @description Merged into the center preferences under `callcenter` on the server: no other module setting is touched. Needs callcenter.admin in that center.
+         */
+        put: operations["CallcenterController_setSettings[2]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A center's call-center settings: time zone, opening hours and silence threshold.
+         * @description Effective values (system, center and override layers, then the defaults).
+         */
+        get: operations["CallcenterController_getSettings[3]_v2"];
+        /**
+         * Change a center's call-center settings (only what is sent).
+         * @description Merged into the center preferences under `callcenter` on the server: no other module setting is touched. Needs callcenter.admin in that center.
+         */
+        put: operations["CallcenterController_setSettings[3]_v2"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -73295,9 +73403,23 @@ export interface components {
              * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
              */
             actorId?: string;
-            reason: string;
-            /** @enum {string} */
+            /**
+             * @deprecated
+             * @description Deprecated: use bookingStatus/careStatus. The old status word, translated to stages with the row stamps.
+             * @enum {string}
+             */
             status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+            /**
+             * @description Booking stage to repair to (with careStatus for an arrived row). Not served (arrived/not_served) needs the arrival stamp (llegadaEn).
+             * @enum {string}
+             */
+            bookingStatus?: "booked" | "confirmed" | "arrived" | "cancelled" | "no_show" | "rescheduled";
+            /**
+             * @description Care stage to repair to (only with bookingStatus=arrived).
+             * @enum {string|null}
+             */
+            careStatus?: "waiting" | "triage" | "in_consultation" | "done" | "not_served" | null;
+            reason: string;
             /** Format: uuid */
             doctorId?: string;
             /** Format: uuid */
@@ -73635,6 +73757,31 @@ export interface components {
             labelKey?: string;
             /** @description Inactive lines are ignored. */
             active?: boolean;
+        };
+        UpdateCallCenterSettingsDto: {
+            /**
+             * @description IANA time zone the call-center days are counted in.
+             * @example America/Puerto_Rico
+             */
+            timeZone?: string;
+            /**
+             * @description Opening hours: { days: ISO weekdays 1..7, start: "HH:MM", end: "HH:MM" } (validated by the service).
+             * @example {
+             *       "days": [
+             *         1,
+             *         2,
+             *         3,
+             *         4,
+             *         5,
+             *         6
+             *       ],
+             *       "start": "08:00",
+             *       "end": "18:00"
+             *     }
+             */
+            hours?: Record<string, never>;
+            /** @description Minutes of silence inside opening hours before the push is "behind" (5..720). */
+            lagAlertMinutes?: number;
         };
         CompleteCallsDto: {
             /** @description How many stored calls to complete in this run (default 500, max 5000). */
@@ -74369,7 +74516,7 @@ export interface components {
             sessionId: string;
             sesionIdRef?: Record<string, never>;
             /** @enum {string} */
-            type: "called" | "presente" | "cancelada" | "en_terapia" | "asistido" | "autopresente" | "datos" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete" | "call_undone" | "reopened" | "dosis_de_resto" | "resto_vencido";
+            type: "called" | "presente" | "cancelada" | "en_terapia" | "asistido" | "autopresente" | "datos" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "entrega_sin_paquete" | "dosis_no_comprada" | "dosis_de_resto" | "resto_vencido" | "call_undone" | "reopened";
             actorId: string | null;
             actorIdRef?: Record<string, never>;
             reason: string | null;
@@ -74472,6 +74619,21 @@ export interface components {
         };
         RepararSesionDto: {
             /**
+             * @deprecated
+             * @description Deprecated: use bookingStatus/careStatus. The old status word, translated to stages with the row stamps.
+             */
+            status?: string;
+            /**
+             * @description Booking stage to repair to (with careStatus for an arrived session). Not served (arrived/not_served) needs the row to already carry its arrival stamp (this repair cannot set one).
+             * @enum {string}
+             */
+            bookingStatus?: "booked" | "confirmed" | "arrived" | "cancelled";
+            /**
+             * @description Care stage to repair to (only with bookingStatus=arrived).
+             * @enum {string|null}
+             */
+            careStatus?: "waiting" | "called" | "in_therapy" | "done" | "not_served" | null;
+            /**
              * Format: uuid
              * @deprecated
              * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
@@ -74485,7 +74647,6 @@ export interface components {
             openVialId?: string;
             /** @description Dose of a 'vial' service visit, in the vial's unit (mg); null = a whole vial. docs/specs/vial-dividido-entre-visitas.md. */
             doseAmount?: number | null;
-            status?: string;
             effectiveDate?: string;
             /** Format: uuid */
             warehouseId?: string;
@@ -75230,7 +75391,7 @@ export interface components {
             reason?: string;
         };
         ClaimPanelWorkDto: {
-            /** @description The section key (panel_sections.slug), e.g. glp1. */
+            /** @description The section key (panel_sections.slug), e.g. glp_1. */
             sectionKey: string;
             /**
              * Format: uuid
@@ -106479,7 +106640,7 @@ export interface operations {
                 date: string;
                 /** @description Subtipo (p. ej. servicio) para filtrar */
                 subtype?: string;
-                /** @description true = solo estados visibleEnAtencion */
+                /** @description true = only the care board's stage groups (confirmed to done). A board's own list (`filters.groups`) always wins over it */
                 onlyCare?: string;
             };
             header?: never;
@@ -106507,7 +106668,7 @@ export interface operations {
                 date: string;
                 /** @description Subtipo (p. ej. servicio) para filtrar */
                 subtype?: string;
-                /** @description true = solo estados visibleEnAtencion */
+                /** @description true = only the care board's stage groups (confirmed to done). A board's own list (`filters.groups`) always wins over it */
                 onlyCare?: string;
             };
             header?: never;
@@ -106535,7 +106696,7 @@ export interface operations {
                 date: string;
                 /** @description Subtipo (p. ej. servicio) para filtrar */
                 subtype?: string;
-                /** @description true = solo estados visibleEnAtencion */
+                /** @description true = only the care board's stage groups (confirmed to done). A board's own list (`filters.groups`) always wins over it */
                 onlyCare?: string;
             };
             header?: never;
@@ -106563,7 +106724,7 @@ export interface operations {
                 date: string;
                 /** @description Subtipo (p. ej. servicio) para filtrar */
                 subtype?: string;
-                /** @description true = solo estados visibleEnAtencion */
+                /** @description true = only the care board's stage groups (confirmed to done). A board's own list (`filters.groups`) always wins over it */
                 onlyCare?: string;
             };
             header?: never;
@@ -144483,6 +144644,198 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "CallcenterController_getSettings[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_setSettings[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallCenterSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_getSettings[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_setSettings[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallCenterSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_getSettings[2]_v2": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_setSettings[2]_v2": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallCenterSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_getSettings[3]_v2": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_setSettings[3]_v2": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallCenterSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
