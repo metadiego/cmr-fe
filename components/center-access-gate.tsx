@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 
 import type { Centro } from "@/lib/api/centers";
 import { menuItemForPath, needsOtherCenter } from "@/lib/nav/screen-access";
-import { setActiveCentro, setClinicViewAll } from "@/lib/tenant";
+import { getActiveCentro, setActiveCentro, setClinicViewAll } from "@/lib/tenant";
 import { urlAfterCenterSwitch } from "@/lib/navigation/after-center-switch";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
@@ -41,7 +41,14 @@ export function CenterAccessGate({ children }: { children: React.ReactNode }) {
     };
   }, [permission]);
 
-  const centers = elsewhere && elsewhere.permission === permission ? elsewhere.centers : null;
+  // Never offer the center the session is already in (FE and BE aliases could disagree).
+  const active = getActiveCentro() ?? (me.kind === "ok" ? me.me.activeClinicId : null);
+  const centers =
+    elsewhere && elsewhere.permission === permission
+      ? elsewhere.centers.filter((c) => c.id !== active)
+      : null;
+  // Until the session is known, do not start a page whose calls might fail here.
+  if (me.kind === "loading") return null;
   // Not blocked, or allowed nowhere (the page answers for itself, as before).
   if (!blocked || !screen || (centers && centers.length === 0)) return <>{children}</>;
   // Blocked here and still asking where it is allowed: do not start a page whose calls would fail.

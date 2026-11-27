@@ -21,16 +21,23 @@ import { PositionsPicker } from "@/components/personal/positions-picker";
 export function StaffPositionsSection({
   persona,
   catalog,
+  catalogError,
   centro,
 }: {
   persona: Personal;
   catalog: Position[];
+  /** Why the position catalog did not load (shown instead of a skeleton that never ends). */
+  catalogError?: string | null;
   centro?: string;
 }) {
   const t = useTranslations("staffPositions");
   const me = useMe();
   const viewerIsAdmin = me.kind === "ok" && isAdmin(me.me);
-  const heldRes = useResource<StaffPositions>(() => getStaffPositions(persona.id, centro), [persona.id, centro]);
+  // Reloads when the record gets its login too: the invite drops permission positions and saves new ones.
+  const heldRes = useResource<StaffPositions>(
+    () => getStaffPositions(persona.id, centro),
+    [persona.id, centro, persona.profileId],
+  );
   const centersRes = useResource<Centro[]>(() => getCenters());
   const editableRes = useResource<Centro[]>(() => getCentrosDondePuedo("staff.update").catch(() => []));
 
@@ -71,9 +78,10 @@ export function StaffPositionsSection({
         <Label>{t("title")}</Label>
         <p className="text-xs text-muted-foreground">{t("help")}</p>
       </div>
+      {catalogError && <p className="text-sm text-destructive">{catalogError}</p>}
       {heldRes.state.kind === "fail" && <p className="text-sm text-destructive">{heldRes.state.message}</p>}
       {centersRes.state.kind === "fail" && <p className="text-sm text-destructive">{centersRes.state.message}</p>}
-      {!grid && heldRes.state.kind !== "fail" && centersRes.state.kind !== "fail" && (
+      {!grid && !catalogError && heldRes.state.kind !== "fail" && centersRes.state.kind !== "fail" && (
         <div className="space-y-2" aria-hidden>
           <div className="h-3 w-24 animate-pulse rounded bg-muted" />
           <div className="h-7 w-full animate-pulse rounded-full bg-muted" />

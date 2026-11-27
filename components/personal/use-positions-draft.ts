@@ -29,7 +29,13 @@ export function usePositionsDraft(staffId: string | null, enabled: boolean, cent
 
   // cmr-be drops the positions that carry permissions when the record gets its login, so the draft
   // starts without them (memoized: a new object every render would re-seed forever).
-  const source = React.useMemo(() => (held ? withoutPermissionPositions(held) : held), [held]);
+  // A new person's draft is a fresh empty load on every open, so a reopened dialog never keeps the
+  // previous invite's chips (draftOnLoad keeps a draft while its source object is the same).
+  const source = React.useMemo(
+    () => (held ? withoutPermissionPositions(held) : held === null ? { primary: null, positions: [] } : held),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [held, enabled],
+  );
   const [draft, setDraft] = React.useState<PositionsDraft | null>(null);
   const ready = source !== undefined && catalogRes.state.kind === "ok" && centersRes.state.kind === "ok";
   // Seeded during render (no effect): another linked record, or a fresh load, replaces the draft.

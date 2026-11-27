@@ -7638,7 +7638,8 @@
     "inviteTitle": "Positions",
     "inviteHelp": "Choose at least one position at a center.",
     "inviteMissing": "a position",
-    "positionsFailed": "The account was created, but the positions were not saved. Open it and assign them from its record."
+    "positionsFailed": "The account was created, but the positions were not saved. Open it and assign them from its record.",
+    "giveAccessNeedsAdmin": "Giving system access is done by an administrator."
   },
   "centerAccess": {
     "title": "{screen}: only at {centers}",

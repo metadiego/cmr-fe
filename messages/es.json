@@ -7638,7 +7638,8 @@
     "inviteTitle": "Puestos",
     "inviteHelp": "Elige al menos un puesto en un centro.",
     "inviteMissing": "un puesto",
-    "positionsFailed": "La cuenta se creó, pero los puestos no se guardaron. Ábrela y asígnalos desde su ficha."
+    "positionsFailed": "La cuenta se creó, pero los puestos no se guardaron. Ábrela y asígnalos desde su ficha.",
+    "giveAccessNeedsAdmin": "Dar acceso al sistema lo hace un administrador."
   },
   "centerAccess": {
     "title": "{screen}: solo en {centers}",

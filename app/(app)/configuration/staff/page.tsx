@@ -183,6 +183,7 @@ export function StaffPanel() {
               key={sel.id}
               persona={sel}
               positions={positions}
+              positionsError={positionsRes.state.kind === "fail" ? positionsRes.state.message : null}
               ehrRoles={ehrRoles}
               ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
               profile={admin && sel.profileId ? profilesById.get(sel.profileId) : undefined}
@@ -236,7 +237,7 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, positions, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
+  persona, positions, positionsError, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
 }: {
   /** The person's login, when the viewer is an admin (only an admin manages access). */
   profile: Perfil | undefined;
@@ -244,6 +245,8 @@ function FichaPersonal({
   persona: Personal;
   /** The position catalog (`GET /positions`). */
   positions: Position[];
+  /** Why the catalog did not load, if it failed. */
+  positionsError: string | null;
   ehrRoles: EhrRole[];
   ehrLink: EhrStaffLink | undefined;
   ehrCenterIds: string[] | undefined;
@@ -258,6 +261,8 @@ function FichaPersonal({
   const tRoot = useTranslations();
   const { can } = useCan();
   const [darAcceso, setDarAcceso] = React.useState(false);
+  const me = useMe();
+  const viewerIsAdmin = me.kind === "ok" && isAdmin(me.me);
   // Hub de USUARIO en la MISMA pantalla (sin ir «más adentro»): la ficha, y —solo para quien hace
   // consultas, es decir tiene la capacidad «medico»— su agenda, pacientes y producción. La disponibilidad
   // (horarios, días libres, permisos, vacaciones) es para TODO usuario por igual. Ver hub-de-usuario-medicos.
@@ -292,12 +297,12 @@ function FichaPersonal({
 
         <TabsContent value="ficha" className="pt-2">
           {/* One "Save" for every section below (save-group.tsx); deactivate is its own action. */}
-          <SaveGroup onSaved={onChanged} footerStart={<StaffActiveButton persona={persona} centro={centro} onChanged={onChanged} />}>
+          <SaveGroup onSaved={() => { onChanged(); onProfileChanged(); }} footerStart={<StaffActiveButton persona={persona} centro={centro} onChanged={onChanged} />}>
             <div className="space-y-6">
               <FichaEditor persona={persona} centro={centro} />
 
               {/* What the person does at each center; their centers are the rows with a position. */}
-              <StaffPositionsSection persona={persona} catalog={positions} centro={centro} />
+              <StaffPositionsSection persona={persona} catalog={positions} catalogError={positionsError} centro={centro} />
 
               {/* Front-desk preferences, only for front-desk staff (or whoever already has one set). */}
               {showsConsultaPreferences(persona) && <FrontdeskConsultaPreferencia persona={persona} centro={centro} />}
@@ -312,11 +317,14 @@ function FichaPersonal({
                     <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
                     <span>{persona.email || t("conCuenta")}</span>
                   </div>
-                ) : (
+                ) : viewerIsAdmin ? (
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
                     <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
                   </div>
+                ) : (
+                  // Giving system access is access management: an administrator's call (cmr-be).
+                  <span className="text-sm text-muted-foreground">{tRoot("staffPositions.giveAccessNeedsAdmin")}</span>
                 )}
               </div>
 
