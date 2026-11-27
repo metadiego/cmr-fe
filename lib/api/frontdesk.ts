@@ -269,22 +269,6 @@ export function getFrontdeskTablero(
   return apiFetch<FrontdeskTablero>(`/frontdesk/tablero?${sp.toString()}`, {}, centroId);
 }
 
-// Transiciones del flujo (sellan hora en el BE): presente → en-terapia → asistido.
-export type TransicionPayload = components["schemas"]["TransicionSesionDto"];
-export type TransicionClave = "presente" | "en-terapia" | "asistido";
-export function marcarTransicion(
-  sesionId: string,
-  transicion: TransicionClave,
-  payload: TransicionPayload = {},
-  centroId?: string,
-): Promise<Sesion> {
-  return apiFetch<Sesion>(
-    `/frontdesk/sesiones/${sesionId}/${transicion}`,
-    { method: "POST", body: JSON.stringify(payload) },
-    centroId,
-  );
-}
-
 // Confirm / unconfirm a therapy session (cmr-be 4a, permission `appointments.confirm` in the session's
 // center). No body; both answer the bare session.
 export function confirmSession(sessionId: string, centroId?: string): Promise<Sesion> {

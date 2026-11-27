@@ -938,7 +938,6 @@
       "type": "Appointment type",
       "typePlaceholder": "Select type",
       "status": "Status",
-      "statusScheduled": "Scheduled",
       "firstVisit": "First visit",
       "reason": "Reason for visit",
       "notes": "Notes",
@@ -1038,7 +1037,18 @@
         "cancelada": "Cancelled",
         "reprogramada": "Rescheduled",
         "reparada": "Repaired",
-        "campo_editado": "Field edited"
+        "campo_editado": "Field edited",
+        "programada": "Scheduled",
+        "corregida": "Corrected",
+        "reopened": "Reopened",
+        "called": "Called",
+        "call_undone": "Call undone",
+        "pendiente": "Pending",
+        "en_terapia": "In therapy",
+        "asistido": "Attended",
+        "reagendada": "Rescheduled",
+        "auto_revertida": "Reverted at end of day",
+        "autopresente": "Checked in on invoicing"
       },
       "notServeHelp": "The patient arrived and left without being seen. Give the reason: the appointment is cancelled and the arrival is kept."
     },

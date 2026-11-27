@@ -33,16 +33,10 @@ export const OLD_STATUS_ALLOWLIST: Readonly<Record<string, OldStatusAllowance>> 
   // group). Also the legacy-availability row state ('pendiente', unrelated).
   "lib/api/pacientes.ts": { reason: "piece 6: schema", hits: 5 },
 
-  // Create doors: the born status a new appointment is written with ('programada' / 'confirmada').
-  "components/agenda/cita-modal.tsx": { reason: "piece 6: write door", hits: 12 },
-  "components/agenda/cita-modal-fields.tsx": { reason: "piece 6: write door", hits: 7 },
-  "components/tablero/board-appointment-modal.tsx": { reason: "piece 6: write door", hits: 1 },
   // The menu entry and label of the check-in door (`presenteCita`, POST …/presente).
   "components/citas/cita-actions.tsx": { reason: "piece 6: write door", hits: 2 },
   // Board action slug sent to the API (`action: "presente"`).
   "components/patient-desk/patient-detail.tsx": { reason: "piece 6: write door", hits: 2 },
-  // Transition keys sent to the API (`TransicionClave`).
-  "lib/api/frontdesk.ts": { reason: "piece 6: write door", hits: 2 },
 
   // board_statuses slugs: flow steps a column requires, stamp columns, KPI chips, transition sources.
   "lib/frontdesk/required-state.ts": { reason: "piece 6: board catalogue", hits: 4 },

@@ -938,7 +938,6 @@
       "type": "Tipo de cita",
       "typePlaceholder": "Seleccionar Tipo",
       "status": "Estado",
-      "statusScheduled": "Agendada",
       "firstVisit": "Primera vez",
       "reason": "Motivo de consulta",
       "notes": "Notas",
@@ -1038,7 +1037,18 @@
         "cancelada": "Cancelada",
         "reprogramada": "Reagendada",
         "reparada": "Reparada",
-        "campo_editado": "Campo editado"
+        "campo_editado": "Campo editado",
+        "programada": "Agendada",
+        "corregida": "Corregida",
+        "reopened": "Reabierta",
+        "called": "Llamado",
+        "call_undone": "Llamado deshecho",
+        "pendiente": "Pendiente",
+        "en_terapia": "En terapia",
+        "asistido": "Asistido",
+        "reagendada": "Reagendada",
+        "auto_revertida": "Revertida al cierre del día",
+        "autopresente": "Presente al facturar"
       },
       "notServeHelp": "El paciente llegó y se fue sin ser atendido. Indica el motivo: la cita queda cancelada y la llegada se conserva."
     },

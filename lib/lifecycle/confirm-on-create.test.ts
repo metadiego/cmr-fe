@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 
-import { bookedUnconfirmedNotice, confirmToggleShown, createConfirmed, heldInCenter } from "./confirm-on-create.ts"
+import { bookedUnconfirmedNotice, bornConfirmedByDefault, confirmToggleShown, createConfirmed, heldInCenter } from "./confirm-on-create.ts"
 
 test("held in the target center: true, false, or unknown while loading / without a target", () => {
   const centers = [{ id: "c1" }, { id: "c2" }]
@@ -35,4 +35,12 @@ test("the booked-unconfirmed notice only when a confirmed booking was wanted and
   assert.equal(bookedUnconfirmedNotice(true, null), false)
   assert.equal(bookedUnconfirmedNotice(true, true), false)
   assert.equal(bookedUnconfirmedNotice(false, false), false)
+})
+
+test("born confirmed by default: every channel but the call center (the patient is there); an explicit choice wins", () => {
+  assert.equal(bornConfirmedByDefault("callcenter"), false)
+  assert.equal(bornConfirmedByDefault("frontdesk"), true)
+  assert.equal(bornConfirmedByDefault(undefined), true)
+  assert.equal(bornConfirmedByDefault("callcenter", true), true)
+  assert.equal(bornConfirmedByDefault("frontdesk", false), false)
 })
