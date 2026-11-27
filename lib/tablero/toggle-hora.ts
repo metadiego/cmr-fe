@@ -25,9 +25,9 @@ const INERT: ToggleResuelto = { checked: false, canCheck: false, canUncheck: fal
 // Decides what a care-flow box (PRESENTE / EN CONSULTA / ASISTIDO) does, without React, so it can be
 // tested. Everything is read by STAGE GROUP (piece 6b), from the row's stages and the transition's
 // groups (`toGroup` / `fromGroups` on the 6b backend, mapped from the old words on 6a):
-//   1. Checked = the row got at least as far as this box's target group on the care flow. A row closed
-//      after arriving (not served) reached the waiting room and no further; a row closed before arriving
-//      reached nothing.
+//   1. Checked = the row got at least as far as this box's target group on the care flow. A CLOSED row
+//      (no_show, cancelled including not served, rescheduled) ranks past every step (rowReach), so it reads
+//      as reached; not being the last step, it is never undone.
 //   2. The "back" is the reverse of THIS BOX's step (a transition leaving its target group for an
 //      earlier step of the flow), never any transition going down from the ROW's group (bug
 //      atencion-la-segunda-casilla-deshace-la-primera: «En consulta» used to undo «Presente»).

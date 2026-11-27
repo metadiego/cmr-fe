@@ -90,7 +90,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
           ) : (
             <>
               <IntroCard title={t("introColumnasTitle")} body={t("introColumnasBody")} />
-              <ColumnasTab clave={clave} />
+              <ColumnasTab clave={clave} entity={registro?.entity} />
             </>
           )}
         </TabsContent>
@@ -105,7 +105,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
           {esServicios && (
             <Seccion titulo={t("colDefaultsTitle")}>
               <p className="mb-3 text-sm text-muted-foreground">{t("colDefaultsHint")}</p>
-              <ColumnasTab clave={clave} />
+              <ColumnasTab clave={clave} entity={registro?.entity} />
             </Seccion>
           )}
 

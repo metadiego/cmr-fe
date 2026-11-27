@@ -245,7 +245,8 @@ export function serviceConcluded(s: PatientService): boolean {
 
 // Which consultation statuses are final, from the consultation board's definition. Empty = none known,
 // so every consultation counts as still open.
-export type IsTerminal = (status: string) => boolean
+// Given the row's stored word and, when known, its stage group (the group decides).
+export type IsTerminal = (status: string, group?: StageGroup | null) => boolean
 const noneTerminal: IsTerminal = () => false
 
 // A patient is done for the day when nothing is still open — every service session attended or
@@ -257,7 +258,7 @@ export function patientConcluded(
 ): boolean {
   const sessions = p.services.flatMap((s) => s.groups)
   if (sessions.some((g) => !groupIn("therapy", g, CLOSED))) return false
-  if (p.consultationStatuses.some((x) => !isTerminal(x))) return false
+  if (p.consultationStatuses.some((x, i) => !isTerminal(x, p.consultationGroups[i]))) return false
   return (
     sessions.some((g) => groupIn("therapy", g, DONE)) ||
     p.consultationGroups.some((g) => !groupIn("medical", g, NEVER_SEEN))
@@ -453,7 +454,7 @@ export function consultationPending(
   p: PatientDay,
   isTerminal: IsTerminal = noneTerminal
 ): boolean {
-  return p.consultationStatuses.some((x) => !isTerminal(x))
+  return p.consultationStatuses.some((x, i) => !isTerminal(x, p.consultationGroups[i]))
 }
 
 // The configured order: services as they come, then the consultation.

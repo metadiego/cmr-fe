@@ -10,7 +10,6 @@ import {
   getColumnasCatalogo,
   getColumnasEfectivas,
   getDefinicion,
-  getTableros,
   crearColumna,
   actualizarColumna,
   colorColumna,
@@ -18,7 +17,6 @@ import {
   personalizarColumna,
   type ColumnaCatalogo,
   type TableroDefinicion,
-  type TableroRegistro,
 } from "@/lib/api/tablero";
 import type { ColumnaEfectiva } from "@/lib/api/agenda-dia";
 import { toastError } from "@/lib/api/errors";
@@ -39,7 +37,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 // Superficie ÚNICA para gestionar las columnas de un tablero: agregar (del
 // catálogo o crear), reordenar ↑/↓, visible/fija, color y configurar — todo en un
 // lugar. Reusa el catálogo (ambitos) + composición (orden) + config por columna.
-export function ColumnasTab({ clave }: { clave: string }) {
+export function ColumnasTab({ clave, entity }: { clave: string; entity: string | null | undefined }) {
   const catRes = useResource<ColumnaCatalogo[]>(() => getColumnasCatalogo());
   const effRes = useResource<ColumnaEfectiva[]>(() => getColumnasEfectivas(clave), [clave]);
   const defRes = useResource<TableroDefinicion>(() => getDefinicion(clave), [clave]);
@@ -50,8 +48,8 @@ export function ColumnasTab({ clave }: { clave: string }) {
   const catalog = (catRes.state.kind === "ok" ? catRes.state.data : []).filter((c) => c.active);
   const efectivas = effRes.state.kind === "ok" ? effRes.state.data : [];
   const definition = defRes.state.kind === "ok" ? defRes.state.data : null;
-  const regRes = useResource<TableroRegistro[]>(() => getTableros());
-  const kind = boardKind((regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.slug === clave)?.entity);
+  // The board's entity comes from the editor, which already loads the registry.
+  const kind = boardKind(entity);
 
   function reloadAll() {
     catRes.reload();

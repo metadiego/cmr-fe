@@ -133,3 +133,19 @@ export function rowReach(kind: AppointmentKind, row: StagedRow): number {
   const rank = flowRank(kind, group)
   return rank >= 0 ? rank : FLOW[kind].length
 }
+
+/**
+ * Whether a consultation is in a final status, read by stage group. The board's catalogue flags statuses
+ * `isTerminal`; the flag is mapped to the group of each flagged status (its `group` on 6b, its old word on
+ * 6a). A row is final when its group is one of those; a row with no known group falls back to the flagged
+ * slugs (its old word). `word` is the row's stored old value, `group` its stage group.
+ */
+export function terminalChecker(
+  kind: AppointmentKind,
+  statuses: readonly (CatalogueStatus & { isTerminal?: boolean | null })[],
+): (word: string, group?: StageGroup | null) => boolean {
+  const flagged = statuses.filter((s) => s.isTerminal)
+  const groups = new Set(flagged.map((s) => statusGroup(kind, s)).filter(present))
+  const slugs = new Set(flagged.map((s) => s.slug))
+  return (word, group) => (group ? groups.has(group) : slugs.has(word))
+}

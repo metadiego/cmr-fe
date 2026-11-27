@@ -44,7 +44,6 @@ export const OLD_STATUS_ALLOWLIST: Readonly<Record<string, OldStatusAllowance>> 
   "lib/frontdesk/patient-columns.ts": { reason: "piece 6: board catalogue", hits: 1 },
   "components/frontdesk/frontdesk-board.helpers.ts": { reason: "piece 6: board catalogue", hits: 3 },
   "components/frontdesk/frontdesk-board.tsx": { reason: "piece 6: board catalogue", hits: 2 },
-  "components/patient-desk/service-sessions-table.tsx": { reason: "piece 6: board catalogue", hits: 1 },
 
   // Session history event type ('en_terapia' in frontdesk_eventos).
   "components/frontdesk/en-terapia-sin-asistir-banner.tsx": { reason: "piece 6: historial", hits: 1 },

@@ -31,7 +31,7 @@ import type {
   CitaFila as BoardRow,
 } from "@/lib/api/agenda-dia"
 import { NotificarCell as NotifyBell } from "@/components/agenda/tablero-dinamico"
-import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers"
+import { hiddenStepSlugs, sessionSteps } from "@/lib/frontdesk/session-steps"
 import { isSessionToday } from "@/lib/frontdesk/reopen"
 import { todayISO } from "@/lib/agenda/calendar"
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion"
@@ -116,19 +116,22 @@ export function ServiceSessionsTable({
     (key: string) => statuses.find((s) => s.slug === key),
     [statuses]
   )
-  const steps = React.useMemo(() => {
-    const transitions = new Set(
-      (definition?.transitions ?? []).map((x) => x.slug)
-    )
-    return statuses
-      .filter((s) => transitions.has(s.slug) && STAMP_FIELD[s.slug])
-      .map((s) => ({ clave: s.slug, labelKey: s.labelKey, color: s.color, group: s.group }))
-  }, [definition, statuses])
+  // The care-flow steps are read by stage group (stamped groups a transition leads into); each keeps the
+  // status slug as its key, which the row reads stamps and actions by.
+  const stepStatuses = React.useMemo(
+    () => sessionSteps(statuses, definition?.transitions ?? []),
+    [definition, statuses]
+  )
+  const steps = React.useMemo(
+    () =>
+      stepStatuses.map((s) => ({ clave: s.slug, labelKey: s.labelKey, color: s.color, group: s.group })),
+    [stepStatuses]
+  )
   // "Presente" ya no se marca por terapia aquí: es una sola llegada por paciente, en la cabecera
-  // (regla del dueño, 10-oct-2026 — ver BE PR #424). Se oculta el paso SIN sacarlo de `steps`: la
-  // posición en el flujo (pendiente→presente→en_terapia→asistido) sigue intacta para que `FilaSesion`
-  // ubique el estado actual — solo deja de pintarse como un pill más en la fila.
-  const pasosOcultos = React.useMemo(() => new Set(["presente"]), [])
+  // (regla del dueño, 10-oct-2026 — ver BE PR #424). Se oculta el paso de llegada (grupo "waiting") SIN
+  // sacarlo de `steps`: la posición en el flujo sigue intacta para que `FilaSesion` ubique el estado
+  // actual — solo deja de pintarse como un pill más en la fila.
+  const pasosOcultos = React.useMemo(() => hiddenStepSlugs(stepStatuses), [stepStatuses])
 
   const ids = React.useMemo(() => new Set(sessionIds), [sessionIds])
   const rows = React.useMemo(
