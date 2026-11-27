@@ -3,6 +3,7 @@ import assert from "node:assert/strict"
 
 import {
   boardActionView,
+  cancelAllOffered,
   cancelMeaning,
   cancelMeaningFromList,
   noShowAllowed,
@@ -96,4 +97,16 @@ test("a stale or no-longer-allowed refusal refreshes the row; other errors do no
   assert.equal(refusalRefreshesRow({ code: "LIFECYCLE_REASON_REQUIRED" }), false)
   assert.equal(refusalRefreshesRow(new Error("x")), false)
   assert.equal(refusalRefreshesRow(null), false)
+})
+
+test("Cancel all is offered only on a row whose own session can still be cancelled", () => {
+  // Booked or arrived and waiting: the patient's day can still be cancelled from this row.
+  assert.equal(cancelAllOffered(cancelMeaning("therapy", ses("pendiente")), false), true)
+  assert.equal(cancelAllOffered(cancelMeaning("therapy", ses("presente")), false), true)
+  assert.equal(cancelAllOffered(cancelMeaningFromList(["not_serve", "start_therapy"]), false), true)
+  // Therapy started (in therapy or attended): no cancel of any kind on this row.
+  assert.equal(cancelAllOffered(cancelMeaningFromList(["finish", "back_to_waiting"]), false), false)
+  assert.equal(cancelAllOffered(cancelMeaningFromList(["unattend", "undo_attendance"]), false), false)
+  // Already cancelled.
+  assert.equal(cancelAllOffered("cancel", true), false)
 })
