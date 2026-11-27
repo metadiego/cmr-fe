@@ -323,7 +323,7 @@ export function PatientDetail({
               // green bar made the header loud and read as two states).
               <div className="flex items-center gap-1">
                 {/* The pill IS the undo (owner, 27-nov-2026): a small undo arrow says it is clickable; on
-                    hover it turns amber and reads «Deshacer». Both labels share one grid cell so the
+                    hover it turns red and reads «Deshacer». Both labels share one grid cell so the
                     pill keeps its width when they swap. */}
                 <button
                   type="button"
@@ -331,7 +331,7 @@ export function PatientDetail({
                   onClick={handleUndoPresent}
                   title={t("undoPresent")}
                   aria-label={`${t("presentAt", { time: fmtHora(patient.presentAt) })} · ${t("undoPresent")}`}
-                  className="group inline-flex h-6 items-center gap-1 rounded-full bg-emerald-600 px-2 text-[11px] font-semibold text-white tabular-nums transition-colors hover:bg-amber-600 focus-visible:bg-amber-600 focus-visible:outline-none disabled:opacity-60"
+                  className="group inline-flex h-6 items-center gap-1 rounded-full bg-emerald-600 px-2 text-[11px] font-semibold text-white tabular-nums transition-colors hover:bg-destructive focus-visible:bg-destructive focus-visible:outline-none disabled:opacity-60"
                 >
                   <span className="grid">
                     <span className="col-start-1 row-start-1 inline-flex items-center gap-1 group-hover:invisible group-focus-visible:invisible">
