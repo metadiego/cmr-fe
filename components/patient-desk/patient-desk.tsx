@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -53,7 +52,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { tinteFila } from "@/lib/agenda/tinte-tipo"
@@ -410,40 +408,34 @@ export function PatientDesk() {
           />
           <TechnicianStatusButton centro={gate.centro} fecha={date} />
           {/* «Citar» is the same menu in every tab, so the toolbar does not change; in Servicios a
-              filtered service is preselected. The service appointments list lives here too. */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="sm">
-                <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
-                {t("book")}
-                <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {can("citas.create") && (
-                <>
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      setSchedule({
-                        open: true,
-                        pacienteId: "",
-                        servicioId: kind === "services" ? (serviceFilter ?? undefined) : undefined,
-                      })
-                    }
-                  >
-                    {t("bookService")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setAddingConsultation({ open: true })}>
-                    {t("bookConsultation")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              <DropdownMenuItem asChild>
-                <Link href="/scheduling/appointments">{t("serviceAppointments")}</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              filtered service is preselected. Hidden without citas.create: it would be empty. */}
+          {can("citas.create") && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm">
+                  <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
+                  {t("book")}
+                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() =>
+                    setSchedule({
+                      open: true,
+                      pacienteId: "",
+                      servicioId: kind === "services" ? (serviceFilter ?? undefined) : undefined,
+                    })
+                  }
+                >
+                  {t("bookService")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setAddingConsultation({ open: true })}>
+                  {t("bookConsultation")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 

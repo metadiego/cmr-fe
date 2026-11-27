@@ -16,7 +16,7 @@ import { todayISO } from "@/lib/agenda/calendar";
 import { canReopen, duplicatesReopen, REOPEN_ERROR_KEYS, skippedReasons } from "@/lib/frontdesk/reopen";
 import type { StagedRow } from "@/lib/lifecycle/stage-groups";
 import { sessionReasonMissing } from "@/lib/frontdesk/session-reason-missing";
-import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
+import { cancelAllOffered, cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,7 +124,10 @@ export function RowMenu({
   // way back is Unattend, then this).
   const meaning = cancelMeaning("therapy", day.row, allowedActions);
   const showCancel = (allowedActions ? true : !cancelada) && meaning !== null;
+  // The menu item always reads «Cancelar sesión» (arrived but not started included: that is how the desk
+  // cancels one service); the dialog says what it records («Llegó y no se atendió», arrival kept).
   const cancelLabel = meaning === "not_serve" ? tRoot("lifecycle.action.not_serve") : t("cancelar");
+  const showCancelAll = !!patientId && cancelAllOffered(meaning, cancelada);
   const toggle = confirmToggle(allowedActions);
   const confirmMove = (move: "confirm" | "unconfirm") =>
     act(async () => {
@@ -218,10 +221,10 @@ export function RowMenu({
           )}
           {showCancel && (
             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("one"); }}>
-              {cancelLabel}
+              {t("cancelar")}
             </DropdownMenuItem>
           )}
-          {!cancelada && patientId && (
+          {showCancelAll && (
             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen("all"); }}>
               {t("cancelAll")}
             </DropdownMenuItem>

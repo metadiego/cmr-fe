@@ -57,6 +57,16 @@ export function cancelMeaning(
   return "cancel"
 }
 
+/**
+ * «Cancelar todas» on a Patient-desk row: only while the row's own session can still be cancelled
+ * (booked, or arrived and not started). Once therapy started (in therapy or attended) the row offers no
+ * cancel at all, so the day-wide one does not stand in for the missing single cancel (it skips those
+ * sessions anyway).
+ */
+export function cancelAllOffered(meaning: CancelMeaning, cancelled: boolean): boolean {
+  return !cancelled && meaning !== null
+}
+
 /** No-show only before arrival and only for today or a past day (`date`, `today`: YYYY-MM-DD). */
 export function noShowAllowed(
   kind: AppointmentKind,
