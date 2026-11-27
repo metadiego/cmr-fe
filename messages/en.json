@@ -3958,7 +3958,8 @@
     "LIFECYCLE_UNKNOWN_ACTION": "Unknown action for this record.",
     "LIFECYCLE_REASON_REQUIRED": "This action needs a reason.",
     "LIFECYCLE_STALE": "Someone else just changed this record. Reload and try again.",
-    "TABLERO_ACCION_DENEGADA": "You don't have permission for this action in this record's center."
+    "TABLERO_ACCION_DENEGADA": "You don't have permission for this action in this record's center.",
+    "VIAL_CORRECTION_OUT_OF_RANGE": "The correction goes beyond what the vial holds or fits."
   },
   "transferencia": {
     "sesionesExcedenDisponible": "You asked for more sessions than are still pending on that package.",
@@ -5293,7 +5294,23 @@
       "agotado": "empty",
       "descartado": "discarded"
     },
-    "verFactura": "View invoice"
+    "verFactura": "View invoice",
+    "correction": {
+      "open": "Correct content",
+      "title": "Correct the content of vial #{n}",
+      "holds": "It holds {left} of {capacity}.",
+      "direction": "What to do",
+      "out": "Take out of the vial",
+      "in": "Put back into the vial",
+      "amount": "Amount",
+      "maxHint": "At most {max}.",
+      "reason": "Reason",
+      "closeVial": "Close the vial (discarded)",
+      "submit": "Correct",
+      "saved": "Vial content corrected",
+      "tooMuchOut": "The vial only holds {max}: you cannot take out more.",
+      "tooMuchIn": "Only {max} more fits in the vial."
+    }
   },
   "compras": {
     "title": "Purchase planning",
@@ -6434,7 +6451,8 @@
       "modifyPastCashDay": "You're about to change the {day} cash sheet",
       "backdatedInventoryAdjustment": "Backdated inventory adjustment",
       "apiKeyRevoke": "Revoke the API key “{name}”",
-      "voidFormatSheet": "Void the saved sheet"
+      "voidFormatSheet": "Void the saved sheet",
+      "vialContentCorrection": "Correct the vial content"
     },
     "effect": {
       "returnsPackageSession": "Returns the session to the package",

@@ -3958,7 +3958,8 @@
     "LIFECYCLE_UNKNOWN_ACTION": "Acción desconocida para este registro.",
     "LIFECYCLE_REASON_REQUIRED": "Esta acción necesita un motivo.",
     "LIFECYCLE_STALE": "Otra persona acaba de cambiar este registro. Recarga y vuelve a intentarlo.",
-    "TABLERO_ACCION_DENEGADA": "No tienes permiso para esta acción en el centro de este registro."
+    "TABLERO_ACCION_DENEGADA": "No tienes permiso para esta acción en el centro de este registro.",
+    "VIAL_CORRECTION_OUT_OF_RANGE": "La corrección se sale de lo que tiene o cabe en el vial."
   },
   "transferencia": {
     "sesionesExcedenDisponible": "Pediste más sesiones de las que quedan pendientes en ese paquete.",
@@ -5293,7 +5294,23 @@
       "agotado": "agotado",
       "descartado": "descartado"
     },
-    "verFactura": "Ver factura"
+    "verFactura": "Ver factura",
+    "correction": {
+      "open": "Corregir contenido",
+      "title": "Corregir contenido del vial #{n}",
+      "holds": "Tiene {left} de {capacity}.",
+      "direction": "Qué hacer",
+      "out": "Retirar del vial",
+      "in": "Devolver al vial",
+      "amount": "Cantidad",
+      "maxHint": "Como máximo {max}.",
+      "reason": "Motivo",
+      "closeVial": "Cerrar el vial (descartado)",
+      "submit": "Corregir",
+      "saved": "Contenido del vial corregido",
+      "tooMuchOut": "El vial solo tiene {max}: no se puede retirar más.",
+      "tooMuchIn": "Solo caben {max} más en el vial."
+    }
   },
   "compras": {
     "title": "Planificación de compras",
@@ -6434,7 +6451,8 @@
       "modifyPastCashDay": "Vas a cambiar el cuadre del {day}",
       "backdatedInventoryAdjustment": "Ajuste de inventario con fecha pasada",
       "apiKeyRevoke": "Revocar la API key «{name}»",
-      "voidFormatSheet": "Dar de baja la hoja guardada"
+      "voidFormatSheet": "Dar de baja la hoja guardada",
+      "vialContentCorrection": "Corregir el contenido del vial"
     },
     "effect": {
       "returnsPackageSession": "Devuelve la sesión al paquete",

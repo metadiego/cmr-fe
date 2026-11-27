@@ -19863,6 +19863,182 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/personal/{id}/puestos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Positions the person holds and where (centerIds null = everywhere, admin only), plus the primary one shown as their label.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/puestos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PersonalController_getPositions[0]_v1"];
+        /**
+         * Sets the COMPLETE list of positions the person holds and where, and the primary one. staff.update in each touched center; positions that carry permissions need an administrator; admin is held everywhere and asks for confirmation (428 → X-Confirm-Action: rbac.admin.grant / rbac.admin.revoke).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/puestos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setPositions[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Positions the person holds and where (centerIds null = everywhere, admin only), plus the primary one shown as their label.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/positions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PersonalController_getPositions[1]_v1"];
+        /**
+         * Sets the COMPLETE list of positions the person holds and where, and the primary one. staff.update in each touched center; positions that carry permissions need an administrator; admin is held everywhere and asks for confirmation (428 → X-Confirm-Action: rbac.admin.grant / rbac.admin.revoke).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/positions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setPositions[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/puestos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Positions the person holds and where (centerIds null = everywhere, admin only), plus the primary one shown as their label.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/puestos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PersonalController_getPositions[2]_v1"];
+        /**
+         * Sets the COMPLETE list of positions the person holds and where, and the primary one. staff.update in each touched center; positions that carry permissions need an administrator; admin is held everywhere and asks for confirmation (428 → X-Confirm-Action: rbac.admin.grant / rbac.admin.revoke).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/puestos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setPositions[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Positions the person holds and where (centerIds null = everywhere, admin only), plus the primary one shown as their label.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/positions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PersonalController_getPositions[3]_v1"];
+        /**
+         * Sets the COMPLETE list of positions the person holds and where, and the primary one. staff.update in each touched center; positions that carry permissions need an administrator; admin is held everywhere and asks for confirmation (428 → X-Confirm-Action: rbac.admin.grant / rbac.admin.revoke).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/positions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setPositions[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/puestos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Positions the person holds and where (centerIds null = everywhere, admin only), plus the primary one shown as their label. */
+        get: operations["PersonalController_getPositions[4]_v2"];
+        /** Sets the COMPLETE list of positions the person holds and where, and the primary one. staff.update in each touched center; positions that carry permissions need an administrator; admin is held everywhere and asks for confirmation (428 → X-Confirm-Action: rbac.admin.grant / rbac.admin.revoke). */
+        put: operations["PersonalController_setPositions[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Positions the person holds and where (centerIds null = everywhere, admin only), plus the primary one shown as their label. */
+        get: operations["PersonalController_getPositions[5]_v2"];
+        /** Sets the COMPLETE list of positions the person holds and where, and the primary one. staff.update in each touched center; positions that carry permissions need an administrator; admin is held everywhere and asks for confirmation (428 → X-Confirm-Action: rbac.admin.grant / rbac.admin.revoke). */
+        put: operations["PersonalController_setPositions[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/puestos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Positions the person holds and where (centerIds null = everywhere, admin only), plus the primary one shown as their label. */
+        get: operations["PersonalController_getPositions[6]_v2"];
+        /** Sets the COMPLETE list of positions the person holds and where, and the primary one. staff.update in each touched center; positions that carry permissions need an administrator; admin is held everywhere and asks for confirmation (428 → X-Confirm-Action: rbac.admin.grant / rbac.admin.revoke). */
+        put: operations["PersonalController_setPositions[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Positions the person holds and where (centerIds null = everywhere, admin only), plus the primary one shown as their label. */
+        get: operations["PersonalController_getPositions[7]_v2"];
+        /** Sets the COMPLETE list of positions the person holds and where, and the primary one. staff.update in each touched center; positions that carry permissions need an administrator; admin is held everywhere and asks for confirmation (428 → X-Confirm-Action: rbac.admin.grant / rbac.admin.revoke). */
+        put: operations["PersonalController_setPositions[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tableros": {
         parameters: {
             query?: never;
@@ -22827,82 +23003,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/me/centros/operativos": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Centros donde la persona TRABAJA (tiene un rol allí), para el selector del nav. Si devuelve uno solo, no hay nada que elegir y el selector sobra. Los centros con acceso puntual NO salen aquí: para esos, cada pantalla ofrece su propio selector.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auth/me/centros/operativos`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["AuthController_meCentrosOperativos[0]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/me/centers/operational": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Centros donde la persona TRABAJA (tiene un rol allí), para el selector del nav. Si devuelve uno solo, no hay nada que elegir y el selector sobra. Los centros con acceso puntual NO salen aquí: para esos, cada pantalla ofrece su propio selector.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auth/me/centers/operational`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["AuthController_meCentrosOperativos[1]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/auth/me/centros/operativos": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Centros donde la persona TRABAJA (tiene un rol allí), para el selector del nav. Si devuelve uno solo, no hay nada que elegir y el selector sobra. Los centros con acceso puntual NO salen aquí: para esos, cada pantalla ofrece su propio selector. */
-        get: operations["AuthController_meCentrosOperativos[2]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/auth/me/centers/operational": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Centros donde la persona TRABAJA (tiene un rol allí), para el selector del nav. Si devuelve uno solo, no hay nada que elegir y el selector sobra. Los centros con acceso puntual NO salen aquí: para esos, cada pantalla ofrece su propio selector. */
-        get: operations["AuthController_meCentrosOperativos[3]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/auth/me/centros": {
         parameters: {
             query?: never;
@@ -22911,6 +23011,7 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The centers where the person works (holds a position), home center first; every center for an admin, its own for a center API key. /me/centers/operational is the same list.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auth/me/centros`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -22931,10 +23032,53 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * The centers where the person works (holds a position), home center first; every center for an admin, its own for a center API key. /me/centers/operational is the same list.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auth/me/centers`, que devuelve lo mismo con los nombres en inglés.
          */
         get: operations["AuthController_meCentros[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/centros/operativos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The centers where the person works (holds a position), home center first; every center for an admin, its own for a center API key. /me/centers/operational is the same list.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auth/me/centros/operativos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AuthController_meCentros[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/centers/operational": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The centers where the person works (holds a position), home center first; every center for an admin, its own for a center API key. /me/centers/operational is the same list.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/auth/me/centers/operational`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["AuthController_meCentros[3]_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -22950,7 +23094,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["AuthController_meCentros[2]_v2"];
+        /** The centers where the person works (holds a position), home center first; every center for an admin, its own for a center API key. /me/centers/operational is the same list. */
+        get: operations["AuthController_meCentros[4]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -22966,7 +23111,42 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["AuthController_meCentros[3]_v2"];
+        /** The centers where the person works (holds a position), home center first; every center for an admin, its own for a center API key. /me/centers/operational is the same list. */
+        get: operations["AuthController_meCentros[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auth/me/centros/operativos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The centers where the person works (holds a position), home center first; every center for an admin, its own for a center API key. /me/centers/operational is the same list. */
+        get: operations["AuthController_meCentros[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/auth/me/centers/operational": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The centers where the person works (holds a position), home center first; every center for an admin, its own for a center API key. /me/centers/operational is the same list. */
+        get: operations["AuthController_meCentros[7]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -26422,6 +26602,82 @@ export interface paths {
         get?: never;
         /** Deja los centros de ESE permiso para esta persona exactamente en la lista enviada. Concede el permiso en un centro ajeno SIN tocar sus centros de trabajo, su rol ni su menú. `[]` quita todas las excepciones de la fila. */
         put: operations["ProfileAccessController_setCentrosDePermiso[3]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/puestos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Positions (slug, labelKey, permissions carried, fullAccess). A position with 0 permissions only says what the person does and puts them in that position pickers.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/puestos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PositionsController_list[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Positions (slug, labelKey, permissions carried, fullAccess). A position with 0 permissions only says what the person does and puts them in that position pickers.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/positions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PositionsController_list[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/puestos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Positions (slug, labelKey, permissions carried, fullAccess). A position with 0 permissions only says what the person does and puts them in that position pickers. */
+        get: operations["PositionsController_list[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Positions (slug, labelKey, permissions carried, fullAccess). A position with 0 permissions only says what the person does and puts them in that position pickers. */
+        get: operations["PositionsController_list[3]_v2"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -30108,6 +30364,178 @@ export interface paths {
         put: operations["VialesAbiertosController_update[3]_v2"];
         post?: never;
         delete: operations["VialesAbiertosController_remove[3]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/viales-abiertos/{id}/correccion-de-contenido": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct the content (g/mg) of one open vial.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/viales-abiertos/{id}/correccion-de-contenido`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Moves content into ('devolver') or out of ('retirar') this vial only; sealed stock is untouched. Optional estado closes the vial in the same call. The reason is written on the movement. Asks for confirmation (inventory.vial.correct).
+         */
+        post: operations["VialesAbiertosController_correctContent[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/viales-abiertos/{id}/content-correction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct the content (g/mg) of one open vial.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/viales-abiertos/{id}/content-correction`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Moves content into ('devolver') or out of ('retirar') this vial only; sealed stock is untouched. Optional estado closes the vial in the same call. The reason is written on the movement. Asks for confirmation (inventory.vial.correct).
+         */
+        post: operations["VialesAbiertosController_correctContent[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/open-vials/{id}/correccion-de-contenido": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct the content (g/mg) of one open vial.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/open-vials/{id}/correccion-de-contenido`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Moves content into ('devolver') or out of ('retirar') this vial only; sealed stock is untouched. Optional estado closes the vial in the same call. The reason is written on the movement. Asks for confirmation (inventory.vial.correct).
+         */
+        post: operations["VialesAbiertosController_correctContent[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/open-vials/{id}/content-correction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct the content (g/mg) of one open vial.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/open-vials/{id}/content-correction`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Moves content into ('devolver') or out of ('retirar') this vial only; sealed stock is untouched. Optional estado closes the vial in the same call. The reason is written on the movement. Asks for confirmation (inventory.vial.correct).
+         */
+        post: operations["VialesAbiertosController_correctContent[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/viales-abiertos/{id}/correccion-de-contenido": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct the content (g/mg) of one open vial.
+         * @description Moves content into ('devolver') or out of ('retirar') this vial only; sealed stock is untouched. Optional estado closes the vial in the same call. The reason is written on the movement. Asks for confirmation (inventory.vial.correct).
+         */
+        post: operations["VialesAbiertosController_correctContent[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/viales-abiertos/{id}/content-correction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct the content (g/mg) of one open vial.
+         * @description Moves content into ('devolver') or out of ('retirar') this vial only; sealed stock is untouched. Optional estado closes the vial in the same call. The reason is written on the movement. Asks for confirmation (inventory.vial.correct).
+         */
+        post: operations["VialesAbiertosController_correctContent[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/open-vials/{id}/correccion-de-contenido": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct the content (g/mg) of one open vial.
+         * @description Moves content into ('devolver') or out of ('retirar') this vial only; sealed stock is untouched. Optional estado closes the vial in the same call. The reason is written on the movement. Asks for confirmation (inventory.vial.correct).
+         */
+        post: operations["VialesAbiertosController_correctContent[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/open-vials/{id}/content-correction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct the content (g/mg) of one open vial.
+         * @description Moves content into ('devolver') or out of ('retirar') this vial only; sealed stock is untouched. Optional estado closes the vial in the same call. The reason is written on the movement. Asks for confirmation (inventory.vial.correct).
+         */
+        post: operations["VialesAbiertosController_correctContent[7]_v2"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -45994,6 +46422,114 @@ export interface paths {
         post?: never;
         /** Remove a line (its past calls keep the channel they got). */
         delete: operations["CallcenterController_removeChannel[3]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/configuracion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A center's call-center settings: time zone, opening hours and silence threshold.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/configuracion`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Effective values (system, center and override layers, then the defaults).
+         */
+        get: operations["CallcenterController_getSettings[0]_v1"];
+        /**
+         * Change a center's call-center settings (only what is sent).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/configuracion`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merged into the center preferences under `callcenter` on the server: no other module setting is touched. Needs callcenter.admin in that center.
+         */
+        put: operations["CallcenterController_setSettings[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A center's call-center settings: time zone, opening hours and silence threshold.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/settings`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Effective values (system, center and override layers, then the defaults).
+         */
+        get: operations["CallcenterController_getSettings[1]_v1"];
+        /**
+         * Change a center's call-center settings (only what is sent).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/settings`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Merged into the center preferences under `callcenter` on the server: no other module setting is touched. Needs callcenter.admin in that center.
+         */
+        put: operations["CallcenterController_setSettings[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/configuracion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A center's call-center settings: time zone, opening hours and silence threshold.
+         * @description Effective values (system, center and override layers, then the defaults).
+         */
+        get: operations["CallcenterController_getSettings[2]_v2"];
+        /**
+         * Change a center's call-center settings (only what is sent).
+         * @description Merged into the center preferences under `callcenter` on the server: no other module setting is touched. Needs callcenter.admin in that center.
+         */
+        put: operations["CallcenterController_setSettings[2]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A center's call-center settings: time zone, opening hours and silence threshold.
+         * @description Effective values (system, center and override layers, then the defaults).
+         */
+        get: operations["CallcenterController_getSettings[3]_v2"];
+        /**
+         * Change a center's call-center settings (only what is sent).
+         * @description Merged into the center preferences under `callcenter` on the server: no other module setting is touched. Needs callcenter.admin in that center.
+         */
+        put: operations["CallcenterController_setSettings[3]_v2"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -68517,7 +69053,7 @@ export interface components {
              * Format: uuid
              * @description Another patient receives the sessions. Omitted = the same patient (then a center is needed).
              */
-            pacienteDestinoId?: string;
+            destinationPatientId?: string;
             /**
              * Format: uuid
              * @description Omitted = the same center.
@@ -68541,7 +69077,7 @@ export interface components {
              * Format: uuid
              * @description Another patient receives the sessions (v2 destinationPatientId). Omitted = the same patient.
              */
-            pacienteDestinoId?: string;
+            destinationPatientId?: string;
             sessions?: number;
             /** @enum {string} */
             mode?: "virtual" | "fisica";
@@ -68564,7 +69100,7 @@ export interface components {
             clinicDestinoIdRef?: Record<string, never>;
             patientId: string;
             pacienteIdRef?: Record<string, never>;
-            pacienteDestinoId: string | null;
+            destinationPatientId: string | null;
             pacienteDestinoIdRef?: Record<string, never>;
             productId: string;
             productoIdRef?: Record<string, never>;
@@ -69197,8 +69733,8 @@ export interface components {
             notes: string | null;
             reference: string | null;
             /** Format: date-time */
-            anuladoEn: string | null;
-            anuladoPor: string | null;
+            cancelledAt: string | null;
+            cancelledBy: string | null;
             anuladoPorRef?: Record<string, never>;
             cancellationReason: string | null;
             replacesId: string | null;
@@ -69597,9 +70133,9 @@ export interface components {
              */
             refundMethodId?: string | null;
             /** @description Por dónde salió el dinero, si se corrige a la vez. Sin él, los reembolsos se quedan y la respuesta trae el hueco. */
-            reembolsos?: components["schemas"]["ReimbursementLineDto"][];
+            reimbursements?: components["schemas"]["ReimbursementLineDto"][];
             /** @description Por qué se edita (queda en los reembolsos que se reemplazan). */
-            motivoCambio?: string;
+            changeReason?: string;
         };
         ChangeLogEntryEntity: {
             clinicRef?: Record<string, never>;
@@ -69634,7 +70170,7 @@ export interface components {
             updatedAt: string;
         };
         ReplaceRefundReimbursementsDto: {
-            reembolsos: components["schemas"]["ReimbursementLineDto"][];
+            reimbursements: components["schemas"]["ReimbursementLineDto"][];
             /** @description Por qué se corrige (queda en los reembolsos anulados). */
             reason: string;
         };
@@ -70365,7 +70901,7 @@ export interface components {
             /** @description Por qué se fusionan (queda en el registro de cambios). / Why both records are the same person. */
             reason: string;
             /** @description true = se acepta que cambien los conteos de PERSONAS de periodos pasados (pacientes distintos, nuevo vs seguimiento) que la simulación avisa. El dinero no cambia nunca. / Accept the past patient-count changes the simulation reports; money never changes. */
-            aceptarCambioEnReportesPasados?: boolean;
+            acceptPastReportImpact?: boolean;
         };
         StaffPhoneExtensionDto: {
             /**
@@ -70380,7 +70916,7 @@ export interface components {
             extension: string;
         };
         SetStaffPhoneExtensionsDto: {
-            extensiones: components["schemas"]["StaffPhoneExtensionDto"][];
+            extensions: components["schemas"]["StaffPhoneExtensionDto"][];
         };
         CreatePersonalDto: {
             /**
@@ -70420,6 +70956,9 @@ export interface components {
             perfilIdRef?: Record<string, never>;
             jobTitle: string | null;
             capabilities: string[] | null;
+            /** @description The position shown as this person's label (lists, reports). One of the positions they hold. */
+            primaryPositionId: string | null;
+            primaryPositionRef?: Record<string, never>;
             /**
              * @description Los centros donde esta persona APARECE en los selects (frontdesk, facturación, citas). Es un
              *     array porque mucha gente trabaja en los dos: quitar un centro lo apaga y ponerlo lo enciende —
@@ -70518,6 +71057,24 @@ export interface components {
         SetCentrosPersonalDto: {
             /** @description Centros donde la persona aparece en los selects (frontdesk, facturación, citas). Lista completa de los ENCENDIDOS: lo que no venga queda apagado. Al menos uno. */
             centroIds: string[];
+        };
+        PositionAtCentersDto: {
+            /**
+             * @description Position slug (GET /positions), e.g. manager, billing, doctor.
+             * @example billing
+             */
+            position: string;
+            /** @description Centers where it is held. Omitted or null = everywhere, which only the full-access position (admin) allows. */
+            centerIds?: string[] | null;
+        };
+        SetStaffPositionsDto: {
+            /** @description The COMPLETE list of positions the person holds after the change; what is not listed is removed. An empty list removes all. */
+            positions: components["schemas"]["PositionAtCentersDto"][];
+            /**
+             * @description Position shown as the person label (lists, reports); one of `positions`.
+             * @example manager
+             */
+            primary?: string;
         };
         TableroAccionDto: {
             boardSlug: string;
@@ -71447,6 +72004,8 @@ export interface components {
             name: string;
             description: string | null;
             isSystem: boolean;
+            /** @description i18n key of the position label shown on screens and reports (`positions.<slug>`). */
+            labelKey: string | null;
             /**
              * @description Si la FUNCIÓN de este rol es inherentemente multi-centro. Los roles empaquetan permisos para un
              *     grupo de gente, y el alcance de centro es la misma idea aplicada a la tenencia: quien agenda citas
@@ -71511,6 +72070,12 @@ export interface components {
             /** @enum {string} */
             effect: "grant" | "deny";
             centerId: string | null;
+            /**
+             * @description Who created the row: `manual` (a person, from the access screen or the API) or
+             *     `positions_migration` (generated so that moving to positions changed nobody's access). Lets the
+             *     owner list the generated ones and the migration's down() remove exactly those.
+             */
+            source: string;
             profile?: components["schemas"]["PerfilEntity"];
             permissionSlug?: components["schemas"]["PermisoEntity"];
             center?: components["schemas"]["CentroEntity"];
@@ -72262,6 +72827,23 @@ export interface components {
         UpdateVialAbiertoDto: {
             /** @enum {string} */
             status?: "abierto" | "agotado" | "descartado";
+        };
+        CorregirContenidoVialDto: {
+            /** @description Content to move, in the vial unit (g, mg). Greater than 0. */
+            quantity: number;
+            /**
+             * @description 'devolver' = into the vial; 'retirar' = out of it.
+             * @enum {string}
+             */
+            sign: "devolver" | "retirar";
+            /** @description Why (written on the movement). */
+            reason: string;
+            /**
+             * @description Optionally close the vial in the same call.
+             * @enum {string}
+             */
+            status?: "abierto" | "agotado" | "descartado";
+            effectiveDate?: string;
         };
         TipoMovimientoEntity: {
             slug: string;
@@ -73635,6 +74217,31 @@ export interface components {
             labelKey?: string;
             /** @description Inactive lines are ignored. */
             active?: boolean;
+        };
+        UpdateCallCenterSettingsDto: {
+            /**
+             * @description IANA time zone the call-center days are counted in.
+             * @example America/Puerto_Rico
+             */
+            timeZone?: string;
+            /**
+             * @description Opening hours: { days: ISO weekdays 1..7, start: "HH:MM", end: "HH:MM" } (validated by the service).
+             * @example {
+             *       "days": [
+             *         1,
+             *         2,
+             *         3,
+             *         4,
+             *         5,
+             *         6
+             *       ],
+             *       "start": "08:00",
+             *       "end": "18:00"
+             *     }
+             */
+            hours?: Record<string, never>;
+            /** @description Minutes of silence inside opening hours before the push is "behind" (5..720). */
+            lagAlertMinutes?: number;
         };
         CompleteCallsDto: {
             /** @description How many stored calls to complete in this run (default 500, max 5000). */
@@ -75230,7 +75837,7 @@ export interface components {
             reason?: string;
         };
         ClaimPanelWorkDto: {
-            /** @description The section key (panel_sections.slug), e.g. glp1. */
+            /** @description The section key (panel_sections.slug), e.g. glp_1. */
             sectionKey: string;
             /**
              * Format: uuid
@@ -105720,6 +106327,342 @@ export interface operations {
             };
         };
     };
+    "PersonalController_getPositions[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_setPositions[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPositionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_getPositions[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_setPositions[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPositionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_getPositions[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_setPositions[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPositionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_getPositions[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_setPositions[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPositionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_getPositions[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_setPositions[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPositionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_getPositions[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_setPositions[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPositionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_getPositions[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_setPositions[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPositionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_getPositions[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PersonalController_setPositions[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffPositionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "TablerosController_listTableros[0]_v1": {
         parameters: {
             query?: never;
@@ -110048,82 +110991,6 @@ export interface operations {
             };
         };
     };
-    "AuthController_meCentrosOperativos[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CentroEntity"][];
-                };
-            };
-        };
-    };
-    "AuthController_meCentrosOperativos[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CentroEntity"][];
-                };
-            };
-        };
-    };
-    "AuthController_meCentrosOperativos[2]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CentroEntity"][];
-                };
-            };
-        };
-    };
-    "AuthController_meCentrosOperativos[3]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CentroEntity"][];
-                };
-            };
-        };
-    };
     "AuthController_meCentros[0]_v1": {
         parameters: {
             query?: never;
@@ -110162,7 +111029,7 @@ export interface operations {
             };
         };
     };
-    "AuthController_meCentros[2]_v2": {
+    "AuthController_meCentros[2]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -110181,7 +111048,83 @@ export interface operations {
             };
         };
     };
-    "AuthController_meCentros[3]_v2": {
+    "AuthController_meCentros[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CentroEntity"][];
+                };
+            };
+        };
+    };
+    "AuthController_meCentros[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CentroEntity"][];
+                };
+            };
+        };
+    };
+    "AuthController_meCentros[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CentroEntity"][];
+                };
+            };
+        };
+    };
+    "AuthController_meCentros[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CentroEntity"][];
+                };
+            };
+        };
+    };
+    "AuthController_meCentros[7]_v2": {
         parameters: {
             query?: never;
             header?: never;
@@ -115736,6 +116679,82 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PositionsController_list[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PositionsController_list[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PositionsController_list[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PositionsController_list[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -121931,6 +122950,190 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_correctContent[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirContenidoVialDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_correctContent[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirContenidoVialDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_correctContent[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirContenidoVialDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_correctContent[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirContenidoVialDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_correctContent[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirContenidoVialDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_correctContent[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirContenidoVialDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_correctContent[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirContenidoVialDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "VialesAbiertosController_correctContent[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorregirContenidoVialDto"];
+            };
+        };
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -144483,6 +145686,198 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "CallcenterController_getSettings[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_setSettings[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallCenterSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_getSettings[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_setSettings[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallCenterSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_getSettings[2]_v2": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_setSettings[2]_v2": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallCenterSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_getSettings[3]_v2": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_setSettings[3]_v2": {
+        parameters: {
+            query: {
+                /** @description Center whose settings are read or written. */
+                centerId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCallCenterSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

@@ -576,3 +576,20 @@ export function getReporteViales(
     tenant,
   );
 }
+
+// ---- Corregir el contenido de un vial abierto (cmr-be #726) --------------------------------------
+// Mete ('devolver') o saca ('retirar') contenido de UN vial abierto; nunca toca los sellados. Se escribe
+// en el centro del vial. 428 → apiFetch pregunta y repite (inventory.vial.correct, y con fecha pasada
+// también inventory.adjustment.backdate). See docs/specs/correccion-de-contenido-de-vial.md
+export type VialContentCorrection = components["schemas"]["CorregirContenidoVialDto"];
+export function correctVialContent(
+  vialId: string,
+  body: VialContentCorrection,
+  tenant?: string | null,
+): Promise<unknown> {
+  return apiFetch(
+    `/inventory/open-vials/${vialId}/content-correction`,
+    { method: "POST", body: JSON.stringify(body) },
+    tenant,
+  );
+}

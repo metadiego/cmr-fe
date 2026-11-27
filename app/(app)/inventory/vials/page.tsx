@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import * as React from "react"
+import Link from "next/link"
+import { useFormatter, useTranslations } from "next-intl"
 
 import {
   getReporteViales,
@@ -11,25 +11,32 @@ import {
   type Almacen,
   type Producto,
   type ReporteViales,
-} from "@/lib/api/inventario";
-import { useResource } from "@/hooks/use-resource";
-import { useCentroGate } from "@/hooks/use-centro-gate";
+} from "@/lib/api/inventario"
+import { useResource } from "@/hooks/use-resource"
+import { useCan } from "@/hooks/use-can"
+import { useCentroGate } from "@/hooks/use-centro-gate"
 import {
   agruparPorDia,
   nivelDelFrasco,
   textoDeCapacidad,
-} from "@/lib/inventario/viales";
-import { Frasco, PilaDeFrascos } from "@/components/inventario/frasco";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Label } from "@/components/ui/label";
-import { PageContainer, PageHeader } from "@/components/ui/page";
+} from "@/lib/inventario/viales"
+import { Frasco, PilaDeFrascos } from "@/components/inventario/frasco"
+import {
+  VialContentCorrectionDialog,
+  type CorrectableVial,
+} from "@/components/inventario/vial-content-correction-dialog"
+import { Panel } from "@/components/kit/panel"
+import { Button } from "@/components/ui/button"
+import { DatePicker } from "@/components/ui/date-picker"
+import { Label } from "@/components/ui/label"
+import { PageContainer, PageHeader } from "@/components/ui/page"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 
 // SEGUIMIENTO DE VIALES. Lo importante no es la tabla: es el DIBUJO. Se ve el frasco abierto medio lleno
 // y los cerrados contados, y eso se entiende sin leer. Debajo, cada dosis dice de qué vial salió.
@@ -38,40 +45,47 @@ import {
 
 /** Un producto se dosifica en vial cuando tiene contenido por envase y descarga por dosis. */
 function esDeVial(p: Producto): boolean {
-  const contenido = Number(p.content ?? 0);
-  return contenido > 0 && p.isInventoryItem !== false;
+  const contenido = Number(p.content ?? 0)
+  return contenido > 0 && p.isInventoryItem !== false
 }
 
 export default function VialesPage() {
-  const t = useTranslations("inventarioViales");
-  const format = useFormatter();
-  const tc = useTranslations("common");
-  const gate = useCentroGate();
-  const centro = gate.centro || gate.centros[0]?.id || "";
-  const tenant = centro || undefined;
+  const t = useTranslations("inventarioViales")
+  const format = useFormatter()
+  const tc = useTranslations("common")
+  const gate = useCentroGate()
+  const centro = gate.centro || gate.centros[0]?.id || ""
+  const tenant = centro || undefined
 
-  const [productoId, setProductoId] = React.useState("");
-  const [almacenId, setAlmacenId] = React.useState("");
-  const [desde, setDesde] = React.useState("");
-  const [hasta, setHasta] = React.useState("");
+  const [productoId, setProductoId] = React.useState("")
+  const [almacenId, setAlmacenId] = React.useState("")
+  const [desde, setDesde] = React.useState("")
+  const [hasta, setHasta] = React.useState("")
+  // «Corregir contenido» (cmr-be #726): only for inventory.adjust; the BE enforces it too.
+  const { can } = useCan()
+  const canAdjust = can("inventory.adjust")
+  const [correcting, setCorrecting] = React.useState<CorrectableVial | null>(
+    null
+  )
 
   const productosRes = useResource<Producto[]>(
     () => (tenant ? listProductos({}) : Promise.resolve([])),
-    [tenant],
-  );
+    [tenant]
+  )
   const productos = React.useMemo(
     () =>
       productosRes.state.kind === "ok"
         ? productosRes.state.data.filter(esDeVial)
         : [],
-    [productosRes.state],
-  );
+    [productosRes.state]
+  )
 
   const almacenesRes = useResource<Almacen[]>(
     () => (tenant ? listAlmacenes(tenant) : Promise.resolve([])),
-    [tenant],
-  );
-  const almacenes = almacenesRes.state.kind === "ok" ? almacenesRes.state.data : [];
+    [tenant]
+  )
+  const almacenes =
+    almacenesRes.state.kind === "ok" ? almacenesRes.state.data : []
 
   const reporteRes = useResource<ReporteViales | null>(
     () =>
@@ -83,18 +97,17 @@ export default function VialesPage() {
               ...(desde ? { from: desde } : {}),
               ...(hasta ? { to: hasta } : {}),
             },
-            tenant,
+            tenant
           )
         : Promise.resolve(null),
-    [productoId, almacenId, desde, hasta, tenant],
-  );
+    [productoId, almacenId, desde, hasta, tenant]
+  )
 
-  const reporte =
-    reporteRes.state.kind === "ok" ? reporteRes.state.data : null;
-  const producto = productos.find((p) => p.id === productoId);
+  const reporte = reporteRes.state.kind === "ok" ? reporteRes.state.data : null
+  const producto = productos.find((p) => p.id === productoId)
   const unidad =
     (producto as { unidadContenidoNombre?: string } | undefined)
-      ?.unidadContenidoNombre ?? null;
+      ?.unidadContenidoNombre ?? null
   const dias = React.useMemo(
     // agruparPorDia (helper de presentación en lib/inventario) agrupa por `fecha`/`cantidad`; adaptamos
     // los consumos del API v2 (`date`/`quantity`) a esa forma sin perder los demás campos en inglés.
@@ -104,17 +117,17 @@ export default function VialesPage() {
           ...c,
           fecha: c.date,
           cantidad: c.quantity,
-        })),
+        }))
       ),
-    [reporte],
-  );
+    [reporte]
+  )
 
   return (
     <PageContainer>
       <PageHeader title={t("titulo")} description={t("subtitulo")} />
 
       {/* Filtros: el producto manda; el resto acota. */}
-      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm ring-1 shadow-[rgba(16,32,64,0.06)] ring-foreground/10">
         <div className="min-w-64 flex-1 space-y-1.5">
           <Label htmlFor="v-producto">{t("producto")}</Label>
           <Select value={productoId} onValueChange={setProductoId}>
@@ -189,7 +202,7 @@ export default function VialesPage() {
         <>
           {/* INVENTARIO VISUAL: lo que se entiende sin leer. */}
           <div className="mb-6 grid gap-4 md:grid-cols-3">
-            <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+            <section className="rounded-md bg-card p-5 shadow-sm ring-1 shadow-[rgba(16,32,64,0.06)] ring-foreground/10">
               <h2 className="mb-4 text-sm font-medium">{t("enInventario")}</h2>
               <div className="flex items-center gap-5">
                 <PilaDeFrascos cantidad={reporte.cerrados} />
@@ -204,42 +217,67 @@ export default function VialesPage() {
               </div>
             </section>
 
-            <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] md:col-span-2">
-              <h2 className="mb-4 text-sm font-medium">{t("vialActivo")}</h2>
-              {reporte.active ? (
-                <div className="flex items-center gap-6">
-                  <Frasco
-                    nivel={nivelDelFrasco(reporte.active)}
-                    etiqueta={`${Math.round(reporte.active.porcentaje)}%`}
-                  />
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {t("vialNumero", { n: reporte.active.number ?? "—" })}
-                    </p>
-                    <p className="font-mono text-2xl font-semibold">
-                      {textoDeCapacidad(
-                        {
-                          remanente: reporte.active.remanente,
-                          capacidad: reporte.active.capacity,
-                        },
-                        unidad,
-                      )}
-                    </p>
-                    {reporte.active.remanente < 0 && (
-                      <p className="rounded-md border border-warning/40 bg-warning px-2 py-1 text-xs text-warning-foreground">
-                        {t("remanenteNegativo")}
+            <Panel
+              className="md:col-span-2"
+              title={t("vialActivo")}
+              actions={
+                canAdjust && reporte.active ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      reporte.active &&
+                      setCorrecting({
+                        id: reporte.active.id,
+                        number: reporte.active.number,
+                        remnant: reporte.active.remanente,
+                        capacity: reporte.active.capacity,
+                      })
+                    }
+                  >
+                    {t("correction.open")}
+                  </Button>
+                ) : undefined
+              }
+            >
+              <div className="px-5 py-4">
+                {reporte.active ? (
+                  <div className="flex items-center gap-6">
+                    <Frasco
+                      nivel={nivelDelFrasco(reporte.active)}
+                      etiqueta={`${Math.round(reporte.active.porcentaje)}%`}
+                    />
+                    <div className="space-y-1">
+                      <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                        {t("vialNumero", { n: reporte.active.number ?? "—" })}
                       </p>
-                    )}
+                      <p className="font-mono text-2xl font-semibold">
+                        {textoDeCapacidad(
+                          {
+                            remanente: reporte.active.remanente,
+                            capacidad: reporte.active.capacity,
+                          },
+                          unidad
+                        )}
+                      </p>
+                      {reporte.active.remanente < 0 && (
+                        <p className="rounded-md border border-warning/40 bg-warning px-2 py-1 text-xs text-warning-foreground">
+                          {t("remanenteNegativo")}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">{t("sinVialActivo")}</p>
-              )}
-            </section>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {t("sinVialActivo")}
+                  </p>
+                )}
+              </div>
+            </Panel>
           </div>
 
           {/* DETALLE: de qué vial salió cada dosis. */}
-          <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+          <section className="overflow-hidden rounded-md bg-card shadow-sm ring-1 shadow-[rgba(16,32,64,0.06)] ring-foreground/10">
             <div className="flex items-center justify-between border-b px-4 py-3">
               <h2 className="text-sm font-medium">{t("consumos")}</h2>
               <span className="text-xs text-muted-foreground">
@@ -254,18 +292,31 @@ export default function VialesPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50">
-                    <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                      <th className="px-4 py-2 font-semibold">{t("col.fecha")}</th>
-                      <th className="px-4 py-2 font-semibold">{t("col.paciente")}</th>
-                      <th className="px-4 py-2 font-semibold">{t("col.factura")}</th>
-                      <th className="px-4 py-2 text-right font-semibold">{t("col.dosis")}</th>
-                      <th className="px-4 py-2 text-right font-semibold">{t("col.vial")}</th>
+                    <tr className="text-left text-[11px] tracking-wide text-muted-foreground uppercase">
+                      <th className="px-4 py-2 font-semibold">
+                        {t("col.fecha")}
+                      </th>
+                      <th className="px-4 py-2 font-semibold">
+                        {t("col.paciente")}
+                      </th>
+                      <th className="px-4 py-2 font-semibold">
+                        {t("col.factura")}
+                      </th>
+                      <th className="px-4 py-2 text-right font-semibold">
+                        {t("col.dosis")}
+                      </th>
+                      <th className="px-4 py-2 text-right font-semibold">
+                        {t("col.vial")}
+                      </th>
                     </tr>
                   </thead>
                   {dias.map((d) => (
                     <tbody key={d.dia} className="divide-y border-t">
                       <tr className="bg-muted/20">
-                        <td className="px-4 py-1.5 text-xs font-medium" colSpan={4}>
+                        <td
+                          className="px-4 py-1.5 text-xs font-medium"
+                          colSpan={4}
+                        >
                           {d.dia}
                         </td>
                         <td className="px-4 py-1.5 text-right text-xs font-medium">
@@ -273,7 +324,10 @@ export default function VialesPage() {
                         </td>
                       </tr>
                       {d.items.map((c, i) => (
-                        <tr key={`${c.vialId}-${i}`} className="hover:bg-muted/30">
+                        <tr
+                          key={`${c.vialId}-${i}`}
+                          className="hover:bg-muted/30"
+                        >
                           <td className="px-4 py-2 text-muted-foreground">
                             {format.dateTime(new Date(c.date), "time")}
                           </td>
@@ -305,11 +359,18 @@ export default function VialesPage() {
                           {/* Nada aislado: la dosis enlaza a su FACTURA. null = carga vieja sin sesión. */}
                           <td className="px-4 py-2">
                             {c.invoiceId ? (
-                              <Link href={`/billing/invoices/${c.invoiceId}`} className="font-medium text-primary hover:underline">
-                                {c.invoiceNumber ? `#${c.invoiceNumber}` : t("verFactura")}
+                              <Link
+                                href={`/billing/invoices/${c.invoiceId}`}
+                                className="font-medium text-primary hover:underline"
+                              >
+                                {c.invoiceNumber
+                                  ? `#${c.invoiceNumber}`
+                                  : t("verFactura")}
                               </Link>
                             ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
+                              <span className="text-xs text-muted-foreground">
+                                —
+                              </span>
                             )}
                           </td>
                           <td className="px-4 py-2 text-right font-mono">
@@ -337,7 +398,7 @@ export default function VialesPage() {
 
           {/* HISTÓRICO: secundario, que no compita con lo que importa. */}
           {reporte.historicos.length > 0 && (
-            <details className="mt-4 rounded-md bg-card px-4 py-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+            <details className="mt-4 rounded-md bg-card px-4 py-3 shadow-sm ring-1 shadow-[rgba(16,32,64,0.06)] ring-foreground/10">
               <summary className="cursor-pointer text-sm font-medium">
                 {t("historicos", { n: reporte.historicos.length })}
               </summary>
@@ -348,6 +409,23 @@ export default function VialesPage() {
                     className="rounded-full border px-3 py-1 text-xs text-muted-foreground"
                   >
                     #{h.number ?? "—"} · {t(`estado.${h.status}` as never)}
+                    {/* Another vial still open (one per patient, e.g. Plaquex) can be corrected too. */}
+                    {canAdjust && h.status === "abierto" && (
+                      <button
+                        type="button"
+                        className="ml-2 font-medium text-primary hover:underline"
+                        onClick={() =>
+                          setCorrecting({
+                            id: h.id,
+                            number: h.number,
+                            remnant: h.remanente,
+                            capacity: h.totalCapacity,
+                          })
+                        }
+                      >
+                        {t("correction.open")}
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -355,6 +433,17 @@ export default function VialesPage() {
           )}
         </>
       )}
+
+      <VialContentCorrectionDialog
+        vial={correcting}
+        unit={unidad}
+        tenant={tenant}
+        onClose={() => setCorrecting(null)}
+        onDone={() => {
+          setCorrecting(null)
+          reporteRes.reload()
+        }}
+      />
     </PageContainer>
-  );
+  )
 }
