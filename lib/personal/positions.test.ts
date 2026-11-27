@@ -1,6 +1,7 @@
 // lib/personal/positions.ts. Run: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   buildPositionsBody,
   centersOf,
@@ -112,4 +113,17 @@ test("chipState: with a login, a non-admin cannot add the first or remove the la
 
 test("chipState: a center without staff.update is read-only, even for an admin", () => {
   assert.equal(chipState({ ...base, canEditCenter: false, viewerIsAdmin: true }), "noCenterAccess");
+});
+
+// Every position the backend seeds shows a translated label in both catalogues, never a raw slug.
+// `clinical` («Clínico») arrives with cmr-be's role-functions release (docs/specs/rol-de-acceso-funciones-y-horario-handoff-be.md).
+test("every seeded position has a label in es and en", () => {
+  const SEEDED = [
+    "admin", "manager", "appointments", "frontdesk", "billing", "inventory", "doctor", "nurse",
+    "technician", "cashier", "accounting", "other", "clinical", "nursing", "nursing_panel",
+  ];
+  for (const file of ["messages/es.json", "messages/en.json"]) {
+    const positions = (JSON.parse(readFileSync(file, "utf8")) as { positions: Record<string, string> }).positions;
+    for (const slug of SEEDED) assert.ok(positions[slug], `${file}: positions.${slug} missing`);
+  }
 });
