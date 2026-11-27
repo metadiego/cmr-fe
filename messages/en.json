@@ -5953,7 +5953,6 @@
     "searchPlaceholder": "Search patient: name, record or service…",
     "date": "Date",
     "patientsCount": "{n, plural, one {# patient} other {# patients}}",
-    "serviceAppointments": "Service appointments",
     "book": "Book",
     "noMatches": "No patient matches the search.",
     "empty": "No patients with services or consultations on this day.",
