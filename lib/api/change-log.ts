@@ -28,6 +28,8 @@ export interface ChangeLogEntry {
   undoesEntryId?: string | null;
   undoneAt?: string | null;
   undoneByName?: string | null;
+  /** cmr-be #734: whether this kind of change can be undone from the log (false for consultations, for now). */
+  undoable?: boolean;
   /** «2026-11-06 19:31:54», already in the center's time: shown as is. */
   localTime: string;
   changeSet: ChangeSet;

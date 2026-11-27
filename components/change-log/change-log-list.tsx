@@ -8,7 +8,7 @@ import { listChangeLog, undoChange, type ChangeLogEntry, type ChangeLogFilter } 
 import { listPersonal } from "@/lib/api/personal";
 import { ApiError } from "@/lib/api/types";
 import { toastError } from "@/lib/api/errors";
-import { canUndo, entryPatient, fieldChanges, valueText } from "@/lib/change-log/entry";
+import { canUndo, entryKindKey, entryPatient, fieldChanges, valueText } from "@/lib/change-log/entry";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -106,11 +106,13 @@ export function ChangeLogList({
         {rows.map((e) => {
           const p = entryPatient(e);
           const changes = fieldChanges(e);
+          const kindKey = entryKindKey(e);
           return (
             <li key={e.id} className={"rounded-md border px-3 py-2 text-sm " + (e.undoneAt ? "opacity-60" : "")}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs tabular-nums text-muted-foreground">{e.localTime}</span>
+                  {kindKey && <Badge variant="outline">{tRoot(kindKey)}</Badge>}
                   <Badge variant={e.action === "delete" ? "destructive" : "secondary"}>{label("action", e.action)}</Badge>
                   <span className="font-medium">{e.actorKind === "system" ? t("system") : (e.actorName ?? "—")}</span>
                   {showPatient && p.name && (

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { canUndo, entryPatient, fieldChanges, valueText } from "./entry.ts";
+import { canUndo, entryKindKey, entryPatient, fieldChanges, valueText } from "./entry.ts";
 
 // Trimmed from a real prod entry (Caguas, 10-nov 14:03, start_therapy).
 const prod = {
@@ -46,4 +46,15 @@ test("fieldChanges: the BE's display name next to an id (BE #534)", () => {
   assert.equal(nurse.afterName, "Yashira Del Valle Massa");
   assert.equal(nurse.beforeName, null);
   assert.equal(dose.afterName, "25 g Vitamina C");
+});
+
+test("canUndo: an entry the backend says cannot be undone offers no undo (an older backend's entry still does)", () => {
+  assert.equal(canUndo({ undoneAt: null, undoesEntryId: null, undoable: false }, true), false);
+  assert.equal(canUndo({ undoneAt: null, undoesEntryId: null, undoable: true }, true), true);
+  assert.equal(canUndo({ undoneAt: null, undoesEntryId: null }, true), true);
+});
+
+test("entryKindKey: a consultation entry is tagged, a therapy session is not", () => {
+  assert.equal(entryKindKey({ entityType: "appointment" }), "changeLog.entity.appointment");
+  assert.equal(entryKindKey({ entityType: "frontdesk_session" }), null);
 });
