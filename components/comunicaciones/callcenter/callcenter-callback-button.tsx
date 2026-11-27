@@ -7,6 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { CallOutgoing02Icon } from "@hugeicons/core-free-icons";
 
 import { getCallcenterCommand, postCallcenterCallback, type Call } from "@/lib/api/callcenter";
+import { callbackNumberOf } from "@/lib/comunicaciones/callcenter-dashboard";
 import { getStaffExtensions } from "@/lib/api/personal";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { useMe } from "@/hooks/use-me";
@@ -21,7 +22,9 @@ const TIMEOUT_MS = 60_000;
 
 // Handoff §2: dials a real patient's phone — an outward action (rule 8), so Enter never fires it and
 // it always goes through useConfirm(). `callcenter.callback` is brand new and nobody holds it yet
-// (the owner decides who does); until then this button simply never renders for anyone.
+// (the owner decides who does); until then this button simply never renders for anyone. The CALLER
+// (lib/comunicaciones/callcenter-dashboard.ts canCallBack) decides whether this call has an outside
+// number worth calling back at all — this component assumes that's already true.
 export function CallcenterCallbackButton({ call }: { call: Call }) {
   const t = useTranslations("callcenter");
   const tRoot = useTranslations();
@@ -55,7 +58,7 @@ export function CallcenterCallbackButton({ call }: { call: Call }) {
   async function fire() {
     const ok = await confirm({
       title: t("callbackConfirmTitle"),
-      description: t("callbackConfirmBody", { number: call.from ?? "", extension: chosen || call.extension || "" }),
+      description: t("callbackConfirmBody", { number: callbackNumberOf(call) ?? "", extension: chosen || call.extension || "" }),
       confirmLabel: t("callbackConfirm"),
     });
     if (!ok) return;

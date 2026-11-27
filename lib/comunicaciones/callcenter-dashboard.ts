@@ -60,10 +60,23 @@ export function pbxParam(selection: CallcenterPbx): string | undefined {
   return selection === "all" ? undefined : selection;
 }
 
-/** Whether "Devolver" makes sense for a call: `from` is the PATIENT'S number only when they're the
- *  one who called in (entrante/facebook/marypili) — on a "saliente" call `from` is our own extension
- *  (we placed it), and on an "interna" call there is no outside number at all. Calling either of
- *  those back would dial an extension, not a patient — bulletproofing the one "Devolver" exists for. */
-export function canCallBack(call: { from: string | null; address: string | null }): boolean {
-  return !!call.from?.trim() && (call.address === "entrante" || call.address === "facebook" || call.address === "marypili");
+type CallbackCall = { from: string | null; toNumber: string | null; address: string | null; status: string };
+
+/** The patient's own number for "Devolver" — the BE's own split (confirmed by the BE peer, 27-nov):
+ *  on a "saliente" call `from` is OUR extension (we placed it), so the outside party is `toNumber`;
+ *  every other direction has it in `from`. Null when the call has no outside number at all (e.g. "interna"). */
+export function callbackNumberOf(call: CallbackCall): string | null {
+  if (call.address === "interna") return null;
+  const n = call.address === "saliente" ? call.toNumber : call.from;
+  return n?.trim() ? n : null;
+}
+
+/** Whether "Devolver" makes sense for a call: it needs an outside number (never an "interna" call),
+ *  and a completed outbound call ("saliente" + contestada) needs no callback — we already talked to
+ *  them. A MISSED outbound call ("saliente" + not contestada) is exactly "they didn't pick up," so it
+ *  gets the button too (BE peer, 27-nov): the BE dials `toNumber`, the number that was called. */
+export function canCallBack(call: CallbackCall): boolean {
+  if (!callbackNumberOf(call)) return false;
+  if (call.address === "saliente") return call.status !== "contestada";
+  return call.address === "entrante" || call.address === "facebook" || call.address === "marypili";
 }

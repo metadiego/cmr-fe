@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { callcenterTabParams, canCallBack, formatMinSec, isLiveRowStale, pbxParam, quickRange } from "./callcenter-dashboard.ts";
+import { callbackNumberOf, callcenterTabParams, canCallBack, formatMinSec, isLiveRowStale, pbxParam, quickRange } from "./callcenter-dashboard.ts";
 
 test("callcenterTabParams: answered/missed/all map straight through", () => {
   assert.deepEqual(callcenterTabParams("answered"), { tab: "answered" });
@@ -63,23 +63,43 @@ test("pbxParam: 'all' omits the param (today's combined behaviour); the others p
   assert.equal(pbxParam("3cx"), "3cx");
 });
 
+test("callbackNumberOf: entrante/facebook/marypili carry the patient's own number in `from`", () => {
+  const c = { from: "7871234567", toNumber: "2257", status: "contestada" };
+  assert.equal(callbackNumberOf({ ...c, address: "entrante" }), "7871234567");
+  assert.equal(callbackNumberOf({ ...c, address: "facebook" }), "7871234567");
+  assert.equal(callbackNumberOf({ ...c, address: "marypili" }), "7871234567");
+});
+
+test("callbackNumberOf: a saliente call's outside party is `toNumber`, not `from` (the BE's own split, confirmed by the BE peer)", () => {
+  // Real prod case this guards: an outbound call's `from` was "2257" (the operator's own extension).
+  assert.equal(callbackNumberOf({ from: "2257", toNumber: "7871234567", address: "saliente", status: "contestada" }), "7871234567");
+});
+
+test("callbackNumberOf: no outside number at all (e.g. interna) is null", () => {
+  assert.equal(callbackNumberOf({ from: "2222", toNumber: "2223", address: "interna", status: "contestada" }), null);
+});
+
 test("canCallBack: entrante/facebook/marypili carry the patient's own number in `from`", () => {
-  assert.equal(canCallBack({ from: "7871234567", address: "entrante" }), true);
-  assert.equal(canCallBack({ from: "7871234567", address: "facebook" }), true);
-  assert.equal(canCallBack({ from: "7871234567", address: "marypili" }), true);
+  const c = { from: "7871234567", toNumber: null, status: "contestada" };
+  assert.equal(canCallBack({ ...c, address: "entrante" }), true);
+  assert.equal(canCallBack({ ...c, address: "facebook" }), true);
+  assert.equal(canCallBack({ ...c, address: "marypili" }), true);
 });
 
 test("canCallBack: an internal call is never callable back, even with a from", () => {
-  assert.equal(canCallBack({ from: "2222", address: "interna" }), false);
+  assert.equal(canCallBack({ from: "2222", toNumber: "2223", address: "interna", status: "contestada" }), false);
 });
 
-test("canCallBack: a saliente call's `from` is OUR OWN extension, not the patient — never callable back", () => {
-  // Real prod case this guards: an outbound call's `from` was "2257" (the operator's own
-  // extension), which "Devolver" would otherwise have tried to call.
-  assert.equal(canCallBack({ from: "2257", address: "saliente" }), false);
+test("canCallBack: a COMPLETED saliente call needs no callback — we already talked to them", () => {
+  assert.equal(canCallBack({ from: "2257", toNumber: "7871234567", address: "saliente", status: "contestada" }), false);
+});
+
+test("canCallBack: a MISSED saliente call (they didn't pick up) IS callable back — the BE dials toNumber", () => {
+  assert.equal(canCallBack({ from: "2257", toNumber: "7871234567", address: "saliente", status: "perdida" }), true);
+  assert.equal(canCallBack({ from: "2257", toNumber: "7871234567", address: "saliente", status: "fallida" }), true);
 });
 
 test("canCallBack: no number at all (blank or missing) is never callable back", () => {
-  assert.equal(canCallBack({ from: null, address: "entrante" }), false);
-  assert.equal(canCallBack({ from: "  ", address: "entrante" }), false);
+  assert.equal(canCallBack({ from: null, toNumber: null, address: "entrante", status: "contestada" }), false);
+  assert.equal(canCallBack({ from: "  ", toNumber: null, address: "entrante", status: "contestada" }), false);
 });
