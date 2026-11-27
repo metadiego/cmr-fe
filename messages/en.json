@@ -6539,7 +6539,13 @@
       "invoice_line_edit": "Line edited",
       "invoice_line_multipliers": "Areas / days changed",
       "invoice_line_remove": "Line removed",
-      "invoice_line_component_added": "Component added to the kit"
+      "invoice_line_component_added": "Component added to the kit",
+      "confirm": "Confirmed",
+      "unconfirm": "Unconfirmed",
+      "start_triage": "In triage",
+      "start_consultation": "In consultation",
+      "no_show": "No-show",
+      "portfolio_fill": "Portfolio filled"
     },
     "field": {
       "estado": "Status",
@@ -6555,19 +6561,42 @@
       "fecha": "Date",
       "hora": "Time",
       "paqueteId": "Package",
-      "vialAbiertoId": "Open vial"
+      "vialAbiertoId": "Open vial",
+      "llegadaEn": "Arrival",
+      "vitalesEn": "Vitals",
+      "horaInEn": "Consultation start",
+      "horaOutEn": "Consultation end",
+      "confirmadaEn": "Confirmed at",
+      "enfermeraVitalesId": "Vitals nurse",
+      "callcenterId": "Agent",
+      "tipoCitaId": "Appointment type",
+      "motivo": "Reason",
+      "notas": "Notes",
+      "horaFin": "End time",
+      "esPrimeraVez": "First visit",
+      "registradaTardeEn": "Recorded late"
     },
     "status": {
       "pendiente": "Pending",
       "presente": "Present",
       "en_terapia": "In therapy",
       "asistido": "Attended",
-      "cancelada": "Cancelled"
+      "cancelada": "Cancelled",
+      "programada": "Scheduled",
+      "confirmada": "Confirmed",
+      "triage": "Triage",
+      "en_consulta": "In consultation",
+      "atendida": "Attended",
+      "no_show": "No-show",
+      "reprogramada": "Rescheduled"
     },
     "error": {
       "superseded": "Someone changed those fields later: undo the later change first",
       "alreadyUndone": "That change was already undone",
       "notUndoable": "That change cannot be undone"
+    },
+    "entity": {
+      "appointment": "Consultation"
     }
   },
   "calendar": {

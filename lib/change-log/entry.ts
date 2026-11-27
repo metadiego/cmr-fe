@@ -37,9 +37,22 @@ export function entryPatient(e: Pick<ChangeLogEntry, "patient" | "changeSet">): 
   return { name: name || null, record: record || null };
 }
 
-/** Undo is offered on an entry not yet undone that is not itself an undo, and only with the permission. */
-export function canUndo(e: Pick<ChangeLogEntry, "undoneAt" | "undoesEntryId">, hasPermission: boolean): boolean {
-  return hasPermission && !e.undoneAt && !e.undoesEntryId;
+/** Undo is offered on an entry not yet undone that is not itself an undo, of a kind that can be undone, and only with the permission. */
+export function canUndo(
+  e: Pick<ChangeLogEntry, "undoneAt" | "undoesEntryId" | "undoable">,
+  hasPermission: boolean,
+): boolean {
+  // `undoable` (cmr-be #734): false when the entry's kind cannot be undone from the log (a consultation,
+  // until its undo exists). Missing (an older backend) keeps today's rule.
+  return hasPermission && !e.undoneAt && !e.undoesEntryId && e.undoable !== false;
+}
+
+/** Kinds of entry that carry a tag on screen (a therapy session, the usual kind, carries none). */
+const KIND_KEYS: Record<string, string> = { appointment: "changeLog.entity.appointment" };
+
+/** The i18n key of the tag that says what kind of row changed («Consulta»), or null for no tag. */
+export function entryKindKey(e: Pick<ChangeLogEntry, "entityType">): string | null {
+  return KIND_KEYS[e.entityType] ?? null;
 }
 
 const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;

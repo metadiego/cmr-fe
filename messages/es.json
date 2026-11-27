@@ -6539,7 +6539,13 @@
       "invoice_line_edit": "Línea editada",
       "invoice_line_multipliers": "Áreas / días cambiados",
       "invoice_line_remove": "Línea quitada",
-      "invoice_line_component_added": "Componente agregado al kit"
+      "invoice_line_component_added": "Componente agregado al kit",
+      "confirm": "Confirmada",
+      "unconfirm": "Sin confirmar",
+      "start_triage": "En triage",
+      "start_consultation": "En consulta",
+      "no_show": "No se presentó",
+      "portfolio_fill": "Cartera asignada"
     },
     "field": {
       "estado": "Estado",
@@ -6555,19 +6561,42 @@
       "fecha": "Fecha",
       "hora": "Hora",
       "paqueteId": "Paquete",
-      "vialAbiertoId": "Vial abierto"
+      "vialAbiertoId": "Vial abierto",
+      "llegadaEn": "Llegada",
+      "vitalesEn": "Vitales",
+      "horaInEn": "Entró a consulta",
+      "horaOutEn": "Salió de consulta",
+      "confirmadaEn": "Confirmada",
+      "enfermeraVitalesId": "Enfermera de vitales",
+      "callcenterId": "Agente",
+      "tipoCitaId": "Tipo de cita",
+      "motivo": "Motivo",
+      "notas": "Notas",
+      "horaFin": "Hora fin",
+      "esPrimeraVez": "Primera vez",
+      "registradaTardeEn": "Registrada tarde"
     },
     "status": {
       "pendiente": "Pendiente",
       "presente": "Presente",
       "en_terapia": "En terapia",
       "asistido": "Asistido",
-      "cancelada": "Cancelada"
+      "cancelada": "Cancelada",
+      "programada": "Programada",
+      "confirmada": "Confirmada",
+      "triage": "Triage",
+      "en_consulta": "En consulta",
+      "atendida": "Atendida",
+      "no_show": "No se presentó",
+      "reprogramada": "Reprogramada"
     },
     "error": {
       "superseded": "Alguien cambió esos campos después: deshaz primero el cambio posterior",
       "alreadyUndone": "Ese cambio ya se deshizo",
       "notUndoable": "Ese cambio no se puede deshacer"
+    },
+    "entity": {
+      "appointment": "Consulta"
     }
   },
   "calendar": {
