@@ -7442,8 +7442,7 @@
       "bookedBy": "Booked by",
       "status": "Status",
       "confirm": "Confirm",
-      "actions": "Actions",
-      "portfolio": "Portfolio"
+      "actions": "Actions"
     },
     "empty": "No appointments for this day with these filters.",
     "loadFailed": "Could not open the appointment: {message}",

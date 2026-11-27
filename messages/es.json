@@ -7442,8 +7442,7 @@
       "bookedBy": "Agendada por",
       "status": "Estado",
       "confirm": "Confirmar",
-      "actions": "Acciones",
-      "portfolio": "Cartera"
+      "actions": "Acciones"
     },
     "empty": "No hay citas para este día con estos filtros.",
     "loadFailed": "No se pudo abrir la cita: {message}",

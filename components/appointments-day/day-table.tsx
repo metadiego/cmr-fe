@@ -87,7 +87,7 @@ export function DayTable({
       key: "bookedBy",
       // The patient's portfolio owner comes first: stats and commissions hang from it
       // (docs/specs/agendadas-la-cartera-es-lo-principal.md). Who typed the row is secondary.
-      header: t("col.portfolio"),
+      header: t("col.bookedBy"),
       cell: (r) => (
         <div className="min-w-0">
           {r.portfolioOwner ? (
