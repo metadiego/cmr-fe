@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board";
+import { storedStatus } from "@/lib/lifecycle/board-catalogue";
 import { useSaveSection } from "@/components/personal/save-group";
 
 // Sections of a staff record (app/(app)/configuration/staff/page.tsx). `centro` is the PERSON's home
@@ -84,18 +85,22 @@ export function FrontdeskConsultaPreferencia({ persona, centro }: { persona: Per
   const startsActual = prefs.frontdeskStartsOnConsultation ?? false;
   const tabActual = prefs.consultationBoardInitialTab ?? null;
   const [starts, setStarts] = React.useState(startsActual);
-  const [tab, setTab] = React.useState<string>(tabActual ?? AS_IS);
-  const tabValue = tab === AS_IS ? null : tab;
   const defRes = useResource<TableroDefinicion>(
     () => (centro ? getDefinicion(CONSULTATION_BOARD, centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
     [centro],
   );
   const estados = defRes.state.kind === "ok" ? defRes.state.data.statuses : [];
+  // The stored tab stays an old status word (6b keeps it); a group name is accepted too. Mapped on READ
+  // to the board's status (lib/lifecycle/board-catalogue.ts); only a choice made here is written back.
+  const tabStored = storedStatus("medical", estados, tabActual)?.slug ?? tabActual;
+  const [picked, setTab] = React.useState<string | null>(null); // null = untouched
+  const tab = picked ?? tabStored ?? AS_IS;
+  const tabValue = tab === AS_IS ? null : tab;
 
   useSaveSection("frontdesk-start", starts !== startsActual, async () => {
     await updateFrontdeskStartsOnConsultation(persona.id, starts, centro);
   });
-  useSaveSection("consulta-tab", tabValue !== tabActual, async () => {
+  useSaveSection("consulta-tab", picked !== null && tabValue !== tabStored, async () => {
     await updateConsultationBoardInitialTab(persona.id, tabValue, centro);
   });
 
