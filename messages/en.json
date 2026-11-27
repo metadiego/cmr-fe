@@ -523,6 +523,14 @@
     "error": {
       "visit_in_progress": "The patient is already in the center with this visit in progress: it cannot be rescheduled. Book the next one once this one is done.",
       "date_in_past": "You can't book a date in the past ({fecha})."
+    },
+    "movedOffClosedDay": "The appointment moved from {from} to {to} ({reason}).",
+    "quickDateReason": {
+      "sunday": "Sunday",
+      "holiday": "holiday",
+      "vacation": "vacation",
+      "leave": "leave",
+      "no_schedule": "no hours"
     }
   },
   "tableroBoard": {

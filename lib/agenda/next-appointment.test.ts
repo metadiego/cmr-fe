@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { addDaysToDay, canReschedule, pickNextAppointment } from "./next-appointment.ts";
+import { addDaysToDay, canReschedule, pickNextAppointment, skipSundayClient } from "./next-appointment.ts";
 
 test("picks the first pending appointment strictly after the board day", () => {
   const got = pickNextAppointment(
@@ -51,6 +51,16 @@ test("addDaysToDay crosses months and years without a timezone shift", () => {
   assert.equal(addDaysToDay("2026-11-04", 30), "2026-12-04");
   assert.equal(addDaysToDay("2026-12-25", 7), "2027-01-01");
   assert.equal(addDaysToDay("2026-03-01", -1), "2026-02-28");
+});
+
+test("skipSundayClient: a weekday candidate is left alone", () => {
+  // 2026-12-21 is a Monday.
+  assert.equal(skipSundayClient("2026-12-21"), "2026-12-21");
+});
+
+test("skipSundayClient: a Sunday moves to the next day (the BE still corrects holidays on save)", () => {
+  // 2026-12-20 is a Sunday.
+  assert.equal(skipSundayClient("2026-12-20"), "2026-12-21");
 });
 
 test("next appointment reads the stage group: not served is skipped like cancelled; stage columns alone count", () => {

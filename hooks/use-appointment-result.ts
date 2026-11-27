@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useBookingResult } from "@/components/appointments-booking/booking-result-provider";
@@ -22,6 +22,7 @@ import { warningText } from "@/lib/frontdesk/avisos";
 export function useShowAppointmentResult() {
   const tRoot = useTranslations();
   const t = useTranslations("agenda.modal");
+  const format = useFormatter();
   const { show } = useBookingResult();
   return async (
     saved: Cita | undefined,
@@ -52,7 +53,7 @@ export function useShowAppointmentResult() {
           doctor: doctor || saved?.doctorName || null,
           patient: resultPatient(form.patient),
           center: resultCenter(form.center),
-          warnings: (warnings ?? []).map((w) => warningText(w, tRoot)),
+          warnings: (warnings ?? []).map((w) => warningText(w, tRoot, format)),
         }),
       );
     } catch {

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { holidayDates, mergeHolidays } from "./holidays.ts";
+import { dayOfWeekUTC, holidayDates, isBlockedBookingDay, mergeHolidays } from "./holidays.ts";
 
 const C = "center-a";
 const OTHER = "center-b";
@@ -46,6 +46,26 @@ test("holidayDates: the center's own holiday wins over the global one on the sam
     C,
   );
   assert.deepEqual(out, ["2026-11-20"]);
+});
+
+test("dayOfWeekUTC: Sunday is 0, in UTC regardless of the viewer's clock", () => {
+  // 2026-12-20 is a Sunday.
+  assert.equal(dayOfWeekUTC("2026-12-20"), 0);
+  // 2026-12-21 is a Monday.
+  assert.equal(dayOfWeekUTC("2026-12-21"), 1);
+});
+
+test("isBlockedBookingDay: a Sunday is always blocked, holiday set or not", () => {
+  assert.equal(isBlockedBookingDay("2026-12-20", []), true);
+  assert.equal(isBlockedBookingDay("2026-12-20", new Set(["2026-11-01"])), true);
+});
+
+test("isBlockedBookingDay: a day in the holiday set is blocked", () => {
+  assert.equal(isBlockedBookingDay("2026-12-25", ["2026-12-25", "2026-01-01"]), true);
+});
+
+test("isBlockedBookingDay: a plain weekday not in the holiday set is NOT blocked", () => {
+  assert.equal(isBlockedBookingDay("2026-12-21", ["2026-12-25"]), false);
 });
 
 test("mergeHolidays: the center list and the global list merge without duplicates", () => {

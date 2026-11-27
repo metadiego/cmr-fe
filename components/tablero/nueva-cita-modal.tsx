@@ -6,13 +6,15 @@ import { toast } from "sonner";
 
 import type { CitaFila } from "@/lib/api/agenda-dia";
 import {
-  createCita,
+  crearCitaAgenda,
   getCita,
   getTiposCita,
   getVisitasRecientes,
   type TipoCita,
   type Cita,
+  type CreateCitaPayload,
 } from "@/lib/api/citas";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { getOpciones, ejecutarAccion, type Opcion } from "@/lib/api/tablero";
 import { pickDoctor } from "@/lib/tablero/pick-doctor";
 import { patientDoctorOption } from "@/lib/medicos/patient-doctor-option";
@@ -210,7 +212,7 @@ export function NuevaCitaModal({
   async function crear(tId: string, f: string) {
     // Never report a booking that did not happen: a row without a patient cannot be booked.
     if (!pacienteId) throw new Error(t("noPatient"));
-    await createCita(
+    const { advertencias } = await crearCitaAgenda(
       {
         patientId: pacienteId,
         appointmentTypeId: tId,
@@ -221,11 +223,12 @@ export function NuevaCitaModal({
         // CONFIRMED for any date, which is why it shows on its day's board. `confirmed` (cmr-be 4a) needs
         // appointments.confirm in this clinic; without it the appointment is born booked, never a 403.
         confirmed: createConfirmed(true, canConfirmHere),
-      } as Parameters<typeof createCita>[0],
+      } as CreateCitaPayload,
       centroId,
     );
     // Born booked because appointments.confirm is missing here: say so, or the patient never reaches the board.
     if (bookedUnconfirmedNotice(true, canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
+    mostrarAvisos(advertencias, tRoot, format);
     onSaved?.();
     onClose();
   }
@@ -356,7 +359,7 @@ export function NuevaCitaModal({
           <>
           <div className="space-y-2">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("whenBack")}{canSave && <RequiredMark />}</span>
-            <ReturnDatePicker value={fecha} onChange={setFecha} />
+            <ReturnDatePicker value={fecha} onChange={setFecha} doctorId={medicoId !== NO_MEDICO ? medicoId : undefined} centro={centroId} />
           </div>
 
           {/* Availability notice: if the doctor is not in that day, explains and offers the next date. */}

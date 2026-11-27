@@ -9,6 +9,7 @@ import {
   rowInGroups,
   type StagedRow,
 } from "../lifecycle/stage-groups.ts";
+import { dayOfWeekUTC } from "./booking/holidays.ts";
 
 /** A medical appointment: its old status and/or its stage columns (read through `stagesOf`). */
 export type NextAppointmentCandidate = StagedRow & {
@@ -55,4 +56,12 @@ export function addDaysToDay(day: string, days: number): string {
   const [y, m, d] = day.split("-").map(Number);
   const t = new Date(Date.UTC(y, m - 1, d + days));
   return t.toISOString().slice(0, 10);
+}
+
+// Handoff-citas-domingos-y-feriados: with no doctor chosen yet, a return-date chip can only skip
+// Sunday client-side (holidays need the BE/doctor's own schedule) — the BE corrects the rest on save.
+export function skipSundayClient(day: string): string {
+  let d = day;
+  while (dayOfWeekUTC(d) === 0) d = addDaysToDay(d, 1);
+  return d;
 }

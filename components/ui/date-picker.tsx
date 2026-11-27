@@ -49,6 +49,9 @@ type DatePickerProps = {
   onChange: (value: string) => void
   min?: string
   max?: string
+  /** Extra days to grey out in the calendar GRID only (e.g. Sundays + holidays, booking screens) —
+   *  typed/free-text entry is not re-validated against this, only the clickable grid. */
+  excludeDate?: (iso: string) => boolean
   disabled?: boolean
   /** Shows the value without letting it change (the old `readOnly` date inputs). */
   readOnly?: boolean
@@ -76,6 +79,7 @@ function DatePicker({
   onChange,
   min,
   max,
+  excludeDate,
   disabled,
   readOnly,
   clearable,
@@ -169,6 +173,7 @@ function DatePicker({
           disabled={[
             ...(minDate ? [{ before: minDate }] : []),
             ...(maxDate ? [{ after: maxDate }] : []),
+            ...(excludeDate ? [(d: Date) => excludeDate(toDayString(d))] : []),
           ]}
           onSelect={(d) => d && pick(toDayString(d))}
           autoFocus

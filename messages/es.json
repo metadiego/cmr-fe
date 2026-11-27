@@ -523,6 +523,14 @@
     "error": {
       "visit_in_progress": "El paciente ya está en el centro con esta visita en curso: no se puede reprogramar. Agende la próxima cuando esta termine.",
       "date_in_past": "No se puede agendar en una fecha pasada ({fecha})."
+    },
+    "movedOffClosedDay": "La cita se movió de {from} a {to} ({reason}).",
+    "quickDateReason": {
+      "sunday": "domingo",
+      "holiday": "feriado",
+      "vacation": "vacaciones",
+      "leave": "permiso",
+      "no_schedule": "sin horario"
     }
   },
   "tableroBoard": {

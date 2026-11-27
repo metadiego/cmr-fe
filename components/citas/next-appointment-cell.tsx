@@ -7,14 +7,16 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
 
 import {
-  createCita,
+  crearCitaAgenda,
   getTiposCita,
   listCitas,
-  reagendarCita,
+  reagendarCitaAgenda,
   type Cita,
+  type CreateCitaPayload,
   type TipoCita,
 } from "@/lib/api/citas";
 import { toastError } from "@/lib/api/errors";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { addDaysToDay, canReschedule, pickNextAppointment } from "@/lib/agenda/next-appointment";
 import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
@@ -114,7 +116,7 @@ export function NextAppointmentCell({
     setBusy(true);
     try {
       if (appt) {
-        await reagendarCita(
+        const { advertencias } = await reagendarCitaAgenda(
           appt.id,
           {
             date: day,
@@ -126,9 +128,10 @@ export function NextAppointmentCell({
           centroId,
         );
         toast.success(t("moved", { date: fmtDay(day, "dayWeekdayShort") }));
+        mostrarAvisos(advertencias, tRoot, format);
       } else if (patientId && followUp) {
         // Always a follow-up (owner's rule), never the first type of the catalogue.
-        await createCita(
+        const { advertencias } = await crearCitaAgenda(
           {
             patientId,
             appointmentTypeId: followUp.id,
@@ -138,11 +141,12 @@ export function NextAppointmentCell({
             // Booked at the desk with the patient present: confirmed, as in Nueva cita (cmr-be 4a
             // `confirmed`; born booked when appointments.confirm is not held in this clinic).
             confirmed: createConfirmed(true, canConfirmHere),
-          } as Parameters<typeof createCita>[0],
+          } as CreateCitaPayload,
           centroId,
         );
         toast.success(t("booked", { date: fmtDay(day, "dayWeekdayShort") }));
         if (bookedUnconfirmedNotice(true, canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
+        mostrarAvisos(advertencias, tRoot, format);
       }
       setOpen(false);
       onChanged?.();
@@ -203,7 +207,7 @@ export function NextAppointmentCell({
             <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
               {tNueva("whenBack")}
             </span>
-            <ReturnDatePicker value={day} onChange={setDay} />
+            <ReturnDatePicker value={day} onChange={setDay} doctorId={doctorForAviso} centro={centroId} />
             <AvisoDisponibilidad doctorId={doctorForAviso} date={day} centro={centroId} onUseSuggested={setDay} />
             <SlotAvailabilityHint
               day={day}

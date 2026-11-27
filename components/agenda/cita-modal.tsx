@@ -363,7 +363,7 @@ export function CitaModal({
       if (isEdit) {
         toast.success(t("updated"));
         // BE #547: interpolates date/time/opensAt/etc. into the labelKey. Not blocking: already saved.
-        mostrarAvisos(r.advertencias, tRoot);
+        mostrarAvisos(r.advertencias, tRoot, format);
       } else {
         // Every create shows the booking success dialog (spec §1); "moved" when the BE moved the live one.
         if (bookedUnconfirmedNotice(estadoCrear === "confirmada", canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));

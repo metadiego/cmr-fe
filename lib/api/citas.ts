@@ -317,17 +317,19 @@ export const cancelarCita = (id: string, motivo: string, centroId?: string) =>
 // Cross-center MEDICA SEGUIMIENTO: send the destination `doctorId`. `actorId` =
 // the operator's personal.id (audit trail). `tenant` scopes the request (source
 // center). The BE records a `reprogramada` event with antes/después.
+export type ReagendarCitaPayload = {
+  date: string;
+  time?: string;
+  reason: string;
+  centerId?: string; // destination center (omit → keep current)
+  doctorId?: string;
+  actorId?: string;
+  appointmentTypeId?: string; // type of the NEW appointment (omit → the original's)
+};
+
 export function reagendarCita(
   id: string,
-  payload: {
-    date: string;
-    time?: string;
-    reason: string;
-    centerId?: string; // destination center (omit → keep current)
-    doctorId?: string;
-    actorId?: string;
-    appointmentTypeId?: string; // type of the NEW appointment (omit → the original's)
-  },
+  payload: ReagendarCitaPayload,
   tenant?: string,
 ): Promise<Cita> {
   return apiFetch<Cita>(
@@ -335,6 +337,21 @@ export function reagendarCita(
     { method: "POST", body: JSON.stringify(payload) },
     tenant,
   );
+}
+
+// Same endpoint, PLUS any non-fatal warnings (meta.advertencias — e.g. the appointment auto-moved off
+// a Sunday or closing holiday, handoff-citas-domingos-y-feriados). Same contract as crearCitaAgenda.
+export async function reagendarCitaAgenda(
+  id: string,
+  payload: ReagendarCitaPayload,
+  tenant?: string,
+): Promise<{ cita: Cita; advertencias: NonNullable<import("./types").ApiMeta["advertencias"]> }> {
+  const env = await apiFetchEnvelope<Cita>(
+    `/appointments/${id}/reschedule`,
+    { method: "POST", body: JSON.stringify(payload) },
+    tenant,
+  );
+  return { cita: env.data, advertencias: env.meta?.advertencias ?? [] };
 }
 
 // Appointment audit trail (GET /appointments/:id/history). The reschedule event

@@ -30,6 +30,22 @@ export function mergeHolidays<T extends HolidayLike>(lists: T[][]): T[] {
   return out;
 }
 
+// Day of week for a "YYYY-MM-DD" day string, in UTC (the day has no timezone of its own — this
+// must never shift with the viewer's clock, same reasoning as addDaysToDay). 0 = Sunday.
+export function dayOfWeekUTC(iso: string): number {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+/** Sunday, or a day in the center's own blocking-holiday set — the two reasons a booking day is
+ *  disabled in the calendar (handoff-citas-domingos-y-feriados). `holidays` is the output of
+ *  `holidayDates` (already filtered to this center + global, already "blocks" only). */
+export function isBlockedBookingDay(iso: string, holidays: ReadonlySet<string> | readonly string[]): boolean {
+  if (dayOfWeekUTC(iso) === 0) return true;
+  const set = holidays instanceof Set ? holidays : new Set(holidays);
+  return set.has(iso);
+}
+
 /**
  * Blocking, active holidays of `center` (its own and the global ones) as YYYY-MM-DD, sorted and
  * unique. A missing flag counts as true. Another center's holiday never counts.
