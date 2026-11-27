@@ -7442,10 +7442,10 @@
       "bookedBy": "Agendada por",
       "status": "Estado",
       "confirm": "Confirmar",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "portfolio": "Cartera"
     },
     "empty": "No hay citas para este día con estos filtros.",
-    "portfolio": "Cartera: {name}",
     "loadFailed": "No se pudo abrir la cita: {message}",
     "status": {
       "late": "Tarde (no ha llegado)",
@@ -7466,7 +7466,9 @@
       "time": "Hora",
       "timeHint": "Opcional. Déjala vacía para conservar la hora actual.",
       "submit": "Mover"
-    }
+    },
+    "noPortfolio": "Sin cartera",
+    "bookedByName": "Agendó: {name}"
   },
   "nurseStatusTypes": {
     "title": "Estatus de enfermería",

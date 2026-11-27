@@ -7442,10 +7442,10 @@
       "bookedBy": "Booked by",
       "status": "Status",
       "confirm": "Confirm",
-      "actions": "Actions"
+      "actions": "Actions",
+      "portfolio": "Portfolio"
     },
     "empty": "No appointments for this day with these filters.",
-    "portfolio": "Portfolio: {name}",
     "loadFailed": "Could not open the appointment: {message}",
     "status": {
       "late": "Late (not arrived)",
@@ -7466,7 +7466,9 @@
       "time": "Time",
       "timeHint": "Optional. Leave empty to keep the current time.",
       "submit": "Move"
-    }
+    },
+    "noPortfolio": "No portfolio",
+    "bookedByName": "Booked by: {name}"
   },
   "nurseStatusTypes": {
     "title": "Nurse statuses",

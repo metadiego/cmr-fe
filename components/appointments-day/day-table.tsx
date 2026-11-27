@@ -85,13 +85,23 @@ export function DayTable({
       : []),
     {
       key: "bookedBy",
-      header: t("col.bookedBy"),
+      // The patient's portfolio owner comes first: stats and commissions hang from it
+      // (docs/specs/agendadas-la-cartera-es-lo-principal.md). Who typed the row is secondary.
+      header: t("col.portfolio"),
       cell: (r) => (
         <div className="min-w-0">
-          <div className="truncate">{r.createdBy?.name ?? "—"}</div>
-          {r.portfolioOwner && r.portfolioOwner.id !== r.createdBy?.id && (
+          {r.portfolioOwner ? (
+            <div className="truncate">{r.portfolioOwner.name ?? "—"}</div>
+          ) : (
+            <div className="truncate">
+              <span className="rounded bg-warning px-1.5 py-0.5 text-xs font-medium text-warning-foreground">
+                {t("noPortfolio")}
+              </span>
+            </div>
+          )}
+          {r.createdBy?.name && r.createdBy.id !== r.portfolioOwner?.id && (
             <div className="truncate text-xs text-muted-foreground">
-              {t("portfolio", { name: r.portfolioOwner.name ?? "—" })}
+              {t("bookedByName", { name: r.createdBy.name })}
             </div>
           )}
         </div>
