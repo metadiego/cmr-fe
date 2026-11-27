@@ -3,6 +3,7 @@
 // is still empty there but shows a VISIBLE unsaved value in its cell (the proposal pre-filled from the
 // visit sheet, or a number typed whose debounced save has not landed) also counts: it is saved first and
 // the transition runs after. Only a field with neither blocks (cmr-fe docs/specs/asistir-con-areas-sugeridas.md).
+// The moment (`en`) is read under its old or its new name (lib/lifecycle/requirement-moments.ts).
 
 export type TransitionField = { clave: string; labelKey?: string; en?: string; requerido?: boolean };
 
@@ -15,6 +16,8 @@ export type TransitionFieldsPlan = {
   /** Fields with no value anywhere: these block the transition. */
   missing: TransitionField[];
 };
+
+import { momentStep } from "../lifecycle/requirement-moments.ts";
 
 const hasValue = (v: unknown) => v != null && v !== "" && v !== "—";
 
@@ -32,7 +35,7 @@ export function planTransitionFields(
 ): TransitionFieldsPlan {
   const plan: TransitionFieldsPlan = { toSave: [], missing: [] };
   for (const f of fields) {
-    if (!f.requerido || f.en !== state || fieldFilled(f.clave, data, row)) continue;
+    if (!f.requerido || momentStep(f.en) !== state || fieldFilled(f.clave, data, row)) continue;
     const p = pending[f.clave];
     if (p && Number.isFinite(p.value)) plan.toSave.push({ clave: f.clave, ...p });
     else plan.missing.push(f);

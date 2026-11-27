@@ -43,16 +43,13 @@ export const OLD_STATUS_ALLOWLIST: Readonly<Record<string, OldStatusAllowance>> 
   "components/patient-desk/patient-detail.tsx": { reason: "piece 6: write door", hits: 2 },
   // Transition keys sent to the API (`TransicionClave`).
   "lib/api/frontdesk.ts": { reason: "piece 6: write door", hits: 2 },
-  // The requirement MOMENTS a service's required field is asked at (services.form_acciones `en`), named
-  // after the flow's steps; the file reads no session status. Renaming them is a data migration.
-  "components/servicios/requeridos-config.tsx": { reason: "piece 6: write door", hits: 6 },
 
   // board_statuses slugs: flow steps a column requires, stamp columns, KPI chips, transition sources.
   "lib/frontdesk/required-state.ts": { reason: "piece 6: board catalogue", hits: 4 },
   "lib/frontdesk/reopen.ts": { reason: "piece 6: board catalogue", hits: 1 },
   "lib/frontdesk/patient-columns.ts": { reason: "piece 6: board catalogue", hits: 1 },
   "components/frontdesk/frontdesk-board.helpers.ts": { reason: "piece 6: board catalogue", hits: 3 },
-  "components/frontdesk/frontdesk-board.tsx": { reason: "piece 6: board catalogue", hits: 4 },
+  "components/frontdesk/frontdesk-board.tsx": { reason: "piece 6: board catalogue", hits: 2 },
   "components/patient-desk/service-sessions-table.tsx": { reason: "piece 6: board catalogue", hits: 1 },
   // The board status editor's example slug (placeholder).
   "components/configuracion/tablero-editor-admin.tsx": { reason: "piece 6: board catalogue", hits: 1 },

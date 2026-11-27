@@ -122,7 +122,7 @@ export function ServiceSessionsTable({
     )
     return statuses
       .filter((s) => transitions.has(s.slug) && STAMP_FIELD[s.slug])
-      .map((s) => ({ clave: s.slug, labelKey: s.labelKey, color: s.color }))
+      .map((s) => ({ clave: s.slug, labelKey: s.labelKey, color: s.color, group: s.group }))
   }, [definition, statuses])
   // "Presente" ya no se marca por terapia aquí: es una sola llegada por paciente, en la cabecera
   // (regla del dueño, 10-oct-2026 — ver BE PR #424). Se oculta el paso SIN sacarlo de `steps`: la

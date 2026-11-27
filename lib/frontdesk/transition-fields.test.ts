@@ -38,3 +38,21 @@ test("row selects count as filled (label or __valor), a dash does not", () => {
   assert.equal(fieldFilled("dosis", {}, { fd_dosis__valor: "id-1" }), true);
   assert.equal(fieldFilled("dosis", {}, { fd_dosis: "—" }), false);
 });
+
+// Piece 6b: services.form_acciones `en` may hold the step's new name (check_in / start_therapy / finish,
+// accepted by the backend from 6b on); the old names stay what the app writes.
+test("a moment under its new name is asked at the same step as its old name", () => {
+  const fields: TransitionField[] = [
+    { clave: "aplicadas", requerido: true, en: "finish" },
+    { clave: "dosis", requerido: true, en: "check_in" },
+    { clave: "area", requerido: true, en: "start_therapy" },
+  ];
+  assert.deepEqual(planTransitionFields(fields, "asistido", {}, {}, {}).missing.map((f) => f.clave), ["aplicadas"]);
+  assert.deepEqual(planTransitionFields(fields, "presente", {}, {}, {}).missing.map((f) => f.clave), ["dosis"]);
+  assert.deepEqual(planTransitionFields(fields, "en_terapia", {}, {}, {}).missing.map((f) => f.clave), ["area"]);
+});
+
+test("an unknown moment is asked at no step", () => {
+  const fields: TransitionField[] = [{ clave: "x", requerido: true, en: "later" }];
+  assert.deepEqual(planTransitionFields(fields, "asistido", {}, {}, {}).missing, []);
+});

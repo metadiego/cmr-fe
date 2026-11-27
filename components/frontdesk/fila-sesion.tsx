@@ -31,6 +31,7 @@ import { sessionRowStaged } from "@/lib/frontdesk/row-stages";
 import { BEFORE_ARRIVAL, CANCELLED, groupIn, rowGroup } from "@/lib/lifecycle/stage-groups";
 import { RowMenu } from "@/components/frontdesk/row-menu";
 import { readAllowedActions, slugOffered } from "@/lib/lifecycle/allowed-actions";
+import { flowStepIndex, sessionMenuOffered } from "@/lib/frontdesk/session-flow";
 import { FilaSesionModales } from "@/components/frontdesk/fila-sesion-modales";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { Button } from "@/components/ui/button";
@@ -84,7 +85,7 @@ export function FilaSesion({
   sesion?: Sesion;
   colsRender: ({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[];
   flujoCols: FrontdeskColumna[];
-  flujo: { clave: string; labelKey: string; color?: string | null }[];
+  flujo: { clave: string; labelKey: string; color?: string | null; group?: string | null }[];
   pasosOcultos?: Set<string>; // paso.estado que no se pinta (sigue en flujo para curIdx/nextPos)
   transiciones: Transicion[];
   estadoDe: (clave: string) => { labelKey: string; color?: string | null } | undefined;
@@ -513,9 +514,7 @@ export function FilaSesion({
         // asumir el shape del BE; evita el crash "Cannot read properties of null (reading 'length')").
         (tr.formFields?.length ?? 0) === 0 &&
         !pasoKeys.has(tr.slug) &&
-        (slugOffered(tr.slug, allowed) ??
-          (((tr.fromStatuses?.length ?? 0) === 0 || (tr.fromStatuses ?? []).includes(estadoActual)) &&
-            (!tr.permissionSlug || can(tr.permissionSlug)))),
+        sessionMenuOffered(tr, grupoActual, allowed, can), // by group and door slug (lib/frontdesk/session-flow)
     )
     .map((tr) => ({
       clave: tr.slug,
@@ -543,7 +542,7 @@ export function FilaSesion({
   // claves de la definición ('en_terapia'/'asistido'); la posición por estado es la señal fiable.
   //   upcoming/'' (pre-flujo) → primer paso · asistido (último) → ninguno · cancelada → ninguno ·
   //   estado fuera del flujo (terminal desconocido) → ninguno (no ofrece 'Presente' por error).
-  const curIdx = flujo.findIndex((f) => f.clave === estadoActual);
+  const curIdx = flowStepIndex(flujo, grupoActual); // the step of the session's stage group
   const preFlujo = curIdx === -1 && (estadoActual === "" || groupIn("therapy", grupoActual, BEFORE_ARRIVAL.therapy));
   const nextPos = cancelada ? -1 : preFlujo ? 0 : curIdx >= 0 && curIdx + 1 < flujo.length ? curIdx + 1 : -1;
   // Solo si la posición cae dentro de `pasos` (guarda ante un eventual desajuste flujo/columnas del BE).
