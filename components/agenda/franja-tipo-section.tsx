@@ -6,8 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import type { ColumnaEfectiva, TipoFranja, CitaFila } from "@/lib/api/agenda-dia";
-import type { EstadoCitaCatalogo } from "@/lib/api/citas";
-import type { Transicion } from "@/lib/api/tablero";
+import type { EstadoTablero, Transicion } from "@/lib/api/tablero";
 import { AhoraBadge } from "@/components/agenda/franja-resaltada";
 import { tinteFila, esTipoNueva } from "@/lib/agenda/tinte-tipo";
 import { cn } from "@/lib/utils";
@@ -34,7 +33,7 @@ export function CeldaCita({
   col: ColumnaEfectiva;
   fila: CitaFila;
   clinicId: string;
-  estados: EstadoCitaCatalogo[];
+  estados: EstadoTablero[];
   transiciones: Transicion[];
   editableClaves: Set<string>;
   onChanged: () => void;
@@ -48,7 +47,7 @@ export function CeldaCita({
         <EstadoSelect
           tablero="citas_cc"
           entidadId={fila.id}
-          estado={String(fila.estado ?? fila["estado"] ?? "")}
+          fila={fila}
           estados={estados}
           transiciones={transiciones}
           centroId={clinicId}
@@ -131,7 +130,7 @@ export function FranjaTipoSection({
   tipo: TipoFranja;
   cols: ColumnaEfectiva[];
   clinicId: string;
-  estados: EstadoCitaCatalogo[];
+  estados: EstadoTablero[];
   transiciones: Transicion[];
   editableClaves: Set<string>;
   onChanged: () => void;

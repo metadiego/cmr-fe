@@ -14,9 +14,9 @@ import { useFranjaResaltada, AhoraBadge } from "@/components/agenda/franja-resal
 import { cn } from "@/lib/utils";
 import { getActiveCentro } from "@/lib/tenant";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { getTiposCita, type TipoCita, type EstadoCitaCatalogo } from "@/lib/api/citas";
+import { getTiposCita, type TipoCita } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
-import { getDefinicion, type TableroDefinicion, type Transicion } from "@/lib/api/tablero";
+import { getDefinicion, type EstadoTablero, type TableroDefinicion, type Transicion } from "@/lib/api/tablero";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
@@ -305,7 +305,7 @@ function CentroSheet({
 }: {
   centro: CentroDia;
   columnas: ColumnaEfectiva[];
-  estados: EstadoCitaCatalogo[];
+  estados: EstadoTablero[];
   transiciones: Transicion[];
   editableClaves: Set<string>;
   onAgendar: (hora: string | null, tipo: TipoFranja) => void;
@@ -405,7 +405,7 @@ function CentroSheetV2({
 }: {
   centro: CentroDia;
   columnas: ColumnaEfectiva[];
-  estados: EstadoCitaCatalogo[];
+  estados: EstadoTablero[];
   transiciones: Transicion[];
   editableClaves: Set<string>;
   onAgendar: (hora: string | null, tipo: TipoFranja) => void;
