@@ -6,13 +6,10 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
-import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { boardActionMissing } from "@/lib/board/board-action-missing";
 import { availableTransitions } from "@/lib/board/available-transitions";
 import { refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
-import type { AppointmentKind } from "@/lib/lifecycle/stage-groups";
-import { todayPR } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
@@ -39,33 +36,22 @@ import {
 } from "@/components/ui/select";
 
 // Declarative action menu for a board row: buttons come from the tablero's `transiciones`, drawn from
-// the row's `allowedActions` when it carries them (cmr-be 4a) and by state + permission otherwise
-// (lib/board/available-transitions.ts). The required payload fields come from `formFields`. Executes
+// the row's `allowedActions` (cmr-be 4a; the old status rule is gone in 6b, lib/board/available-transitions.ts). The required payload fields come from `formFields`. Executes
 // via POST /board/action with the transition's slug (the backend accepts slugs and action keys).
 export function TableroAcciones({
   tablero,
   entidadId,
-  estado,
-  kind,
-  estados,
   transiciones,
   centroId,
   allowedActions,
-  fecha,
   onDone,
 }: {
   tablero: string;
   entidadId: string;
-  estado: string;
-  /** The board's rows: medical appointments or therapy sessions (Cancel / No-show read their stages). */
-  kind: AppointmentKind;
-  estados: EstadoCitaCatalogo[];
   transiciones: Transicion[];
   centroId?: string;
   /** The row's `allowedActions`; null/undefined when the row does not carry them. */
   allowedActions?: readonly string[] | null;
-  /** The row's day (YYYY-MM-DD): without the list, No-show is not offered for a day that has not come. */
-  fecha?: string;
   onDone: () => void;
 }) {
   const t = useTranslations("tableroBoard");
@@ -97,16 +83,7 @@ export function TableroAcciones({
     },
   );
 
-  const isTerminal = estados.find((e) => e.slug === estado)?.isTerminal ?? false;
-  const available = availableTransitions(transiciones, {
-    kind,
-    status: estado,
-    isTerminal,
-    allowed: allowedActions ?? null,
-    can,
-    date: fecha,
-    today: todayPR(),
-  });
+  const available = availableTransitions(transiciones, { allowed: allowedActions ?? null, can });
 
   if (available.length === 0) return null;
 

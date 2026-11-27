@@ -4,8 +4,9 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
-import type { ColumnaEfectiva } from "@/lib/api/agenda-dia";
-import { resolveToggle, type EstadoLite } from "@/lib/tablero/toggle-hora";
+import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
+import { resolveToggle } from "@/lib/tablero/toggle-hora";
+import type { AppointmentKind, StagedRow } from "@/lib/lifecycle/stage-groups";
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
 import { datosFaltantesDe } from "@/lib/api/ehr-gate";
@@ -38,11 +39,11 @@ function fmtHora(v: unknown): string | null {
 export function CeldaToggleHora({
   tablero,
   entidadId,
-  estado,
+  kind,
+  fila,
   col,
   value,
   transiciones,
-  estados,
   centroId,
   pacienteId,
   allowedActions,
@@ -51,11 +52,13 @@ export function CeldaToggleHora({
 }: {
   tablero: string;
   entidadId: string;
-  estado: string;
+  /** The board's lifecycle kind (null: a board of another entity, the box stays inert). */
+  kind: AppointmentKind | null;
+  /** The row: its stages (and old value) decide the box, by stage group. */
+  fila: CitaFila;
   col: ColumnaEfectiva;
   value: unknown;
   transiciones: Transicion[];
-  estados: EstadoLite[];
   centroId?: string;
   pacienteId?: string;
   /** The row's `allowedActions` (cmr-be 4a); null when the row does not carry them (today's rule). */
@@ -78,10 +81,10 @@ export function CeldaToggleHora({
   // Decisión PURA (marcado/deshabilitado/acción a ejecutar), testeada en lib/tablero/toggle-hora.
   // `action` ya es no-op cuando la casilla no puede avanzar ni deshacer → jamás manda el back de otra etapa.
   const { checked, disabled, action } = resolveToggle({
-    estado,
+    kind,
+    row: fila as StagedRow,
     forwardSlug: transClave,
     transiciones,
-    estados,
     optimistic,
     busy,
     allowed: allowedActions,

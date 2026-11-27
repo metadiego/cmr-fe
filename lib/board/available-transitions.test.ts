@@ -15,63 +15,61 @@ const transitions = [
   tr("apagada", [], { active: false }),
 ]
 const canAll = () => true
-const today = "2026-11-25"
 
-test("without allowedActions: today's rule (status, permission, active)", () => {
-  const out = availableTransitions(transitions, { kind: "medical", status: "programada", isTerminal: false, today, allowed: null, can: (p) => p !== "appointments.confirm" })
-  assert.deepEqual(out.map((t) => t.slug), ["presente", "recordatorio", "cancelar"])
+// Piece 6b: the menu is drawn from the row's `allowedActions` only; the old status rule is gone. The
+// backend stamps the list on every board row since piece 4 (cmr-be stamp-allowed-actions.ts).
+
+test("without allowedActions: no lifecycle move is offered (the status rule is gone); a board's own one keeps its permission", () => {
+  const out = availableTransitions(transitions, { allowed: null, can: (p) => p !== "appointments.confirm" })
+  assert.deepEqual(out.map((t) => t.slug), ["recordatorio"])
 })
 
 test("with allowedActions: the lifecycle moves come from the list, not from status or permission", () => {
-  // stored status says programada, but the list (the backend) says only check-in and cancel today
-  const out = availableTransitions(transitions, { kind: "medical", status: "programada", isTerminal: false, today, allowed: ["check_in", "cancel"], can: () => false })
+  const out = availableTransitions(transitions, { allowed: ["check_in", "cancel"], can: () => false })
   assert.deepEqual(out.map((t) => t.slug), ["presente", "recordatorio", "cancelar"])
 })
 
 test("with allowedActions: a move the list leaves out is hidden", () => {
-  const out = availableTransitions(transitions, { kind: "medical", status: "confirmada", isTerminal: false, today, allowed: ["confirm"], can: canAll })
+  const out = availableTransitions(transitions, { allowed: ["confirm"], can: canAll })
   assert.deepEqual(out.map((t) => t.slug), ["confirmar", "recordatorio"])
 })
 
 test("cancel on an arrived row is relabelled not-served", () => {
-  const out = availableTransitions(transitions, { kind: "medical", status: "presente", isTerminal: false, today, allowed: ["not_serve"], can: canAll })
+  const out = availableTransitions(transitions, { allowed: ["not_serve"], can: canAll })
   const cancel = out.find((t) => t.slug === "cancelar")
   assert.equal(cancel?.labelKey, "lifecycle.action.not_serve")
 })
 
-test("an empty list hides every lifecycle move; a board's own transition keeps its rule", () => {
-  const out = availableTransitions(transitions, { kind: "medical", status: "programada", isTerminal: false, today, allowed: [], can: canAll })
-  assert.deepEqual(out.map((t) => t.slug), ["recordatorio"])
+test("an empty list hides every lifecycle move; a board's own transition keeps its permission rule", () => {
+  assert.deepEqual(availableTransitions(transitions, { allowed: [], can: canAll }).map((t) => t.slug), ["recordatorio"])
+  const guarded = [tr("recordatorio", [], { permissionSlug: "board.remind" })]
+  assert.deepEqual(availableTransitions(guarded, { allowed: [], can: () => false }), [])
 })
 
-test("without allowedActions: piece-3 rules hide Cancel in consultation and relabel it on arrival", () => {
-  const ts = [tr("cancelar", ["presente", "en_consulta"])]
-  const arrived = availableTransitions(ts, { kind: "medical", status: "presente", isTerminal: false, today, allowed: null, can: canAll })
-  assert.equal(arrived[0]?.labelKey, "lifecycle.action.not_serve")
-  const inConsult = availableTransitions(ts, { kind: "medical", status: "en_consulta", isTerminal: false, today, allowed: null, can: canAll })
-  assert.deepEqual(inConsult, [])
+test("a not-served row: only what the list offers, whatever the transition's fromStatuses say", () => {
+  const ts = [tr("cancelar", ["presente", "en_consulta"]), tr("reactivar", ["cancelada"]), tr("presente", ["confirmada"])]
+  assert.deepEqual(availableTransitions(ts, { allowed: ["reactivate"], can: canAll }).map((t) => t.slug), ["reactivar"])
+  assert.deepEqual(availableTransitions(ts, { allowed: [], can: canAll }), [])
 })
 
-test("without allowedActions: No-show hidden on a future day and after arrival", () => {
-  const ts = [tr("no_show", ["confirmada", "presente"])]
-  const run = (status: string, date: string) =>
-    availableTransitions(ts, { kind: "medical", status, isTerminal: false, today, date, allowed: null, can: canAll }).map((t) => t.slug)
-  assert.deepEqual(run("confirmada", today), ["no_show"])
-  assert.deepEqual(run("confirmada", "2026-12-01"), [])
-  assert.deepEqual(run("presente", today), [])
-})
-
-test("with allowedActions: the list wins over the piece-3 rules (No-show listed on a future day stays)", () => {
+test("No-show follows the list: listed on a future day stays, left out today is hidden", () => {
   const ts = [tr("no_show", ["confirmada"])]
-  const out = availableTransitions(ts, { kind: "medical", status: "confirmada", isTerminal: false, today, date: "2026-12-01", allowed: ["no_show"], can: canAll })
-  assert.deepEqual(out.map((t) => t.slug), ["no_show"])
+  assert.deepEqual(availableTransitions(ts, { allowed: ["no_show"], can: canAll }).map((t) => t.slug), ["no_show"])
+  assert.deepEqual(availableTransitions(ts, { allowed: ["cancel"], can: canAll }), [])
 })
 
-test("without allowedActions: a session board reads the therapy stages (Cancel on a waiting session is not served; no No-show)", () => {
-  const ts = [tr("cancelar", ["pendiente", "presente", "en_terapia"]), tr("no_show", ["pendiente"])]
-  const run = (status: string) =>
-    availableTransitions(ts, { kind: "therapy", status, isTerminal: false, today, date: today, allowed: null, can: canAll })
-  assert.deepEqual(run("pendiente").map((t) => t.slug), ["cancelar"])
-  assert.equal(run("presente")[0]?.labelKey, "lifecycle.action.not_serve")
-  assert.deepEqual(run("en_terapia"), [])
+test("a called therapy session: start therapy and not-served cancel, no undo of the check-in", () => {
+  const ts = [
+    tr("en_terapia", ["presente"], { sortOrder: 2 }),
+    tr("cancelar", ["pendiente", "presente"], { sortOrder: 9 }),
+    tr("volver_pendiente", ["presente"], { sortOrder: 4 }),
+  ]
+  const out = availableTransitions(ts, { allowed: ["start_therapy", "not_serve", "uncall"], can: canAll })
+  assert.deepEqual(out.map((t) => t.slug), ["en_terapia", "cancelar"])
+  assert.equal(out[1]?.labelKey, "lifecycle.action.not_serve")
+})
+
+test("inactive transitions never show, listed or not", () => {
+  const ts = [tr("presente", [], { active: false })]
+  assert.deepEqual(availableTransitions(ts, { allowed: ["check_in"], can: canAll }), [])
 })

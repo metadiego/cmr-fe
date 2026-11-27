@@ -1,9 +1,8 @@
-import { apiFetch, apiFetchEnvelope, oneCenterPath } from "./client";
+import { apiFetch, apiFetchEnvelope } from "./client";
 import type { components } from "./schema";
 import type { Persistencia } from "./types";
 import type { ColumnaEfectiva, CitaFila } from "./agenda-dia";
 import type { EstadoCitaCatalogo } from "./citas";
-import { readChoice, tenantOf } from "@/lib/clinic-read-scope";
 
 // Catalog column definition (GET /board/columns). `scopes` = which boards
 // it's eligible for. Distinct from ColumnaEfectiva (a placed column).
@@ -17,21 +16,6 @@ export type ColumnaCatalogo = components["schemas"]["ColumnaEntity"];
 export interface Tablero {
   columns: ColumnaEfectiva[];
   rows: CitaFila[];
-}
-
-// tablero: which board composition ("citas" = Atención al Paciente).
-// soloAtencion: only Atención states (confirmada→atendida) — the AP board.
-// The picked center (`centroId`) or `centerIds` goes as `?centerIds=` (lib/clinic-read-scope.ts); neither:
-// the top bar's clinic (every readable one on «Ambos»). Each row carries `clinicId`.
-export async function getTablero(
-  fecha: string,
-  opts: { tablero?: string; centroId?: string; centerIds?: string[]; soloAtencion?: boolean } = {},
-): Promise<Tablero> {
-  const sp = new URLSearchParams({ date: fecha });
-  if (opts.tablero) sp.set("boardSlug", opts.tablero);
-  if (opts.soloAtencion) sp.set("onlyCare", "true");
-  const choice = readChoice(opts.centroId, opts.centerIds);
-  return apiFetch<Tablero>(await oneCenterPath(`/appointments/board?${sp.toString()}`, choice), {}, tenantOf(choice));
 }
 
 // ── Column builder (metadata engine — works for any tablero key) ─────────────
@@ -135,7 +119,16 @@ export interface Transicion {
   requiresConfirmation: boolean;
   sortOrder: number;
   active: boolean;
+  /** 6b backend only: the stage groups of `fromStatuses` / `toStatus` (lib/lifecycle/board-catalogue.ts). */
+  fromGroups?: string[] | null;
+  toGroup?: string | null;
 }
+
+/**
+ * A board status (definicion.estados). `slug` stays the old status word on both backends; the 6b one
+ * also serves its stage `group`. Screens read it through lib/lifecycle/board-catalogue.ts.
+ */
+export type EstadoTablero = EstadoCitaCatalogo & { group?: string | null };
 
 export interface SubTipo {
   id: string;
@@ -148,7 +141,7 @@ export interface SubTipo {
 export interface TableroDefinicion {
   boardSlug: string;
   columns: ColumnaEfectiva[]; // clave opaca `columnas`→`columns`; contenido en español
-  statuses: EstadoCitaCatalogo[];
+  statuses: EstadoTablero[];
   transitions: Transicion[];
   subtypes: SubTipo[];
 }

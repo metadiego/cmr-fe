@@ -54,7 +54,6 @@ export const OLD_STATUS_ALLOWLIST: Readonly<Record<string, OldStatusAllowance>> 
   "components/frontdesk/frontdesk-board.helpers.ts": { reason: "piece 6: board catalogue", hits: 3 },
   "components/frontdesk/frontdesk-board.tsx": { reason: "piece 6: board catalogue", hits: 4 },
   "components/patient-desk/service-sessions-table.tsx": { reason: "piece 6: board catalogue", hits: 1 },
-  "components/tablero/flujo-atencion.tsx": { reason: "piece 6: board catalogue", hits: 1 },
   // The board status editor's example slug (placeholder).
   "components/configuracion/tablero-editor-admin.tsx": { reason: "piece 6: board catalogue", hits: 1 },
 
