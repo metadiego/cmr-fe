@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { ALL_CENTERS, normalizeName, planInvite, suggestStaff } from "./invite.ts";
+import { ALL_CENTERS, hasAnyPosition, inviteCenterFor, normalizeName, planInvite, suggestStaff } from "./invite.ts";
 
 const people = [
   { id: "1", name: "José", lastName: "Pérez Rivera" },
@@ -63,4 +63,17 @@ test("planInvite for all centers puts the linked staff record's center first", (
   const plan = planInvite(ALL_CENTERS, ["c1", "c2", "c3"], "", "c2");
   assert.equal(plan.inviteCenterId, "c2");
   assert.deepEqual(plan.extraCenterIds, ["c1", "c3"]);
+});
+
+test("inviteCenterFor: a linked staff record goes without a center (positions follow), a new one to its first center", () => {
+  const grid = { admin: false, byCenter: { CAG: ["nurse"], BAY: ["doctor"] } };
+  assert.equal(inviteCenterFor(grid, true), undefined);
+  assert.equal(inviteCenterFor(grid, false), "BAY");
+  assert.equal(inviteCenterFor({ admin: true, byCenter: {} }, false), undefined);
+});
+
+test("hasAnyPosition: a center with a position, or the admin switch", () => {
+  assert.equal(hasAnyPosition({ admin: false, byCenter: {} }), false);
+  assert.equal(hasAnyPosition({ admin: true, byCenter: {} }), true);
+  assert.equal(hasAnyPosition({ admin: false, byCenter: { BAY: ["doctor"] } }), true);
 });

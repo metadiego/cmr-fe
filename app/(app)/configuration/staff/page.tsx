@@ -5,15 +5,16 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { UserAccountIcon, UserAdd01Icon } from "@hugeicons/core-free-icons";
 
-import { listPersonalAll, getCargos, type Personal, type PersonalEnAlcance, type CargoCatalogo } from "@/lib/api/personal";
+import { listPersonalAll, type Personal, type PersonalEnAlcance } from "@/lib/api/personal";
 import { FichaEditor, StaffActiveButton } from "@/components/personal/ficha-editor";
 import { SaveGroup } from "@/components/personal/save-group";
-import { normalizeResponsibilities, responsibilityOptions, showsConsultaPreferences } from "@/lib/personal/responsibilities";
+import { normalizeResponsibilities, showsConsultaPreferences } from "@/lib/personal/responsibilities";
 import { NuevoPersonalDialog } from "@/components/personal/nuevo-personal-dialog";
 import { StaffList } from "@/components/personal/staff-list";
-import { CentrosDePersona, FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
+import { FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
+import { StaffPositionsSection } from "@/components/personal/staff-positions-section";
 import { DarAccesoDialog } from "@/components/personal/give-access-dialog";
-import { getRoles, type Rol } from "@/lib/api/rbac";
+import { getPositions, type Position } from "@/lib/api/positions";
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { InviteDialog } from "@/components/admin/invite-dialog";
 import { UserAccessPanel } from "@/components/admin/user-access-panel";
@@ -69,11 +70,9 @@ export function StaffPanel() {
     () => (listRes.state.kind === "ok" ? listRes.state.data : []),
     [listRes.state],
   );
-  const rolesRes = useResource<Rol[]>(() => getRoles());
-  const roles = rolesRes.state.kind === "ok" ? rolesRes.state.data : [];
   // Catálogo de cargos del BE: one closed list, the same in every clinic.
-  const cargosRes = useResource<CargoCatalogo[]>(() => getCargos());
-  const cargoCatalogo = cargosRes.state.kind === "ok" ? cargosRes.state.data : [];
+  const positionsRes = useResource<Position[]>(() => getPositions());
+  const positions = positionsRes.state.kind === "ok" ? positionsRes.state.data : [];
   // La cuenta del EHR no es por centro (una persona, una cuenta) pero el BE la guarda contra el centro
   // donde se creó: se piden TODOS los centros donde el que mira tiene ehr-integration.read (verificado
   // en vivo 2026-10-01). Tolerante al fallo: sin BE, sencillamente no hay vínculos que mostrar.
@@ -97,7 +96,6 @@ export function StaffPanel() {
   const fillHeight = useFillViewportHeight(gridRef);
 
   // Responsibilities offered: every tag in use by real staff (there is no separate catalogue).
-  const capacidadOpciones = React.useMemo(() => responsibilityOptions(personal), [personal]);
 
   const accessCounts = countByAccess(personal, profilesById);
   const filtrados = filterByAccess(personal, access, profilesById)
@@ -166,6 +164,7 @@ export function StaffPanel() {
           <StaffList
             isSuspended={(p) => accessOf(p, profilesById) === "suspended"}
             people={filtrados}
+            positions={positions}
             selectedId={selId}
             onSelect={setSelId}
             q={q}
@@ -183,9 +182,8 @@ export function StaffPanel() {
             <FichaPersonal
               key={sel.id}
               persona={sel}
-              cargoCatalogo={cargoCatalogo}
-              capacidadOpciones={capacidadOpciones}
-              roles={roles}
+              positions={positions}
+              positionsError={positionsRes.state.kind === "fail" ? positionsRes.state.message : null}
               ehrRoles={ehrRoles}
               ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
               profile={admin && sel.profileId ? profilesById.get(sel.profileId) : undefined}
@@ -239,15 +237,16 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
+  persona, positions, positionsError, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
 }: {
   /** The person's login, when the viewer is an admin (only an admin manages access). */
   profile: Perfil | undefined;
   onProfileChanged: () => void;
   persona: Personal;
-  cargoCatalogo: CargoCatalogo[];
-  capacidadOpciones: string[];
-  roles: Rol[];
+  /** The position catalog (`GET /positions`). */
+  positions: Position[];
+  /** Why the catalog did not load, if it failed. */
+  positionsError: string | null;
   ehrRoles: EhrRole[];
   ehrLink: EhrStaffLink | undefined;
   ehrCenterIds: string[] | undefined;
@@ -262,6 +261,8 @@ function FichaPersonal({
   const tRoot = useTranslations();
   const { can } = useCan();
   const [darAcceso, setDarAcceso] = React.useState(false);
+  const me = useMe();
+  const viewerIsAdmin = me.kind === "ok" && isAdmin(me.me);
   // Hub de USUARIO en la MISMA pantalla (sin ir «más adentro»): la ficha, y —solo para quien hace
   // consultas, es decir tiene la capacidad «medico»— su agenda, pacientes y producción. La disponibilidad
   // (horarios, días libres, permisos, vacaciones) es para TODO usuario por igual. Ver hub-de-usuario-medicos.
@@ -296,12 +297,12 @@ function FichaPersonal({
 
         <TabsContent value="ficha" className="pt-2">
           {/* One "Save" for every section below (save-group.tsx); deactivate is its own action. */}
-          <SaveGroup onSaved={onChanged} footerStart={<StaffActiveButton persona={persona} centro={centro} onChanged={onChanged} />}>
+          <SaveGroup onSaved={() => { onChanged(); onProfileChanged(); }} footerStart={<StaffActiveButton persona={persona} centro={centro} onChanged={onChanged} />}>
             <div className="space-y-6">
-              <FichaEditor persona={persona} cargoCatalogo={cargoCatalogo} capacidadOpciones={capacidadOpciones} centro={centro} />
+              <FichaEditor persona={persona} centro={centro} />
 
-              {/* Service centers: where the person appears in the dropdowns. */}
-              <CentrosDePersona persona={persona} centro={centro} />
+              {/* What the person does at each center; their centers are the rows with a position. */}
+              <StaffPositionsSection persona={persona} catalog={positions} catalogError={positionsError} centro={centro} />
 
               {/* Front-desk preferences, only for front-desk staff (or whoever already has one set). */}
               {showsConsultaPreferences(persona) && <FrontdeskConsultaPreferencia persona={persona} centro={centro} />}
@@ -316,11 +317,14 @@ function FichaPersonal({
                     <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
                     <span>{persona.email || t("conCuenta")}</span>
                   </div>
-                ) : (
+                ) : viewerIsAdmin ? (
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
                     <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
                   </div>
+                ) : (
+                  // Giving system access is access management: an administrator's call (cmr-be).
+                  <span className="text-sm text-muted-foreground">{tRoot("staffPositions.giveAccessNeedsAdmin")}</span>
                 )}
               </div>
 
@@ -341,7 +345,6 @@ function FichaPersonal({
       {darAcceso && (
         <DarAccesoDialog
           persona={persona}
-          roles={roles}
           centro={centro}
           onClose={() => setDarAcceso(false)}
           onDone={() => { setDarAcceso(false); onChanged(); onProfileChanged(); }}

@@ -7595,5 +7595,55 @@
     "timeZoneHint": "Ej. America/Puerto_Rico.",
     "save": "Guardar",
     "settingsSaved": "Configuración guardada."
+  },
+  "positions": {
+    "admin": "Administrador",
+    "manager": "Gerente",
+    "appointments": "Operadora",
+    "frontdesk": "Recepción",
+    "billing": "Facturación",
+    "inventory": "Inventario",
+    "doctor": "Médico",
+    "nurse": "Enfermera",
+    "technician": "Técnico",
+    "cashier": "Cajero",
+    "accounting": "Contabilidad",
+    "other": "Otro",
+    "nursing": "Enfermería",
+    "nursing_panel": "Panel de enfermería",
+    "facturacion-inventario": "Facturación e inventario",
+    "read_only": "Solo lectura",
+    "accessChangeNeedsAdmin": "Solo un administrador puede cambiar puestos con permisos o los centros de alguien con acceso al sistema.",
+    "centersRequired": "Cada puesto necesita al menos un centro.",
+    "primaryNotHeld": "El puesto principal tiene que ser uno de los puestos que tiene la persona.",
+    "unknown": "Ese puesto no existe.",
+    "noDateWindows": "Los puestos no tienen fecha de fin: el acceso quedó sin fecha."
+  },
+  "staffPositions": {
+    "title": "Puestos",
+    "help": "Lo que la persona hace en cada centro. Sus centros son los que tienen al menos un puesto.",
+    "primary": "Principal",
+    "makePrimary": "Marcar como puesto principal",
+    "primaryHelp": "El principal es la etiqueta de la persona en listas e informes.",
+    "carriesPermissions": "Da acceso al sistema",
+    "adminSwitch": "Administrador (acceso total en todos los centros)",
+    "adminSwitchHelp": "Pide confirmación al guardar.",
+    "none": "Sin puestos en este centro.",
+    "noneAtAll": "Sin puestos: la persona no aparece en ningún centro.",
+    "blocked": {
+      "carriesPermissions": "Los puestos con candado dan acceso al sistema: solo un administrador los cambia.",
+      "loginCenterNeedsAdmin": "Esta persona tiene acceso al sistema: añadirla a un centro o quitarla del último puesto de un centro lo hace un administrador.",
+      "noCenterAccess": "No puedes editar personal en este centro."
+    },
+    "inviteTitle": "Puestos",
+    "inviteHelp": "Elige al menos un puesto en un centro.",
+    "inviteMissing": "un puesto",
+    "positionsFailed": "La cuenta se creó, pero los puestos no se guardaron. Ábrela y asígnalos desde su ficha.",
+    "giveAccessNeedsAdmin": "Dar acceso al sistema lo hace un administrador."
+  },
+  "centerAccess": {
+    "title": "{screen}: solo en {centers}",
+    "description": "En el centro activo no tienes acceso a {screen}. Cambia de centro para usarla.",
+    "switchTo": "Ir a {center}"
   }
 }

@@ -2,27 +2,29 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { positionLabel } from "@/lib/personal/positions";
 import { toast } from "sonner";
 
 import {
   inviteUser,
-  assignCenter,
   getProfiles,
   type InviteResponse,
   type Perfil,
 } from "@/lib/api/profiles";
 import { getCenters } from "@/lib/api/centers";
-import { getRoles, clonarAccesoDe, assignRoleToProfile } from "@/lib/api/rbac";
-import { listPersonal, type Personal } from "@/lib/api/personal";
+import { clonarAccesoDe } from "@/lib/api/rbac";
+import { setStaffPositions } from "@/lib/api/positions";
+import { listPersonal, listPersonalAll, type Personal } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useMe, isAdmin } from "@/hooks/use-me";
-import { isAdminRole } from "@/lib/access/role-keys";
-import { ALL_CENTERS, planInvite, suggestStaff } from "@/lib/admin/invite";
+import { hasAnyPosition, inviteCenterFor, suggestStaff } from "@/lib/admin/invite";
+import { buildPositionsBody, chipState } from "@/lib/personal/positions";
+import { usePositionsDraft } from "@/components/personal/use-positions-draft";
+import { PositionsPicker } from "@/components/personal/positions-picker";
 import { Button } from "@/components/ui/button";
 import { EmailInput } from "@/components/email-input";
 import { Input } from "@/components/ui/input";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -42,7 +44,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 
 export function InviteDialog({
   open,
@@ -58,22 +59,19 @@ export function InviteDialog({
   const t = useTranslations("admin.invite");
   const tc = useTranslations("admin");
   const tRoot = useTranslations();
+  const tp = useTranslations("staffPositions");
 
   // Everything the dialog holds, re-initialised each time it opens.
   // `personalId`: optional link to a staff record that has no login yet — the new account attaches to
   // that record and keeps its history. "" = an account with no staff record, as before.
-  // `centroId` + `rolClave`: center and role in the same step (otherwise the invitee is born with no
-  // access and their first login is a 403).
+  // What the person does and where is their positions (docs/specs/positions-and-centers.md), saved
+  // right after the account exists: the invite itself carries no role.
   const [form, update] = useDialogForm(
     () => ({
       email: "",
       nombre: "",
       apellido: "",
       personalId: "",
-      centroId: "",
-      rolClave: "",
-      temporal: false,
-      vigenteHasta: "",
       origenPerfilId: "",
       origenQuery: "",
       origenOpen: false,
@@ -83,12 +81,13 @@ export function InviteDialog({
     }),
     open,
   );
-  const { email, nombre, apellido, personalId, centroId, rolClave, temporal, vigenteHasta } = form;
+  const { email, nombre, apellido, personalId } = form;
   const { origenPerfilId, origenQuery, origenOpen, result, copied, cloneMsg } = form;
   // "Clone from": copy another profile's access to the new one (after inviting). Since cmr-be #557
   // only an admin manages access, so the field is shown to admins only.
   const meState = useMe();
-  const puedeClonar = meState.kind === "ok" && isAdmin(meState.me);
+  const viewerIsAdmin = meState.kind === "ok" && isAdmin(meState.me);
+  const puedeClonar = viewerIsAdmin;
   const { state: perfilesState } = useResource(
     () => (open && puedeClonar ? getProfiles(1, 200) : Promise.resolve([] as Perfil[])),
     [open, puedeClonar],
@@ -105,13 +104,6 @@ export function InviteDialog({
     [open],
   );
   const centros = centrosState.kind === "ok" ? centrosState.data : [];
-  const { state: rolesState } = useResource(
-    () => (open ? getRoles() : Promise.resolve([])),
-    [open],
-  );
-  // The admin role is granted globally and with an explicit confirmation, which the invite cannot
-  // ask for (cmr-be would create the user without it). It is given afterwards from the user's roles.
-  const roles = (rolesState.kind === "ok" ? rolesState.data : []).filter((r) => !isAdminRole(r));
   // Staff records WITHOUT a login (profileId === null): candidates to link. 65 active in Caguas fit in
   // one page; if they ever stop fitting, the BE will offer `?sinCuenta=true`.
   const { state: personalState } = useResource(
@@ -126,9 +118,12 @@ export function InviteDialog({
   // instead of creating the same person twice.
   const suggested = personalId ? null : suggestStaff(sinCuenta, nombre, apellido);
   const centerName = (id?: string | null) => centros.find((c) => c.id === id)?.name ?? "";
+  const linked = sinCuenta.find((p) => p.id === personalId);
+  // Starts from the linked record's positions: the save sends the complete list.
+  const draft = usePositionsDraft(personalId || null, open, linked?.clinicId ?? undefined);
 
-  // Picking a person pre-fills first/last name (same data, no retyping) and sets their center (avoids
-  // the "belongs to another center" error). Everything stays editable.
+  // Picking a person pre-fills first/last name (same data, no retyping) and loads their positions.
+  // Everything stays editable.
   function pickPersonal(id: string) {
     const p = sinCuenta.find((x) => x.id === id);
     update(
@@ -137,7 +132,6 @@ export function InviteDialog({
             personalId: id,
             nombre: p.name ?? "",
             apellido: p.lastName ?? "",
-            ...(p.clinicId ? { centroId: p.clinicId } : {}),
           }
         : { personalId: id },
     );
@@ -146,44 +140,36 @@ export function InviteDialog({
   const missing = missingFields([
     [t("email"), !!email.trim()],
     [t("name"), !!nombre.trim()],
+    [tp("inviteMissing"), hasAnyPosition(draft.grid)],
   ]);
 
   const { submitting, submit } = useSubmit(async () => {
-    const linked = sinCuenta.find((p) => p.id === personalId);
-    const plan = planInvite(centroId, centros.map((c) => c.id), rolClave, linked?.clinicId);
+    const inviteCenterId = inviteCenterFor(draft.grid, !!linked);
     const res = await inviteUser({
       email: email.trim(),
       name: nombre.trim(),
       lastName: apellido.trim() || undefined,
-      centerId: plan.inviteCenterId,
-      rolClave: plan.inviteRole,
+      centerId: inviteCenterId,
       // Enganchar a la persona ya dada de alta (conserva su historial). Sin esto, cuenta sin ficha.
       staffId: personalId || undefined,
-      tipoAsignacion: centroId && temporal ? "temporal" : undefined,
-      validUntil: centroId && temporal ? vigenteHasta || undefined : undefined,
       redirectTo: `${window.location.origin}/auth/set-password`,
     });
     toast.success(t("success", { email: res.email }));
-    // "All centers": the invite carried one center; the rest and the role (with no center, so it
-    // applies everywhere) are granted now. The user already exists, so a failure is a warning.
+    // The account exists: now its positions. The invite response carries no staff id, so a new
+    // person's record is found by its login. A failure here does not undo the account: the admin is
+    // told, and can assign them from the record (onRequestAssign).
     const warnings: string[] = [];
-    for (const centerId of plan.extraCenterIds) {
-      try {
-        await assignCenter(res.id, {
-          centerId,
-          type: temporal ? "temporal" : undefined,
-          validUntil: temporal ? vigenteHasta || undefined : undefined,
-        });
-      } catch {
-        warnings.push(t("centerFailed", { centro: centerName(centerId) }));
-      }
-    }
-    if (plan.globalRole) {
-      try {
-        await assignRoleToProfile(res.id, plan.globalRole);
-      } catch {
-        warnings.push(t("roleFailed"));
-      }
+    try {
+      const staffId = personalId || (await listPersonalAll()).find((p) => p.profileId === res.id)?.id;
+      if (!staffId) throw new Error("staff record of the new login not found");
+      await setStaffPositions(
+        staffId,
+        buildPositionsBody(draft.grid, draft.primary, draft.catalog),
+        linked?.clinicId ?? inviteCenterId,
+      );
+    } catch (e) {
+      toastError(e, tRoot);
+      warnings.push(tp("positionsFailed"));
     }
     // "Clone from": the profile now exists → copy the source's access. A failed clone does not fail the
     // invite: the user is created and warned separately (cloning can be retried from their record).
@@ -275,7 +261,6 @@ export function InviteDialog({
     );
   }
 
-  const personaEnlazada = sinCuenta.find((x) => x.id === personalId);
 
   return (
     <FormDialog
@@ -290,6 +275,9 @@ export function InviteDialog({
       actions={[{ label: t("submit"), onClick: () => submit() }]}
       submitting={submitting}
       missing={missing}
+      // Never submit over a draft that is still loading or failed: the save sends the complete list.
+      blocked={!draft.ready || !!draft.failure}
+      reason={draft.failure ?? (draft.ready ? undefined : tRoot("common.loading"))}
       submittingLabel={t("submitting")}
       cancelLabel={tc("cancel")}
     >
@@ -312,7 +300,7 @@ export function InviteDialog({
             {sinCuenta.map((p) => (
               <SelectItem key={p.id} value={p.id}>
                 {p.name} {p.lastName ?? ""}
-                {p.jobTitle ? ` · ${p.jobTitle}` : ""}
+                {p.jobTitle ? ` · ${positionLabel(p.jobTitle, tRoot)}` : ""}
               </SelectItem>
             ))}
           </SelectContent>
@@ -320,8 +308,8 @@ export function InviteDialog({
         {personalId && (
           <p className="text-xs text-success-foreground">
             {t("personaEnlazando", {
-              nombre: personaEnlazada
-                ? `${personaEnlazada.name} ${personaEnlazada.lastName ?? ""}`.trim()
+              nombre: linked
+                ? `${linked.name} ${linked.lastName ?? ""}`.trim()
                 : "",
             })}
           </p>
@@ -366,53 +354,26 @@ export function InviteDialog({
           </Button>
         </div>
       )}
-      <Field label={t("centro")} htmlFor="invite-center" hint={t("centroHint")}>
-        <Select value={centroId || undefined} onValueChange={(v) => update({ centroId: v })}>
-          <SelectTrigger id="invite-center" className="w-full">
-            <SelectValue placeholder={t("centroPlaceholder")} />
-          </SelectTrigger>
-          <SelectContent>
-            {centros.length > 1 && (
-              <SelectItem value={ALL_CENTERS}>{t("centroTodos", { n: centros.length })}</SelectItem>
-            )}
-            {centros.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Field>
-      {centroId && (
-        <div className="space-y-2 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
-          <label className="flex items-center gap-3 text-sm">
-            <Checkbox checked={temporal} onCheckedChange={(v) => update({ temporal: v === true })} />
-            <span>{t("temporal")}</span>
-          </label>
-          {temporal && (
-            <Field label={t("vigenteHasta")}>
-              <DatePicker
-                value={vigenteHasta}
-                onChange={(v) => update({ vigenteHasta: v })}
-                clearable
-              />
-            </Field>
-          )}
-        </div>
-      )}
-      <Field label={t("rol")} htmlFor="invite-role" hint={`${t("rolHint")} ${t("rolAdminHint")}`}>
-        <Select value={rolClave || undefined} onValueChange={(v) => update({ rolClave: v })}>
-          <SelectTrigger id="invite-role" className="w-full">
-            <SelectValue placeholder={t("rolPlaceholder")} />
-          </SelectTrigger>
-          <SelectContent>
-            {roles.map((r) => (
-              <SelectItem key={r.id} value={r.slug}>
-                {r.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <Field label={tp("inviteTitle")} hint={tp("inviteHelp")}>
+        {draft.failure ? (
+          <p className="text-sm text-destructive">{draft.failure}</p>
+        ) : draft.ready ? (
+          <PositionsPicker
+            idPrefix="invite"
+            catalog={draft.catalog}
+            centers={draft.centers}
+            grid={draft.grid}
+            onChange={draft.setGrid}
+            primary={draft.primary}
+            onPrimaryChange={draft.setPrimary}
+            viewerIsAdmin={viewerIsAdmin}
+            blockOf={(position, centerId) =>
+              chipState({ position, centerId, grid: draft.grid, viewerIsAdmin, hasLogin: true, canEditCenter: true })
+            }
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+        )}
       </Field>
 
       {/* "Clone from" (optional): copies another user's access after inviting. Searches by name or

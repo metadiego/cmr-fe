@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { getCentrosDondePuedo, getMyCentrosOperativos, type Centro } from "@/lib/api/centers";
+import { getCentrosDondePuedo, getMyCentros, type Centro } from "@/lib/api/centers";
 import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { defaultScreenCenter, isScreenPickerRedundant } from "@/lib/screen-center";
 import { useMe } from "@/hooks/use-me";
@@ -57,7 +57,7 @@ export function useCentroPantalla(
   const escrituraRes = useResource<Centro[]>(() => getCentrosDondePuedo(permisoWrite), [permisoWrite]);
   const escrituraIds = new Set((escrituraRes.state.kind === "ok" ? escrituraRes.state.data : []).map((c) => c.id));
   // The same list the top bar is filled with: if it covers this screen's centers, no second picker.
-  const operativosRes = useResource<Centro[]>(() => getMyCentrosOperativos().catch(() => []), []);
+  const operativosRes = useResource<Centro[]>(() => getMyCentros().catch(() => []), []);
   const operativosIds = operativosRes.state.kind === "ok" ? operativosRes.state.data.map((c) => c.id) : [];
 
   const centroIds = centros.map((c) => c.id);

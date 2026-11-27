@@ -15,11 +15,10 @@ import { toastError } from "@/lib/api/errors"
 import { useCan } from "@/hooks/use-can"
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Building01Icon, MoreHorizontalIcon, Shield01Icon, SquareLock02Icon } from "@hugeicons/core-free-icons"
+import { MoreHorizontalIcon, Shield01Icon, SquareLock02Icon } from "@hugeicons/core-free-icons"
 import { CodigoAccesoDialog } from "@/components/admin/codigo-acceso-dialog"
 import { CambiarEmailDialog } from "@/components/admin/cambiar-email-dialog"
 import { AccessDialog } from "@/components/admin/access-dialog"
-import { ProfileCentrosDialog } from "@/components/admin/profile-centros-dialog"
 import { ProfileEditDialog } from "@/components/admin/profile-edit-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -31,8 +30,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 // The login of a staff member, managed from their record (Staff and Users are one screen): status,
-// roles, centers, and every action the old users table had. Only an admin gets here: managing
-// access needs full access in the BE.
+// exceptions, and every action the old users table had. Roles and centers are the person's positions
+// («Puestos» on the same record). Only an admin gets here: managing access needs full access in the BE.
 
 const USER_STATUSES = ["aprobado", "pendiente", "suspendido", "rechazado"]
 
@@ -60,12 +59,10 @@ export function UserAccessPanel({ profile, onChanged }: { profile: Perfil; onCha
   const tRoot = useTranslations()
   const { can } = useCan()
   const [busy, setBusy] = React.useState(false)
-  const [centersOpen, setCentersOpen] = React.useState(false)
   const [accessOpen, setAccessOpen] = React.useState(false)
   const [editOpen, setEditOpen] = React.useState(false)
   const [emailOpen, setEmailOpen] = React.useState(false)
   const [codigo, setCodigo] = React.useState<CodigoAccesoResult | null>(null)
-  const activeCenters = (profile.centers ?? []).filter((c) => c.active)
 
   async function run(fn: () => Promise<void>) {
     if (busy) return // avoids a double POST (the second would be a 409)
@@ -98,15 +95,17 @@ export function UserAccessPanel({ profile, onChanged }: { profile: Perfil; onCha
     <div className="space-y-3 rounded-md border px-3 py-3 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <UserStatusBadge status={profile.status ?? ""} />
+        {profile.isAdmin && (
+          <Badge className="gap-1">
+            <HugeiconsIcon icon={Shield01Icon} data-icon="inline-start" />
+            {t("users.adminBadge")}
+          </Badge>
+        )}
         <span className="min-w-0 truncate text-muted-foreground">{profile.email}</span>
         <div className="ml-auto flex items-center gap-1">
           <Button size="sm" variant="ghost" onClick={() => setAccessOpen(true)}>
             <HugeiconsIcon icon={SquareLock02Icon} data-icon="inline-start" />
             {t("users.access")}
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => setCentersOpen(true)}>
-            <HugeiconsIcon icon={Building01Icon} data-icon="inline-start" />
-            {t("users.centros")}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -141,50 +140,6 @@ export function UserAccessPanel({ profile, onChanged }: { profile: Perfil; onCha
         </div>
       </div>
 
-      <dl className="grid gap-2 sm:grid-cols-[8rem_1fr]">
-        <dt className="text-xs text-muted-foreground">{t("columns.roles")}</dt>
-        <dd className="flex flex-wrap gap-1">
-          {profile.isAdmin ? (
-            <Badge className="gap-1">
-              <HugeiconsIcon icon={Shield01Icon} data-icon="inline-start" />
-              {t("users.adminBadge")}
-            </Badge>
-          ) : profile.roles?.length ? (
-            profile.roles.map((r) => (
-              <Badge key={`${r.slug}|${r.centerId ?? ""}`} variant="secondary">{r.name}</Badge>
-            ))
-          ) : (
-            <span className="text-xs text-muted-foreground">{t("users.sinRol")}</span>
-          )}
-        </dd>
-        <dt className="text-xs text-muted-foreground">{t("columns.centros")}</dt>
-        <dd className="flex flex-wrap gap-1">
-          {activeCenters.length ? (
-            activeCenters.map((c) => (
-              <Badge key={c.asignacionId} variant="outline">
-                {c.name ?? c.centerId.slice(0, 8)}
-                {c.type === "temporal" && c.validUntil ? ` · ${t("users.hasta", { fecha: c.validUntil })}` : ""}
-              </Badge>
-            ))
-          ) : (
-            <span className="text-xs text-muted-foreground">
-              {profile.isAdmin ? t("users.allCenters") : t("users.sinCentro")}
-            </span>
-          )}
-        </dd>
-      </dl>
-
-      <ProfileCentrosDialog
-        key={centersOpen ? profile.id : "centers-none"}
-        profile={centersOpen ? profile : null}
-        open={centersOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCentersOpen(false)
-            onChanged()
-          }
-        }}
-      />
       <ProfileEditDialog
         key={editOpen ? profile.id : "edit-none"}
         profile={editOpen ? profile : null}

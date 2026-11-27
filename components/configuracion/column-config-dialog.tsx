@@ -21,6 +21,7 @@ import { useSubmit } from "@/components/kit/use-submit";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { positionLabel } from "@/lib/personal/positions";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowUp01Icon, ArrowDown01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import {
@@ -453,7 +454,7 @@ function PersonalCapacidadesConfig({
     () => [...new Set([...responsibilityOptions(personal), ...capacidades])],
     [personal, capacidades],
   );
-  const label = (slug: string) => (tRoot.has(`personal.cargo.${slug}`) ? tRoot(`personal.cargo.${slug}`) : slug);
+  const label = (slug: string) => positionLabel(slug, tRoot);
   const toggle = (c: string) => onChange(capacidades.includes(c) ? capacidades.filter((x) => x !== c) : [...capacidades, c]);
 
   return (

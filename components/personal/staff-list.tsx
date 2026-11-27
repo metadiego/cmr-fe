@@ -5,6 +5,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 
 import type { PersonalEnAlcance } from "@/lib/api/personal";
+import type { Position } from "@/lib/api/positions";
+import { positionLabel } from "@/lib/personal/positions";
 import { staffFullName } from "@/lib/personal/staff-name";
 import { clinicNamesOf } from "@/lib/personal/staff-clinics";
 import { cn } from "@/lib/utils";
@@ -15,8 +17,10 @@ import { Input } from "@/components/ui/input";
 // one clinic on screen (`showClinics`), each row carries the clinics the person serves in as badges
 // (`servesInCenters`, else the home clinic `clinicName`).
 export function StaffList({
-  people, selectedId, onSelect, q, onQChange, loading, loaded, showClinics, isSuspended,
+  people, positions, selectedId, onSelect, q, onQChange, loading, loaded, showClinics, isSuspended,
 }: {
+  /** The position catalog, to name each person's primary position. */
+  positions: Position[];
   /** True for a person whose login is suspended (known to an admin only). */
   isSuspended?: (p: PersonalEnAlcance) => boolean;
   people: PersonalEnAlcance[];
@@ -30,7 +34,10 @@ export function StaffList({
 }) {
   const t = useTranslations("personalFicha");
   const tRoot = useTranslations();
-  const cargoLabel = (slug: string) => (tRoot.has(`personal.cargo.${slug}`) ? tRoot(`personal.cargo.${slug}`) : slug);
+  const primaryLabel = (p: PersonalEnAlcance) => {
+    const position = p.primaryPositionId ? positions.find((x) => x.id === p.primaryPositionId) : undefined;
+    return position ? positionLabel(position.slug, tRoot, position.name) : t("sinCargo");
+  };
   return (
     <>
       <div className="relative">
@@ -57,7 +64,7 @@ export function StaffList({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{staffFullName(p)}</span>
                   <span className={cn("block truncate text-xs", on ? "text-primary-foreground/70" : "text-muted-foreground")}>
-                    {p.jobTitle ? cargoLabel(p.jobTitle) : t("sinCargo")}{p.profileId ? (isSuspended?.(p) ? ` · ${t("suspendida")}` : "") : ` · ${t("sinCuenta")}`}
+                    {primaryLabel(p)}{p.profileId ? (isSuspended?.(p) ? ` · ${t("suspendida")}` : "") : ` · ${t("sinCuenta")}`}
                   </span>
                   {showClinics && <ClinicBadges person={p} selected={on} />}
                 </span>
