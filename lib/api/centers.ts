@@ -105,21 +105,11 @@ export function createCenter(payload: CreateCenterPayload): Promise<Centro> {
   });
 }
 
-// The principal's own centers WITH name (master → all). Use this for the center
-// selector instead of cross-referencing allowedClinicIds against getCenters().
+// The principal's own centers WITH name (admin → all): the centers where they hold a position, home
+// center first (cmr-be positions-and-centers). The one source for the top-bar picker and every "my
+// centers" list; the BE still answers the old `/auth/me/centers/operational` with this same list.
 export async function getMyCentros(): Promise<Centro[]> {
   const res: unknown = await apiFetch(`/auth/me/centers`);
-  if (Array.isArray(res)) return res as Centro[];
-  const items = (res as { items?: unknown } | null)?.items;
-  return Array.isArray(items) ? (items as Centro[]) : [];
-}
-
-// Centros donde la persona TRABAJA DE VERDAD (tiene un rol) → para el selector del NAV, que cambia el
-// contexto de facturar/cobrar/agendar. NO usar getMyCentros aquí: esa trae TODOS los centros asignados,
-// incluidos accesos puntuales (p.ej. mirar el calendario ajeno) → mudarse allí no deja hacer nada. Uno
-// solo → no enseñar el selector del nav. Handoff selector-de-centro-en-la-pantalla §«El selector del NAV».
-export async function getMyCentrosOperativos(): Promise<Centro[]> {
-  const res: unknown = await apiFetch(`/auth/me/centers/operational`);
   if (Array.isArray(res)) return res as Centro[];
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as Centro[]) : [];

@@ -33,6 +33,7 @@ import { useHasCustomBackground } from "@/components/presentation-provider";
 import { cn } from "@/lib/utils";
 import { PageTitleInShellContext } from "@/components/ui/page";
 import { ShellCrumbProvider, type ShellCrumbValue } from "@/components/shell-crumb";
+import { CenterAccessGate } from "@/components/center-access-gate";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
@@ -150,7 +151,9 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
         <AppSidebar onHoverChange={setPeeking} />
         <ShellBody sectionTitle={sectionTitle} sectionHref={sectionHref} crumb={crumb?.label} session={session} sinPerfil={sinPerfil} onCollapseRequest={collapseNow}>
           <ShellCrumbProvider onChange={setCrumb}>
-            <PageTitleInShellContext.Provider value={titleInShell}>{children}</PageTitleInShellContext.Provider>
+            <PageTitleInShellContext.Provider value={titleInShell}>
+              <CenterAccessGate>{children}</CenterAccessGate>
+            </PageTitleInShellContext.Provider>
           </ShellCrumbProvider>
         </ShellBody>
       </SidebarProvider>

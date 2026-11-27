@@ -10,7 +10,8 @@ import { useResource } from "@/hooks/use-resource";
 // (NextAppointmentCell), and a request per row would burst the backend's per-person rate limit.
 const TTL_MS = 60_000;
 const cache = new Map<string, { at: number; promise: Promise<Centro[] | null> }>();
-function centersWhere(permission: string): Promise<Centro[] | null> {
+/** The centers where the person holds `permission` (cached a minute, shared); null on failure. */
+export function centersWhere(permission: string): Promise<Centro[] | null> {
   const hit = cache.get(permission);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.promise;
   const promise = getCentrosDondePuedo(permission).catch(() => {

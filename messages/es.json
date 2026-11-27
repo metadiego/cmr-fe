@@ -7639,5 +7639,10 @@
     "inviteHelp": "Elige al menos un puesto en un centro.",
     "inviteMissing": "un puesto",
     "positionsFailed": "La cuenta se creó, pero los puestos no se guardaron. Ábrela y asígnalos desde su ficha."
+  },
+  "centerAccess": {
+    "title": "{screen}: solo en {centers}",
+    "description": "En el centro activo no tienes acceso a {screen}. Cambia de centro para usarla.",
+    "switchTo": "Ir a {center}"
   }
 }

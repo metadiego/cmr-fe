@@ -220,3 +220,17 @@ Flujo (solo admins invitan): correo + nombre + (opcional) ficha existente + reji
 - [ ] **Step 2:** Guardar sobre una ficha **sin login** de prueba (ni Damian ni nadie real): añadir y quitar un puesto de 0 permisos; recargar → persiste.
 - [ ] **Step 3:** PR en `metadiego/cmr-fe` (descripción en español, lo verificado separado de lo supuesto). Vercel despliega al mezclar.
 - [ ] **Step 4:** En `cmr-app/todo/README.md`: FE-1b (menú = unión de centros + nota por pantalla; necesita BE-1b: `/me/menu` sobre la unión de los centros de la persona y permisos por centro en `/me`), y la verificación real tras mezclar.
+
+## Addendum (26-nov-2026, noche): FE-1b dentro de este mismo PR
+
+El dueño quiere todo esta noche y 3 PRs en total (#722, el BE de esta noche, este). El BE nuevo
+(`cmr-be` rama `feat/positions-be2`) sirve: `/me/menu` = unión de los centros de la persona;
+`/me/centers` y `/me/centers/operational` = la misma lista (centro de origen primero, sin `centers.switch`).
+
+- **Menú igual en cualquier centro:** `hooks/use-menu.ts` ya no vuelve a filtrar por los permisos del
+  centro activo (el BE ya decide).
+- **Pantalla sin acceso en el centro activo:** `components/center-access-gate.tsx`, una sola pieza en el
+  shell. Encuentra la pantalla por la ruta (`lib/nav/screen-access.ts`, probado) y, si el centro activo
+  no tiene su permiso pero otro sí, muestra «{pantalla}: solo en {centros}» con «Ir a {centro}». Mientras
+  pregunta, no arranca la página.
+- **Task 7 hecha:** el selector y `useCentroPantalla` leen `getMyCentros`; `getMyCentrosOperativos` borrado.

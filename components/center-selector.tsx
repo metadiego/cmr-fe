@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useMe } from "@/hooks/use-me";
-import { getMyCentrosOperativos, type Centro } from "@/lib/api/centers";
+import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getMyPreferences } from "@/lib/api/preferences";
 import { getActiveCentro, isClinicViewAll, setActiveCentro, setClinicViewAll } from "@/lib/tenant";
 import { urlAfterCenterSwitch } from "@/lib/navigation/after-center-switch";
@@ -32,7 +32,7 @@ export function CenterSelector() {
   React.useEffect(() => {
     if (me.kind !== "ok") return;
     let active = true;
-    getMyCentrosOperativos()
+    getMyCentros()
       .then((list) => active && setCentros(list))
       .catch((err) => active && toast.error(apiErrorMessage(err)));
     getMyPreferences()

@@ -3,29 +3,19 @@
 import * as React from "react";
 
 import { type MenuItem } from "@/lib/api/menu";
-import { filterMenuByPermissions } from "@/lib/nav/menu-access";
-import { useMe } from "@/hooks/use-me";
 import { useMenuContext, useMenuFetch } from "@/components/menu-provider";
 
-// Menú de navegación del principal. La decisión «los accesos los decide el frontend»
-// (docs/specs/accesos-los-decide-el-frontend.md) sigue valiendo — el FE filtra por `permissions`
-// (lib/nav/menu-access), nunca a mano — pero la FUENTE pasó a ser `GET /me/menu` (ya filtrado por
-// el BE), no el catálogo completo `GET /menu`: ese endpoint pasó a exigir el permiso `menu.read`
-// (BE MenuController) después de escrita aquella decisión, y casi nadie lo tiene — pedirlo en cada
-// navegación producía un 403 por persona por página (~680/día, handoff-ruido-403-auditoria.md).
-// `filterMenuByPermissions` sobre un menú YA filtrado por el BE es idempotente (vuelve a filtrar lo
-// mismo), así que este cambio no altera qué ve nadie. Devuelve [] mientras carga o sin sesión.
+// The principal's navigation menu: `GET /me/menu`, already decided by the BE as every screen the
+// person can use in AT LEAST ONE of their centers (cmr-be positions spec §2.5). It is NOT filtered
+// again by the active center's permissions here: that would make the menu change with the center.
+// A screen the active center does not allow is handled by CenterAccessGate, which names the centers
+// where it is allowed. Hidden items still drop. Returns [] while loading or without a session.
 //
-// Prefiere el MenuProvider compartido (un solo fetch); si no hay provider montado, cae a su
-// propio fetch, igual que useMe()/MeProvider — mismo patrón, mismo motivo (components/menu-provider.tsx).
+// Prefers the shared MenuProvider (one fetch); without one mounted, it fetches on its own, like
+// useMe()/MeProvider (components/menu-provider.tsx).
 export function useMenu(): MenuItem[] {
   const shared = useMenuContext();
   const local = useMenuFetch(shared === null);
   const catalog = shared ?? local;
-  const me = useMe();
-
-  return React.useMemo(() => {
-    const permissions = me.kind === "ok" ? me.me.permissions : [];
-    return filterMenuByPermissions(catalog, permissions);
-  }, [catalog, me]);
+  return React.useMemo(() => catalog.filter((i) => i.visible !== false), [catalog]);
 }
