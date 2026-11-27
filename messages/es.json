@@ -6015,6 +6015,11 @@
     "presentAt": "Presente {time}",
     "markPendingPresent": "Marcar presente (pendientes: {n})",
     "markPresentHint": "Clic para marcar presente",
+    "undoPresentConfirmTitle": "¿Deshacer la llegada?",
+    "undoPresentConfirmBody": "Se quita «Presente» de las sesiones y la consulta de hoy de este paciente que siguen en espera. Las que ya fueron llamadas, están en terapia o atendidas no cambian.",
+    "markPendingConfirmTitle": "¿Marcar presente lo pendiente ({n})?",
+    "markPendingConfirmBody": "Las sesiones y la consulta de hoy que aún no tienen llegada quedan como presentes.",
+    "markPendingConfirmAction": "Marcar presente",
     "filteredSections": {
       "showingOnly": "Mostrando solo: {service}",
       "showingAll": "Mostrando todas las terapias",

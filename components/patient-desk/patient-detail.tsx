@@ -39,6 +39,7 @@ import { PackageGateHost } from "@/components/frontdesk/package-gate-dialog"
 import type { EhrReadinessField } from "@/lib/api/ehr-integration"
 import { PacienteFormSheet as PatientFormSheet } from "@/components/clientes/paciente-form-sheet"
 import { Button } from "@/components/ui/button"
+import { useConfirm } from "@/components/kit/confirm-host"
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges"
 import {
   DropdownMenu,
@@ -220,6 +221,27 @@ export function PatientDetail({
     }
   }
 
+  // One click on the pill or the «pendientes» button used to act at once, and both are easy to hit by
+  // accident (owner, 27-nov-2026): each now asks first.
+  const confirm = useConfirm()
+  async function confirmUndoPresent() {
+    const ok = await confirm({
+      title: t("undoPresentConfirmTitle"),
+      description: t("undoPresentConfirmBody"),
+      confirmLabel: t("undoPresent"),
+      destructive: true,
+    })
+    if (ok) await handleUndoPresent()
+  }
+  async function confirmPendingPresent(n: number) {
+    const ok = await confirm({
+      title: t("markPendingConfirmTitle", { n }),
+      description: t("markPendingConfirmBody"),
+      confirmLabel: t("markPendingConfirmAction"),
+    })
+    if (ok) await handlePresent()
+  }
+
   async function handleUndoPresent() {
     setPresenceBusy(true)
     try {
@@ -328,7 +350,7 @@ export function PatientDetail({
                 <button
                   type="button"
                   disabled={presenceBusy}
-                  onClick={handleUndoPresent}
+                  onClick={confirmUndoPresent}
                   title={t("undoPresent")}
                   aria-label={`${t("presentAt", { time: fmtHora(patient.presentAt) })} · ${t("undoPresent")}`}
                   className="group inline-flex h-6 items-center gap-1 rounded-full bg-emerald-600 px-2 text-[11px] font-semibold text-white tabular-nums transition-colors hover:bg-destructive focus-visible:bg-destructive focus-visible:outline-none disabled:opacity-60"
@@ -352,7 +374,7 @@ export function PatientDetail({
                     size="sm"
                     className="h-6 px-2 text-[11px]"
                     disabled={presenceBusy}
-                    onClick={handlePresent}
+                    onClick={() => confirmPendingPresent(pendingArrivals(patient))}
                   >
                     {t("markPendingPresent", { n: pendingArrivals(patient) })}
                   </Button>

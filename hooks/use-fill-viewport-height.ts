@@ -9,7 +9,8 @@ import * as React from "react"
 // Why measure instead of CSS: the app shell's <main> grows with its content instead of being a
 // bounded flex box, so a pure-CSS "fill the rest" is not available without changing every page,
 // and a hard-coded calc(100vh - Xrem) breaks as soon as the toolbar above changes height.
-// Re-measures on resize and whenever the page content changes size (a strip or a pager appears).
+// Re-measures on resize and whenever the page content changes size (a strip or a pager appears
+// or goes away).
 //
 // Returns undefined until the first measurement and on narrow screens (below `minWidth`), where
 // the page scrolls normally and elements keep their natural height.
@@ -52,8 +53,14 @@ export function useFillViewportHeight(
     }
     measure()
     window.addEventListener("resize", measure)
+    // Watch the page content too, not only <main>: <main> is flex-1 in a full-height shell, so when a
+    // strip above the element appears or goes away (the therapy queue strip) its box does not change,
+    // and the element moved without being re-measured, ending short of the window (27-nov-2026).
     const observer = new ResizeObserver(measure)
-    observer.observe(main ?? el.parentElement ?? el)
+    const watched = new Set<Element>([main ?? el.parentElement ?? el])
+    if (el.parentElement) watched.add(el.parentElement)
+    if (main) for (const child of Array.from(main.children)) watched.add(child)
+    watched.forEach((node) => observer.observe(node))
     return () => {
       window.removeEventListener("resize", measure)
       observer.disconnect()
