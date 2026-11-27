@@ -11,6 +11,7 @@ import {
   Calendar03Icon,
   PencilEdit02Icon,
   Tick02Icon,
+  Undo02Icon,
 } from "@hugeicons/core-free-icons"
 
 import {
@@ -278,7 +279,7 @@ export function PatientDetail({
               onChange={onFlagsChange}
             />
           </div>
-          <div className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+          <div className="mt-1.5 flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
             {patient.record ? (
               <span>
                 {t("record")} #{patient.record}
@@ -321,20 +322,28 @@ export function PatientDetail({
               // is green; its actions sit beside it as ordinary quiet buttons (a yellow button inside the
               // green bar made the header loud and read as two states).
               <div className="flex items-center gap-1">
-                <span className="inline-flex h-6 items-center gap-1 rounded-full bg-emerald-600 px-2 text-[11px] font-semibold text-white tabular-nums">
-                  <HugeiconsIcon icon={Tick02Icon} className="size-3" />
-                  {t("presentAt", { time: fmtHora(patient.presentAt) })}
-                </span>
-                <Button
+                {/* The pill IS the undo (owner, 27-nov-2026): a small undo arrow says it is clickable; on
+                    hover it turns amber and reads «Deshacer». Both labels share one grid cell so the
+                    pill keeps its width when they swap. */}
+                <button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-1.5 text-[11px] text-muted-foreground"
                   disabled={presenceBusy}
                   onClick={handleUndoPresent}
+                  title={t("undoPresent")}
+                  aria-label={`${t("presentAt", { time: fmtHora(patient.presentAt) })} · ${t("undoPresent")}`}
+                  className="group inline-flex h-6 items-center gap-1 rounded-full bg-emerald-600 px-2 text-[11px] font-semibold text-white tabular-nums transition-colors hover:bg-amber-600 focus-visible:bg-amber-600 focus-visible:outline-none disabled:opacity-60"
                 >
-                  {t("undoPresent")}
-                </Button>
+                  <span className="grid">
+                    <span className="col-start-1 row-start-1 inline-flex items-center gap-1 group-hover:invisible group-focus-visible:invisible">
+                      <HugeiconsIcon icon={Tick02Icon} className="size-3" />
+                      {t("presentAt", { time: fmtHora(patient.presentAt) })}
+                    </span>
+                    <span className="invisible col-start-1 row-start-1 inline-flex items-center justify-center gap-1 group-hover:visible group-focus-visible:visible">
+                      {t("undoPresent")}
+                    </span>
+                  </span>
+                  <HugeiconsIcon icon={Undo02Icon} className="size-3 opacity-80" />
+                </button>
                 {/* Already present, but a therapy/consultation is still waiting: mark those too. */}
                 {kind !== "consultation" && pendingArrivals(patient) > 0 && (
                   <Button

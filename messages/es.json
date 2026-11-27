@@ -5959,7 +5959,7 @@
     "patients": "Pacientes del día",
     "pickPatient": "Elige un paciente de la lista para ver sus servicios.",
     "record": "Record",
-    "firstAt": "primera cita {time}",
+    "firstAt": "Primera cita {time}",
     "markPresent": "No presente",
     "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
