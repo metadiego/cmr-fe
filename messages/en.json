@@ -938,6 +938,7 @@
       "type": "Appointment type",
       "typePlaceholder": "Select type",
       "status": "Status",
+      "statusScheduled": "Scheduled",
       "firstVisit": "First visit",
       "reason": "Reason for visit",
       "notes": "Notes",

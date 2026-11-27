@@ -938,6 +938,7 @@
       "type": "Tipo de cita",
       "typePlaceholder": "Seleccionar Tipo",
       "status": "Estado",
+      "statusScheduled": "Agendada",
       "firstVisit": "Primera vez",
       "reason": "Motivo de consulta",
       "notes": "Notas",

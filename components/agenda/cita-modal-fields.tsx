@@ -5,8 +5,10 @@ import { useTranslations } from "next-intl";
 import type { Personal } from "@/lib/api/personal";
 import { Field } from "@/components/kit/form-dialog";
 import { SegmentedControl } from "@/components/kit/segmented-control";
-import { StatusBadge } from "@/components/kit/status-badge";
-import type { StageLabel } from "@/lib/lifecycle/stage-labels";
+import { Badge } from "@/components/ui/badge";
+import type { EstadoTablero } from "@/lib/api/tablero";
+import type { StagedRow } from "@/lib/lifecycle/stage-groups";
+import { statusBadge, statusOptions } from "@/lib/agenda/status-field";
 import {
   Select,
   SelectContent,
@@ -52,17 +54,21 @@ export function DoctorField({
 }
 
 // The status of the appointment: on edit, its stage label as a badge; on create, whether it is born
-// confirmed (a boolean, `confirmed` on the create door), labelled from lifecycle.label.medical.*.
+// confirmed (a boolean, `confirmed` on the create door). Labels from lifecycle.label.medical.*, colours
+// from the consultation board's catalogue (lib/agenda/status-field.ts).
 export function StatusField({
   isEdit,
-  editLabel,
+  statuses,
+  cita,
   confirmed,
   canConfirm = true,
   onChange,
 }: {
   isEdit: boolean;
-  /** Edit: the appointment's stage label (null when unknown). */
-  editLabel: StageLabel | null;
+  /** The consultation board's statuses (colours). */
+  statuses: EstadoTablero[];
+  /** Edit: the appointment. */
+  cita: StagedRow | null;
   /** Create: born confirmed. */
   confirmed: boolean;
   /** Create: false when appointments.confirm is known missing in this clinic (no toggle: born booked). */
@@ -71,19 +77,24 @@ export function StatusField({
 }) {
   const t = useTranslations("agenda.modal");
   const tRoot = useTranslations();
-  const label = (key: "booked" | "confirmed") => tRoot(`lifecycle.label.medical.${key}`);
+  const badge = statusBadge(statuses, isEdit ? cita : null);
   return (
     <Field label={t("status")}>
       {isEdit || !canConfirm ? (
         <div className="flex h-9 items-center">
-          <StatusBadge kind="medicalStatus" value={isEdit ? editLabel : "booked"} />
+          <Badge
+            variant="secondary"
+            style={badge.color ? { backgroundColor: `${badge.color}20`, color: badge.color } : undefined}
+          >
+            {badge.labelKey ? tRoot(badge.labelKey) : t("statusScheduled")}
+          </Badge>
         </div>
       ) : (
         <SegmentedControl
           ariaLabel={t("status")}
           value={confirmed ? "confirmed" : "booked"}
           onChange={(v) => onChange(v === "confirmed")}
-          options={(["booked", "confirmed"] as const).map((key) => ({ value: key, label: label(key) }))}
+          options={statusOptions(statuses).map((o) => ({ value: o.value, label: tRoot(o.labelKey), dot: o.dot }))}
         />
       )}
     </Field>
