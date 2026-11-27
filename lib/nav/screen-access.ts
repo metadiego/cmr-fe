@@ -4,19 +4,29 @@
 // then the shell names the centers where it is allowed instead of opening a page that fails.
 import type { MenuItem } from "@/lib/api/menu";
 import { holdsPermission } from "../rbac/permission-aliases.ts";
+import { routeForClave } from "./manifest.ts";
 
 type Screen = Pick<MenuItem, "slug" | "path" | "permissionSlug">;
 
-/** The menu item whose path is the longest one the URL starts with (whole segments only). */
+const RECORD_ID = /^([0-9]+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+
+/**
+ * The menu item a URL belongs to, by the FE route the sidebar links to (`routeForClave`, BE paths are
+ * Spanish and not the app's routes). Only the screen itself or a record under it (`/<route>/<id>/…`)
+ * counts: another sub-page may need a different permission, so it is left to answer for itself.
+ * The root route never matches everything.
+ */
 export function menuItemForPath<T extends Screen>(items: readonly T[], pathname: string): T | null {
-  let best: T | null = null;
+  let best: { item: T; route: string } | null = null;
   for (const i of items) {
-    const p = i.path;
-    if (!p || !p.startsWith("/")) continue;
-    const matches = pathname === p || pathname.startsWith(p.endsWith("/") ? p : `${p}/`);
-    if (matches && (!best || p.length > best.path.length)) best = i;
+    const route = routeForClave(i.slug, i.path);
+    if (!route.startsWith("/") || route === "/") continue;
+    const rest = pathname === route ? "" : pathname.startsWith(`${route}/`) ? pathname.slice(route.length + 1) : null;
+    if (rest === null) continue;
+    if (rest !== "" && !RECORD_ID.test(rest.split("/")[0])) continue;
+    if (!best || route.length > best.route.length) best = { item: i, route };
   }
-  return best;
+  return best?.item ?? null;
 }
 
 /** True when the screen asks for a permission the active center's session does not hold. */

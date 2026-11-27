@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import type { Centro } from "@/lib/api/centers";
 import { menuItemForPath, needsOtherCenter } from "@/lib/nav/screen-access";
 import { setActiveCentro, setClinicViewAll } from "@/lib/tenant";
+import { urlAfterCenterSwitch } from "@/lib/navigation/after-center-switch";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { centersWhere } from "@/hooks/use-can-in-center";
@@ -50,7 +51,11 @@ export function CenterAccessGate({ children }: { children: React.ReactNode }) {
   const switchTo = (id: string) => {
     setClinicViewAll(false);
     setActiveCentro(id);
-    window.location.reload();
+    // Same as the top-bar picker: a record of the previous center goes back to its list.
+    const { pathname: path, search } = window.location;
+    const next = urlAfterCenterSwitch(path, search, id);
+    if (next === path + search) window.location.reload();
+    else window.location.assign(next);
   };
   return (
     <div className="mx-auto max-w-xl px-4 py-10">
