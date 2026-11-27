@@ -195,7 +195,8 @@ test("stagesOf trusts the stage columns when the row is synced", () => {
     syncedStatus: "programada",
   } as const
   assert.deepEqual(stagesOf("medical", row), { booking: "booked", care: null })
-  // No syncedStatus on the row: the stage columns are trusted as they are.
+  // No syncedStatus on the row (a board row): the stage columns are trusted while they agree with the
+  // old word's group; here they do not (6b review), so the old word decides.
   assert.deepEqual(
     stagesOf("medical", {
       status: "programada",
@@ -203,7 +204,7 @@ test("stagesOf trusts the stage columns when the row is synced", () => {
       careStatus: null,
     }),
     {
-      booking: "confirmed",
+      booking: "booked",
       care: null,
     }
   )
@@ -286,7 +287,7 @@ test("rowInGroups / isNotCancelled", () => {
   assert.equal(isNotCancelled("therapy", { status: "asistido" }), true)
 })
 
-test("syncedStatus present but null means not synced: derive from the old value; key absent: trust the columns", () => {
+test("syncedStatus present but null means not synced: derive from the old value; key absent: trust the columns only if they agree", () => {
   assert.deepEqual(
     stagesOf("medical", {
       estado: "presente",
@@ -303,10 +304,36 @@ test("syncedStatus present but null means not synced: derive from the old value;
       careStatus: null,
     }),
     {
-      booking: "booked",
-      care: null,
+      booking: "arrived",
+      care: "waiting",
     }
   )
+})
+
+test("no syncedStatus key: stored stages that agree with the old word's group are trusted (they say more)", () => {
+  // A called session: the old word says present (waiting), the columns say called (same group).
+  assert.deepEqual(stagesOf("therapy", { status: "presente", bookingStatus: "arrived", careStatus: "called" }), {
+    booking: "arrived",
+    care: "called",
+  })
+  // A not-served appointment: cancelled and not served share a group.
+  assert.deepEqual(stagesOf("medical", { estado: "cancelada", bookingStatus: "arrived", careStatus: "not_served" }), {
+    booking: "arrived",
+    care: "not_served",
+  })
+  // No old word at all: the columns are all there is.
+  assert.deepEqual(stagesOf("medical", { bookingStatus: "confirmed", careStatus: null }), { booking: "confirmed", care: null })
+})
+
+test("no syncedStatus key: stored stages of another group than the old word are stale, the old word decides", () => {
+  assert.deepEqual(stagesOf("medical", { estado: "atendida", bookingStatus: "arrived", careStatus: "waiting" }), {
+    booking: "arrived",
+    care: "done",
+  })
+  assert.deepEqual(stagesOf("therapy", { status: "asistido", bookingStatus: "arrived", careStatus: "in_therapy" }), {
+    booking: "arrived",
+    care: "done",
+  })
 })
 
 test("rowGroup: a row's group, by its stages or derived from its old value; null when unknown", () => {

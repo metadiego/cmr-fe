@@ -30,7 +30,8 @@ import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-moda
 import { NextAppointmentCell } from "@/components/citas/next-appointment-cell";
 import { BoardHeadSkeleton, BoardRowsSkeleton } from "@/components/agenda/tablero-dinamico-skeleton";
 import { readAllowedActions } from "@/lib/lifecycle/allowed-actions";
-
+import { rowColour, type EstadoLite } from "@/lib/board/row-colour";
+import type { AppointmentKind } from "@/lib/lifecycle/stage-groups";
 // Single renderer for the metadata-driven board (dynamic columns). Header per
 // labelKey, cell per column `tipo`; the "accion" column becomes CitaActions.
 // Shared by the call-center day-view and the Atención (AP) board so there's one
@@ -330,6 +331,7 @@ export function TableroDinamico({
   optionsByCol,
   transiciones,
   estados,
+  kind,
   density,
   loading,
   leadWidths,
@@ -345,7 +347,9 @@ export function TableroDinamico({
   onRefresh?: () => void;
   optionsByCol?: Record<string, Opcion[]>;
   transiciones?: Transicion[];
-  estados?: { clave: string; orden: number; color?: string | null }[];
+  estados?: EstadoLite[];
+  /** The rows' lifecycle kind (cita board = medical, session board = therapy); null for another entity. */
+  kind?: AppointmentKind | null;
   density?: "comodo" | "compacto";
   // Skeleton rows under the headers (placeholder headers too when `columnas` is still empty).
   loading?: boolean;
@@ -356,10 +360,8 @@ export function TableroDinamico({
   const cols = useVisibleColumns(columnas);
   const rowPad = density === "compacto" ? "py-1" : "py-2";
 
-  // Modal de post-acción ("Nueva cita" al marcar asistido) y candado del EHR: viven AQUÍ, no dentro
-  // de FlujoAtencion (por fila) — la fila que acaba de avanzar puede quedar fuera del filtro de KPI
-  // activo en el próximo refetch, lo que desmontaría un modal guardado en su estado local antes de
-  // que la persona pudiera usarlo. Handoff HANDOFF-modal-proxima-cita-se-cierra-solo.md.
+  // The post-action modal and the EHR gate live HERE, not per row in FlujoAtencion: a row that just
+  // advanced can leave the KPI filter on refetch and unmount them (HANDOFF-modal-proxima-cita-se-cierra-solo).
   const [postAccion, setPostAccion] = React.useState<PostAccionCtx | null>(null);
   const [ehrGate, setEhrGate] = React.useState<EhrGateCtx | null>(null);
 
@@ -423,11 +425,11 @@ export function TableroDinamico({
         <CeldaToggleHora
           tablero={tablero}
           entidadId={fila.id}
-          estado={String(fila.estado ?? "")}
+          kind={kind ?? null}
+          fila={fila}
           col={col}
           value={fila[col.clave]}
           transiciones={transiciones ?? []}
-          estados={estados ?? []}
           centroId={centroId}
           pacienteId={(fila as { pacienteId?: unknown }).pacienteId != null ? String((fila as { pacienteId?: unknown }).pacienteId) : undefined}
           allowedActions={readAllowedActions(fila)}
@@ -486,9 +488,7 @@ export function TableroDinamico({
     return <Cell col={col} value={fila[col.clave]} />;
   }
 
-  // Encadenamiento CONFIGURABLE (dato): las columnas con el mismo `render.group`
-  // se agrupan en una sola columna encadenada. El orden/dependencias salen de las
-  // transiciones + orden de estados (en FlujoAtencion). Cero hardcode en el FE.
+  // Columns sharing a `render.group` chain into one flow column; FlujoAtencion orders them by stage group.
   const groups: BoardColumnGroup[] = [];
   for (const col of cols) {
     const groupName = (col.render as Record<string, unknown> | null)?.group as string | undefined;
@@ -548,7 +548,7 @@ export function TableroDinamico({
             </tr>
           )}
           {filas.map((fila) => {
-            const rowColor = estados?.find((e) => e.clave === String(fila.estado ?? ""))?.color ?? null;
+            const rowColor = rowColour(kind ?? null, estados ?? [], fila);
             return (
               <tr key={fila.id} className="border-t transition-colors hover:bg-muted/40">
                 {groups.map((g, gi) =>
@@ -557,6 +557,7 @@ export function TableroDinamico({
                       <FlujoAtencion
                         tablero={tablero ?? ""}
                         fila={fila}
+                        kind={kind ?? null}
                         cols={g.cols}
                         transiciones={transiciones ?? []}
                         estados={estados ?? []}

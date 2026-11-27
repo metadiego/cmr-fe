@@ -289,22 +289,29 @@ function deriveStages(kind: AppointmentKind, row: StagedRow): Stages | null {
 
 /**
  * The stages a reader should judge a row by. The stored `bookingStatus` / `careStatus` are trusted
- * when `bookingStatus` is present and the row is not known to be stale (the response carries no `syncedStatus` key,
- * or `syncedStatus` equals its old status) and the pair is a stage of the kind. Otherwise they are
- * derived from the old value (and its stamps), so a row a bypassing writer just changed, or one with
- * no stage yet, is never judged stale. Null for a status the mapping does not know.
+ * when `bookingStatus` is present, the pair is a stage of the kind, and the row is not known to be stale:
+ * - with a `syncedStatus` key, when it equals the row's old status;
+ * - without one (a board row), when the row carries no old status, or the stored pair falls in the same
+ *   group as the stages derived from it (the columns then only say more: called, not served).
+ * Otherwise they are derived from the old value (and its stamps), so a row a bypassing writer just
+ * changed, or one with no stage yet, is never judged stale. Null for a status the mapping does not know.
  */
 export function stagesOf(kind: AppointmentKind, row: StagedRow): Stages | null {
   const old = oldStatusOf(row)
-  const synced = !("syncedStatus" in row) || row.syncedStatus === old
-  if (row.bookingStatus && synced) {
+  const derived = deriveStages(kind, row)
+  if (row.bookingStatus) {
     const stored: Stages = {
       booking: row.bookingStatus,
       care: row.careStatus ?? null,
     }
-    if (findGroup(kind, stored) !== undefined) return stored
+    const storedGroup = findGroup(kind, stored)
+    const synced =
+      "syncedStatus" in row
+        ? row.syncedStatus === old
+        : old === null || derived === null || findGroup(kind, derived) === storedGroup
+    if (storedGroup !== undefined && synced) return stored
   }
-  return deriveStages(kind, row)
+  return derived
 }
 
 /** The group a row is in, or null for a status the mapping does not know (or no status at all). */

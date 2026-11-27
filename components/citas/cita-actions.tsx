@@ -30,9 +30,8 @@ import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action
 import { apiErrorLabel } from "@/lib/api/errors";
 import { appointmentMenuFor } from "@/lib/lifecycle/allowed-actions";
 import { useCan } from "@/hooks/use-can";
-import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
-import { useEstados } from "@/hooks/use-estados";
+import { labelText, stageLabel } from "@/lib/lifecycle/stage-labels";
 import { FormDialog } from "@/components/kit/form-dialog";
 import { Field } from "@/components/kit/field";
 import { useSubmit } from "@/components/kit/use-submit";
@@ -252,8 +251,6 @@ function RescheduleDialog({
   const tc = useTranslations("common");
   const tRoot = useTranslations();
   const { can } = useCan();
-  const me = useMe();
-  const actorId = me.kind === "ok" ? me.me.staffId ?? undefined : undefined;
   const id = React.useId();
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
@@ -331,7 +328,6 @@ function RescheduleDialog({
           reason: motivo.trim(),
           centerId: crossCentro ? centro : undefined,
           doctorId: crossCentro && medico ? medico : undefined,
-          actorId,
         },
         cita.clinicId ?? undefined,
       );
@@ -446,7 +442,6 @@ export function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => 
   const format = useFormatter();
   const tc = useTranslations("common");
   const tRoot = useTranslations();
-  const { map: estadosMap } = useEstados();
 
   const histRes = useResource<CitaEvento[]>(() =>
     getHistorial(cita.id, cita.clinicId ?? undefined),
@@ -480,9 +475,10 @@ export function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => 
       if (from !== to) rows.push({ label, from, to });
     };
     const txt = (v: unknown) => (v ? String(v) : "—");
+    // The diff names old status words (the history derives them from the stages): shown by stage label.
     const estadoName = (v: unknown) => {
-      const e = estadosMap.get(String(v));
-      return e ? tRoot(e.labelKey) : v ? String(v) : "—";
+      const word = v ? String(v) : "";
+      return labelText(tRoot, "medical", word ? stageLabel("medical", { estado: word }) : null, word) || "—";
     };
     push("estado", t("estado"), estadoName);
     push("fecha", t("date"), txt);
@@ -513,7 +509,7 @@ export function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => 
             return (
               <li key={ev.id} className="rounded-md bg-card p-3 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{t(`event.${ev.type}`)}</span>
+                  <span className="font-medium">{t.has(`event.${ev.type}`) ? t(`event.${ev.type}`) : ev.type}</span>
                   <span className="text-xs text-muted-foreground">{fmt(ev.createdAt)}</span>
                 </div>
                 {ev.reason && <p className="mt-1 text-xs text-muted-foreground">{ev.reason}</p>}

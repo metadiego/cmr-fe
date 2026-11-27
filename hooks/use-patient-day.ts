@@ -22,9 +22,11 @@ import {
 } from "@/lib/api/tablero"
 import {
   groupByPatient,
+  type IsTerminal,
   type DayService,
   type PatientDay,
 } from "@/lib/frontdesk/patient-day"
+import { terminalChecker } from "@/lib/lifecycle/board-catalogue"
 import { useResource } from "@/hooks/use-resource"
 import { useCitaStream as useLiveStream } from "@/hooks/use-cita-stream"
 import { CONSULTATION_BOARD, isConsultationBoard } from "@/lib/frontdesk/consultation-board"
@@ -46,7 +48,7 @@ export interface PatientDayData {
   live: boolean
   refresh: () => void
   // Whether a consultation status is final (the board catalog's isTerminal).
-  isConsultationTerminal: (status: string) => boolean
+  isConsultationTerminal: IsTerminal
 }
 
 // Everything the patient desk shows for one center and day: the day's sessions across ALL services
@@ -155,22 +157,14 @@ export function usePatientDay(
 
   const consultations =
     consultRes.state.kind === "ok" ? consultRes.state.data : null
-  // Final consultation statuses come from the board's catalog (isTerminal), not from code.
-  const consultTerminal = React.useMemo(
+  // Final consultations come from the board's catalog (isTerminal), read by stage group, not from code.
+  const isConsultationTerminal = React.useMemo(
     () =>
-      new Set(
-        (consultDefRes.state.kind === "ok"
-          ? (consultDefRes.state.data?.statuses ?? [])
-          : []
-        )
-          .filter((x) => x.isTerminal)
-          .map((x) => x.slug)
+      terminalChecker(
+        "medical",
+        consultDefRes.state.kind === "ok" ? (consultDefRes.state.data?.statuses ?? []) : []
       ),
     [consultDefRes.state]
-  )
-  const isConsultationTerminal = React.useCallback(
-    (status: string) => consultTerminal.has(status),
-    [consultTerminal]
   )
   const patients = React.useMemo(
     () =>
@@ -182,9 +176,9 @@ export function usePatientDay(
         })),
         (consultations?.rows ?? []) as { id: string }[],
         dayServices,
-        (status) => consultTerminal.has(status)
+        isConsultationTerminal
       ),
-    [sessions, consultations, dayServices, consultTerminal]
+    [sessions, consultations, dayServices, isConsultationTerminal]
   )
   const sessionsById = React.useMemo(
     () => new Map(sessions.map((s) => [s.id, s])),

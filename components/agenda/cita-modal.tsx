@@ -34,7 +34,6 @@ import { useResource } from "@/hooks/use-resource";
 import { useAppointmentSlots } from "@/hooks/use-appointment-slots";
 import { useMe } from "@/hooks/use-me";
 import { useShowAppointmentResult } from "@/hooks/use-appointment-result";
-import { useEstados } from "@/hooks/use-estados";
 import { addMinutes } from "@/lib/agenda/calendar";
 import { appointmentMissing, type AppointmentField } from "@/lib/agenda/appointment-missing";
 import { citaEditPayload } from "@/lib/agenda/cita-edit-payload";
@@ -55,7 +54,10 @@ import {
 import { PatientPickerWithCreate } from "@/components/citas/patient-picker-with-create";
 import { CitaActions } from "@/components/citas/cita-actions";
 import { useCanInCenter } from "@/hooks/use-can-in-center";
-import { bookedUnconfirmedNotice, CONFIRM_PERMISSION, confirmToggleShown, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
+import { bookedUnconfirmedNotice, bornConfirmedByDefault, CONFIRM_PERMISSION, confirmToggleShown, createConfirmed } from "@/lib/lifecycle/confirm-on-create";
+import { useStatusColours } from "@/hooks/use-status-colours";
+import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
+import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board";
 
 export function CitaModal({
   open,
@@ -68,7 +70,7 @@ export function CitaModal({
   tipos,
   medicos: medicosProp,
   canal,
-  estadoInicial,
+  confirmedInitial,
   allowedActions,
   onOpenChange,
   onSaved,
@@ -87,8 +89,8 @@ export function CitaModal({
   // patient with none yet). Each screen declares its own; undeclared sends nothing and the BE uses
   // 'frontdesk'. Handoff bug-canal-callcenter-no-se-manda-handoff-fe.md.
   canal?: "frontdesk" | "callcenter";
-  // Create only: the status the toggle starts on, over the channel's default (a board's walk-in: confirmada).
-  estadoInicial?: "programada" | "confirmada";
+  // Create only: whether the toggle starts on confirmed, over the channel's default (a board's walk-in: true).
+  confirmedInitial?: boolean;
   // Edit only: the row's `allowedActions` when opened from a list that has them (CitaActions draws them).
   allowedActions?: string[] | null;
   onOpenChange: (open: boolean) => void;
@@ -105,10 +107,7 @@ export function CitaModal({
 
   const me = useMe();
   const callcenterId = me.kind === "ok" ? me.me.staffId ?? undefined : undefined;
-  const { map: estadosMap, estados } = useEstados();
-  // On create the state is the catalog's initial one; on edit it's the cita's.
-  const estadoClave = cita?.status ?? estados.find((e) => e.isInitial)?.slug ?? "programada";
-  const estadoDef = estadosMap.get(estadoClave);
+  const boardStatuses = useStatusColours(isEdit);
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -176,18 +175,10 @@ export function CitaModal({
   // defecto (como antes) apagaba ese chequeo siempre y el personal de call-center, que no tiene por
   // qué saber que hay que marcar la casilla a mano, terminaba citando pacientes nuevos como si
   // fueran de seguimiento. Handoff bug-primera-vez-fuerza-medico-handoff-fe.
-  // The status a NEW appointment starts with (BE allowlist programada|confirmada). Call center books
-  // remotely, so it starts at the catalogue's initial status; any other channel has the patient present,
-  // so it starts "confirmada" (owner, 13-oct-2026). Still editable below; this is only the default.
-  const claveInicial = estadoInicial ?? (
-    canal === "callcenter"
-      ? (estados.find((e) => e.isInitial)?.slug ?? "programada")
-      : "confirmada"
-  ) as "programada" | "confirmada";
-  // El catálogo llega por red: el estado se DERIVA de su inicial hasta que el usuario elija a mano
-  // (sin setState en efecto, que dispara renders en cascada / lo marca el React Compiler).
-  const [estadoElegido, setEstadoElegido] = React.useState<"programada" | "confirmada" | null>(null);
-  const estadoCrear = estadoElegido ?? claveInicial;
+  // Whether a NEW appointment is born confirmed (`confirmed` on create): the channel's default
+  // (lib/lifecycle/confirm-on-create.ts) until the person flips the toggle. Still editable below.
+  const [confirmedPicked, setConfirmedPicked] = React.useState<boolean | null>(null);
+  const confirmedWanted = confirmedPicked ?? bornConfirmedByDefault(canal, confirmedInitial);
   const [motivo, setMotivo] = React.useState(cita?.reason ?? "");
   const [notas, setNotas] = React.useState(cita?.notes ?? "");
   const [warn, setWarn] = React.useState<CitaConflicto[] | null>(null);
@@ -347,7 +338,7 @@ export function CitaModal({
     const { cita: saved, advertencias } = isEdit
       ? await actualizarCitaAgenda(cita!.id, editPayload ?? {}, effectiveCentro || undefined)
       : await crearCitaAgenda(
-          { ...payload, confirmed: createConfirmed(estadoCrear === "confirmada", canConfirmHere), bookedByStaffId: callcenterId },
+          { ...payload, confirmed: createConfirmed(confirmedWanted, canConfirmHere), bookedByStaffId: callcenterId },
           effectiveCentro || undefined,
         );
     return { kind: "saved", saved, advertencias, patient: paciente };
@@ -366,7 +357,7 @@ export function CitaModal({
         mostrarAvisos(r.advertencias, tRoot);
       } else {
         // Every create shows the booking success dialog (spec §1); "moved" when the BE moved the live one.
-        if (bookedUnconfirmedNotice(estadoCrear === "confirmada", canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
+        if (bookedUnconfirmedNotice(confirmedWanted, canConfirmHere)) toast.warning(tRoot("lifecycle.bookedUnconfirmed"));
         void showResult(r.saved, r.advertencias, {
           patient: r.patient, asked: { date: fechaSel, time: hora }, typeName: tipo?.name ?? "", types: tipos,
           doctor: medicos.find((m) => m.id === medicoId), center: centros.find((c) => c.id === effectiveCentro),
@@ -404,11 +395,11 @@ export function CitaModal({
   const statusField = (
     <StatusField
       isEdit={isEdit}
-      estadoDef={estadoDef}
-      estadosMap={estadosMap}
-      estadoCrear={canConfirmHere === false ? "programada" : estadoCrear}
+      statuses={boardStatuses}
+      cita={cita ?? null}
+      confirmed={canConfirmHere !== false && confirmedWanted}
       canConfirm={confirmToggleShown(canConfirmHere)}
-      onChange={setEstadoElegido}
+      onChange={setConfirmedPicked}
     />
   );
 

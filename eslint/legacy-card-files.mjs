@@ -82,7 +82,6 @@ export const LEGACY_CARD_FILES = [
   "components/calendario/calendario.tsx",
   "components/change-log/confirmation-policies.tsx",
   "components/citas/cita-actions.tsx",
-  "components/citas/cita-board.tsx",
   "components/clientes/acciones-paciente-sheet.tsx",
   "components/clientes/cambio-protocolo-form.tsx",
   "components/clientes/config-alta-admin.tsx",

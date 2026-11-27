@@ -14,7 +14,7 @@ test("consultation view: every present patient together by arrival, finished or 
     services: [],
     consultationIds: ["c"],
     consultationStatuses: ["atendida"],
-    consultationGroups: consultGroups(["atendida"]),
+    consultationGroups: consultGroups(["atendida"]), consultationLabels: [],
     consultationSubtypes: [""],
     doctorName: "",
     allCancelled: false,
@@ -35,12 +35,12 @@ test("consultation view: every present patient together by arrival, finished or 
 
 test("present patient: counts sessions still pendiente and consultations not yet present", () => {
   const svc = (statuses: string[]) => ({
-    serviceId: "s", slug: "s", name: "S", color: null, staffGroup: 0 as never, sessionIds: statuses.map((_, i) => String(i)), statuses, groups: therapyGroups(statuses),
+    serviceId: "s", slug: "s", name: "S", color: null, staffGroup: 0 as never, sessionIds: statuses.map((_, i) => String(i)), statuses, groups: therapyGroups(statuses), labels: [],
   })
   const p = {
     patientId: "p", name: "P", record: "", earliestTime: null, presentAt: "2026-11-04T14:00:00Z", consultationPresentAt: null, allCancelled: false,
     services: [svc(["presente", "pendiente"]), svc(["asistido"])],
-    consultationIds: ["c1", "c2"], consultationStatuses: ["confirmada", "en_consulta"], consultationGroups: consultGroups(["confirmada", "en_consulta"]), consultationSubtypes: ["", ""], doctorName: "",
+    consultationIds: ["c1", "c2"], consultationStatuses: ["confirmada", "en_consulta"], consultationGroups: consultGroups(["confirmada", "en_consulta"]), consultationLabels: [], consultationSubtypes: ["", ""], doctorName: "",
   }
   assert.equal(pendingArrivals(p), 2)
   assert.equal(pendingArrivals({ ...p, services: [svc(["presente"])], consultationStatuses: ["presente", "asistido"], consultationGroups: consultGroups(["presente", "asistido"]) }), 0)
@@ -51,7 +51,7 @@ test("consultation view: a patient who came only for therapies reads not present
   const p = {
     patientId: "p", name: "P", record: "", earliestTime: null, allCancelled: false, services: [],
     presentAt: "2026-11-04T14:47:00Z", consultationPresentAt: null,
-    consultationIds: ["c"], consultationStatuses: ["confirmada"], consultationGroups: consultGroups(["confirmada"]), consultationSubtypes: [""], doctorName: "",
+    consultationIds: ["c"], consultationStatuses: ["confirmada"], consultationGroups: consultGroups(["confirmada"]), consultationLabels: [], consultationSubtypes: [""], doctorName: "",
   }
   assert.equal(asConsultationView(p).presentAt, null)
   assert.equal(asConsultationView({ ...p, consultationPresentAt: "2026-11-04T15:00:00Z" }).presentAt, "2026-11-04T15:00:00Z")

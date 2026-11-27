@@ -23,6 +23,7 @@ import { useMe, isAdmin } from "@/hooks/use-me";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { momentStep, REQUIREMENT_MOMENTS } from "@/lib/lifecycle/requirement-moments";
 import {
   Select,
   SelectContent,
@@ -35,7 +36,10 @@ import {
 
 const NO_BINDING = "__form__"; // "En el formulario" = sin binding (se captura en el modal de acciones)
 const TIPOS = ["texto", "numero", "fecha", "bool", "select"];
-const ACCIONES = ["presente", "en_terapia", "asistido"]; // dónde se exige (en); hoy se usa asistido
+// Where a field is asked (en): the flow steps under their old names, which the app writes (6a accepts no
+// other); a stored new name (check_in…) is shown and re-saved as its step (lib/lifecycle/requirement-moments.ts).
+const ACCIONES = REQUIREMENT_MOMENTS;
+const DEFAULT_MOMENT = ACCIONES[ACCIONES.length - 1];
 
 // Configura los CAMPOS REQUERIDOS de un servicio (formAcciones.campos). Data-driven: cada campo declara
 // si es requerido, en qué acción, y DÓNDE vive su valor (binding a la entidad/paquete, o el formulario).
@@ -108,7 +112,7 @@ function CamposEditor({
   const [alcance, setAlcance] = React.useState<Alcance>("centro");
 
   const set = (i: number, patch: Partial<ServicioCampo>) => setRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
-  const add = () => setRows((rs) => [...rs, { clave: "", tipo: "texto", requerido: true, en: "asistido" }]);
+  const add = () => setRows((rs) => [...rs, { clave: "", tipo: "texto", requerido: true, en: DEFAULT_MOMENT }]);
   const del = (i: number) => setRows((rs) => rs.filter((_, j) => j !== i));
 
   // Agrupa el catálogo de fuentes por grupo (sesión, personal, paquete) para el desplegable.
@@ -119,7 +123,7 @@ function CamposEditor({
     setSaving(true);
     try {
       const campos = rows.filter((r) => r.clave.trim()).map((r) => {
-        const c: ServicioCampo = { clave: r.clave.trim(), tipo: r.tipo, requerido: !!r.requerido, en: r.en || "asistido" };
+        const c: ServicioCampo = { clave: r.clave.trim(), tipo: r.tipo, requerido: !!r.requerido, en: momentStep(r.en) || DEFAULT_MOMENT };
         if (r.labelKey) c.labelKey = r.labelKey;
         if (r.binding) c.binding = r.binding; // ausente = se captura en el formulario
         return c;
@@ -176,7 +180,7 @@ function CamposEditor({
                 </td>
                 <td className="px-3 py-1.5"><Switch checked={!!r.requerido} onCheckedChange={(v) => set(i, { requerido: v })} /></td>
                 <td className="px-3 py-1.5">
-                  <Select value={r.en ?? "asistido"} onValueChange={(v) => set(i, { en: v })}>
+                  <Select value={momentStep(r.en) ?? DEFAULT_MOMENT} onValueChange={(v) => set(i, { en: v })}>
                     <SelectTrigger className="h-8 w-36"><SelectValue /></SelectTrigger>
                     <SelectContent>{ACCIONES.map((a) => <SelectItem key={a} value={a}>{t(`momento.${a}`)}</SelectItem>)}</SelectContent>
                   </Select>

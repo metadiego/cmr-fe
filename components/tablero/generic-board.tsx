@@ -34,6 +34,8 @@ import {
 import { TableroDinamico } from "@/components/agenda/tablero-dinamico";
 import { TableroAcciones } from "@/components/tablero/tablero-acciones";
 import { readAllowedActions } from "@/lib/lifecycle/allowed-actions";
+import { boardKind, storedStatus } from "@/lib/lifecycle/board-catalogue";
+import { kpiChips } from "@/lib/board/kpi-chips";
 import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
 import { BoardAppointmentModal } from "@/components/tablero/board-appointment-modal";
 import { readDensity, type Density } from "@/hooks/use-board-prefs";
@@ -97,6 +99,9 @@ export function GenericBoard({
   const registro = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.slug === tablero);
   const defRes = useResource<TableroDefinicion>(() => getDefinicion(tablero), [tablero]);
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
+  // The lifecycle kind of the board's rows (cita = medical, sesion = therapy): chips, colours and toggles
+  // read the rows' stage groups (lib/lifecycle/board-catalogue.ts). Null for a board of another entity.
+  const kind = boardKind(registro?.entity);
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -169,8 +174,12 @@ export function GenericBoard({
   // While the centre list is still loading there is no centroId yet and the fetcher above resolves an
   // empty board: that is still loading, never "0 rows". Live (SSE) refetches go through refresh() and
   // never come back here.
+  // The registry too: until it lands the board's entity (its lifecycle kind) is unknown.
   const loading =
-    centrosRes.state.kind === "loading" || defRes.state.kind === "loading" || filasRes.state.kind === "loading";
+    regRes.state.kind === "loading" ||
+    centrosRes.state.kind === "loading" ||
+    defRes.state.kind === "loading" ||
+    filasRes.state.kind === "loading";
 
   const { live } = useCitaStream({
     centroId,
@@ -263,16 +272,12 @@ export function GenericBoard({
         const base = subTipo
           ? data.rows.filter((f) => String((f as { subtipo?: unknown }).subtipo ?? "") === subTipo)
           : data.rows;
-        const counts = new Map<string, number>();
-        for (const f of base) {
-          const e = String(f.estado ?? "");
-          counts.set(e, (counts.get(e) ?? 0) + 1);
-        }
-        // La tarjeta del estado seleccionado (incluida la preferencia inicial) se muestra aunque tenga 0: la
-        // persona que abre "en Presente" debe ver esa pestaña activa aunque hoy esté vacía (handoff §3).
-        const kpiEstados = def.statuses.filter((e) => (counts.get(e.slug) ?? 0) > 0 || e.slug === estadoFiltro);
-        // Con un paciente filtrado, el estado se ignora: debe verse esté como esté (confirmada, presente…).
-        const porEstado = estadoFiltro && !pacienteFiltro ? base.filter((f) => String(f.estado ?? "") === estadoFiltro) : base;
+        // The selected chip: a status slug, or the person's stored preference (an old word, or a group
+        // name), mapped on read to this board's status. Rows are counted by stage group (lib/board/kpi-chips).
+        const selected = kind ? (storedStatus(kind, def.statuses, estadoFiltro)?.slug ?? estadoFiltro) : estadoFiltro;
+        const { counts, chips: kpiEstados, filtered: inChip } = kpiChips(kind, def.statuses, base, selected);
+        // With a patient filtered the status is ignored: the patient shows whatever their status.
+        const porEstado = selected && !pacienteFiltro ? inChip : base;
         // Filtro de texto en vivo: match local sobre las columnas visibles de ESTE tablero (nombre, record…).
         // `coincide` con query vacía/indefinida siempre da true (no-op para quien no pasa `q`).
         const filtered = pacienteFiltro
@@ -288,15 +293,15 @@ export function GenericBoard({
         return (
           <>
             <div className="flex flex-wrap gap-2">
-              <KpiCard label={t("all")} count={base.length} active={estadoFiltro === ""} onClick={() => pick("")} />
+              <KpiCard label={t("all")} count={base.length} active={selected === ""} onClick={() => pick("")} />
               {kpiEstados.map((e) => (
                 <KpiCard
                   key={e.slug}
                   label={tRoot(e.labelKey)}
                   count={counts.get(e.slug) ?? 0}
                   color={e.color}
-                  active={estadoFiltro === e.slug}
-                  onClick={() => pick(estadoFiltro === e.slug ? "" : e.slug)}
+                  active={selected === e.slug}
+                  onClick={() => pick(selected === e.slug ? "" : e.slug)}
                 />
               ))}
             </div>
@@ -325,7 +330,8 @@ export function GenericBoard({
           onRefresh={filasRes.refresh}
           optionsByCol={optionsByCol}
           transiciones={def.transitions}
-          estados={def.statuses.map((e) => ({ clave: e.slug, orden: e.sortOrder, color: e.color }))}
+          kind={kind}
+          estados={def.statuses.map((e) => ({ clave: e.slug, orden: e.sortOrder, color: e.color, group: e.group }))}
           density={density}
           emptyLabel={t("empty")}
           renderAccion={(fila, col) => {
@@ -342,13 +348,9 @@ export function GenericBoard({
               <TableroAcciones
                 tablero={tablero}
                 entidadId={fila.id}
-                estado={String(fila.estado ?? fila["estado"] ?? "")}
-                kind="therapy" // las citas (medical) ya salieron arriba con AccionesModal; aquí solo terapia/servicios
-                estados={def.statuses}
                 transiciones={def.transitions}
                 centroId={centroId}
                 allowedActions={readAllowedActions(fila)}
-                fecha={fecha}
                 onDone={filasRes.refresh}
               />
             );

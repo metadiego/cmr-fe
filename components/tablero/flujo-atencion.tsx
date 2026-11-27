@@ -14,6 +14,9 @@ import { isEhrEnabled, getEhrReadiness, type EhrReadinessField } from "@/lib/api
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
 import { readAllowedActions } from "@/lib/lifecycle/allowed-actions";
+import { flowRank, transitionToGroup } from "@/lib/lifecycle/board-catalogue";
+import type { AppointmentKind, StagedRow } from "@/lib/lifecycle/stage-groups";
+import { estadoOfGroup, type EstadoLite } from "@/lib/board/row-colour";
 import { cn } from "@/lib/utils";
 
 export type PostAccionCtx = { fila: CitaFila; accion: string; render: Record<string, unknown> | null };
@@ -52,8 +55,6 @@ function fmtHora(v: unknown): string | null {
   return m ? `${m[1].padStart(2, "0")}:${m[2]}` : s;
 }
 
-type EstadoLite = { clave: string; orden: number; color?: string | null };
-
 // "Flujo de atención": los toggles PRESENTE / EN CONSULTA / ASISTIDO como chips
 // conectados. Fuente de verdad = los TIMESTAMPS sellados de cada etapa (no depende
 // de `fila.estado`). Marca en orden (cada etapa exige la anterior) y desmarca EN
@@ -61,6 +62,7 @@ type EstadoLite = { clave: string; orden: number; color?: string | null };
 export function FlujoAtencion({
   tablero,
   fila,
+  kind,
   cols,
   transiciones,
   estados,
@@ -71,6 +73,8 @@ export function FlujoAtencion({
 }: {
   tablero: string;
   fila: CitaFila;
+  /** The board's lifecycle kind: steps are ordered, coloured and decided by stage group. */
+  kind: AppointmentKind | null;
   cols: ColumnaEfectiva[];
   transiciones: Transicion[];
   estados: EstadoLite[];
@@ -88,37 +92,39 @@ export function FlujoAtencion({
   const [busy, setBusy] = React.useState<string | null>(null);
   const [opt, setOpt] = React.useState<Record<string, boolean>>({});
 
-  const ordenOf = (clave: string | null) => estados.find((e) => e.clave === clave)?.orden ?? 0;
   const fwdSlug = (col: ColumnaEfectiva) =>
     (col.render as Record<string, unknown> | null)?.transition as string | undefined;
   const fwdOf = (col: ColumnaEfectiva) => {
     const clave = fwdSlug(col);
     return clave ? transiciones.find((t) => t.slug === clave) : undefined;
   };
-  // Color de cada etapa = color del estado destino (dato: def.estados). Da los
-  // colores del mockup (presente/en consulta/asistido) sin hardcode.
-  const colorOf = (col: ColumnaEfectiva) => estados.find((e) => e.clave === fwdOf(col)?.toStatus)?.color ?? colColor(col) ?? null;
+  // The target group of a step (6b `toGroup`, else its old `toStatus` mapped).
+  const targetOf = (col: ColumnaEfectiva) => {
+    const fwd = fwdOf(col);
+    return kind && fwd ? transitionToGroup(kind, fwd) : null;
+  };
+  // A step's colour = the colour of the board status of its target group (data: def.estados).
+  const colorOf = (col: ColumnaEfectiva) =>
+    (kind ? estadoOfGroup(kind, estados, targetOf(col))?.color : null) ?? colColor(col) ?? null;
 
   // Decisión de cada etapa vía la MISMA lógica pura y testeada que CeldaToggleHora
   // (lib/tablero/toggle-hora): una casilla solo manda SU avance o SU propio back (el reverso de su
   // etapa), y si no puede ni avanzar ni deshacer es no-op. Antes «En consulta» calculaba el back
   // desde el estado de la fila y podía deshacer «Presente» (handoff atencion-la-segunda-casilla).
-  const estadoFila = String(fila.estado ?? "");
   const resolved = (col: ColumnaEfectiva) =>
     resolveToggle({
-      estado: estadoFila,
+      kind,
+      row: fila as StagedRow,
       forwardSlug: fwdSlug(col),
       transiciones,
-      estados,
       optimistic: opt[col.clave],
       busy: busy === col.clave,
       // The row's allowedActions (cmr-be 4a), when it carries them: the backend's decision for this user.
       allowed: readAllowedActions(fila),
     });
 
-  // Orden de la cadena = orden del estado destino de cada etapa (dato, no la
-  // composición). Así el encadenamiento respeta el flujo real.
-  const orderedCols = [...cols].sort((a, b) => ordenOf(fwdOf(a)?.toStatus ?? null) - ordenOf(fwdOf(b)?.toStatus ?? null));
+  // Chain order = the care-flow order of each step's target group (not the composition order).
+  const orderedCols = kind ? [...cols].sort((a, b) => flowRank(kind, targetOf(a)) - flowRank(kind, targetOf(b))) : cols;
 
   // Ejecuta la transición de la etapa (el trabajo real). Separado de `toggle` para poder interponer el
   // gate del EHR antes de marcar Presente y reanudar aquí tras completar los datos.
@@ -167,7 +173,7 @@ export function FlujoAtencion({
     // Gate EHR: SOLO al MARCAR la etapa cuyo destino es "presente". Si el enganche está apagado o el EHR
     // no responde, NO se bloquea (fail-open): Presente sigue funcionando como siempre.
     const pacienteId = fila.pacienteId ? String(fila.pacienteId) : "";
-    if (!checked && fwdOf(col)?.toStatus === "presente" && pacienteId) {
+    if (!checked && targetOf(col) === "waiting" && pacienteId) {
       try {
         if (await isEhrEnabled(centroId, "consulta")) {
           const r = await getEhrReadiness(pacienteId, centroId, "consulta");

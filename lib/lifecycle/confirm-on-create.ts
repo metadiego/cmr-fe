@@ -36,3 +36,12 @@ export function bookedUnconfirmedNotice(wanted: boolean, canConfirmHere: boolean
 
 /** The permission that confirms, for both kinds. */
 export const CONFIRM_PERMISSION = "appointments.confirm"
+
+/**
+ * Whether a new appointment starts on «Confirmada» in the create form (a boolean since piece 6b, no status
+ * word). The call center books remotely, so it starts booked; any other channel has the patient present
+ * and starts confirmed (owner, 13-oct-2026). A screen's explicit choice (a board walk-in) wins.
+ */
+export function bornConfirmedByDefault(channel: string | undefined, explicit?: boolean): boolean {
+  return explicit ?? channel !== "callcenter"
+}

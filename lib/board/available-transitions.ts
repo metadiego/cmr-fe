@@ -1,15 +1,14 @@
 // Which declared transitions a board row's action menu offers (components/tablero/tablero-acciones.tsx).
 //
-// A row WITH `allowedActions` (cmr-be piece 4a): every lifecycle move is drawn from the list (stage, date
-// rule and the per-center permission are already in it), so the stored status and the flat permission
-// list are not consulted for those. A transition that is not a lifecycle move (a board's own) keeps the
-// board's rule. A row WITHOUT the list (backend before 4a) keeps the status + permission rule, with Cancel
-// and No-show narrowed by the piece-3 catalogue on the row's stage group (lib/lifecycle/board-action-rules.ts `boardActionView`).
-// Cancel on an arrived row is "not served": same transition, its own label.
+// Piece 6b: every lifecycle move is drawn from the row's `allowedActions` (stage, date rule and the
+// per-center permission are already in it); the old rule by stored status, `fromStatuses` and the flat
+// permission list is gone. The backend stamps the list on every board row since piece 4 (cmr-be
+// `stamp-allowed-actions.ts`, on /board/rows and /frontdesk/tablero), so a row without it offers no
+// lifecycle move. A transition that is not a lifecycle move (a board's own) is offered when its
+// permission is held. Cancel on an arrived row is "not served": same transition, its own label.
 
 import { slugOffered } from "../lifecycle/allowed-actions.ts"
-import { boardActionView, cancelMeaningFromList, CANCEL_SLUG, NOT_SERVE_LABEL_KEY } from "../lifecycle/board-action-rules.ts"
-import type { AppointmentKind } from "../lifecycle/stage-groups.ts"
+import { cancelMeaningFromList, CANCEL_SLUG, NOT_SERVE_LABEL_KEY } from "../lifecycle/board-action-rules.ts"
 
 export interface TransitionLite {
   slug: string
@@ -20,35 +19,25 @@ export interface TransitionLite {
   active?: boolean
 }
 
+/** Whether a slug names a lifecycle move (a door slug or an action key of the catalogue). */
+const isLifecycleMove = (slug: string) => slugOffered(slug, []) !== null
+
 export function availableTransitions<T extends TransitionLite>(
   transitions: readonly T[],
   row: {
-    /** The board's entity: a `cita` board holds medical rows, a session board therapy rows. */
-    kind: AppointmentKind
-    /** The row's board status: a catalogue slug for `fromStatuses`, and the old value its stages derive from. */
-    status: string
-    isTerminal: boolean
+    /** The row's `allowedActions`; null when the row does not carry them. */
     allowed: readonly string[] | null
     can: (permission: string) => boolean
-    /** The row's day and today (YYYY-MM-DD), for No-show on a row without the list. */
-    date?: string | null
-    today: string
   },
 ): T[] {
-  const oldRule = (tr: T) =>
-    (!tr.permissionSlug || row.can(tr.permissionSlug)) &&
-    ((tr.fromStatuses ?? []).includes(row.status) || ((tr.fromStatuses?.length ?? 0) === 0 && !row.isTerminal))
   const notServe = row.allowed !== null && cancelMeaningFromList(row.allowed) === "not_serve"
   return transitions
     .filter((tr) => tr.active !== false)
     .flatMap((tr): T[] => {
-      const listed = slugOffered(tr.slug, row.allowed)
-      if (listed === false) return []
-      if (listed === true) return [notServe && tr.slug === CANCEL_SLUG ? { ...tr, labelKey: NOT_SERVE_LABEL_KEY } : tr]
-      if (!oldRule(tr)) return []
-      // No list (or a board's own slug): Cancel and No-show follow the piece-3 catalogue.
-      const view = boardActionView(tr.slug, tr.labelKey, row.kind, { status: row.status }, row.date, row.today)
-      return view.visible ? [view.labelKey === tr.labelKey ? tr : { ...tr, labelKey: view.labelKey }] : []
+      // Not a lifecycle move (a board's own): offered by permission only; its fromStatuses are no longer read.
+      if (!isLifecycleMove(tr.slug)) return !tr.permissionSlug || row.can(tr.permissionSlug) ? [tr] : []
+      if (slugOffered(tr.slug, row.allowed) !== true) return []
+      return [notServe && tr.slug === CANCEL_SLUG ? { ...tr, labelKey: NOT_SERVE_LABEL_KEY } : tr]
     })
     .sort((a, b) => a.sortOrder - b.sortOrder)
 }

@@ -1,9 +1,8 @@
-import { apiFetch, apiFetchEnvelope, oneCenterPath } from "./client";
+import { apiFetch, apiFetchEnvelope } from "./client";
 import type { components } from "./schema";
 import type { Persistencia } from "./types";
 import type { ColumnaEfectiva, CitaFila } from "./agenda-dia";
 import type { EstadoCitaCatalogo } from "./citas";
-import { readChoice, tenantOf } from "@/lib/clinic-read-scope";
 
 // Catalog column definition (GET /board/columns). `scopes` = which boards
 // it's eligible for. Distinct from ColumnaEfectiva (a placed column).
@@ -17,21 +16,6 @@ export type ColumnaCatalogo = components["schemas"]["ColumnaEntity"];
 export interface Tablero {
   columns: ColumnaEfectiva[];
   rows: CitaFila[];
-}
-
-// tablero: which board composition ("citas" = Atención al Paciente).
-// soloAtencion: only Atención states (confirmada→atendida) — the AP board.
-// The picked center (`centroId`) or `centerIds` goes as `?centerIds=` (lib/clinic-read-scope.ts); neither:
-// the top bar's clinic (every readable one on «Ambos»). Each row carries `clinicId`.
-export async function getTablero(
-  fecha: string,
-  opts: { tablero?: string; centroId?: string; centerIds?: string[]; soloAtencion?: boolean } = {},
-): Promise<Tablero> {
-  const sp = new URLSearchParams({ date: fecha });
-  if (opts.tablero) sp.set("boardSlug", opts.tablero);
-  if (opts.soloAtencion) sp.set("onlyCare", "true");
-  const choice = readChoice(opts.centroId, opts.centerIds);
-  return apiFetch<Tablero>(await oneCenterPath(`/appointments/board?${sp.toString()}`, choice), {}, tenantOf(choice));
 }
 
 // ── Column builder (metadata engine — works for any tablero key) ─────────────
@@ -135,7 +119,16 @@ export interface Transicion {
   requiresConfirmation: boolean;
   sortOrder: number;
   active: boolean;
+  /** 6b backend only: the stage groups of `fromStatuses` / `toStatus` (lib/lifecycle/board-catalogue.ts). */
+  fromGroups?: string[] | null;
+  toGroup?: string | null;
 }
+
+/**
+ * A board status (definicion.estados). `slug` stays the old status word on both backends; the 6b one
+ * also serves its stage `group`. Screens read it through lib/lifecycle/board-catalogue.ts.
+ */
+export type EstadoTablero = EstadoCitaCatalogo & { group?: string | null };
 
 export interface SubTipo {
   id: string;
@@ -148,7 +141,7 @@ export interface SubTipo {
 export interface TableroDefinicion {
   boardSlug: string;
   columns: ColumnaEfectiva[]; // clave opaca `columnas`→`columns`; contenido en español
-  statuses: EstadoCitaCatalogo[];
+  statuses: EstadoTablero[];
   transitions: Transicion[];
   subtypes: SubTipo[];
 }
@@ -290,10 +283,6 @@ export type CreateTableroInput = components["schemas"]["CreateTableroDto"];
 export type UpdateTableroInput = components["schemas"]["UpdateTableroDto"];
 export type CreateColumnaInput = components["schemas"]["CreateColumnaDto"];
 export type UpdateColumnaInput = components["schemas"]["UpdateColumnaDto"];
-export type CreateEstadoInput = components["schemas"]["CreateEstadoDto"];
-export type UpdateEstadoInput = components["schemas"]["UpdateEstadoDto"];
-export type CreateTransicionInput = components["schemas"]["CreateTransicionDto"];
-export type UpdateTransicionInput = components["schemas"]["UpdateTransicionDto"];
 export type CreateSubTipoInput = components["schemas"]["CreateSubtipoDto"];
 export type UpdateSubTipoInput = components["schemas"]["UpdateSubtipoDto"];
 
@@ -317,34 +306,6 @@ export function crearColumna(body: CreateColumnaInput): Promise<ColumnaCatalogo>
 }
 export function actualizarColumna(id: string, body: UpdateColumnaInput): Promise<ColumnaCatalogo> {
   return apiFetch(`/board/columns/${id}`, { method: "PUT", body: JSON.stringify(body) });
-}
-
-// Estados
-export function getEstadosAdmin(tablero: string, all = true): Promise<EstadoCitaCatalogo[]> {
-  return apiFetch(`/board/statuses${q(tablero, all)}`);
-}
-export function crearEstado(body: CreateEstadoInput): Promise<EstadoCitaCatalogo> {
-  return apiFetch(`/board/statuses`, { method: "POST", body: JSON.stringify(body) });
-}
-export function actualizarEstado(id: string, body: UpdateEstadoInput): Promise<EstadoCitaCatalogo> {
-  return apiFetch(`/board/statuses/${id}`, { method: "PUT", body: JSON.stringify(body) });
-}
-export function borrarEstado(id: string): Promise<void> {
-  return apiFetch(`/board/statuses/${id}`, { method: "DELETE" });
-}
-
-// Transiciones
-export function getTransicionesAdmin(tablero: string, all = true): Promise<Transicion[]> {
-  return apiFetch(`/board/transitions${q(tablero, all)}`);
-}
-export function crearTransicion(body: CreateTransicionInput): Promise<Transicion> {
-  return apiFetch(`/board/transitions`, { method: "POST", body: JSON.stringify(body) });
-}
-export function actualizarTransicion(id: string, body: UpdateTransicionInput): Promise<Transicion> {
-  return apiFetch(`/board/transitions/${id}`, { method: "PUT", body: JSON.stringify(body) });
-}
-export function borrarTransicion(id: string): Promise<void> {
-  return apiFetch(`/board/transitions/${id}`, { method: "DELETE" });
 }
 
 // SubTipos

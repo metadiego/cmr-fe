@@ -8,8 +8,9 @@ import {
   setComposicionRender,
   type ColumnaCatalogo,
   type UpdateColumnaInput,
-  type Transicion,
+  type TableroDefinicion,
 } from "@/lib/api/tablero";
+import { doorSlugOptions } from "@/lib/tablero/column-pickers";
 import { listProductos, type Producto } from "@/lib/api/inventario";
 import { listGruposFacturacion } from "@/lib/api/grupos-facturacion";
 import { listPersonalAll, type PersonalEnAlcance } from "@/lib/api/personal";
@@ -51,7 +52,7 @@ export function ColumnConfigDialog({
   tablero,
   renderEfectivo,
   labelActual,
-  transiciones,
+  definition,
   onClose,
   onSaved,
 }: {
@@ -62,7 +63,8 @@ export function ColumnConfigDialog({
   // sobre la que se guarda el label para no perder min/dato/group/transition. null = sin override.
   renderEfectivo?: Record<string, unknown> | null;
   labelActual?: string; // nombre propio actual en este tablero (composición), "" si no tiene
-  transiciones: Transicion[];
+  // The board definition (statuses + transitions): the door picker lists from it.
+  definition: TableroDefinicion | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -93,6 +95,7 @@ export function ColumnConfigDialog({
     Array.isArray(r.capacidades) ? (r.capacidades as string[]).map(String) : [],
   );
   const [transition, setTransition] = React.useState((r.transition as string) ?? "");
+  const doors = React.useMemo(() => doorSlugOptions(definition?.transitions ?? []), [definition]);
   const [estampa, setEstampa] = React.useState((r.estampa as string) ?? "");
   const [group, setGroup] = React.useState((r.group as string) ?? "");
   const [compute, setCompute] = React.useState((r.compute as string) ?? "");
@@ -258,7 +261,7 @@ export function ColumnConfigDialog({
             <Select value={transition} onValueChange={setTransition}>
               <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
               <SelectContent>
-                {transiciones.map((tr) => <SelectItem key={tr.slug} value={tr.slug}>{tr.slug}</SelectItem>)}
+                {doors.map((d) => <SelectItem key={d.value} value={d.value}>{d.value}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>

@@ -18,7 +18,6 @@ import { toastError } from "@/lib/api/errors";
 import { addDaysToDay, canReschedule, pickNextAppointment } from "@/lib/agenda/next-appointment";
 import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
-import { useMe } from "@/hooks/use-me";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,8 +51,6 @@ export function NextAppointmentCell({
   const canConfirmHere = useCanInCenter(CONFIRM_PERMISSION, centroId);
   const format = useFormatter();
   const { can } = useCan();
-  const me = useMe();
-  const actorId = me.kind === "ok" ? me.me.staffId ?? undefined : undefined;
 
   const current = typeof value === "string" && value ? value : null;
   const [open, setOpen] = React.useState(false);
@@ -121,7 +118,6 @@ export function NextAppointmentCell({
             time: appt.time ?? undefined, // only the date moves
             appointmentTypeId: followUp?.id,
             reason: reason.trim() || t("defaultReason"),
-            actorId,
           },
           centroId,
         );

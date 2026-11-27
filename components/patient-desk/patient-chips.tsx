@@ -2,7 +2,14 @@
 
 import { useTranslations } from "next-intl"
 
-import { patientSections, serviceConcluded, type PatientDay } from "@/lib/frontdesk/patient-day"
+import {
+  patientSections,
+  serviceConcluded,
+  type PatientDay,
+} from "@/lib/frontdesk/patient-day"
+import { chipStatus } from "@/lib/frontdesk/patient-chip"
+import type { StageGroup } from "@/lib/lifecycle/stage-groups"
+import type { StageLabel } from "@/lib/lifecycle/stage-labels"
 import type { PatientDayData } from "@/hooks/use-patient-day"
 
 // The chips that summarise a patient's day: one per service (its color + the status of its sessions)
@@ -20,19 +27,23 @@ export function PatientChips({
 }) {
   const t = useTranslations("patientDesk")
   const tRoot = useTranslations()
-  // Label and colour of a status come from the board's own catalogue (board_statuses: slug → labelKey,
-  // color, both set per board by an admin), so they stay keyed by the catalogue slug until piece 6
-  // replaces the catalogue. Decisions about the day read stage groups (lib/frontdesk/patient-day.ts).
-  const statusLabel = (slug: string, consult = false) => {
-    const def = consult ? data.consultationDefinition : data.serviceDefinition
-    const s = def?.statuses.find((x) => x.slug === slug)
-    return s ? tRoot(s.labelKey) : slug
+  // A chip's status: the row's stage label (not served reads as such) in the colour of the board status
+  // of its stage group (lib/frontdesk/patient-chip.ts); the raw status only when no stage is known.
+  type Status = {
+    raw: string
+    group: StageGroup | null
+    label: StageLabel | null
   }
-  const statusColor = (slug: string, consult = false) =>
-    (consult
-      ? data.consultationDefinition
-      : data.serviceDefinition
-    )?.statuses.find((x) => x.slug === slug)?.color ?? null
+  const statusView = (st: Status, consult = false) => {
+    const def = consult ? data.consultationDefinition : data.serviceDefinition
+    const v = chipStatus(
+      consult ? "medical" : "therapy",
+      def?.statuses ?? [],
+      st.group,
+      st.label
+    )
+    return { text: v.labelKey ? tRoot(v.labelKey) : st.raw, color: v.color }
+  }
   const consultLabel = data.consultationTab
     ? tRoot.has(data.consultationTab.labelKey)
       ? tRoot(data.consultationTab.labelKey)
@@ -43,43 +54,49 @@ export function PatientChips({
     key: string,
     color: string | null,
     name: string,
-    status: string,
+    status: Status,
     consult = false,
     concluded = false
-  ) => (
-    <span
-      key={key}
-      className={
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
-        (concluded ? "border-success/50 bg-success/10" : "bg-background")
-      }
-    >
+  ) => {
+    const view = statusView(status, consult)
+    return (
       <span
-        className="size-2 rounded-full"
-        style={{
-          backgroundColor: color || "var(--muted-foreground)",
-        }}
-        aria-hidden
-      />
-      <span className="uppercase">{name}</span>
-      {concluded && (
-        <span className="text-success-foreground" aria-label={t("serviceDone")}>
-          ✓
-        </span>
-      )}
-      {!compact && status && (
+        key={key}
+        className={
+          "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
+          (concluded ? "border-success/50 bg-success/10" : "bg-background")
+        }
+      >
         <span
-          className="rounded-full px-1.5 text-[10px]"
+          className="size-2 rounded-full"
           style={{
-            backgroundColor: `${statusColor(status, consult) ?? "#94a3b8"}22`,
-            color: statusColor(status, consult) ?? undefined,
+            backgroundColor: color || "var(--muted-foreground)",
           }}
-        >
-          {statusLabel(status, consult)}
-        </span>
-      )}
-    </span>
-  )
+          aria-hidden
+        />
+        <span className="uppercase">{name}</span>
+        {concluded && (
+          <span
+            className="text-success-foreground"
+            aria-label={t("serviceDone")}
+          >
+            ✓
+          </span>
+        )}
+        {!compact && view.text && (
+          <span
+            className="rounded-full px-1.5 text-[10px]"
+            style={{
+              backgroundColor: `${view.color ?? "#94a3b8"}22`,
+              color: view.color ?? undefined,
+            }}
+          >
+            {view.text}
+          </span>
+        )}
+      </span>
+    )
+  }
   return (
     <div className="flex flex-wrap gap-1.5">
       {patientSections(patient).map((x) =>
@@ -88,7 +105,11 @@ export function PatientChips({
               x.service.serviceId,
               x.service.color,
               x.service.name,
-              x.service.statuses[0] ?? "",
+              {
+                raw: x.service.statuses[0] ?? "",
+                group: x.service.groups[0] ?? null,
+                label: x.service.labels[0] ?? null,
+              },
               false,
               serviceConcluded(x.service)
             )
@@ -96,7 +117,11 @@ export function PatientChips({
               "consult",
               data.consultationTab?.color ?? null,
               consultLabel,
-              patient.consultationStatuses[0] ?? "",
+              {
+                raw: patient.consultationStatuses[0] ?? "",
+                group: patient.consultationGroups[0] ?? null,
+                label: patient.consultationLabels[0] ?? null,
+              },
               true
             )
       )}

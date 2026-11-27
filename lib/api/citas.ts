@@ -29,20 +29,9 @@ export type StageBookingStatus = NonNullable<ListQuery["bookingStatus"]>[number]
 export type StageCareStatus = NonNullable<ListQuery["careStatus"]>[number];
 export type CanalCita = Cita["channel"];
 
-// State catalog (GET /appointments/statuses): labelKey/color/sortOrder/flags. Drive UI
-// from this instead of hardcoding the state list. Fetched once (memoized promise).
+// A board status row (board_statuses / the 6b definition's statuses). GET /appointments/statuses is gone
+// with the board catalogue (piece 6b): screens read the board definition by stage group instead.
 export type EstadoCitaCatalogo = components["schemas"]["EstadoCitaEntity"];
-
-let estadosPromise: Promise<EstadoCitaCatalogo[]> | null = null;
-export function getEstados(): Promise<EstadoCitaCatalogo[]> {
-  if (!estadosPromise) {
-    estadosPromise = apiFetch<EstadoCitaCatalogo[]>(`/appointments/statuses`).catch((err) => {
-      estadosPromise = null; // let it retry after a failure
-      throw err;
-    });
-  }
-  return estadosPromise;
-}
 
 // Overlap conflict + warning shapes (POST /appointments/validate and meta.advertencias).
 // `advertencias`/`conflictos`/`ok` NO están en el mapa api-ingles → el BE los sirve tal cual (español).
@@ -71,7 +60,6 @@ export interface ListCitasParams {
   /** Care stage(s) once the patient arrived. */
   careStatus?: StageCareStatus[];
   channel?: CanalCita;
-  onlyCare?: boolean; // only states visible to the Atención board
   centerIds?: string[]; // the centers to read; each needs citas.read THERE
 }
 
@@ -314,9 +302,9 @@ export const noShowCita = (id: string, centroId?: string) =>
 export const cancelarCita = (id: string, motivo: string, centroId?: string) =>
   transition(id, "cancel", { reason: motivo }, centroId);
 // Reschedule / move. `centerId` in the BODY = destination center (omit = keep).
-// Cross-center MEDICA SEGUIMIENTO: send the destination `doctorId`. `actorId` =
-// the operator's personal.id (audit trail). `tenant` scopes the request (source
-// center). The BE records a `reprogramada` event with antes/después.
+// Cross-center MEDICA SEGUIMIENTO: send the destination `doctorId`. The actor is the
+// login (the BE takes it from the session; `actorId` is no longer sent, 6b). `tenant`
+// scopes the request (source center). The history shows the move with antes/después.
 export function reagendarCita(
   id: string,
   payload: {
@@ -325,7 +313,6 @@ export function reagendarCita(
     reason: string;
     centerId?: string; // destination center (omit → keep current)
     doctorId?: string;
-    actorId?: string;
     appointmentTypeId?: string; // type of the NEW appointment (omit → the original's)
   },
   tenant?: string,
@@ -355,6 +342,12 @@ export interface CitaEvento {
   } | null;
   isRetroactive: boolean;
   createdAt: string;
+  // From 6b, stage moves come from status_changes (same shape) and add these (absent on older events).
+  source?: "status_changes";
+  action?: string;
+  channel?: string;
+  occurredAt?: string;
+  changes?: { level: string; fromStatus: string | null; toStatus: string | null }[];
 }
 
 export function getHistorial(id: string, centroId?: string): Promise<CitaEvento[]> {

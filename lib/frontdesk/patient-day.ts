@@ -15,6 +15,7 @@ import {
   type StageGroup,
 } from "../lifecycle/stage-groups.ts"
 import { consultationRowStaged } from "./row-stages.ts"
+import { stageLabel, type StageLabel } from "../lifecycle/stage-labels.ts"
 
 // A therapy session of the day (FrontdeskSesionEntity): old status, its stamps and stage columns.
 // `presentAt` is narrowed to a string: it is compared as an ISO instant.
@@ -62,6 +63,7 @@ export interface PatientService {
   sessionIds: string[]
   statuses: string[] // board catalogue slugs, for labels and colours only
   groups: (StageGroup | null)[] // parallel to statuses: the stage group each session is in
+  labels: (StageLabel | null)[] // parallel: the stage label each session shows (not served told apart)
 }
 
 // Who performs a service, in the order the filtered view groups the rest: technician only, nurse
@@ -83,6 +85,7 @@ export interface PatientDay {
   consultationIds: string[]
   consultationStatuses: string[] // board catalogue slugs (labels, isTerminal)
   consultationGroups: (StageGroup | null)[] // parallel: the stage group of each consultation
+  consultationLabels: (StageLabel | null)[] // parallel: the stage label of each consultation
   consultationSubtypes: string[] // parallel to consultationIds/consultationStatuses
   doctorName: string // the consultation's attending doctor (board's "medico" column), "" if none yet
   // The order the patient's sections (services + consultation) are drawn in, set by orderSections.
@@ -127,6 +130,7 @@ export function groupByPatient(
         consultationIds: [],
         consultationStatuses: [],
         consultationGroups: [],
+        consultationLabels: [],
         consultationSubtypes: [],
         doctorName: "",
         earliestTime: null,
@@ -160,6 +164,7 @@ export function groupByPatient(
         sessionIds: [],
         statuses: [],
         groups: [],
+        labels: [],
       }
       p.services.push(ps)
     }
@@ -167,6 +172,7 @@ export function groupByPatient(
     ps.statuses.push(text(s.status))
     const group = rowGroup("therapy", s)
     ps.groups.push(group)
+    ps.labels.push(stageLabel("therapy", s))
     const cancelled = groupIn("therapy", group, CANCELLED)
     if (!cancelled) p.allCancelled = false
     p.earliestTime = minIso(p.earliestTime, s.time ? s.time.slice(0, 5) : null)
@@ -182,8 +188,10 @@ export function groupByPatient(
     const p = get(id, text(c.paciente), text(c.record))
     p.consultationIds.push(c.id)
     p.consultationStatuses.push(text(c.estado))
-    const group = rowGroup("medical", consultationRowStaged(c))
+    const staged = consultationRowStaged(c)
+    const group = rowGroup("medical", staged)
     p.consultationGroups.push(group)
+    p.consultationLabels.push(stageLabel("medical", staged))
     p.consultationSubtypes.push(text(c.subtipo))
     const doctor = text(c.medico)
     if (doctor) p.doctorName = doctor
@@ -207,6 +215,7 @@ export function groupByPatient(
       ps.sessionIds = live.map((i) => ps.sessionIds[i])
       ps.statuses = live.map((i) => ps.statuses[i])
       ps.groups = live.map((i) => ps.groups[i])
+      ps.labels = live.map((i) => ps.labels[i])
     }
 
   // Services in the configured order (the order of `services`), not in arrival order.
@@ -236,7 +245,8 @@ export function serviceConcluded(s: PatientService): boolean {
 
 // Which consultation statuses are final, from the consultation board's definition. Empty = none known,
 // so every consultation counts as still open.
-export type IsTerminal = (status: string) => boolean
+// Given the row's stored word and, when known, its stage group (the group decides).
+export type IsTerminal = (status: string, group?: StageGroup | null) => boolean
 const noneTerminal: IsTerminal = () => false
 
 // A patient is done for the day when nothing is still open — every service session attended or
@@ -248,7 +258,7 @@ export function patientConcluded(
 ): boolean {
   const sessions = p.services.flatMap((s) => s.groups)
   if (sessions.some((g) => !groupIn("therapy", g, CLOSED))) return false
-  if (p.consultationStatuses.some((x) => !isTerminal(x))) return false
+  if (p.consultationStatuses.some((x, i) => !isTerminal(x, p.consultationGroups[i]))) return false
   return (
     sessions.some((g) => groupIn("therapy", g, DONE)) ||
     p.consultationGroups.some((g) => !groupIn("medical", g, NEVER_SEEN))
@@ -444,7 +454,7 @@ export function consultationPending(
   p: PatientDay,
   isTerminal: IsTerminal = noneTerminal
 ): boolean {
-  return p.consultationStatuses.some((x) => !isTerminal(x))
+  return p.consultationStatuses.some((x, i) => !isTerminal(x, p.consultationGroups[i]))
 }
 
 // The configured order: services as they come, then the consultation.

@@ -17,7 +17,6 @@ import {
   personalizarColumna,
   type ColumnaCatalogo,
   type TableroDefinicion,
-  type Transicion,
 } from "@/lib/api/tablero";
 import type { ColumnaEfectiva } from "@/lib/api/agenda-dia";
 import { toastError } from "@/lib/api/errors";
@@ -46,7 +45,7 @@ export function ColumnasTab({ clave }: { clave: string }) {
     catRes.state.kind === "loading" || effRes.state.kind === "loading" || defRes.state.kind === "loading";
   const catalog = (catRes.state.kind === "ok" ? catRes.state.data : []).filter((c) => c.active);
   const efectivas = effRes.state.kind === "ok" ? effRes.state.data : [];
-  const transiciones = defRes.state.kind === "ok" ? defRes.state.data.transitions : [];
+  const definition = defRes.state.kind === "ok" ? defRes.state.data : null;
 
   function reloadAll() {
     catRes.reload();
@@ -68,7 +67,7 @@ export function ColumnasTab({ clave }: { clave: string }) {
       clave={clave}
       catalog={catalog}
       efectivas={efectivas}
-      transiciones={transiciones}
+      definition={definition}
       onChanged={reloadAll}
     />
   );
@@ -119,13 +118,13 @@ function ColumnasEditor({
   clave,
   catalog,
   efectivas,
-  transiciones,
+  definition,
   onChanged,
 }: {
   clave: string;
   catalog: ColumnaCatalogo[];
   efectivas: ColumnaEfectiva[];
-  transiciones: Transicion[];
+  definition: TableroDefinicion | null;
   onChanged: () => void;
 }) {
   const t = useTranslations("configuracion.tableros");
@@ -393,7 +392,7 @@ function ColumnasEditor({
             tablero={clave}
             renderEfectivo={(ef?.render as Record<string, unknown> | null) ?? (configCol.render as Record<string, unknown> | null)}
             labelActual={ef?.label ?? ""}
-            transiciones={transiciones}
+            definition={definition}
             onClose={() => setConfigCol(null)}
             onSaved={onChanged}
           />

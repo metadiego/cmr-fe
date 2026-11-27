@@ -34,6 +34,8 @@ import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
 import { hideCancelledRow } from "@/lib/frontdesk/reopen";
 import { sessionRowStaged } from "@/lib/frontdesk/row-stages";
+import { rowStatusSlug } from "@/lib/board/kpi-chips";
+import { statusGroup } from "@/lib/lifecycle/board-catalogue";
 import { flowColumns, plainColumns, renderColumns, sortBoardRowsNatural } from "@/lib/frontdesk/board-columns";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
@@ -385,12 +387,14 @@ export function FrontdeskBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `can` is a fresh closure every render
   }, [hayDosis, gate.centro, board, sesiones]);
 
-  // Estado de una fila: PREFERIR el `estado` top-level que ahora manda el BE en cada fila (PR #195, la
-  // verdad del flujo), con respaldo a la columna proyectada `fd_estado` y a la entidad de sesión.
+  // A row's status: the row's top-level `estado` (PR #195), else `fd_estado`, else the session's.
   const estadoFila = React.useCallback(
     (f: FrontdeskFila) => String(f.estado ?? f.fd_estado ?? sesiones.get(f.id)?.status ?? ""),
     [sesiones],
   );
+  // The status chip a row counts under, by its stage group (6b); whether the chosen chip is the cancelled one.
+  const chipOf = React.useCallback((f: FrontdeskFila) => rowStatusSlug("therapy", estados, { ...sessionRowStaged(estadoFila(f), sesiones.get(f.id)), estado: estadoFila(f) }), [estados, estadoFila, sesiones]);
+  const filtroCancelado = !!estadoFiltro && statusGroup("therapy", { slug: estadoFiltro }) === "cancelled_or_not_served";
 
   // Filtro compuesto: paciente FIJADO (desplegable) filtra las filas de TODOS los servicios a ese paciente; si no, búsqueda (texto O pacienteId) → ocultar canceladas → KPI.
   const pacienteFiltroId = pacienteFiltro?.id ?? null;
@@ -405,13 +409,13 @@ export function FrontdeskBoard() {
       return q.trim().length >= 2 ? coincide(textosConPaciente, q) || porPaciente : coincide(textosConPaciente, q);
     });
     const conVisibilidad =
-      ocultarCanceladas && estadoFiltro !== "cancelada"
+      ocultarCanceladas && !filtroCancelado
         ? conBusqueda.filter((f) => !hideCancelledRow(sessionRowStaged(estadoFila(f), sesiones.get(f.id)), sesiones.get(f.id)?.date, todayISO()))
         : conBusqueda;
     return estadoFiltro
-      ? conVisibilidad.filter((f) => estadoFila(f) === estadoFiltro)
+      ? conVisibilidad.filter((f) => chipOf(f) === estadoFiltro)
       : conVisibilidad;
-  }, [board, columnas, q, pacienteFiltroId, pacienteIds, sesiones, estadoFiltro, ocultarCanceladas, estadoFila]);
+  }, [board, columnas, q, pacienteFiltroId, pacienteIds, sesiones, estadoFiltro, ocultarCanceladas, estadoFila, chipOf, filtroCancelado]);
 
   // Board order. Natural (sort=null): by stage group, see sortBoardRowsNatural (handoff
   // orden-de-fila-del-tablero-12-oct). A header click sorts by that column (asc/desc); the Flow header
@@ -440,19 +444,15 @@ export function FrontdeskBoard() {
   const toggleSort = (col: string) =>
     setSort((prev) => (prev?.col === col ? (prev.dir === "asc" ? { col, dir: "desc" } : null) : { col, dir: "asc" }));
 
-  // KPIs sobre el set buscado (sin el filtro de estado, para que los conteos guíen).
   const kpis = React.useMemo(() => {
     const filas = board?.rows ?? [];
     const counts = new Map<string, number>();
-    for (const f of filas) {
-      const e = estadoFila(f);
-      counts.set(e, (counts.get(e) ?? 0) + 1);
-    }
+    for (const e of filas.map(chipOf)) counts.set(e, (counts.get(e) ?? 0) + 1);
     // "Todos" refleja lo VISIBLE: si se ocultan canceladas, no las cuenta (evita "Todos: 25" con 22 filas).
     // Los `counts` quedan completos para que la ficha "Cancelada" siga mostrando su número y poder revelarlas.
-    const ocultas = ocultarCanceladas && estadoFiltro !== "cancelada" ? filas.filter((f) => hideCancelledRow(sessionRowStaged(estadoFila(f), sesiones.get(f.id)), sesiones.get(f.id)?.date, todayISO())).length : 0;
+    const ocultas = ocultarCanceladas && !filtroCancelado ? filas.filter((f) => hideCancelledRow(sessionRowStaged(estadoFila(f), sesiones.get(f.id)), sesiones.get(f.id)?.date, todayISO())).length : 0;
     return { counts, total: filas.length - ocultas };
-  }, [board, estadoFila, ocultarCanceladas, estadoFiltro, sesiones]);
+  }, [board, estadoFila, ocultarCanceladas, filtroCancelado, sesiones, chipOf]);
 
   // Until the tabs (services + Consulta) and the board resolve, KPIs/rows would read "0"/empty: skeleton instead.
   const cargando = [servRes, tabsRes, boardRes, defRes].some((r) => r.state.kind === "loading");
@@ -611,7 +611,7 @@ export function FrontdeskBoard() {
                   sesion={sesiones.get(f.id)}
                   colsRender={colsRender}
                   flujoCols={flujoCols}
-                  flujo={flujo.map((e) => ({ clave: e.slug, labelKey: e.labelKey, color: e.color }))}
+                  flujo={flujo.map((e) => ({ clave: e.slug, labelKey: e.labelKey, color: e.color, group: e.group }))}
                   transiciones={def?.transitions ?? []}
                   estadoDe={estadoDe}
                   servicio={servicioActivo}

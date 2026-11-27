@@ -146,10 +146,12 @@ export function ConsultationRows({
           onRefresh={onChanged}
           optionsByCol={options}
           transiciones={definition?.transitions ?? []}
+          kind="medical"
           estados={(definition?.statuses ?? []).map((s) => ({
             clave: s.slug,
             orden: s.sortOrder,
             color: s.color,
+            group: s.group,
           }))}
           density="compacto"
           renderAccion={(row, col) => (

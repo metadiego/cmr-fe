@@ -15,7 +15,7 @@ import { CitaModal } from "@/components/agenda/cita-modal";
 /**
  * «Agregar cita» from a board (patient desk, generic boards): the same CitaModal as Citas, so it ends in
  * the booking success dialog like every other booking (spec 2026-11-23 §6). The board's walk-in defaults:
- * today, the next whole hour (editable), status «confirmada» so it lands on today's board, and the
+ * today, the next whole hour (editable), born confirmed so it lands on today's board, and the
  * patient preloaded when the board already has one. The BE keeps one live appointment per patient
  * (a different day moves it; the success dialog says «Cita movida»).
  */
@@ -66,7 +66,7 @@ export function BoardAppointmentModal({
       tipos={tiposRes.state.kind === "ok" ? tiposRes.state.data : []}
       medicos={medicosRes.state.kind === "ok" ? medicosRes.state.data : []}
       canal="frontdesk"
-      estadoInicial="confirmada"
+      confirmedInitial
       onOpenChange={(o) => !o && onClose()}
       onSaved={() => onSaved?.()}
       onPatientDataClosed={(p) => {
