@@ -34,8 +34,9 @@ export type CallStatistics = {
   byHour: (CallBreakdown & { hour: number })[];
 };
 
-export function getCallStatistics(from: string, to: string, centroId?: string | null): Promise<CallStatistics> {
+export function getCallStatistics(from: string, to: string, pbx?: string, centroId?: string | null): Promise<CallStatistics> {
   const sp = new URLSearchParams({ from, to });
+  if (pbx) sp.set("pbx", pbx);
   return apiFetch<CallStatistics>(`/callcenter/statistics?${sp.toString()}`, {}, centroId);
 }
 
@@ -51,15 +52,18 @@ export function getMissedReport(
   from: string,
   to: string,
   direction?: CallDirection,
+  pbx?: string,
   centroId?: string | null,
 ): Promise<MissedReport> {
   const sp = new URLSearchParams({ from, to });
   if (direction) sp.set("direction", direction);
+  if (pbx) sp.set("pbx", pbx);
   return apiFetch<MissedReport>(`/callcenter/missed-report?${sp.toString()}`, {}, centroId);
 }
 
 export type Call = {
   id: string;
+  /** "ucm-bayamon" | "3cx". */
   pbx: string;
   from: string | null;
   toNumber: string | null;
@@ -92,6 +96,7 @@ export type ListCallsParams = {
   staffId?: string;
   number?: string;
   direction?: CallDirection;
+  pbx?: string;
   page?: number;
   limit?: number;
 };
@@ -201,4 +206,40 @@ export function updateCallcenterSettings(centerId: string, payload: CallcenterSe
     method: "PUT",
     body: JSON.stringify(payload),
   });
+}
+
+// --- Phase 3 (cmr-be #728, handoff-callcenter-devolver-y-grabaciones): callback + recordings. The
+// Bayamón agent runs these; until it's installed on ServerPHP (needs the owner's password), every
+// command stays "pending" — the screen must say so plainly, not spin forever silently.
+
+export type CallcenterCommandStatus = "pending" | "done" | "failed";
+
+export type CallcenterCommand = {
+  id: string;
+  status: CallcenterCommandStatus;
+  error?: string | null;
+};
+
+export type CallbackResult = CallcenterCommand & {
+  number: string;
+  extension: string;
+};
+
+/** `extension` omitted = the call's own extension (the BE's own default). */
+export function postCallcenterCallback(callId: string, extension?: string, centroId?: string | null): Promise<CallbackResult> {
+  return apiFetch<CallbackResult>(
+    `/callcenter/calls/${encodeURIComponent(callId)}/callback`,
+    { method: "POST", body: JSON.stringify(extension ? { extension } : {}) },
+    centroId,
+  );
+}
+
+export function getCallcenterCommand(id: string, centroId?: string | null): Promise<CallcenterCommand> {
+  return apiFetch<CallcenterCommand>(`/callcenter/commands/${encodeURIComponent(id)}`, {}, centroId);
+}
+
+export type RecordingResult = { status: "ready"; url: string } | { status: "pending" | "taken"; commandId: string };
+
+export function postCallcenterRecording(callId: string, centroId?: string | null): Promise<RecordingResult> {
+  return apiFetch<RecordingResult>(`/callcenter/calls/${encodeURIComponent(callId)}/recording`, { method: "POST" }, centroId);
 }

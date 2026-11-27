@@ -49,3 +49,21 @@ export function isLiveRowStale(agentReportedAt: string, now: Date, staleAfterMin
   if (!Number.isFinite(ts)) return true;
   return now.getTime() - ts > staleAfterMinutes * 60_000;
 }
+
+// Phase 3 (handoff-callcenter-devolver-y-grabaciones): the switchboard split is the main difference
+// from the legacy screen — its KPIs count only the UCM (132, matching exactly); ours used to add the
+// 3CX in by default (198). "all" keeps today's combined behaviour; "ucm-bayamon" is the new default.
+export type CallcenterPbx = "ucm-bayamon" | "3cx" | "all";
+
+/** The `pbx` query param for a selector choice — "all" means "omit it" (today's combined read). */
+export function pbxParam(selection: CallcenterPbx): string | undefined {
+  return selection === "all" ? undefined : selection;
+}
+
+/** Whether "Devolver" makes sense for a call: `from` is the PATIENT'S number only when they're the
+ *  one who called in (entrante/facebook/marypili) — on a "saliente" call `from` is our own extension
+ *  (we placed it), and on an "interna" call there is no outside number at all. Calling either of
+ *  those back would dial an extension, not a patient — bulletproofing the one "Devolver" exists for. */
+export function canCallBack(call: { from: string | null; address: string | null }): boolean {
+  return !!call.from?.trim() && (call.address === "entrante" || call.address === "facebook" || call.address === "marypili");
+}

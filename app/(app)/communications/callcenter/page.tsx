@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { getCallStatistics, getLiveCalls, getMissedReport, getPushHealth } from "@/lib/api/callcenter";
-import { quickRange } from "@/lib/comunicaciones/callcenter-dashboard";
+import { pbxParam, quickRange, type CallcenterPbx } from "@/lib/comunicaciones/callcenter-dashboard";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useCitaStream } from "@/hooks/use-cita-stream";
@@ -16,6 +16,8 @@ import { SegmentedControl } from "@/components/kit/segmented-control";
 import { LoadingPanel, ErrorState } from "@/components/kit/panel";
 import { CallcenterLagBanner } from "@/components/comunicaciones/callcenter/callcenter-lag-banner";
 import { CallcenterLivePanel } from "@/components/comunicaciones/callcenter/callcenter-live-panel";
+import { Callcenter3cxPanel } from "@/components/comunicaciones/callcenter/callcenter-3cx-panel";
+import { CallcenterPbxSelector } from "@/components/comunicaciones/callcenter/callcenter-pbx-selector";
 import { CallcenterStatsSection } from "@/components/comunicaciones/callcenter/callcenter-stats-section";
 import { CallcenterCallsTable } from "@/components/comunicaciones/callcenter/callcenter-calls-table";
 import { CallcenterMissedReport } from "@/components/comunicaciones/callcenter/callcenter-missed-report";
@@ -34,13 +36,16 @@ export default function CallcenterPage() {
   const [customTo, setCustomTo] = React.useState(today.to);
   const { from, to } = rangeKind === "range" ? { from: customFrom, to: customTo } : quickRange(rangeKind, new Date());
 
+  // Default UCM Bayamón (handoff §1): it matches the legacy screen's own count exactly; "Todas" is
+  // today's prior combined behaviour. The 3CX panel below is independent of this — always 3CX, always today.
+  const [pbx, setPbx] = React.useState<CallcenterPbx>("ucm-bayamon");
   const [section, setSection] = React.useState<Section>("calls");
   const [refreshKey, setRefreshKey] = React.useState(0);
 
-  const statsKey = `${from}|${to}`;
-  const { state: statsState, refresh: refreshStats } = useResource(() => getCallStatistics(from, to, null), [statsKey]);
+  const statsKey = `${from}|${to}|${pbx}`;
+  const { state: statsState, refresh: refreshStats } = useResource(() => getCallStatistics(from, to, pbxParam(pbx), null), [statsKey]);
   const { state: missedState, refresh: refreshMissed } = useResource(
-    () => (section === "missed" ? getMissedReport(from, to, undefined, null) : Promise.resolve(null)),
+    () => (section === "missed" ? getMissedReport(from, to, undefined, pbxParam(pbx), null) : Promise.resolve(null)),
     [statsKey, section],
   );
   const { state: liveState, refresh: refreshLive } = useResource(() => getLiveCalls(null), []);
@@ -75,18 +80,21 @@ export default function CallcenterPage() {
 
       <CallcenterLagBanner health={health} />
 
-      <div className="flex flex-wrap items-center gap-2">
-        {(["today", "week", "range"] as const).map((k) => (
-          <Button key={k} size="sm" variant={rangeKind === k ? "default" : "outline"} onClick={() => setRangeKind(k)}>
-            {t(`range.${k}`)}
-          </Button>
-        ))}
-        {rangeKind === "range" && (
-          <>
-            <DatePicker value={customFrom} onChange={setCustomFrom} className="h-9 w-[150px]" />
-            <DatePicker value={customTo} min={customFrom} onChange={setCustomTo} className="h-9 w-[150px]" />
-          </>
-        )}
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {(["today", "week", "range"] as const).map((k) => (
+            <Button key={k} size="sm" variant={rangeKind === k ? "default" : "outline"} onClick={() => setRangeKind(k)}>
+              {t(`range.${k}`)}
+            </Button>
+          ))}
+          {rangeKind === "range" && (
+            <>
+              <DatePicker value={customFrom} onChange={setCustomFrom} className="h-9 w-[150px]" />
+              <DatePicker value={customTo} min={customFrom} onChange={setCustomTo} className="h-9 w-[150px]" />
+            </>
+          )}
+        </div>
+        <CallcenterPbxSelector value={pbx} onChange={setPbx} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
@@ -107,7 +115,7 @@ export default function CallcenterPage() {
           />
 
           {section === "calls" && (
-            <CallcenterCallsTable from={from} to={to} refreshKey={refreshKey} onOpenPatient={(id) => router.push(`/patients/${id}`)} />
+            <CallcenterCallsTable from={from} to={to} pbx={pbx} refreshKey={refreshKey} onOpenPatient={(id) => router.push(`/patients/${id}`)} />
           )}
           {section === "missed" && (
             <>
@@ -118,8 +126,9 @@ export default function CallcenterPage() {
           )}
         </div>
 
-        <div className="lg:sticky lg:top-4 lg:self-start">
+        <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
           <CallcenterLivePanel calls={live} />
+          <Callcenter3cxPanel from={today.from} refreshKey={refreshKey} />
         </div>
       </div>
     </PageContainer>

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { callcenterTabParams, formatMinSec, isLiveRowStale, quickRange } from "./callcenter-dashboard.ts";
+import { callcenterTabParams, canCallBack, formatMinSec, isLiveRowStale, pbxParam, quickRange } from "./callcenter-dashboard.ts";
 
 test("callcenterTabParams: answered/missed/all map straight through", () => {
   assert.deepEqual(callcenterTabParams("answered"), { tab: "answered" });
@@ -55,4 +55,31 @@ test("isLiveRowStale: an hour-old heartbeat is stale, never shown as live", () =
 
 test("isLiveRowStale: an unparseable timestamp is treated as stale, never as live", () => {
   assert.equal(isLiveRowStale("not-a-date", new Date()), true);
+});
+
+test("pbxParam: 'all' omits the param (today's combined behaviour); the others pass through", () => {
+  assert.equal(pbxParam("all"), undefined);
+  assert.equal(pbxParam("ucm-bayamon"), "ucm-bayamon");
+  assert.equal(pbxParam("3cx"), "3cx");
+});
+
+test("canCallBack: entrante/facebook/marypili carry the patient's own number in `from`", () => {
+  assert.equal(canCallBack({ from: "7871234567", address: "entrante" }), true);
+  assert.equal(canCallBack({ from: "7871234567", address: "facebook" }), true);
+  assert.equal(canCallBack({ from: "7871234567", address: "marypili" }), true);
+});
+
+test("canCallBack: an internal call is never callable back, even with a from", () => {
+  assert.equal(canCallBack({ from: "2222", address: "interna" }), false);
+});
+
+test("canCallBack: a saliente call's `from` is OUR OWN extension, not the patient — never callable back", () => {
+  // Real prod case this guards: an outbound call's `from` was "2257" (the operator's own
+  // extension), which "Devolver" would otherwise have tried to call.
+  assert.equal(canCallBack({ from: "2257", address: "saliente" }), false);
+});
+
+test("canCallBack: no number at all (blank or missing) is never callable back", () => {
+  assert.equal(canCallBack({ from: null, address: "entrante" }), false);
+  assert.equal(canCallBack({ from: "  ", address: "entrante" }), false);
 });

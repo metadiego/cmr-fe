@@ -4,13 +4,16 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { listCalls, type Call } from "@/lib/api/callcenter";
-import { callcenterTabParams, formatMinSec, type CallcenterTab } from "@/lib/comunicaciones/callcenter-dashboard";
+import { callcenterTabParams, canCallBack, formatMinSec, pbxParam, type CallcenterPbx, type CallcenterTab } from "@/lib/comunicaciones/callcenter-dashboard";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { SegmentedControl } from "@/components/kit/segmented-control";
 import { StatusBadge } from "@/components/kit/status-badge";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/kit/field";
+import { CallcenterCallbackButton } from "./callcenter-callback-button";
+import { CallcenterRecordingButton } from "./callcenter-recording-button";
 
 const TABS: readonly { value: CallcenterTab; labelKey: string }[] = [
   { value: "answered", labelKey: "tabAnswered" },
@@ -29,15 +32,19 @@ function fmtTime(iso: string | null): string {
 export function CallcenterCallsTable({
   from,
   to,
+  pbx,
   onOpenPatient,
   refreshKey,
 }: {
   from: string;
   to: string;
+  pbx: CallcenterPbx;
   onOpenPatient: (patientId: string) => void;
   refreshKey: number;
 }) {
   const t = useTranslations("callcenter");
+  const { can } = useCan();
+  const canCallback = can("callcenter.callback");
   const [tab, setTab] = React.useState<CallcenterTab>("all");
   const [extension, setExtension] = React.useState("");
   const [number, setNumber] = React.useState("");
@@ -50,7 +57,16 @@ export function CallcenterCallsTable({
     };
   }
 
-  const params = { from, to, ...callcenterTabParams(tab), extension: extension.trim() || undefined, number: number.trim() || undefined, page, limit: 50 };
+  const params = {
+    from,
+    to,
+    ...callcenterTabParams(tab),
+    extension: extension.trim() || undefined,
+    number: number.trim() || undefined,
+    pbx: pbxParam(pbx),
+    page,
+    limit: 50,
+  };
   const key = JSON.stringify(params) + "|" + refreshKey;
   const { state } = useResource(() => listCalls(params, null), [key]);
   const rowsState = state.kind === "ok" ? ({ kind: "ok" as const, data: state.data.items }) : state;
@@ -78,6 +94,17 @@ export function CallcenterCallsTable({
     { key: "duration", header: t("colDuration"), cell: (c) => formatMinSec(c.talkTimeSeconds), align: "right" },
     { key: "status", header: t("colStatus"), cell: (c) => <StatusBadge kind="call" value={c.status} /> },
     { key: "channel", header: t("colChannel"), cell: (c) => (t.has(`channel.${c.channel}`) ? t(`channel.${c.channel}`) : c.channel) },
+    {
+      key: "actions",
+      header: "",
+      cell: (c) => (
+        <div className="flex items-center justify-end gap-1.5">
+          {c.recordingFile && <CallcenterRecordingButton callId={c.id} />}
+          {canCallback && canCallBack(c) && <CallcenterCallbackButton call={c} />}
+        </div>
+      ),
+      align: "right",
+    },
   ];
 
   return (
