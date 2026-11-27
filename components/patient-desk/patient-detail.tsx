@@ -307,9 +307,9 @@ export function PatientDetail({
             {patient.earliestTime
               ? `· ${t("firstAt", { time: patient.earliestTime })}`
               : ""}
-          </div>
-          {/* Status under the name (present or not, with its own fixes); actions sit on the right. */}
-          <div className="mt-2 flex flex-wrap items-center gap-1">
+          {/* Presence sits on the record line, after the first-appointment time (owner, 27-nov-2026:
+              saves a line); compact h-6 controls so the line keeps the text's height. */}
+          <div className="ml-2 flex flex-wrap items-center gap-1">
           {/* Un único botón para servicios Y consulta, indistinto de cuál tenga el paciente (13-oct-2026):
               antes solo aparecía con servicios, dejando a quien SOLO tiene consulta sin forma de llegar
               aquí salvo por su propia fila — justo la fila que acabamos de ocultar. */}
@@ -321,15 +321,15 @@ export function PatientDetail({
               // is green; its actions sit beside it as ordinary quiet buttons (a yellow button inside the
               // green bar made the header loud and read as two states).
               <div className="flex items-center gap-1">
-                <span className="inline-flex h-7 items-center gap-1 rounded-full bg-emerald-600 px-2.5 text-xs font-semibold text-white tabular-nums">
-                  <HugeiconsIcon icon={Tick02Icon} className="size-3.5" />
+                <span className="inline-flex h-6 items-center gap-1 rounded-full bg-emerald-600 px-2 text-[11px] font-semibold text-white tabular-nums">
+                  <HugeiconsIcon icon={Tick02Icon} className="size-3" />
                   {t("presentAt", { time: fmtHora(patient.presentAt) })}
                 </span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs text-muted-foreground"
+                  className="h-6 px-1.5 text-[11px] text-muted-foreground"
                   disabled={presenceBusy}
                   onClick={handleUndoPresent}
                 >
@@ -341,7 +341,7 @@ export function PatientDetail({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-7 text-xs"
+                    className="h-6 px-2 text-[11px]"
                     disabled={presenceBusy}
                     onClick={handlePresent}
                   >
@@ -355,7 +355,7 @@ export function PatientDetail({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 border-dashed border-muted-foreground text-muted-foreground hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                className="h-6 px-2 text-[11px] border-dashed border-muted-foreground text-muted-foreground hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                 title={t("markPresentHint")}
                 disabled={presenceBusy}
                 onClick={handlePresent}
@@ -363,6 +363,7 @@ export function PatientDetail({
                 {t("markPresent")}
               </Button>
             ))}
+          </div>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
