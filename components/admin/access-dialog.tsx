@@ -28,7 +28,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SegmentedControl } from "@/components/kit/segmented-control"
 import {
   Select,
   SelectContent,
@@ -39,7 +39,8 @@ import {
 
 const GLOBAL = "__global__"
 
-// A login's access sheet: permission exceptions and the menu preview, scoped to a center or global.
+// A login's access sheet («Qué puede abrir»): per center, the screens their roles open (a switch adds an
+// exception for this person only), the exceptions they have, and the raw permission list under «Avanzado».
 // Roles and centers are no longer here: they are the person's positions, edited on the staff record
 // (docs/specs/positions-and-centers.md).
 export function AccessDialog({
@@ -77,64 +78,125 @@ function defaultCentroDe(profile: Perfil): string {
   const centrosDeRoles = new Set(
     roles.map((r) => r.centerId).filter((c): c is string => c !== null)
   )
-  return !tieneRolGlobal && centrosDeRoles.size === 1 ? [...centrosDeRoles][0] : GLOBAL
+  return !tieneRolGlobal && centrosDeRoles.size >= 1 ? [...centrosDeRoles][0] : GLOBAL
 }
 
 function AccessPanel({ profile }: { profile: Perfil }) {
   const t = useTranslations("admin.access")
   const [centro, setCentro] = React.useState<string>(() => defaultCentroDe(profile))
   const centroId = centro === GLOBAL ? undefined : centro
+  const [advanced, setAdvanced] = React.useState(false)
 
   const centers = useResource<Centro[]>(() => getCenters())
   const access = useResource<ProfileAccess>(
     () => getProfileAccess(profile.id, centroId),
     [profile.id, centro]
   )
+  const scopeOptions = [
+    ...(centers.state.kind === "ok" ? centers.state.data.map((c) => ({ value: c.id, label: c.name })) : []),
+    { value: GLOBAL, label: t("allCenters") },
+  ]
+
+  // What the person can open, per center: the screens (from their roles, with this person's exceptions)
+  // first; the exceptions they have, listed; the raw permission catalogue folded away under «Avanzado».
+  return (
+    <div className="mt-2 space-y-5">
+      <SegmentedControl
+        options={scopeOptions}
+        value={centro}
+        onChange={setCentro}
+        ariaLabel={t("scope")}
+        className="w-full"
+      />
+      <section className="space-y-2">
+        <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">{t("screensTitle")}</h3>
+        <p className="text-xs text-muted-foreground">{t("screensHelp")}</p>
+        <MenuPreviewTab profile={profile} centroId={centroId} centro={centro} onChanged={access.reload} />
+      </section>
+
+      <OverridesList profile={profile} centroId={centroId} access={access.state} onChanged={access.reload} />
+
+      <section className="border-t pt-4">
+        <button
+          type="button"
+          onClick={() => setAdvanced((v) => !v)}
+          aria-expanded={advanced}
+          className="text-xs font-medium text-muted-foreground hover:text-foreground"
+        >
+          {advanced ? "▾" : "▸"} {t("advanced")}
+        </button>
+        {advanced && (
+          <div className="mt-3">
+            <ExceptionsTab profile={profile} centroId={centroId} access={access.state} onChanged={access.reload} />
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
+
+// The exceptions this person has in the chosen scope, in words, each removable.
+function OverridesList({
+  profile,
+  centroId,
+  access,
+  onChanged,
+}: {
+  profile: Perfil
+  centroId?: string
+  access: ReturnType<typeof useResource<ProfileAccess>>["state"]
+  onChanged: () => void
+}) {
+  const t = useTranslations("admin.access")
+  const tRoot = useTranslations()
+  const [busy, setBusy] = React.useState<string | null>(null)
+  if (access.kind !== "ok") return null
+  const list = access.data.overrides
+  const describe = (slug: string) => access.data.permissions.find((p) => p.slug === slug)?.description || slug
 
   return (
-    <div className="mt-4 space-y-4">
-      <div className="space-y-1.5">
-        <span className="text-sm text-muted-foreground">{t("scope")}</span>
-        <Select value={centro} onValueChange={setCentro}>
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={GLOBAL}>{t("global")}</SelectItem>
-            {centers.state.kind === "ok" &&
-              centers.state.data.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Tabs defaultValue="exceptions">
-        <TabsList>
-          <TabsTrigger value="exceptions">{t("tabs.exceptions")}</TabsTrigger>
-          <TabsTrigger value="menu">{t("tabs.menu")}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="exceptions" className="mt-4">
-          <ExceptionsTab
-            profile={profile}
-            centroId={centroId}
-            access={access.state}
-            onChanged={access.reload}
-          />
-        </TabsContent>
-
-        <TabsContent value="menu" className="mt-4">
-          <MenuPreviewTab
-            profile={profile}
-            centroId={centroId}
-            centro={centro}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+    <section className="space-y-2 border-t pt-4">
+      <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        {t("overridesTitle", { count: list.length })}
+      </h3>
+      {list.length === 0 ? (
+        <p className="text-xs text-muted-foreground">{t("overridesNone")}</p>
+      ) : (
+        <ul className="divide-y rounded-lg border">
+          {list.map((o) => (
+            <li key={o.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+              <span className="min-w-0">
+                <span className="block truncate">{describe(o.permissionSlug)}</span>
+                <span className="font-mono text-[11px] text-muted-foreground">{o.permissionSlug}</span>
+              </span>
+              <span className="flex shrink-0 items-center gap-2">
+                <Badge variant={o.effect === "grant" ? "outline" : "destructive"}>
+                  {o.effect === "grant" ? t("overrideGrant") : t("overrideDeny")}
+                </Badge>
+                <button
+                  type="button"
+                  disabled={busy === o.id}
+                  onClick={async () => {
+                    setBusy(o.id)
+                    try {
+                      await removeProfileOverride(profile.id, o.permissionId, centroId)
+                      onChanged()
+                    } catch (err) {
+                      toastError(err, tRoot)
+                    } finally {
+                      setBusy(null)
+                    }
+                  }}
+                  className="text-xs text-muted-foreground hover:text-destructive"
+                >
+                  {t("overrideRemove")}
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   )
 }
 
@@ -216,7 +278,7 @@ function ExceptionsTab({
             const value: TriState = p.override ?? "inherit"
             const concedidos = new Set(centrosDe(p).map((c) => c.id))
             return (
-              <div key={p.slug} className="space-y-2 rounded-md bg-card px-3 py-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+              <div key={p.slug} className="space-y-2 rounded-lg border bg-card px-3 py-2">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -297,10 +359,13 @@ function MenuPreviewTab({
   profile,
   centroId,
   centro,
+  onChanged,
 }: {
   profile: Perfil
   centroId?: string
   centro: string
+  /** An exception was added or removed (the exceptions list reloads). */
+  onChanged?: () => void
 }) {
   const t = useTranslations("admin.access")
   const tRoot = useTranslations()
@@ -356,6 +421,7 @@ function MenuPreviewTab({
       }
       refresh()
       refreshAccess()
+      onChanged?.()
     } catch (err) {
       toastError(err, tRoot)
     } finally {
@@ -368,39 +434,38 @@ function MenuPreviewTab({
   if (state.data.length === 0)
     return <p className="text-sm text-muted-foreground">{t("menuEmpty")}</p>
 
+  const items = state.data.filter((i) => i.type !== "separador" && i.visible !== false)
+  const allowedCount = items.filter((i) => i.type !== "grupo" && i.allowed).length
+
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted-foreground">{t("menuEditableHelp")}</p>
-      <ul className="space-y-1">
-        {state.data.map((item) => {
+      <p className="text-xs tabular-nums text-muted-foreground">{t("screensCount", { count: allowedCount })}</p>
+      <ul className="divide-y rounded-lg border">
+        {items.map((item) => {
+          const label = item.customLabel || safe(tRoot, item.labelKey)
+          if (item.type === "grupo") {
+            return (
+              <li key={item.id} className="bg-muted/30 px-3 py-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                {label}
+              </li>
+            )
+          }
           const permiso = item.requiresPermiso
           const esExcepcion = permiso ? overridePorClave.has(permiso) : false
           return (
-            <li
-              key={item.id}
-              className="flex items-center justify-between gap-3 rounded-md bg-card px-3 py-2 text-sm shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
-              style={{ marginLeft: item.parentSlug ? 16 : 0 }}
-            >
-              <span
-                className={
-                  item.allowed ? "" : "text-muted-foreground line-through"
-                }
-              >
-                {safe(tRoot, item.labelKey)}
-              </span>
+            <li key={item.id} className={cn("flex items-center justify-between gap-3 px-3 py-2 text-sm", item.parentSlug && "pl-6")}>
+              <span className={item.allowed ? "" : "text-muted-foreground"}>{label}</span>
               <div className="flex shrink-0 items-center gap-2">
-                {esExcepcion && (
-                  <Badge variant="outline">{t("excepcion")}</Badge>
-                )}
+                {esExcepcion && <Badge variant="outline">{t("excepcion")}</Badge>}
                 {permiso ? (
                   <Switch
                     checked={item.allowed}
                     disabled={busy === permiso}
                     onCheckedChange={(v) => toggle(permiso, v)}
-                    aria-label={safe(tRoot, item.labelKey)}
+                    aria-label={label}
                   />
                 ) : (
-                  <Badge variant="secondary">{t("sinPermiso")}</Badge>
+                  <span className="text-xs text-muted-foreground">{t("sinPermiso")}</span>
                 )}
               </div>
             </li>

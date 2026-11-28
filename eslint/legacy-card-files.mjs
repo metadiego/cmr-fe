@@ -38,7 +38,6 @@ export const LEGACY_CARD_FILES = [
   "app/auth/set-password/page.tsx",
   "app/login/page.tsx",
   "app/oauth/consent/page.tsx",
-  "components/admin/access-dialog.tsx",
   "components/admin/codigo-acceso-dialog.tsx",
   "components/admin/datos-fiscales-dialog.tsx",
   "components/admin/editor-rol.tsx",

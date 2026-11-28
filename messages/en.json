@@ -1694,7 +1694,7 @@
       "adminRoleFixed": "The Administrator role has full access and cannot be edited."
     },
     "access": {
-      "title": "User access",
+      "title": "What they can open",
       "scope": "Scope",
       "global": "Global (all centers)",
       "tabs": {
@@ -1730,7 +1730,17 @@
       "sinCentros": "No centers assigned.",
       "rolesGlobales": "Roles in ALL centers",
       "sinRolesGlobales": "None",
-      "anadir": "+ Add"
+      "anadir": "+ Add",
+      "allCenters": "All centers",
+      "screensTitle": "Screens",
+      "screensHelp": "What their roles open at this center. A switch adds an exception for this person only; for many people, change the role.",
+      "screensCount": "Screens open: {count}",
+      "overridesTitle": "This person's exceptions ({count})",
+      "overridesNone": "None: everything comes from their roles.",
+      "overrideGrant": "Given",
+      "overrideDeny": "Removed",
+      "overrideRemove": "Remove",
+      "advanced": "Advanced: every permission"
     },
     "menu": {
       "title": "Dynamic menu",
@@ -1822,7 +1832,7 @@
     "cancel": "Cancel",
     "users": {
       "invite": "Invite user",
-      "access": "Access",
+      "access": "What they can open",
       "centros": "Centers",
       "editar": "Edit user",
       "suspender": "Suspend",
@@ -7779,7 +7789,11 @@
     },
     "inactive": "hidden",
     "none": "No functions: they will not appear in any picker once pickers read from here.",
-    "selectedCount": "{count} of {total}"
+    "selectedCount": "{count} of {total}",
+    "groupHelp": {
+      "tasks": "Their job at the clinic (doctor, nurse, front desk…).",
+      "services": "The services they can deliver. Used to list them in pickers and to count available staff when booking that service (once bookings read from here)."
+    }
   },
   "homeCenter": {
     "label": "Home center",

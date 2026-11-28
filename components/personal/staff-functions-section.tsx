@@ -78,6 +78,7 @@ export function StaffFunctionsSection({
                   <span>{t(`group.${group}`)}</span>
                   <span className="tabular-nums normal-case">{t("selectedCount", { count, total: list.length })}</span>
                 </legend>
+                <p className="text-xs text-muted-foreground">{t(`groupHelp.${group}`)}</p>
                 {list.length === 0 ? (
                   <p className="text-xs text-muted-foreground">{t("emptyGroup")}</p>
                 ) : (

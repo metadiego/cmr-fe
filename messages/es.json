@@ -1694,7 +1694,7 @@
       "adminRoleFixed": "El rol Administrador tiene acceso total y no se edita."
     },
     "access": {
-      "title": "Accesos del usuario",
+      "title": "Qué puede abrir",
       "scope": "Ámbito",
       "global": "Global (todos los centros)",
       "tabs": {
@@ -1730,7 +1730,17 @@
       "sinCentros": "Sin centros asignados.",
       "rolesGlobales": "Roles en TODOS los centros",
       "sinRolesGlobales": "Ninguno",
-      "anadir": "+ Añadir"
+      "anadir": "+ Añadir",
+      "allCenters": "Todos los centros",
+      "screensTitle": "Pantallas",
+      "screensHelp": "Lo que le abren sus roles en este centro. Un interruptor crea una excepción solo para esta persona; para mucha gente, cambia el rol.",
+      "screensCount": "Pantallas abiertas: {count}",
+      "overridesTitle": "Excepciones de esta persona ({count})",
+      "overridesNone": "Ninguna: todo viene de sus roles.",
+      "overrideGrant": "Dada",
+      "overrideDeny": "Quitada",
+      "overrideRemove": "Quitar",
+      "advanced": "Avanzado: todos los permisos"
     },
     "menu": {
       "title": "Menú dinámico",
@@ -1822,7 +1832,7 @@
     "cancel": "Cancelar",
     "users": {
       "invite": "Invitar usuario",
-      "access": "Accesos",
+      "access": "Qué puede abrir",
       "centros": "Centros",
       "editar": "Editar usuario",
       "suspender": "Suspender",
@@ -7779,7 +7789,11 @@
     },
     "inactive": "oculta",
     "none": "Sin funciones: no saldrá en ningún selector cuando el sistema los lea de aquí.",
-    "selectedCount": "{count} de {total}"
+    "selectedCount": "{count} de {total}",
+    "groupHelp": {
+      "tasks": "Su trabajo en la clínica (médico, enfermera, recepción…).",
+      "services": "Los servicios que sabe dar. Sirven para ponerla en los selectores y para contar el personal disponible al reservar ese servicio (cuando las reservas lean de aquí)."
+    }
   },
   "homeCenter": {
     "label": "Centro de origen",
