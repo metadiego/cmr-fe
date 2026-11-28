@@ -313,6 +313,13 @@ export const noShowCita = (id: string, centroId?: string) =>
   transition(id, "no-show", undefined, centroId);
 export const cancelarCita = (id: string, motivo: string, centroId?: string) =>
   transition(id, "cancel", { reason: motivo }, centroId);
+// Patient arrived (waiting/triage), paid and had vitals taken, then had to leave before being seen
+// (handoff se-retiro-antes-de-la-consulta, cmr-be PR #732, 27-nov-2026): a DIFFERENT door than plain
+// Cancel — vitals and the invoice stay untouched, and the next "Facturar consulta" returns that same
+// paid invoice as a balance instead of a fresh draft. Body key is `motivo`, not `reason`: the BE's own
+// contract here, verified against a real Caguas case (récord 16186).
+export const seRetiroDeCita = (id: string, motivo: string, centroId?: string) =>
+  transition(id, "left", { motivo }, centroId);
 // Reschedule / move. `centerId` in the BODY = destination center (omit = keep).
 // Cross-center MEDICA SEGUIMIENTO: send the destination `doctorId`. `actorId` =
 // the operator's personal.id (audit trail). `tenant` scopes the request (source

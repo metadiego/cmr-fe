@@ -1050,7 +1050,9 @@
         "reparada": "Repaired",
         "campo_editado": "Field edited"
       },
-      "notServeHelp": "The patient arrived and left without being seen. Give the reason: the appointment is cancelled and the arrival is kept."
+      "notServeHelp": "The patient arrived and left without being seen. Give the reason: the appointment is cancelled and the arrival is kept.",
+      "seRetiroHelp": "The patient arrived, paid and had their vitals taken, but had to leave before the consultation. Give the reason: what they paid stays as a balance for their next visit.",
+      "seRetiroPlaceholder": "They had an emergency and left"
     },
     "filterState": "Status",
     "filterDoctor": "Doctor",
@@ -7471,6 +7473,9 @@
         "cancelled": "Cancelled",
         "not_served": "Left without being served"
       }
+    },
+    "door": {
+      "se_retiro": "Left"
     }
   },
   "appointmentsDay": {

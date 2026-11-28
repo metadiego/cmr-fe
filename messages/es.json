@@ -1050,7 +1050,9 @@
         "reparada": "Reparada",
         "campo_editado": "Campo editado"
       },
-      "notServeHelp": "El paciente llegó y se fue sin ser atendido. Indica el motivo: la cita queda cancelada y la llegada se conserva."
+      "notServeHelp": "El paciente llegó y se fue sin ser atendido. Indica el motivo: la cita queda cancelada y la llegada se conserva.",
+      "seRetiroHelp": "El paciente llegó, pagó y le tomaron los signos vitales, pero tuvo que irse antes de la consulta. Indica el motivo: lo pagado queda como saldo para su próxima cita.",
+      "seRetiroPlaceholder": "Tuvo una emergencia y se fue"
     },
     "filterState": "Estado",
     "filterDoctor": "Médico",
@@ -7471,6 +7473,9 @@
         "cancelled": "Cancelada",
         "not_served": "Se fue sin ser atendido"
       }
+    },
+    "door": {
+      "se_retiro": "Se retiró"
     }
   },
   "appointmentsDay": {

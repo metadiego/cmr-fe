@@ -11,6 +11,7 @@ import {
   presenteCita,
   noShowCita,
   cancelarCita,
+  seRetiroDeCita,
   reagendarCitaAgenda,
   getTiposCita,
   getHistorial,
@@ -121,9 +122,11 @@ export function CitaActions({
     allowed: allowedActions,
     canConfirm: can("appointments.confirm"),
   });
-  // Cancel on an arrived patient is "arrived, not served": same dialog and reason, its own words.
+  // Cancel on an arrived patient is really "Se retiró" (handoff se-retiro-antes-de-la-consulta,
+  // 27-nov-2026): same reason-required dialog, but its OWN door — vitals and the invoice already taken
+  // stay untouched, never the plain Cancel's.
   const notServe = cancelMeaning("medical", cita, allowedActions) === "not_serve";
-  const cancelLabel = notServe ? tRoot("lifecycle.action.not_serve") : t("cancelar");
+  const cancelLabel = notServe ? tRoot("lifecycle.door.se_retiro") : t("cancelar");
   // Show the menu whenever the user can act OR at least view history.
   if (!can("citas.update") && !can("citas.read")) return null;
 
@@ -186,13 +189,13 @@ export function CitaActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Cancel — requires a reason. Irreversible: only the button cancels, Enter never does. */}
+      {/* Cancel / Se retiró — requires a reason. Irreversible: only the button acts, Enter never does. */}
       <FormDialog
         open={cancelOpen}
         onOpenChange={setCancelOpen}
         size="md"
         title={notServe ? cancelLabel : t("cancelTitle")}
-        description={notServe ? t("notServeHelp") : t("cancelHelp")}
+        description={notServe ? t("seRetiroHelp") : t("cancelHelp")}
         onSubmit={() => {}}
         actions={[
           {
@@ -200,7 +203,10 @@ export function CitaActions({
             variant: "destructive",
             onClick: () =>
               run(
-                () => cancelarCita(cita.id, cancelForm.reason.trim(), centroId),
+                () =>
+                  notServe
+                    ? seRetiroDeCita(cita.id, cancelForm.reason.trim(), centroId)
+                    : cancelarCita(cita.id, cancelForm.reason.trim(), centroId),
                 () => setCancelOpen(false),
               ),
           },
@@ -213,6 +219,7 @@ export function CitaActions({
             id={reasonId}
             value={cancelForm.reason}
             onChange={(e) => setCancelForm({ reason: e.target.value })}
+            placeholder={notServe ? t("seRetiroPlaceholder") : undefined}
             rows={3}
           />
         </Field>
