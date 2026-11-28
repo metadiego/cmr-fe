@@ -68,17 +68,21 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
     if (!data || !puedeImprimir) return;
     const filas = conceptos
       .map((c) => {
+        const lineas = (f: { date: string; number: string; lines: { description: string; amount: number }[] }[]) =>
+          f
+            .flatMap((f) =>
+              f.lines.map(
+                (l) =>
+                  `<tr class="detalle"><td>${esc(l.description)} · ${esc(dia(f.date))}${f.number ? ` · ${esc(f.number)}` : ""}</td><td class="num">${money.format(l.amount)}</td></tr>`,
+              ),
+            )
+            .join("");
+        // "sin_clasificar" is not a real category (owner, 28-nov-2026: that label should never print) —
+        // it never gets its own summary row, only each product it actually covers.
+        if (c.slug === "sin_clasificar") return c.detail?.length ? lineas(c.detail) : "";
         const header = `<tr><td>${esc(nombreConcepto(c))}</td><td class="num">${money.format(c.total)}</td></tr>`;
         if (!detallado || !c.detail?.length) return header;
-        const lineas = c.detail
-          .flatMap((f) =>
-            f.lines.map(
-              (l) =>
-                `<tr class="detalle"><td>${esc(l.description)} · ${esc(dia(f.date))}${f.number ? ` · ${esc(f.number)}` : ""}</td><td class="num">${money.format(l.amount)}</td></tr>`,
-            ),
-          )
-          .join("");
-        return header + lineas;
+        return header + lineas(c.detail);
       })
       .join("");
     const tratoLabel = trato === "sra" ? t("sra") : t("sr");
@@ -186,6 +190,29 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
                 <tr><td colSpan={4} className="px-5 py-10 text-center text-muted-foreground">{t("empty")}</td></tr>
               ) : (
                 conceptos.map((c) => {
+                  // "sin_clasificar" names no real group (owner, 28-nov-2026: that label must not show
+                  // at all) — print each product it covers directly, never a lump row under that name.
+                  if (c.slug === "sin_clasificar") {
+                    if (!c.detail?.length) return null;
+                    return (
+                      <React.Fragment key={c.slug}>
+                        {c.detail.flatMap((f) =>
+                          f.lines.map((l) => (
+                            <tr key={l.invoiceItemId} className="border-t">
+                              <td className="py-3 pr-4 pl-5">
+                                <Link href={`/inventory/products`} className="hover:underline hover:text-foreground">{l.description}</Link>
+                              </td>
+                              <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
+                                <Link href={`/billing/invoices/${f.invoiceId}${qsCentro}`} className="text-primary underline-offset-2 hover:underline">{f.number || "—"}</Link>
+                              </td>
+                              <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">—</td>
+                              <td className="py-3 pr-5 pl-4 text-right font-medium tabular-nums">{money.format(l.amount)}</td>
+                            </tr>
+                          )),
+                        )}
+                      </React.Fragment>
+                    );
+                  }
                   const tieneDetalle = !!c.detail?.length;
                   const abierto = expandido.has(c.slug);
                   return (
