@@ -48,7 +48,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
-import { LegacyPackagesPanel } from "@/components/patient-desk/legacy-packages-panel"
 import { BEFORE_ARRIVAL, groupIn } from "@/lib/lifecycle/stage-groups"
 
 export type ScheduleRequest = {
@@ -467,10 +466,6 @@ export function PatientDetail({
               />
             )
       )}
-
-      {/* Secondary to the day's actual work above (owner, 28-nov-2026: it crowded out the therapy
-          tables staff need first) — collapsed by default, last on the page. */}
-      <LegacyPackagesPanel patientId={patient.patientId} centerId={centerId} onChanged={data.refresh} />
 
       {dataGate && (
         <EhrReadinessModal
