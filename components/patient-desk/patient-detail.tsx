@@ -25,12 +25,12 @@ import {
 } from "@/lib/frontdesk/patient-day"
 import { FilteredSectionsHint } from "@/components/patient-desk/filtered-sections-hint"
 import type { PatientDayData } from "@/hooks/use-patient-day"
-import { presentPatient, undoPresentPatient } from "@/lib/api/frontdesk-queue"
+import { undoPresentPatient } from "@/lib/api/frontdesk-queue"
+import { checkInVisit } from "@/lib/api/visits"
 import { ejecutarAccion } from "@/lib/api/tablero"
 import { asignarRecord, getPaciente, type Paciente } from "@/lib/api/pacientes"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
-import { apiErrorLabel, toastError } from "@/lib/api/errors"
-import { ApiError } from "@/lib/api/types"
+import { toastError } from "@/lib/api/errors"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
 import { EhrGateHost, EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal"
@@ -97,11 +97,9 @@ export function PatientDetail({
   const shown = visibleSections(patientSections(patient), kind === "services" ? serviceFilter : null, showAll)
   const filteredName = patient.services.find((x) => x.serviceId === serviceFilter)?.name ?? ""
   // The consultation refused Presente for missing patient data: the same modal as the consultation
-  // board asks for them, then retries. Services are never held by this (owner, 14-oct-2026).
-  const [dataGate, setDataGate] = React.useState<{
-    faltantes: EhrReadinessField[]
-    consultIds: string[]
-  } | null>(null)
+  // board asks for them, then retries the WHOLE check-in (owner, 14-oct-2026; handoff-presente-
+  // paciente-nuevo-pide-datos, 27-nov-2026). Services are never held by this.
+  const [dataGate, setDataGate] = React.useState<EhrReadinessField[] | null>(null)
   // Gate per-row de un servicio (p. ej. al avanzar el flujo de una sesión puntual, NO el "Presente"
   // masivo de arriba, que para servicios nunca bloquea por diseño — ver el comentario anterior). Vive
   // aquí, no en ServiceSessionsTable/FilaSesion, porque la fila puede desmontarse a mitad de la acción
@@ -144,80 +142,40 @@ export function PatientDetail({
     }
   }
 
-  // UNA llegada por paciente al día, no por terapia (BE PR #424, 10-oct-2026): reemplaza el "Presente"
-  // que antes vivía en cada fila de servicio (ver pasosOcultos en ServiceSessionsTable). `failed` trae
-  // terapias que no pudieron marcarse por su propia regla — las demás quedan marcadas igual, por eso
-  // es un aviso, no un error que bloquee.
-  //
-  // El MISMO botón también marca presente la consulta, si tiene una pendiente (programada/confirmada):
-  // el dueño no quiere marcar presente dos veces al mismo paciente por tener servicio Y consulta el
-  // mismo día (caso real, record 15612, 13-oct-2026). La consulta usa su propio board (`atencion`),
-  // así que es la MISMA acción `ejecutarAccion` que ya dispara cada pill de su flujo — nada nuevo del
-  // lado del BE, solo disparada desde aquí también.
+  // UNA llegada por paciente al día, no por terapia: consulta Y terapias a la vez, por el MISMO
+  // endpoint (`POST /visits/check-in`, handoff-presente-paciente-nuevo-pide-datos, 27-nov-2026) — el
+  // dueño no quiere marcar presente dos veces al mismo paciente por tener servicio Y consulta el
+  // mismo día (caso real, record 15612, 13-oct-2026). Antes la consulta se marcaba aparte con
+  // `ejecutarAccion`/board `atencion`, y un paciente CON SOLO una consulta nueva nunca disparaba el
+  // candado de datos porque la llamada de terapias (`/frontdesk/patients/:id/present`) respondía
+  // `{marked:[],failed:[]}` sin tocar la consulta (caso real: Caguas, "Paciente Nuevo"). `failed[]`
+  // llega con HTTP 200 — nunca lanza — así que cada fila se lee, nunca se atrapa como error.
   async function handlePresent() {
+    if (!centerId) return
+    // Consulta view: the button speaks only of the consultation — never marks the therapies.
+    const pendingConsultIds = patient.consultationIds.filter((_, i) =>
+      groupIn("medical", patient.consultationGroups[i], CONSULT_PENDING_GROUPS)
+    )
+    if (kind === "consultation" && pendingConsultIds.length === 0) return
     setPresenceBusy(true)
     try {
-      // Consulta view: the button speaks only of the consultation — never marks the therapies.
-      const res =
-        kind === "consultation"
-          ? { failed: [] as { reason: string }[] }
-          : await presentPatient(patient.patientId, date, centerId)
-      const warnings = res.failed.map((f) => f.reason)
-      const pendingConsultIds = patient.consultationIds.filter((_, i) =>
-        groupIn("medical", patient.consultationGroups[i], CONSULT_PENDING_GROUPS)
-      )
-      if (pendingConsultIds.length > 0) {
-        const results = await Promise.allSettled(
-          pendingConsultIds.map((id) =>
-            ejecutarAccion(
-              { boardSlug: CONSULTATION_BOARD, entityId: id, action: "presente" },
-              centerId
-            )
-          )
-        )
-        // Services were already marked above and are never held back. A consultation the BE refuses for
-        // missing patient data (PACIENTE_DATOS_REQUERIDOS, fail-closed) opens the SAME modal as the
-        // consultation board — Atención has the patient in front of them — and retries on save
-        // (owner, 14-oct-2026). Any other reason is shown as it comes.
-        const needData: string[] = []
-        let faltantes: EhrReadinessField[] = []
-        results.forEach((r, i) => {
-          if (r.status !== "rejected") return
-          const err = r.reason
-          const f =
-            err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS"
-              ? ((err.data?.faltantes as EhrReadinessField[] | undefined) ?? [])
-              : []
-          if (f.length) {
-            needData.push(pendingConsultIds[i])
-            faltantes = f
-          } else warnings.push(apiErrorLabel(err, tRoot))
-        })
-        if (needData.length) setDataGate({ faltantes, consultIds: needData })
-      }
-      if (warnings.length > 0) toast.warning(warnings.join(" · "))
+      const res = await checkInVisit(patient.patientId, centerId, {
+        date,
+        appointmentIds: kind === "consultation" ? pendingConsultIds : undefined,
+      })
+      const dataFailure = res.failed.find((f) => f.code === "PACIENTE_DATOS_REQUERIDOS")
+      const otherWarnings = res.failed
+        .filter((f) => f !== dataFailure)
+        .map((f) => (f.labelKey && tRoot.has(f.labelKey) ? tRoot(f.labelKey) : (f.message ?? f.code)))
+      if (otherWarnings.length > 0) toast.warning(otherWarnings.join(" · "))
+      // The BE refuses for missing patient data (fail-closed): the SAME modal as the consultation
+      // board asks for them, then retries this whole check-in on save (owner, 14-oct-2026).
+      if (dataFailure) setDataGate((dataFailure.missingFields as EhrReadinessField[] | undefined) ?? [])
       data.refresh()
     } catch (err) {
       toastError(err, tRoot)
     } finally {
       setPresenceBusy(false)
-    }
-  }
-
-  // After the modal saved the data: mark the consultation(s) present again.
-  async function retryConsultPresent(consultIds: string[]) {
-    setPresenceBusy(true)
-    try {
-      for (const id of consultIds)
-        await ejecutarAccion(
-          { boardSlug: CONSULTATION_BOARD, entityId: id, action: "presente" },
-          centerId
-        )
-    } catch (err) {
-      toastError(err, tRoot)
-    } finally {
-      setPresenceBusy(false)
-      data.refresh()
     }
   }
 
@@ -512,13 +470,12 @@ export function PatientDetail({
       {dataGate && (
         <EhrReadinessModal
           pacienteId={patient.patientId}
-          faltantes={dataGate.faltantes}
+          faltantes={dataGate}
           centroId={centerId}
           onCancel={() => setDataGate(null)}
           onCompleted={() => {
-            const ids = dataGate.consultIds
             setDataGate(null)
-            void retryConsultPresent(ids)
+            void handlePresent()
           }}
         />
       )}
