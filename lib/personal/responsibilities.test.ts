@@ -27,17 +27,17 @@ test("responsibilityOptions lists every tag in use once, sorted", () => {
   assert.deepEqual(responsibilityOptions(people), ["operadora", "tecnico"]);
 });
 
-test("showsSpecialty only for doctors, or when already filled", () => {
-  assert.equal(showsSpecialty("medico", [], null), true);
-  assert.equal(showsSpecialty(null, ["medico"], null), true);
-  assert.equal(showsSpecialty("tecnico", ["tecnico"], ""), false);
-  assert.equal(showsSpecialty("tecnico", [], "Dermatología"), true);
+test("showsSpecialty only for doctors (the doctor function), or when already filled", () => {
+  assert.equal(showsSpecialty(true, null), true);
+  assert.equal(showsSpecialty(false, ""), false);
+  assert.equal(showsSpecialty(false, null), false);
+  assert.equal(showsSpecialty(false, "Dermatología"), true);
 });
 
-test("showsConsultaPreferences for front desk, or when a preference is set", () => {
-  assert.equal(showsConsultaPreferences({ jobTitle: "recepcion" }), true);
-  assert.equal(showsConsultaPreferences({ capabilities: ["recepcion"] }), true);
-  assert.equal(showsConsultaPreferences({ jobTitle: "tecnico", capabilities: ["tecnico"] }), false);
-  assert.equal(showsConsultaPreferences({ jobTitle: "tecnico", consultationBoardInitialTab: "presente" }), true);
-  assert.equal(showsConsultaPreferences({ frontdeskStartsOnConsultation: true }), true);
+test("showsConsultaPreferences for front desk (the front_desk function), or when a preference is set", () => {
+  assert.equal(showsConsultaPreferences(true, {}), true);
+  assert.equal(showsConsultaPreferences(false, {}), false);
+  assert.equal(showsConsultaPreferences(false, { consultationBoardInitialTab: "presente" }), true);
+  assert.equal(showsConsultaPreferences(false, { frontdeskStartsOnConsultation: true }), true);
+  assert.equal(showsConsultaPreferences(false, { frontdeskStartsOnConsultation: false, consultationBoardInitialTab: null }), false);
 });

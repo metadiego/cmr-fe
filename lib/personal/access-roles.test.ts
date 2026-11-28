@@ -1,7 +1,7 @@
 // lib/personal/access-roles.ts. Run: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { accessRoleCatalog, hiddenHeldPositions, withHiddenPositions } from "./access-roles.ts";
+import { accessRoleCatalog, hiddenHeldPositions, primaryIsHidden, withHiddenPositions } from "./access-roles.ts";
 import type { Position, StaffPositionsBody } from "../api/positions.ts";
 
 const pos = (slug: string, permissions: number, fullAccess = false): Position => ({
@@ -13,6 +13,10 @@ const catalog = [
 ];
 const functionSlugs = ["doctor", "technician", "nurse", "front_desk"];
 const RETIRED = ["read_only", "facturacion-inventario"];
+const heldOf = (primary: string | null, slugs: string[]) => ({
+  primary,
+  positions: slugs.map((s) => ({ position: s, labelKey: null, permissions: 0, centerIds: ["bay"] })),
+});
 
 test("access roles: no job positions (0 permissions and a function of the same slug); clinical stays", () => {
   const slugs = accessRoleCatalog(catalog, functionSlugs, RETIRED, []).map((p) => p.slug);
@@ -53,4 +57,18 @@ test("a hidden primary survives when no shown role is held", () => {
     positions: [{ position: "technician", centerIds: ["bay"] }],
     primary: "technician",
   });
+});
+
+test("a hidden job-position primary wins over the picker's primary while still held", () => {
+  const hidden = [{ position: "technician", centerIds: ["bay"] }];
+  const body: StaffPositionsBody = { positions: [{ position: "clinical", centerIds: ["bay"] }], primary: "clinical" };
+  assert.equal(withHiddenPositions(body, hidden, "technician").primary, "technician");
+  assert.equal(withHiddenPositions(body, [], "technician").primary, "clinical");
+});
+
+test("primaryIsHidden: only when the primary is held and not shown", () => {
+  const shown = accessRoleCatalog(catalog, functionSlugs, RETIRED, []);
+  assert.equal(primaryIsHidden(heldOf("technician", ["technician", "clinical"]), shown), true);
+  assert.equal(primaryIsHidden(heldOf("clinical", ["technician", "clinical"]), shown), false);
+  assert.equal(primaryIsHidden(heldOf(null, ["technician"]), shown), false);
 });

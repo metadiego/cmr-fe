@@ -21,6 +21,14 @@ export function accessRoleCatalog(
   });
 }
 
+/** Roles being phased out (cmr-be handoff §4): offered only to whoever still holds them. */
+export const RETIRED_ACCESS_ROLES = ["read_only", "facturacion-inventario"] as const;
+
+/** Whether the person's primary position is one the access-role picker does not show. */
+export function primaryIsHidden(held: StaffPositions, shown: readonly Position[]): boolean {
+  return !!held.primary && !shown.some((p) => p.slug === held.primary) && held.positions.some((h) => h.position === held.primary);
+}
+
 /** Positions the person holds that the access-role picker does not show, as body entries. */
 export function hiddenHeldPositions(held: StaffPositions, shown: readonly Position[]): StaffPositionsBody["positions"] {
   const shownSlugs = new Set(shown.map((p) => p.slug));
@@ -30,8 +38,9 @@ export function hiddenHeldPositions(held: StaffPositions, shown: readonly Positi
 }
 
 /**
- * The picker's body plus the hidden positions. When the picker holds nothing, the hidden `heldPrimary`
- * stays the primary (the BE refuses a primary that is not held).
+ * The picker's body plus the hidden positions. A primary that is a hidden job position (the label the
+ * staff list shows, e.g. «Técnico») is kept while it is still held: the picker cannot offer it, so it
+ * must not silently replace it with an access role.
  */
 export function withHiddenPositions(
   body: StaffPositionsBody,
@@ -39,6 +48,7 @@ export function withHiddenPositions(
   heldPrimary?: string | null,
 ): StaffPositionsBody {
   const positions = [...body.positions, ...hidden];
-  const primary = body.primary ?? (heldPrimary && hidden.some((h) => h.position === heldPrimary) ? heldPrimary : undefined);
+  const keepHidden = !!heldPrimary && hidden.some((h) => h.position === heldPrimary);
+  const primary = keepHidden ? heldPrimary : body.primary;
   return primary ? { positions, primary } : { positions };
 }

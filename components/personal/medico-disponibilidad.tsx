@@ -5,17 +5,14 @@ import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
-  getHorariosMedico,
-  createHorario,
-  deleteHorario,
   listDoctorAbsences,
   createDoctorAbsence,
   deleteDoctorAbsence,
   getNextAvailableDate,
-  type HorarioMedico,
   type DoctorAbsence,
 } from "@/lib/api/disponibilidad";
 import { toastError } from "@/lib/api/errors";
+import { Panel } from "@/components/kit/panel";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
@@ -32,17 +29,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Pestaña «Disponibilidad» del hub del médico: horarios (los días que trabaja; los vacíos son libres),
-// ausencias (vacaciones/permisos) y festivos (compartidos, solo lectura), más el probador de próxima
-// fecha válida. Escrituras gateadas por `citas.config`. Handoff ficha-del-medico-hub / agenda-dias-bloqueados-por-medico.
-const DOW = [1, 2, 3, 4, 5, 6, 0]; // Lun→Dom (dayOfWeek 0=Dom, convención JS getDay)
+// Absences (vacation / leave) and the next-valid-date checker, under the staff record's «Horario» tab.
+// The weekly agenda itself is components/personal/staff-schedule.tsx (one row per center, staff.update).
+// Absence writes are gated by `citas.config`. Handoff ficha-del-medico-hub / agenda-dias-bloqueados-por-medico.
 
 export function MedicoDisponibilidad({ doctorId, centro }: { doctorId: string; centro?: string }) {
   const t = useTranslations("medicoHub");
   return (
     <div className="grid gap-6 xl:grid-cols-2">
       <div className="space-y-6">
-        <Horarios doctorId={doctorId} centro={centro} />
         <ProximaFecha doctorId={doctorId} centro={centro} />
       </div>
       <div className="space-y-6">
@@ -55,115 +50,9 @@ export function MedicoDisponibilidad({ doctorId, centro }: { doctorId: string; c
 
 function Card({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">{title}</h3>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Horarios({ doctorId, centro }: { doctorId: string; centro?: string }) {
-  const t = useTranslations("medicoHub");
-  const { can } = useCan();
-  const puedeConfig = can("citas.config");
-  const { state, reload } = useResource<HorarioMedico[]>(() => getHorariosMedico(doctorId), [doctorId]);
-  const horarios = state.kind === "ok" ? state.data : [];
-  const [busy, setBusy] = React.useState(false);
-  const [nuevo, setNuevo] = React.useState<{ dow: number; dias: Set<number>; inicio: string; fin: string } | null>(null);
-
-  function toggleDia(d: number) {
-    if (!nuevo) return;
-    const dias = new Set(nuevo.dias);
-    if (dias.has(d)) dias.delete(d);
-    else dias.add(d);
-    setNuevo({ ...nuevo, dias });
-  }
-
-  // Same start/end applied to every checked day at once (owner's request, 2026-09-22) — one
-  // schedule row per day server-side (createHorario has no bulk endpoint), fired together.
-  async function agregar() {
-    if (!nuevo || !nuevo.inicio || !nuevo.fin || nuevo.dias.size === 0 || busy) return;
-    setBusy(true);
-    try {
-      await Promise.all(
-        [...nuevo.dias].map((dow) =>
-          createHorario({ staffId: doctorId, dayOfWeek: dow, startTime: nuevo.inicio, endTime: nuevo.fin }, centro),
-        ),
-      );
-      setNuevo(null);
-      reload();
-    } catch (e) { toastError(e); } finally { setBusy(false); }
-  }
-  async function quitar(id: string) {
-    setBusy(true);
-    try { await deleteHorario(id, centro); reload(); } catch (e) { toastError(e); } finally { setBusy(false); }
-  }
-
-  return (
-    <Card title={t("scheduleTitle")}>
-      {state.kind === "loading" ? (
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
-      ) : (
-        <div className="space-y-1.5">
-          {DOW.map((d) => {
-            const delDia = horarios.filter((h) => h.dayOfWeek === d);
-            return (
-              <div key={d} className="flex items-start gap-3 border-b py-1.5 last:border-b-0">
-                <span className="w-24 shrink-0 text-sm font-medium">{t(`dow.${d}`)}</span>
-                <div className="flex-1 space-y-1">
-                  {delDia.length === 0 ? (
-                    <span className="text-xs text-muted-foreground">{t("dayOff")}</span>
-                  ) : (
-                    delDia.map((h) => (
-                      <span key={h.id} className="mr-2 inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs tabular-nums">
-                        {h.startTime}–{h.endTime}
-                        {puedeConfig && (
-                          <button type="button" onClick={() => quitar(h.id)} disabled={busy} className="text-destructive hover:underline" aria-label={t("remove")}>×</button>
-                        )}
-                      </span>
-                    ))
-                  )}
-                  {puedeConfig && nuevo?.dow === d && (
-                    <div className="mt-1 space-y-2">
-                      <div className="flex items-center gap-1.5">
-                        <TimePicker value={nuevo.inicio} onChange={(v) => setNuevo({ ...nuevo, inicio: v })} className="h-8 w-28" aria-label={t("start")} />
-                        <span className="text-muted-foreground">–</span>
-                        <TimePicker value={nuevo.fin} onChange={(v) => setNuevo({ ...nuevo, fin: v })} className="h-8 w-28" aria-label={t("end")} />
-                        <Button type="button" size="sm" className="h-8" disabled={!nuevo.inicio || !nuevo.fin || nuevo.dias.size === 0 || busy} onClick={agregar}>{t("add")}</Button>
-                        <Button type="button" size="sm" variant="ghost" className="h-8" onClick={() => setNuevo(null)}>{t("cancel")}</Button>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                        <span>{t("applyToDays")}</span>
-                        <label className="flex items-center gap-1">
-                          <input
-                            type="checkbox"
-                            checked={nuevo.dias.size === DOW.length}
-                            onChange={(e) => setNuevo({ ...nuevo, dias: new Set(e.target.checked ? DOW : []) })}
-                          />
-                          {t("allDays")}
-                        </label>
-                        {DOW.map((dd) => (
-                          <label key={dd} className="flex items-center gap-1">
-                            <input type="checkbox" checked={nuevo.dias.has(dd)} onChange={() => toggleDia(dd)} />
-                            {t(`dow.${dd}`)}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {puedeConfig && nuevo?.dow !== d && (
-                  <button type="button" onClick={() => setNuevo({ dow: d, dias: new Set([d]), inicio: "", fin: "" })} className="shrink-0 text-xs text-primary hover:underline">+ {t("add")}</button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </Card>
+    <Panel title={title} actions={action}>
+      <div className="px-5 py-4">{children}</div>
+    </Panel>
   );
 }
 

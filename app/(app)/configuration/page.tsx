@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   PaintBoardIcon, Menu01Icon, DashboardSquare01Icon, InvoiceIcon, ListSettingIcon,
-  PrinterIcon, UserAccountIcon, CheckListIcon, StethoscopeIcon, Pulse01Icon, CallIcon, ArrowRight01Icon,
+  PrinterIcon, UserAccountIcon, Briefcase01Icon, CheckListIcon, StethoscopeIcon, Pulse01Icon, CallIcon, ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 
 import { useMenu } from "@/hooks/use-menu";
@@ -27,6 +27,7 @@ const SECCIONES = [
   { href: "/configuration/required-fields", icon: CheckListIcon, key: "requeridos" },
   { href: "/configuration/nursing-panel", icon: StethoscopeIcon, key: "panelEnfermeria" },
   { href: "/configuration/nursing-statuses", icon: Pulse01Icon, key: "nurseStatusTypes" },
+  { href: "/configuration/functions", icon: Briefcase01Icon, key: "functions" },
   { href: "/configuration/callcenter", icon: CallIcon, key: "callcenter" },
 ] as const;
 

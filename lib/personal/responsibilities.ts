@@ -1,5 +1,5 @@
-// Responsibilities of a staff member (`staff.capabilities`): the tags that decide which lists a person
-// appears in (doctors, nurses, technicians…) and, for "medico", the doctor tabs of their record.
+// Responsibilities of a staff member (`staff.capabilities`): the legacy tags some pickers still read
+// until the BE's PR 4 retires them. The staff record itself now reads Functions (lib/personal/functions.ts).
 // Every tag is also a job-title slug, so its label is the job title's (`personal.cargo.<slug>`).
 
 /**
@@ -31,25 +31,18 @@ export function responsibilityOptions(people: readonly { capabilities?: string[]
   return normalizeResponsibilities(people.flatMap((p) => p.capabilities ?? [])).sort();
 }
 
-/** Specialty only means something for a doctor; it stays visible when someone already filled it. */
-export function showsSpecialty(jobTitle: string | null | undefined, tags: readonly string[], specialty: string | null | undefined): boolean {
-  return jobTitle === "medico" || tags.includes("medico") || !!specialty?.trim();
+/** Specialty only means something for a doctor (the `doctor` function); it stays visible when filled. */
+export function showsSpecialty(isDoctor: boolean, specialty: string | null | undefined): boolean {
+  return isDoctor || !!specialty?.trim();
 }
 
 /**
- * The Consulta preferences (land on Consulta, initial tab) are for front-desk staff; they stay visible
- * for anyone who already has one set, so a saved value is never hidden.
+ * The Consulta preferences (land on Consulta, initial tab) are for front-desk staff (the `front_desk`
+ * function); they stay visible for anyone who already has one set, so a saved value is never hidden.
  */
-export function showsConsultaPreferences(p: {
-  jobTitle?: string | null;
-  capabilities?: string[] | null;
-  frontdeskStartsOnConsultation?: boolean | null;
-  consultationBoardInitialTab?: string | null;
-}): boolean {
-  return (
-    p.jobTitle === "recepcion" ||
-    normalizeResponsibilities(p.capabilities).includes("recepcion") ||
-    !!p.frontdeskStartsOnConsultation ||
-    !!p.consultationBoardInitialTab
-  );
+export function showsConsultaPreferences(
+  isFrontDesk: boolean,
+  p: { frontdeskStartsOnConsultation?: boolean | null; consultationBoardInitialTab?: string | null },
+): boolean {
+  return isFrontDesk || !!p.frontdeskStartsOnConsultation || !!p.consultationBoardInitialTab;
 }
