@@ -17,6 +17,7 @@ test("with a center: both hours or neither, end after start", () => {
   assert.equal(dayChangeProblem(draft({ startTime: "08:00" }), TODAY), "bothHours");
   assert.equal(dayChangeProblem(draft({ startTime: "12:00", endTime: "08:00" }), TODAY), "endBeforeStart");
   assert.equal(dayChangeProblem(draft({ startTime: "08:00", endTime: "12:00" }), TODAY), null);
+  assert.equal(dayChangeProblem(draft({ startTime: "8:00", endTime: "12:00" }), TODAY), "format");
 });
 
 test("not coming: no hours", () => {

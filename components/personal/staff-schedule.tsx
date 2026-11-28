@@ -4,7 +4,6 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import {
-  createScheduleRow,
   createScheduleRows,
   deactivateScheduleRow,
   getStaffSchedule,
@@ -174,7 +173,10 @@ function ScheduleRowDialog({
     }
     const move = moveCenterSteps({ ...row, startTime: start, endTime: end }, center, staffId);
     if (move) {
-      await createScheduleRow(move.create);
+      // Upsert by day in the new center: no duplicate if the day already exists there, and a retry after
+      // a failed deactivate does not create it twice.
+      const { dayOfWeek, ...rest } = move.create;
+      await createScheduleRows({ ...rest, daysOfWeek: [dayOfWeek] });
       await deactivateScheduleRow(move.deactivate.id, move.deactivate.centerId);
     } else {
       await updateScheduleRow(row.id, row.clinicId, { startTime: start, endTime: end });
@@ -202,7 +204,7 @@ function ScheduleRowDialog({
       title={row ? t("editTitle", { day: tRoot(`medicoHub.dow.${row.dayOfWeek}`) }) : t("addTitle")}
       description={row ? undefined : t("addHelp")}
       missing={missing}
-      blocked={unchanged || (problem !== null && problem !== "missing")}
+      blocked={unchanged}
       reason={unchanged ? t("unchanged") : problem && problem !== "missing" ? t(`problem.${problem}`) : null}
       submitting={save.submitting || remove.submitting}
       submitLabel={t("save")}

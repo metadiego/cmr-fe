@@ -90,8 +90,9 @@ export function StaffPanel() {
   const ehrCenterIds = ehrCentrosRes.state.kind === "ok" ? ehrCentrosRes.state.data.map((c) => c.id) : undefined;
   // Functions catalog (inactive ones too: a person may still hold one) and the centers the record's
   // sections need: every center, where the viewer reads staff, where they edit it.
-  const functionsRes = useResource<CatalogFunction[]>(() => getFunctions(true).catch(() => []));
+  const functionsRes = useResource<CatalogFunction[]>(() => getFunctions(true));
   const functionCatalog = React.useMemo(() => (functionsRes.state.kind === "ok" ? functionsRes.state.data : []), [functionsRes.state]);
+  const functionsError = functionsRes.state.kind === "fail" ? functionsRes.state.message : null;
   const centersRes = useResource<Centro[]>(() => getCenters());
   const staffReadRes = useResource(() => getCentrosDondePuedo("staff.read").catch(() => []));
   const staffUpdateRes = useResource(() => getCentrosDondePuedo("staff.update").catch(() => []));
@@ -206,6 +207,7 @@ export function StaffPanel() {
               persona={sel}
               positions={positions}
               functionCatalog={functionCatalog}
+              functionsError={functionsError}
               scope={scope}
               positionsError={positionsRes.state.kind === "fail" ? positionsRes.state.message : null}
               ehrRoles={ehrRoles}
@@ -263,7 +265,7 @@ export default function PersonalPage() {
 type CenterScope = { all: Centro[]; read: { id: string; name: string }[]; update: { id: string; name: string }[] };
 
 function FichaPersonal({
-  persona, positions, functionCatalog, scope, positionsError, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
+  persona, positions, functionCatalog, functionsError, scope, positionsError, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
 }: {
   /** The person's login, when the viewer is an admin (only an admin manages access). */
   profile: Perfil | undefined;
@@ -273,6 +275,8 @@ function FichaPersonal({
   positions: Position[];
   /** The functions catalog (`GET /functions?includeInactive=true`). */
   functionCatalog: CatalogFunction[];
+  /** Why the functions catalog did not load. */
+  functionsError: string | null;
   /** Every center, and where the viewer holds staff.read / staff.update. */
   scope: CenterScope;
   /** Why the catalog did not load, if it failed. */
@@ -347,6 +351,7 @@ function FichaPersonal({
               <StaffFunctionsSection
                 staffId={persona.id}
                 catalog={functionCatalog}
+                catalogError={functionsError ?? (functionsRes.state.kind === "fail" ? functionsRes.state.message : null)}
                 held={heldFunctions}
                 canEdit={canEditRecord}
                 centro={centro}
@@ -355,7 +360,7 @@ function FichaPersonal({
 
               {/* What the person can open, per center: administrators only. */}
               {viewerIsAdmin && (
-                <StaffPositionsSection persona={persona} catalog={positions} functionSlugs={functionSlugs} catalogError={positionsError} centro={centro} />
+                <StaffPositionsSection persona={persona} catalog={positions} functionSlugs={functionSlugs} catalogError={positionsError ?? functionsError} centro={centro} />
               )}
 
               {/* Front-desk preferences, only for front-desk staff (or whoever already has one set). */}

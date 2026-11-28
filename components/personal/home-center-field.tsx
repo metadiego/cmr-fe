@@ -29,10 +29,13 @@ export function HomeCenterField({
 }) {
   const t = useTranslations("homeCenter");
   const [picked, setPicked] = React.useState(current);
+  // What is saved: `current` until the list refresh brings the new home, the picked one right after a save.
+  const [saved, setSaved] = React.useState(current);
   const { options, blocked } = homeCenterChoice(centers, current, editable);
 
-  useSaveSection("home-center", picked !== current, async () => {
-    await setHomeCenter(staffId, picked, current);
+  useSaveSection("home-center", picked !== saved, async () => {
+    await setHomeCenter(staffId, picked, saved);
+    setSaved(picked);
   });
 
   return (

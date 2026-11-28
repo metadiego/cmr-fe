@@ -7846,7 +7846,8 @@
       "pastDay": "A past day cannot be set.",
       "bothHours": "Set both hours or neither.",
       "endBeforeStart": "The end must be after the start.",
-      "noHoursWhenAway": "When not coming, no hours."
+      "noHoursWhenAway": "When not coming, no hours.",
+      "format": "Type the hours as HH:mm."
     }
   },
   "functionsConfig": {

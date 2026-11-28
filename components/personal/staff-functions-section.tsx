@@ -8,6 +8,7 @@ import { functionLabel, functionsBody, groupFunctions, offeredFunctions, sameFun
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { useSaveSection } from "@/components/personal/save-group";
+import { ErrorState } from "@/components/kit/panel";
 
 // «Funciones» on the staff record (cmr-be handoff §2.2): what the person does — services and tasks —
 // with no center. Never opens a screen (that is «Rol de acceso»). Saved with the record's single
@@ -16,6 +17,7 @@ import { useSaveSection } from "@/components/personal/save-group";
 export function StaffFunctionsSection({
   staffId,
   catalog,
+  catalogError,
   held,
   canEdit,
   centro,
@@ -24,6 +26,8 @@ export function StaffFunctionsSection({
   staffId: string;
   /** `GET /functions?includeInactive=true`. */
   catalog: CatalogFunction[];
+  /** Why the catalog or the person's functions did not load (shown instead of a skeleton that never ends). */
+  catalogError?: string | null;
   /** What the person holds; null while it loads. */
   held: StaffFunction[] | null;
   /** The viewer holds staff.update at the person's home center. */
@@ -54,7 +58,9 @@ export function StaffFunctionsSection({
         <Label>{t("title")}</Label>
         <p className="text-xs text-muted-foreground">{canEdit ? t("help") : t("readOnly")}</p>
       </div>
-      {loading ? (
+      {catalogError ? (
+        <ErrorState message={catalogError} />
+      ) : loading ? (
         <div className="space-y-2" aria-hidden>
           <div className="h-3 w-24 animate-pulse rounded bg-muted" />
           <div className="h-7 w-full animate-pulse rounded-full bg-muted" />

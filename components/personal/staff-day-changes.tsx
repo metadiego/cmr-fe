@@ -147,7 +147,6 @@ function DayChangeDialog({
       title={t("addTitle")}
       description={t("addHelp")}
       missing={missing}
-      blocked={problem !== null}
       reason={problem ? t(`problem.${problem}`) : null}
       submitting={save.submitting}
       submitLabel={t("save")}

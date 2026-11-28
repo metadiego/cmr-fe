@@ -7846,7 +7846,8 @@
       "pastDay": "Un día pasado no se puede poner.",
       "bothHours": "Pon las dos horas o ninguna.",
       "endBeforeStart": "La salida tiene que ser posterior a la entrada.",
-      "noHoursWhenAway": "Si no viene, sin horas."
+      "noHoursWhenAway": "Si no viene, sin horas.",
+      "format": "Escribe las horas como HH:mm."
     }
   },
   "functionsConfig": {

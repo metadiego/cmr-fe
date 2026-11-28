@@ -15,7 +15,7 @@ export interface DayChangeDraft {
   note: string;
 }
 
-export type DayChangeProblem = "pastDay" | "bothHours" | "endBeforeStart" | "noHoursWhenAway" | null;
+export type DayChangeProblem = "pastDay" | "bothHours" | "format" | "endBeforeStart" | "noHoursWhenAway" | null;
 
 /** Filled-in but invalid (a reason, never "missing"). `today` = YYYY-MM-DD at the home center. */
 export function dayChangeProblem(d: DayChangeDraft, today: string): DayChangeProblem {
@@ -24,7 +24,8 @@ export function dayChangeProblem(d: DayChangeDraft, today: string): DayChangePro
   if (d.center === NOT_COMING) return anyHour ? "noHoursWhenAway" : null;
   if (!anyHour) return null;
   if (!d.startTime || !d.endTime) return "bothHours";
-  return hoursProblem(d.startTime, d.endTime) ? "endBeforeStart" : null;
+  const p = hoursProblem(d.startTime, d.endTime);
+  return p === "format" ? "format" : p ? "endBeforeStart" : null;
 }
 
 export function dayChangeBody(d: DayChangeDraft): { centerId: string | null; startTime?: string; endTime?: string; note?: string } {

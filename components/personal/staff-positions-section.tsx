@@ -69,8 +69,7 @@ export function StaffPositionsSection({
     const shown = new Set(catalog.map((p) => p.slug));
     return { ...loaded, positions: loaded.positions.filter((h) => shown.has(h.position)) };
   }, [loaded, catalog]);
-  const hidden = React.useMemo(() => (loaded ? hiddenHeldPositions(loaded, catalog) : []), [loaded, catalog]);
-  const hiddenPrimary = loaded && primaryIsHidden(loaded, catalog) ? loaded.primary : null;
+  const hiddenPrimaryNow = loaded && primaryIsHidden(loaded, catalog) ? loaded.primary : null;
 
   // Loaded / saved / edited state (lib/personal/positions-draft): a save's result is never overwritten
   // by the pre-save load the fetcher still holds. Seeded during render (no effect).
@@ -85,6 +84,12 @@ export function StaffPositionsSection({
 
   useSaveSection("positions", !!draft && isDraftDirty(draft, catalog), async () => {
     if (!draft) throw new Error("positions are not loaded");
+    // The hidden job positions are read AGAIN now, never from the first load: the record's single Save
+    // runs «Funciones» first, and unticking Técnico there drops the technician position in the BE. Re-sending
+    // the old list would bring the position (and with it the function) back.
+    const fresh = await getStaffPositions(persona.id, centro);
+    const hidden = hiddenHeldPositions(fresh, catalog);
+    const hiddenPrimary = primaryIsHidden(fresh, catalog) ? fresh.primary : null;
     const body = withHiddenPositions(buildPositionsBody(draft.grid, draft.primary, catalog), hidden, hiddenPrimary);
     const result = await setStaffPositions(persona.id, body, centro);
     const shown = new Set(catalog.map((p) => p.slug));
@@ -123,7 +128,7 @@ export function StaffPositionsSection({
             primary={shownPrimary}
             onPrimaryChange={(p) => setDraft((d) => (d ? { ...d, primary: p } : d))}
             viewerIsAdmin={viewerIsAdmin}
-            hidePrimary={!!hiddenPrimary}
+            hidePrimary={!!hiddenPrimaryNow}
             blockOf={(position, centerId) =>
               chipState({
                 position,

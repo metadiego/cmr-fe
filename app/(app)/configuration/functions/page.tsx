@@ -18,6 +18,7 @@ import { functionLabel, groupFunctions } from "@/lib/personal/functions";
 import { slugify } from "@/lib/frontdesk/nurse-status-tipo-form";
 import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { ConfigGuard } from "@/components/configuracion/config-guard";
 import { Panel, EmptyState, ErrorState, LoadingPanel, RecordTable, Th, Td } from "@/components/kit/panel";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -37,6 +38,7 @@ const PLACES: FunctionPlace[] = ["in_person", "any_center"];
 // keeps it. `kind` and the service never change after creation (the BE answers 400).
 export default function FunctionsConfigPage() {
   const t = useTranslations("functionsConfig");
+  const { can } = useCan();
   const { state, reload } = useResource<CatalogFunction[]>(() => getFunctions(true));
   const [editing, setEditing] = React.useState<CatalogFunction | "new" | null>(null);
   const list = state.kind === "ok" ? state.data : [];
@@ -49,10 +51,12 @@ export default function FunctionsConfigPage() {
           title={t("title")}
           description={t("help")}
           actions={
-            <Button size="sm" onClick={() => setEditing("new")}>
-              <HugeiconsIcon icon={Add01Icon} className="size-4" />
-              {t("new")}
-            </Button>
+            can("rbac.create") && (
+              <Button size="sm" onClick={() => setEditing("new")}>
+                <HugeiconsIcon icon={Add01Icon} className="size-4" />
+                {t("new")}
+              </Button>
+            )
           }
         />
         {state.kind === "loading" && <LoadingPanel rows={6} />}
