@@ -7792,7 +7792,7 @@
     "selectedCount": "{count} de {total}",
     "groupHelp": {
       "tasks": "Su trabajo en la clínica (médico, enfermera, recepción…).",
-      "services": "Los servicios que sabe dar. Sirven para ponerla en los selectores y para contar el personal disponible al reservar ese servicio (cuando las reservas lean de aquí)."
+      "services": "Los servicios que puede entregar. Sirven para ponerla en los selectores y para contar el personal disponible al reservar ese servicio (cuando las reservas lean de aquí)."
     }
   },
   "homeCenter": {
