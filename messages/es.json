@@ -7828,7 +7828,9 @@
     },
     "addDay": "Añadir {day} en {center}",
     "generalWhenNone": "Mientras no tenga horario propio, cuenta el horario general de cada centro:",
-    "generalOtherDays": "Los días sin horario propio en un centro cuenta su horario general:"
+    "generalOtherDays": "Los días sin horario propio en un centro cuenta su horario general:",
+    "repeatedHelp": "Guardado {count} veces: se muestra una vez.",
+    "repeatedFix": "Este horario está guardado {count} veces (de la pantalla anterior). «Guardar» deja una sola copia; «Quitar» las quita todas."
   },
   "staffDayChanges": {
     "title": "Cambios de un día",

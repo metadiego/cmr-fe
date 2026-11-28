@@ -9,7 +9,7 @@ import {
   getStaffSchedule,
   updateScheduleRow,
 } from "@/lib/api/staff-schedule";
-import { WEEK, hoursProblem, moveCenterSteps, splitRows, summarizeWeek, weekGrid, type ScheduleRow } from "@/lib/personal/schedule";
+import { WEEK, collapseRepeats, hoursProblem, moveCenterSteps, splitRows, summarizeWeek, weekGrid, type ScheduleRow } from "@/lib/personal/schedule";
 import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
@@ -48,7 +48,7 @@ export function StaffSchedule({
   const grid = weekGrid(own);
   const generalSummary = summarizeWeek(general);
   const editable = new Set(editableCenters.map((c) => c.id));
-  const [dialog, setDialog] = React.useState<{ row: ScheduleRow | null; day: number; center?: string } | null>(null);
+  const [dialog, setDialog] = React.useState<{ row: ScheduleRow | null; repeats?: ScheduleRow[]; day: number; center?: string } | null>(null);
   const dayName = (d: number) => t(`dowShort.${d}`);
   const span = (from: number, to: number) => (from === to ? dayName(from) : `${dayName(from)}–${dayName(to)}`);
 
@@ -98,19 +98,25 @@ export function StaffSchedule({
                           return (
                             <td key={d} className="px-1 py-1.5 text-center align-middle">
                               <div className="flex flex-col items-center gap-1">
-                                {cell.map((r) => (
+                                {collapseRepeats(cell).map(({ row: r, repeats }) => (
                                   <button
                                     key={r.id}
                                     type="button"
                                     disabled={!canEdit}
-                                    onClick={() => setDialog({ row: r, day: d })}
-                                    title={canEdit ? t("edit") : t("noEditHere")}
+                                    onClick={() => setDialog({ row: r, repeats, day: d })}
+                                    title={repeats.length ? t("repeatedHelp", { count: repeats.length + 1 }) : canEdit ? t("edit") : t("noEditHere")}
                                     className={cn(
-                                      "w-full rounded-md bg-primary/10 px-1 py-1 text-xs font-medium text-primary tabular-nums transition-colors",
+                                      "relative w-full rounded-md bg-primary/10 px-1 py-1 text-xs font-medium text-primary tabular-nums transition-colors",
                                       canEdit ? "hover:bg-primary/20" : "cursor-default",
+                                      repeats.length > 0 && "ring-1 ring-warning",
                                     )}
                                   >
                                     {r.startTime}–{r.endTime}
+                                    {repeats.length > 0 && (
+                                      <span className="absolute -top-1.5 -right-1 rounded-full bg-warning px-1 text-[9px] leading-tight font-semibold text-warning-foreground">
+                                        ×{repeats.length + 1}
+                                      </span>
+                                    )}
                                   </button>
                                 ))}
                                 {cell.length === 0 &&
@@ -156,6 +162,7 @@ export function StaffSchedule({
         <ScheduleRowDialog
           staffId={staffId}
           row={dialog.row}
+          repeats={dialog.repeats ?? []}
           day={dialog.day}
           initialCenter={dialog.center}
           centers={editableCenters}
@@ -172,6 +179,7 @@ export function StaffSchedule({
 function ScheduleRowDialog({
   staffId,
   row,
+  repeats,
   day,
   initialCenter,
   centers,
@@ -180,6 +188,8 @@ function ScheduleRowDialog({
 }: {
   staffId: string;
   row: ScheduleRow | null;
+  /** Copies of `row` (same day, center and hours) saved twice by older screens: removed with it. */
+  repeats: ScheduleRow[];
   day: number;
   /** Preselected center when adding from an empty cell. */
   initialCenter?: string;
@@ -201,7 +211,8 @@ function ScheduleRowDialog({
     [t("start"), !!start],
     [t("end"), !!end],
   ]);
-  const unchanged = !!row && row.clinicId === center && row.startTime === start && row.endTime === end;
+  // Same values but saved twice: «Guardar» is the cleanup, so it is not "unchanged".
+  const unchanged = !!row && repeats.length === 0 && row.clinicId === center && row.startTime === start && row.endTime === end;
 
   const save = useSubmit(async () => {
     if (!row) {
@@ -218,11 +229,13 @@ function ScheduleRowDialog({
     } else {
       await updateScheduleRow(row.id, row.clinicId, { startTime: start, endTime: end });
     }
+    // Saving the entry also clears its old copies, so the day ends with exactly one row.
+    for (const r of repeats) await deactivateScheduleRow(r.id, r.clinicId);
   }, { successMessage: t("saved"), onSuccess: onSaved });
 
   const remove = useSubmit(async () => {
     if (!row) throw new Error("nothing to remove");
-    await deactivateScheduleRow(row.id, row.clinicId);
+    for (const r of [row, ...repeats]) await deactivateScheduleRow(r.id, r.clinicId);
   }, { successMessage: t("removed"), onSuccess: onSaved });
 
   const toggleDay = (d: number) =>
@@ -262,6 +275,11 @@ function ScheduleRowDialog({
         ) : undefined
       }
     >
+      {repeats.length > 0 && (
+        <p className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
+          {t("repeatedFix", { count: repeats.length + 1 })}
+        </p>
+      )}
       <Field label={t("center")} htmlFor="sched-center" required>
         <Select value={center} onValueChange={setCenter}>
           <SelectTrigger id="sched-center" className="w-full"><SelectValue placeholder={t("pickCenter")} /></SelectTrigger>

@@ -1,7 +1,7 @@
 // lib/personal/schedule.ts. Run: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { WEEK, byDay, hoursProblem, moveCenterSteps, splitRows, summarizeWeek, weekGrid, type ScheduleRow } from "./schedule.ts";
+import { WEEK, byDay, collapseRepeats, hoursProblem, moveCenterSteps, splitRows, summarizeWeek, weekGrid, type ScheduleRow } from "./schedule.ts";
 
 const row = (over: Partial<ScheduleRow>): ScheduleRow => ({
   id: "r", staffId: "p", clinicId: "bay", clinicName: "Bayamón", dayOfWeek: 1, startTime: "08:00", endTime: "12:00",
@@ -72,4 +72,14 @@ test("summarizeWeek: consecutive days with the same hours collapse into a span",
       { from: 4, to: 4, startTime: "08:00", endTime: "12:00" },
     ] },
   ]);
+});
+
+test("collapseRepeats: identical hours in one cell show once; the extra rows are listed for cleanup", () => {
+  const cell = [
+    row({ id: "a", startTime: "07:00", endTime: "17:00" }),
+    row({ id: "b", startTime: "07:00", endTime: "17:00" }),
+    row({ id: "c", startTime: "18:00", endTime: "19:00" }),
+  ];
+  const out = collapseRepeats(cell);
+  assert.deepEqual(out.map((e) => [e.row.id, e.repeats.map((r) => r.id)]), [["a", ["b"]], ["c", []]]);
 });

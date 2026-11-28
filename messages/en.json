@@ -7828,7 +7828,9 @@
     },
     "addDay": "Add {day} at {center}",
     "generalWhenNone": "Until they have their own, each center's general hours count:",
-    "generalOtherDays": "On days without their own hours at a center, its general hours count:"
+    "generalOtherDays": "On days without their own hours at a center, its general hours count:",
+    "repeatedHelp": "Saved {count} times: shown once.",
+    "repeatedFix": "This entry is saved {count} times (from the previous screen). «Save» keeps a single copy; «Remove» removes them all."
   },
   "staffDayChanges": {
     "title": "One-day changes",

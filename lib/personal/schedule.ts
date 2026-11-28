@@ -97,3 +97,17 @@ export function summarizeWeek(rows: readonly ScheduleRow[]): { clinicId: string;
     return { clinicId: line.clinicId, clinicName: line.clinicName, spans };
   });
 }
+
+/**
+ * One entry per distinct range in a cell. Old screens could save the same day twice (one POST per
+ * day); those copies are shown once, with the extra rows kept so they can be removed.
+ */
+export function collapseRepeats(cell: readonly ScheduleRow[]): { row: ScheduleRow; repeats: ScheduleRow[] }[] {
+  const out: { row: ScheduleRow; repeats: ScheduleRow[] }[] = [];
+  for (const r of cell) {
+    const same = out.find((e) => e.row.startTime === r.startTime && e.row.endTime === r.endTime);
+    if (same) same.repeats.push(r);
+    else out.push({ row: r, repeats: [] });
+  }
+  return out;
+}
