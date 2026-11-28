@@ -1629,7 +1629,8 @@
     "inventory_adjustments": "Ajustes",
     "inventoryBackdate": "Ajustes con fecha pasada",
     "appointmentsDay": "Citas",
-    "functions": "Funciones"
+    "functions": "Funciones",
+    "legacyPackages": "Paquetes del legado"
   },
   "admin": {
     "title": "Administración",
