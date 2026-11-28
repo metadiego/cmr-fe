@@ -17,6 +17,23 @@ test("explainFormatWriteError: a bare 403 gets the every-center label, keeping i
   assert.deepEqual(out.data, { faltan: ["formats.config"] })
 })
 
+test("explainFormatWriteError: the BE's real 403 (generic labelKey + faltan formats.config) is relabelled", () => {
+  const e = new ApiError(
+    "FORBIDDEN",
+    "Forbidden",
+    403,
+    undefined,
+    "auth.permiso_faltante",
+    {
+      faltan: ["formats.config"],
+    }
+  )
+  assert.equal(
+    (explainFormatWriteError(e) as ApiError).labelKey,
+    FORMAT_NEEDS_EVERY_CENTER
+  )
+})
+
 test("explainFormatWriteError: other errors, and a 403 that already has its label, pass untouched", () => {
   const labelled = new ApiError(
     "FORBIDDEN",

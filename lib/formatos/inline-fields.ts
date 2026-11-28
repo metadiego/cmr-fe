@@ -5,13 +5,13 @@
 
 export function splitInlineFields<T extends { clave: string }>(
   fields: T[],
-  inlineKeys: readonly string[] | null | undefined,
+  inlineKeys: readonly string[] | null | undefined
 ): { inline: T[]; rest: T[] } {
-  if (!inlineKeys?.length) return { inline: [], rest: fields };
+  if (!inlineKeys?.length) return { inline: [], rest: fields }
   const inline = inlineKeys
     .map((k) => fields.find((f) => f.clave === k))
-    .filter((f): f is T => !!f);
-  return { inline, rest: fields.filter((f) => !inline.includes(f)) };
+    .filter((f): f is T => !!f)
+  return { inline, rest: fields.filter((f) => !inline.includes(f)) }
 }
 
 // "campos" layout, `render.camposEnPares`: the legacy 2-column header table (one row per PAIR of
@@ -19,9 +19,9 @@ export function splitInlineFields<T extends { clave: string }>(
 // one-line cramming asked for on 04-nov): Fecha|Paciente, Hora entrada|Hora salida, Sesión|Record.
 // An odd field count leaves the last row with just one field (still a valid row, not dropped).
 export function chunkPairs<T>(items: readonly T[]): T[][] {
-  const out: T[][] = [];
-  for (let i = 0; i < items.length; i += 2) out.push(items.slice(i, i + 2));
-  return out;
+  const out: T[][] = []
+  for (let i = 0; i < items.length; i += 2) out.push(items.slice(i, i + 2))
+  return out
 }
 
 // "campos" layout, `render.fieldRows`: each row is a list of field keys spread on one line, in that order
@@ -29,20 +29,20 @@ export function chunkPairs<T>(items: readonly T[]): T[][] {
 // are skipped, a row left empty is dropped, and fields in no row stay below (`rest`), one per line.
 export function splitFieldRows<T extends { clave: string }>(
   fields: T[],
-  rows: readonly (readonly string[])[] | null | undefined,
+  rows: readonly (readonly string[])[] | null | undefined
 ): { rows: T[][]; rest: T[] } {
-  if (!rows?.length) return { rows: [], rest: fields };
-  const used = new Set<T>();
-  const out: T[][] = [];
+  if (!rows?.length) return { rows: [], rest: fields }
+  const used = new Set<T>()
+  const out: T[][] = []
   for (const keys of rows) {
-    const row: T[] = [];
+    const row: T[] = []
     for (const k of keys) {
-      const f = fields.find((x) => x.clave === k && !used.has(x));
-      if (!f) continue;
-      used.add(f);
-      row.push(f);
+      const f = fields.find((x) => x.clave === k && !used.has(x))
+      if (!f) continue
+      used.add(f)
+      row.push(f)
     }
-    if (row.length > 0) out.push(row);
+    if (row.length > 0) out.push(row)
   }
-  return { rows: out, rest: fields.filter((f) => !used.has(f)) };
+  return { rows: out, rest: fields.filter((f) => !used.has(f)) }
 }

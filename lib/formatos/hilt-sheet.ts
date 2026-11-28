@@ -3,7 +3,7 @@
 // scale, so it has room for fewer rows.
 
 /** Data rows the first sheet holds next to the comments, fields and pain scale (legacy: 22). */
-export const HILT_FIRST_PAGE_ROWS = 22;
+export const HILT_FIRST_PAGE_ROWS = 22
 
 /**
  * Splits the regions into the two sheets, first-fit and in order: a region goes on the first sheet if
@@ -12,18 +12,18 @@ export const HILT_FIRST_PAGE_ROWS = 22;
  */
 export function hiltPages<T extends { filas: readonly unknown[] }>(
   sections: readonly T[],
-  firstPageRows = HILT_FIRST_PAGE_ROWS,
+  firstPageRows = HILT_FIRST_PAGE_ROWS
 ): { first: T[]; second: T[] } {
-  const first: T[] = [];
-  const second: T[] = [];
-  let used = 0;
+  const first: T[] = []
+  const second: T[] = []
+  let used = 0
   for (const s of sections) {
     if (used + s.filas.length <= firstPageRows) {
-      first.push(s);
-      used += s.filas.length;
+      first.push(s)
+      used += s.filas.length
     } else {
-      second.push(s);
+      second.push(s)
     }
   }
-  return { first, second };
+  return { first, second }
 }

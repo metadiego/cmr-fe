@@ -7,18 +7,19 @@
 // blank. Only the counter column (render.numerarFilas) is rewritten, as "i/count" when the format
 // numbers as a fraction, or "i" otherwise.
 
-export type PrintRow = Record<string, string | null | undefined>;
+export type PrintRow = Record<string, string | null | undefined>
 
 export function rowsForPrint(
   rows: PrintRow[],
   count: number | null | undefined,
   counterKey: string | null | undefined,
-  asFraction: boolean,
+  asFraction: boolean
 ): PrintRow[] {
-  if (!count || count < 1 || !Number.isInteger(count)) return rows;
+  if (!count || count < 1 || !Number.isInteger(count)) return rows
   return Array.from({ length: count }, (_, i) => {
-    const row = { ...(rows[i] ?? {}) };
-    if (counterKey) row[counterKey] = asFraction ? `${i + 1}/${count}` : String(i + 1);
-    return row;
-  });
+    const row = { ...(rows[i] ?? {}) }
+    if (counterKey)
+      row[counterKey] = asFraction ? `${i + 1}/${count}` : String(i + 1)
+    return row
+  })
 }
