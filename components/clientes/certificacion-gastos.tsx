@@ -226,7 +226,9 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
                     );
                   }
                   const tieneDetalle = !!c.detail?.length;
-                  const abierto = expandido.has(c.slug);
+                  // "Detallado" mode opens every concept on screen too — what you see is what prints,
+                  // rather than making staff click through each row to check what the document will say.
+                  const abierto = detallado || expandido.has(c.slug);
                   return (
                     <React.Fragment key={c.slug}>
                       <tr className={"border-t " + (tieneDetalle ? "cursor-pointer hover:bg-muted/30" : "")} onClick={() => tieneDetalle && setExpandido((s) => { const n = new Set(s); if (n.has(c.slug)) n.delete(c.slug); else n.add(c.slug); return n; })}>
