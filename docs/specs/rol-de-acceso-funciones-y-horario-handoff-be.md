@@ -45,7 +45,13 @@ solo muestran y editan los datos.
 - Se mueven también solas desde las pantallas de hoy: un puesto sin permisos (médico, enfermera, técnico,
   cajero, contabilidad) añadido o quitado en la pantalla de puestos añade o quita su función; el cargo y
   las capacidades del formulario viejo de personal también.
-- Quitar una función que un puesto todavía respalda da 409 `functions.backedByPosition` (§3).
+- Quitar una función que respalda un puesto sin permisos que la persona tiene (médico, enfermera, técnico,
+  cajero, contabilidad) **quita también ese puesto, en todos los centros donde lo tiene**, en la misma
+  petición y de forma atómica (ya no hay 409; `cmr-be/docs/specs/functions-drop-job-position.md`). Se
+  autoriza como un cambio de puestos: `staff.update` en cada uno de esos centros (si falta, 403), y si la
+  persona tiene login y con eso cambia el conjunto de centros donde tiene algún puesto, solo un
+  administrador → 403 `positions.accessChangeNeedsAdmin` (§3), sin escribir nada. Si ese puesto era el
+  principal, el principal queda vacío. Tras guardar, volver a leer los puestos (`GET /staff/:id/positions`).
 
 ### 2.3 Horario = la agenda (endpoints que ya existían; el nombre `doctors/` es histórico, vale para todos)
 | Método y ruta | Permiso | Cuerpo |
@@ -96,7 +102,7 @@ Reglas para la pantalla:
 | labelKey | Cuándo | Datos extra en el cuerpo del error |
 |---|---|---|
 | `functions.unknown` | función inexistente, o inactiva que se intenta añadir | `unknown: string[]` |
-| `functions.backedByPosition` (409) | quitar una función que un puesto de la pantalla de hoy todavía respalda | `blockedBy: { functions, positions }` — decir «quita antes el puesto …» |
+| `positions.accessChangeNeedsAdmin` (403) | en `PUT /staff/:id/functions`: quitar una función cuyo puesto sin permisos es el único que la persona (con login) tiene en algún centro, sin ser administrador (cambiaría dónde puede entrar) | — decir «esto cambia los centros de la persona: lo hace un administrador» |
 | `functions.duplicate` (409) | slug repetido en el catálogo | `slug` |
 | `functions.unknownService` | `serviceSlug` que no existe | `serviceSlug` |
 | `functions.kindServiceMismatch` | `kind` y `serviceSlug` no casan | — |
