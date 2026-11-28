@@ -9,7 +9,7 @@ import {
   getStaffSchedule,
   updateScheduleRow,
 } from "@/lib/api/staff-schedule";
-import { WEEK, byDay, hoursProblem, moveCenterSteps, splitRows, type ScheduleRow } from "@/lib/personal/schedule";
+import { WEEK, hoursProblem, moveCenterSteps, splitRows, summarizeWeek, weekGrid, type ScheduleRow } from "@/lib/personal/schedule";
 import { missingFields } from "@/lib/forms/missing";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,8 @@ type Center = { id: string; name: string };
 // «Horario» on the staff record = the person's agenda, the ONE schedule (owner, 27-nov; cmr-be handoff
 // §2.3). Each row has its own center, chosen here and always sent: a row without one used to land in
 // the session's center. Writes save at once and need staff.update at the row's center. The centers'
-// general rows (staffId null) the GET fills in are shown apart, never as the person's own.
+// general rows (staffId null) the GET fills in for the days the person has none are summarized in one
+// line under the grid, never shown as the person's own.
 export function StaffSchedule({
   staffId,
   readCenters,
@@ -44,10 +45,12 @@ export function StaffSchedule({
   const res = useResource<ScheduleRow[]>(() => getStaffSchedule(staffId, readIds), [staffId, readIds.join(",")]);
   const rows = res.state.kind === "ok" ? res.state.data : [];
   const { own, general } = splitRows(rows, staffId);
-  const ownByDay = byDay(own);
-  const generalByDay = byDay(general);
+  const grid = weekGrid(own);
+  const generalSummary = summarizeWeek(general);
   const editable = new Set(editableCenters.map((c) => c.id));
-  const [dialog, setDialog] = React.useState<{ row: ScheduleRow | null; day: number } | null>(null);
+  const [dialog, setDialog] = React.useState<{ row: ScheduleRow | null; day: number; center?: string } | null>(null);
+  const dayName = (d: number) => t(`dowShort.${d}`);
+  const span = (from: number, to: number) => (from === to ? dayName(from) : `${dayName(from)}–${dayName(to)}`);
 
   return (
     <Panel
@@ -64,59 +67,89 @@ export function StaffSchedule({
       {res.state.kind === "fail" ? (
         <div className="p-5"><ErrorState message={res.state.message} /></div>
       ) : res.state.kind === "loading" ? (
-        <div className="divide-y" aria-hidden>
-          {WEEK.map((d) => (
-            <div key={d} className="flex items-center gap-4 px-5 py-3">
-              <div className="h-3.5 w-20 animate-pulse rounded bg-muted" />
-              <div className="h-6 w-40 animate-pulse rounded-full bg-muted" />
-            </div>
-          ))}
+        <div className="space-y-3 px-5 py-4" aria-hidden>
+          <div className="h-4 w-full animate-pulse rounded bg-muted" />
+          <div className="h-8 w-full animate-pulse rounded bg-muted" />
         </div>
       ) : (
         <>
-          {own.length === 0 && <EmptyState>{t("empty")}</EmptyState>}
-          <ul className="divide-y">
-            {WEEK.map((d) => {
-              const mine = ownByDay.get(d) ?? [];
-              const centerRows = generalByDay.get(d) ?? [];
-              return (
-                <li key={d} className="flex flex-col gap-2 px-5 py-2.5 sm:flex-row sm:items-start">
-                  <span className="w-28 shrink-0 pt-1 text-sm font-medium">{tRoot(`medicoHub.dow.${d}`)}</span>
-                  <div className="flex flex-1 flex-wrap items-center gap-1.5">
-                    {mine.length === 0 && <span className="pt-1 text-xs text-muted-foreground">{t("dayOff")}</span>}
-                    {mine.map((r) => {
-                      const canEdit = editable.has(r.clinicId);
-                      return (
-                        <button
-                          key={r.id}
-                          type="button"
-                          disabled={!canEdit}
-                          onClick={() => setDialog({ row: r, day: r.dayOfWeek })}
-                          title={canEdit ? t("edit") : t("noEditHere")}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs tabular-nums transition-colors",
-                            canEdit ? "hover:bg-accent" : "cursor-default opacity-80",
-                          )}
-                        >
-                          <span className="font-medium">{r.clinicName ?? "—"}</span>
-                          <span className="text-muted-foreground">{r.startTime}–{r.endTime}</span>
-                        </button>
-                      );
-                    })}
-                    {centerRows.map((r) => (
-                      <span
-                        key={r.id}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-dashed px-3 py-1 text-xs text-muted-foreground tabular-nums"
-                        title={t("generalHelp")}
-                      >
-                        {r.clinicName ?? "—"} · {r.startTime}–{r.endTime} · {t("general")}
-                      </span>
+          {grid.length === 0 ? (
+            <EmptyState>{t("empty")}</EmptyState>
+          ) : (
+            // One line per center, one column per weekday: where and when, read at a glance.
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[40rem] table-fixed text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/30">
+                    <th className="w-36 px-5 py-2 text-left text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{t("center")}</th>
+                    {WEEK.map((d) => (
+                      <th key={d} className="px-1 py-2 text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{dayName(d)}</th>
                     ))}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {grid.map((line) => {
+                    const canEdit = editable.has(line.clinicId);
+                    return (
+                      <tr key={line.clinicId}>
+                        <td className="truncate px-5 py-2 font-medium" title={line.clinicName}>{line.clinicName}</td>
+                        {WEEK.map((d) => {
+                          const cell = line.days.get(d) ?? [];
+                          return (
+                            <td key={d} className="px-1 py-1.5 text-center align-middle">
+                              <div className="flex flex-col items-center gap-1">
+                                {cell.map((r) => (
+                                  <button
+                                    key={r.id}
+                                    type="button"
+                                    disabled={!canEdit}
+                                    onClick={() => setDialog({ row: r, day: d })}
+                                    title={canEdit ? t("edit") : t("noEditHere")}
+                                    className={cn(
+                                      "w-full rounded-md bg-primary/10 px-1 py-1 text-xs font-medium text-primary tabular-nums transition-colors",
+                                      canEdit ? "hover:bg-primary/20" : "cursor-default",
+                                    )}
+                                  >
+                                    {r.startTime}–{r.endTime}
+                                  </button>
+                                ))}
+                                {cell.length === 0 &&
+                                  (canEdit ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => setDialog({ row: null, day: d, center: line.clinicId })}
+                                      aria-label={t("addDay", { day: tRoot(`medicoHub.dow.${d}`), center: line.clinicName })}
+                                      className="w-full rounded-md px-1 py-1 text-xs text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
+                                    >
+                                      —
+                                    </button>
+                                  ) : (
+                                    <span className="py-1 text-xs text-muted-foreground/60">—</span>
+                                  ))}
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {generalSummary.length > 0 && (
+            <div className="space-y-1 border-t bg-muted/20 px-5 py-3 text-xs text-muted-foreground">
+              <p>{grid.length === 0 ? t("generalWhenNone") : t("generalOtherDays")}</p>
+              <ul className="flex flex-wrap gap-x-6 gap-y-1">
+                {generalSummary.map((c) => (
+                  <li key={c.clinicId} className="tabular-nums">
+                    <span className="font-medium text-foreground/80">{c.clinicName}</span>{" "}
+                    {c.spans.map((s) => `${span(s.from, s.to)} ${s.startTime}–${s.endTime}`).join(" · ")}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </>
       )}
       {dialog && (
@@ -124,6 +157,7 @@ export function StaffSchedule({
           staffId={staffId}
           row={dialog.row}
           day={dialog.day}
+          initialCenter={dialog.center}
           centers={editableCenters}
           onClose={() => setDialog(null)}
           onSaved={() => { setDialog(null); res.reload(); }}
@@ -139,6 +173,7 @@ function ScheduleRowDialog({
   staffId,
   row,
   day,
+  initialCenter,
   centers,
   onClose,
   onSaved,
@@ -146,6 +181,8 @@ function ScheduleRowDialog({
   staffId: string;
   row: ScheduleRow | null;
   day: number;
+  /** Preselected center when adding from an empty cell. */
+  initialCenter?: string;
   centers: Center[];
   onClose: () => void;
   onSaved: () => void;
@@ -153,7 +190,7 @@ function ScheduleRowDialog({
   const t = useTranslations("staffSchedule");
   const tRoot = useTranslations();
   const confirm = useConfirm();
-  const [center, setCenter] = React.useState(row?.clinicId ?? (centers.length === 1 ? centers[0].id : ""));
+  const [center, setCenter] = React.useState(row?.clinicId ?? initialCenter ?? (centers.length === 1 ? centers[0].id : ""));
   const [days, setDays] = React.useState<Set<number>>(new Set([day]));
   const [start, setStart] = React.useState(row?.startTime ?? "");
   const [end, setEnd] = React.useState(row?.endTime ?? "");

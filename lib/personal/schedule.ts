@@ -56,3 +56,44 @@ export function moveCenterSteps(
     deactivate: { id: row.id, centerId: row.clinicId },
   };
 }
+
+/** One line of the week grid: a center, and each weekday's rows there (sorted by start). */
+export interface WeekLine {
+  clinicId: string;
+  clinicName: string;
+  days: Map<number, ScheduleRow[]>;
+}
+
+/** The person's rows as a center × weekday grid, centers by name. */
+export function weekGrid(rows: readonly ScheduleRow[]): WeekLine[] {
+  const byCenter = new Map<string, ScheduleRow[]>();
+  for (const r of rows) byCenter.set(r.clinicId, [...(byCenter.get(r.clinicId) ?? []), r]);
+  return [...byCenter.entries()]
+    .map(([clinicId, list]) => ({ clinicId, clinicName: list[0].clinicName ?? "—", days: byDay(list) }))
+    .sort((a, b) => a.clinicName.localeCompare(b.clinicName));
+}
+
+/** A run of consecutive weekdays (Monday-first order) with the same hours. */
+export interface WeekSpan {
+  from: number;
+  to: number;
+  startTime: string;
+  endTime: string;
+}
+
+/** Each center's rows as compact spans («Lun–Sáb 07:00–17:00»), for a one-line summary. */
+export function summarizeWeek(rows: readonly ScheduleRow[]): { clinicId: string; clinicName: string; spans: WeekSpan[] }[] {
+  return weekGrid(rows).map((line) => {
+    const spans: WeekSpan[] = [];
+    let prevDay: number | null = null;
+    for (const d of WEEK) {
+      for (const r of line.days.get(d) ?? []) {
+        const last = spans.find((s) => s.to === prevDay && s.startTime === r.startTime && s.endTime === r.endTime);
+        if (last) last.to = d;
+        else spans.push({ from: d, to: d, startTime: r.startTime, endTime: r.endTime });
+      }
+      prevDay = d;
+    }
+    return { clinicId: line.clinicId, clinicName: line.clinicName, spans };
+  });
+}

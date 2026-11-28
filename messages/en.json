@@ -7791,12 +7791,9 @@
   "staffSchedule": {
     "tab": "Schedule",
     "title": "Schedule",
-    "help": "The days they work, each at its center. Tap an entry to change or remove it.",
+    "help": "Where and when they work each week. Tap an entry to change or remove it, or an empty cell to add that day.",
     "readOnly": "The days they work, each at its center. Changing it needs permission to edit staff at that center.",
-    "empty": "No schedule of their own: type it with «Add».",
-    "dayOff": "Off",
-    "general": "center's general hours",
-    "generalHelp": "The center's default hours, not this person's. Changed in booking settings.",
+    "empty": "No schedule of their own. Add it with «Add».",
     "add": "Add",
     "edit": "Change or remove",
     "noEditHere": "You cannot edit staff at this center.",
@@ -7818,7 +7815,19 @@
     "problem": {
       "format": "Type the hours as HH:mm.",
       "endBeforeStart": "The end must be after the start."
-    }
+    },
+    "dowShort": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "0": "Sun"
+    },
+    "addDay": "Add {day} at {center}",
+    "generalWhenNone": "Until they have their own, each center's general hours count:",
+    "generalOtherDays": "On days without their own hours at a center, its general hours count:"
   },
   "staffDayChanges": {
     "title": "One-day changes",

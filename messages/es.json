@@ -7791,12 +7791,9 @@
   "staffSchedule": {
     "tab": "Horario",
     "title": "Horario",
-    "help": "Los días que trabaja, cada uno en su centro. Toca un horario para cambiarlo o quitarlo.",
+    "help": "Dónde y cuándo trabaja cada semana. Toca un horario para cambiarlo o quitarlo, o una casilla vacía para añadir ese día.",
     "readOnly": "Los días que trabaja, cada uno en su centro. Para cambiarlo hace falta poder editar personal en ese centro.",
-    "empty": "Sin horario propio: se teclea con «Añadir».",
-    "dayOff": "Libre",
-    "general": "horario general del centro",
-    "generalHelp": "Horario por defecto del centro, no de esta persona. Se cambia en la configuración de reservas.",
+    "empty": "Sin horario propio. Añádelo con «Añadir».",
     "add": "Añadir",
     "edit": "Cambiar o quitar",
     "noEditHere": "No puedes editar personal en este centro.",
@@ -7818,7 +7815,19 @@
     "problem": {
       "format": "Escribe las horas como HH:mm.",
       "endBeforeStart": "La salida tiene que ser posterior a la entrada."
-    }
+    },
+    "dowShort": {
+      "1": "Lun",
+      "2": "Mar",
+      "3": "Mié",
+      "4": "Jue",
+      "5": "Vie",
+      "6": "Sáb",
+      "0": "Dom"
+    },
+    "addDay": "Añadir {day} en {center}",
+    "generalWhenNone": "Mientras no tenga horario propio, cuenta el horario general de cada centro:",
+    "generalOtherDays": "Los días sin horario propio en un centro cuenta su horario general:"
   },
   "staffDayChanges": {
     "title": "Cambios de un día",

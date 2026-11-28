@@ -1,7 +1,7 @@
 // lib/personal/schedule.ts. Run: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { WEEK, byDay, hoursProblem, moveCenterSteps, splitRows, type ScheduleRow } from "./schedule.ts";
+import { WEEK, byDay, hoursProblem, moveCenterSteps, splitRows, summarizeWeek, weekGrid, type ScheduleRow } from "./schedule.ts";
 
 const row = (over: Partial<ScheduleRow>): ScheduleRow => ({
   id: "r", staffId: "p", clinicId: "bay", clinicName: "Bayamón", dayOfWeek: 1, startTime: "08:00", endTime: "12:00",
@@ -47,4 +47,29 @@ test("moving a row to another center = create there first, then deactivate the o
     deactivate: { id: "old", centerId: "bay" },
   });
   assert.equal(moveCenterSteps(r, "bay", "p"), null);
+});
+
+test("weekGrid: one line per center (by name), each weekday with its rows", () => {
+  const rows = [
+    row({ id: "c1", clinicId: "cag", clinicName: "Caguas", dayOfWeek: 2 }),
+    row({ id: "b1", dayOfWeek: 1, startTime: "13:00", endTime: "17:00" }),
+    row({ id: "b2", dayOfWeek: 1 }),
+  ];
+  const g = weekGrid(rows);
+  assert.deepEqual(g.map((l) => l.clinicId), ["bay", "cag"]);
+  assert.deepEqual(g[0].days.get(1)!.map((r) => r.id), ["b2", "b1"]);
+  assert.deepEqual(g[0].days.get(2), []);
+  assert.deepEqual(g[1].days.get(2)!.map((r) => r.id), ["c1"]);
+});
+
+test("summarizeWeek: consecutive days with the same hours collapse into a span", () => {
+  const rows = [1, 2, 3, 4, 5, 6].map((d) => row({ id: `b${d}`, dayOfWeek: d, startTime: "07:00", endTime: "17:00" }))
+    .concat([row({ id: "cag", clinicId: "cag", clinicName: "Caguas", dayOfWeek: 2 }), row({ id: "cag4", clinicId: "cag", clinicName: "Caguas", dayOfWeek: 4 })]);
+  assert.deepEqual(summarizeWeek(rows), [
+    { clinicId: "bay", clinicName: "Bayamón", spans: [{ from: 1, to: 6, startTime: "07:00", endTime: "17:00" }] },
+    { clinicId: "cag", clinicName: "Caguas", spans: [
+      { from: 2, to: 2, startTime: "08:00", endTime: "12:00" },
+      { from: 4, to: 4, startTime: "08:00", endTime: "12:00" },
+    ] },
+  ]);
 });
