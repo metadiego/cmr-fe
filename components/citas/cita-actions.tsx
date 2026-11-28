@@ -84,7 +84,11 @@ export function CitaActions({
   // One CitaActions per table row: ids must not collide.
   const reasonId = `${React.useId()}-cancel-reason`;
 
-  const [cancelOpen, setCancelOpen] = React.useState(false);
+  // "Se retiró" is its OWN door next to Cancel, not a relabeling of it (owner, via cmr-be-76,
+  // 28-nov-2026): cancelling a present appointment, or one booked by mistake, still has to exist.
+  // One dialog shell, two modes — same reason-required form either way.
+  const [dialogMode, setDialogMode] = React.useState<"cancel" | "seRetiro" | null>(null);
+  const cancelOpen = dialogMode !== null;
   const [reagOpen, setReagOpen] = React.useState(false);
   const [histOpen, setHistOpen] = React.useState(false);
   // Clean reason on every open (and on another appointment).
@@ -106,7 +110,7 @@ export function CitaActions({
       // The appointment moved under us: close the dialog and redraw (the toast still says why).
       onError: (err) => {
         if (refusalRefreshesRow(err)) {
-          setCancelOpen(false);
+          setDialogMode(null);
           onChanged();
         }
         return false;
@@ -122,11 +126,12 @@ export function CitaActions({
     allowed: allowedActions,
     canConfirm: can("appointments.confirm"),
   });
-  // Cancel on an arrived patient is really "Se retiró" (handoff se-retiro-antes-de-la-consulta,
-  // 27-nov-2026): same reason-required dialog, but its OWN door — vitals and the invoice already taken
-  // stay untouched, never the plain Cancel's.
+  // "Se retiró" (handoff se-retiro-antes-de-la-consulta, 27-nov-2026) sits NEXT TO Cancel, never in its
+  // place: cancelling a present appointment, or one booked by mistake, still has to exist on its own.
+  // It only applies once arrived (waiting/triage) — the same stage Cancel's own meaning turns into
+  // "not served" — and its door keeps vitals and the invoice already taken, which plain Cancel does not.
   const notServe = cancelMeaning("medical", cita, allowedActions) === "not_serve";
-  const cancelLabel = notServe ? tRoot("lifecycle.door.se_retiro") : t("cancelar");
+  const seRetiroLabel = tRoot("lifecycle.door.se_retiro");
   // Show the menu whenever the user can act OR at least view history.
   if (!can("citas.update") && !can("citas.read")) return null;
 
@@ -178,12 +183,20 @@ export function CitaActions({
           <DropdownMenuItem onSelect={() => setHistOpen(true)}>
             {t("historial")}
           </DropdownMenuItem>
+          {actions.includes("cancelar") && notServe && (
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={() => setDialogMode("seRetiro")}
+            >
+              {seRetiroLabel}
+            </DropdownMenuItem>
+          )}
           {actions.includes("cancelar") && (
             <DropdownMenuItem
               variant="destructive"
-              onSelect={() => setCancelOpen(true)}
+              onSelect={() => setDialogMode("cancel")}
             >
-              {cancelLabel}
+              {t("cancelar")}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -192,22 +205,22 @@ export function CitaActions({
       {/* Cancel / Se retiró — requires a reason. Irreversible: only the button acts, Enter never does. */}
       <FormDialog
         open={cancelOpen}
-        onOpenChange={setCancelOpen}
+        onOpenChange={(o) => !o && setDialogMode(null)}
         size="md"
-        title={notServe ? cancelLabel : t("cancelTitle")}
-        description={notServe ? t("seRetiroHelp") : t("cancelHelp")}
+        title={dialogMode === "seRetiro" ? seRetiroLabel : t("cancelTitle")}
+        description={dialogMode === "seRetiro" ? t("seRetiroHelp") : t("cancelHelp")}
         onSubmit={() => {}}
         actions={[
           {
-            label: cancelLabel,
+            label: dialogMode === "seRetiro" ? seRetiroLabel : t("cancelar"),
             variant: "destructive",
             onClick: () =>
               run(
                 () =>
-                  notServe
+                  dialogMode === "seRetiro"
                     ? seRetiroDeCita(cita.id, cancelForm.reason.trim(), centroId)
                     : cancelarCita(cita.id, cancelForm.reason.trim(), centroId),
-                () => setCancelOpen(false),
+                () => setDialogMode(null),
               ),
           },
         ]}
@@ -219,7 +232,7 @@ export function CitaActions({
             id={reasonId}
             value={cancelForm.reason}
             onChange={(e) => setCancelForm({ reason: e.target.value })}
-            placeholder={notServe ? t("seRetiroPlaceholder") : undefined}
+            placeholder={dialogMode === "seRetiro" ? t("seRetiroPlaceholder") : undefined}
             rows={3}
           />
         </Field>
