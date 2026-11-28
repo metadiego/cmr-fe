@@ -23,8 +23,8 @@ export function accessRoleCatalog(
 
 /**
  * Roles being phased out, offered only to whoever still holds them: «Solo lectura» and «Facturación e
- * inventario» (cmr-be handoff §4), «Otro», and «Enfermería» / «Panel de enfermería», merged into «Clínico»
- * (owner, 28-nov; cmr-be feat/functions-drop-job-position).
+ * inventario» (cmr-be handoff §4), «Otro», and «Enfermería» / «Panel de enfermería», merged into «Estación de
+ * enfermería» (owner, 28-nov; cmr-be feat/functions-drop-job-position).
  */
 export const RETIRED_ACCESS_ROLES = ["read_only", "facturacion-inventario", "other", "nursing", "nursing_panel"] as const;
 

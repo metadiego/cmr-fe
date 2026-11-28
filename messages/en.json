@@ -7718,7 +7718,8 @@
     "centersRequired": "Each position needs at least one center.",
     "primaryNotHeld": "The primary position must be one the person holds.",
     "unknown": "That position does not exist.",
-    "noDateWindows": "Positions have no end date: the access was given without one."
+    "noDateWindows": "Positions have no end date: the access was given without one.",
+    "nursing_station": "Nursing station"
   },
   "staffPositions": {
     "title": "Roles per center",

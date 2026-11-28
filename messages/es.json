@@ -7718,7 +7718,8 @@
     "centersRequired": "Cada puesto necesita al menos un centro.",
     "primaryNotHeld": "El puesto principal tiene que ser uno de los puestos que tiene la persona.",
     "unknown": "Ese puesto no existe.",
-    "noDateWindows": "Los puestos no tienen fecha de fin: el acceso quedó sin fecha."
+    "noDateWindows": "Los puestos no tienen fecha de fin: el acceso quedó sin fecha.",
+    "nursing_station": "Estación de enfermería"
   },
   "staffPositions": {
     "title": "Roles por centro",
