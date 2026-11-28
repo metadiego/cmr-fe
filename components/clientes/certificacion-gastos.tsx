@@ -7,10 +7,12 @@ import { useTranslations } from "next-intl";
 import { getCertificacionGastos, type CertificacionGastos as Cert } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
+import { titleCaseSlug } from "@/lib/format/text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ErrorState, LoadingPanel, Panel } from "@/components/kit/panel";
 import {
   Select,
@@ -40,6 +42,10 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
   const [{ desde, hasta }, setRango] = React.useState(anioEnCurso);
   const [persona, setPersona] = React.useState("");
   const [trato, setTrato] = React.useState<"sr" | "sra">("sr");
+  // Grouped by default (the legacy document's usual shape); checked, the printed document opens
+  // every concept into its own invoices/products instead of one total line — the owner's fix for
+  // "sin_clasificar" printing as a single opaque amount with no way to tell what was bought.
+  const [detallado, setDetallado] = React.useState(false);
   const [expandido, setExpandido] = React.useState<Set<string>>(new Set());
   const qsCentro = centro ? `?centro=${encodeURIComponent(centro)}` : "";
   const dia = (iso: string) => { const d = parseDayUTC(iso); return d ? dayFmt.format(d) : iso; };
@@ -56,15 +62,24 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
   const cuadra = data?.reconciliation?.cuadra !== false;
   const puedeImprimir = !!data && cuadra && total > 0;
   const nombreConcepto = (c: { labelKey: string; slug: string }) =>
-    tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.slug;
+    tRoot.has(c.labelKey) ? tRoot(c.labelKey) : titleCaseSlug(c.slug);
 
   function imprimir() {
     if (!data || !puedeImprimir) return;
     const filas = conceptos
-      .map(
-        (c) =>
-          `<tr><td>${esc(nombreConcepto(c))}</td><td class="num">${money.format(c.total)}</td></tr>`,
-      )
+      .map((c) => {
+        const header = `<tr><td>${esc(nombreConcepto(c))}</td><td class="num">${money.format(c.total)}</td></tr>`;
+        if (!detallado || !c.detail?.length) return header;
+        const lineas = c.detail
+          .flatMap((f) =>
+            f.lines.map(
+              (l) =>
+                `<tr class="detalle"><td>${esc(l.description)} · ${esc(dia(f.date))}${f.number ? ` · ${esc(f.number)}` : ""}</td><td class="num">${money.format(l.amount)}</td></tr>`,
+            ),
+          )
+          .join("");
+        return header + lineas;
+      })
       .join("");
     const tratoLabel = trato === "sra" ? t("sra") : t("sr");
     const rec = data.patient?.medicalRecordNumber ? ` · ${t("record")} ${esc(String(data.patient.medicalRecordNumber))}` : "";
@@ -81,6 +96,8 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
         table{width:100%;border-collapse:collapse;margin:1.2rem 0}
         th,td{border-bottom:1px solid #999;padding:.5rem .3rem;text-align:left}
         th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+        tr.detalle td{font-size:.85rem;color:#555;padding-top:.15rem;padding-bottom:.15rem;border-bottom:none}
+        tr.detalle td:first-child{padding-left:1.2rem}
         .total td{border-top:2px solid #111;border-bottom:none;font-weight:bold}
         .foot{margin-top:3.5rem;font-size:.95rem}
         .firma{margin-top:3rem;border-top:1px solid #111;width:60%;padding-top:.3rem}
@@ -139,6 +156,10 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
           <Input id="cg-persona" value={persona} onChange={(e) => setPersona(e.target.value)} placeholder={t("authorizedPersonPh")} />
         </div>
         <Button type="button" onClick={imprimir} disabled={!puedeImprimir}>{t("print")}</Button>
+      </div>
+      <div className="flex items-center gap-2 px-5 pb-4">
+        <Checkbox id="cg-detallado" checked={detallado} onCheckedChange={(v) => setDetallado(v === true)} />
+        <Label htmlFor="cg-detallado" className="cursor-pointer font-normal text-muted-foreground">{t("detailedHint")}</Label>
       </div>
       </Panel>
 

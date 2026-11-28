@@ -5757,6 +5757,7 @@
     "refunds": "Refunds",
     "total": "Total",
     "empty": "No expenses in the range.",
+    "detailedHint": "Detailed — open each concept into its invoices and products",
     "noCuadra": "The breakdown does not match the invoices; it cannot be printed.",
     "record": "record",
     "bodyIntro": "Hereby, at the request of {trato} {persona}, it is certified that:",

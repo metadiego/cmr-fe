@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { sentenceCase } from "./text.ts";
+import { sentenceCase, titleCaseSlug } from "./text.ts";
 
 test("raises only the first letter", () => {
   assert.equal(sentenceCase("octubre de 2026", "es"), "Octubre de 2026");
@@ -11,4 +11,10 @@ test("raises only the first letter", () => {
 test("leaves empty and already-cased strings alone", () => {
   assert.equal(sentenceCase("", "es"), "");
   assert.equal(sentenceCase("October 2026", "en"), "October 2026");
+});
+
+test("titleCaseSlug turns a db slug into a readable label", () => {
+  assert.equal(titleCaseSlug("sin_clasificar"), "Sin Clasificar");
+  assert.equal(titleCaseSlug("laser-transcraneal"), "Laser Transcraneal");
+  assert.equal(titleCaseSlug("vit_c"), "Vit C");
 });

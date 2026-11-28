@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/facturacion-reportes";
 import { useResource } from "@/hooks/use-resource";
 import { useReportClinics } from "@/hooks/use-report-clinics";
+import { titleCaseSlug } from "@/lib/format/text";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -30,9 +31,6 @@ function isoDay(d: Date) {
 }
 const money = (v: number) => `$${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(v ?? 0))}`;
 const nint = (v: number) => new Intl.NumberFormat("en-US").format(Number(v ?? 0));
-function titleCase(s: string) {
-  return s.replace(/[_-]+/g, " ").replace(/\b\p{L}/gu, (c) => c.toUpperCase());
-}
 
 const TODAS = "__todas__";
 
@@ -91,7 +89,7 @@ export default function VentasPorGrupoPage() {
     return aplicar(isoDay(new Date(h.getFullYear(), h.getMonth(), 1)), isoDay(h), division);
   }
 
-  const rotulo = (g: { labelKey: string; slug: string }) => (tRoot.has(g.labelKey) ? tRoot(g.labelKey) : titleCase(g.slug));
+  const rotulo = (g: { labelKey: string; slug: string }) => (tRoot.has(g.labelKey) ? tRoot(g.labelKey) : titleCaseSlug(g.slug));
 
   function exportarCsv() {
     if (!data) return;
@@ -188,7 +186,7 @@ export default function VentasPorGrupoPage() {
               {megasUtiles.map((m) => (
                 <div key={m.slug} className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
                   <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    {tRoot.has(`fac.megagrupo.${m.slug}`) ? tRoot(`fac.megagrupo.${m.slug}`) : titleCase(m.slug)}
+                    {tRoot.has(`fac.megagrupo.${m.slug}`) ? tRoot(`fac.megagrupo.${m.slug}`) : titleCaseSlug(m.slug)}
                   </div>
                   <div className="text-lg font-bold tabular-nums">{money(m.neto)}</div>
                   <div className="text-[11px] text-muted-foreground">{t("nFacturas", { n: nint(m.invoices) })}</div>
@@ -219,7 +217,7 @@ export default function VentasPorGrupoPage() {
                 {grupos.map((g) => {
                   // Etiqueta de megagrupo por fila solo cuando agrupa 2+ (si es 1:1 con su clave, es ruido).
                   const megaUtil = !!g.megagrupoClave && g.megagrupoClave !== g.slug && (gruposPorMega.get(g.megagrupoClave) ?? 0) > 1;
-                  const mega = megaUtil ? (tRoot.has(`fac.megagrupo.${g.megagrupoClave}`) ? tRoot(`fac.megagrupo.${g.megagrupoClave}`) : titleCase(g.megagrupoClave!)) : null;
+                  const mega = megaUtil ? (tRoot.has(`fac.megagrupo.${g.megagrupoClave}`) ? tRoot(`fac.megagrupo.${g.megagrupoClave}`) : titleCaseSlug(g.megagrupoClave!)) : null;
                   return <GrupoRow key={g.slug} g={g} rotulo={rotulo(g)} maxNeto={maxNeto} sinClasLabel={t("sinClasificarTip")} mega={mega} />;
                 })}
               </tbody>
