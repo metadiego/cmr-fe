@@ -39,8 +39,6 @@ export const OLD_STATUS_ALLOWLIST: Readonly<Record<string, OldStatusAllowance>> 
   "components/tablero/board-appointment-modal.tsx": { reason: "piece 6: write door", hits: 1 },
   // The menu entry and label of the check-in door (`presenteCita`, POST …/presente).
   "components/citas/cita-actions.tsx": { reason: "piece 6: write door", hits: 2 },
-  // Board action slug sent to the API (`action: "presente"`).
-  "components/patient-desk/patient-detail.tsx": { reason: "piece 6: write door", hits: 2 },
   // Transition keys sent to the API (`TransicionClave`).
   "lib/api/frontdesk.ts": { reason: "piece 6: write door", hits: 2 },
   // The requirement MOMENTS a service's required field is asked at (services.form_acciones `en`), named
