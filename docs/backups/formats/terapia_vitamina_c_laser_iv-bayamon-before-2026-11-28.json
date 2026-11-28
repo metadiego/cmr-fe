@@ -1,0 +1,93 @@
+{
+ "id": "0777a780-a2fc-4fcc-aceb-44f898972bca",
+ "clinicId": "ef6f87b0-cfb8-4d33-84c6-9ce51848f8e1",
+ "createdAt": "2026-07-29T19:16:40.495Z",
+ "updatedAt": "2026-09-19T18:55:30.249Z",
+ "slug": "terapia_vitamina_c_laser_iv",
+ "labelKey": "frontdesk.formato.terapia_vitamina_c_laser_iv",
+ "title": "SUEROTERAPIA VIT C CON LASER INTRAVENOSO",
+ "serviceSlug": "vit_c",
+ "layout": "sesiones",
+ "columns": [
+  {
+   "clave": "fecha",
+   "label": "FECHA",
+   "labelKey": "formato.col.fecha"
+  },
+  {
+   "clave": "red",
+   "label": "RED",
+   "labelKey": "formato.col.red"
+  },
+  {
+   "clave": "green",
+   "label": "GREEN",
+   "labelKey": "formato.col.green"
+  },
+  {
+   "clave": "blue",
+   "label": "BLUE",
+   "labelKey": "formato.col.blue"
+  },
+  {
+   "clave": "yellow",
+   "label": "YELLOW",
+   "labelKey": "formato.col.yellow"
+  },
+  {
+   "clave": "infra",
+   "label": "INFRA",
+   "labelKey": "formato.col.infra"
+  },
+  {
+   "clave": "ultra",
+   "label": "ULTRA",
+   "labelKey": "formato.col.ultra"
+  }
+ ],
+ "rows": 1,
+ "fields": [
+  {
+   "clave": "paciente",
+   "label": "NOMBRE DEL PACIENTE:",
+   "origen": "paciente.nombre",
+   "labelKey": "formato.campo.paciente"
+  },
+  {
+   "clave": "record",
+   "label": "RECORD #:",
+   "origen": "paciente.record",
+   "labelKey": "formato.campo.record"
+  }
+ ],
+ "sections": [
+  {
+   "tipo": "firmas",
+   "lineas": [
+    {
+     "label": "ENFERMERO(A):",
+     "labelKey": "ENFERMERO(A):"
+    },
+    {
+     "label": "FIRMA DEL PACIENTE",
+     "labelKey": "FIRMA DEL PACIENTE"
+    },
+    {
+     "label": "HORA:",
+     "labelKey": "HORA:"
+    }
+   ]
+  }
+ ],
+ "render": {
+  "notas": [
+   "",
+   ""
+  ],
+  "porPagina": 2
+ },
+ "letterhead": true,
+ "sortOrder": 0,
+ "active": true,
+ "fillable": false
+}

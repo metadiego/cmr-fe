@@ -1,0 +1,132 @@
+{
+  "id": "f23668af-6f22-4e6f-9b63-83fd89237271",
+  "clinicId": "ef6f87b0-cfb8-4d33-84c6-9ce51848f8e1",
+  "createdAt": "2026-07-30T19:06:19.379Z",
+  "updatedAt": "2026-11-04T19:35:02.627Z",
+  "slug": "apex_rf",
+  "labelKey": "frontdesk.formato.apex_rf",
+  "title": "APEX",
+  "serviceSlug": "apex",
+  "layout": "campos",
+  "columns": null,
+  "rows": 1,
+  "fields": [
+    {
+      "clave": "paciente",
+      "label": "Paciente:",
+      "origen": "paciente.nombre",
+      "labelKey": "formato.campo.paciente"
+    },
+    {
+      "clave": "record",
+      "label": "Record #:",
+      "origen": "paciente.record",
+      "labelKey": "formato.campo.record"
+    },
+    {
+      "clave": "sesion",
+      "label": "Sesión #:",
+      "origen": "sesion.sesiones",
+      "labelKey": "formato.campo.sesion"
+    },
+    {
+      "clave": "fecha",
+      "label": "Fecha:",
+      "origen": "sesion.fecha",
+      "labelKey": "formato.campo.fecha"
+    },
+    {
+      "clave": "hora_entrada",
+      "label": "Hora de entrada:",
+      "origen": "",
+      "labelKey": "formato.campo.hora_entrada"
+    },
+    {
+      "clave": "hora_salida",
+      "label": "Hora de salida:",
+      "origen": "",
+      "labelKey": "formato.campo.hora_salida"
+    }
+  ],
+  "sections": [
+    {
+      "tipo": "tabla_tematica",
+      "filas": [
+        {
+          "desc": "RADIOFRECUENCIA"
+        }
+      ],
+      "cabecera": [
+        [
+          {
+            "clave": "desc",
+            "label": "Descripción del proceso"
+          },
+          {
+            "clave": "inicio",
+            "label": "Tiempo inicio"
+          },
+          {
+            "clave": "fin",
+            "label": "Tiempo finalización"
+          },
+          {
+            "clave": "efectivo",
+            "label": "Tiempo efectivo"
+          },
+          {
+            "clave": "energia",
+            "label": "Energía"
+          },
+          {
+            "clave": "temperatura",
+            "label": "Temperatura"
+          },
+          {
+            "clave": "nivel",
+            "label": "Nivel Total"
+          }
+        ]
+      ],
+      "colorHeader": "#5b9bd5",
+      "colorDescCol": "#1f6fb2",
+      "filasEnBlanco": 0
+    },
+    {
+      "tipo": "texto_libre",
+      "estilo": "lineas",
+      "lineas": 6,
+      "titulo": "Observaciones:"
+    },
+    {
+      "tipo": "firmas",
+      "lineas": [
+        {
+          "label": "Enfermero/técnico:",
+          "labelKey": "Enfermero/técnico:"
+        },
+        {
+          "label": "Médico:",
+          "labelKey": "Médico:"
+        },
+        {
+          "label": "Paciente:",
+          "labelKey": "Paciente:"
+        }
+      ]
+    }
+  ],
+  "render": {
+    "camposEnLinea": [
+      "paciente",
+      "record",
+      "sesion",
+      "fecha"
+    ],
+    "ocultarEmpresa": true
+  },
+  "letterhead": true,
+  "sortOrder": 0,
+  "active": true,
+  "fillable": false
+}

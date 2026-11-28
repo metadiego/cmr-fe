@@ -24,11 +24,15 @@ nadie se entera hasta que una enfermera imprime.
 | `render` | `camposEnLinea: [paciente, record, sesion, fecha]`, `ocultarEmpresa` | `camposEnPares`, `subrayarValores`, `ocultarEmpresa` |
 | `fields` / `sections` | también difieren | también difieren |
 
-**Sin igualar:** el dueño tiene que decir cuál es el bueno. Caguas es el más reciente.
+**Igualado el 28-nov:** el dueño eligió Caguas. Su versión se copió a Bayamón por PUT. La de Bayamón queda
+guardada en `docs/backups/formats/apex_rf-bayamon-before-2026-11-28.json`, por si resultara ser la buena.
 
 ### Los otros 31 formatos
 
 Son iguales hoy, pero solo por casualidad.
+
+Tras los dos arreglos, los 33 formatos son idénticos en los dos centros (comprobado el 28-nov). La migración
+ya no debería encontrar diferencias.
 
 ## Lo que se pide
 
@@ -41,7 +45,7 @@ Son iguales hoy, pero solo por casualidad.
 3. **El armado** (`/formats/:slug/assembly`) combina la definición global con los datos del centro de la sesión.
 4. **Migración:**
    - funde las filas por centro en una;
-   - para cada `slug` con diferencias, se para y lo informa en vez de elegir sola (hoy solo `apex_rf`).
+   - para cada `slug` con diferencias, se para y lo informa en vez de elegir sola (el 28-nov ya no queda ninguno).
 5. **El editor de formatos** (`PUT /formats/:id`) cambia la definición única: un cambio sale en todos los centros
    a la vez.
 
