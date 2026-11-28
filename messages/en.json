@@ -7762,7 +7762,7 @@
   },
   "staffFunctions": {
     "title": "Functions",
-    "help": "What the person does, with no center. It opens no screens: that is the access role. Removing Doctor, Nurse, Technician, Cashier or Accounting also removes its position.",
+    "help": "What the person does, with no center. It opens no screens: that is the access role. All are in person except those marked «Any center». Removing Doctor, Nurse, Technician, Cashier or Accounting also removes its position.",
     "readOnly": "What the person does. Changing it needs permission to edit staff at their home center.",
     "group": {
       "tasks": "Tasks",
@@ -7778,7 +7778,8 @@
       "any_center": "Any center"
     },
     "inactive": "hidden",
-    "none": "No functions: they will not appear in any picker once pickers read from here."
+    "none": "No functions: they will not appear in any picker once pickers read from here.",
+    "selectedCount": "{count} of {total}"
   },
   "homeCenter": {
     "label": "Home center",

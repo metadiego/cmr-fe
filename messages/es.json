@@ -7762,7 +7762,7 @@
   },
   "staffFunctions": {
     "title": "Funciones",
-    "help": "Lo que hace la persona, sin centro. No abre pantallas: eso es el rol de acceso. Al quitar Médico, Enfermera, Técnico, Caja o Contabilidad se quita también su puesto.",
+    "help": "Lo que hace la persona, sin centro. No abre pantallas: eso es el rol de acceso. Todas son presenciales salvo las marcadas «Cualquier centro». Al quitar Médico, Enfermera, Técnico, Caja o Contabilidad se quita también su puesto.",
     "readOnly": "Lo que hace la persona. Para cambiarlo hace falta poder editar personal en su centro de origen.",
     "group": {
       "tasks": "Tareas",
@@ -7778,7 +7778,8 @@
       "any_center": "Cualquier centro"
     },
     "inactive": "oculta",
-    "none": "Sin funciones: no saldrá en ningún selector cuando el sistema los lea de aquí."
+    "none": "Sin funciones: no saldrá en ningún selector cuando el sistema los lea de aquí.",
+    "selectedCount": "{count} de {total}"
   },
   "homeCenter": {
     "label": "Centro de origen",

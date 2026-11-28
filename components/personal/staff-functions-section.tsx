@@ -7,6 +7,7 @@ import { setStaffFunctions, type CatalogFunction, type StaffFunction } from "@/l
 import { functionLabel, functionsBody, groupFunctions, offeredFunctions, sameFunctions, toggleFunction } from "@/lib/personal/functions";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useSaveSection } from "@/components/personal/save-group";
 import { ErrorState } from "@/components/kit/panel";
 
@@ -66,43 +67,55 @@ export function StaffFunctionsSection({
           <div className="h-7 w-full animate-pulse rounded-full bg-muted" />
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {([["tasks", tasks], ["services", services]] as const).map(([group, list]) => (
-            <div key={group} className="space-y-1.5">
-              <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{t(`group.${group}`)}</div>
-              {list.length === 0 ? (
-                <p className="text-xs text-muted-foreground">{t("emptyGroup")}</p>
-              ) : (
-                <div className="flex flex-wrap gap-1.5">
-                  {list.map((f) => {
-                    const on = current.includes(f.slug);
-                    return (
-                      <button
-                        key={f.slug}
-                        type="button"
-                        aria-pressed={on}
-                        disabled={!canEdit}
-                        title={t(`place.${f.place}`)}
-                        onClick={() => setDraft(toggleFunction(current, f.slug))}
-                        className={cn(
-                          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                          on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
-                          !canEdit && "cursor-not-allowed opacity-70 hover:bg-transparent",
-                        )}
-                      >
-                        {on ? "✓ " : ""}
-                        {functionLabel(f, tRoot)}
-                        <span className={cn("rounded px-1 text-[10px] font-normal", on ? "bg-primary/10" : "bg-muted")}>
-                          {t(`placeShort.${f.place}`)}
-                        </span>
-                        {!f.active && <span className="text-[10px] font-normal">· {t("inactive")}</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ))}
+        // Two rows (tasks, then services), each a column grid of checkboxes: easy to scan, no pill soup.
+        // «Presencial» is the norm, so only «Cualquier centro» is marked.
+        <div className="space-y-4">
+          {([["tasks", tasks], ["services", services]] as const).map(([group, list]) => {
+            const count = list.filter((f) => current.includes(f.slug)).length;
+            return (
+              <fieldset key={group} className="space-y-2">
+                <legend className="flex w-full items-baseline justify-between text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                  <span>{t(`group.${group}`)}</span>
+                  <span className="tabular-nums normal-case">{t("selectedCount", { count, total: list.length })}</span>
+                </legend>
+                {list.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">{t("emptyGroup")}</p>
+                ) : (
+                  <div className="grid grid-cols-1 gap-x-4 gap-y-0.5 rounded-lg border p-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                    {list.map((f) => {
+                      const on = current.includes(f.slug);
+                      const id = `fn-${staffId}-${f.slug}`;
+                      return (
+                        <label
+                          key={f.slug}
+                          htmlFor={id}
+                          className={cn(
+                            "flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                            canEdit ? "cursor-pointer hover:bg-accent" : "cursor-default",
+                            on ? "font-medium text-foreground" : "text-muted-foreground",
+                          )}
+                        >
+                          <Checkbox
+                            id={id}
+                            checked={on}
+                            disabled={!canEdit}
+                            onCheckedChange={() => setDraft(toggleFunction(current, f.slug))}
+                          />
+                          <span className="truncate" title={functionLabel(f, tRoot)}>{functionLabel(f, tRoot)}</span>
+                          {f.place === "any_center" && (
+                            <span className="ml-auto shrink-0 rounded bg-info px-1.5 py-0.5 text-[10px] font-normal text-info-foreground">
+                              {t("placeShort.any_center")}
+                            </span>
+                          )}
+                          {!f.active && <span className="shrink-0 text-[10px] font-normal text-muted-foreground">· {t("inactive")}</span>}
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </fieldset>
+            );
+          })}
         </div>
       )}
       {!loading && current.length === 0 && <p className="text-xs text-warning-foreground">{t("none")}</p>}
