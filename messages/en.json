@@ -4971,7 +4971,8 @@
     "guardar": "Save",
     "guardando": "Saving…",
     "guardado": "Saved",
-    "sinPermiso": "You don't have access (formatos.config)."
+    "sinPermiso": "You don't have access (formatos.config).",
+    "needsEveryCenter": "A format is the same in every center: changing it needs the format configuration permission in every active center."
   },
   "pacientes": {
     "record_duplicado": "That record number already belongs to another patient of this center",

@@ -4971,7 +4971,8 @@
     "guardar": "Guardar",
     "guardando": "Guardando…",
     "guardado": "Guardado",
-    "sinPermiso": "No tienes acceso (formatos.config)."
+    "sinPermiso": "No tienes acceso (formatos.config).",
+    "needsEveryCenter": "Un formato es el mismo en todos los centros: para cambiarlo necesitas el permiso de configurar formatos en cada centro activo."
   },
   "pacientes": {
     "record_duplicado": "Ese número de récord ya pertenece a otro paciente de este centro",

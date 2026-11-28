@@ -1,4 +1,5 @@
 import { apiFetch } from "./client";
+import { explainFormatWriteError } from "../formatos/format-write-error.ts";
 
 // Formatos de terapia (genéricos, data-driven, leídos del legacy). Cada servicio declara sus formatos
 // en `servicio.formAcciones.reports[]` (report.id === formato.clave). El documento se pide "armado"
@@ -238,8 +239,12 @@ export type FormatoInput = {
   active?: boolean;
 };
 export function createFormato(input: FormatoInput, centroId?: string): Promise<Formato> {
-  return apiFetch<Formato>(`/formats`, { method: "POST", body: JSON.stringify(input) }, centroId);
+  return apiFetch<Formato>(`/formats`, { method: "POST", body: JSON.stringify(input) }, centroId).catch((e) => {
+    throw explainFormatWriteError(e);
+  });
 }
 export function updateFormato(id: string, input: Partial<FormatoInput>, centroId?: string): Promise<Formato> {
-  return apiFetch<Formato>(`/formats/${id}`, { method: "PUT", body: JSON.stringify(input) }, centroId);
+  return apiFetch<Formato>(`/formats/${id}`, { method: "PUT", body: JSON.stringify(input) }, centroId).catch((e) => {
+    throw explainFormatWriteError(e);
+  });
 }
