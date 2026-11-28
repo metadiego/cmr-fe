@@ -6884,6 +6884,34 @@
         "physical": "En almacén",
         "freeStock": "Libre"
       }
+    },
+    "tabPurchasesRefunds": "Compras y devoluciones",
+    "purchasesRefunds": {
+      "sectionPurchases": "Compras",
+      "sectionRefunds": "Devoluciones",
+      "emptyPurchases": "Sin compras en el rango.",
+      "emptyRefunds": "Sin devoluciones en el rango.",
+      "col": {
+        "date": "Fecha",
+        "record": "Récord",
+        "patient": "Paciente",
+        "invoice": "Factura",
+        "channel": "Vía",
+        "quantity": "Cantidad",
+        "refundNumber": "N.º devolución"
+      },
+      "channel": {
+        "direct": "Directa",
+        "kit": "En kit",
+        "kitNamed": "En kit «{kit}»",
+        "legacy": "Legado"
+      },
+      "viaKit": "del kit",
+      "totalPurchased": "Total comprado",
+      "totalRefunded": "Total devuelto",
+      "totalNet": "Neto",
+      "totalsTitle": "Totales del periodo",
+      "undatedLegacy": "{packages} cargas del legado sin factura ({quantity} unidades): no se ubican en ningún mes."
     }
   },
   "inventoryReceipts": {

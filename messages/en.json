@@ -6884,6 +6884,34 @@
         "physical": "In warehouse",
         "freeStock": "Free"
       }
+    },
+    "tabPurchasesRefunds": "Purchases & refunds",
+    "purchasesRefunds": {
+      "sectionPurchases": "Purchases",
+      "sectionRefunds": "Refunds",
+      "emptyPurchases": "No purchases in the range.",
+      "emptyRefunds": "No refunds in the range.",
+      "col": {
+        "date": "Date",
+        "record": "Record",
+        "patient": "Patient",
+        "invoice": "Invoice",
+        "channel": "Channel",
+        "quantity": "Quantity",
+        "refundNumber": "Refund #"
+      },
+      "channel": {
+        "direct": "Direct",
+        "kit": "In a kit",
+        "kitNamed": "In kit “{kit}”",
+        "legacy": "Legacy"
+      },
+      "viaKit": "via kit",
+      "totalPurchased": "Total purchased",
+      "totalRefunded": "Total refunded",
+      "totalNet": "Net",
+      "totalsTitle": "Period totals",
+      "undatedLegacy": "{packages} legacy load(s) with no invoice ({quantity} units): they land in no month."
     }
   },
   "inventoryReceipts": {

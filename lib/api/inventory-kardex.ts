@@ -151,6 +151,48 @@ export function getKardexDeliveryControl(p: { productId: string; from: string; t
   );
 }
 
+// ---- "Compras y devoluciones" (handoff kardex-compras-y-devoluciones, 28-nov-2026): a FIXED photo of
+// the period — every row already comes dated by the BE, nothing undated except `undatedLegacy`
+// (legacy loads with no invoice at all, which the BE cannot place in any month). ----------------------
+
+export type KardexPurchaseChannel = "direct" | "kit" | "legacy";
+export type KardexPurchaseLine = {
+  date: string;
+  recordNumber: string | null;
+  patientName: string | null;
+  invoiceNumber: string | null;
+  channel: KardexPurchaseChannel;
+  /** The kit/product actually sold, when it differs from this kardex's own product (channel "kit"). */
+  soldAs: { sku: string | null; name: string } | null;
+  quantity: number;
+};
+export type KardexRefundLine = {
+  date: string;
+  refundNumber: string | null;
+  invoiceNumber: string | null;
+  recordNumber: string | null;
+  patientName: string | null;
+  quantity: number;
+  viaKit: boolean;
+};
+export type KardexPurchasesRefunds = {
+  product: KardexProduct;
+  from: string;
+  to: string;
+  purchases: KardexPurchaseLine[];
+  refunds: KardexRefundLine[];
+  totals: { purchased: number; refunded: number; net: number };
+  undatedLegacy: { packages: number; quantity: number };
+};
+
+export function getKardexPurchasesRefunds(p: { productId: string; from: string; to: string }, centerId?: string | null) {
+  return apiFetch<KardexPurchasesRefunds>(
+    `/inventory/reports/purchases-refunds?${query({ productoId: p.productId, desde: p.from, hasta: p.to }, centerId)}`,
+    {},
+    centerId ?? undefined,
+  );
+}
+
 // ---- Kardex overview of ALL products (BE: cmr-be #699, docs/specs/kardex-resumen-de-todos-los-productos.md) ----
 // One call for the whole catalog in a center and range, split by deduction mode so the owner can see
 // "a la venta" and "a la entrega" products together or apart without picking one product at a time.
