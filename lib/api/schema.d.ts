@@ -957,7 +957,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after and whether it was undone.
+         * Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after, whether it was undone, and undoable (whether its kind can be undone from the log; consultations (appointment) cannot yet).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/registro-de-cambios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -978,7 +978,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after and whether it was undone.
+         * Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after, whether it was undone, and undoable (whether its kind can be undone from the log; consultations (appointment) cannot yet).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/change-log`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -998,7 +998,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after and whether it was undone. */
+        /** Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after, whether it was undone, and undoable (whether its kind can be undone from the log; consultations (appointment) cannot yet). */
         get: operations["ChangeLogController_list[2]_v2"];
         put?: never;
         post?: never;
@@ -1015,7 +1015,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after and whether it was undone. */
+        /** Changes, newest first: filter by entityType+entityId (one row), patientId+date (a patient's day) or actorStaffId/actorProfileId (a user), and from/to. Every center where you hold change_log.read; centerIds narrows. Each entry has actorName, localTime (center time zone), action, changedFields, before/after, whether it was undone, and undoable (whether its kind can be undone from the log; consultations (appointment) cannot yet). */
         get: operations["ChangeLogController_list[3]_v2"];
         put?: never;
         post?: never;
@@ -6015,8 +6015,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
-         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
+         * "Facturar Consulta": the balance of a visit the patient left, else a draft with the type's line. Idempotent.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/cita/{citaId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -6037,8 +6036,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
-         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
+         * "Facturar Consulta": the balance of a visit the patient left, else a draft with the type's line. Idempotent.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/appointment/{citaId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -6059,8 +6057,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
-         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
+         * "Facturar Consulta": the balance of a visit the patient left, else a draft with the type's line. Idempotent.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/cita/{citaId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -6081,8 +6078,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
-         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
+         * "Facturar Consulta": the balance of a visit the patient left, else a draft with the type's line. Idempotent.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/appointment/{citaId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -6102,10 +6098,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
-         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
-         */
+        /** "Facturar Consulta": the balance of a visit the patient left, else a draft with the type's line. Idempotent. */
         post: operations["FacturacionController_facturarConsulta[4]_v2"];
         delete?: never;
         options?: never;
@@ -6122,10 +6115,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
-         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
-         */
+        /** "Facturar Consulta": the balance of a visit the patient left, else a draft with the type's line. Idempotent. */
         post: operations["FacturacionController_facturarConsulta[5]_v2"];
         delete?: never;
         options?: never;
@@ -6142,10 +6132,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
-         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
-         */
+        /** "Facturar Consulta": the balance of a visit the patient left, else a draft with the type's line. Idempotent. */
         post: operations["FacturacionController_facturarConsulta[6]_v2"];
         delete?: never;
         options?: never;
@@ -6162,10 +6149,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
-         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
-         */
+        /** "Facturar Consulta": the balance of a visit the patient left, else a draft with the type's line. Idempotent. */
         post: operations["FacturacionController_facturarConsulta[7]_v2"];
         delete?: never;
         options?: never;
@@ -19858,6 +19842,158 @@ export interface paths {
         put: operations["PersonalController_update[3]_v2"];
         post?: never;
         delete: operations["PersonalController_remove[3]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/centro-de-origen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Changes the home center of the record. staff.update at the current and the new center; 400 staff.unknownCenter for an unknown or inactive center; the same center changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/centro-de-origen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setHomeCenter[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/home-center": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Changes the home center of the record. staff.update at the current and the new center; 400 staff.unknownCenter for an unknown or inactive center; the same center changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/home-center`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setHomeCenter[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/centro-de-origen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Changes the home center of the record. staff.update at the current and the new center; 400 staff.unknownCenter for an unknown or inactive center; the same center changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/centro-de-origen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setHomeCenter[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/home-center": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Changes the home center of the record. staff.update at the current and the new center; 400 staff.unknownCenter for an unknown or inactive center; the same center changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/home-center`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PersonalController_setHomeCenter[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/centro-de-origen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Changes the home center of the record. staff.update at the current and the new center; 400 staff.unknownCenter for an unknown or inactive center; the same center changes nothing. */
+        put: operations["PersonalController_setHomeCenter[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/home-center": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Changes the home center of the record. staff.update at the current and the new center; 400 staff.unknownCenter for an unknown or inactive center; the same center changes nothing. */
+        put: operations["PersonalController_setHomeCenter[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/centro-de-origen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Changes the home center of the record. staff.update at the current and the new center; 400 staff.unknownCenter for an unknown or inactive center; the same center changes nothing. */
+        put: operations["PersonalController_setHomeCenter[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/home-center": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Changes the home center of the record. staff.update at the current and the new center; 400 staff.unknownCenter for an unknown or inactive center; the same center changes nothing. */
+        put: operations["PersonalController_setHomeCenter[7]_v2"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -38665,6 +38801,178 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/citas/{id}/se-retiro": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient left before the consultation: out of "present", vitals and payment kept, the paid consultation stays as a balance.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/{id}/se-retiro`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Runs not_serve from waiting or triage, in the appointment center. motivo is required. A later "bill the consultation" of the same patient and center takes that paid invoice instead of billing again.
+         */
+        post: operations["AppointmentLeftController_left[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/{id}/left": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient left before the consultation: out of "present", vitals and payment kept, the paid consultation stays as a balance.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/{id}/left`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Runs not_serve from waiting or triage, in the appointment center. motivo is required. A later "bill the consultation" of the same patient and center takes that paid invoice instead of billing again.
+         */
+        post: operations["AppointmentLeftController_left[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/{id}/se-retiro": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient left before the consultation: out of "present", vitals and payment kept, the paid consultation stays as a balance.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/{id}/se-retiro`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Runs not_serve from waiting or triage, in the appointment center. motivo is required. A later "bill the consultation" of the same patient and center takes that paid invoice instead of billing again.
+         */
+        post: operations["AppointmentLeftController_left[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/{id}/left": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient left before the consultation: out of "present", vitals and payment kept, the paid consultation stays as a balance.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/{id}/left`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Runs not_serve from waiting or triage, in the appointment center. motivo is required. A later "bill the consultation" of the same patient and center takes that paid invoice instead of billing again.
+         */
+        post: operations["AppointmentLeftController_left[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/{id}/se-retiro": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient left before the consultation: out of "present", vitals and payment kept, the paid consultation stays as a balance.
+         * @description Runs not_serve from waiting or triage, in the appointment center. motivo is required. A later "bill the consultation" of the same patient and center takes that paid invoice instead of billing again.
+         */
+        post: operations["AppointmentLeftController_left[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/{id}/left": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient left before the consultation: out of "present", vitals and payment kept, the paid consultation stays as a balance.
+         * @description Runs not_serve from waiting or triage, in the appointment center. motivo is required. A later "bill the consultation" of the same patient and center takes that paid invoice instead of billing again.
+         */
+        post: operations["AppointmentLeftController_left[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/{id}/se-retiro": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient left before the consultation: out of "present", vitals and payment kept, the paid consultation stays as a balance.
+         * @description Runs not_serve from waiting or triage, in the appointment center. motivo is required. A later "bill the consultation" of the same patient and center takes that paid invoice instead of billing again.
+         */
+        post: operations["AppointmentLeftController_left[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/{id}/left": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The patient left before the consultation: out of "present", vitals and payment kept, the paid consultation stays as a balance.
+         * @description Runs not_serve from waiting or triage, in the appointment center. motivo is required. A later "bill the consultation" of the same patient and center takes that paid invoice instead of billing again.
+         */
+        post: operations["AppointmentLeftController_left[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tablero/estados": {
         parameters: {
             query?: never;
@@ -39951,6 +40259,178 @@ export interface paths {
         get: operations["DoctorDaySummaryController_get[3]_v2"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/cartera/asignar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fill the empty portfolio owners of a date range.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/cartera/asignar`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Appointments and service sessions with no portfolio owner (cancelled and rescheduled excluded), in the centers where the caller holds appointments.repair (centerIds narrows). The owner is the patient's: its most recent row with one, else its captor when that person is a call-center agent (agent_mappings). dryRun (default true) only counts; dryRun=false writes row by row after confirmation (428 → X-Confirm-Action: appointments.portfolio.fill). A row with an owner is never touched.
+         */
+        post: operations["PortfolioFillController_fill[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/cartera/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fill the empty portfolio owners of a date range.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/cartera/assign`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Appointments and service sessions with no portfolio owner (cancelled and rescheduled excluded), in the centers where the caller holds appointments.repair (centerIds narrows). The owner is the patient's: its most recent row with one, else its captor when that person is a call-center agent (agent_mappings). dryRun (default true) only counts; dryRun=false writes row by row after confirmation (428 → X-Confirm-Action: appointments.portfolio.fill). A row with an owner is never touched.
+         */
+        post: operations["PortfolioFillController_fill[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/portfolio/asignar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fill the empty portfolio owners of a date range.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/portfolio/asignar`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Appointments and service sessions with no portfolio owner (cancelled and rescheduled excluded), in the centers where the caller holds appointments.repair (centerIds narrows). The owner is the patient's: its most recent row with one, else its captor when that person is a call-center agent (agent_mappings). dryRun (default true) only counts; dryRun=false writes row by row after confirmation (428 → X-Confirm-Action: appointments.portfolio.fill). A row with an owner is never touched.
+         */
+        post: operations["PortfolioFillController_fill[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/portfolio/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fill the empty portfolio owners of a date range.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/portfolio/assign`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Appointments and service sessions with no portfolio owner (cancelled and rescheduled excluded), in the centers where the caller holds appointments.repair (centerIds narrows). The owner is the patient's: its most recent row with one, else its captor when that person is a call-center agent (agent_mappings). dryRun (default true) only counts; dryRun=false writes row by row after confirmation (428 → X-Confirm-Action: appointments.portfolio.fill). A row with an owner is never touched.
+         */
+        post: operations["PortfolioFillController_fill[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/cartera/asignar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fill the empty portfolio owners of a date range.
+         * @description Appointments and service sessions with no portfolio owner (cancelled and rescheduled excluded), in the centers where the caller holds appointments.repair (centerIds narrows). The owner is the patient's: its most recent row with one, else its captor when that person is a call-center agent (agent_mappings). dryRun (default true) only counts; dryRun=false writes row by row after confirmation (428 → X-Confirm-Action: appointments.portfolio.fill). A row with an owner is never touched.
+         */
+        post: operations["PortfolioFillController_fill[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/cartera/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fill the empty portfolio owners of a date range.
+         * @description Appointments and service sessions with no portfolio owner (cancelled and rescheduled excluded), in the centers where the caller holds appointments.repair (centerIds narrows). The owner is the patient's: its most recent row with one, else its captor when that person is a call-center agent (agent_mappings). dryRun (default true) only counts; dryRun=false writes row by row after confirmation (428 → X-Confirm-Action: appointments.portfolio.fill). A row with an owner is never touched.
+         */
+        post: operations["PortfolioFillController_fill[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/portfolio/asignar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fill the empty portfolio owners of a date range.
+         * @description Appointments and service sessions with no portfolio owner (cancelled and rescheduled excluded), in the centers where the caller holds appointments.repair (centerIds narrows). The owner is the patient's: its most recent row with one, else its captor when that person is a call-center agent (agent_mappings). dryRun (default true) only counts; dryRun=false writes row by row after confirmation (428 → X-Confirm-Action: appointments.portfolio.fill). A row with an owner is never touched.
+         */
+        post: operations["PortfolioFillController_fill[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/portfolio/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Fill the empty portfolio owners of a date range.
+         * @description Appointments and service sessions with no portfolio owner (cancelled and rescheduled excluded), in the centers where the caller holds appointments.repair (centerIds narrows). The owner is the patient's: its most recent row with one, else its captor when that person is a call-center agent (agent_mappings). dryRun (default true) only counts; dryRun=false writes row by row after confirmation (428 → X-Confirm-Action: appointments.portfolio.fill). A row with an owner is never touched.
+         */
+        post: operations["PortfolioFillController_fill[7]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -43855,14 +44335,16 @@ export interface paths {
         /**
          * Schedules of every center where the caller reads appointments (`centerIds` narrows; outside is
          *     403), each row with `clinicId`/`clinicName`. With `staffId`, resolved day by day inside EACH
-         *     center: a screen of one center sends `centerIds=[that center]`.
+         *     center: a screen of one center sends `centerIds=[that center]`. A person's agenda (`staffId`)
+         *     is also readable with staff.read (it is part of their staff record, owner 28-nov).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medicos/horarios`, que devuelve lo mismo con los nombres en inglés.
          */
         get: operations["HorariosController_list[0]_v1"];
         put?: never;
         /**
-         * In `centerId` (citas.config there) or the session center.
+         * In `centerId` or the session center: a person's row needs staff.update there, a center default
+         *     appointments.config there.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medicos/horarios`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -43883,14 +44365,16 @@ export interface paths {
         /**
          * Schedules of every center where the caller reads appointments (`centerIds` narrows; outside is
          *     403), each row with `clinicId`/`clinicName`. With `staffId`, resolved day by day inside EACH
-         *     center: a screen of one center sends `centerIds=[that center]`.
+         *     center: a screen of one center sends `centerIds=[that center]`. A person's agenda (`staffId`)
+         *     is also readable with staff.read (it is part of their staff record, owner 28-nov).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/doctors/schedules`, que devuelve lo mismo con los nombres en inglés.
          */
         get: operations["HorariosController_list[1]_v1"];
         put?: never;
         /**
-         * In `centerId` (citas.config there) or the session center.
+         * In `centerId` or the session center: a person's row needs staff.update there, a center default
+         *     appointments.config there.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/doctors/schedules`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -43911,11 +44395,15 @@ export interface paths {
         /**
          * Schedules of every center where the caller reads appointments (`centerIds` narrows; outside is
          *     403), each row with `clinicId`/`clinicName`. With `staffId`, resolved day by day inside EACH
-         *     center: a screen of one center sends `centerIds=[that center]`.
+         *     center: a screen of one center sends `centerIds=[that center]`. A person's agenda (`staffId`)
+         *     is also readable with staff.read (it is part of their staff record, owner 28-nov).
          */
         get: operations["HorariosController_list[2]_v2"];
         put?: never;
-        /** In `centerId` (citas.config there) or the session center. */
+        /**
+         * In `centerId` or the session center: a person's row needs staff.update there, a center default
+         *     appointments.config there.
+         */
         post: operations["HorariosController_create[2]_v2"];
         delete?: never;
         options?: never;
@@ -43933,11 +44421,15 @@ export interface paths {
         /**
          * Schedules of every center where the caller reads appointments (`centerIds` narrows; outside is
          *     403), each row with `clinicId`/`clinicName`. With `staffId`, resolved day by day inside EACH
-         *     center: a screen of one center sends `centerIds=[that center]`.
+         *     center: a screen of one center sends `centerIds=[that center]`. A person's agenda (`staffId`)
+         *     is also readable with staff.read (it is part of their staff record, owner 28-nov).
          */
         get: operations["HorariosController_list[3]_v2"];
         put?: never;
-        /** In `centerId` (citas.config there) or the session center. */
+        /**
+         * In `centerId` or the session center: a person's row needs staff.update there, a center default
+         *     appointments.config there.
+         */
         post: operations["HorariosController_create[3]_v2"];
         delete?: never;
         options?: never;
@@ -44038,7 +44530,7 @@ export interface paths {
         };
         get?: never;
         /**
-         * In the schedule's own center, with citas.config there.
+         * In the schedule's own center: staff.update there for a person's row, appointments.config for a default.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medicos/horarios/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44063,7 +44555,7 @@ export interface paths {
         };
         get?: never;
         /**
-         * In the schedule's own center, with citas.config there.
+         * In the schedule's own center: staff.update there for a person's row, appointments.config for a default.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/doctors/schedules/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -44087,7 +44579,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** In the schedule's own center, with citas.config there. */
+        /** In the schedule's own center: staff.update there for a person's row, appointments.config for a default. */
         put: operations["HorariosController_update[2]_v2"];
         post?: never;
         delete: operations["HorariosController_remove[2]_v2"];
@@ -44104,7 +44596,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** In the schedule's own center, with citas.config there. */
+        /** In the schedule's own center: staff.update there for a person's row, appointments.config for a default. */
         put: operations["HorariosController_update[3]_v2"];
         post?: never;
         delete: operations["HorariosController_remove[3]_v2"];
@@ -44580,6 +45072,334 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/cambios-de-un-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One-day changes of the person from a date (default today in the zone of the home center), in date order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/cambios-de-un-dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DayChangesController_listDayChanges[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/day-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One-day changes of the person from a date (default today in the zone of the home center), in date order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/day-changes`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DayChangesController_listDayChanges[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/cambios-de-un-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One-day changes of the person from a date (default today in the zone of the home center), in date order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/cambios-de-un-dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DayChangesController_listDayChanges[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/day-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One-day changes of the person from a date (default today in the zone of the home center), in date order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/day-changes`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["DayChangesController_listDayChanges[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/cambios-de-un-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One-day changes of the person from a date (default today in the zone of the home center), in date order. */
+        get: operations["DayChangesController_listDayChanges[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/day-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One-day changes of the person from a date (default today in the zone of the home center), in date order. */
+        get: operations["DayChangesController_listDayChanges[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/cambios-de-un-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One-day changes of the person from a date (default today in the zone of the home center), in date order. */
+        get: operations["DayChangesController_listDayChanges[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/day-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One-day changes of the person from a date (default today in the zone of the home center), in date order. */
+        get: operations["DayChangesController_listDayChanges[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/cambios-de-un-dia/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Sets the change of one day (upsert). A null center = does not come (no hours). 400 dayChanges.pastDay for a past day.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/cambios-de-un-dia/{day}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["DayChangesController_setDayChange[0]_v1"];
+        post?: never;
+        /**
+         * Removes the change of one day. 404 if there is none; 400 dayChanges.pastDay for a past day.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/cambios-de-un-dia/{day}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["DayChangesController_removeDayChange[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/day-changes/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Sets the change of one day (upsert). A null center = does not come (no hours). 400 dayChanges.pastDay for a past day.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/day-changes/{day}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["DayChangesController_setDayChange[1]_v1"];
+        post?: never;
+        /**
+         * Removes the change of one day. 404 if there is none; 400 dayChanges.pastDay for a past day.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/day-changes/{day}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["DayChangesController_removeDayChange[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/cambios-de-un-dia/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Sets the change of one day (upsert). A null center = does not come (no hours). 400 dayChanges.pastDay for a past day.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/cambios-de-un-dia/{day}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["DayChangesController_setDayChange[2]_v1"];
+        post?: never;
+        /**
+         * Removes the change of one day. 404 if there is none; 400 dayChanges.pastDay for a past day.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/cambios-de-un-dia/{day}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["DayChangesController_removeDayChange[2]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/day-changes/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Sets the change of one day (upsert). A null center = does not come (no hours). 400 dayChanges.pastDay for a past day.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/day-changes/{day}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["DayChangesController_setDayChange[3]_v1"];
+        post?: never;
+        /**
+         * Removes the change of one day. 404 if there is none; 400 dayChanges.pastDay for a past day.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/day-changes/{day}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["DayChangesController_removeDayChange[3]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/cambios-de-un-dia/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Sets the change of one day (upsert). A null center = does not come (no hours). 400 dayChanges.pastDay for a past day. */
+        put: operations["DayChangesController_setDayChange[4]_v2"];
+        post?: never;
+        /** Removes the change of one day. 404 if there is none; 400 dayChanges.pastDay for a past day. */
+        delete: operations["DayChangesController_removeDayChange[4]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/day-changes/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Sets the change of one day (upsert). A null center = does not come (no hours). 400 dayChanges.pastDay for a past day. */
+        put: operations["DayChangesController_setDayChange[5]_v2"];
+        post?: never;
+        /** Removes the change of one day. 404 if there is none; 400 dayChanges.pastDay for a past day. */
+        delete: operations["DayChangesController_removeDayChange[5]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/cambios-de-un-dia/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Sets the change of one day (upsert). A null center = does not come (no hours). 400 dayChanges.pastDay for a past day. */
+        put: operations["DayChangesController_setDayChange[6]_v2"];
+        post?: never;
+        /** Removes the change of one day. 404 if there is none; 400 dayChanges.pastDay for a past day. */
+        delete: operations["DayChangesController_removeDayChange[6]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/day-changes/{day}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Sets the change of one day (upsert). A null center = does not come (no hours). 400 dayChanges.pastDay for a past day. */
+        put: operations["DayChangesController_setDayChange[7]_v2"];
+        post?: never;
+        /** Removes the change of one day. 404 if there is none; 400 dayChanges.pastDay for a past day. */
+        delete: operations["DayChangesController_removeDayChange[7]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -46535,6 +47355,416 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/callcenter/llamadas/{id}/devolver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Call this number back: the local agent of the call’s switchboard rings the extension, then dials.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/llamadas/{id}/devolver`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Queues an order (the cloud never enters the clinic network). Inbound: the caller; outbound: the number dialed. extension defaults to the call’s. Follow it with GET commands/:id. One call center: callcenter.callback in any center.
+         */
+        post: operations["CallcenterController_callBack[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/calls/{id}/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Call this number back: the local agent of the call’s switchboard rings the extension, then dials.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/calls/{id}/callback`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Queues an order (the cloud never enters the clinic network). Inbound: the caller; outbound: the number dialed. extension defaults to the call’s. Follow it with GET commands/:id. One call center: callcenter.callback in any center.
+         */
+        post: operations["CallcenterController_callBack[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/llamadas/{id}/devolver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Call this number back: the local agent of the call’s switchboard rings the extension, then dials.
+         * @description Queues an order (the cloud never enters the clinic network). Inbound: the caller; outbound: the number dialed. extension defaults to the call’s. Follow it with GET commands/:id. One call center: callcenter.callback in any center.
+         */
+        post: operations["CallcenterController_callBack[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/calls/{id}/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Call this number back: the local agent of the call’s switchboard rings the extension, then dials.
+         * @description Queues an order (the cloud never enters the clinic network). Inbound: the caller; outbound: the number dialed. extension defaults to the call’s. Follow it with GET commands/:id. One call center: callcenter.callback in any center.
+         */
+        post: operations["CallcenterController_callBack[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/llamadas/{id}/grabacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Listen to a call: a short signed URL if uploaded, else ONE upload order for the local agent.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/llamadas/{id}/grabacion`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Returns { status: "ready", url } or { status: "pending" | "taken", commandId }: ask again (or follow GET commands/:id). 404 when the switchboard has no recording.
+         */
+        post: operations["CallcenterController_recording[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/calls/{id}/recording": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Listen to a call: a short signed URL if uploaded, else ONE upload order for the local agent.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/calls/{id}/recording`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Returns { status: "ready", url } or { status: "pending" | "taken", commandId }: ask again (or follow GET commands/:id). 404 when the switchboard has no recording.
+         */
+        post: operations["CallcenterController_recording[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/llamadas/{id}/grabacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Listen to a call: a short signed URL if uploaded, else ONE upload order for the local agent.
+         * @description Returns { status: "ready", url } or { status: "pending" | "taken", commandId }: ask again (or follow GET commands/:id). 404 when the switchboard has no recording.
+         */
+        post: operations["CallcenterController_recording[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/calls/{id}/recording": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Listen to a call: a short signed URL if uploaded, else ONE upload order for the local agent.
+         * @description Returns { status: "ready", url } or { status: "pending" | "taken", commandId }: ask again (or follow GET commands/:id). 404 when the switchboard has no recording.
+         */
+        post: operations["CallcenterController_recording[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/comandos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One agent order: pending, taken, done or failed (with its reason).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/comandos/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CallcenterController_command[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/commands/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One agent order: pending, taken, done or failed (with its reason).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/commands/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CallcenterController_command[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/comandos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One agent order: pending, taken, done or failed (with its reason). */
+        get: operations["CallcenterController_command[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/commands/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One agent order: pending, taken, done or failed (with its reason). */
+        get: operations["CallcenterController_command[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/comandos/tomar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Local agent: take the pending orders of its switchboard (they become taken).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/comandos/tomar`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Called by the agent with its switchboard key (the center comes from the key). A recording order carries recordingFile and a signed upload URL.
+         */
+        post: operations["CallcenterController_take[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/commands/take": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Local agent: take the pending orders of its switchboard (they become taken).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/commands/take`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Called by the agent with its switchboard key (the center comes from the key). A recording order carries recordingFile and a signed upload URL.
+         */
+        post: operations["CallcenterController_take[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/comandos/tomar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Local agent: take the pending orders of its switchboard (they become taken).
+         * @description Called by the agent with its switchboard key (the center comes from the key). A recording order carries recordingFile and a signed upload URL.
+         */
+        post: operations["CallcenterController_take[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/commands/take": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Local agent: take the pending orders of its switchboard (they become taken).
+         * @description Called by the agent with its switchboard key (the center comes from the key). A recording order carries recordingFile and a signed upload URL.
+         */
+        post: operations["CallcenterController_take[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/comandos/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Local agent: report an order done or failed (a recording reports the uploaded path).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/comandos/{id}/resultado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CallcenterController_result[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/callcenter/commands/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Local agent: report an order done or failed (a recording reports the uploaded path).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/callcenter/commands/{id}/result`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["CallcenterController_result[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/comandos/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Local agent: report an order done or failed (a recording reports the uploaded path). */
+        post: operations["CallcenterController_result[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/callcenter/commands/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Local agent: report an order done or failed (a recording reports the uploaded path). */
+        post: operations["CallcenterController_result[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/callcenter/llamadas/completar": {
         parameters: {
             query?: never;
@@ -47163,6 +48393,78 @@ export interface paths {
         get: operations["CallcenterController_stream_v2"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/media/upload-url`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["MediaController_uploadUrl[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/media/url-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/media/url-upload`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["MediaController_uploadUrl[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/media/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MediaController_uploadUrl[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/media/url-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MediaController_uploadUrl[3]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -67401,78 +68703,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/media/upload-url": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/media/upload-url`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["MediaController_uploadUrl[0]_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/media/url-upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/media/url-upload`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["MediaController_uploadUrl[1]_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/media/upload-url": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["MediaController_uploadUrl[2]_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/media/url-upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["MediaController_uploadUrl[3]_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/ahora-mismo/stream": {
         parameters: {
             query?: never;
@@ -68786,6 +70016,346 @@ export interface paths {
         put: operations["SchedulingBridgeController_updateAgentMapping_v2"];
         post?: never;
         delete: operations["SchedulingBridgeController_deleteAgentMapping_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/funciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The functions catalog (includeInactive=true adds the hidden ones).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/funciones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FunctionsController_list[0]_v1"];
+        put?: never;
+        /**
+         * Creates a function. kind service needs a serviceSlug that exists; task forbids it. 409 on a repeated slug.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/funciones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FunctionsController_create[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/functions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The functions catalog (includeInactive=true adds the hidden ones).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/functions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["FunctionsController_list[1]_v1"];
+        put?: never;
+        /**
+         * Creates a function. kind service needs a serviceSlug that exists; task forbids it. 409 on a repeated slug.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/functions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FunctionsController_create[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/funciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The functions catalog (includeInactive=true adds the hidden ones). */
+        get: operations["FunctionsController_list[2]_v2"];
+        put?: never;
+        /** Creates a function. kind service needs a serviceSlug that exists; task forbids it. 409 on a repeated slug. */
+        post: operations["FunctionsController_create[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/functions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The functions catalog (includeInactive=true adds the hidden ones). */
+        get: operations["FunctionsController_list[3]_v2"];
+        put?: never;
+        /** Creates a function. kind service needs a serviceSlug that exists; task forbids it. 409 on a repeated slug. */
+        post: operations["FunctionsController_create[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/funciones/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edits a function (name, labelKey, place, active, sortOrder). kind and serviceSlug never change. 404 on an unknown slug.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/funciones/{slug}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["FunctionsController_update[0]_v1"];
+        trace?: never;
+    };
+    "/api/v1/functions/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edits a function (name, labelKey, place, active, sortOrder). kind and serviceSlug never change. 404 on an unknown slug.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/functions/{slug}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        patch: operations["FunctionsController_update[1]_v1"];
+        trace?: never;
+    };
+    "/api/v2/funciones/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edits a function (name, labelKey, place, active, sortOrder). kind and serviceSlug never change. 404 on an unknown slug. */
+        patch: operations["FunctionsController_update[2]_v2"];
+        trace?: never;
+    };
+    "/api/v2/functions/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edits a function (name, labelKey, place, active, sortOrder). kind and serviceSlug never change. 404 on an unknown slug. */
+        patch: operations["FunctionsController_update[3]_v2"];
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/funciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The functions the person holds, in picker order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/funciones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["StaffFunctionsController_get[0]_v1"];
+        /**
+         * Sets the COMPLETE list of the person functions. 400 on an unknown slug, or an inactive one the person does not already hold; 409 when a no-permission position the person still holds backs a function being removed.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/funciones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["StaffFunctionsController_set[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/personal/{id}/functions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The functions the person holds, in picker order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/functions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["StaffFunctionsController_get[1]_v1"];
+        /**
+         * Sets the COMPLETE list of the person functions. 400 on an unknown slug, or an inactive one the person does not already hold; 409 when a no-permission position the person still holds backs a function being removed.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/personal/{id}/functions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["StaffFunctionsController_set[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/funciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The functions the person holds, in picker order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/funciones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["StaffFunctionsController_get[2]_v1"];
+        /**
+         * Sets the COMPLETE list of the person functions. 400 on an unknown slug, or an inactive one the person does not already hold; 409 when a no-permission position the person still holds backs a function being removed.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/funciones`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["StaffFunctionsController_set[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/staff/{id}/functions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The functions the person holds, in picker order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/functions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["StaffFunctionsController_get[3]_v1"];
+        /**
+         * Sets the COMPLETE list of the person functions. 400 on an unknown slug, or an inactive one the person does not already hold; 409 when a no-permission position the person still holds backs a function being removed.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/staff/{id}/functions`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["StaffFunctionsController_set[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/funciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The functions the person holds, in picker order. */
+        get: operations["StaffFunctionsController_get[4]_v2"];
+        /** Sets the COMPLETE list of the person functions. 400 on an unknown slug, or an inactive one the person does not already hold; 409 when a no-permission position the person still holds backs a function being removed. */
+        put: operations["StaffFunctionsController_set[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/personal/{id}/functions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The functions the person holds, in picker order. */
+        get: operations["StaffFunctionsController_get[5]_v2"];
+        /** Sets the COMPLETE list of the person functions. 400 on an unknown slug, or an inactive one the person does not already hold; 409 when a no-permission position the person still holds backs a function being removed. */
+        put: operations["StaffFunctionsController_set[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/funciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The functions the person holds, in picker order. */
+        get: operations["StaffFunctionsController_get[6]_v2"];
+        /** Sets the COMPLETE list of the person functions. 400 on an unknown slug, or an inactive one the person does not already hold; 409 when a no-permission position the person still holds backs a function being removed. */
+        put: operations["StaffFunctionsController_set[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/staff/{id}/functions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The functions the person holds, in picker order. */
+        get: operations["StaffFunctionsController_get[7]_v2"];
+        /** Sets the COMPLETE list of the person functions. 400 on an unknown slug, or an inactive one the person does not already hold; 409 when a no-permission position the person still holds backs a function being removed. */
+        put: operations["StaffFunctionsController_set[7]_v2"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -71057,6 +72627,13 @@ export interface components {
         SetCentrosPersonalDto: {
             /** @description Centros donde la persona aparece en los selects (frontdesk, facturación, citas). Lista completa de los ENCENDIDOS: lo que no venga queda apagado. Al menos uno. */
             centroIds: string[];
+        };
+        SetHomeCenterDto: {
+            /**
+             * Format: uuid
+             * @description Active center that becomes the home center of the record (shown as its center in lists).
+             */
+            centerId: string;
         };
         PositionAtCentersDto: {
             /**
@@ -73477,6 +75054,74 @@ export interface components {
             subject?: string;
             body: string;
         };
+        CancelarCitaDto: {
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
+             */
+            actorId?: string;
+            reason: string;
+        };
+        CitaEntity: {
+            clinicRef?: Record<string, never>;
+            patientId: string;
+            pacienteIdRef?: Record<string, never>;
+            appointmentTypeId: string;
+            tipoCitaIdRef?: Record<string, never>;
+            doctorId: string | null;
+            medicoIdRef?: Record<string, never>;
+            date: string;
+            time: string | null;
+            endTime: string | null;
+            /** @enum {string} */
+            status: "no_show" | "triage" | "programada" | "confirmada" | "presente" | "en_consulta" | "atendida" | "cancelada" | "reprogramada";
+            isFirstVisit: boolean;
+            /** @enum {string} */
+            channel: "frontdesk" | "callcenter" | "webhook" | "ia";
+            reason: string | null;
+            notes: string | null;
+            rescheduledFromId: string | null;
+            reprogramadaDeIdRef?: Record<string, never>;
+            bookedByStaffId: string | null;
+            callcenterIdRef?: Record<string, never>;
+            createdByProfileId: string | null;
+            creadoPorPerfilIdRef?: Record<string, never>;
+            frontDeskStaffId: string | null;
+            atencionIdRef?: Record<string, never>;
+            vitalsNurseId: string | null;
+            enfermeraVitalesIdRef?: Record<string, never>;
+            /** Format: date-time */
+            confirmedAt: string | null;
+            /** Format: date-time */
+            arrivedAt: string | null;
+            /** Format: date-time */
+            vitalsAt: string | null;
+            /** Format: date-time */
+            checkedInAt: string | null;
+            /** Format: date-time */
+            checkedOutAt: string | null;
+            /** Format: date-time */
+            lateRegisteredAt: string | null;
+            legacyId: string | null;
+            legacyOrigin: string | null;
+            sheetSlotId: string | null;
+            /** @enum {string|null} */
+            bookingStatus: "booked" | "confirmed" | "arrived" | "cancelled" | "no_show" | "rescheduled" | null;
+            /** @enum {string|null} */
+            careStatus: "waiting" | "triage" | "in_consultation" | "done" | "not_served" | "called" | "in_therapy" | null;
+            visitId: string | null;
+            visitIdRef?: Record<string, never>;
+            confirmedByStaffId: string | null;
+            confirmedByStaffIdRef?: Record<string, never>;
+            syncedStatus: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         EstadoCitaEntity: {
             /** @default null */
             clinicId: string | null;
@@ -73615,6 +75260,19 @@ export interface components {
             content?: string;
             active?: boolean;
         };
+        PortfolioFillDto: {
+            /** @description First day (YYYY-MM-DD), inclusive. */
+            from: string;
+            /** @description Last day (YYYY-MM-DD), inclusive. */
+            to: string;
+            /** @description Centers to narrow to; without it, every center where the caller holds appointments.repair. */
+            centerIds?: string[];
+            /**
+             * @description true (default) only counts; false writes, after confirmation.
+             * @default true
+             */
+            dryRun?: boolean;
+        };
         ValidarCitaDto: {
             /**
              * Format: uuid
@@ -73663,65 +75321,6 @@ export interface components {
             bookedByStaffId?: string;
             /** Format: uuid */
             frontDeskStaffId?: string;
-        };
-        CitaEntity: {
-            clinicRef?: Record<string, never>;
-            patientId: string;
-            pacienteIdRef?: Record<string, never>;
-            appointmentTypeId: string;
-            tipoCitaIdRef?: Record<string, never>;
-            doctorId: string | null;
-            medicoIdRef?: Record<string, never>;
-            date: string;
-            time: string | null;
-            endTime: string | null;
-            /** @enum {string} */
-            status: "no_show" | "triage" | "programada" | "confirmada" | "presente" | "en_consulta" | "atendida" | "cancelada" | "reprogramada";
-            isFirstVisit: boolean;
-            /** @enum {string} */
-            channel: "frontdesk" | "callcenter" | "webhook" | "ia";
-            reason: string | null;
-            notes: string | null;
-            rescheduledFromId: string | null;
-            reprogramadaDeIdRef?: Record<string, never>;
-            bookedByStaffId: string | null;
-            callcenterIdRef?: Record<string, never>;
-            createdByProfileId: string | null;
-            creadoPorPerfilIdRef?: Record<string, never>;
-            frontDeskStaffId: string | null;
-            atencionIdRef?: Record<string, never>;
-            vitalsNurseId: string | null;
-            enfermeraVitalesIdRef?: Record<string, never>;
-            /** Format: date-time */
-            confirmedAt: string | null;
-            /** Format: date-time */
-            arrivedAt: string | null;
-            /** Format: date-time */
-            vitalsAt: string | null;
-            /** Format: date-time */
-            checkedInAt: string | null;
-            /** Format: date-time */
-            checkedOutAt: string | null;
-            /** Format: date-time */
-            lateRegisteredAt: string | null;
-            legacyId: string | null;
-            legacyOrigin: string | null;
-            sheetSlotId: string | null;
-            /** @enum {string|null} */
-            bookingStatus: "booked" | "confirmed" | "arrived" | "cancelled" | "no_show" | "rescheduled" | null;
-            /** @enum {string|null} */
-            careStatus: "waiting" | "triage" | "in_consultation" | "done" | "not_served" | "called" | "in_therapy" | null;
-            visitId: string | null;
-            visitIdRef?: Record<string, never>;
-            confirmedByStaffId: string | null;
-            confirmedByStaffIdRef?: Record<string, never>;
-            syncedStatus: string | null;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
         };
         UpdateCitaDto: {
             /** Format: uuid */
@@ -73860,15 +75459,6 @@ export interface components {
             doctorId: string;
             /** @enum {string} */
             scope?: "temporal" | "total";
-        };
-        CancelarCitaDto: {
-            /**
-             * Format: uuid
-             * @deprecated
-             * @description Ignored. Who did it is the authenticated principal (an API key may name a person with X-On-Behalf-Of).
-             */
-            actorId?: string;
-            reason: string;
         };
         RepararCitaDto: {
             /**
@@ -74077,6 +75667,19 @@ export interface components {
             reason?: string;
             active?: boolean;
         };
+        SetDayChangeDto: {
+            /**
+             * Format: uuid
+             * @description Center where the person works that day; null = does not come.
+             */
+            centerId: string | null;
+            /** @description HH:mm; both times or none. */
+            startTime?: string | null;
+            /** @description HH:mm; both times or none. */
+            endTime?: string | null;
+            /** @description Free-text reason. */
+            note?: string | null;
+        };
         CrearEventoDto: {
             /**
              * Format: uuid
@@ -74243,6 +75846,52 @@ export interface components {
             /** @description Minutes of silence inside opening hours before the push is "behind" (5..720). */
             lagAlertMinutes?: number;
         };
+        CallbackDto: {
+            /**
+             * @description Extension that rings first and then dials the number. Default: the extension of the call.
+             * @example 2222
+             */
+            extension?: string;
+        };
+        CallCommandEntity: {
+            clinicRef?: Record<string, never>;
+            pbx: string;
+            /** @enum {string} */
+            kind: "callback" | "recording";
+            callId: string | null;
+            number: string | null;
+            extension: string | null;
+            /** @enum {string} */
+            status: "done" | "pending" | "failed" | "taken";
+            error: string | null;
+            result: Record<string, never> | null;
+            requestedBy: string | null;
+            /** Format: date-time */
+            takenAt: string | null;
+            /** Format: date-time */
+            finishedAt: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        TakeCommandsDto: {
+            /**
+             * @description Switchboard key (ucm-bayamon, 3cx).
+             * @example ucm-bayamon
+             */
+            pbx: string;
+        };
+        CommandResultDto: {
+            /** @description Whether the order was carried out. */
+            ok: boolean;
+            /** @description Why it failed. */
+            error?: string;
+            /** @description What it reported (a recording reports `path`, the uploaded object). */
+            result?: Record<string, never>;
+        };
         CompleteCallsDto: {
             /** @description How many stored calls to complete in this run (default 500, max 5000). */
             limit?: number;
@@ -74301,12 +75950,19 @@ export interface components {
             transcript: string | null;
             /** Format: date-time */
             transcribedAt: string | null;
+            recordingPath: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        RequestUploadUrlDto: {
+            /** @enum {string} */
+            kind: "avatar" | "background" | "logo";
+            contentType: string;
+            ext?: string;
         };
         CreateApiKeyDto: {
             name: string;
@@ -74683,6 +76339,7 @@ export interface components {
             pushesToEhrOnPresente: boolean;
             /** @enum {string|null} */
             sheetSection: "LASER" | "IV" | null;
+            sheetKeywords: string[] | null;
             startStepMinutes: number | null;
             statisticsUnitKey: string | null;
             id: string;
@@ -74738,6 +76395,8 @@ export interface components {
              * @enum {string|null}
              */
             sheetSection?: "LASER" | "IV" | null;
+            /** @description Words the call center writes in the areas cell of the sheet LASER tab to book this service there (e.g. ["APEX"]); null = none. */
+            sheetKeywords?: string[] | null;
             /** @description Minutes between the start times this service offers and accepts (60 = on the hour only, like the call-center sheet for Laser and the IV line). Null = every slot of the day. Does not change how long the session takes. */
             startStepMinutes?: number | null;
             /**
@@ -74795,6 +76454,8 @@ export interface components {
              * @enum {string|null}
              */
             sheetSection?: "LASER" | "IV" | null;
+            /** @description Words the call center writes in the areas cell of the sheet LASER tab to book this service there (e.g. ["APEX"]); null = none. */
+            sheetKeywords?: string[] | null;
             /** @description Minutes between the start times this service offers and accepts (60 = on the hour only, like the call-center sheet for Laser and the IV line). Null = every slot of the day. Does not change how long the session takes. */
             startStepMinutes?: number | null;
             /**
@@ -76474,12 +78135,6 @@ export interface components {
             /** @description What failed (feeder empty, scanner busy, unreachable…). */
             error?: string;
         };
-        RequestUploadUrlDto: {
-            /** @enum {string} */
-            kind: "avatar" | "background" | "logo";
-            contentType: string;
-            ext?: string;
-        };
         RightNowSellerDto: {
             userId?: string | null;
             name?: string | null;
@@ -76994,6 +78649,32 @@ export interface components {
             externalCode?: string;
             /** Format: uuid */
             staffId?: string;
+        };
+        CreateFunctionDto: {
+            /** @description Stable machine name, unique. */
+            slug: string;
+            name: string;
+            /** @description i18n key; defaults to functions.<slug> for a task function and to none (the name is shown) for a service function. */
+            labelKey?: string;
+            /** @enum {string} */
+            kind: "service" | "task";
+            /** @description services.slug it covers; required for kind service, forbidden for task. */
+            serviceSlug?: string;
+            /** @enum {string} */
+            place: "in_person" | "any_center";
+            sortOrder?: number;
+        };
+        UpdateFunctionDto: {
+            name?: string;
+            labelKey?: string;
+            /** @enum {string} */
+            place?: "in_person" | "any_center";
+            active?: boolean;
+            sortOrder?: number;
+        };
+        SetStaffFunctionsDto: {
+            /** @description The COMPLETE list of function slugs the person holds. */
+            functions: string[];
         };
     };
     responses: never;
@@ -106327,6 +108008,206 @@ export interface operations {
             };
         };
     };
+    "PersonalController_setHomeCenter[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetHomeCenterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
+    "PersonalController_setHomeCenter[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetHomeCenterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
+    "PersonalController_setHomeCenter[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetHomeCenterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
+    "PersonalController_setHomeCenter[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetHomeCenterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
+    "PersonalController_setHomeCenter[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetHomeCenterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
+    "PersonalController_setHomeCenter[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetHomeCenterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
+    "PersonalController_setHomeCenter[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetHomeCenterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
+    "PersonalController_setHomeCenter[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetHomeCenterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalEntity"];
+                };
+            };
+        };
+    };
     "PersonalController_getPositions[0]_v1": {
         parameters: {
             query?: never;
@@ -133809,6 +135690,206 @@ export interface operations {
             };
         };
     };
+    "AppointmentLeftController_left[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
+    "AppointmentLeftController_left[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
+    "AppointmentLeftController_left[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
+    "AppointmentLeftController_left[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
+    "AppointmentLeftController_left[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
+    "AppointmentLeftController_left[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
+    "AppointmentLeftController_left[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
+    "AppointmentLeftController_left[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
     "TableroEstadosController_listEstados[0]_v1": {
         parameters: {
             query?: {
@@ -135958,6 +138039,190 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "PortfolioFillController_fill[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortfolioFillDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PortfolioFillController_fill[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortfolioFillDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PortfolioFillController_fill[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortfolioFillDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PortfolioFillController_fill[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortfolioFillDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PortfolioFillController_fill[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortfolioFillDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PortfolioFillController_fill[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortfolioFillDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PortfolioFillController_fill[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortfolioFillDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "PortfolioFillController_fill[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortfolioFillDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -142757,6 +145022,630 @@ export interface operations {
             };
         };
     };
+    "DayChangesController_listDayChanges[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description First date to list, YYYY-MM-DD; defaults to today in the time zone of the home center of the person. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DayChangesController_listDayChanges[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description First date to list, YYYY-MM-DD; defaults to today in the time zone of the home center of the person. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DayChangesController_listDayChanges[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description First date to list, YYYY-MM-DD; defaults to today in the time zone of the home center of the person. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DayChangesController_listDayChanges[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description First date to list, YYYY-MM-DD; defaults to today in the time zone of the home center of the person. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DayChangesController_listDayChanges[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description First date to list, YYYY-MM-DD; defaults to today in the time zone of the home center of the person. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DayChangesController_listDayChanges[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description First date to list, YYYY-MM-DD; defaults to today in the time zone of the home center of the person. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DayChangesController_listDayChanges[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description First date to list, YYYY-MM-DD; defaults to today in the time zone of the home center of the person. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DayChangesController_listDayChanges[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description First date to list, YYYY-MM-DD; defaults to today in the time zone of the home center of the person. */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "DayChangesController_setDayChange[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDayChangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DayChangesController_removeDayChange[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DayChangesController_setDayChange[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDayChangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DayChangesController_removeDayChange[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DayChangesController_setDayChange[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDayChangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DayChangesController_removeDayChange[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DayChangesController_setDayChange[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDayChangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DayChangesController_removeDayChange[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DayChangesController_setDayChange[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDayChangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DayChangesController_removeDayChange[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DayChangesController_setDayChange[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDayChangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DayChangesController_removeDayChange[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DayChangesController_setDayChange[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDayChangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DayChangesController_removeDayChange[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "DayChangesController_setDayChange[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDayChangeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "DayChangesController_removeDayChange[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+                day: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "CaptacionController_porAgente[0]_v1": {
         parameters: {
             query: {
@@ -145881,6 +148770,466 @@ export interface operations {
             };
         };
     };
+    "CallcenterController_callBack[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallbackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_callBack[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallbackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_callBack[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallbackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_callBack[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallbackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_recording[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_recording[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_recording[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_recording[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "CallcenterController_command[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_command[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_command[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_command[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_take[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TakeCommandsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CallcenterController_take[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TakeCommandsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CallcenterController_take[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TakeCommandsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CallcenterController_take[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TakeCommandsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CallcenterController_result[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommandResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_result[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommandResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_result[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommandResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
+    "CallcenterController_result[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommandResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallCommandEntity"];
+                };
+            };
+        };
+    };
     "CallcenterController_completeCalls[0]_v1": {
         parameters: {
             query?: {
@@ -146166,6 +149515,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
                 /** @description Extensión. / Extension. */
                 extension?: string;
                 /** @description answered = contestada; missed = perdida, ocupada or fallida. */
@@ -146208,6 +149559,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
                 /** @description Extensión. / Extension. */
                 extension?: string;
                 /** @description answered = contestada; missed = perdida, ocupada or fallida. */
@@ -146250,6 +149603,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
                 /** @description Extensión. / Extension. */
                 extension?: string;
                 /** @description answered = contestada; missed = perdida, ocupada or fallida. */
@@ -146292,6 +149647,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
                 /** @description Extensión. / Extension. */
                 extension?: string;
                 /** @description answered = contestada; missed = perdida, ocupada or fallida. */
@@ -146334,6 +149691,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
             };
             header?: never;
             path?: never;
@@ -146358,6 +149717,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
             };
             header?: never;
             path?: never;
@@ -146382,6 +149743,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
             };
             header?: never;
             path?: never;
@@ -146406,6 +149769,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
             };
             header?: never;
             path?: never;
@@ -146430,6 +149795,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
                 /** @description Only missed calls of this direction (as the PBX reports it). */
                 direction?: string;
             };
@@ -146456,6 +149823,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
                 /** @description Only missed calls of this direction (as the PBX reports it). */
                 direction?: string;
             };
@@ -146482,6 +149851,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
                 /** @description Only missed calls of this direction (as the PBX reports it). */
                 direction?: string;
             };
@@ -146508,6 +149879,8 @@ export interface operations {
                 from?: string;
                 /** @description Hasta (YYYY-MM-DD, día completo). / To (whole day). */
                 to?: string;
+                /** @description Only these switchboards, comma separated (ucm-bayamon, 3cx); none = all. The legacy dashboard counts the UCM alone. */
+                pbx?: string[];
                 /** @description Only missed calls of this direction (as the PBX reports it). */
                 direction?: string;
             };
@@ -146648,6 +150021,90 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "MediaController_uploadUrl[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUploadUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MediaController_uploadUrl[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUploadUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MediaController_uploadUrl[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUploadUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MediaController_uploadUrl[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestUploadUrlDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -177726,90 +181183,6 @@ export interface operations {
             };
         };
     };
-    "MediaController_uploadUrl[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestUploadUrlDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "MediaController_uploadUrl[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestUploadUrlDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "MediaController_uploadUrl[2]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestUploadUrlDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "MediaController_uploadUrl[3]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RequestUploadUrlDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "AhoraMismoController_stream[0]_v1": {
         parameters: {
             query?: never;
@@ -179861,6 +183234,702 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "FunctionsController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Include the functions hidden from pickers (active = false). */
+                includeInactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "FunctionsController_create[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFunctionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FunctionsController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Include the functions hidden from pickers (active = false). */
+                includeInactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "FunctionsController_create[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFunctionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FunctionsController_list[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Include the functions hidden from pickers (active = false). */
+                includeInactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "FunctionsController_create[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFunctionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FunctionsController_list[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Include the functions hidden from pickers (active = false). */
+                includeInactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "FunctionsController_create[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFunctionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FunctionsController_update[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFunctionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FunctionsController_update[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFunctionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FunctionsController_update[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFunctionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FunctionsController_update[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFunctionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_get[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_set[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffFunctionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_get[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_set[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffFunctionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_get[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_set[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffFunctionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_get[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_set[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffFunctionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_get[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_set[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffFunctionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_get[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_set[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffFunctionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_get[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_set[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffFunctionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_get[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "StaffFunctionsController_set[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetStaffFunctionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
