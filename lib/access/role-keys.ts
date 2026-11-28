@@ -12,7 +12,11 @@ export const LEGACY_ROLE_KEYS: Readonly<Record<string, string>> = {
   cc_operator: "appointments",
   facturacion: "billing",
   facturador_consulta: "billing",
-  enfermeria: "nursing",
+  // Enfermería and Panel de enfermería were merged into Clínico (owner, 28-nov; cmr-be
+  // docs/specs/clinical-absorbs-nursing-and-other-retired.md).
+  enfermeria: "clinical",
+  nursing: "clinical",
+  nursing_panel: "clinical",
   inventarios: "inventory",
   solo_lectura: "read_only",
 };

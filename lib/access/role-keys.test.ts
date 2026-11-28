@@ -11,7 +11,9 @@ test("roleKey maps every legacy key to its new key and leaves the rest alone", (
   assert.equal(roleKey("cc_operator"), "appointments");
   assert.equal(roleKey("facturacion"), "billing");
   assert.equal(roleKey("facturador_consulta"), "billing");
-  assert.equal(roleKey("enfermeria"), "nursing");
+  assert.equal(roleKey("enfermeria"), "clinical");
+  assert.equal(roleKey("nursing"), "clinical");
+  assert.equal(roleKey("nursing_panel"), "clinical");
   assert.equal(roleKey("inventarios"), "inventory");
   assert.equal(roleKey("solo_lectura"), "read_only");
   assert.equal(roleKey("admin"), "admin");
