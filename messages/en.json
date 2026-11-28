@@ -5587,6 +5587,10 @@
       "functions": {
         "title": "Functions",
         "desc": "What each person does: services and tasks, in person or for any center."
+      },
+      "legacyPackagesConfig": {
+        "title": "Legacy packages",
+        "desc": "Window to correct legacy-imported packages."
       }
     }
   },
@@ -7937,5 +7941,40 @@
     "schedule": {
       "duplicate": "That person already has those same hours that day at this center."
     }
+  },
+  "legacyPackages": {
+    "title": "Legacy packages",
+    "product": "Product",
+    "deliveredOfTotal": "Delivered/Total",
+    "pending": "Pending",
+    "correct": "Correct",
+    "total": "Total",
+    "delivered": "Delivered",
+    "reason": "Reason",
+    "reasonPlaceholder": "The legacy system says 6/12",
+    "closePackage": "Close this package",
+    "correctDone": "Package corrected.",
+    "invalidDeliveredOverTotal": "Delivered cannot be more than total.",
+    "invalidNegative": "Numbers cannot be negative.",
+    "invalidNotInteger": "Use whole numbers.",
+    "correctionClosed": "The legacy package correction window is closed.",
+    "notLegacy": "This package is not a legacy one; it cannot be corrected here.",
+    "nothingPending": "This package has nothing pending to correct.",
+    "outOfRange": "Those numbers are not valid for this package.",
+    "reasonRequired": "Give the reason for the correction."
+  },
+  "legacyPackagesConfig": {
+    "title": "Legacy packages — configuration",
+    "help": "Temporary window to correct legacy-imported packages from patient-desk.",
+    "sinCentro": "You have no centers assigned.",
+    "windowTitle": "Correction window",
+    "until": "Legacy package correction until",
+    "untilHint": "31 days max. Empty or past = closed.",
+    "statusOpen": "Open until {until}.",
+    "statusClosed": "Closed. No one can correct legacy packages right now.",
+    "save": "Save",
+    "closeNow": "Close",
+    "saved": "Window updated.",
+    "closed": "Window closed."
   }
 }

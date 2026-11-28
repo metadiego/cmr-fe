@@ -5587,6 +5587,10 @@
       "functions": {
         "title": "Funciones",
         "desc": "Lo que hace cada persona: servicios y tareas, presencial o para cualquier centro."
+      },
+      "legacyPackagesConfig": {
+        "title": "Paquetes del legado",
+        "desc": "Ventana para corregir paquetes importados del legado."
       }
     }
   },
@@ -7937,5 +7941,40 @@
     "schedule": {
       "duplicate": "Esa persona ya tiene ese mismo horario ese día en este centro."
     }
+  },
+  "legacyPackages": {
+    "title": "Paquetes del legado",
+    "product": "Producto",
+    "deliveredOfTotal": "Entregadas/Total",
+    "pending": "Pendientes",
+    "correct": "Corregir",
+    "total": "Total",
+    "delivered": "Entregadas",
+    "reason": "Motivo",
+    "reasonPlaceholder": "El legado marca 6/12",
+    "closePackage": "Cerrar este paquete",
+    "correctDone": "Paquete corregido.",
+    "invalidDeliveredOverTotal": "Las entregadas no pueden ser más que el total.",
+    "invalidNegative": "Los números no pueden ser negativos.",
+    "invalidNotInteger": "Usa números enteros.",
+    "correctionClosed": "La ventana de corrección de paquetes del legado está cerrada.",
+    "notLegacy": "Este paquete no es del legado; no se puede corregir aquí.",
+    "nothingPending": "Este paquete no tiene nada pendiente que corregir.",
+    "outOfRange": "Esos números no son válidos para este paquete.",
+    "reasonRequired": "Indica el motivo de la corrección."
+  },
+  "legacyPackagesConfig": {
+    "title": "Paquetes del legado — configuración",
+    "help": "Ventana temporal para corregir paquetes importados del legado desde patient-desk.",
+    "sinCentro": "No tienes centros asignados.",
+    "windowTitle": "Ventana de corrección",
+    "until": "Corrección de paquetes del legado hasta",
+    "untilHint": "Máximo 31 días. Vacío o pasado = cerrada.",
+    "statusOpen": "Abierta hasta {until}.",
+    "statusClosed": "Cerrada. Nadie puede corregir paquetes del legado ahora mismo.",
+    "save": "Guardar",
+    "closeNow": "Cerrar",
+    "saved": "Ventana actualizada.",
+    "closed": "Ventana cerrada."
   }
 }

@@ -48,6 +48,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CONSULTATION_BOARD } from "@/lib/frontdesk/consultation-board"
+import { LegacyPackagesPanel } from "@/components/patient-desk/legacy-packages-panel"
 import { BEFORE_ARRIVAL, groupIn } from "@/lib/lifecycle/stage-groups"
 
 export type ScheduleRequest = {
@@ -423,6 +424,8 @@ export function PatientDetail({
       </div>
 
       {/* Sections in one order (lib: patientSections), narrowed to the board's service filter (visibleSections). */}
+      <LegacyPackagesPanel patientId={patient.patientId} centerId={centerId} onChanged={data.refresh} />
+
       {shown.hidden > 0 || showAll ? <FilteredSectionsHint serviceName={filteredName} hidden={shown.hidden} showAll={showAll} onToggle={() => setShowAll((v) => !v)} /> : null}
       {shown.sections.map((x) =>
         x.kind === "service"
