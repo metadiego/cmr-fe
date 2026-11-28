@@ -32,6 +32,7 @@ export function StaffPositionsSection({
   functionSlugs,
   catalogError,
   centro,
+  bare = false,
 }: {
   persona: Personal;
   catalog: Position[];
@@ -40,6 +41,8 @@ export function StaffPositionsSection({
   /** Why the position catalog did not load (shown instead of a skeleton that never ends). */
   catalogError?: string | null;
   centro?: string;
+  /** Inside «Acceso al sistema» (staff-access-section): a small subheading instead of its own section. */
+  bare?: boolean;
 }) {
   const t = useTranslations("staffPositions");
   const me = useMe();
@@ -103,11 +106,18 @@ export function StaffPositionsSection({
     : [];
 
   return (
-    <div className="space-y-3 border-t pt-4">
-      <div className="space-y-0.5">
-        <Label>{t("title")}</Label>
-        <p className="text-xs text-muted-foreground">{t("help")}</p>
-      </div>
+    <div className={bare ? "space-y-3" : "space-y-3 border-t pt-4"}>
+      {bare ? (
+        <div className="space-y-0.5">
+          <div className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{t("title")}</div>
+          <p className="text-xs text-muted-foreground">{t("help")}</p>
+        </div>
+      ) : (
+        <div className="space-y-0.5">
+          <Label>{t("title")}</Label>
+          <p className="text-xs text-muted-foreground">{t("help")}</p>
+        </div>
+      )}
       {catalogError && <p className="text-sm text-destructive">{catalogError}</p>}
       {heldRes.state.kind === "fail" && <p className="text-sm text-destructive">{heldRes.state.message}</p>}
       {centersRes.state.kind === "fail" && <p className="text-sm text-destructive">{centersRes.state.message}</p>}

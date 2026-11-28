@@ -21,8 +21,12 @@ export function accessRoleCatalog(
   });
 }
 
-/** Roles being phased out (cmr-be handoff §4): offered only to whoever still holds them. */
-export const RETIRED_ACCESS_ROLES = ["read_only", "facturacion-inventario"] as const;
+/**
+ * Roles being phased out, offered only to whoever still holds them: «Solo lectura» and «Facturación e
+ * inventario» (cmr-be handoff §4), «Otro», and «Enfermería» / «Panel de enfermería», merged into «Clínico»
+ * (owner, 28-nov; cmr-be feat/functions-drop-job-position).
+ */
+export const RETIRED_ACCESS_ROLES = ["read_only", "facturacion-inventario", "other", "nursing", "nursing_panel"] as const;
 
 /** Whether the person's primary position is one the access-role picker does not show. */
 export function primaryIsHidden(held: StaffPositions, shown: readonly Position[]): boolean {

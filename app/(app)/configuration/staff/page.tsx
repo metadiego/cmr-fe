@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { UserAccountIcon, UserAdd01Icon } from "@hugeicons/core-free-icons";
+import { UserAdd01Icon } from "@hugeicons/core-free-icons";
 
 import { listPersonalAll, type Personal, type PersonalConPreferenciaFrontdesk, type PersonalEnAlcance } from "@/lib/api/personal";
 import { FichaEditor, StaffActiveButton } from "@/components/personal/ficha-editor";
@@ -19,12 +19,11 @@ import { HomeCenterField } from "@/components/personal/home-center-field";
 import { NuevoPersonalDialog } from "@/components/personal/nuevo-personal-dialog";
 import { StaffList } from "@/components/personal/staff-list";
 import { FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
-import { StaffPositionsSection } from "@/components/personal/staff-positions-section";
+import { StaffAccessSection } from "@/components/personal/staff-access-section";
 import { DarAccesoDialog } from "@/components/personal/give-access-dialog";
 import { getPositions, type Position } from "@/lib/api/positions";
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { InviteDialog } from "@/components/admin/invite-dialog";
-import { UserAccessPanel } from "@/components/admin/user-access-panel";
 import { ACCESS_FILTERS, accessOf, countByAccess, filterByAccess, type AccessFilter } from "@/lib/personal/staff-access";
 import { useMe, isAdmin } from "@/hooks/use-me";
 import { cn } from "@/lib/utils";
@@ -41,7 +40,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MedicoDisponibilidad } from "@/components/personal/medico-disponibilidad";
 import { MedicoAgenda, MedicoPacientes, MedicoProduccion } from "@/components/personal/medico-hub-tabs";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Ficha de personal: TODO en una pantalla, sin saltar. Lista a la izquierda, ficha de la persona a la
@@ -358,36 +356,23 @@ function FichaPersonal({
                 onSaved={(now) => { setSavedFunctions(now); onChanged(); }}
               />
 
-              {/* What the person can open, per center: administrators only. */}
-              {viewerIsAdmin && (
-                <StaffPositionsSection persona={persona} catalog={positions} functionSlugs={functionSlugs} catalogError={positionsError ?? functionsError} centro={centro} />
-              )}
-
               {/* Front-desk preferences, only for front-desk staff (or whoever already has one set). */}
               {showsConsultaPreferences(holdsFunction(heldFunctions, "front_desk"), persona as PersonalConPreferenciaFrontdesk) && (
                 <FrontdeskConsultaPreferencia persona={persona} centro={centro} />
               )}
 
-              {/* System access */}
-              <div className="border-t pt-4">
-                <Label className="mb-2 block">{t("acceso")}</Label>
-                {profile ? (
-                  <UserAccessPanel profile={profile} onChanged={onProfileChanged} />
-                ) : persona.profileId ? (
-                  <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
-                    <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
-                    <span>{persona.email || t("conCuenta")}</span>
-                  </div>
-                ) : viewerIsAdmin ? (
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
-                    <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
-                  </div>
-                ) : (
-                  // Giving system access is access management: an administrator's call (cmr-be).
-                  <span className="text-sm text-muted-foreground">{tRoot("staffPositions.giveAccessNeedsAdmin")}</span>
-                )}
-              </div>
+              {/* System access: the login and, for an admin, the access roles per center (one section). */}
+              <StaffAccessSection
+                persona={persona}
+                profile={profile}
+                viewerIsAdmin={viewerIsAdmin}
+                positions={positions}
+                positionsError={positionsError ?? functionsError}
+                functionSlugs={functionSlugs}
+                centro={centro}
+                onProfileChanged={onProfileChanged}
+                onGiveAccess={() => setDarAcceso(true)}
+              />
 
               {/* EHR account: on every record (owner, 01-oct-2026): any job title may need it. */}
               <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centerIds={ehrCenterIds} centro={centro} onChanged={onEhrChanged} />

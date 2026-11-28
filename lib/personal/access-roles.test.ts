@@ -1,7 +1,7 @@
 // lib/personal/access-roles.ts. Run: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { accessRoleCatalog, hiddenHeldPositions, primaryIsHidden, withHiddenPositions } from "./access-roles.ts";
+import { RETIRED_ACCESS_ROLES, accessRoleCatalog, hiddenHeldPositions, primaryIsHidden, withHiddenPositions } from "./access-roles.ts";
 import type { Position, StaffPositionsBody } from "../api/positions.ts";
 
 const pos = (slug: string, permissions: number, fullAccess = false): Position => ({
@@ -71,4 +71,11 @@ test("primaryIsHidden: only when the primary is held and not shown", () => {
   assert.equal(primaryIsHidden(heldOf("technician", ["technician", "clinical"]), shown), true);
   assert.equal(primaryIsHidden(heldOf("clinical", ["technician", "clinical"]), shown), false);
   assert.equal(primaryIsHidden(heldOf(null, ["technician"]), shown), false);
+});
+
+test("retired roles (owner, 28-nov): Otro and the nursing roles merged into Clínico are no longer offered", () => {
+  for (const slug of ["other", "nursing", "nursing_panel", "read_only", "facturacion-inventario"]) {
+    assert.ok((RETIRED_ACCESS_ROLES as readonly string[]).includes(slug), slug);
+  }
+  assert.ok(!(RETIRED_ACCESS_ROLES as readonly string[]).includes("clinical"));
 });

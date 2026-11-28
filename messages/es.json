@@ -7711,8 +7711,8 @@
     "noDateWindows": "Los puestos no tienen fecha de fin: el acceso quedó sin fecha."
   },
   "staffPositions": {
-    "title": "Rol de acceso",
-    "help": "Lo que la persona puede abrir en cada centro. Lo que hace va en «Funciones».",
+    "title": "Roles por centro",
+    "help": "Lo que puede abrir en cada centro. Lo que hace va en «Funciones».",
     "primary": "Principal",
     "makePrimary": "Marcar como puesto principal",
     "primaryHelp": "El principal es la etiqueta de la persona en listas e informes.",
@@ -7885,5 +7885,8 @@
     "slugTaken": "Ya hay una función «{slug}».",
     "created": "Función creada",
     "updated": "Función actualizada"
+  },
+  "staffAccess": {
+    "help": "Qué puede abrir la persona: su cuenta, y para un administrador sus roles por centro."
   }
 }

@@ -7711,8 +7711,8 @@
     "noDateWindows": "Positions have no end date: the access was given without one."
   },
   "staffPositions": {
-    "title": "Access role",
-    "help": "What the person can open at each center. What they do goes in «Functions».",
+    "title": "Roles per center",
+    "help": "What they can open at each center. What they do goes in «Functions».",
     "primary": "Primary",
     "makePrimary": "Make primary position",
     "primaryHelp": "The primary one is the person's label in lists and reports.",
@@ -7885,5 +7885,8 @@
     "slugTaken": "There is already a function «{slug}».",
     "created": "Function created",
     "updated": "Function updated"
+  },
+  "staffAccess": {
+    "help": "What the person can open: their login and, for an administrator, their roles per center."
   }
 }
