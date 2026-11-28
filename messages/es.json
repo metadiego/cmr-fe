@@ -3710,7 +3710,10 @@
     },
     "multipliersEditHint": "Corrige áreas o días aquí: se guarda al salir del campo.",
     "lineProduct": "Producto/servicio",
-    "priceLoading": "Buscando el precio…"
+    "priceLoading": "Buscando el precio…",
+    "division": {
+      "consulta": "Consulta"
+    }
   },
   "precios": {
     "title": "Precios",
@@ -4246,7 +4249,19 @@
       "metodoPago": "Pago"
     },
     "grupo": {
-      "producto": "Producto"
+      "producto": "Producto",
+      "laser_intravenoso": "Láser Intravenoso",
+      "laser": "Láser",
+      "vit_c": "Suero Vitamina C",
+      "transcraneal_laser": "Láser Transcraneal",
+      "nano": "Nano",
+      "pemf": "PEMF",
+      "avacen": "Avacen",
+      "energetica": "Cámara Energética",
+      "hiperbarica": "Cámara Hiperbárica",
+      "amnisoma": "Amnisome",
+      "emtt": "EMTT",
+      "npt": "Protocolo NPT"
     },
     "breakdown": {
       "sessions": "Sesiones",

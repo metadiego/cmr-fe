@@ -3710,7 +3710,10 @@
     },
     "multipliersEditHint": "Fix areas or days here: saved when you leave the field.",
     "lineProduct": "Product/service",
-    "priceLoading": "Looking up the price…"
+    "priceLoading": "Looking up the price…",
+    "division": {
+      "consulta": "Consultation"
+    }
   },
   "precios": {
     "title": "Prices",
@@ -4246,7 +4249,19 @@
       "metodoPago": "Payment"
     },
     "grupo": {
-      "producto": "Product"
+      "producto": "Product",
+      "laser_intravenoso": "Intravenous Laser",
+      "laser": "Laser",
+      "vit_c": "Vitamin C Drip",
+      "transcraneal_laser": "Transcranial Laser",
+      "nano": "Nano",
+      "pemf": "PEMF",
+      "avacen": "Avacen",
+      "energetica": "Energy Chamber",
+      "hiperbarica": "Hyperbaric Chamber",
+      "amnisoma": "Amnisome",
+      "emtt": "EMTT",
+      "npt": "NPT Protocol"
     },
     "breakdown": {
       "sessions": "Sessions",
