@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { SegmentedControl } from "@/components/kit/segmented-control";
 import { ErrorState, LoadingPanel, Panel } from "@/components/kit/panel";
 import {
   Select,
@@ -42,10 +42,13 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
   const [{ desde, hasta }, setRango] = React.useState(anioEnCurso);
   const [persona, setPersona] = React.useState("");
   const [trato, setTrato] = React.useState<"sr" | "sra">("sr");
-  // Grouped by default (the legacy document's usual shape); checked, the printed document opens
-  // every concept into its own invoices/products instead of one total line — the owner's fix for
-  // "sin_clasificar" printing as a single opaque amount with no way to tell what was bought.
-  const [detallado, setDetallado] = React.useState(false);
+  // Two printable models, side by side, neither one replacing the other (owner, 28-nov-2026): the
+  // original "Detallado" line-item printout is kept exactly as it already worked, next to a new
+  // "Agrupado" one-line-per-concept printout — grouped is the default once a concept has a real
+  // billing group. "sin_clasificar" is never one of the two choices: it never gets a lump row in
+  // either model, only each product it actually covers (see the print/table code below).
+  const [modo, setModo] = React.useState<"agrupado" | "detallado">("agrupado");
+  const detallado = modo === "detallado";
   const [expandido, setExpandido] = React.useState<Set<string>>(new Set());
   const qsCentro = centro ? `?centro=${encodeURIComponent(centro)}` : "";
   const dia = (iso: string) => { const d = parseDayUTC(iso); return d ? dayFmt.format(d) : iso; };
@@ -161,9 +164,18 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
         </div>
         <Button type="button" onClick={imprimir} disabled={!puedeImprimir}>{t("print")}</Button>
       </div>
-      <div className="flex items-center gap-2 px-5 pb-4">
-        <Checkbox id="cg-detallado" checked={detallado} onCheckedChange={(v) => setDetallado(v === true)} />
-        <Label htmlFor="cg-detallado" className="cursor-pointer font-normal text-muted-foreground">{t("detailedHint")}</Label>
+      <div className="flex items-center gap-3 px-5 pb-4">
+        <Label className="font-normal text-muted-foreground">{t("printModel")}</Label>
+        <SegmentedControl
+          ariaLabel={t("printModel")}
+          className="w-auto"
+          value={modo}
+          onChange={setModo}
+          options={[
+            { value: "agrupado", label: t("modeGrouped") },
+            { value: "detallado", label: t("modeDetailed") },
+          ]}
+        />
       </div>
       </Panel>
 
