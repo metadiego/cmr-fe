@@ -40,7 +40,8 @@ import { AddKitComponent } from "@/components/facturacion/add-kit-component";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
-import { getProfiles, type Perfil } from "@/lib/api/profiles";
+import { listPersonalAll } from "@/lib/api/personal";
+import { currentStaffId, reassignOptions, staffName } from "@/lib/facturacion/reassign-user-missing";
 import { PatientTodaySummaryButton } from "@/components/facturacion/resumen-paciente-panel";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
@@ -1161,15 +1162,9 @@ function UsuarioResponsable({
   );
 }
 
-// Corregir el usuario responsable → PUT /facturas/:id/cabecera { usuarioId } (id de /profiles). El BE
-// valida existencia y permiso (admin; gerente o quien facturó, el mismo día). Handoff usuario-de-la-factura.
-function UsuarioDialog({
-  open,
-  onOpenChange,
-  centro,
-  factura,
-  onSaved,
-}: {
+// Invoice seller → PUT /invoices/:id/header { userId: STAFF id } (cmr-be #749), from the center's active staff
+// like «Cambiar usuario» (/profiles was admin-only). Spec vendedor-de-la-factura-desde-el-personal.md.
+function UsuarioDialog({ open, onOpenChange, centro, factura, onSaved }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   centro?: string;
@@ -1177,13 +1172,13 @@ function UsuarioDialog({
   onSaved: () => void;
 }) {
   const t = useTranslations("facturacion");
-  // getProfiles es de administración (403 a un cajero): pedirlo SOLO al abrir este diálogo (acción de
-  // admin «corregir usuario»), no al montar la pantalla de caja. Handoff selector-de-linea-sin-buscador.
-  const perfilesRes = useResource<Perfil[]>(() => (open ? getProfiles() : Promise.resolve([])), [open]);
-  const perfiles = perfilesRes.state.kind === "ok" ? perfilesRes.state.data : [];
-  const est = String(factura.status ?? "");
-  const actual = ((est === "borrador" ? factura.createdBy?.profileId : factura.issuedBy?.profileId) ?? factura.emisor?.profileId ?? "") as string;
-  const [sel, setSel] = React.useState<string>(actual);
+  const home = (factura as { clinicId?: string }).clinicId ?? centro; // the staff must serve the INVOICE's center (#749)
+  const staffRes = useResource(() => (open ? listPersonalAll({}, home) : Promise.resolve([])), [open, home]);
+  const staff = staffRes.state.kind === "ok" ? staffRes.state.data : [];
+  const person = (String(factura.status ?? "") === "borrador" ? factura.createdBy : factura.issuedBy) ?? factura.emisor;
+  const actual = currentStaffId(staff, person);
+  const options = reassignOptions(staff, actual);
+  const [picked, setSel] = React.useState<string>(""), sel = picked || actual || "";
   const missing = invoiceUserMissing({ userId: sel }).map(() => t("usuarioResponsable"));
   const { submitting, submit } = useSubmit(
     () => editarCabeceraFactura(String(factura.id), { userId: sel } as EditarCabeceraPayload, centro),
@@ -1201,11 +1196,11 @@ function UsuarioDialog({
       missing={missing}
     >
       <Field label={t("usuarioResponsable")} htmlFor="invoice-user" required>
-        {perfilesRes.state.kind === "loading" ? <ControlSkeleton /> : (
+        {staffRes.state.kind === "loading" ? <ControlSkeleton /> : (
         <Select value={sel} onValueChange={setSel}>
           <SelectTrigger id="invoice-user"><SelectValue placeholder={t("elegirUsuario")} /></SelectTrigger>
           <SelectContent>
-            {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+            {options.map((p) => <SelectItem key={p.id} value={p.id}>{staffName(p)}</SelectItem>)}
           </SelectContent>
         </Select>
         )}

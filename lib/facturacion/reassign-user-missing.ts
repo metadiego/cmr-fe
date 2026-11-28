@@ -15,3 +15,17 @@ export function reassignOptions(staff: StaffOption[], keepId?: string | null): S
 export function reassignCheck(picked: string, currentId: string | null | undefined): { filled: boolean; same: boolean } {
   return { filled: !!picked, same: !!picked && picked === currentId };
 }
+
+/**
+ * The staff id of whoever the invoice belongs to now (its seller), from the person the invoice carries
+ * (`issuedBy`/`createdBy`/`emisor`: `id` and `profileId`). PUT /invoices/:id/header { userId } takes a
+ * staff id since cmr-be #749, the same list «Cambiar usuario» picks from. Null when none matches.
+ */
+export function currentStaffId(
+  staff: ReadonlyArray<StaffOption & { profileId?: string | null }>,
+  person: { id?: string | null; profileId?: string | null } | null | undefined,
+): string | null {
+  if (!person) return null;
+  const hit = staff.find((s) => (!!person.id && s.id === person.id) || (!!person.profileId && s.profileId === person.profileId));
+  return hit?.id ?? null;
+}

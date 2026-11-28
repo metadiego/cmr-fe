@@ -52,7 +52,7 @@ const DEBT = {
   // helpers moved to lib/facturacion/line-quantity.ts, tested there instead of living inline.
   // 18-nov-2026: 1305 → 1297 — the receipt preview left the editor grid for a header drawer
   // (components/facturacion/receipt-preview-sheet.tsx).
-  "app/(app)/billing/invoices/[id]/page.tsx": 1291,
+  "app/(app)/billing/invoices/[id]/page.tsx": 1286,
   // 17-nov-2026: 1048 → 1046 — the product sheet moved onto the standard FormSheet shell (kit Field,
   // useDialogForm, useSubmit); the local Field and canSubmit went.
   // 20-nov-2026: 1046 → 1020 — Toggle/CatalogSelect moved to producto-form-controls.tsx, making room
