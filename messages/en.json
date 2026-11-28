@@ -1624,7 +1624,8 @@
     "inventory_daily_kardex": "Daily kardex",
     "inventory_adjustments": "Adjustments",
     "inventoryBackdate": "Backdated adjustments",
-    "appointmentsDay": "Appointments"
+    "appointmentsDay": "Appointments",
+    "functions": "Functions"
   },
   "admin": {
     "title": "Administration",
@@ -1693,7 +1694,7 @@
       "adminRoleFixed": "The Administrator role has full access and cannot be edited."
     },
     "access": {
-      "title": "User access",
+      "title": "What they can open",
       "scope": "Scope",
       "global": "Global (all centers)",
       "tabs": {
@@ -1729,7 +1730,17 @@
       "sinCentros": "No centers assigned.",
       "rolesGlobales": "Roles in ALL centers",
       "sinRolesGlobales": "None",
-      "anadir": "+ Add"
+      "anadir": "+ Add",
+      "allCenters": "All centers",
+      "screensTitle": "Screens",
+      "screensHelp": "What their roles open at this center. A switch adds an exception for this person only; for many people, change the role.",
+      "screensCount": "Screens open: {count}",
+      "overridesTitle": "This person's exceptions ({count})",
+      "overridesNone": "None: everything comes from their roles.",
+      "overrideGrant": "Given",
+      "overrideDeny": "Removed",
+      "overrideRemove": "Remove",
+      "advanced": "Advanced: every permission"
     },
     "menu": {
       "title": "Dynamic menu",
@@ -1821,7 +1832,7 @@
     "cancel": "Cancel",
     "users": {
       "invite": "Invite user",
-      "access": "Access",
+      "access": "What they can open",
       "centros": "Centers",
       "editar": "Edit user",
       "suspender": "Suspend",
@@ -5552,6 +5563,10 @@
       "callcenter": {
         "title": "Call Center",
         "desc": "Lines by channel and the lag-alert hours."
+      },
+      "functions": {
+        "title": "Functions",
+        "desc": "What each person does: services and tasks, in person or for any center."
       }
     }
   },
@@ -5826,7 +5841,8 @@
     "ausencia": {
       "rango_invalido": "The absence range is invalid (end before start).",
       "horas_invalidas": "The end time must be after the start time"
-    }
+    },
+    "horario_imposible": "The end time must be after the start time."
   },
   "printHub": {
     "invalidQueue": "The queue or share name has characters that are not allowed (only letters, digits, space and _ . - $).",
@@ -7702,11 +7718,13 @@
     "centersRequired": "Each position needs at least one center.",
     "primaryNotHeld": "The primary position must be one the person holds.",
     "unknown": "That position does not exist.",
-    "noDateWindows": "Positions have no end date: the access was given without one."
+    "noDateWindows": "Positions have no end date: the access was given without one.",
+    "nursing_station": "Nursing station",
+    "noPositionToCarry": "That person has no role to carry to that center: give them a role there first."
   },
   "staffPositions": {
-    "title": "Positions",
-    "help": "What the person does at each center. Their centers are those with at least one position.",
+    "title": "Roles per center",
+    "help": "What they can open at each center. What they do goes in «Functions».",
     "primary": "Primary",
     "makePrimary": "Make primary position",
     "primaryHelp": "The primary one is the person's label in lists and reports.",
@@ -7730,5 +7748,168 @@
     "title": "{screen}: only at {centers}",
     "description": "You have no access to {screen} at the active center. Switch centers to use it.",
     "switchTo": "Go to {center}"
+  },
+  "functions": {
+    "doctor": "Doctor",
+    "nurse": "Nurse",
+    "technician": "Technician",
+    "front_desk": "Front desk",
+    "cashier": "Cashier",
+    "operator": "Operator",
+    "billing": "Billing",
+    "accounting": "Accounting",
+    "unknown": "That function does not exist or is hidden: it cannot be added.",
+    "backedByPosition": "A position the person still holds backs that function: remove the position first.",
+    "duplicate": "A function with that identifier already exists.",
+    "unknownService": "That service does not exist.",
+    "kindServiceMismatch": "A service function needs its service, and a task has none.",
+    "notFound": "That function does not exist."
+  },
+  "staff": {
+    "unknownCenter": "That center does not exist or is inactive."
+  },
+  "dayChanges": {
+    "pastDay": "A past day cannot be set or removed.",
+    "notFound": "That change no longer exists."
+  },
+  "staffFunctions": {
+    "title": "Functions",
+    "help": "What the person does, with no center. It opens no screens: that is the access role. All are in person except those marked «Any center». Removing Doctor, Nurse, Technician, Cashier or Accounting also removes its position.",
+    "readOnly": "What the person does. Changing it needs permission to edit staff at their home center.",
+    "group": {
+      "tasks": "Tasks",
+      "services": "Services"
+    },
+    "emptyGroup": "No functions of this kind.",
+    "place": {
+      "in_person": "In person",
+      "any_center": "For any center"
+    },
+    "placeShort": {
+      "in_person": "In person",
+      "any_center": "Any center"
+    },
+    "inactive": "hidden",
+    "none": "No functions: they will not appear in any picker once pickers read from here.",
+    "selectedCount": "{count} of {total}",
+    "groupHelp": {
+      "tasks": "Their job at the clinic (doctor, nurse, front desk…).",
+      "services": "The services they can deliver. Used to list them in pickers and to count available staff when booking that service (once bookings read from here)."
+    }
+  },
+  "homeCenter": {
+    "label": "Home center",
+    "help": "The record's center. Not where they work each day (that is the schedule) nor what they can open (that is the access role).",
+    "blocked": {
+      "noUpdateAtCurrent": "Changing it needs permission to edit staff at the current center and the new one.",
+      "noOtherCenter": "There is no other center where you can edit staff."
+    }
+  },
+  "staffSchedule": {
+    "tab": "Schedule",
+    "title": "Schedule",
+    "help": "Where and when they work each week. Tap an entry to change or remove it, or an empty cell to add that day.",
+    "readOnly": "The days they work, each at its center. Changing it needs permission to edit staff at that center.",
+    "empty": "No schedule of their own. Add it with «Add».",
+    "add": "Add",
+    "edit": "Change or remove",
+    "noEditHere": "You cannot edit staff at this center.",
+    "addTitle": "Add hours",
+    "addHelp": "The same hours on the ticked days, at the chosen center. A day they already had at that center is replaced.",
+    "editTitle": "{day} hours",
+    "center": "Center",
+    "pickCenter": "Pick the center",
+    "days": "Days",
+    "start": "Start",
+    "end": "End",
+    "save": "Save",
+    "saved": "Schedule saved",
+    "remove": "Remove",
+    "removed": "Day removed",
+    "removeConfirm": "Remove this day from the schedule?",
+    "removeHelp": "They will no longer work that day at this center.",
+    "unchanged": "Nothing has changed.",
+    "problem": {
+      "format": "Type the hours as HH:mm.",
+      "endBeforeStart": "The end must be after the start."
+    },
+    "dowShort": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "0": "Sun"
+    },
+    "addDay": "Add {day} at {center}",
+    "generalWhenNone": "Until they have their own, each center's general hours count:",
+    "generalOtherDays": "On days without their own hours at a center, its general hours count:",
+    "repeatedHelp": "Saved {count} times: shown once.",
+    "repeatedFix": "This entry is saved {count} times (from the previous screen). «Save» keeps a single copy; «Remove» removes them all."
+  },
+  "staffDayChanges": {
+    "title": "One-day changes",
+    "help": "One day at another center, other hours or not coming. They do not change bookings yet.",
+    "empty": "No changes from today.",
+    "add": "Add",
+    "addTitle": "One-day change",
+    "addHelp": "A change already set for that day is replaced.",
+    "day": "Day",
+    "where": "Where",
+    "pickWhere": "Pick the center or «Not coming»",
+    "notComing": "Not coming",
+    "hours": "Hours",
+    "usualHours": "their usual hours",
+    "start": "Start",
+    "end": "End",
+    "hoursHint": "Empty = their usual hours.",
+    "note": "Note",
+    "save": "Save",
+    "saved": "Change saved",
+    "remove": "Remove",
+    "removed": "Change removed",
+    "removeConfirm": "Remove this day's change?",
+    "problem": {
+      "pastDay": "A past day cannot be set.",
+      "bothHours": "Set both hours or neither.",
+      "endBeforeStart": "The end must be after the start.",
+      "noHoursWhenAway": "When not coming, no hours.",
+      "format": "Type the hours as HH:mm."
+    }
+  },
+  "functionsConfig": {
+    "title": "Functions",
+    "help": "What each person does: services and tasks. «In person» counts only at their center; «For any center» works from any. Hiding a function does not take it from whoever holds it.",
+    "new": "New function",
+    "tasks": "Tasks",
+    "services": "Services",
+    "empty": "No functions of this kind.",
+    "name": "Name",
+    "place": "Place",
+    "placeHint": "In person = counts only where they work that day.",
+    "order": "Order",
+    "orderInvalid": "The order is a whole number from 0 up.",
+    "active": "Offered",
+    "edit": "Edit",
+    "editTitle": "Edit «{name}»",
+    "kind": "Kind",
+    "kindTask": "Task",
+    "kindService": "Service",
+    "kindFixed": "The kind and the service do not change.",
+    "service": "Service",
+    "pickService": "Pick the service",
+    "slugPreview": "Identifier: {slug}",
+    "slugTaken": "There is already a function «{slug}».",
+    "created": "Function created",
+    "updated": "Function updated"
+  },
+  "staffAccess": {
+    "help": "What the person can open: their login and, for an administrator, their roles per center."
+  },
+  "availability": {
+    "schedule": {
+      "duplicate": "That person already has those same hours that day at this center."
+    }
   }
 }

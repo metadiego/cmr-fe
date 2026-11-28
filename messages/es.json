@@ -1624,7 +1624,8 @@
     "inventory_daily_kardex": "Kardex diario",
     "inventory_adjustments": "Ajustes",
     "inventoryBackdate": "Ajustes con fecha pasada",
-    "appointmentsDay": "Citas"
+    "appointmentsDay": "Citas",
+    "functions": "Funciones"
   },
   "admin": {
     "title": "Administración",
@@ -1693,7 +1694,7 @@
       "adminRoleFixed": "El rol Administrador tiene acceso total y no se edita."
     },
     "access": {
-      "title": "Accesos del usuario",
+      "title": "Qué puede abrir",
       "scope": "Ámbito",
       "global": "Global (todos los centros)",
       "tabs": {
@@ -1729,7 +1730,17 @@
       "sinCentros": "Sin centros asignados.",
       "rolesGlobales": "Roles en TODOS los centros",
       "sinRolesGlobales": "Ninguno",
-      "anadir": "+ Añadir"
+      "anadir": "+ Añadir",
+      "allCenters": "Todos los centros",
+      "screensTitle": "Pantallas",
+      "screensHelp": "Lo que le abren sus roles en este centro. Un interruptor crea una excepción solo para esta persona; para mucha gente, cambia el rol.",
+      "screensCount": "Pantallas abiertas: {count}",
+      "overridesTitle": "Excepciones de esta persona ({count})",
+      "overridesNone": "Ninguna: todo viene de sus roles.",
+      "overrideGrant": "Dada",
+      "overrideDeny": "Quitada",
+      "overrideRemove": "Quitar",
+      "advanced": "Avanzado: todos los permisos"
     },
     "menu": {
       "title": "Menú dinámico",
@@ -1821,7 +1832,7 @@
     "cancel": "Cancelar",
     "users": {
       "invite": "Invitar usuario",
-      "access": "Accesos",
+      "access": "Qué puede abrir",
       "centros": "Centros",
       "editar": "Editar usuario",
       "suspender": "Suspender",
@@ -5552,6 +5563,10 @@
       "callcenter": {
         "title": "Call Center",
         "desc": "Líneas por canal y horario de la alerta de atraso."
+      },
+      "functions": {
+        "title": "Funciones",
+        "desc": "Lo que hace cada persona: servicios y tareas, presencial o para cualquier centro."
       }
     }
   },
@@ -5826,7 +5841,8 @@
     "ausencia": {
       "rango_invalido": "El rango de la ausencia es inválido (fin antes del inicio).",
       "horas_invalidas": "La hora de fin debe ser posterior a la de inicio"
-    }
+    },
+    "horario_imposible": "La hora de salida tiene que ser posterior a la de entrada."
   },
   "printHub": {
     "invalidQueue": "La cola o el recurso compartido tiene caracteres no permitidos (solo letras, números, espacio y _ . - $).",
@@ -7702,11 +7718,13 @@
     "centersRequired": "Cada puesto necesita al menos un centro.",
     "primaryNotHeld": "El puesto principal tiene que ser uno de los puestos que tiene la persona.",
     "unknown": "Ese puesto no existe.",
-    "noDateWindows": "Los puestos no tienen fecha de fin: el acceso quedó sin fecha."
+    "noDateWindows": "Los puestos no tienen fecha de fin: el acceso quedó sin fecha.",
+    "nursing_station": "Estación de enfermería",
+    "noPositionToCarry": "Esa persona no tiene ningún rol que dar en ese centro: dale primero un rol allí."
   },
   "staffPositions": {
-    "title": "Puestos",
-    "help": "Lo que la persona hace en cada centro. Sus centros son los que tienen al menos un puesto.",
+    "title": "Roles por centro",
+    "help": "Lo que puede abrir en cada centro. Lo que hace va en «Funciones».",
     "primary": "Principal",
     "makePrimary": "Marcar como puesto principal",
     "primaryHelp": "El principal es la etiqueta de la persona en listas e informes.",
@@ -7730,5 +7748,168 @@
     "title": "{screen}: solo en {centers}",
     "description": "En el centro activo no tienes acceso a {screen}. Cambia de centro para usarla.",
     "switchTo": "Ir a {center}"
+  },
+  "functions": {
+    "doctor": "Médico",
+    "nurse": "Enfermera",
+    "technician": "Técnico",
+    "front_desk": "Recepción",
+    "cashier": "Caja",
+    "operator": "Operadora",
+    "billing": "Facturación",
+    "accounting": "Contabilidad",
+    "unknown": "Esa función no existe o está oculta: no se puede añadir.",
+    "backedByPosition": "Esa función la respalda un puesto que la persona todavía tiene: quita antes el puesto.",
+    "duplicate": "Ya hay una función con ese identificador.",
+    "unknownService": "Ese servicio no existe.",
+    "kindServiceMismatch": "Una función de servicio necesita su servicio, y una tarea no lleva servicio.",
+    "notFound": "Esa función no existe."
+  },
+  "staff": {
+    "unknownCenter": "Ese centro no existe o está inactivo."
+  },
+  "dayChanges": {
+    "pastDay": "Un día pasado no se puede poner ni quitar.",
+    "notFound": "Ese cambio ya no existe."
+  },
+  "staffFunctions": {
+    "title": "Funciones",
+    "help": "Lo que hace la persona, sin centro. No abre pantallas: eso es el rol de acceso. Todas son presenciales salvo las marcadas «Cualquier centro». Al quitar Médico, Enfermera, Técnico, Caja o Contabilidad se quita también su puesto.",
+    "readOnly": "Lo que hace la persona. Para cambiarlo hace falta poder editar personal en su centro de origen.",
+    "group": {
+      "tasks": "Tareas",
+      "services": "Servicios"
+    },
+    "emptyGroup": "No hay funciones de este tipo.",
+    "place": {
+      "in_person": "Presencial",
+      "any_center": "Para cualquier centro"
+    },
+    "placeShort": {
+      "in_person": "Presencial",
+      "any_center": "Cualquier centro"
+    },
+    "inactive": "oculta",
+    "none": "Sin funciones: no saldrá en ningún selector cuando el sistema los lea de aquí.",
+    "selectedCount": "{count} de {total}",
+    "groupHelp": {
+      "tasks": "Su trabajo en la clínica (médico, enfermera, recepción…).",
+      "services": "Los servicios que puede entregar. Sirven para ponerla en los selectores y para contar el personal disponible al reservar ese servicio (cuando las reservas lean de aquí)."
+    }
+  },
+  "homeCenter": {
+    "label": "Centro de origen",
+    "help": "El centro de la ficha. No es dónde trabaja cada día (eso es el horario) ni qué puede abrir (eso es el rol de acceso).",
+    "blocked": {
+      "noUpdateAtCurrent": "Para cambiarlo hace falta poder editar personal en el centro actual y en el nuevo.",
+      "noOtherCenter": "No hay otro centro en el que puedas editar personal."
+    }
+  },
+  "staffSchedule": {
+    "tab": "Horario",
+    "title": "Horario",
+    "help": "Dónde y cuándo trabaja cada semana. Toca un horario para cambiarlo o quitarlo, o una casilla vacía para añadir ese día.",
+    "readOnly": "Los días que trabaja, cada uno en su centro. Para cambiarlo hace falta poder editar personal en ese centro.",
+    "empty": "Sin horario propio. Añádelo con «Añadir».",
+    "add": "Añadir",
+    "edit": "Cambiar o quitar",
+    "noEditHere": "No puedes editar personal en este centro.",
+    "addTitle": "Añadir horario",
+    "addHelp": "Las mismas horas en los días marcados, en el centro elegido. Si ya tenía ese día en ese centro, se sustituye.",
+    "editTitle": "Horario del {day}",
+    "center": "Centro",
+    "pickCenter": "Elige el centro",
+    "days": "Días",
+    "start": "Entrada",
+    "end": "Salida",
+    "save": "Guardar",
+    "saved": "Horario guardado",
+    "remove": "Quitar",
+    "removed": "Día quitado",
+    "removeConfirm": "¿Quitar este día del horario?",
+    "removeHelp": "Ese día dejará de trabajar en este centro.",
+    "unchanged": "No has cambiado nada.",
+    "problem": {
+      "format": "Escribe las horas como HH:mm.",
+      "endBeforeStart": "La salida tiene que ser posterior a la entrada."
+    },
+    "dowShort": {
+      "1": "Lun",
+      "2": "Mar",
+      "3": "Mié",
+      "4": "Jue",
+      "5": "Vie",
+      "6": "Sáb",
+      "0": "Dom"
+    },
+    "addDay": "Añadir {day} en {center}",
+    "generalWhenNone": "Mientras no tenga horario propio, cuenta el horario general de cada centro:",
+    "generalOtherDays": "Los días sin horario propio en un centro cuenta su horario general:",
+    "repeatedHelp": "Guardado {count} veces: se muestra una vez.",
+    "repeatedFix": "Este horario está guardado {count} veces (de la pantalla anterior). «Guardar» deja una sola copia; «Quitar» las quita todas."
+  },
+  "staffDayChanges": {
+    "title": "Cambios de un día",
+    "help": "Un día en otro centro, con otras horas o sin venir. Todavía no cambian las reservas.",
+    "empty": "Sin cambios desde hoy.",
+    "add": "Añadir",
+    "addTitle": "Cambio de un día",
+    "addHelp": "Si ese día ya tenía un cambio, se sustituye.",
+    "day": "Día",
+    "where": "Dónde",
+    "pickWhere": "Elige el centro o «No viene»",
+    "notComing": "No viene",
+    "hours": "Horas",
+    "usualHours": "sus horas de siempre",
+    "start": "Entrada",
+    "end": "Salida",
+    "hoursHint": "Vacías = sus horas de siempre.",
+    "note": "Nota",
+    "save": "Guardar",
+    "saved": "Cambio guardado",
+    "remove": "Quitar",
+    "removed": "Cambio quitado",
+    "removeConfirm": "¿Quitar el cambio de este día?",
+    "problem": {
+      "pastDay": "Un día pasado no se puede poner.",
+      "bothHours": "Pon las dos horas o ninguna.",
+      "endBeforeStart": "La salida tiene que ser posterior a la entrada.",
+      "noHoursWhenAway": "Si no viene, sin horas.",
+      "format": "Escribe las horas como HH:mm."
+    }
+  },
+  "functionsConfig": {
+    "title": "Funciones",
+    "help": "Lo que hace cada persona: servicios y tareas. «Presencial» cuenta solo en su centro; «Para cualquier centro» vale desde cualquiera. Ocultar una función no se la quita a quien ya la tiene.",
+    "new": "Nueva función",
+    "tasks": "Tareas",
+    "services": "Servicios",
+    "empty": "No hay funciones de este tipo.",
+    "name": "Nombre",
+    "place": "Lugar",
+    "placeHint": "Presencial = cuenta solo donde trabaja ese día.",
+    "order": "Orden",
+    "orderInvalid": "El orden es un número entero de 0 en adelante.",
+    "active": "Se ofrece",
+    "edit": "Editar",
+    "editTitle": "Editar «{name}»",
+    "kind": "Tipo",
+    "kindTask": "Tarea",
+    "kindService": "Servicio",
+    "kindFixed": "El tipo y el servicio no se cambian.",
+    "service": "Servicio",
+    "pickService": "Elige el servicio",
+    "slugPreview": "Identificador: {slug}",
+    "slugTaken": "Ya hay una función «{slug}».",
+    "created": "Función creada",
+    "updated": "Función actualizada"
+  },
+  "staffAccess": {
+    "help": "Qué puede abrir la persona: su cuenta, y para un administrador sus roles por centro."
+  },
+  "availability": {
+    "schedule": {
+      "duplicate": "Esa persona ya tiene ese mismo horario ese día en este centro."
+    }
   }
 }

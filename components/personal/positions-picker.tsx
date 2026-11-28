@@ -32,6 +32,7 @@ export function PositionsPicker({
   blockOf,
   viewerIsAdmin,
   idPrefix,
+  hidePrimary = false,
 }: {
   catalog: Position[];
   centers: { id: string; name: string }[];
@@ -43,6 +44,8 @@ export function PositionsPicker({
   viewerIsAdmin: boolean;
   /** Unique per mounted picker, for label/control ids. */
   idPrefix: string;
+  /** The primary is a position this picker does not show (a job position): no selector. */
+  hidePrimary?: boolean;
 }) {
   const t = useTranslations("staffPositions");
   const tRoot = useTranslations();
@@ -124,7 +127,7 @@ export function PositionsPicker({
         );
       })}
 
-      {held.length > 1 && shownPrimary && (
+      {!hidePrimary && held.length > 1 && shownPrimary && (
         <div className="grid gap-1.5 sm:max-w-xs">
           <Label htmlFor={`${idPrefix}-primary`}>{t("primary")}</Label>
           <Select value={shownPrimary} onValueChange={onPrimaryChange}>

@@ -224,3 +224,10 @@ export async function getMedicos(centroId?: CenterChoice): Promise<Personal[]> {
   const { items } = await listPersonal({ capacidad: "medico", limit: 100 }, centroId);
   return items;
 }
+
+// Home center of a staff record (cmr-be docs/specs/staff-home-center.md): `staff.update` at the current
+// home AND the new one (403 otherwise); 400 `staff.unknownCenter` for a missing or inactive center. The
+// new center joins the record's own centers list; the old one stays until someone turns it off.
+export function setHomeCenter(id: string, centerId: string, currentHome?: string): Promise<Personal> {
+  return apiFetch<Personal>(`/staff/${id}/home-center`, { method: "PUT", body: JSON.stringify({ centerId }) }, currentHome);
+}

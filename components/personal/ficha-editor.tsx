@@ -21,27 +21,30 @@ import { Label } from "@/components/ui/label";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { useSaveSection } from "@/components/personal/save-group";
-import { normalizeResponsibilities, showsSpecialty } from "@/lib/personal/responsibilities";
+import { showsSpecialty } from "@/lib/personal/responsibilities";
 
 // The editable identity fields of a staff record. Saved by the record's single "Save" (save-group.tsx).
 // Phone, sex and color are not shown: nothing reads them and nobody filled them (production,
 // 14-nov-2026); the API still accepts them. Specialty only for doctors. `initials` is not edited: the
-// BE recomputes it. What the person does and where is the «Puestos» section (staff-positions-section);
-// the BE keeps job title and responsibilities in step with it, so they are read here, never edited.
+// BE recomputes it. What the person does is «Funciones» (staff-functions-section) and what they can open
+// is «Rol de acceso» (staff-positions-section); the BE keeps job title and capabilities in step.
 
 export function FichaEditor({
   persona,
   centro,
+  isDoctor,
 }: {
   persona: Personal;
   centro?: string;
+  /** Holds the `doctor` function (shows Specialty). */
+  isDoctor: boolean;
 }) {
   const t = useTranslations("personalFicha");
   const [name, setName] = React.useState(persona.name ?? "");
   const [lastName, setLastName] = React.useState(persona.lastName ?? "");
   const [specialty, setSpecialty] = React.useState(persona.specialty ?? "");
   const [email, setEmail] = React.useState(persona.email ?? "");
-  const withSpecialty = showsSpecialty(persona.jobTitle, normalizeResponsibilities(persona.capabilities), persona.specialty);
+  const withSpecialty = showsSpecialty(isDoctor, persona.specialty);
 
   const norm = (s: string) => s.trim();
   const dirty =

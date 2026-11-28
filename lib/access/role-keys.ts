@@ -12,7 +12,11 @@ export const LEGACY_ROLE_KEYS: Readonly<Record<string, string>> = {
   cc_operator: "appointments",
   facturacion: "billing",
   facturador_consulta: "billing",
-  enfermeria: "nursing",
+  // Enfermería and Panel de enfermería were merged into one role for the shared nursing-station logins,
+  // «Estación de enfermería» (owner, 28-nov; cmr-be feat/functions-drop-job-position).
+  enfermeria: "nursing_station",
+  nursing: "nursing_station",
+  nursing_panel: "nursing_station",
   inventarios: "inventory",
   solo_lectura: "read_only",
 };

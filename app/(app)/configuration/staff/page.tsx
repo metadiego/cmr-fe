@@ -3,21 +3,27 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { UserAccountIcon, UserAdd01Icon } from "@hugeicons/core-free-icons";
+import { UserAdd01Icon } from "@hugeicons/core-free-icons";
 
-import { listPersonalAll, type Personal, type PersonalEnAlcance } from "@/lib/api/personal";
+import { listPersonalAll, type Personal, type PersonalConPreferenciaFrontdesk, type PersonalEnAlcance } from "@/lib/api/personal";
 import { FichaEditor, StaffActiveButton } from "@/components/personal/ficha-editor";
 import { SaveGroup } from "@/components/personal/save-group";
-import { normalizeResponsibilities, showsConsultaPreferences } from "@/lib/personal/responsibilities";
+import { showsConsultaPreferences } from "@/lib/personal/responsibilities";
+import { holdsFunction } from "@/lib/personal/functions";
+import { getFunctions, getStaffFunctions, type CatalogFunction, type StaffFunction } from "@/lib/api/functions";
+import { getCenters, type Centro } from "@/lib/api/centers";
+import { StaffFunctionsSection } from "@/components/personal/staff-functions-section";
+import { StaffSchedule } from "@/components/personal/staff-schedule";
+import { StaffDayChanges } from "@/components/personal/staff-day-changes";
+import { HomeCenterField } from "@/components/personal/home-center-field";
 import { NuevoPersonalDialog } from "@/components/personal/nuevo-personal-dialog";
 import { StaffList } from "@/components/personal/staff-list";
 import { FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
-import { StaffPositionsSection } from "@/components/personal/staff-positions-section";
+import { StaffAccessSection } from "@/components/personal/staff-access-section";
 import { DarAccesoDialog } from "@/components/personal/give-access-dialog";
 import { getPositions, type Position } from "@/lib/api/positions";
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { InviteDialog } from "@/components/admin/invite-dialog";
-import { UserAccessPanel } from "@/components/admin/user-access-panel";
 import { ACCESS_FILTERS, accessOf, countByAccess, filterByAccess, type AccessFilter } from "@/lib/personal/staff-access";
 import { useMe, isAdmin } from "@/hooks/use-me";
 import { cn } from "@/lib/utils";
@@ -34,7 +40,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MedicoDisponibilidad } from "@/components/personal/medico-disponibilidad";
 import { MedicoAgenda, MedicoPacientes, MedicoProduccion } from "@/components/personal/medico-hub-tabs";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Ficha de personal: TODO en una pantalla, sin saltar. Lista a la izquierda, ficha de la persona a la
@@ -81,6 +86,22 @@ export function StaffPanel() {
     [],
   );
   const ehrCenterIds = ehrCentrosRes.state.kind === "ok" ? ehrCentrosRes.state.data.map((c) => c.id) : undefined;
+  // Functions catalog (inactive ones too: a person may still hold one) and the centers the record's
+  // sections need: every center, where the viewer reads staff, where they edit it.
+  const functionsRes = useResource<CatalogFunction[]>(() => getFunctions(true));
+  const functionCatalog = React.useMemo(() => (functionsRes.state.kind === "ok" ? functionsRes.state.data : []), [functionsRes.state]);
+  const functionsError = functionsRes.state.kind === "fail" ? functionsRes.state.message : null;
+  const centersRes = useResource<Centro[]>(() => getCenters());
+  const staffReadRes = useResource(() => getCentrosDondePuedo("staff.read").catch(() => []));
+  const staffUpdateRes = useResource(() => getCentrosDondePuedo("staff.update").catch(() => []));
+  const scope = React.useMemo(
+    () => ({
+      all: centersRes.state.kind === "ok" ? centersRes.state.data : [],
+      read: staffReadRes.state.kind === "ok" ? staffReadRes.state.data : [],
+      update: staffUpdateRes.state.kind === "ok" ? staffUpdateRes.state.data : [],
+    }),
+    [centersRes.state, staffReadRes.state, staffUpdateRes.state],
+  );
   const ehrCenterKey = ehrCenterIds?.join(",");
   const ehrLinksRes = useResource<EhrStaffLink[]>(
     () => (ehrCenterIds ? listEhrStaffLinks(undefined, ehrCenterIds).catch(() => []) : Promise.resolve([])),
@@ -128,7 +149,7 @@ export function StaffPanel() {
         className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr] lg:grid-rows-[minmax(0,1fr)]"
       >
         {/* Lista */}
-        <aside className="flex min-h-0 flex-col gap-3 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+        <aside className="flex min-h-0 flex-col gap-3 rounded-xl border bg-card p-3 shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               {create.canCreate && <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>}
@@ -183,6 +204,9 @@ export function StaffPanel() {
               key={sel.id}
               persona={sel}
               positions={positions}
+              functionCatalog={functionCatalog}
+              functionsError={functionsError}
+              scope={scope}
               positionsError={positionsRes.state.kind === "fail" ? positionsRes.state.message : null}
               ehrRoles={ehrRoles}
               ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
@@ -236,8 +260,10 @@ export default function PersonalPage() {
   );
 }
 
+type CenterScope = { all: Centro[]; read: { id: string; name: string }[]; update: { id: string; name: string }[] };
+
 function FichaPersonal({
-  persona, positions, positionsError, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
+  persona, positions, functionCatalog, functionsError, scope, positionsError, ehrRoles, ehrLink, ehrCenterIds, profile, onProfileChanged, centro, centroNombre, onChanged, onEhrChanged,
 }: {
   /** The person's login, when the viewer is an admin (only an admin manages access). */
   profile: Perfil | undefined;
@@ -245,6 +271,12 @@ function FichaPersonal({
   persona: Personal;
   /** The position catalog (`GET /positions`). */
   positions: Position[];
+  /** The functions catalog (`GET /functions?includeInactive=true`). */
+  functionCatalog: CatalogFunction[];
+  /** Why the functions catalog did not load. */
+  functionsError: string | null;
+  /** Every center, and where the viewer holds staff.read / staff.update. */
+  scope: CenterScope;
   /** Why the catalog did not load, if it failed. */
   positionsError: string | null;
   ehrRoles: EhrRole[];
@@ -266,13 +298,21 @@ function FichaPersonal({
   // Hub de USUARIO en la MISMA pantalla (sin ir «más adentro»): la ficha, y —solo para quien hace
   // consultas, es decir tiene la capacidad «medico»— su agenda, pacientes y producción. La disponibilidad
   // (horarios, días libres, permisos, vacaciones) es para TODO usuario por igual. Ver hub-de-usuario-medicos.
-  const esMedico = normalizeResponsibilities(persona.capabilities).includes("medico");
+  // What the person does = their Functions (no longer job title / capabilities).
+  const functionsRes = useResource<StaffFunction[]>(() => getStaffFunctions(persona.id, centro), [persona.id, centro]);
+  const [savedFunctions, setSavedFunctions] = React.useState<StaffFunction[] | null>(null);
+  const heldFunctions = savedFunctions ?? (functionsRes.state.kind === "ok" ? functionsRes.state.data : null);
+  const editableIds = React.useMemo(() => new Set(scope.update.map((c) => c.id)), [scope.update]);
+  const canEditRecord = !!centro && editableIds.has(centro);
+  const functionSlugs = React.useMemo(() => functionCatalog.map((f) => f.slug), [functionCatalog]);
+  const activeCenters = scope.all.filter((c) => c.active !== false);
+  const esMedico = holdsFunction(heldFunctions, "doctor");
   const puedeAgenda = esMedico && can("citas.read");
   const puedePacientes = esMedico && can("pacientes.read");
   const puedeProduccion = esMedico && can("citas.read");
 
   return (
-    <div className="h-full space-y-6 overflow-y-auto rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+    <div className="h-full space-y-6 overflow-y-auto rounded-xl border bg-card p-6 shadow-xs">
       {/* Identidad */}
       <div className="flex items-center gap-3">
         <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
@@ -289,7 +329,7 @@ function FichaPersonal({
       <Tabs defaultValue="ficha">
         <TabsList className="mb-2 flex flex-wrap">
           <TabsTrigger value="ficha">{t("tabFicha")}</TabsTrigger>
-          <TabsTrigger value="disponibilidad">{tRoot("medicoHub.tabs.availability")}</TabsTrigger>
+          <TabsTrigger value="horario">{tRoot("staffSchedule.tab")}</TabsTrigger>
           {puedeAgenda && <TabsTrigger value="agenda">{tRoot("medicoHub.tabs.agenda")}</TabsTrigger>}
           {puedePacientes && <TabsTrigger value="pacientes">{tRoot("medicoHub.tabs.patients")}</TabsTrigger>}
           {puedeProduccion && <TabsTrigger value="produccion">{tRoot("medicoHub.tabs.production")}</TabsTrigger>}
@@ -299,34 +339,40 @@ function FichaPersonal({
           {/* One "Save" for every section below (save-group.tsx); deactivate is its own action. */}
           <SaveGroup onSaved={() => { onChanged(); onProfileChanged(); }} footerStart={<StaffActiveButton persona={persona} centro={centro} onChanged={onChanged} />}>
             <div className="space-y-6">
-              <FichaEditor persona={persona} centro={centro} />
+              <FichaEditor persona={persona} centro={centro} isDoctor={esMedico} />
 
-              {/* What the person does at each center; their centers are the rows with a position. */}
-              <StaffPositionsSection persona={persona} catalog={positions} catalogError={positionsError} centro={centro} />
+              {centro && (
+                <HomeCenterField staffId={persona.id} current={centro} centers={scope.all} editable={editableIds} />
+              )}
+
+              {/* What the person does: services and tasks, no center. */}
+              <StaffFunctionsSection
+                staffId={persona.id}
+                catalog={functionCatalog}
+                catalogError={functionsError ?? (functionsRes.state.kind === "fail" ? functionsRes.state.message : null)}
+                held={heldFunctions}
+                canEdit={canEditRecord}
+                centro={centro}
+                onSaved={(now) => { setSavedFunctions(now); onChanged(); }}
+              />
 
               {/* Front-desk preferences, only for front-desk staff (or whoever already has one set). */}
-              {showsConsultaPreferences(persona) && <FrontdeskConsultaPreferencia persona={persona} centro={centro} />}
+              {showsConsultaPreferences(holdsFunction(heldFunctions, "front_desk"), persona as PersonalConPreferenciaFrontdesk) && (
+                <FrontdeskConsultaPreferencia persona={persona} centro={centro} />
+              )}
 
-              {/* System access */}
-              <div className="border-t pt-4">
-                <Label className="mb-2 block">{t("acceso")}</Label>
-                {profile ? (
-                  <UserAccessPanel profile={profile} onChanged={onProfileChanged} />
-                ) : persona.profileId ? (
-                  <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
-                    <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
-                    <span>{persona.email || t("conCuenta")}</span>
-                  </div>
-                ) : viewerIsAdmin ? (
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
-                    <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
-                  </div>
-                ) : (
-                  // Giving system access is access management: an administrator's call (cmr-be).
-                  <span className="text-sm text-muted-foreground">{tRoot("staffPositions.giveAccessNeedsAdmin")}</span>
-                )}
-              </div>
+              {/* System access: the login and, for an admin, the access roles per center (one section). */}
+              <StaffAccessSection
+                persona={persona}
+                profile={profile}
+                viewerIsAdmin={viewerIsAdmin}
+                positions={positions}
+                positionsError={positionsError ?? functionsError}
+                functionSlugs={functionSlugs}
+                centro={centro}
+                onProfileChanged={onProfileChanged}
+                onGiveAccess={() => setDarAcceso(true)}
+              />
 
               {/* EHR account: on every record (owner, 01-oct-2026): any job title may need it. */}
               <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centerIds={ehrCenterIds} centro={centro} onChanged={onEhrChanged} />
@@ -334,7 +380,9 @@ function FichaPersonal({
           </SaveGroup>
         </TabsContent>
 
-        <TabsContent value="disponibilidad" className="pt-2">
+        <TabsContent value="horario" className="space-y-6 pt-2">
+          <StaffSchedule staffId={persona.id} readCenters={scope.read} editableCenters={scope.update} />
+          <StaffDayChanges staffId={persona.id} homeCenter={centro} centers={activeCenters} canEdit={canEditRecord} />
           <MedicoDisponibilidad doctorId={persona.id} centro={centro} />
         </TabsContent>
         {puedeAgenda && <TabsContent value="agenda" className="pt-2"><MedicoAgenda doctorId={persona.id} /></TabsContent>}
