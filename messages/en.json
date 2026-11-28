@@ -7719,7 +7719,8 @@
     "primaryNotHeld": "The primary position must be one the person holds.",
     "unknown": "That position does not exist.",
     "noDateWindows": "Positions have no end date: the access was given without one.",
-    "nursing_station": "Nursing station"
+    "nursing_station": "Nursing station",
+    "noPositionToCarry": "That person has no role to carry to that center: give them a role there first."
   },
   "staffPositions": {
     "title": "Roles per center",
