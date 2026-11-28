@@ -20,6 +20,11 @@ th{background:#f2f2f2}
 tfoot td{font-weight:700;background:#f7f7f7}
 .text-right{text-align:right}.font-bold,.font-semibold{font-weight:700}
 .text-xs{font-size:9px}.text-muted-foreground{color:#555}
+.uppercase{text-transform:uppercase}
+/* Kardex monthly subtotal row (owner, 28-nov-2026): the whole row tinted edge to edge, not just
+   the month label — Tailwind's own bg-muted/border classes have no effect here (this popup only
+   loads this stylesheet, never Tailwind's), so the row needs its own rule. */
+.kardex-month-row td{background:#e8edf3;border-top:2px solid #0f3d5e}
 /* A section added to the print on request (e.g. the kardex «Resumen gerencial»): hidden on screen with
    Tailwind's \`hidden\`, shown here. print-keep keeps it in one piece: it stays on the same sheet when it
    fits and the browser moves the whole block to the next sheet when it does not. */

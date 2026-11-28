@@ -88,15 +88,19 @@ export function KardexDeliveryControlView({ data }: { data: KardexDeliveryContro
                       <TableCell className="text-xs text-muted-foreground">{deliveryObservationsText(l, t)}</TableCell>
                     </TableRow>
                   ))}
-                  <TableRow className="bg-muted/40">
-                    <TableCell colSpan={4} className="font-semibold">
+                  {/* The month subtotal has to read faster than every data row above it (owner, 28-nov-2026):
+                      the whole row tinted edge to edge, bold, the month in capitals. `kardex-month-row` is the
+                      print CSS hook — REPORT_PRINT_CSS serializes this table's own innerHTML into a popup with
+                      none of Tailwind's CSS loaded, so Tailwind's bg-muted/uppercase have no effect there. */}
+                  <TableRow className="kardex-month-row border-t-2 border-foreground/30 bg-muted/60">
+                    <TableCell colSpan={4} className="font-bold uppercase">
                       {monthLabel(g.month)}
                     </TableCell>
-                    <TableCell className="text-right font-semibold tabular-nums">{num(g.sold)}</TableCell>
-                    <TableCell className="text-right font-semibold tabular-nums">{num(g.delivered)}</TableCell>
-                    <TableCell />
-                    <TableCell className="text-right font-semibold tabular-nums">{num(g.pending)}</TableCell>
-                    <TableCell />
+                    <TableCell className="text-right font-bold tabular-nums">{num(g.sold)}</TableCell>
+                    <TableCell className="text-right font-bold tabular-nums">{num(g.delivered)}</TableCell>
+                    <TableCell className="font-bold" />
+                    <TableCell className="text-right font-bold tabular-nums">{num(g.pending)}</TableCell>
+                    <TableCell className="font-bold" />
                   </TableRow>
                 </React.Fragment>
               ))}

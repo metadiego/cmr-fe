@@ -32,3 +32,11 @@ test("a print-only section is shown in print and kept whole (same page if it fit
   assert.match(REPORT_PRINT_CSS, /\.print-keep\{break-inside:avoid;page-break-inside:avoid;/);
   assert.doesNotMatch(REPORT_PRINT_CSS, /break-before:page/);
 });
+
+test("uppercase survives into print (Tailwind's own CSS is never loaded in the print popup)", () => {
+  assert.match(REPORT_PRINT_CSS, /\.uppercase\{text-transform:uppercase\}/);
+});
+
+test("the kardex monthly subtotal row is tinted edge to edge in print, not just its label cell", () => {
+  assert.match(REPORT_PRINT_CSS, /\.kardex-month-row td\{background:[^;]+;border-top:[^}]+\}/);
+});
