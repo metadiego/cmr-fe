@@ -7904,5 +7904,10 @@
   },
   "staffAccess": {
     "help": "What the person can open: their login and, for an administrator, their roles per center."
+  },
+  "availability": {
+    "schedule": {
+      "duplicate": "That person already has those same hours that day at this center."
+    }
   }
 }

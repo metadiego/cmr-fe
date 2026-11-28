@@ -7904,5 +7904,10 @@
   },
   "staffAccess": {
     "help": "Qué puede abrir la persona: su cuenta, y para un administrador sus roles por centro."
+  },
+  "availability": {
+    "schedule": {
+      "duplicate": "Esa persona ya tiene ese mismo horario ese día en este centro."
+    }
   }
 }
