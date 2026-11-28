@@ -424,8 +424,6 @@ export function PatientDetail({
       </div>
 
       {/* Sections in one order (lib: patientSections), narrowed to the board's service filter (visibleSections). */}
-      <LegacyPackagesPanel patientId={patient.patientId} centerId={centerId} onChanged={data.refresh} />
-
       {shown.hidden > 0 || showAll ? <FilteredSectionsHint serviceName={filteredName} hidden={shown.hidden} showAll={showAll} onToggle={() => setShowAll((v) => !v)} /> : null}
       {shown.sections.map((x) =>
         x.kind === "service"
@@ -469,6 +467,10 @@ export function PatientDetail({
               />
             )
       )}
+
+      {/* Secondary to the day's actual work above (owner, 28-nov-2026: it crowded out the therapy
+          tables staff need first) — collapsed by default, last on the page. */}
+      <LegacyPackagesPanel patientId={patient.patientId} centerId={centerId} onChanged={data.refresh} />
 
       {dataGate && (
         <EhrReadinessModal
