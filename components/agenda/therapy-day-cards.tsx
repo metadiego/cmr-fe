@@ -7,6 +7,8 @@ import { Cancel01Icon, DragDropIcon } from "@hugeicons/core-free-icons";
 import { type Servicio } from "@/lib/api/servicios";
 import { type ServicioConSaldo, type Sesion } from "@/lib/api/frontdesk";
 import { type Paciente } from "@/lib/api/pacientes";
+import { bookedCount, toBookCount } from "@/lib/agenda/service-balance";
+import { todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 import { PacienteSelect } from "@/components/citas/paciente-select";
 import { ExistingSessionsBadge } from "@/components/agenda/existing-sessions-badge";
@@ -122,6 +124,19 @@ export function TherapyDayCards({
           <div className="flex flex-wrap gap-1.5">
             {saldo.map((s) => {
               const on = sel.has(s.serviceId);
+              // The explicit compradas/usadas/agendadas/por-agendar breakdown (handoff
+              // saldo-al-citar-explicito, 28-nov-2026): "quedan N" alone read as if a session had
+              // already been discounted the moment a purchase auto-marked the patient present,
+              // when the package was untouched. Falls back to the old chip while the BE doesn't
+              // send purchased/used yet.
+              const booked = bookedCount(upcomingByService.get(s.serviceId) ?? [], todayPR());
+              const toBook = toBookCount(s.pending, booked);
+              const balance =
+                s.purchased == null || s.used == null
+                  ? t("remaining", { n: s.pending })
+                  : booked > 0
+                    ? t("balance", { purchased: s.purchased, used: s.used, booked, toBook })
+                    : t("balanceNoBooked", { purchased: s.purchased, used: s.used, toBook });
               return (
                 <button
                   key={s.serviceId}
@@ -133,7 +148,7 @@ export function TherapyDayCards({
                   )}
                 >
                   {s.name}
-                  <span className="ml-1 opacity-70">· {t("remaining", { n: s.pending })}</span>
+                  <span className="ml-1 opacity-70">· {balance}</span>
                 </button>
               );
             })}

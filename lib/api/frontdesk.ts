@@ -137,7 +137,16 @@ export async function agendarVariosServicios(
 // aparece. Solo servicios activos del centro activo, ordenados por pendientes (más primero) y por nombre.
 // Sirve para pre-marcar las casillas en «Citar». `pending` sale de la misma cuenta que la disponibilidad
 // por servicio. GET /frontdesk/patients/:id/availability. Handoff citar-marcar-los-servicios-con-saldo.
-export type ServicioConSaldo = { serviceId: string; name: string; slug: string; pending: number };
+// `purchased`/`used` (PR #748, handoff saldo-al-citar-explicito): lo gastado de verdad (entregado +
+// devuelto + transferido), nunca una cita agendada/auto-presente. Opcionales: BE viejo no los manda.
+export type ServicioConSaldo = {
+  serviceId: string;
+  name: string;
+  slug: string;
+  pending: number;
+  purchased?: number;
+  used?: number;
+};
 export function getServiciosConSaldo(patientId: string, centroId?: string): Promise<ServicioConSaldo[]> {
   return apiFetch<ServicioConSaldo[]>(`/frontdesk/patients/${patientId}/availability`, {}, centroId);
 }

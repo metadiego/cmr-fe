@@ -398,6 +398,8 @@
     "change": "Cambiar",
     "bought": "Ya compradas",
     "remaining": "quedan {n}",
+    "balance": "{purchased} compradas · {used} usadas · {booked} agendadas · {toBook} por agendar",
+    "balanceNoBooked": "{purchased} compradas · {used} usadas · {toBook} por agendar",
     "addTherapy": "Agregar terapia",
     "hoursFor": "Horas · {service}",
     "entryHours": "Horas de entrada",
