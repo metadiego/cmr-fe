@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { reagendarSesion, type Sesion } from "@/lib/api/frontdesk";
 import { toastError } from "@/lib/api/errors";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { DatePicker } from "@/components/ui/date-picker";
 
@@ -25,6 +26,7 @@ export function ExistingSessionsBadge({
 }) {
   const t = useTranslations("therapyPlanner");
   const tRoot = useTranslations();
+  const format = useFormatter();
   const [editing, setEditing] = React.useState<string | null>(null);
   const [nuevaFecha, setNuevaFecha] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -33,8 +35,9 @@ export function ExistingSessionsBadge({
     if (!nuevaFecha || busy) return;
     setBusy(true);
     try {
-      await reagendarSesion(id, nuevaFecha, centro);
+      const { warnings } = await reagendarSesion(id, nuevaFecha, centro);
       toast.success(t("rescheduled"));
+      mostrarAvisos(warnings, tRoot, format);
       setEditing(null);
       onChanged();
     } catch (err) {

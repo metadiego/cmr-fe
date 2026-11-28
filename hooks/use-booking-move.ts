@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useBookingResult } from "@/components/appointments-booking/booking-result-provider";
@@ -10,8 +10,9 @@ import type { Paciente } from "@/lib/api/pacientes";
 
 import type { CalendarMoving } from "@/components/appointments-booking/booking-calendar";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
-import { reagendarCita } from "@/lib/api/citas";
+import { reagendarCitaAgenda } from "@/lib/api/citas";
 import { apiErrorLabel } from "@/lib/api/errors";
+import { warningText } from "@/lib/frontdesk/avisos";
 import { reagendarSesion } from "@/lib/api/frontdesk";
 
 /**
@@ -38,6 +39,7 @@ export function useBookingMove({
 }): CalendarMoving | undefined {
   const t = useTranslations("appointmentsBooking");
   const tRoot = useTranslations();
+  const format = useFormatter();
   const { show: showResult } = useBookingResult();
   return (
     movingItem && {
@@ -51,11 +53,14 @@ export function useBookingMove({
           toast.error(t("toasts.moveReasonRequired"));
           return false;
         }
+        let warnings: string[] = [];
         try {
           if (a.kind === "medical") {
-            await reagendarCita(a.id, { date: to.date, time: to.time, reason: why }, tenant);
+            const { advertencias } = await reagendarCitaAgenda(a.id, { date: to.date, time: to.time, reason: why }, tenant);
+            warnings = advertencias.map((w) => warningText(w, tRoot, format));
           } else {
-            await reagendarSesion(a.id, to.date, tenant, to.time);
+            const { warnings: w } = await reagendarSesion(a.id, to.date, tenant, to.time);
+            warnings = w.map((x) => warningText(x, tRoot, format));
           }
         } catch (err) {
           // labelKey-aware (citas.error.visit_in_progress, etc.): the raw translator here was dropping
@@ -78,7 +83,7 @@ export function useBookingMove({
               },
             ],
             skipped: [],
-            warnings: [],
+            warnings,
           }),
         );
         onMoved([a.date, to.date]);

@@ -11,7 +11,7 @@ import {
   presenteCita,
   noShowCita,
   cancelarCita,
-  reagendarCita,
+  reagendarCitaAgenda,
   getTiposCita,
   getHistorial,
   type Cita,
@@ -28,6 +28,7 @@ import { rescheduleMissing, type RescheduleField } from "@/lib/citas/reschedule-
 import { citaBlockingCode } from "@/lib/api/cita-errors";
 import { cancelMeaning, refusalRefreshesRow } from "@/lib/lifecycle/board-action-rules";
 import { apiErrorLabel } from "@/lib/api/errors";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { appointmentMenuFor } from "@/lib/lifecycle/allowed-actions";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
@@ -251,6 +252,7 @@ function RescheduleDialog({
   const t = useTranslations("appointments.actions");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const format = useFormatter();
   const { can } = useCan();
   const me = useMe();
   const actorId = me.kind === "ok" ? me.me.staffId ?? undefined : undefined;
@@ -323,7 +325,7 @@ function RescheduleDialog({
   const { submitting, submit } = useSubmit(
     () => {
       setBlockError(null);
-      return reagendarCita(
+      return reagendarCitaAgenda(
         cita.id,
         {
           date: fecha,
@@ -338,7 +340,10 @@ function RescheduleDialog({
     },
     {
       successMessage: t("done"),
-      onSuccess: () => onDone(),
+      onSuccess: ({ advertencias }) => {
+        mostrarAvisos(advertencias, tRoot, format);
+        onDone();
+      },
       onError: (err) => {
         if (!citaBlockingCode(err)) return false;
         setBlockError(apiErrorLabel(err, tRoot));
